@@ -115,7 +115,7 @@ const ChatArea = (props) => {
 
       const inputs = {
         mock_perplexity_text: mockMode === 'BE' ? JSON.stringify({
-            "content": "2025年11月7日は「立冬」「鍋の日」「知恵の日」などの記念日があり、また新潟・佐渡空港の開港記念日でもあります。\n\n具体的には、  \n- **立冬**：二十四節気の一つで、冬の始まりを意味する日です。  \n- **鍋の日**：冬の訪れとともに鍋料理を楽しむ日として制定されています。  \n- **知恵の日**：知恵を大切にする日として認知されています。  \n- 1958年に**新潟・佐渡空港がオープンした日**でもあります[10][14]。\n\nまた、運勢的には「頼まれごとをきっかけに信頼関係が深まる日」とされ、金運は「大切なお金をしっかり守れる日」との占いもあります[3][17]。\n\nさらに、2025年11月7日は地震が日向灘で発生した日でもありますが、特別な凶日とはされていません[11]。  \n\nこれらの情報から、11月7日は季節の節目として冬の始まりを感じる日であり、記念日も多い日といえます。",
+            "content": "2025年11月7日は「立冬」「鍋の日」「知恵の日」などの記念日があり、また新潟・佐渡空港の開港記念日でもあります。\n\n具体的には、  \n- **立冬**:二十四節気の一つで、冬の始まりを意味する日です。  \n- **鍋の日**:冬の訪れとともに鍋料理を楽しむ日として制定されています。  \n- **知恵の日**:知恵を大切にする日として認知されています。  \n- 1958年に**新潟・佐渡空港がオープンした日**でもあります[10][14]。\n\nまた、運勢的には「頼まれごとをきっかけに信頼関係が深まる日」とされ、金運は「大切なお金をしっかり守れる日」との占いもあります[3][17]。\n\nさらに、2025年11月7日は地震が日向灘で発生した日でもありますが、特別な凶日とはされていません[11]。  \n\nこれらの情報から、11月7日は季節の節目として冬の始まりを感じる日であり、記念日も多い日といえます。",
             "role": "assistant",
             "citations": [
             "https://www.mwed.jp/articles/12629/",
@@ -198,15 +198,18 @@ const ChatArea = (props) => {
                 else if (data.event === 'message_end') {
                   addLog('[API Stream] Received event: message_end', 'info');
                   const citations = data.metadata?.retriever_resources || [];
-                  addLog(`[API Stream] Citations found: ${citations.length}`, 'info');
+                  addLog(`[API Stream] Citations from retriever_resources: ${citations.length}`, 'info');
 
-                  setMessages((prev) =>
-                    prev.map((msg) =>
-                      msg.id === aiMessageId
-                        ? { ...msg, citations: mapCitations(citations) }
-                        : msg
-                    )
-                  );
+                  // retriever_resourcesがある場合のみ上書き（通常のナレッジベース検索時）
+                  if (citations.length > 0) {
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === aiMessageId
+                          ? { ...msg, citations: mapCitations(citations) }
+                          : msg
+                      )
+                    );
+                  }
                   
                   if (data.message_id) {
                     fetchSuggestions(data.message_id, aiMessageId);
@@ -215,6 +218,37 @@ const ChatArea = (props) => {
                 
                 else if (data.event === 'workflow_finished') {
                   addLog('[API Stream] Received event: workflow_finished', 'info');
+                  
+                  // JSON形式の回答をパースする
+                  setMessages((prev) => {
+                    return prev.map((msg) => {
+                      if (msg.id === aiMessageId) {
+                        let finalText = msg.text;
+                        let finalCitations = msg.citations || [];
+
+                        // JSON形式の回答をパース試行
+                        try {
+                          const trimmedText = finalText.trim();
+                          if (trimmedText.startsWith('{') && trimmedText.endsWith('}')) {
+                            const parsed = JSON.parse(trimmedText);
+                            if (parsed.answer) {
+                              finalText = parsed.answer;
+                              if (parsed.citations && Array.isArray(parsed.citations)) {
+                                finalCitations = mapCitationsFromLLM(parsed.citations);
+                                addLog(`[API] Parsed ${finalCitations.length} citations from LLM response`, 'info');
+                              }
+                            }
+                          }
+                        } catch (e) {
+                          addLog(`[API] Not JSON format or parse error: ${e.message}`, 'info');
+                        }
+
+                        return { ...msg, text: finalText, citations: finalCitations };
+                      }
+                      return msg;
+                    });
+                  });
+                  
                   setIsLoading(false);
                 }
 
@@ -283,12 +317,24 @@ const ChatArea = (props) => {
     });
   };
 
+  // LLMが返すJSON形式のcitationsを変換
+  const mapCitationsFromLLM = (citations) => {
+    if (!citations || !Array.isArray(citations)) return [];
+    
+    return citations.map((cite, index) => ({
+      id: `cite_llm_${index}`,
+      type: cite.url ? 'web' : 'file',
+      source: `[${index + 1}] ${cite.source || '不明な出典'}`,
+      url: cite.url || null,
+    }));
+  };
+
   return (
     <div className="chat-area">
       <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
       <ChatHistory
         messages={messages}
-        onSuggestionClick={handleSendMessage} // ★ T-11対応: propsを渡す
+        onSuggestionClick={handleSendMessage}
       />
       <ChatInput isLoading={isLoading} onSendMessage={handleSendMessage} />
     </div>
