@@ -163,6 +163,10 @@ const ChatArea = (props) => {
         // ストリーミング処理
         const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
         let buffer = '';
+        let contentBuffer = ''; // ストリーミング内容を一時保存
+        let hasParsedCitations = false; // JSON由来のcitationsがあるかのフラグ
+        let pendingSuggestions = []; // 保留中のsuggestions
+        let isStreamingAnimation = false; // アニメーション中かどうか
 
         while (true) {
           const { value, done } = await reader.read();
@@ -185,13 +189,31 @@ const ChatArea = (props) => {
                 
                 if (data.event === 'message') {
                   if (data.answer) {
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === aiMessageId
-                          ? { ...msg, text: msg.text + data.answer }
-                          : msg
-                      )
-                    );
+                    contentBuffer += data.answer;
+                    
+                    // JSON形式かチェック
+                    const trimmed = contentBuffer.trim();
+                    const isJson = trimmed.startsWith('{');
+                    
+                    if (!isJson) {
+                      // 通常のテキストの場合は1文字ずつ表示
+                      setMessages((prev) =>
+                        prev.map((msg) =>
+                          msg.id === aiMessageId
+                            ? { ...msg, text: contentBuffer }
+                            : msg
+                        )
+                      );
+                    } else {
+                      // JSON形式の場合はローディング表示
+                      setMessages((prev) =>
+                        prev.map((msg) =>
+                          msg.id === aiMessageId
+                            ? { ...msg, text: '回答を生成中...' }
+                            : msg
+                        )
+                      );
+                    }
                   }
                 } 
                 
@@ -200,8 +222,8 @@ const ChatArea = (props) => {
                   const citations = data.metadata?.retriever_resources || [];
                   addLog(`[API Stream] Citations from retriever_resources: ${citations.length}`, 'info');
 
-                  // retriever_resourcesがある場合のみ上書き（通常のナレッジベース検索時）
-                  if (citations.length > 0) {
+                  // retriever_resourcesがある場合、かつJSON由来のcitationsがない場合のみ上書き
+                  if (citations.length > 0 && !hasParsedCitations) {
                     setMessages((prev) =>
                       prev.map((msg) =>
                         msg.id === aiMessageId
@@ -212,7 +234,7 @@ const ChatArea = (props) => {
                   }
                   
                   if (data.message_id) {
-                    fetchSuggestions(data.message_id, aiMessageId);
+                    fetchSuggestions(data.message_id, aiMessageId, isStreamingAnimation, pendingSuggestions);
                   }
                 }
                 
@@ -220,36 +242,72 @@ const ChatArea = (props) => {
                   addLog('[API Stream] Received event: workflow_finished', 'info');
                   
                   // JSON形式の回答をパースする
-                  setMessages((prev) => {
-                    return prev.map((msg) => {
-                      if (msg.id === aiMessageId) {
-                        let finalText = msg.text;
-                        let finalCitations = msg.citations || [];
+                  const currentMsg = messages.find(m => m.id === aiMessageId);
+                  let finalText = contentBuffer;
+                  let finalCitations = currentMsg?.citations || [];
+                  let isJsonFormat = false;
 
-                        // JSON形式の回答をパース試行
-                        try {
-                          const trimmedText = finalText.trim();
-                          if (trimmedText.startsWith('{') && trimmedText.endsWith('}')) {
-                            const parsed = JSON.parse(trimmedText);
-                            if (parsed.answer) {
-                              finalText = parsed.answer;
-                              if (parsed.citations && Array.isArray(parsed.citations)) {
-                                finalCitations = mapCitationsFromLLM(parsed.citations);
-                                addLog(`[API] Parsed ${finalCitations.length} citations from LLM response`, 'info');
-                              }
-                            }
-                          }
-                        } catch (e) {
-                          addLog(`[API] Not JSON format or parse error: ${e.message}`, 'info');
+                  // JSON形式の回答をパース試行
+                  try {
+                    const trimmedText = finalText.trim();
+                    if (trimmedText.startsWith('{') && trimmedText.endsWith('}')) {
+                      const parsed = JSON.parse(trimmedText);
+                      if (parsed.answer) {
+                        finalText = parsed.answer;
+                        isJsonFormat = true;
+                        if (parsed.citations && Array.isArray(parsed.citations)) {
+                          finalCitations = mapCitationsFromLLM(parsed.citations);
+                          addLog(`[API] Parsed ${finalCitations.length} citations from LLM response`, 'info');
                         }
-
-                        return { ...msg, text: finalText, citations: finalCitations };
                       }
-                      return msg;
-                    });
-                  });
-                  
-                  setIsLoading(false);
+                    }
+                  } catch (e) {
+                    addLog(`[API] Not JSON format or parse error: ${e.message}`, 'info');
+                  }
+
+                  // JSON形式の場合は、パース後に演出としてストリーミング表示
+                  if (isJsonFormat && finalText) {
+                    addLog('[API] Starting streaming animation for parsed JSON response', 'info');
+                    hasParsedCitations = true; // フラグを立てる
+                    isStreamingAnimation = true; // アニメーション開始
+                    let charIndex = 0;
+                    const streamInterval = setInterval(() => {
+                      if (charIndex <= finalText.length) {
+                        const displayText = finalText.substring(0, charIndex);
+                        setMessages((prev) =>
+                          prev.map((msg) =>
+                            msg.id === aiMessageId
+                              ? { ...msg, text: displayText }
+                              : msg
+                          )
+                        );
+                        charIndex += 1; // 1文字ずつ表示
+                      } else {
+                        clearInterval(streamInterval);
+                        isStreamingAnimation = false; // アニメーション終了
+                        // アニメーション完了後に出典と関連質問を設定
+                        setMessages((prev) =>
+                          prev.map((msg) =>
+                            msg.id === aiMessageId
+                              ? { ...msg, citations: finalCitations, suggestions: pendingSuggestions }
+                              : msg
+                          )
+                        );
+                        addLog('[API] Streaming animation completed with citations and suggestions', 'info');
+                        setIsLoading(false);
+                      }
+                    }, 20); // 20msごと
+                  } else {
+                    // JSON形式でない場合は即座に表示
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === aiMessageId
+                          ? { ...msg, text: finalText, citations: finalCitations }
+                          : msg
+                      )
+                    );
+                    setIsLoading(false);
+                  }
                 }
 
                 else if (data.event === 'error') {
@@ -267,7 +325,7 @@ const ChatArea = (props) => {
     }
   };
 
-  const fetchSuggestions = async (messageId, aiMessageId) => {
+  const fetchSuggestions = async (messageId, aiMessageId, isStreamingAnimationActive, pendingSuggestionsRef) => {
     addLog(`[API] Fetching suggestions for message_id: ${messageId}`, 'info');
     try {
       const response = await fetch(
@@ -288,13 +346,22 @@ const ChatArea = (props) => {
       const result = await response.json();
       if (result.result === 'success' && result.data) {
         addLog(`[API] Suggestions found: ${result.data.length}`, 'info');
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === aiMessageId
-              ? { ...msg, suggestions: result.data }
-              : msg
-          )
-        );
+        
+        // アニメーション中の場合は保留
+        if (isStreamingAnimationActive) {
+          addLog('[API] Suggestions stored for later display (animation in progress)', 'info');
+          pendingSuggestionsRef.length = 0; // 配列をクリア
+          pendingSuggestionsRef.push(...result.data); // 新しいデータを追加
+        } else {
+          // アニメーション中でない場合は即座に表示
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId
+                ? { ...msg, suggestions: result.data }
+                : msg
+            )
+          );
+        }
       }
     } catch (error) {
       addLog(`[API Error] Suggestions fetch failed: ${error.message}`, 'warn');
