@@ -1,120 +1,74 @@
-import React, { useState } from 'react'; // 修正: useState を react からインポート
-import './style.css'; // スタイルシートをインポートします
+// src/App.jsx
+import { useState } from 'react';
+import './App.css';
+import './index.css';
 
-// コンポーネントのインポート (雛形)
-import MockModeSelect from './components/MockModeSelect.jsx';
-import ChatHistory from './components/ChatHistory.jsx';
-import ChatInput from './components/ChatInput.jsx';
-
-// --- PoC用の初期モックデータ ---
-// 「F-UI-001: 会話履歴の取得・表示」の検証用
-const INITIAL_MESSAGES = [
-  {
-    id: 'm1',
-    type: 'user',
-    text: 'Difyの標準UIの制約について教えてください。',
-  },
-  {
-    id: 'm2',
-    type: 'ai',
-    text: 'Difyの標準UIでは、要件定義書(4.2)にある「脚注形式の出典」や「ボタン形式のプロアクティブ提案」の実現が困難である可能性が高いです。',
-    // PoCの検証項目 (F-UI-003, F-UI-004) のためのデータ構造を定義
-    citations: [
-      { id: 'c1', source: '社内AIチャットボット_基本設計書_(Phase_1).pdf', page: 6 }
-    ],
-    suggestedQuestions: [
-      'Phase 2でのカスタムフロントエンド開発は必須ですか？',
-      'ストリーミング応答の制御は可能ですか？'
-    ]
-  },
-  {
-    id: 'm3',
-    type: 'user',
-    text: 'なるほど。このPoCでその課題を検証するのですね。',
-  }
-];
-// ---
+// コンポーネントのインポート
+import Sidebar from './components/Sidebar'; // 本物をインポート
+import ChatArea from './components/ChatArea';
 
 function App() {
-  // 「カスタムフロントエンド PoC 基本設計書 (5. 画面設計)」 に基づく状態管理
-  
-  // F-UI-006, F-UI-007: モックモードの状態
-  // 'OFF': 実API (Mode 3)
-  // 'FE': フロントエンド・モック (Mode 1)
-  // 'BE': バックエンド・モック (Mode 2)
-  const [mockMode, setMockMode] = useState('OFF'); 
-  
-  // F-UI-001: 会話履歴の状態
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  
-  // T-07: APIローディング状態
-  const [isLoading, setIsLoading] = useState(false);
+  // 新基本設計書 (5.1) に基づく状態定義
+  const [messages, setMessages] = useState([]); // チャット履歴
+  const [isLoading, setIsLoading] = useState(false); // 回答生成中か
+  const [conversationId, setConversationId] = useState(null); // 現在の会話ID
 
-  // T-05:チャット送信処理 (PoCロードマップ Step 2で実装)
-  const handleSend = (inputText) => {
-    console.log('--- 送信処理 ---');
-    console.log('Mock Mode:', mockMode);
-    console.log('Input Text:', inputText);
-    
-    // T-06, T-08, T-10: Dify API (ストリーミング) 呼び出しロジック
-    // ... (ここにfetchとReadableStreamの実装を追加) ...
+  // F-UI-006, F-UI-007 のためのモード
+  // PoC基本設計書 (4.) に従い、初期値は 'FE' (フロントエンドモック) が安全です
+  const [mockMode, setMockMode] = useState('FE');
 
-    // (仮) ユーザーの質問を履歴に追加
-    const userMessage = {
-      id: `m${messages.length + 1}`,
-      type: 'user',
-      text: inputText,
-    };
-    setMessages([...messages, userMessage]);
-    
-    // (仮) ローディング開始
-    setIsLoading(true);
+  // T-04 (履歴選択) のための処理
+  const handleSetConversationId = (id) => {
+    setConversationId(id);
+    // TODO: T-04 で履歴API (GET /messages) を呼び出し、
+    // setMessages(...) で履歴をセットする
 
-    // (仮) AIの応答をシミュレート
-    setTimeout(() => {
-      const aiResponse = {
-        id: `m${messages.length + 2}`,
-        type: 'ai',
-        text: `「${inputText}」に対するAIの応答です。\n(現在ローディング中: ${isLoading}, モックモード: ${mockMode})`,
-        citations: [],
-        suggestedQuestions: []
-      };
-      setMessages(prev => [...prev, aiResponse]);
-      setIsLoading(false);
-    }, 1500);
-  };
-
-  // F-UI-006, F-UI-007: モックモード変更処理
-  const handleMockModeChange = (mode) => {
-    setMockMode(mode);
-    console.log('Mock Mode Changed:', mode);
+    // (T-03時点のダミー動作)
+    if (id === null) {
+      // 新規チャット (新基本設計書 5.2.1)
+      setMessages([]);
+    } else {
+      // ダミーの履歴をロード (新基本設計書 5.2.2)
+      setMessages([
+        {
+          id: '1',
+          role: 'user',
+          text: `履歴(${id})の過去の質問`,
+        },
+        {
+          id: '2',
+          role: 'ai',
+          text: `履歴(${id})の過去の回答`,
+          citations: [], // T-09用
+          suggestions: [], // T-11用
+        },
+      ]);
+    }
   };
 
   return (
-    // 'app-container' がウィンドウ全体の背景
-    <div className="app-container">
-      {/* 'chat-window' がMacのウィンドウ風UI */}
-      <div className="chat-window">
-        
-        
-        {/* PoC用デバッグUI (F-UI-006, F-UI-007) */}
-        <MockModeSelect 
-          currentMode={mockMode} 
-          onChange={handleMockModeChange} 
-        />
-        
-        {/* メインのチャット履歴 (F-UI-001) */}
-        <ChatHistory 
-          messages={messages} 
-          isLoading={isLoading}
-        />
-        
-        {/* T-03: チャット入力欄 */}
-        <ChatInput 
-          onSend={handleSend} 
-          isLoading={isLoading} 
-        />
-      </div>
+    <div className="app">
+      {/* T-04 (履歴) のため、conversationId の管理と
+        履歴リスト(conversations)を渡す必要があります
+      */}
+      <Sidebar
+        conversationId={conversationId}
+        setConversationId={handleSetConversationId}
+        // conversations={conversations} // T-04で実装
+      />
+
+      {/* メインのチャットエリア。
+        状態と更新用関数(setter)をpropsとして渡します。
+      */}
+      <ChatArea
+        messages={messages}
+        setMessages={setMessages}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        mockMode={mockMode}
+        setMockMode={setMockMode}
+        conversationId={conversationId}
+      />
     </div>
   );
 }

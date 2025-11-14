@@ -1,0 +1,163 @@
+/* src/components/styles/MessageBlock.css */
+
+/* メッセージブロック全体 */
+.message-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px; /* ChatGPT風の最大幅 */
+  margin: 0 auto; /* 中央揃え */
+}
+
+/* 役割（User / AI）のラベル */
+.message-role {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+/* AIの回答 */
+.message-role-ai {
+  color: #4A4A4A; /* 少し柔らかい色 */
+}
+
+/* ユーザーの質問 */
+.message-role-user {
+  color: #1A73E8; /* ユーザーの色を区別 */
+}
+
+/* メッセージ本体のコンテナ */
+.message-content {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #202123;
+  word-wrap: break-word; /* 長い単語を折り返す */
+}
+
+/* AIの回答コンテナ（本文、出典、提案を内包） */
+.message-content-ai {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 本文とメタデータの間の余白 */
+}
+
+/* Markdownレンダラーのスタイル（本文） */
+.markdown-renderer {
+  /* react-markdown が生成するタグへのスタイル */
+  white-space: pre-wrap; /* 改行を保持 */
+}
+
+.markdown-renderer p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+.markdown-renderer p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-renderer ul,
+.markdown-renderer ol {
+  padding-left: 24px;
+}
+
+.markdown-renderer code {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #f0f0f0;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.markdown-renderer pre {
+  background-color: #2d2d2d;
+  color: #f8f8f2;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.markdown-renderer pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.markdown-renderer a {
+  color: #1A73E8;
+  text-decoration: none;
+}
+.markdown-renderer a:hover {
+  text-decoration: underline;
+}
+
+/* --- 出典リスト (T-09) --- */
+.citation-list {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 12px;
+}
+
+.citation-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.citation-item {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.citation-link {
+  color: #1A73E8;
+  text-decoration: none;
+  word-break: break-all; /* URLがはみ出ないように */
+}
+.citation-link:hover {
+  text-decoration: underline;
+}
+
+.citation-index {
+  font-weight: 700;
+  margin-right: 8px;
+  color: #333;
+}
+
+/* --- 提案ボタン (T-11) --- */
+.suggestion-buttons {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.suggestion-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.suggestion-button {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 20px; /* 楕円形のボタン */
+  background-color: #f9f9f9;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  text-align: left;
+}
+
+.suggestion-button:hover {
+  background-color: #f0f0f0;
+  border-color: #aaa;
+}

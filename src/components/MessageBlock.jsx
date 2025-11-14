@@ -1,66 +1,54 @@
+// src/components/MessageBlock.jsx
 import React from 'react';
-import { FileText, Lightbulb } from 'lucide-react';
+import './styles/MessageBlock.css';
 
-// F-UI-003, F-UI-004: 個別のメッセージブロック
-// ChatHistory.jsx から呼び出され、style.css の .message-block スタイルが適用されます
-// ★本PoCの最重要検証コンポーネント (出典と提案の分離描画)
-function MessageBlock({ message }) {
-  const { type, text, citations, suggestedQuestions } = message;
+import MarkdownRenderer from './MarkdownRenderer';
+import CitationList from './CitationList';
+import SuggestionButtons from './SuggestionButtons';
 
-  // ユーザーのメッセージかAIのメッセージかでスタイルを切り替える
-  const isUser = type === 'user';
-  const blockClassName = isUser ? 'message-block user' : 'message-block ai';
-  const bubbleClassName = isUser ? 'message-bubble user' : 'message-bubble ai';
-
-  // T-11: 提案ボタンクリック時の処理 (PoCではコンソールログ)
-  const handleSuggestionClick = (question) => {
-    console.log('Suggested Question Clicked:', question);
-    // 将来的には onSend(question) などを呼び出す
-  };
+/**
+ * 1つのQ&Aペアを表示 (5.1)
+ * @param {object} message - メッセージオブジェクト
+ */
+const MessageBlock = ({ message }) => {
+  const { role, text, citations, suggestions } = message;
+  const isAi = role === 'ai';
 
   return (
-    <div className={blockClassName}>
-      {/* メッセージ本体 (吹き出し) */}
-      <div className={bubbleClassName}>
-        {text}
+    <div className="message-block">
+      {/* 役割ラベル */}
+      <div
+        className={`message-role ${
+          isAi ? 'message-role-ai' : 'message-role-user'
+        }`}
+      >
+        {isAi ? 'AI' : 'あなた'}
       </div>
 
-      {/* T-09: F-UI-003 (出典の分離・描画) */}
-      {/* AIのメッセージかつ、出典が存在する場合のみ描画 */}
-      {!isUser && citations && citations.length > 0 && (
-        <div className="citations">
-          {citations.map((cite, index) => (
-            <span key={cite.id || `c-${index}`} className="citation-item">
-              {/* --- 変更 (Icon) --- */}
-              <FileText size={14} />
-              {/* --- 変更ここまで --- */}
-              {cite.source} {cite.page ? `(P. ${cite.page})` : ''}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* コンテンツ本体 */}
+      <div
+        className={`message-content ${
+          isAi ? 'message-content-ai' : 'message-content-user'
+        }`}
+      >
+        {/* 本文 (T-06) */}
+        <MarkdownRenderer content={text || '(回答を生成中...)'} />
 
-      {/* T-11: F-UI-004 (プロアクティブ提案の分離・描画) */}
-      {/* AIのメッセージかつ、提案が存在する場合のみ描画 */}
-      {!isUser && suggestedQuestions && suggestedQuestions.length > 0 && (
-        <div className="suggested-questions">
-          {suggestedQuestions.map((q, index) => (
-            <button 
-              key={`q-${index}`} 
-              className="suggested-question-button"
-              onClick={() => handleSuggestionClick(q)}
-            >
-              {/* --- 変更 (Icon) --- */}
-              <Lightbulb size={16} />
-              {/* 変更したアイコンに合わせてテキストをspanで囲む */}
-              <span>{q}</span>
-              {/* --- 変更ここまで --- */}
-            </button>
-          ))}
-        </div>
-      )}
+        {/* AIの回答の場合のみ、出典と提案を表示 */}
+        {isAi && (
+          <>
+            {/* 出典リスト (T-09) */}
+            <CitationList citations={citations} />
+            {/* 提案ボタン (T-11) */}
+            <SuggestionButtons
+              suggestions={suggestions}
+              onSuggestionClick={(q) => console.log('Suggestion clicked:', q)}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default MessageBlock;

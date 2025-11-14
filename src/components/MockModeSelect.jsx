@@ -1,27 +1,29 @@
+// src/components/MockModeSelect.jsx
 import React from 'react';
-import { SlidersHorizontal } from 'lucide-react';
+import './styles/ChatArea.css';
 
-// F-UI-006, F-UI-007: モックモード切り替え用UI
-// App.jsx から呼び出され、style.css の .mock-mode-select スタイルが適用されます
-function MockModeSelect({ currentMode, onChange }) {
-  
-  const handleChange = (event) => {
-    onChange(event.target.value);
-  };
-
+/**
+ * PoC用 モックモード切替UI (F-UI-006, F-UI-007)
+ * @param {string} mockMode - 現在のモード ('OFF', 'FE', 'BE')
+ * @param {function} setMockMode - モードを更新する関数
+ */
+const MockModeSelect = ({ mockMode, setMockMode }) => {
   return (
     <div className="mock-mode-select">
-      <label htmlFor="mock-mode">
-        <SlidersHorizontal size={14} />
-        <span>PoC Debug Mode:</span>
+      <label htmlFor="mock-mode-selector">
+        [PoCデバッグ用] モード:
       </label>
-      <select id="mock-mode" value={currentMode} onChange={handleChange}>
-        <option value="OFF">OFF (実API / Mode 3)</option>
-        <option value="FE">FE Mock (Mode 1)</option>
-        <option value="BE">BE Mock (Mode 2)</option>
+      <select
+        id="mock-mode-selector"
+        value={mockMode}
+        onChange={(e) => setMockMode(e.target.value)}
+      >
+        <option value="OFF">OFF (API実効)</option>
+        <option value="FE">FE Mock (フロント完結)</option>
+        <option value="BE">BE Mock (Difyワークフロー)</option>
       </select>
     </div>
   );
-}
+};
 
 export default MockModeSelect;

@@ -1,40 +1,41 @@
+// src/components/ChatHistory.jsx
 import React, { useEffect, useRef } from 'react';
-import MessageBlock from './MessageBlock.jsx'; // 個別のメッセージブロック
-// --- (オプション) 新規コンポーネントをインポート ---
-// import TypingIndicator from './TypingIndicator.jsx';
+import './styles/ChatArea.css';
+import MessageBlock from './MessageBlock'; // 本物をインポート
 
-// F-UI-001: 会話履歴のリスト表示
-// App.jsx から呼び出され、style.css の .chat-history スタイルが適用されます
-function ChatHistory({ messages, isLoading }) {
-  const historyEndRef = useRef(null);
+/**
+ * チャット履歴表示エリア (T-06)
+ * @param {Array} messages - App.jsxから渡される
+ */
+const ChatHistory = ({ messages }) => {
+  const endOfMessagesRef = useRef(null);
 
-  // 新しいメッセージが追加されたら、一番下までスクロールする
+  // メッセージが更新されるたびに一番下にスクロールする (T-06)
+  const scrollToBottom = () => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
-    historyEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    scrollToBottom();
+  }, [messages]); // messages が変わるたびに実行
 
   return (
     <div className="chat-history">
-      {messages.map((msg, index) => (
-        <MessageBlock 
-          key={msg.id || `msg-${index}`} 
-          message={msg} 
-        />
-      ))}
-      
-      {/* (仮) T-07: ローディング中の表示 */}
-      {isLoading && (
-        <div className="typing-indicator">
-          <span></span>
-          <span></span>
-          <span></span>
+      {messages.length === 0 ? (
+        // 初期表示状態 (新基本設計書 5.2.1)
+        <div className="chat-history-empty">
+          お困りのことはありますか？
         </div>
+      ) : (
+        // 履歴表示状態 (新基本設計書 5.2.2)
+        messages.map((msg) => (
+          <MessageBlock key={msg.id} message={msg} />
+        ))
       )}
-
-      {/* スクロール用の終端マーカー */}
-      <div ref={historyEndRef} />
+      {/* スクロール用の空要素 */}
+      <div ref={endOfMessagesRef} />
     </div>
   );
-}
+};
 
 export default ChatHistory;

@@ -1,0 +1,70 @@
+/* src/components/styles/Sidebar.css */
+/* .sidebar (親) は App.css で定義済み */
+
+.sidebar-header {
+  flex-shrink: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+}
+
+.new-chat-button {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background-color: #343541;
+  color: #ECECEC;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.new-chat-button:hover {
+  background-color: #4a4a4f;
+}
+
+/* 会話履歴リスト */
+.conversation-list {
+  flex-grow: 1; /* 残りの高さをすべて取る */
+  overflow-y: auto; /* スクロール可能に */
+  margin-top: 16px;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.conversation-item {
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #ECECEC;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* はみ出したテキストを ... で表示 */
+  transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+  background-color: #2a2b2e;
+}
+
+.conversation-item.active {
+  background-color: #343541;
+  font-weight: 500;
+}
