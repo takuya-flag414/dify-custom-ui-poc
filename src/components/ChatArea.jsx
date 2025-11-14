@@ -1,22 +1,17 @@
 // src/components/ChatArea.jsx
 import React from 'react';
-import '../App.css'; // .chat-area のスタイルをインポート
+import '../App.css';
 import './styles/ChatArea.css';
 
 import MockModeSelect from './MockModeSelect';
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
 
-/**
- * メインのチャットエリア (5.1) 
- * @param {Array} messages
- * @param {function} setMessages
- * @param {boolean} isLoading
- * @param {function} setIsLoading
- * @param {string} mockMode
- * @param {function} setMockMode
- * @param {string} conversationId
- */
+// --- PoC API設定 ---
+const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
+const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
+const USER_ID = 'poc-user-01';
+
 const ChatArea = (props) => {
   const {
     messages,
@@ -26,55 +21,275 @@ const ChatArea = (props) => {
     mockMode,
     setMockMode,
     conversationId,
+    addLog,
   } = props;
 
-  /**
-   * メッセージ送信時の処理 (T-05, T-06 の起点)
-   * PoC基本設計書 (5.4の3.) [cite: 387, 388] に基づき、
-   * ここでローディングを開始し、メッセージを追加する。
-   */
-  const handleSendMessage = (text) => {
-    console.log('Send:', text, 'Mode:', mockMode, 'ConvID:', conversationId);
+  const handleApiError = (errorText, aiMessageId) => {
+    addLog(`[API Error] ${errorText}`, 'error');
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === aiMessageId
+          ? {
+              ...msg,
+              text: `**エラーが発生しました:**\n\n${errorText}\n\nAPIキーまたはURLの設定、リクエストの形式を確認してください。`,
+              citations: [],
+              suggestions: [],
+            }
+          : msg
+      )
+    );
+    setIsLoading(false);
+  };
 
-    // TODO: T-05 (API呼び出し) / F-UI-006 (FEモック) のロジックを実装
-    
-    // (T-03時点のダミー動作)
+  const handleSendMessage = async (text) => {
+    addLog(`[ChatArea] Sending message: "${text}", Mode: ${mockMode}, ConvID: ${conversationId}`, 'info');
+
     // 1. ユーザーの質問を履歴に追加
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       text: text,
       role: 'user',
     };
-    
-    // 2. AIの応答（ダミー）を準備
-    const aiMessage = {
-      id: `msg_${Date.now()}_ai`,
-      text: `「${text}」に対するFEモックの応答です。\nストリーミングは未実装です。`,
-      role: 'ai',
-      citations: [], // T-09用
-      suggestions: [], // T-11用
-    };
-
-    // 3. 履歴を更新し、ローディング状態をシミュレート
-    setMessages([...messages, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    // (ダミーのAI応答時間)
-    setTimeout(() => {
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false); // 応答完了
-    }, 1500);
+    // 2. AIの空の回答欄をまず追加
+    const aiMessageId = `msg_${Date.now()}_ai`;
+    const aiMessage = {
+      id: aiMessageId,
+      text: '',
+      role: 'ai',
+      citations: [],
+      suggestions: [],
+    };
+    setMessages((prev) => [...prev, aiMessage]);
+
+    // --- FEモック ---
+    if (mockMode === 'FE') {
+      addLog('[ChatArea] FE Mock Mode started.', 'info');
+      const mockResponse = `「${text}」に対するFEモックの応答です。\nこれは擬似的なストリーミング(T-06)のテストです。\n1文字ずつ表示されます。`;
+      let index = 0;
+      const streamInterval = setInterval(() => {
+        if (index < mockResponse.length) {
+          const char = mockResponse[index];
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId ? { ...msg, text: msg.text + char } : msg
+            )
+          );
+          index++;
+        } else {
+          clearInterval(streamInterval);
+          addLog('[ChatArea] FE Mock stream finished.', 'info');
+          const mockCitations = [
+            { id: 'fe-1', type: 'file', source: 'FEモック.pdf (P.1)' },
+            { id: 'fe-2', type: 'web', source: 'https://mock.dify.ai/api', url: 'https://mock.dify.ai' },
+          ];
+          const mockSuggestions = [
+            'FEモックの次の質問は?',
+            'BEモックについても教えて',
+          ];
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId
+                ? { ...msg, citations: mockCitations, suggestions: mockSuggestions }
+                : msg
+            )
+          );
+          setIsLoading(false);
+          addLog('[ChatArea] FE Mock completed.', 'info');
+        }
+      }, 50);
+
+    } else {
+      // --- API実効 / BEモック ---
+      addLog(`[API] ${mockMode} Mode selected. Calling Dify API...`, 'info');
+
+      if (!DIFY_API_KEY || !DIFY_API_URL) {
+        handleApiError(
+          'VITE_DIFY_API_KEY または VITE_DIFY_API_URL が設定されていません。',
+          aiMessageId
+        );
+        return;
+      }
+
+      const inputs = {
+        mock_perplexity_text: mockMode === 'BE' ? JSON.stringify({
+            "content": "2025年11月7日は「立冬」「鍋の日」「知恵の日」などの記念日があり、また新潟・佐渡空港の開港記念日でもあります。\n\n具体的には、  \n- **立冬**：二十四節気の一つで、冬の始まりを意味する日です。  \n- **鍋の日**：冬の訪れとともに鍋料理を楽しむ日として制定されています。  \n- **知恵の日**：知恵を大切にする日として認知されています。  \n- 1958年に**新潟・佐渡空港がオープンした日**でもあります[10][14]。\n\nまた、運勢的には「頼まれごとをきっかけに信頼関係が深まる日」とされ、金運は「大切なお金をしっかり守れる日」との占いもあります[3][17]。\n\nさらに、2025年11月7日は地震が日向灘で発生した日でもありますが、特別な凶日とはされていません[11]。  \n\nこれらの情報から、11月7日は季節の節目として冬の始まりを感じる日であり、記念日も多い日といえます。",
+            "role": "assistant",
+            "citations": [
+            "https://www.mwed.jp/articles/12629/",
+            "https://note.com/zouplans/n/n06f668ef9b97",
+            "https://sp.gettersiida.net/article/gettersiida/unsei/27188/",
+            "https://kids.yahoo.co.jp/today/1008",
+            "https://www.mwed.jp/articles/13239/",
+            "https://zatsuneta.com/category/anniversary10.html",
+            "https://netlab.click/todayis/1107",
+            "https://kango.mynavi.jp/contents/nurseplus/news/20251107-2182253/"
+            ]
+        }) : '',
+        // isDebugMode は mockMode に応じて設定
+        isDebugMode: mockMode === 'BE',
+        };
+
+      const requestBody = {
+        inputs: inputs,
+        query: text,
+        user: USER_ID,
+        conversation_id: conversationId || '',
+        response_mode: 'streaming',
+      };
+
+      addLog(`[API] Request body: ${JSON.stringify(requestBody, null, 2)}`, 'info');
+
+      try {
+        const response = await fetch(`${DIFY_API_URL}/chat-messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${DIFY_API_KEY}`,
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`API request failed with status ${response.status}: ${errorData.message || 'Unknown error'}`);
+        }
+        if (!response.body) {
+          throw new Error('ReadableStream not available');
+        }
+
+        // ストリーミング処理
+        const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            addLog('[API Stream] Stream finished.', 'info');
+            break;
+          }
+
+          buffer += value;
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const dataLine = line.substring(6).trim();
+              if (!dataLine) continue;
+
+              try {
+                const data = JSON.parse(dataLine);
+                
+                if (data.event === 'message') {
+                  if (data.answer) {
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === aiMessageId
+                          ? { ...msg, text: msg.text + data.answer }
+                          : msg
+                      )
+                    );
+                  }
+                } 
+                
+                else if (data.event === 'message_end') {
+                  addLog('[API Stream] Received event: message_end', 'info');
+                  const citations = data.metadata?.retriever_resources || [];
+                  addLog(`[API Stream] Citations found: ${citations.length}`, 'info');
+
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === aiMessageId
+                        ? { ...msg, citations: mapCitations(citations) }
+                        : msg
+                    )
+                  );
+                  
+                  if (data.message_id) {
+                    fetchSuggestions(data.message_id, aiMessageId);
+                  }
+                }
+                
+                else if (data.event === 'workflow_finished') {
+                  addLog('[API Stream] Received event: workflow_finished', 'info');
+                  setIsLoading(false);
+                }
+
+                else if (data.event === 'error') {
+                  throw new Error(`API Stream Error: ${JSON.stringify(data)}`);
+                }
+              } catch (e) {
+                addLog(`[API Stream] JSON parse error: ${e}`, 'warn');
+              }
+            }
+          }
+        }
+      } catch (error) {
+        handleApiError(error.message, aiMessageId);
+      }
+    }
+  };
+
+  const fetchSuggestions = async (messageId, aiMessageId) => {
+    addLog(`[API] Fetching suggestions for message_id: ${messageId}`, 'info');
+    try {
+      const response = await fetch(
+        `${DIFY_API_URL}/messages/${messageId}/suggested?user=${USER_ID}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${DIFY_API_KEY}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Suggestions API failed with status ${response.status}: ${errorData.message || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      if (result.result === 'success' && result.data) {
+        addLog(`[API] Suggestions found: ${result.data.length}`, 'info');
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMessageId
+              ? { ...msg, suggestions: result.data }
+              : msg
+          )
+        );
+      }
+    } catch (error) {
+      addLog(`[API Error] Suggestions fetch failed: ${error.message}`, 'warn');
+    }
+  };
+
+  const mapCitations = (resources) => {
+    return resources.map((res, index) => {
+      const sourceName = res.document_name || '不明な出典';
+      const url = res.document_url || null;
+      
+      let displayText = `[${index + 1}] ${sourceName}`;
+
+      return {
+        id: res.document_id || `cite_${index}`,
+        type: url ? 'web' : 'file',
+        source: displayText,
+        url: url,
+      };
+    });
   };
 
   return (
     <div className="chat-area">
-      {/* デバッグ用UI (F-UI-006, F-UI-007) [cite: 335] */}
       <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
-
-      {/* チャット履歴 (T-06)  */}
-      <ChatHistory messages={messages} />
-
-      {/* 入力フォーム (T-03)  */}
+      <ChatHistory
+        messages={messages}
+        onSuggestionClick={handleSendMessage} // ★ T-11対応: propsを渡す
+      />
       <ChatInput isLoading={isLoading} onSendMessage={handleSendMessage} />
     </div>
   );

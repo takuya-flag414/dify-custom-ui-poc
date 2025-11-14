@@ -12,12 +12,12 @@
 .sidebar {
   width: 260px;
   flex-shrink: 0; /* サイドバーの幅を固定 */
-  background-color: #202123; /* ChatGPT風のダークな背景色 */
-  color: #ECECEC; /* 明るいテキスト色 */
+  background-color: var(--color-primary-dark); /* ロゴのネイビーに変更 */
+  color: var(--color-primary-text); /* ロゴの白に変更 */
   padding: 16px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #3c3c3c;
+  border-right: 1px solid #3D4A6A; /* ネイビーに合わせた境界線色 */
 }
 
 /* チャットエリア（メインコンテンツ） */
@@ -25,7 +25,8 @@
   flex-grow: 1; /* 残りの幅すべてを使用 */
   display: flex;
   flex-direction: column;
-  background-color: #FFFFFF; /* クリーンな白背景 */
+  background-color: var(--color-bg-white); /* クリーンな白背景 */
   height: 100vh; /* 高さを画面全体に */
   max-height: 100vh; /* 高さが画面を超えないように */
+  position: relative; /* スティッキーな子の基準点 */
 }

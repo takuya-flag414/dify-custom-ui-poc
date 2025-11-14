@@ -4,26 +4,26 @@
 .sidebar-header {
   flex-shrink: 0;
   padding-bottom: 16px;
-  border-bottom: 1px solid #3c3c3c;
+  border-bottom: 1px solid #3D4A6A; /* ネイビーに合わせた境界線色 */
 }
 
 .sidebar-title {
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
-  color: #ffffff;
+  color: var(--color-primary-text); /* ロゴの白 */
 }
 
 .new-chat-button {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: var(--font-family-base);
   font-size: 0.9rem;
   font-weight: 500;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #555;
+  border: 1px solid rgba(245, 245, 245, 0.2); /* 白い境界線 */
   border-radius: 8px;
-  background-color: #343541;
-  color: #ECECEC;
+  background-color: rgba(245, 245, 245, 0.05); /* わずかに明るく */
+  color: var(--color-primary-text);
   cursor: pointer;
   text-align: left;
   transition: background-color 0.2s;
@@ -34,7 +34,7 @@
 }
 
 .new-chat-button:hover {
-  background-color: #4a4a4f;
+  background-color: rgba(245, 245, 245, 0.15); /* ホバー時 */
 }
 
 /* 会話履歴リスト */
@@ -52,19 +52,57 @@
   font-size: 0.9rem;
   padding: 10px 12px;
   border-radius: 8px;
-  color: #ECECEC;
+  color: #A9B2C8; /* 少し落ち着いた白 */
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; /* はみ出したテキストを ... で表示 */
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .conversation-item:hover {
-  background-color: #2a2b2e;
+  background-color: rgba(245, 245, 245, 0.05);
+  color: var(--color-primary-text);
 }
 
 .conversation-item.active {
-  background-color: #343541;
-  font-weight: 500;
+  /* ★すりガラス風（立体的）デザインに変更 */
+  background-color: rgba(245, 245, 245, 0.1); /* わずかに明るく */
+  font-weight: 700;
+  color: var(--color-primary-text); /* ★赤文字を削除し、白に戻す */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25); /* ★内側に影をつけ立体的に */
+}
+
+/* --- デバッグツール --- */
+.sidebar-debug-tools {
+  flex-shrink: 0; /* 高さを固定 */
+  border-top: 1px solid #3D4A6A; /* ネイビーに合わせた境界線色 */
+  padding: 16px;
+  margin-top: auto; /* ★重要: サイドバーの最下部に固定 */
+  background-color: var(--color-primary-dark);
+}
+
+.debug-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #A9B2C8; /* 少し落ち着いた白 */
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.debug-copy-button {
+  font-family: var(--font-family-base);
+  font-size: 0.8rem;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(245, 245, 245, 0.2);
+  border-radius: 6px;
+  background-color: rgba(245, 245, 245, 0.1);
+  color: var(--color-primary-text);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.debug-copy-button:hover {
+  background-color: rgba(245, 245, 245, 0.2);
 }

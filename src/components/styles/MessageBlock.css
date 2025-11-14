@@ -1,51 +1,84 @@
 /* src/components/styles/MessageBlock.css */
 
+/* --- ★ アニメーション定義 (T-12) --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* --- --- */
+
 /* メッセージブロック全体 */
 .message-block {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 800px; /* ChatGPT風の最大幅 */
-  margin: 0 auto; /* 中央揃え */
+  max-width: 85%; /* 吹き出しの最大幅 */
 }
 
 /* 役割（User / AI）のラベル */
 .message-role {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  padding: 0 4px;
 }
 
 /* AIの回答 */
 .message-role-ai {
-  color: #4A4A4A; /* 少し柔らかい色 */
+  color: #4A4A4A;
+  text-align: left;
 }
 
 /* ユーザーの質問 */
 .message-role-user {
-  color: #1A73E8; /* ユーザーの色を区別 */
+  color: var(--color-primary-dark); /* ★ロゴのネイビーに変更 */
+  text-align: right;
 }
 
-/* メッセージ本体のコンテナ */
+/* メッセージ本体のコンテナ (共通の吹き出しスタイル) */
 .message-content {
   font-size: 1rem;
   line-height: 1.7;
-  color: #202123;
-  word-wrap: break-word; /* 長い単語を折り返す */
+  color: var(--color-text-dark);
+  word-wrap: break-word;
+  padding: 12px 16px;
+  border-radius: 12px;
 }
 
 /* AIの回答コンテナ（本文、出典、提案を内包） */
 .message-content-ai {
   display: flex;
   flex-direction: column;
-  gap: 16px; /* 本文とメタデータの間の余白 */
+  gap: 16px;
+  
+  /* ★AI吹き出しスタイル (Mac風) */
+  background-color: #F0F0F5; /* 明るいグレー */
+  border: none;
+  border-top-left-radius: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* 繊細な影 */
+}
+
+/* ★ユーザー吹き出しスタイル (ロゴ風) */
+.message-content-user {
+  background-color: var(--color-primary-dark); /* ★ロゴのネイビー */
+  color: var(--color-primary-text); /* ★ロゴの白 */
+  border-top-right-radius: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ユーザー吹き出し内のリンク色を調整 */
+.message-content-user a {
+  color: #89b4f8; /* ネイビー背景でも見やすいリンク色 */
 }
 
 /* Markdownレンダラーのスタイル（本文） */
 .markdown-renderer {
-  /* react-markdown が生成するタグへのスタイル */
-  white-space: pre-wrap; /* 改行を保持 */
+  white-space: pre-wrap;
 }
 
 .markdown-renderer p {
@@ -63,10 +96,16 @@
 
 .markdown-renderer code {
   font-family: 'Courier New', Courier, monospace;
-  background-color: #f0f0f0;
+  background-color: rgba(0, 0, 0, 0.05);
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+/* ユーザー吹き出し内のコードスタイル */
+.message-content-user code {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--color-primary-text);
 }
 
 .markdown-renderer pre {
@@ -92,8 +131,13 @@
 
 /* --- 出典リスト (T-09) --- */
 .citation-list {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 12px;
+
+  /* ★ アニメーション適用 */
+  opacity: 0; /* 初期状態 */
+  animation: fadeInUp 0.4s ease-out forwards;
+  animation-delay: 0.1s; /* 本文表示から一呼吸おく */
 }
 
 .citation-title {
@@ -113,7 +157,7 @@
 .citation-link {
   color: #1A73E8;
   text-decoration: none;
-  word-break: break-all; /* URLがはみ出ないように */
+  word-break: break-all;
 }
 .citation-link:hover {
   text-decoration: underline;
@@ -127,12 +171,17 @@
 
 /* --- 提案ボタン (T-11) --- */
 .suggestion-buttons {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 12px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
+
+  /* ★ アニメーション適用 (出典より少し遅らせる) */
+  opacity: 0; /* 初期状態 */
+  animation: fadeInUp 0.4s ease-out forwards;
+  animation-delay: 0.2s; /* 出典より 0.1s 遅らせる */
 }
 
 .suggestion-title {
@@ -145,19 +194,20 @@
 }
 
 .suggestion-button {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: var(--font-family-base);
   font-size: 0.9rem;
   padding: 8px 12px;
   border: 1px solid #ccc;
-  border-radius: 20px; /* 楕円形のボタン */
-  background-color: #f9f9f9;
+  border-radius: 20px;
+  background-color: var(--color-bg-white);
   color: #333;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
   text-align: left;
 }
 
 .suggestion-button:hover {
-  background-color: #f0f0f0;
-  border-color: #aaa;
+  background-color: var(--color-bg-white);
+  border-color: var(--color-accent-red); /* ★ホバーで赤枠 */
+  color: var(--color-accent-red); /* ★ホバーで赤テキスト */
 }

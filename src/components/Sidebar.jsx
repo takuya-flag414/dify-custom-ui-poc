@@ -4,38 +4,78 @@ import './styles/Sidebar.css'; // Sidebar用のCSS
 
 /**
  * サイドバー (T-04 履歴リストの雛形)
- * @param {string} conversationId - App.jsx の現在の会話ID
- * @param {function} setConversationId - App.jsx の会話ID更新関数
+ * @param {string} conversationId
+ * @param {function} setConversationId
+ * @param {Array} messagesLog - App.jsx の会話ログ
+ * @param {Array} systemLogs - App.jsx のシステムログ
  */
-const Sidebar = ({ conversationId, setConversationId }) => {
+const Sidebar = ({
+  conversationId,
+  setConversationId,
+  messagesLog,
+  systemLogs,
+}) => {
   // T-04時点のダミーデータ
-  // TODO: T-04で Dify API (GET /conversations) から取得する
   const [conversations, setConversations] = useState([
     { id: 'conv_1', name: 'Dify API連携について' },
     { id: 'conv_2', name: 'PoCロードマップの進捗' },
     { id: 'conv_3', name: 'UIデザインの検討' },
   ]);
 
+  const [copyButtonText, setCopyButtonText] = useState('ログをクリップボードにコピー');
+
   const handleNewChat = () => {
     // 新規チャット (新基本設計書 5.2.1)
-    console.log('New Chat');
     setConversationId(null);
-    // TODO: T-04で messages state をクリアする処理を App.jsx に実装
   };
 
   const handleSelectConversation = (id) => {
     // 履歴表示 (新基本設計書 5.2.2)
-    console.log('Select Conv:', id);
     setConversationId(id);
-    // TODO: T-04で App.jsx が API (GET /messages) を叩くトリガー
   };
+
+  // --- 🔽 デバッグログ機能 🔽 ---
+  const handleCopyLogs = () => {
+    console.log('[Sidebar] Copying logs to clipboard...', 'info');
+    let logContent = '--- PoC Debug Logs ---\n\n';
+
+    // 1. システムログ
+    logContent += '--- System Logs ---\n';
+    logContent += systemLogs.join('\n');
+    logContent += '\n\n';
+
+    // 2. 会話ログ (messages)
+    logContent += '--- Conversation Logs (JSON) ---\n';
+    try {
+      logContent += JSON.stringify(messagesLog, null, 2); // 見やすく整形
+    } catch (error) {
+      console.error('[Sidebar] Failed to stringify messagesLog:', error);
+      logContent += 'Failed to stringify conversation logs.';
+    }
+    logContent += '\n\n--- End of Logs ---';
+
+    // 3. クリップボードにコピー
+    navigator.clipboard
+      .writeText(logContent)
+      .then(() => {
+        console.log('[Sidebar] Logs copied successfully!', 'info');
+        setCopyButtonText('コピーしました！');
+        setTimeout(() => setCopyButtonText('ログをクリップボードにコピー'), 2000);
+      })
+      .catch((err) => {
+        console.error('[Sidebar] Failed to copy logs:', err);
+        setCopyButtonText('コピーに失敗しました');
+        setTimeout(() => setCopyButtonText('ログをクリップボードにコピー'), 2000);
+      });
+  };
+  // --- 🔼 デバッグログ機能 🔼 ---
 
   return (
     <div className="sidebar">
+      {/* --- ヘッダーと新規チャット --- */}
       <div className="sidebar-header">
         <h1 className="sidebar-title">社内AIチャット PoC</h1>
         <button className="new-chat-button" onClick={handleNewChat}>
-          {/* SVGアイコン（プラス） */}
           <svg
             width="20"
             height="20"
@@ -53,7 +93,7 @@ const Sidebar = ({ conversationId, setConversationId }) => {
         </button>
       </div>
 
-      {/* 会話履歴リスト (T-04) */}
+      {/* --- 会話履歴リスト (T-04) --- */}
       <div className="conversation-list">
         {conversations.map((conv) => (
           <div
@@ -68,7 +108,13 @@ const Sidebar = ({ conversationId, setConversationId }) => {
         ))}
       </div>
 
-      {/* (オプション) フッター（ユーザー名など）は T-03 のスコープ外 */}
+      {/* --- 🔽 デバッグツール 🔽 --- */}
+      <div className="sidebar-debug-tools">
+        <h4 className="debug-title">[PoC デバッグ]</h4>
+        <button className="debug-copy-button" onClick={handleCopyLogs}>
+          {copyButtonText}
+        </button>
+      </div>
     </div>
   );
 };

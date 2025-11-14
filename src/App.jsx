@@ -1,34 +1,92 @@
 // src/App.jsx
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // useEffect, useCallback を追加
 import './App.css';
 import './index.css';
 
 // コンポーネントのインポート
-import Sidebar from './components/Sidebar'; // 本物をインポート
+import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
+
+// 元のコンソール関数を保持
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleInfo = console.info;
 
 function App() {
   // 新基本設計書 (5.1) に基づく状態定義
-  const [messages, setMessages] = useState([]); // チャット履歴
-  const [isLoading, setIsLoading] = useState(false); // 回答生成中か
-  const [conversationId, setConversationId] = useState(null); // 現在の会話ID
-
-  // F-UI-006, F-UI-007 のためのモード
-  // PoC基本設計書 (4.) に従い、初期値は 'FE' (フロントエンドモック) が安全です
+  const [messages, setMessages] = useState([]); // チャット履歴 (会話ログ)
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState(null);
   const [mockMode, setMockMode] = useState('FE');
+
+  // --- 🔽 デバッグログ機能 🔽 ---
+  const [systemLogs, setSystemLogs] = useState([]); // システムログ
+
+  // ログ追加関数 (useCallbackでメモ化)
+  const addLog = useCallback((message, level = 'log') => {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+
+    // 元のコンソールにも出力
+    switch (level) {
+      case 'error':
+        originalConsoleError(logEntry);
+        break;
+      case 'warn':
+        originalConsoleWarn(logEntry);
+        break;
+      case 'info':
+        originalConsoleInfo(logEntry);
+        break;
+      default:
+        originalConsoleLog(logEntry);
+    }
+
+    // stateにも追加
+    setSystemLogs((prevLogs) => [...prevLogs, logEntry]);
+  }, []); // 依存配列は空
+
+  // グローバルコンソールの上書き (マウント時に1回だけ実行)
+  useEffect(() => {
+    addLog('--- PoC App Initialized ---', 'info');
+    addLog('console.log, console.error, console.warn, console.info をオーバーライドしました。', 'info');
+
+    console.log = (message, ...optionalParams) => {
+      addLog(message + (optionalParams.length > 0 ? ` ${JSON.stringify(optionalParams)}` : ''), 'log');
+    };
+    console.error = (message, ...optionalParams) => {
+      addLog(message + (optionalParams.length > 0 ? ` ${JSON.stringify(optionalParams)}` : ''), 'error');
+    };
+    console.warn = (message, ...optionalParams) => {
+      addLog(message + (optionalParams.length > 0 ? ` ${JSON.stringify(optionalParams)}` : ''), 'warn');
+    };
+    console.info = (message, ...optionalParams) => {
+      addLog(message + (optionalParams.length > 0 ? ` ${JSON.stringify(optionalParams)}` : ''), 'info');
+    };
+
+    // クリーンアップ関数 (アンマウント時に元のコンソールに戻す)
+    return () => {
+      console.log = originalConsoleLog;
+      console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
+      console.info = originalConsoleInfo;
+    };
+  }, [addLog]); // addLogが変更された時のみ再実行 (初回実行)
+  // --- 🔼 デバッグログ機能 🔼 ---
 
   // T-04 (履歴選択) のための処理
   const handleSetConversationId = (id) => {
     setConversationId(id);
-    // TODO: T-04 で履歴API (GET /messages) を呼び出し、
-    // setMessages(...) で履歴をセットする
+    console.log(`[App] Conversation changed to: ${id}`);
 
-    // (T-03時点のダミー動作)
     if (id === null) {
-      // 新規チャット (新基本設計書 5.2.1)
+      // 新規チャット
       setMessages([]);
+      console.log('[App] New chat selected. Messages cleared.');
     } else {
-      // ダミーの履歴をロード (新基本設計書 5.2.2)
+      // ダミーの履歴をロード
+      console.log(`[App] Loading dummy history for conv_id: ${id}`);
       setMessages([
         {
           id: '1',
@@ -39,8 +97,8 @@ function App() {
           id: '2',
           role: 'ai',
           text: `履歴(${id})の過去の回答`,
-          citations: [], // T-09用
-          suggestions: [], // T-11用
+          citations: [],
+          suggestions: [],
         },
       ]);
     }
@@ -48,18 +106,13 @@ function App() {
 
   return (
     <div className="app">
-      {/* T-04 (履歴) のため、conversationId の管理と
-        履歴リスト(conversations)を渡す必要があります
-      */}
       <Sidebar
         conversationId={conversationId}
         setConversationId={handleSetConversationId}
-        // conversations={conversations} // T-04で実装
+        // デバッグログ機能用のpropsを追加
+        messagesLog={messages} // 会話ログ
+        systemLogs={systemLogs} // システムログ
       />
-
-      {/* メインのチャットエリア。
-        状態と更新用関数(setter)をpropsとして渡します。
-      */}
       <ChatArea
         messages={messages}
         setMessages={setMessages}
@@ -68,6 +121,8 @@ function App() {
         mockMode={mockMode}
         setMockMode={setMockMode}
         conversationId={conversationId}
+        // デバッグログ機能用のpropsを追加
+        addLog={addLog}
       />
     </div>
   );

@@ -1,120 +1,162 @@
 /* src/components/styles/ChatArea.css */
-
-/* --- モックモード選択 (デバッグ用) --- */
-.mock-mode-select {
-  padding: 12px 16px;
-  background-color: #f7f7f7;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #555;
-  flex-shrink: 0;
-}
-
-.mock-mode-select label {
-  font-weight: 500;
-}
-
-.mock-mode-select select {
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: 12px;
-  padding: 4px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-/* --- チャット履歴エリア --- */
-.chat-history {
-  flex-grow: 1; /* ★重要: 残りの高さをすべて取る */
-  overflow-y: auto; /* ★重要: スクロール可能に */
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px; /* メッセージ間の余白 */
-}
-
-/* 履歴がない場合の初期メッセージ */
-.chat-history-empty {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #888;
-  font-size: 1.2rem;
-  text-align: center;
-}
-
-/* --- チャット入力エリア --- */
-.chat-input-container {
-  flex-shrink: 0; /* 高さを固定 */
-  padding: 24px;
-  padding-top: 16px;
-  background-color: #ffffff;
-  border-top: 1px solid #e0e0e0;
-}
-
-.chat-input-form {
-  display: flex;
-  align-items: flex-end; /* ボタンとテキストエリアの底を揃える */
-  gap: 12px;
-  max-width: 800px; /* チャット入力欄の最大幅 */
-  margin: 0 auto; /* 中央揃え */
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 8px 12px;
-  transition: border-color 0.2s;
-}
-
-.chat-input-form:focus-within {
-  border-color: #333; /* フォーカス時に枠線を濃く */
-}
-
-.chat-input-textarea {
-  flex-grow: 1;
-  border: none;
-  outline: none;
-  padding: 8px;
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: 1rem;
-  line-height: 1.5;
-  resize: none; /* リサイズハンドルを非表示 */
-  max-height: 200px; /* テキストエリアの最大高 */
-  min-height: 24px; /* テキストエリアの最小高 (line-height) */
-  overflow-y: auto; /* 必要に応じてスクロール */
-}
-
-.chat-input-textarea::placeholder {
-  color: #aaa;
-}
-
-.chat-input-textarea:disabled {
-  background-color: transparent;
-  color: #999;
-}
-
-.chat-input-button {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  padding: 6px;
-  border: none;
-  border-radius: 6px;
-  background-color: #333;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s;
-}
-
-.chat-input-button:hover:not(:disabled) {
-  background-color: #555;
-}
-
-.chat-input-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
+ 
+ /* --- モックモード選択 (すりガラス) --- */
+ .mock-mode-select {
+   padding: 12px 24px; /* パディングを左右に広げる */
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   font-size: 12px;
+   color: #555;
+   flex-shrink: 0;
+   
+   /* ★すりガラス効果 */
+   position: sticky;
+   top: 0;
+   z-index: 10;
+   background-color: rgba(249, 249, 252, 0.75); /* 半透明の白 */
+   backdrop-filter: blur(15px);
+   -webkit-backdrop-filter: blur(15px); /* Safari対応 */
+   border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* 繊細な境界線 */
+ }
+ 
+ .mock-mode-select label {
+   font-weight: 500;
+ }
+ 
+ .mock-mode-select select {
+   font-family: var(--font-family-base);
+   font-size: 12px;
+   padding: 4px;
+   border-radius: 4px;
+   border: 1px solid #ccc;
+ }
+ 
+ /* --- チャット履歴エリア --- */
+ .chat-history {
+   flex-grow: 1; /* ★重要: 残りの高さをすべて取る */
+   overflow-y: auto; /* ★重要: スクロール可能に */
+   padding: 24px;
+   display: flex;
+   flex-direction: column;
+   align-items: center; /* ★ チャット履歴全体を中央寄せにする */
+   
+   /* ★スティッキーなフッターのための余白 */
+   padding-bottom: 150px; /* 入力欄の高さ分を確保 */
+ }
+ 
+ /* 履歴がない場合の初期メッセージ */
+ .chat-history-empty {
+   flex-grow: 1;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   color: #888;
+   font-size: 1.2rem;
+   text-align: center;
+   min-height: 300px; /* 空の時でも一定の高さ */
+ }
+ 
+ /* --- 吹き出し (T-12) --- */
+ .chat-row {
+   display: flex;
+   flex-direction: column;
+   margin-bottom: 20px;
+   width: 100%;
+   max-width: 800px; /* チャット全体の最大幅 */
+ }
+ 
+ .chat-row-user {
+   align-items: flex-end;
+ }
+ 
+ .chat-row-ai {
+   align-items: flex-start;
+ }
+ 
+ /* --- チャット入力エリア (すりガラス) --- */
+ .chat-input-container {
+   flex-shrink: 0;
+   
+   /* ★すりガラス効果 */
+   position: sticky;
+   bottom: 0;
+   z-index: 10;
+   background-color: rgba(255, 255, 255, 0.75); /* 半透明の白 */
+   backdrop-filter: blur(20px);
+   -webkit-backdrop-filter: blur(20px); /* Safari対応 */
+   border-top: 1px solid rgba(0, 0, 0, 0.08); /* 繊細な境界線 */
+   
+   padding: 16px 24px 24px 24px; /* パディング調整 */
+ }
+ 
+ .chat-input-form {
+   display: flex;
+   align-items: flex-end;
+   gap: 12px;
+   max-width: 800px;
+   margin: 0 auto;
+   
+   /* Mac風の入力フォーム */
+   background-color: var(--color-bg-white);
+   border: 1px solid rgba(0, 0, 0, 0.1);
+   border-radius: 12px; /* 角を丸く */
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 繊細な影 */
+   
+   padding: 8px 12px;
+   transition: border-color 0.2s, box-shadow 0.2s;
+ }
+ 
+ .chat-input-form:focus-within {
+   border-color: rgba(0, 0, 0, 0.2);
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+ }
+ 
+ .chat-input-textarea {
+   flex-grow: 1;
+   border: none;
+   outline: none;
+   padding: 8px;
+   font-family: var(--font-family-base);
+   font-size: 1rem;
+   line-height: 1.5;
+   resize: none;
+   max-height: 200px;
+   min-height: 24px;
+   overflow-y: auto;
+   background-color: transparent; /* 親の白を透過 */
+ }
+ 
+ .chat-input-textarea::placeholder {
+   color: #aaa;
+ }
+ 
+ .chat-input-textarea:disabled {
+   background-color: transparent;
+   color: #999;
+ }
+ 
+ .chat-input-button {
+   flex-shrink: 0;
+   width: 32px;
+   height: 32px;
+   padding: 6px;
+   border: none;
+   border-radius: 8px; /* 角をフォームに合わせる */
+   background-color: var(--color-primary-dark); /* ★ロゴのネイビー */
+   color: var(--color-primary-text); /* ロゴの白 */
+   cursor: pointer;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   transition: background-color 0.2s;
+ }
+ 
+ .chat-input-button:hover:not(:disabled) {
+   background-color: var(--color-accent-red); /* ★ホバーで赤に */
+ }
+ 
+ .chat-input-button:disabled {
+   background-color: #ccc;
+   cursor: not-allowed;
+ }
