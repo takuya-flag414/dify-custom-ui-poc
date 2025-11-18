@@ -39,6 +39,7 @@ const ChatArea = (props) => {
               citations: [],
               suggestions: [],
               isStreaming: false, // ★ 修正: ストリーミング完了
+              timestamp: new Date().toISOString(), // ★ 時刻追加
             }
           : msg
       )
@@ -54,6 +55,7 @@ const ChatArea = (props) => {
       id: `msg_${Date.now()}_user`,
       text: text,
       role: 'user',
+      timestamp: new Date().toISOString(), // ★ 修正: 時刻追加
     };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
@@ -67,6 +69,7 @@ const ChatArea = (props) => {
       citations: [],
       suggestions: [],
       isStreaming: true, // ★ 修正: ストリーミング開始フラグ
+      timestamp: new Date().toISOString(), // ★ 修正: 時刻追加
     };
     setMessages((prev) => [...prev, aiMessage]);
 

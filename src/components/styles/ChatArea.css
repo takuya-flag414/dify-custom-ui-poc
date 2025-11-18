@@ -1,189 +1,238 @@
 /* src/components/styles/ChatArea.css */
- 
- /* --- ★上部バー全体 (旧 .mock-mode-select) --- */
- .top-bar-container {
-   padding: 12px 24px;
-   display: flex; /* ★左右分離レイアウト */
-   align-items: center;
-   justify-content: space-between; /* ★左右に分離 */
-   gap: 16px;
-   flex-shrink: 0;
-   position: sticky;
-   top: 0;
-   z-index: 10;
-   background-color: var(--color-bg-white);
-   border-bottom: 1px solid var(--color-border);
- }
 
- /* ★上部バーの左側 (モード選択) */
- .mock-mode-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--color-text-light);
- }
- 
- .mock-mode-controls label {
-   font-weight: 500;
- }
- 
- .mock-mode-controls select {
-   font-family: var(--font-family-base);
-   font-size: 12px;
-   padding: 4px;
-   border-radius: 4px;
-   border: 1px solid var(--color-border);
- }
+/* --- ★上部バー全体 (変更なし) --- */
+.top-bar-container {
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--color-bg-white);
+  border-bottom: 1px solid var(--color-border);
+}
 
- /* ★上部バーの右側 (デバッグボタン) */
- /* ( .debug-controls は親の justify-content により自動で右寄せされるため、CSS定義は不要 ) */
- 
- /* ★上部バー用のログコピーボタン (Sidebar.cssから流用・調整) */
- .debug-copy-button-topbar {
-    font-family: var(--font-family-base);
-    font-size: 0.8rem;
-    padding: 6px 10px; /* ★少し小さく調整 */
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    background-color: var(--color-bg-white);
-    color: var(--color-text-dark);
-    cursor: pointer;
-    transition: background-color 0.2s;
- }
+/* ... (上部バー内部のスタイルは変更なし) ... */
+.mock-mode-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+.mock-mode-controls label { font-weight: 500; }
+.mock-mode-controls select {
+  font-family: var(--font-family-base);
+  font-size: 12px;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+.debug-copy-button-topbar {
+  font-family: var(--font-family-base);
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg-white);
+  color: var(--color-text-dark);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.debug-copy-button-topbar:hover { background-color: #F0F0F5; }
 
- .debug-copy-button-topbar:hover {
-    background-color: #F0F0F5; /* (薄いグレー) */
- }
 
- 
- /* --- チャット履歴エリア (変更なし) --- */
- .chat-history {
-   flex-grow: 1; 
-   overflow-y: auto; 
-   padding: 24px;
-   display: flex;
-   flex-direction: column;
-   align-items: center; 
-   padding-bottom: 150px; 
- }
- 
- /* ... (既存の .chat-history-empty, .initial-message-header, .chat-row などは変更なし) ... */
- .chat-history-empty {
-   flex-grow: 1;
-   display: flex;
-   flex-direction: column; 
-   align-items: center;
-   justify-content: center;
-   color: var(--color-text-light); 
-   text-align: center;
-   width: 100%;
-   max-width: 800px; /* 最大幅 */
- }
- .initial-message-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
- }
- .initial-message-title {
-    font-size: 1.5rem; /* 24px */
-    font-weight: 600; /* semibold */
-    color: var(--color-text-light);
-    margin-top: 16px;
- }
- .chat-row {
-   display: flex;
-   flex-direction: column;
-   margin-bottom: 20px;
-   width: 100%;
-   max-width: 800px; /* チャット全体の最大幅 */
- }
- .chat-row-user {
-   align-items: flex-end;
- }
- .chat-row-ai {
-   align-items: flex-start;
- }
- 
- /* --- チャット入力エリア (変更なし) --- */
- .chat-input-container {
-   flex-shrink: 0;
-   position: sticky;
-   bottom: 0;
-   z-index: 10;
-   background-color: var(--color-bg-white);
-   border-top: 1px solid var(--color-border);
-   padding: 16px 24px 24px 24px;
- }
- 
- .chat-input-container-centered {
-    width: 100%;
-    padding: 16px 24px 24px 24px;
- }
+/* --- チャット履歴エリア --- */
+.chat-history {
+  flex-grow: 1; 
+  overflow-y: auto; 
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ★重要: これにより全ての子要素が中央揃えになります */
+  padding-bottom: 150px; 
+}
 
- .chat-input-form {
-   display: flex;
-   align-items: flex-end; 
-   gap: 12px;
-   max-width: 800px;
-   margin: 0 auto;
-   background-color: var(--color-bg-white);
-   border: 1px solid var(--color-border);
-   border-radius: 1rem; 
-   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); 
-   padding: 8px 12px;
-   transition: border-color 0.2s, box-shadow 0.2s;
- }
- 
- .chat-input-form:focus-within {
-   border-color: #9CA3AF;
-   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
- }
- 
- /* ... (既存の .chat-input-textarea, .chat-input-button などは変更なし) ... */
- .chat-input-textarea {
-   flex-grow: 1;
-   border: none;
-   outline: none;
-   padding: 8px;
-   font-family: var(--font-family-base);
-   font-size: 1rem;
-   line-height: 1.5;
-   resize: none;
-   max-height: 200px;
-   min-height: 24px; 
-   overflow-y: auto;
-   background-color: transparent;
-   color: var(--color-text-dark);
- }
- .chat-input-textarea::placeholder {
-   color: #9CA3AF;
- }
- .chat-input-textarea:disabled {
-   background-color: transparent;
-   color: #999;
- }
- .chat-input-button {
-   flex-shrink: 0;
-   width: 32px;
-   height: 32px;
-   padding: 6px;
-   border: none;
-   border-radius: 8px;
-   background-color: var(--color-button-dark);
-   color: var(--color-primary-text);
-   cursor: pointer;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   transition: background-color 0.2s;
- }
- .chat-input-button:hover:not(:disabled) {
-   background-color: var(--color-button-dark-hover);
- }
- .chat-input-button:disabled {
-   background-color: #ccc;
-   cursor: not-allowed;
- }
+.chat-history-empty {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light); 
+  text-align: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.initial-message-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.initial-message-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  margin-top: 16px;
+}
+
+
+/* === ★★★ 修正: チャット行とタイムスタンプのレイアウト ★★★ === */
+
+/* ラッパー: メッセージとタイムスタンプを縦に並べるコンテナ */
+.chat-row-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 20px;
+
+  /* ★調整ポイント1: 【二者の距離（横幅）】
+     ここの数値を小さくすると、AIとユーザーの距離が近づきます。
+     (例: 800px -> 700px)
+  */
+  max-width: 800px; 
+  
+  /* ★調整ポイント2: 【全体の内側余白】
+     ここを増やすと、チャット全体がさらに中央に寄り、左右に余白が生まれます。
+     (例: 0 20px)
+  */
+  padding: 0 10px; 
+}
+
+/* 前回追加した align-self (左右寄せ) は削除しました。
+   代わりに margin で個別の余白を調整します。
+*/
+.chat-row-wrapper-user {
+  /* ★調整ポイント3: 【ユーザー側の追加余白】
+     ユーザー（右側）だけ、さらに画面端から離したい場合はここを増やします。
+  */
+  margin-right: 0px; 
+}
+
+.chat-row-wrapper-ai {
+  /* ★調整ポイント4: 【AI側の追加余白】
+     AI（左側）だけ、さらに画面端から離したい場合はここを増やします。
+  */
+  margin-left: 0px;
+}
+
+
+/* メッセージ本体の行 */
+.chat-row {
+  display: flex;
+  width: 100%;
+}
+
+/* ユーザーメッセージ: 右寄せ */
+.chat-row-user {
+  justify-content: flex-end;
+}
+
+/* AIメッセージ: 左寄せ */
+.chat-row-ai {
+  justify-content: flex-start;
+}
+
+/* ユーザータイムスタンプ */
+.user-timestamp {
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin-top: 4px;
+  
+  /* 右寄せ配置 */
+  text-align: right;
+  
+  /* アイコン(32px) + gap(12px) = 44px 分のマージンを取り、
+     吹き出しの下あたりに表示されるように調整 */
+  margin-right: 44px; 
+}
+/* === 修正ここまで === */
+
+
+/* --- チャット入力エリア (変更なし) --- */
+.chat-input-container {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background-color: var(--color-bg-white);
+  border-top: 1px solid var(--color-border);
+  padding: 16px 24px 24px 24px;
+  
+  /* 入力欄も中央揃えにするため flex を適用 */
+  display: flex;
+  justify-content: center; 
+}
+
+.chat-input-container-centered {
+  width: 100%;
+  padding: 16px 24px 24px 24px;
+  /* 中央配置用 */
+  display: flex;
+  justify-content: center;
+}
+
+.chat-input-form {
+  display: flex;
+  align-items: flex-end; 
+  gap: 12px;
+  width: 100%; /* 親のpadding内で最大化 */
+  
+  /* ★調整ポイント5: 【入力欄の幅】
+     チャット履歴の幅 (max-width: 800px) と合わせると綺麗です。
+  */
+  max-width: 800px; 
+  
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem; 
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); 
+  padding: 8px 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* ... (以下のスタイルは変更なし) ... */
+.chat-input-form:focus-within {
+  border-color: #9CA3AF;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+.chat-input-textarea {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  padding: 8px;
+  font-family: var(--font-family-base);
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: none;
+  max-height: 200px;
+  min-height: 24px; 
+  overflow-y: auto;
+  background-color: transparent;
+  color: var(--color-text-dark);
+}
+.chat-input-textarea::placeholder { color: #9CA3AF; }
+.chat-input-textarea:disabled { background-color: transparent; color: #999; }
+.chat-input-button {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--color-button-dark);
+  color: var(--color-primary-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+.chat-input-button:hover:not(:disabled) { background-color: var(--color-button-dark-hover); }
+.chat-input-button:disabled { background-color: #ccc; cursor: not-allowed; }

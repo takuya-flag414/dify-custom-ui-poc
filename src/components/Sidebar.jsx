@@ -1,38 +1,39 @@
 // src/components/Sidebar.jsx
-import React, { useState } from 'react';
+import React from 'react'; // ★ useStateを削除
 import './styles/Sidebar.css'; // Sidebar用のCSS
 
 /**
  * サイドバー (T-04 履歴リストの雛形)
  * @param {string} conversationId
  * @param {function} setConversationId
+ * @param {Array} conversations // ★ 追加: App.jsxから実データを取得
  * ★ デバッグ用props (messagesLog, systemLogs) を削除
  */
 const Sidebar = ({
   conversationId,
   setConversationId,
+  conversations, // ★ 修正: Propsで受け取る
 }) => {
-  // T-04時点のダミーデータ
-  const [conversations, setConversations] = useState([
-    { id: 'conv_1', name: 'Dify API連携について' },
-    { id: 'conv_2', name: 'PoCロードマップの進捗' },
-    { id: 'conv_3', name: 'UIデザインの検討' },
-  ]);
+  // ★ 削除: T-04時点のダミーデータ 
+  // const [conversations, setConversations] = useState([
+  //   { id: 'conv_1', name: 'Dify API連携について' },
+  //   { id: 'conv_2', name: 'PoCロードマップの進捗' },
+  //   { id: 'conv_3', name: 'UIデザインの検討' },
+  // ]);
 
-  // ★ copyButtonText state を削除
-  // const [copyButtonText, setCopyButtonText] = useState('ログをクリップボードにコピー');
+  // ★ 削除: copyButtonText state [cite: 16]
 
   const handleNewChat = () => {
-    // 新規チャット (新基本設計書 5.2.1)
+    // 新規チャット (新基本設計書 5.2.1) [cite: 18-20]
     setConversationId(null);
   };
 
   const handleSelectConversation = (id) => {
-    // 履歴表示 (新基本設計書 5.2.2)
+    // 履歴表示 (新基本設計書 5.2.2) [cite: 22-24]
     setConversationId(id);
   };
 
-  // --- 🔽 デバッグログ機能 (handleCopyLogs) を削除 🔽 ---
+  // --- 🔽 デバッグログ機能 (handleCopyLogs) を削除 🔽 --- [cite: 28, 42-48]
   // ...
   // --- 🔼 デバッグログ機能 🔼 ---
 
@@ -40,14 +41,14 @@ const Sidebar = ({
     <div className="sidebar">
       {/* --- ヘッダーと新規チャット --- */}
       <div className="sidebar-header">
-        {/* ★プロトタイプ準拠: ロゴアイコンを追加 */}
+        {/* ★プロトタイプ準拠: ロゴアイコンを追加 [cite: 52-56] */}
         <div style={{ color: '#2563EB', width: '32px', height: '32px' }}>
           <LogoIcon />
         </div>
         <h1 className="sidebar-title">社内AI (PoC)</h1>
       </div>
 
-      {/* ★ボタンの <button> タグ自体は既存のものを流用 */}
+      {/* ★ボタンの <button> タグ自体は既存のものを流用 [cite: 61-65] */}
       <button className="new-chat-button" onClick={handleNewChat}>
         {/* ★プロトタイプ準拠: アイコンを差し替え */}
         <NewChatIcon />
@@ -56,6 +57,7 @@ const Sidebar = ({
 
       {/* --- 会話履歴リスト (T-04) --- */}
       <div className="conversation-list">
+        {/* ★ 修正: propsのconversationsをmapする。APIのkey (id, name) [cite: 801-802] と一致 */}
         {conversations.map((conv) => (
           <div
             key={conv.id}
@@ -69,12 +71,9 @@ const Sidebar = ({
         ))}
       </div>
 
-      {/* --- 🔽 デバッグツール (JSX) を削除 🔽 --- */}
+      {/* --- 🔽 デバッグツール (JSX) を削除 🔽 --- [cite: 82-89] */}
       {/* <div className="sidebar-debug-tools">
-        <h4 className="debug-title">[PoC デバッグ]</h4>
-        <button className="debug-copy-button" onClick={handleCopyLogs}>
-          {copyButtonText}
-        </button>
+        ...
       </div> 
       */}
       {/* --- 🔼 デバッグツール 🔼 --- */}
@@ -82,7 +81,7 @@ const Sidebar = ({
   );
 };
 
-// === 🔽 プロトタイプからアイコン定義を移植 🔽 ===
+// === 🔽 プロトタイプからアイコン定義を移植 🔽 === [cite: 94-111]
 
 const LogoIcon = () => (
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
