@@ -5,6 +5,8 @@ import './styles/MessageBlock.css'; // 既存のインポート
 import MarkdownRenderer from './MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
+// ★ 追加: インジケーターのインポート
+import ProcessStatusIndicator from './ProcessStatusIndicator';
 
 /**
  * 1つのQ&Aペアを表示 (5.1)
@@ -12,8 +14,8 @@ import SuggestionButtons from './SuggestionButtons';
  * @param {function} onSuggestionClick - 提案クリック時に実行する関数
  */
 const MessageBlock = ({ message, onSuggestionClick }) => {
-  // ★ 修正: isStreaming と citations フラグを message から取り出す
-  const { role, text, citations, suggestions, isStreaming } = message;
+  // ★ 修正: processStatus を分割代入に追加
+  const { role, text, citations, suggestions, isStreaming, processStatus } = message;
   const isAi = role === 'ai';
 
   return (
@@ -48,10 +50,14 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
             isAi ? 'message-content-ai' : 'message-content-user'
           }`}
         >
+          {/* ★ 追加: プロセスインジケーター (AIかつストリーミング中のみ表示) */}
+          {isAi && isStreaming && (
+            <ProcessStatusIndicator status={processStatus} />
+          )}
+
           {/* 本文 (T-06) */}
-          {/* ★ 修正: isStreaming と citations を MarkdownRenderer に渡す */}
           <MarkdownRenderer
-            content={text || '...'}
+            content={text || ''} // textが空でもインジケーターが出るのでOK
             isStreaming={isAi && isStreaming}
             citations={citations}
           />

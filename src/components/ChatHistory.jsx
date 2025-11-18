@@ -51,17 +51,34 @@ const ChatHistory = ({
 
   return (
     <div className="chat-history">
-      {/* ... 初期表示状態のロジックは変更なし ... */}
+      {/* ★★★ プロトタイプ準拠: 中央配置のロジック ★★★ */}
       {messages.length === 0 && !isLoading ? (
-        // 初期表示状態
+        // 初期表示状態 (新基本設計書 5.2.1)
         <div className="chat-history-empty">
-          {/* ... */}
+          
+          {/* ★プロトタイプ風ヘッダー */}
+          <div className="initial-message-header">
+            <div style={{ width: '40px', height: '40px' }}> {/* アイコンサイズ調整 */}
+              <AssistantIcon />
+            </div>
+            <h2 className="initial-message-title">
+              お困りのことはありますか？
+            </h2>
+          </div>
+          
+          {/* ★中央配置の入力フォーム */}
+          <ChatInput
+            isLoading={isLoading}
+            onSendMessage={onSendMessage}
+            isCentered={true} // ★中央配置フラグ
+          />
+
         </div>
       ) : (
-        // 履歴表示状態
+        // 履歴表示状態 (新基本設計書 5.2.2)
+        // ★★★ 修正: 時刻表示のためにJSX構造を変更 ★★★
         messages.map((msg) => (
-          // ★ 修正: chat-row-wrapper-user / -ai クラスは残す
-          // ★      align-items が CSS で制御される
+          // ★ ステップ2-1: ラッパーを追加
           <div
             key={msg.id}
             className={`chat-row-wrapper ${
@@ -76,11 +93,11 @@ const ChatHistory = ({
             >
               <MessageBlock
                 message={msg}
-                onSuggestionClick={onSuggestionClick}
+                onSuggestionClick={onSuggestionClick} // ★ T-11対応: propsを渡す
               />
             </div>
             
-            {/* ユーザーかつ時刻が存在する場合のみ表示 */}
+            {/* ★ ステップ2-2: ユーザーかつ時刻が存在する場合のみ表示 */}
             {msg.role === 'user' && msg.timestamp && (
               <span className="user-timestamp">
                 {formatTimestamp(msg.timestamp)}
@@ -89,6 +106,7 @@ const ChatHistory = ({
           </div>
         ))
       )}
+      {/* スクロール用の空要素 */}
       <div ref={endOfMessagesRef} />
     </div>
   );

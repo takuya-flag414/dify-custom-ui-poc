@@ -7,6 +7,9 @@ import './index.css';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 
+// モックデータのインポート
+import { mockConversations, mockMessages } from './mockData';
+
 // --- PoC API設定 (ChatArea.jsx [cite: 31-33] からコピー) ---
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
@@ -28,6 +31,9 @@ function App() {
 
   // --- ★ 追加: 会話リスト State ---
   const [conversations, setConversations] = useState([]);
+
+  // --- ★ 追加: FEモード用・動的メッセージ履歴 (メモリ保存) ---
+  const [dynamicMockMessages, setDynamicMockMessages] = useState({});
 
   // --- 🔽 デバッグログ機能 (Sidebarから昇格) 🔽 ---
   const [systemLogs, setSystemLogs] = useState([]); // システムログ
@@ -89,13 +95,11 @@ function App() {
     const fetchConversations = async () => {
       // FEモック時は履歴も固定のダミーデータ
       if (mockMode === 'FE') {
-        addLog('[App] FE Mock mode. Loading dummy conversations.', 'info');
-        // Sidebar.jsx [cite: 11-15] からダミーデータを移植
-        setConversations([
-          { id: 'conv_1', name: 'Dify API連携について (Mock)' },
-          { id: 'conv_2', name: 'PoCロードマップの進捗 (Mock)' },
-          { id: 'conv_3', name: 'UIデザインの検討 (Mock)' },
-        ]);
+        addLog('[App] FE Mock mode. Loading rich dummy conversations.', 'info');
+        // mockData.js の静的データを使用 (初期化)
+        // ※ dynamicMockMessages にある新規会話は、handleConversationCreated で追加されるため
+        //    ここでは初期リストのみをセットする方針でOK
+        setConversations(mockConversations);
         return;
       }
 
@@ -108,7 +112,7 @@ function App() {
       }
       
       try {
-        // Dify APIマニュアル (p.17) [cite: 786-787]
+        // Dify APIマニュアル (p.17) [cite: 490-492]
         const response = await fetch(
           `${DIFY_API_URL}/conversations?user=${USER_ID}`,
           {
@@ -174,7 +178,7 @@ function App() {
   // --- ★ 修正: 履歴選択処理 (T-04 / P-4) ---
 
   // ChatArea.jsx [cite: 312-325] のロジックをコピー
-  // Dify API(p.16) [cite: 746-750] の retriever_resources をマッピング
+  // Dify API(p.16) の retriever_resources をマッピング
   const mapCitationsFromApi = (resources) => {
     if (!resources || !Array.isArray(resources) || resources.length === 0) return [];
     
@@ -193,6 +197,19 @@ function App() {
     });
   };
 
+  // LLMが返すJSON形式のcitationsを変換 (ChatArea.jsxから移植)
+  const mapCitationsFromLLM = (citations) => {
+    if (!citations || !Array.isArray(citations)) return [];
+    
+    return citations.map((cite, index) => ({
+      id: `cite_llm_hist_${index}`, // 履歴用ID
+      type: cite.url ? 'web' : 'file',
+      // プレフィックス [1] をここで付与する
+      source: `[${index + 1}] ${cite.source || '不明な出典'}`,
+      url: cite.url || null,
+    }));
+  };
+
   // T-04 (履歴選択) のための処理
   const handleSetConversationId = async (id) => {
     addLog(`[App] Conversation changed to: ${id}`, 'info');
@@ -205,22 +222,31 @@ function App() {
       return;
     }
 
-    // FEモック時はダミーデータをロード (元のロジック [cite: 80-92] を流用)
+    // FEモック時は mockData.js または dynamicMockMessages からデータをロード
     if (mockMode === 'FE') {
-      const now = new Date().toISOString();
-      addLog(`[App] Loading dummy history for conv_id: ${id}`, 'info');
+      addLog(`[App] Loading rich dummy history for conv_id: ${id}`, 'info');
       setConversationId(id);
-      setMessages([
-        {
-          id: '1', role: 'user', text: `履歴(${id})の過去の質問 (Mock)`,
-          timestamp: now // ★ 時刻追加
-        },
-        {
-          id: '2', role: 'ai', text: `履歴(${id})の過去の回答 (Mock)`, 
-          citations: [], suggestions: [], isStreaming: false,
-          timestamp: now // ★ 時刻追加
-        },
-      ]);
+      
+      // 1. まず動的メモリ(新規作成・更新分)を確認
+      if (dynamicMockMessages[id]) {
+          addLog('[App] Found in dynamic memory.', 'info');
+          setMessages(dynamicMockMessages[id]);
+          return;
+      }
+
+      // 2. なければ静的ファイル(mockData.js)を確認
+      const targetMock = mockMessages[id];
+      if (targetMock) {
+        setMessages(targetMock);
+      } else {
+        // どちらにもない場合
+         setMessages([
+            { 
+                id: 'err', role: 'ai', text: '（モックデータ定義外の会話です）', 
+                timestamp: new Date().toISOString()
+            }
+        ]);
+      }
       return;
     }
 
@@ -246,9 +272,7 @@ function App() {
       const historyData = await response.json();
       addLog(`[App] Fetched ${historyData.data?.length || 0} messages.`, 'info');
 
-      // ★★★ 修正: APIの返却順に関わらず、created_at (タイムスタンプ) で確実に昇順ソートする ★★★
-      // .reverse() は削除し、.sort() に変更します。
-      // APIのcreated_atはint(Unix Time)なので、引き算で正しく比較できます。
+      // ★★★ 修正: タイムスタンプ昇順ソート ★★★
       const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
       // API形式 (query, answer) から 
@@ -271,15 +295,36 @@ function App() {
         }
         // 2. AIの回答
         if (item.answer) {
-          newMessages.push({
-            id: item.id, // AI回答のIDをメインIDとする
-            role: 'ai',
-            text: item.answer,
-            citations: mapCitationsFromApi(item.retriever_resources || []), // 履歴の出典もマッピング
-            suggestions: [], // 履歴ロード時は提案ボタンなし
-            isStreaming: false,
-            timestamp: timestamp, // ★ 時刻追加
-          });
+            // ★★★ 追加: JSONパース処理 ★★★
+            let aiText = item.answer;
+            let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
+
+            // 回答がJSON形式 (BEモック等) の場合、パースを試みる
+            try {
+                const trimmed = aiText.trim();
+                if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                    const parsed = JSON.parse(trimmed);
+                    if (parsed.answer) {
+                        aiText = parsed.answer; // 本文のみ抽出
+                        // JSON内のcitationsがあれば、そちらを優先してパース
+                        if (parsed.citations && Array.isArray(parsed.citations)) {
+                            aiCitations = mapCitationsFromLLM(parsed.citations);
+                        }
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            newMessages.push({
+                id: item.id, // AI回答のIDをメインIDとする
+                role: 'ai',
+                text: aiText, // ★ パース後のテキスト
+                citations: aiCitations, // ★ パース後の出典
+                suggestions: [], // 履歴ロード時は提案ボタンなし
+                isStreaming: false,
+                timestamp: timestamp, // ★ 時刻追加
+            });
         }
       }
       
@@ -296,6 +341,34 @@ function App() {
       setIsLoading(false); // ★ ローディング解除
     }
   };
+
+  // === ★★★ 追加: 新規会話作成時のハンドラ ★★★ ===
+  const handleConversationCreated = (newId, newTitle) => {
+    addLog(`[App] New conversation created: ${newId} "${newTitle}"`, 'info');
+    
+    // 1. 会話リストの先頭に追加
+    const newConv = { id: newId, name: newTitle };
+    
+    setConversations((prev) => {
+      if (prev.some(c => c.id === newId)) return prev;
+      return [newConv, ...prev];
+    });
+
+    // 2. 現在の会話IDを更新
+    setConversationId(newId);
+  };
+
+  // === ★★★ 追加: メッセージ履歴更新ハンドラ (FEモード用バックアップ) ★★★ ===
+  const handleUpdateMessageHistory = useCallback((id, newMessages) => {
+    // FEモードでIDが有効な場合のみメモリに保存
+    if (mockMode === 'FE' && id) {
+      setDynamicMockMessages((prev) => ({
+        ...prev,
+        [id]: newMessages
+      }));
+    }
+  }, [mockMode]);
+
 
   return (
     <div className="app">
@@ -315,10 +388,12 @@ function App() {
         conversationId={conversationId}
         addLog={addLog} // ★addLogは引き続き渡す
         
-        // ★デバッグログ機能用のpropsを ChatArea に追加
+        // ★ 追加: ハンドラを渡す
+        onConversationCreated={handleConversationCreated}
+        onUpdateMessageHistory={handleUpdateMessageHistory}
+
         handleCopyLogs={handleCopyLogs}
         copyButtonText={copyButtonText}
-        // ★ 冗長な messagesLog, systemLogs は削除
       />
     </div>
   );
