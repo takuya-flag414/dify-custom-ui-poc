@@ -6,8 +6,9 @@ import './styles/ChatArea.css';
  * 質問入力フォーム (T-03)
  * @param {boolean} isLoading - App.jsxから渡される
  * @param {function} onSendMessage - ChatArea.jsxから渡される
+ * @param {boolean} isCentered - ★中央配置かどうかのフラグ
  */
-const ChatInput = ({ isLoading, onSendMessage }) => {
+const ChatInput = ({ isLoading, onSendMessage, isCentered = false }) => {
   const [inputText, setInputText] = useState('');
   const textareaRef = useRef(null);
 
@@ -42,8 +43,13 @@ const ChatInput = ({ isLoading, onSendMessage }) => {
     }
   };
 
+  // ★コンテナのクラスを、中央配置 (isCentered) か下部固定かで切り替える
+  const containerClassName = isCentered
+    ? 'chat-input-container-centered'
+    : 'chat-input-container';
+
   return (
-    <div className="chat-input-container">
+    <div className={containerClassName}>
       <form className="chat-input-form" onSubmit={handleSubmit}>
         <textarea
           ref={textareaRef}
@@ -53,30 +59,30 @@ const ChatInput = ({ isLoading, onSendMessage }) => {
           onKeyDown={handleKeyDown}
           placeholder="質問を入力してください (Shift+Enterで改行)"
           rows={1} // 初期行数
-          disabled={isLoading} // ストリーミング中は非活性 [cite: 388]
+          disabled={isLoading} // ストリーミング中は非活性
         />
         <button
           type="submit"
           className="chat-input-button"
-          disabled={isLoading} // ストリーミング中は非活性 [cite: 388]
+          disabled={isLoading || !inputText.trim()} // ★未入力でも非活性に
         >
-          {/* SVGアイコン（送信矢印） */}
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z"
-              fill="currentColor"
-            />
-          </svg>
+          {/* ★プロトタイプ準拠: アイコンを差し替え */}
+          <SendIcon />
         </button>
       </form>
     </div>
   );
 };
+
+// === 🔽 プロトタイプからアイコン定義を移植 🔽 ===
+
+const SendIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+);
+
+// === 🔼 プロトタイプからアイコン定義を移植 🔼 ===
 
 export default ChatInput;

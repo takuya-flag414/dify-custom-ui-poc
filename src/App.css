@@ -6,18 +6,19 @@
   height: 100vh; /* 画面全体の高さ */
   width: 100vw; /* 画面全体の幅 */
   overflow: hidden; /* はみ出しを隠す */
+  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白背景) */
 }
 
 /* サイドバー */
 .sidebar {
   width: 260px;
   flex-shrink: 0; /* サイドバーの幅を固定 */
-  background-color: var(--color-primary-dark); /* ロゴのネイビーに変更 */
-  color: var(--color-primary-text); /* ロゴの白に変更 */
+  background-color: var(--color-sidebar-bg); /* ★プロトタイプ準拠 (グレー) */
+  color: var(--color-text-dark); /* ★プロトタイプ準拠 (黒文字) */
   padding: 16px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #3D4A6A; /* ネイビーに合わせた境界線色 */
+  border-right: 1px solid var(--color-border); /* ★プロトタイプ準拠 (境界線) */
 }
 
 /* チャットエリア（メインコンテンツ） */
@@ -25,7 +26,7 @@
   flex-grow: 1; /* 残りの幅すべてを使用 */
   display: flex;
   flex-direction: column;
-  background-color: var(--color-bg-white); /* クリーンな白背景 */
+  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白背景) */
   height: 100vh; /* 高さを画面全体に */
   max-height: 100vh; /* 高さが画面を超えないように */
   position: relative; /* スティッキーな子の基準点 */

@@ -4,14 +4,20 @@
 .sidebar-header {
   flex-shrink: 0;
   padding-bottom: 16px;
-  border-bottom: 1px solid #3D4A6A; /* ネイビーに合わせた境界線色 */
+  border-bottom: 1px solid var(--color-border); /* ★境界線色を更新 */
+  
+  /* ★プロトタイプ準拠: ロゴとタイトルを横並び */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px; /* ヘッダーの高さを固定 */
 }
 
 .sidebar-title {
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
-  color: var(--color-primary-text); /* ロゴの白 */
+  color: var(--color-text-dark); /* ★文字色を更新 */
 }
 
 .new-chat-button {
@@ -20,10 +26,10 @@
   font-weight: 500;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid rgba(245, 245, 245, 0.2); /* 白い境界線 */
+  border: 1px solid var(--color-border); /* ★境界線色を更新 */
   border-radius: 8px;
-  background-color: rgba(245, 245, 245, 0.05); /* わずかに明るく */
-  color: var(--color-primary-text);
+  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白) */
+  color: var(--color-text-dark); /* ★文字色を更新 */
   cursor: pointer;
   text-align: left;
   transition: background-color 0.2s;
@@ -34,7 +40,7 @@
 }
 
 .new-chat-button:hover {
-  background-color: rgba(245, 245, 245, 0.15); /* ホバー時 */
+  background-color: #F0F0F5; /* ★プロトタイプ準拠 (薄いグレー) */
 }
 
 /* 会話履歴リスト */
@@ -52,7 +58,7 @@
   font-size: 0.9rem;
   padding: 10px 12px;
   border-radius: 8px;
-  color: #A9B2C8; /* 少し落ち着いた白 */
+  color: var(--color-text-light); /* ★文字色を更新 (薄め) */
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -61,31 +67,31 @@
 }
 
 .conversation-item:hover {
-  background-color: rgba(245, 245, 245, 0.05);
-  color: var(--color-primary-text);
+  background-color: #E5E7EB; /* ★プロトタイプ準拠 (ホバー色) */
+  color: var(--color-text-dark);
 }
 
 .conversation-item.active {
-  /* ★すりガラス風（立体的）デザインに変更 */
-  background-color: rgba(245, 245, 245, 0.1); /* わずかに明るく */
+  /* ★プロトタイプ準拠 (すりガラス風 -> グレー背景) */
+  background-color: #E5E7EB; /* ★プロトタイプ準拠 (bg-gray-200相当) */
   font-weight: 700;
-  color: var(--color-primary-text); /* ★赤文字を削除し、白に戻す */
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25); /* ★内側に影をつけ立体的に */
+  color: var(--color-text-dark); /* ★文字色を更新 */
+  box-shadow: none; /* ★すりガラス風の影を削除 */
 }
 
 /* --- デバッグツール --- */
 .sidebar-debug-tools {
   flex-shrink: 0; /* 高さを固定 */
-  border-top: 1px solid #3D4A6A; /* ネイビーに合わせた境界線色 */
+  border-top: 1px solid var(--color-border); /* ★境界線色を更新 */
   padding: 16px;
   margin-top: auto; /* ★重要: サイドバーの最下部に固定 */
-  background-color: var(--color-primary-dark);
+  background-color: var(--color-sidebar-bg); /* ★親の背景色に合わせる */
 }
 
 .debug-title {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #A9B2C8; /* 少し落ち着いた白 */
+  color: var(--color-text-light); /* ★文字色を更新 (薄め) */
   margin: 0 0 8px 0;
   text-transform: uppercase;
 }
@@ -95,14 +101,14 @@
   font-size: 0.8rem;
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid rgba(245, 245, 245, 0.2);
+  border: 1px solid var(--color-border); /* ★境界線色を更新 */
   border-radius: 6px;
-  background-color: rgba(245, 245, 245, 0.1);
-  color: var(--color-primary-text);
+  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白) */
+  color: var(--color-text-dark); /* ★文字色を更新 */
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .debug-copy-button:hover {
-  background-color: rgba(245, 245, 245, 0.2);
+  background-color: #F0F0F5; /* ★プロトタイプ準拠 (薄いグレー) */
 }

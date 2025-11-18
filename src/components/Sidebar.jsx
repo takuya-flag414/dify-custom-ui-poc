@@ -6,14 +6,11 @@ import './styles/Sidebar.css'; // Sidebar用のCSS
  * サイドバー (T-04 履歴リストの雛形)
  * @param {string} conversationId
  * @param {function} setConversationId
- * @param {Array} messagesLog - App.jsx の会話ログ
- * @param {Array} systemLogs - App.jsx のシステムログ
+ * ★ デバッグ用props (messagesLog, systemLogs) を削除
  */
 const Sidebar = ({
   conversationId,
   setConversationId,
-  messagesLog,
-  systemLogs,
 }) => {
   // T-04時点のダミーデータ
   const [conversations, setConversations] = useState([
@@ -22,7 +19,8 @@ const Sidebar = ({
     { id: 'conv_3', name: 'UIデザインの検討' },
   ]);
 
-  const [copyButtonText, setCopyButtonText] = useState('ログをクリップボードにコピー');
+  // ★ copyButtonText state を削除
+  // const [copyButtonText, setCopyButtonText] = useState('ログをクリップボードにコピー');
 
   const handleNewChat = () => {
     // 新規チャット (新基本設計書 5.2.1)
@@ -34,64 +32,27 @@ const Sidebar = ({
     setConversationId(id);
   };
 
-  // --- 🔽 デバッグログ機能 🔽 ---
-  const handleCopyLogs = () => {
-    console.log('[Sidebar] Copying logs to clipboard...', 'info');
-    let logContent = '--- PoC Debug Logs ---\n\n';
-
-    // 1. システムログ
-    logContent += '--- System Logs ---\n';
-    logContent += systemLogs.join('\n');
-    logContent += '\n\n';
-
-    // 2. 会話ログ (messages)
-    logContent += '--- Conversation Logs (JSON) ---\n';
-    try {
-      logContent += JSON.stringify(messagesLog, null, 2); // 見やすく整形
-    } catch (error) {
-      console.error('[Sidebar] Failed to stringify messagesLog:', error);
-      logContent += 'Failed to stringify conversation logs.';
-    }
-    logContent += '\n\n--- End of Logs ---';
-
-    // 3. クリップボードにコピー
-    navigator.clipboard
-      .writeText(logContent)
-      .then(() => {
-        console.log('[Sidebar] Logs copied successfully!', 'info');
-        setCopyButtonText('コピーしました！');
-        setTimeout(() => setCopyButtonText('ログをクリップボードにコピー'), 2000);
-      })
-      .catch((err) => {
-        console.error('[Sidebar] Failed to copy logs:', err);
-        setCopyButtonText('コピーに失敗しました');
-        setTimeout(() => setCopyButtonText('ログをクリップボードにコピー'), 2000);
-      });
-  };
+  // --- 🔽 デバッグログ機能 (handleCopyLogs) を削除 🔽 ---
+  // ...
   // --- 🔼 デバッグログ機能 🔼 ---
 
   return (
     <div className="sidebar">
       {/* --- ヘッダーと新規チャット --- */}
       <div className="sidebar-header">
-        <h1 className="sidebar-title">社内AIチャット PoC</h1>
-        <button className="new-chat-button" onClick={handleNewChat}>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          新しいチャット
-        </button>
+        {/* ★プロトタイプ準拠: ロゴアイコンを追加 */}
+        <div style={{ color: '#2563EB', width: '32px', height: '32px' }}>
+          <LogoIcon />
+        </div>
+        <h1 className="sidebar-title">社内AI (PoC)</h1>
       </div>
+
+      {/* ★ボタンの <button> タグ自体は既存のものを流用 */}
+      <button className="new-chat-button" onClick={handleNewChat}>
+        {/* ★プロトタイプ準拠: アイコンを差し替え */}
+        <NewChatIcon />
+        新しいチャット
+      </button>
 
       {/* --- 会話履歴リスト (T-04) --- */}
       <div className="conversation-list">
@@ -108,15 +69,35 @@ const Sidebar = ({
         ))}
       </div>
 
-      {/* --- 🔽 デバッグツール 🔽 --- */}
-      <div className="sidebar-debug-tools">
+      {/* --- 🔽 デバッグツール (JSX) を削除 🔽 --- */}
+      {/* <div className="sidebar-debug-tools">
         <h4 className="debug-title">[PoC デバッグ]</h4>
         <button className="debug-copy-button" onClick={handleCopyLogs}>
           {copyButtonText}
         </button>
-      </div>
+      </div> 
+      */}
+      {/* --- 🔼 デバッグツール 🔼 --- */}
     </div>
   );
 };
+
+// === 🔽 プロトタイプからアイコン定義を移植 🔽 ===
+
+const LogoIcon = () => (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+    </svg>
+);
+
+const NewChatIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M12 17V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M9.5 14.5L12 12L14.5 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+);
+
+// === 🔼 プロトタイプからアイコン定義を移植 🔼 ===
 
 export default Sidebar;

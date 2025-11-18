@@ -1,63 +1,98 @@
 /* src/components/styles/ChatArea.css */
  
- /* --- モックモード選択 (すりガラス) --- */
- .mock-mode-select {
-   padding: 12px 24px; /* パディングを左右に広げる */
-   display: flex;
+ /* --- ★上部バー全体 (旧 .mock-mode-select) --- */
+ .top-bar-container {
+   padding: 12px 24px;
+   display: flex; /* ★左右分離レイアウト */
    align-items: center;
-   gap: 8px;
-   font-size: 12px;
-   color: #555;
+   justify-content: space-between; /* ★左右に分離 */
+   gap: 16px;
    flex-shrink: 0;
-   
-   /* ★すりガラス効果 */
    position: sticky;
    top: 0;
    z-index: 10;
-   background-color: rgba(249, 249, 252, 0.75); /* 半透明の白 */
-   backdrop-filter: blur(15px);
-   -webkit-backdrop-filter: blur(15px); /* Safari対応 */
-   border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* 繊細な境界線 */
+   background-color: var(--color-bg-white);
+   border-bottom: 1px solid var(--color-border);
+ }
+
+ /* ★上部バーの左側 (モード選択) */
+ .mock-mode-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--color-text-light);
  }
  
- .mock-mode-select label {
+ .mock-mode-controls label {
    font-weight: 500;
  }
  
- .mock-mode-select select {
+ .mock-mode-controls select {
    font-family: var(--font-family-base);
    font-size: 12px;
    padding: 4px;
    border-radius: 4px;
-   border: 1px solid #ccc;
+   border: 1px solid var(--color-border);
  }
+
+ /* ★上部バーの右側 (デバッグボタン) */
+ /* ( .debug-controls は親の justify-content により自動で右寄せされるため、CSS定義は不要 ) */
  
- /* --- チャット履歴エリア --- */
+ /* ★上部バー用のログコピーボタン (Sidebar.cssから流用・調整) */
+ .debug-copy-button-topbar {
+    font-family: var(--font-family-base);
+    font-size: 0.8rem;
+    padding: 6px 10px; /* ★少し小さく調整 */
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: var(--color-bg-white);
+    color: var(--color-text-dark);
+    cursor: pointer;
+    transition: background-color 0.2s;
+ }
+
+ .debug-copy-button-topbar:hover {
+    background-color: #F0F0F5; /* (薄いグレー) */
+ }
+
+ 
+ /* --- チャット履歴エリア (変更なし) --- */
  .chat-history {
-   flex-grow: 1; /* ★重要: 残りの高さをすべて取る */
-   overflow-y: auto; /* ★重要: スクロール可能に */
+   flex-grow: 1; 
+   overflow-y: auto; 
    padding: 24px;
    display: flex;
    flex-direction: column;
-   align-items: center; /* ★ チャット履歴全体を中央寄せにする */
-   
-   /* ★スティッキーなフッターのための余白 */
-   padding-bottom: 150px; /* 入力欄の高さ分を確保 */
+   align-items: center; 
+   padding-bottom: 150px; 
  }
  
- /* 履歴がない場合の初期メッセージ */
+ /* ... (既存の .chat-history-empty, .initial-message-header, .chat-row などは変更なし) ... */
  .chat-history-empty {
    flex-grow: 1;
    display: flex;
+   flex-direction: column; 
    align-items: center;
    justify-content: center;
-   color: #888;
-   font-size: 1.2rem;
+   color: var(--color-text-light); 
    text-align: center;
-   min-height: 300px; /* 空の時でも一定の高さ */
+   width: 100%;
+   max-width: 800px; /* 最大幅 */
  }
- 
- /* --- 吹き出し (T-12) --- */
+ .initial-message-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+ }
+ .initial-message-title {
+    font-size: 1.5rem; /* 24px */
+    font-weight: 600; /* semibold */
+    color: var(--color-text-light);
+    margin-top: 16px;
+ }
  .chat-row {
    display: flex;
    flex-direction: column;
@@ -65,53 +100,49 @@
    width: 100%;
    max-width: 800px; /* チャット全体の最大幅 */
  }
- 
  .chat-row-user {
    align-items: flex-end;
  }
- 
  .chat-row-ai {
    align-items: flex-start;
  }
  
- /* --- チャット入力エリア (すりガラス) --- */
+ /* --- チャット入力エリア (変更なし) --- */
  .chat-input-container {
    flex-shrink: 0;
-   
-   /* ★すりガラス効果 */
    position: sticky;
    bottom: 0;
    z-index: 10;
-   background-color: rgba(255, 255, 255, 0.75); /* 半透明の白 */
-   backdrop-filter: blur(20px);
-   -webkit-backdrop-filter: blur(20px); /* Safari対応 */
-   border-top: 1px solid rgba(0, 0, 0, 0.08); /* 繊細な境界線 */
-   
-   padding: 16px 24px 24px 24px; /* パディング調整 */
+   background-color: var(--color-bg-white);
+   border-top: 1px solid var(--color-border);
+   padding: 16px 24px 24px 24px;
  }
  
+ .chat-input-container-centered {
+    width: 100%;
+    padding: 16px 24px 24px 24px;
+ }
+
  .chat-input-form {
    display: flex;
-   align-items: flex-end;
+   align-items: flex-end; 
    gap: 12px;
    max-width: 800px;
    margin: 0 auto;
-   
-   /* Mac風の入力フォーム */
    background-color: var(--color-bg-white);
-   border: 1px solid rgba(0, 0, 0, 0.1);
-   border-radius: 12px; /* 角を丸く */
-   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 繊細な影 */
-   
+   border: 1px solid var(--color-border);
+   border-radius: 1rem; 
+   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); 
    padding: 8px 12px;
    transition: border-color 0.2s, box-shadow 0.2s;
  }
  
  .chat-input-form:focus-within {
-   border-color: rgba(0, 0, 0, 0.2);
-   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   border-color: #9CA3AF;
+   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
  }
  
+ /* ... (既存の .chat-input-textarea, .chat-input-button などは変更なし) ... */
  .chat-input-textarea {
    flex-grow: 1;
    border: none;
@@ -122,40 +153,36 @@
    line-height: 1.5;
    resize: none;
    max-height: 200px;
-   min-height: 24px;
+   min-height: 24px; 
    overflow-y: auto;
-   background-color: transparent; /* 親の白を透過 */
+   background-color: transparent;
+   color: var(--color-text-dark);
  }
- 
  .chat-input-textarea::placeholder {
-   color: #aaa;
+   color: #9CA3AF;
  }
- 
  .chat-input-textarea:disabled {
    background-color: transparent;
    color: #999;
  }
- 
  .chat-input-button {
    flex-shrink: 0;
    width: 32px;
    height: 32px;
    padding: 6px;
    border: none;
-   border-radius: 8px; /* 角をフォームに合わせる */
-   background-color: var(--color-primary-dark); /* ★ロゴのネイビー */
-   color: var(--color-primary-text); /* ロゴの白 */
+   border-radius: 8px;
+   background-color: var(--color-button-dark);
+   color: var(--color-primary-text);
    cursor: pointer;
    display: flex;
    align-items: center;
    justify-content: center;
    transition: background-color 0.2s;
  }
- 
  .chat-input-button:hover:not(:disabled) {
-   background-color: var(--color-accent-red); /* ★ホバーで赤に */
+   background-color: var(--color-button-dark-hover);
  }
- 
  .chat-input-button:disabled {
    background-color: #ccc;
    cursor: not-allowed;

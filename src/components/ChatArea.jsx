@@ -1,7 +1,7 @@
 // src/components/ChatArea.jsx
 import React from 'react';
 import '../App.css';
-import './styles/ChatArea.css';
+import './styles/ChatArea.css'; // ★CSSの変更を反映
 
 import MockModeSelect from './MockModeSelect';
 import ChatHistory from './ChatHistory';
@@ -22,8 +22,12 @@ const ChatArea = (props) => {
     setMockMode,
     conversationId,
     addLog,
+    // ★ App.jsxからログ機能を受け取る
+    handleCopyLogs,
+    copyButtonText,
   } = props;
 
+  // --- (handleApiError, handleSendMessage, etc. ... 既存のロジックは変更なし) ---
   const handleApiError = (errorText, aiMessageId) => {
     addLog(`[API Error] ${errorText}`, 'error');
     setMessages((prev) =>
@@ -99,7 +103,7 @@ const ChatArea = (props) => {
           setIsLoading(false);
           addLog('[ChatArea] FE Mock completed.', 'info');
         }
-      }, 50);
+      }, 20);
 
     } else {
       // --- API実効 / BEモック ---
@@ -115,7 +119,7 @@ const ChatArea = (props) => {
 
       const inputs = {
         mock_perplexity_text: mockMode === 'BE' ? JSON.stringify({
-            "content": "2025年11月7日は「立冬」「鍋の日」「知恵の日」などの記念日があり、また新潟・佐渡空港の開港記念日でもあります。\n\n具体的には、  \n- **立冬**:二十四節気の一つで、冬の始まりを意味する日です。  \n- **鍋の日**:冬の訪れとともに鍋料理を楽しむ日として制定されています。  \n- **知恵の日**:知恵を大切にする日として認知されています。  \n- 1958年に**新潟・佐渡空港がオープンした日**でもあります[10][14]。\n\nまた、運勢的には「頼まれごとをきっかけに信頼関係が深まる日」とされ、金運は「大切なお金をしっかり守れる日」との占いもあります[3][17]。\n\nさらに、2025年11月7日は地震が日向灘で発生した日でもありますが、特別な凶日とはされていません[11]。  \n\nこれらの情報から、11月7日は季節の節目として冬の始まりを感じる日であり、記念日も多い日といえます。",
+            "content": "2025年11月7日は「立冬」「鍋の日」「知恵の日」などの記念日があり、また新潟・佐渡空港の開港記念日でもあります。\n\n具体的には、  \n- **立冬**:二十四節気の一つで、冬の始まりを意味する日です。  \n- **鍋の日**:冬の訪れとともに鍋料理を楽しむ日として制定されています。  \n- **知恵の日**:知恵を大切にする日として認知されています。  \n- 1958年に**新潟・佐渡空港がオープンした日**でもあります[10][14]。\n\nまた、運勢的には「頼まれごとをきっかけに信頼関係が深まる日」とされ、金運は「大切なお金をしっかり守れる日」との占いもあります[3][17]。  \n\nさらに、2025年11月7日は地震が日向灘で発生した日でもありますが、特別な凶日とはされていません[11]。  \n\nこれらの情報から、11月7日は季節の節目として冬の始まりを感じる日であり、記念日も多い日といえます。",
             "role": "assistant",
             "citations": [
             "https://www.mwed.jp/articles/12629/",
@@ -160,7 +164,7 @@ const ChatArea = (props) => {
           throw new Error('ReadableStream not available');
         }
 
-        // ストリーミング処理
+        // ... (既存のストリーミング処理ロジックは変更なし) ...
         const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
         let buffer = '';
         let contentBuffer = ''; // ストリーミング内容を一時保存
@@ -395,15 +399,47 @@ const ChatArea = (props) => {
       url: cite.url || null,
     }));
   };
-
+  
   return (
     <div className="chat-area">
-      <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
+      {/* ★★★ ここからが変更点 ★★★ */}
+      {/* 以前の <MockModeSelect ... /> は、
+        <div className="mock-mode-select">...</div> というラッパーを持っていました。
+        これを、左右分離のレイアウトに変更します。
+      */}
+      <div className="top-bar-container"> {/* ★ 以前の .mock-mode-select */}
+        
+        {/* 左側: モード選択 */}
+        <div className="mock-mode-controls">
+          <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
+        </div>
+
+        {/* 右側: ログコピーボタン */}
+        <div className="debug-controls">
+          <button 
+            className="debug-copy-button-topbar" 
+            onClick={handleCopyLogs}
+          >
+            {copyButtonText}
+          </button>
+        </div>
+      </div>
+      {/* ★★★ 変更点ここまで ★★★ */}
+
       <ChatHistory
         messages={messages}
         onSuggestionClick={handleSendMessage}
+        isLoading={isLoading}
+        onSendMessage={handleSendMessage}
       />
-      <ChatInput isLoading={isLoading} onSendMessage={handleSendMessage} />
+      
+      {(messages.length > 0 || isLoading) && (
+        <ChatInput 
+          isLoading={isLoading} 
+          onSendMessage={handleSendMessage} 
+          isCentered={false}
+        />
+      )}
     </div>
   );
 };

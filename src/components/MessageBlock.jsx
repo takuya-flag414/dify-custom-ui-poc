@@ -16,13 +16,12 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   const isAi = role === 'ai';
 
   return (
-    // ★ message-block に役割クラスを追加し、CSSで最大幅を制御しやすくする
     <div
       className={`message-block ${
         isAi ? 'message-block-ai' : 'message-block-user'
       }`}
     >
-      {/* ★ 役割ラベルを吹き出しの上に移動 */}
+      {/* 役割ラベル */}
       <div
         className={`message-role ${
           isAi ? 'message-role-ai' : 'message-role-user'
@@ -31,32 +30,89 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
         {isAi ? 'AI' : 'あなた'}
       </div>
 
-      {/* コンテンツ本体 (これが吹き出しとなる) */}
+      {/* アイコンと吹き出しを内包するコンテナ */}
       <div
-        className={`message-content ${
-          isAi ? 'message-content-ai' : 'message-content-user'
+        className={`message-container ${
+          isAi ? 'message-container-ai' : 'message-container-user'
         }`}
       >
-        {/* 本文 (T-06) */}
-        {/* ★ textが空（ストリーミング中）の時の表示を修正 */}
-        <MarkdownRenderer content={text || '...'} />
+        {/* アイコン (吹き出しの外) */}
+        <div style={{ width: '32px', height: '32px', flexShrink: 0, marginTop: '4px' }}>
+          {isAi ? <AssistantIcon /> : <UserIcon />}
+        </div>
 
-        {/* AIの回答の場合のみ、出典と提案を表示 */}
-        {/* ★ AIかつ、本文が生成された後（ストリーミング完了後）にメタデータを表示 */}
-        {isAi && text && (
-          <>
-            {/* 出典リスト (T-09) */}
-            <CitationList citations={citations} />
-            {/* 提案ボタン (T-11) */}
-            <SuggestionButtons
-              suggestions={suggestions}
-              onSuggestionClick={onSuggestionClick} // ★ T-11対応: console.logからpropsに変更
-            />
-          </>
-        )}
+        {/* コンテンツ本体 (これが吹き出しとなる) */}
+        <div
+          className={`message-content ${
+            isAi ? 'message-content-ai' : 'message-content-user'
+          }`}
+        >
+          {/* 本文 (T-06) */}
+          <MarkdownRenderer content={text || '...'} />
+
+          {/* AIの回答の場合のみ、出典と提案を表示 */}
+          {isAi && text && (
+            <>
+              {/* 出典リスト (T-09) */}
+              <CitationList citations={citations} />
+              {/* 提案ボタン (T-11) */}
+              <SuggestionButtons
+                suggestions={suggestions}
+                onSuggestionClick={onSuggestionClick}
+              />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
+// === 🔽 アイコン定義を style 属性に修正 🔽 ===
+
+const UserIcon = () => (
+    // ★ className="... rounded-full" を style 属性に置き換え
+    <div style={{
+        display: 'flex',
+        width: '32px',       // h-8, w-8
+        height: '32px',      // h-8, w-8
+        alignItems: 'center', // items-center
+        justifyContent: 'center', // justify-center
+        borderRadius: '50%',   // ★ rounded-full
+        backgroundColor: '#2563EB',
+        color: 'white',
+        fontSize: '0.875rem',
+        fontWeight: 'bold'
+    }}>
+        You
+    </div>
+);
+
+// ★ AssistantIcon を export して ChatHistory.jsx で使えるようにする
+export const AssistantIcon = () => (
+    // ★ className="... rounded-full" を style 属性に置き換え
+    <div style={{
+        display: 'flex',
+        width: '32px',       // h-8, w-8
+        height: '32px',      // h-8, w-8
+        alignItems: 'center', // items-center
+        justifyContent: 'center', // justify-center
+        borderRadius: '50%',   // ★ rounded-full
+        backgroundColor: '#1F2937', // (bg-gray-800)
+        color: 'white',
+        padding: '4px'        // p-1
+    }}>
+        <LogoIcon />
+    </div>
+);
+
+const LogoIcon = () => (
+    // (SVG自体は変更なし)
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+    </svg>
+);
+
+// === 🔼 アイコン定義を style 属性に修正 🔼 ===
 
 export default MessageBlock;

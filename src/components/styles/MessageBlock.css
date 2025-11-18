@@ -17,28 +17,48 @@
 .message-block {
   display: flex;
   flex-direction: column;
-  max-width: 85%; /* 吹き出しの最大幅 */
+  max-width: 100%; /* ★最大幅は .chat-row が担当 */
 }
 
-/* 役割（User / AI）のラベル */
+/* ★プロトタイプ準拠: アイコンと吹き出しのコンテナ */
+.message-container {
+  display: flex;
+  align-items: flex-start; /* アイコンと吹き出しを上揃え */
+  gap: 12px; /* アイコンと吹き出しの間隔 */
+}
+
+/* ★ユーザー用 (右寄せ) */
+.message-container-user {
+  justify-content: flex-end;
+  flex-direction: row-reverse; /* アイコンと吹き出しを反転 */
+}
+
+/* ★役割（User / AI）のラベル (プロトタイプには無いが、既存のものを流用) */
 .message-role {
   font-size: 0.9rem;
   font-weight: 700;
   margin-bottom: 4px;
   padding: 0 4px;
+  
+  /* ★アイコンの幅を考慮したマージン */
+  /* (アイコンサイズ 32px + gap 12px = 44px) */
+  margin-left: 44px;
 }
 
-/* AIの回答 */
+/* ★AIの役割ラベル */
 .message-role-ai {
   color: #4A4A4A;
   text-align: left;
 }
 
-/* ユーザーの質問 */
+/* ★ユーザーの役割ラベル */
 .message-role-user {
-  color: var(--color-primary-dark); /* ★ロゴのネイビーに変更 */
+  color: var(--color-user-bg); /* ★ユーザーの青色に変更 */
   text-align: right;
+  margin-left: 0;
+  margin-right: 44px; /* ★右寄せの場合 */
 }
+
 
 /* メッセージ本体のコンテナ (共通の吹き出しスタイル) */
 .message-content {
@@ -47,7 +67,8 @@
   color: var(--color-text-dark);
   word-wrap: break-word;
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: 12px; /* ★rounded-lg */
+  max-width: 90%; /* ★吹き出しが横幅いっぱいにならないように */
 }
 
 /* AIの回答コンテナ（本文、出典、提案を内包） */
@@ -56,24 +77,26 @@
   flex-direction: column;
   gap: 16px;
   
-  /* ★AI吹き出しスタイル (Mac風) */
-  background-color: #F0F0F5; /* 明るいグレー */
-  border: none;
-  border-top-left-radius: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* 繊細な影 */
+  /* ★AI吹き出しスタイル (プロトタイプ準拠) */
+  background-color: var(--color-ai-bg); /* ★明るいグレー (bg-gray-100) */
+  border: 1px solid var(--color-border); /* ★境界線を追加 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* ★ユーザー吹き出しスタイル (ロゴ風) */
+/* ★ユーザー吹き出しスタイル (プロトタイプ準拠) */
 .message-content-user {
-  background-color: var(--color-primary-dark); /* ★ロゴのネイビー */
+  background-color: var(--color-user-bg); /* ★プロトタイプ準拠 (青 bg-blue-600) */
   color: var(--color-primary-text); /* ★ロゴの白 */
-  border-top-right-radius: 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* ユーザー吹き出し内のリンク色を調整 */
 .message-content-user a {
-  color: #89b4f8; /* ネイビー背景でも見やすいリンク色 */
+  color: #A5B4FC; /* ★青背景でも見やすいリンク色 (light-blue) */
+  text-decoration: underline;
+}
+.message-content-user a:hover {
+  text-decoration: none;
 }
 
 /* Markdownレンダラーのスタイル（本文） */
@@ -94,6 +117,7 @@
   padding-left: 24px;
 }
 
+/* ... (Markdownの code, pre, a などのスタイルは変更なし) ... */
 .markdown-renderer code {
   font-family: 'Courier New', Courier, monospace;
   background-color: rgba(0, 0, 0, 0.05);
@@ -101,13 +125,10 @@
   border-radius: 4px;
   font-size: 0.9em;
 }
-
-/* ユーザー吹き出し内のコードスタイル */
 .message-content-user code {
   background-color: rgba(255, 255, 255, 0.15);
   color: var(--color-primary-text);
 }
-
 .markdown-renderer pre {
   background-color: #2d2d2d;
   color: #f8f8f2;
@@ -115,12 +136,10 @@
   border-radius: 8px;
   overflow-x: auto;
 }
-
 .markdown-renderer pre code {
   background-color: transparent;
   padding: 0;
 }
-
 .markdown-renderer a {
   color: #1A73E8;
   text-decoration: none;
@@ -129,9 +148,10 @@
   text-decoration: underline;
 }
 
+
 /* --- 出典リスト (T-09) --- */
 .citation-list {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1); /* ★AI吹き出し内の境界線 */
   padding-top: 12px;
 
   /* ★ アニメーション適用 */
@@ -143,7 +163,7 @@
 .citation-title {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #555;
+  color: var(--color-text-light); /* ★文字色を更新 */
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -155,7 +175,7 @@
 }
 
 .citation-link {
-  color: #1A73E8;
+  color: var(--color-user-bg); /* ★プロトタイプ準拠 (青) */
   text-decoration: none;
   word-break: break-all;
 }
@@ -166,12 +186,12 @@
 .citation-index {
   font-weight: 700;
   margin-right: 8px;
-  color: #333;
+  color: var(--color-text-dark); /* ★文字色を更新 */
 }
 
 /* --- 提案ボタン (T-11) --- */
 .suggestion-buttons {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1); /* ★AI吹き出し内の境界線 */
   padding-top: 12px;
   display: flex;
   flex-direction: column;
@@ -181,13 +201,13 @@
   /* ★ アニメーション適用 (出典より少し遅らせる) */
   opacity: 0; /* 初期状態 */
   animation: fadeInUp 0.4s ease-out forwards;
-  animation-delay: 0.2s; /* 出典より 0.1s 遅らせる */
+  animation-delay: 0.2s;
 }
 
 .suggestion-title {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #555;
+  color: var(--color-text-light); /* ★文字色を更新 */
   margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -197,17 +217,17 @@
   font-family: var(--font-family-base);
   font-size: 0.9rem;
   padding: 8px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border); /* ★境界線色を更新 */
   border-radius: 20px;
-  background-color: var(--color-bg-white);
-  color: #333;
+  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白) */
+  color: var(--color-user-bg); /* ★プロトタイプ準拠 (青文字) */
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s, color 0.2s;
   text-align: left;
 }
 
 .suggestion-button:hover {
-  background-color: var(--color-bg-white);
-  border-color: var(--color-accent-red); /* ★ホバーで赤枠 */
-  color: var(--color-accent-red); /* ★ホバーで赤テキスト */
+  background-color: #F0F0F5; /* ★プロトタイプ準拠 (薄いグレー) */
+  border-color: #9CA3AF;
+  color: #1D4ED8; /* ★プロトタイプ準拠 (濃い青) */
 }

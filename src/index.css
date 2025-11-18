@@ -1,21 +1,30 @@
 /* src/index.css */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
-/* --- カラーパレット定義 (ロゴ準拠) --- */
+/* --- カラーパレット定義 (プロトタイプ準拠に更新) --- */
 :root {
   --font-family-base: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   
-  /* ロゴカラー */
-  --color-primary-dark: #2C3A5A; /* ロゴのネイビー */
-  --color-primary-text: #F5F5F5; /* ロゴの白 (可読性のため純白#FFFより優先) */
+  /* ロゴカラー (既存) */
+  --color-primary-dark: #2C3A5A; /* ロゴのネイビー (旧 ユーザー吹き出し) */
+  --color-primary-text: #F5F5F5; /* ロゴの白 */
   --color-accent-red: #E60012;  /* ロゴの赤 */
   
-  /* UI基本色 */
-  --color-bg-body: #F0F0F5;     /* Mac風の明るい背景グレー */
-  --color-bg-white: #FFFFFF;    /* コンテンツの白 */
-  --color-text-dark: #202123;   /* 基本のテキスト黒 */
+  /* UI基本色 (プロトタイプ準拠) */
+  --color-bg-body: #F3F4F6;     /* 全体の背景 (bg-gray-100) */
+  --color-bg-white: #FFFFFF;    /* メインエリアの背景 (bg-white) */
+  --color-text-dark: #1F2937;   /* 基本のテキスト黒 (text-gray-800) */
+  --color-text-light: #6B7280; /* 薄いテキスト (text-gray-500) */
+  --color-border: #D1D5DB;     /* 境界線 (border-gray-300) */
+
+  /* コンポーネント色 (プロトタイプ準拠) */
+  --color-sidebar-bg: #F3F4F6;    /* サイドバー背景 (bg-gray-100) */
+  --color-user-bg: #2563EB;      /* ユーザー吹き出し (bg-blue-600) */
+  --color-ai-bg: #F3F4F6;        /* AI吹き出し (bg-gray-100) */
+  --color-button-dark: #1F2937;  /* 送信ボタン (bg-gray-800) */
+  --color-button-dark-hover: #374151; /* 送信ボタンホバー (bg-gray-700) */
 }
 /* --- --- */
 
@@ -26,6 +35,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-body); /* アプリ全体の背景色を更新 */
+  color: var(--color-text-dark); /* デフォルトの文字色 */
 }
 
 /* ボックスサイズの計算をボーダーボックスに統一 */

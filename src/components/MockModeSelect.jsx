@@ -1,6 +1,7 @@
 // src/components/MockModeSelect.jsx
 import React from 'react';
-import './styles/ChatArea.css';
+// ★ .css のインポートを削除 (ChatArea.css が担当)
+// import './styles/ChatArea.css'; 
 
 /**
  * PoC用 モックモード切替UI (F-UI-006, F-UI-007)
@@ -9,7 +10,8 @@ import './styles/ChatArea.css';
  */
 const MockModeSelect = ({ mockMode, setMockMode }) => {
   return (
-    <div className="mock-mode-select">
+    // ★外側の <div className="mock-mode-select"> を削除し、Fragmentに変更
+    <>
       <label htmlFor="mock-mode-selector">
         [PoCデバッグ用] モード:
       </label>
@@ -22,7 +24,8 @@ const MockModeSelect = ({ mockMode, setMockMode }) => {
         <option value="FE">FE Mock (フロント完結)</option>
         <option value="BE">BE Mock (Difyワークフロー)</option>
       </select>
-    </div>
+    </>
+    // ★外側の </div> を削除
   );
 };
 

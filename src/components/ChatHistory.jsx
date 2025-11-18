@@ -1,14 +1,23 @@
 // src/components/ChatHistory.jsx
 import React, { useEffect, useRef } from 'react';
 import './styles/ChatArea.css'; // 既存のインポート
-import MessageBlock from './MessageBlock'; // 本物をインポート
+import MessageBlock from './MessageBlock';
+import ChatInput from './ChatInput'; // ★中央配置のためにインポート
+import { AssistantIcon } from './MessageBlock'; // ★アイコンをインポート
 
 /**
  * チャット履歴表示エリア (T-06)
  * @param {Array} messages - App.jsxから渡される
  * @param {function} onSuggestionClick - ChatAreaから渡される
+ * @param {boolean} isLoading - ★中央配置のために ChatArea から渡される
+ * @param {function} onSendMessage - ★中央配置のために ChatArea から渡される
  */
-const ChatHistory = ({ messages, onSuggestionClick }) => {
+const ChatHistory = ({
+  messages,
+  onSuggestionClick,
+  isLoading,
+  onSendMessage,
+}) => {
   const endOfMessagesRef = useRef(null);
 
   // メッセージが更新されるたびに一番下にスクロールする (T-06)
@@ -22,15 +31,32 @@ const ChatHistory = ({ messages, onSuggestionClick }) => {
 
   return (
     <div className="chat-history">
-      {messages.length === 0 ? (
+      {/* ★★★ プロトタイプ準拠: 中央配置のロジックに変更 ★★★ */}
+      {messages.length === 0 && !isLoading ? (
         // 初期表示状態 (新基本設計書 5.2.1)
         <div className="chat-history-empty">
-          お困りのことはありますか？
+          
+          {/* ★プロトタイプ風ヘッダー */}
+          <div className="initial-message-header">
+            <div style={{ width: '40px', height: '40px' }}> {/* アイコンサイズ調整 */}
+              <AssistantIcon />
+            </div>
+            <h2 className="initial-message-title">
+              お困りのことはありますか？
+            </h2>
+          </div>
+          
+          {/* ★中央配置の入力フォーム */}
+          <ChatInput
+            isLoading={isLoading}
+            onSendMessage={onSendMessage}
+            isCentered={true} // ★中央配置フラグ
+          />
+
         </div>
       ) : (
         // 履歴表示状態 (新基本設計書 5.2.2)
         messages.map((msg) => (
-          // ★ 役割に応じて左右に振り分けるラッパーを追加
           <div
             key={msg.id}
             className={`chat-row ${

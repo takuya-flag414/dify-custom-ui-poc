@@ -20,8 +20,9 @@ function App() {
   const [conversationId, setConversationId] = useState(null);
   const [mockMode, setMockMode] = useState('FE');
 
-  // --- 🔽 デバッグログ機能 🔽 ---
+  // --- 🔽 デバッグログ機能 (Sidebarから昇格) 🔽 ---
   const [systemLogs, setSystemLogs] = useState([]); // システムログ
+  const [copyButtonText, setCopyButtonText] = useState('ログをコピー'); // ★ボタンテキスト用のstate
 
   // ログ追加関数 (useCallbackでメモ化)
   const addLog = useCallback((message, level = 'log') => {
@@ -73,20 +74,56 @@ function App() {
       console.info = originalConsoleInfo;
     };
   }, [addLog]); // addLogが変更された時のみ再実行 (初回実行)
+
+  // ★ログコピー機能 (Sidebarから昇格)
+  const handleCopyLogs = () => {
+    addLog('[App] Copying logs to clipboard...', 'info');
+    let logContent = '--- PoC Debug Logs ---\n\n';
+
+    // 1. システムログ
+    logContent += '--- System Logs ---\n';
+    logContent += systemLogs.join('\n');
+    logContent += '\n\n';
+
+    // 2. 会話ログ (messages)
+    logContent += '--- Conversation Logs (JSON) ---\n';
+    try {
+      logContent += JSON.stringify(messages, null, 2); // ★ messagesLog -> messages
+    } catch (error) {
+      addLog(`[App] Failed to stringify messages: ${error.message}`, 'error');
+      logContent += 'Failed to stringify conversation logs.';
+    }
+    logContent += '\n\n--- End of Logs ---';
+
+    // 3. クリップボードにコピー
+    navigator.clipboard
+      .writeText(logContent)
+      .then(() => {
+        addLog('[App] Logs copied successfully!', 'info');
+        setCopyButtonText('コピーしました！');
+        setTimeout(() => setCopyButtonText('ログをコピー'), 2000);
+      })
+      .catch((err) => {
+        addLog(`[App] Failed to copy logs: ${err.message}`, 'error');
+        setCopyButtonText('コピーに失敗');
+        setTimeout(() => setCopyButtonText('ログをコピー'), 2000);
+      });
+  };
   // --- 🔼 デバッグログ機能 🔼 ---
+
 
   // T-04 (履歴選択) のための処理
   const handleSetConversationId = (id) => {
     setConversationId(id);
-    console.log(`[App] Conversation changed to: ${id}`);
+    addLog(`[App] Conversation changed to: ${id}`, 'info'); // ★ console.log -> addLog
 
     if (id === null) {
       // 新規チャット
       setMessages([]);
-      console.log('[App] New chat selected. Messages cleared.');
+      addLog('[App] New chat selected. Messages cleared.', 'info');
     } else {
       // ダミーの履歴をロード
-      console.log(`[App] Loading dummy history for conv_id: ${id}`);
+      addLog(`[App] Loading dummy history for conv_id: ${id}`, 'info');
       setMessages([
         {
           id: '1',
@@ -109,9 +146,9 @@ function App() {
       <Sidebar
         conversationId={conversationId}
         setConversationId={handleSetConversationId}
-        // デバッグログ機能用のpropsを追加
-        messagesLog={messages} // 会話ログ
-        systemLogs={systemLogs} // システムログ
+        // ★デバッグログ機能用のpropsを削除
+        // messagesLog={messages}
+        // systemLogs={systemLogs}
       />
       <ChatArea
         messages={messages}
@@ -121,8 +158,13 @@ function App() {
         mockMode={mockMode}
         setMockMode={setMockMode}
         conversationId={conversationId}
-        // デバッグログ機能用のpropsを追加
-        addLog={addLog}
+        addLog={addLog} // ★addLogは引き続き渡す
+        
+        // ★デバッグログ機能用のpropsを ChatArea に追加
+        messagesLog={messages}
+        systemLogs={systemLogs}
+        handleCopyLogs={handleCopyLogs}
+        copyButtonText={copyButtonText}
       />
     </div>
   );
