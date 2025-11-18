@@ -151,8 +151,10 @@
 
 /* --- 出典リスト (T-09) --- */
 .citation-list {
-  border-top: 1px solid rgba(0, 0, 0, 0.1); /* ★AI吹き出し内の境界線 */
+  /* ★ 修正(1): 境界線の色を --color-border に統一 */
+  border-top: 1px solid var(--color-border); 
   padding-top: 12px;
+  margin-top: 12px; /* ★本文とのマージンを gap から分離 */
 
   /* ★ アニメーション適用 */
   opacity: 0; /* 初期状態 */
@@ -169,30 +171,69 @@
   letter-spacing: 0.5px;
 }
 
+/* ★ 修正(2): CitationItem.jsx のための Flexbox スタイル */
 .citation-item {
-  font-size: 0.9rem;
-  margin-bottom: 4px;
+  display: flex; /* ★ Flexboxに変更 */
+  align-items: center; /* ★ 縦方向中央揃え */
+  margin-bottom: 6px;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem;
 }
 
+/* ★ 削除 (古い .citation-link) - .citation-item にマージ */
+/*
+.citation-link { ... }
+*/
+
+/* ★ 削除 (古い .citation-index) - CitationItem.jsx で不要に */
+/*
+.citation-index { ... }
+*/
+
+
+/* --- ★ 修正(3): CitationItem.jsx で利用するスタイルを追記 ★ --- */
+
+/* ファビコン用のスタイル */
+.citation-favicon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px; /* アイコンとテキストの間隔 */
+  flex-shrink: 0; /* コンテナが縮んでもアイコンサイズを維持 */
+  border-radius: 4px; /* 少し角丸にする */
+}
+
+/* リンク（タイトル）用のスタイル */
 .citation-link {
   color: var(--color-user-bg); /* ★プロトタイプ準拠 (青) */
   text-decoration: none;
-  word-break: break-all;
+  
+  /* タイトルが長い場合に省略 (...) する */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .citation-link:hover {
   text-decoration: underline;
 }
 
-.citation-index {
-  font-weight: 700;
-  margin-right: 8px;
-  color: var(--color-text-dark); /* ★文字色を更新 */
+/* ファイル名（リンクなし）用のスタイル */
+.citation-text {
+  color: var(--color-text-dark); /* 通常のテキスト色 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* --- --- 修正(3) ここまで --- --- */
+
 
 /* --- 提案ボタン (T-11) --- */
 .suggestion-buttons {
-  border-top: 1px solid rgba(0, 0, 0, 0.1); /* ★AI吹き出し内の境界線 */
+  /* ★ 修正: 境界線の色を --color-border に統一 & マージン調整 */
+  border-top: 1px solid var(--color-border); 
   padding-top: 12px;
+  margin-top: 12px; /* ★本文とのマージンを gap から分離 */
+  
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -230,4 +271,21 @@
   background-color: #F0F0F5; /* ★プロトタイプ準拠 (薄いグレー) */
   border-color: #9CA3AF;
   color: #1D4ED8; /* ★プロトタイプ準拠 (濃い青) */
+}
+
+/* ★ 本文中の脚注 [1] (sup) のためのスタイル */
+.inline-citation {
+  display: inline-block;
+  vertical-align: super; /* <sup> タグの挙動 */
+  font-size: 0.75em; /* 少し小さく */
+  line-height: 1;
+  font-weight: 700;
+  color: var(--color-user-bg); /* 出典リンクと同じ青色 */
+  padding: 0 2px;
+  cursor: default;
+  
+  /* Safari/Chromeでの選択範囲のズレを防止 */
+  position: relative;
+  top: -0.3em;
+  margin: 0 1px;
 }

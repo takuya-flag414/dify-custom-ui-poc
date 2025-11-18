@@ -12,7 +12,8 @@ import SuggestionButtons from './SuggestionButtons';
  * @param {function} onSuggestionClick - 提案クリック時に実行する関数
  */
 const MessageBlock = ({ message, onSuggestionClick }) => {
-  const { role, text, citations, suggestions } = message;
+  // ★ 修正: isStreaming と citations フラグを message から取り出す
+  const { role, text, citations, suggestions, isStreaming } = message;
   const isAi = role === 'ai';
 
   return (
@@ -48,10 +49,15 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
           }`}
         >
           {/* 本文 (T-06) */}
-          <MarkdownRenderer content={text || '...'} />
+          {/* ★ 修正: isStreaming と citations を MarkdownRenderer に渡す */}
+          <MarkdownRenderer
+            content={text || '...'}
+            isStreaming={isAi && isStreaming}
+            citations={citations}
+          />
 
           {/* AIの回答の場合のみ、出典と提案を表示 */}
-          {isAi && text && (
+          {isAi && text && !isStreaming && (
             <>
               {/* 出典リスト (T-09) */}
               <CitationList citations={citations} />
@@ -68,17 +74,16 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   );
 };
 
-// === 🔽 アイコン定義を style 属性に修正 🔽 ===
+// === 🔽 アイコン定義 (変更なし) 🔽 ===
 
 const UserIcon = () => (
-    // ★ className="... rounded-full" を style 属性に置き換え
     <div style={{
         display: 'flex',
-        width: '32px',       // h-8, w-8
-        height: '32px',      // h-8, w-8
-        alignItems: 'center', // items-center
-        justifyContent: 'center', // justify-center
-        borderRadius: '50%',   // ★ rounded-full
+        width: '32px',
+        height: '32px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '50%',
         backgroundColor: '#2563EB',
         color: 'white',
         fontSize: '0.875rem',
@@ -88,31 +93,28 @@ const UserIcon = () => (
     </div>
 );
 
-// ★ AssistantIcon を export して ChatHistory.jsx で使えるようにする
 export const AssistantIcon = () => (
-    // ★ className="... rounded-full" を style 属性に置き換え
     <div style={{
         display: 'flex',
-        width: '32px',       // h-8, w-8
-        height: '32px',      // h-8, w-8
-        alignItems: 'center', // items-center
-        justifyContent: 'center', // justify-center
-        borderRadius: '50%',   // ★ rounded-full
-        backgroundColor: '#1F2937', // (bg-gray-800)
+        width: '32px',
+        height: '32px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '50%',
+        backgroundColor: '#1F2937',
         color: 'white',
-        padding: '4px'        // p-1
+        padding: '4px'
     }}>
         <LogoIcon />
     </div>
 );
 
 const LogoIcon = () => (
-    // (SVG自体は変更なし)
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
     </svg>
 );
 
-// === 🔼 アイコン定義を style 属性に修正 🔼 ===
+// === 🔼 アイコン定義 🔼 ===
 
 export default MessageBlock;

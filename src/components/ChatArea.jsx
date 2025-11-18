@@ -38,6 +38,7 @@ const ChatArea = (props) => {
               text: `**エラーが発生しました:**\n\n${errorText}\n\nAPIキーまたはURLの設定、リクエストの形式を確認してください。`,
               citations: [],
               suggestions: [],
+              isStreaming: false, // ★ 修正: ストリーミング完了
             }
           : msg
       )
@@ -65,6 +66,7 @@ const ChatArea = (props) => {
       role: 'ai',
       citations: [],
       suggestions: [],
+      isStreaming: true, // ★ 修正: ストリーミング開始フラグ
     };
     setMessages((prev) => [...prev, aiMessage]);
 
@@ -96,7 +98,12 @@ const ChatArea = (props) => {
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === aiMessageId
-                ? { ...msg, citations: mockCitations, suggestions: mockSuggestions }
+                ? { 
+                    ...msg, 
+                    citations: mockCitations, 
+                    suggestions: mockSuggestions, 
+                    isStreaming: false // ★ 修正: ストリーミング完了
+                  }
                 : msg
             )
           );
@@ -118,19 +125,21 @@ const ChatArea = (props) => {
       }
 
       const inputs = {
+        // ★ 修正: PMご指摘の通り、BEモックのJSONをPerplexity APIの形式に修正
         mock_perplexity_text: mockMode === 'BE' ? JSON.stringify({
-            "content": "2025年11月7日は「立冬」「鍋の日」「知恵の日」などの記念日があり、また新潟・佐渡空港の開港記念日でもあります。\n\n具体的には、  \n- **立冬**:二十四節気の一つで、冬の始まりを意味する日です。  \n- **鍋の日**:冬の訪れとともに鍋料理を楽しむ日として制定されています。  \n- **知恵の日**:知恵を大切にする日として認知されています。  \n- 1958年に**新潟・佐渡空港がオープンした日**でもあります[10][14]。\n\nまた、運勢的には「頼まれごとをきっかけに信頼関係が深まる日」とされ、金運は「大切なお金をしっかり守れる日」との占いもあります[3][17]。  \n\nさらに、2025年11月7日は地震が日向灘で発生した日でもありますが、特別な凶日とはされていません[11]。  \n\nこれらの情報から、11月7日は季節の節目として冬の始まりを感じる日であり、記念日も多い日といえます。",
-            "role": "assistant",
-            "citations": [
-            "https://www.mwed.jp/articles/12629/",
-            "https://note.com/zouplans/n/n06f668ef9b97",
-            "https://sp.gettersiida.net/article/gettersiida/unsei/27188/",
-            "https://kids.yahoo.co.jp/today/1008",
-            "https://www.mwed.jp/articles/13239/",
-            "https://zatsuneta.com/category/anniversary10.html",
-            "https://netlab.click/todayis/1107",
-            "https://kango.mynavi.jp/contents/nurseplus/news/20251107-2182253/"
-            ]
+            "search_results": [
+              {
+                "url": "https://netlab.click/todayis/1118",
+                "snippet": "2025年11月18日は「土木の日」「いい家の日」「森とふるさとの日」など、様々な記念日が制定されています。",
+                "title": "今日は何の日？ 2025年11月18日の記念日まとめ｜ねとらぼ"
+              },
+              {
+                "url": "https://note.com/zouplans/n/n11c613763e21",
+                "snippet": "2025年11月18日は何の日か。運勢占いでは「解放の日」「ブレーキの日」とされ、努力が実る日です。",
+                "title": "2025年11月18日の運勢と記念日｜占いと暦"
+              }
+            ],
+            "answer": "2025年11月18日は、「土木の日」「いい家の日」「森とふるさとの日」など様々な記念日があります。また、運勢的には「解放の日」とされ、努力が実る日と言われています。"
         }) : '',
         // isDebugMode は mockMode に応じて設定
         isDebugMode: mockMode === 'BE',
@@ -293,7 +302,12 @@ const ChatArea = (props) => {
                         setMessages((prev) =>
                           prev.map((msg) =>
                             msg.id === aiMessageId
-                              ? { ...msg, citations: finalCitations, suggestions: pendingSuggestions }
+                              ? { 
+                                  ...msg, 
+                                  citations: finalCitations, 
+                                  suggestions: pendingSuggestions, 
+                                  isStreaming: false // ★ 修正: ストリーミング完了
+                                }
                               : msg
                           )
                         );
@@ -306,7 +320,12 @@ const ChatArea = (props) => {
                     setMessages((prev) =>
                       prev.map((msg) =>
                         msg.id === aiMessageId
-                          ? { ...msg, text: finalText, citations: finalCitations }
+                          ? { 
+                              ...msg, 
+                              text: finalText, 
+                              citations: finalCitations, 
+                              isStreaming: false // ★ 修正: ストリーミング完了
+                            }
                           : msg
                       )
                     );
@@ -374,7 +393,8 @@ const ChatArea = (props) => {
 
   const mapCitations = (resources) => {
     return resources.map((res, index) => {
-      const sourceName = res.document_name || '不明な出典';
+      // ★ 修正: Difyのretriever_resourcesから "title" を "source" に使う
+      const sourceName = res.document_name || res.dataset_name || '不明な出典';
       const url = res.document_url || null;
       
       let displayText = `[${index + 1}] ${sourceName}`;
@@ -395,6 +415,8 @@ const ChatArea = (props) => {
     return citations.map((cite, index) => ({
       id: `cite_llm_${index}`,
       type: cite.url ? 'web' : 'file',
+      // ★ 修正: Difyワークフロー(YML)が "source" にタイトルを入れる前提
+      // プレフィックス [1] をここで付与する
       source: `[${index + 1}] ${cite.source || '不明な出典'}`,
       url: cite.url || null,
     }));
