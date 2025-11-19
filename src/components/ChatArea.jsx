@@ -1,5 +1,5 @@
 // src/components/ChatArea.jsx
-import React, { useEffect } from 'react'; // ★ useEffectを追加
+import React, { useEffect } from 'react';
 import '../App.css';
 import './styles/ChatArea.css';
 
@@ -9,11 +9,32 @@ import ChatInput from './ChatInput';
 
 // ストリーミング用モックデータのインポート
 import { mockStreamResponse } from '../mockData';
+// APIクライアントのインポート
+import { uploadFile } from '../api/dify';
+// ユーティリティのインポート
+import { parseLlmResponse } from '../utils/responseParser';
 
 // --- PoC API設定 ---
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 const USER_ID = 'poc-user-01';
+
+// BEモック用の注入データ
+const MOCK_PERPLEXITY_JSON = JSON.stringify({
+  "search_results": [
+    {
+      "url": "https://netlab.click/todayis/1118",
+      "snippet": "2025年11月18日は「土木の日」「いい家の日」「森とふるさとの日」など、様々な記念日が制定されています。",
+      "title": "今日は何の日？ 2025年11月18日の記念日まとめ｜ねとらぼ"
+    },
+    {
+      "url": "https://note.com/zouplans/n/n11c613763e21",
+      "snippet": "2025年11月18日は何の日か。運勢占いでは「解放の日」「ブレーキの日」とされ、努力が実る日です。",
+      "title": "2025年11月18日の運勢と記念日｜占いと暦"
+    }
+  ],
+  "answer": "2025年11月18日は、「土木の日」「いい家の日」「森とふるさとの日」など様々な記念日があります。また、運勢的には「解放の日」とされ、努力が実る日と言われています。"
+});
 
 const ChatArea = (props) => {
   const {
@@ -27,21 +48,16 @@ const ChatArea = (props) => {
     addLog,
     handleCopyLogs,
     copyButtonText,
-    // ★ 追加: ハンドラ
     onConversationCreated,
     onUpdateMessageHistory,
   } = props;
 
-  // ★★★ 追加: メッセージ履歴の同期 (FEモード用) ★★★
   useEffect(() => {
-    // FEモードかつ会話IDが確定している場合、履歴を親にバックアップ
     if (mockMode === 'FE' && conversationId && messages.length > 0) {
       onUpdateMessageHistory(conversationId, messages);
     }
   }, [messages, mockMode, conversationId, onUpdateMessageHistory]);
 
-
-  // --- ヘルパー関数 (変更なし) ---
   const handleApiError = (errorText, aiMessageId) => {
     addLog(`[API Error] ${errorText}`, 'error');
     setMessages((prev) =>
@@ -49,12 +65,12 @@ const ChatArea = (props) => {
         msg.id === aiMessageId
           ? {
               ...msg,
-              text: `**エラーが発生しました:**\n\n${errorText}\n\nAPIキーまたはURLの設定、リクエストの形式を確認してください。`,
+              text: `**エラーが発生しました:**\n\n${errorText}\n\nAPI設定またはファイル形式を確認してください。`,
               citations: [],
               suggestions: [],
               isStreaming: false,
               timestamp: new Date().toISOString(),
-              processStatus: null, // エラー時はステータス消去
+              processStatus: null,
             }
           : msg
       )
@@ -62,23 +78,55 @@ const ChatArea = (props) => {
     setIsLoading(false);
   };
 
-  const handleSendMessage = async (text) => {
-    addLog(`[ChatArea] Sending message: "${text}", Mode: ${mockMode}, ConvID: ${conversationId}`, 'info');
+  const handleSendMessage = async (text, attachment = null) => {
+    addLog(`[ChatArea] Sending: "${text}", Mode: ${mockMode}, File: ${attachment ? attachment.name : 'None'}`, 'info');
 
-    // ★ フラグ: この送信処理内で会話作成を通知済みかどうか
-    let isConversationCreatedLocally = false;
+    let uploadedFileId = null;
+    let displayFiles = [];
 
-    // 1. ユーザーの質問
+    // Case 1: BE Mockモード
+    if (mockMode === 'BE') {
+        if (attachment) {
+            addLog('[ChatArea] BE Mode active. SKIPPING file upload (Mocking).', 'warn');
+            displayFiles = [{ name: `(Mock) ${attachment.name}`, type: 'document' }];
+        }
+    }
+    // Case 2: 本番 (OFF) モード
+    else if (mockMode === 'OFF') {
+        if (attachment) {
+            setIsLoading(true); 
+            try {
+                addLog('[ChatArea] Uploading file to Dify...', 'info');
+                const uploadRes = await uploadFile(attachment, USER_ID, DIFY_API_URL, DIFY_API_KEY);
+                uploadedFileId = uploadRes.id;
+                displayFiles = [{ name: attachment.name, type: 'document' }];
+                addLog(`[ChatArea] Upload success. ID: ${uploadedFileId}`, 'info');
+            } catch (e) {
+                handleApiError(`ファイルアップロード失敗: ${e.message}`, `err_${Date.now()}`);
+                setIsLoading(false); 
+                return;
+            }
+        }
+    }
+    // Case 3: FE Mockモード
+    else {
+        if (attachment) {
+            displayFiles = [{ name: attachment.name, type: 'document' }];
+        }
+    }
+
+    // ユーザーメッセージ表示
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       text: text,
       role: 'user',
       timestamp: new Date().toISOString(),
+      files: displayFiles 
     };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    // 2. AIの回答欄 (初期状態)
+    // AIメッセージ枠
     const aiMessageId = `msg_${Date.now()}_ai`;
     const aiMessage = {
       id: aiMessageId,
@@ -88,40 +136,28 @@ const ChatArea = (props) => {
       suggestions: [],
       isStreaming: true,
       timestamp: new Date().toISOString(),
-      // ★ 修正: 絵文字削除
-      processStatus: 'AIが思考を開始しました...', 
+      processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : 'AIが思考を開始しました...', 
     };
     setMessages((prev) => [...prev, aiMessage]);
 
-    // --- FEモック (UX確認用) ---
+    // --- FE Mock Logic ---
     if (mockMode === 'FE') {
       addLog('[ChatArea] FE Mock Mode started.', 'info');
       
-      // ★ 追加: 新規チャットなら即座にサイドバー追加 (ダミーID)
       if (!conversationId) {
         const mockNewId = `mock_conv_${Date.now()}`;
-        addLog(`[ChatArea] FE Mock: Generating new conversation ID: ${mockNewId}`, 'info');
-        // 親コンポーネントに通知 (タイトルは質問文)
-        onConversationCreated(mockNewId, text);
-        // 注意: setConversationIdは親で行われるが、props経由での反映にはラグがあるため
-        // 以下のuseEffectによる同期は、IDが降りてきてから機能する
+        onConversationCreated(mockNewId, text || attachment?.name || '新規チャット');
       }
-
       const mockResponseText = mockStreamResponse.text;
       
-      // ★ FEモック: ステータス遷移をシミュレート (絵文字削除)
       setTimeout(() => {
         setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, processStatus: '外部情報を検索しています...' } : msg));
       }, 500);
-
       setTimeout(() => {
         setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, processStatus: '回答を生成しています...' } : msg));
       }, 1500);
-
-      // ストリーミング開始 (3秒後)
       setTimeout(() => {
         setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, processStatus: null } : msg));
-
         let index = 0;
         const streamInterval = setInterval(() => {
           if (index < mockResponseText.length) {
@@ -135,7 +171,6 @@ const ChatArea = (props) => {
           } else {
             clearInterval(streamInterval);
             addLog('[ChatArea] FE Mock stream finished.', 'info');
-            
             setMessages((prev) =>
               prev.map((msg) =>
                 msg.id === aiMessageId
@@ -144,58 +179,45 @@ const ChatArea = (props) => {
                       citations: mockStreamResponse.citations, 
                       suggestions: mockStreamResponse.suggestions, 
                       isStreaming: false,
-                      processStatus: null // 念のため消去
+                      processStatus: null 
                     }
                   : msg
               )
             );
             setIsLoading(false);
-            addLog('[ChatArea] FE Mock completed.', 'info');
           }
         }, 20);
       }, 3000);
+      return;
+    }
 
-    } else {
-      // --- API実効 / BEモック ---
-      addLog(`[API] ${mockMode} Mode selected. Calling Dify API...`, 'info');
+    // --- API Request ---
+    if (!DIFY_API_KEY || !DIFY_API_URL) {
+      handleApiError('API KEY or URL missing.', aiMessageId);
+      return;
+    }
 
-      if (!DIFY_API_KEY || !DIFY_API_URL) {
-        handleApiError(
-          'VITE_DIFY_API_KEY または VITE_DIFY_API_URL が設定されていません。',
-          aiMessageId
-        );
-        return;
-      }
+    const filesPayload = uploadedFileId ? [
+        {
+            type: 'document',
+            transfer_method: 'local_file',
+            upload_file_id: uploadedFileId
+        }
+    ] : [];
 
-      const inputs = {
-        mock_perplexity_text: mockMode === 'BE' ? JSON.stringify({
-            "search_results": [
-              {
-                "url": "https://netlab.click/todayis/1118",
-                "snippet": "2025年11月18日は「土木の日」「いい家の日」「森とふるさとの日」など、様々な記念日が制定されています。",
-                "title": "今日は何の日？ 2025年11月18日の記念日まとめ｜ねとらぼ"
-              },
-              {
-                "url": "https://note.com/zouplans/n/n11c613763e21",
-                "snippet": "2025年11月18日は何の日か。運勢占いでは「解放の日」「ブレーキの日」とされ、努力が実る日です。",
-                "title": "2025年11月18日の運勢と記念日｜占いと暦"
-              }
-            ],
-            "answer": "2025年11月18日は、「土木の日」「いい家の日」「森とふるさとの日」など様々な記念日があります。また、運勢的には「解放の日」とされ、努力が実る日と言われています。"
-        }) : '',
-        // isDebugMode は mockMode に応じて設定
-        isDebugMode: mockMode === 'BE',
-      };
+    const requestBody = {
+      inputs: {
+         isDebugMode: mockMode === 'BE',
+         mock_perplexity_text: mockMode === 'BE' ? MOCK_PERPLEXITY_JSON : '',
+      },
+      query: text, 
+      user: USER_ID,
+      conversation_id: conversationId || '',
+      response_mode: 'streaming',
+      files: filesPayload, 
+    };
 
-      const requestBody = {
-        inputs: inputs,
-        query: text,
-        user: USER_ID,
-        conversation_id: conversationId || '',
-        response_mode: 'streaming',
-      };
-
-      try {
+    try {
         const response = await fetch(`${DIFY_API_URL}/chat-messages`, {
           method: 'POST',
           headers: {
@@ -207,18 +229,15 @@ const ChatArea = (props) => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(`API request failed: ${errorData.message}`);
+          throw new Error(errorData.message || errorData.code || 'API Error');
         }
         if (!response.body) throw new Error('ReadableStream not available');
 
         const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
         let buffer = '';
-        let contentBuffer = ''; 
-        let hasParsedCitations = false; 
-        let pendingSuggestions = []; 
-        let isStreamingAnimation = false; 
-
-        // ★ ステータス更新用ヘルパー
+        let contentBuffer = '';
+        let isConversationCreatedLocally = false;
+        
         const updateStatus = (status) => {
              setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, processStatus: status } : msg));
         };
@@ -238,173 +257,132 @@ const ChatArea = (props) => {
 
               try {
                 const data = JSON.parse(dataLine);
-                
-                // === ★ 追加: 新規会話IDの検知と登録 ===
+
                 if (data.conversation_id && !conversationId && !isConversationCreatedLocally) {
                      isConversationCreatedLocally = true;
-                     addLog(`[API] New conversation detected: ${data.conversation_id}`, 'info');
-                     // 親コンポーネントに通知 (タイトルは質問文)
-                     onConversationCreated(data.conversation_id, text);
+                     const title = text || (attachment ? attachment.name : '新規チャット');
+                     onConversationCreated(data.conversation_id, title);
                 }
-                // ========================================
 
-                // --- 1. ワークフローイベントの解析 ---
                 if (data.event === 'node_started') {
                     const nodeType = data.data?.node_type;
-                    const nodeTitle = data.data?.title;
-                    
-                    if (nodeType === 'tool') {
-                         updateStatus(`外部ツールを実行中: ${nodeTitle || 'Tool'}...`);
-                    } else if (nodeType === 'retriever') { 
-                         updateStatus('社内ドキュメントを参照しています...');
-                    } else if (nodeType === 'llm') {
-                         updateStatus('AIが思考しています...');
-                    }
+                    if (nodeType === 'llm') updateStatus('AIが思考しています...');
+                    else if (nodeType === 'tool') updateStatus('外部ツールを実行中...');
                 }
-
-                // --- 2. メッセージ (本文) イベントの解析 ---
                 else if (data.event === 'message') {
-                  if (data.answer) {
-                    contentBuffer += data.answer;
-
-                    // JSON形式かどうかの簡易チェックと、キーの出現監視
-                    const trimmed = contentBuffer.trim();
-                    if (trimmed.startsWith('{')) {
-                        // ★ 修正: 絵文字削除
-                        if (/"answer"\s*:/.test(contentBuffer)) {
-                            updateStatus('回答を生成しています...');
-                        }
-                        if (/"citations"\s*:/.test(contentBuffer)) {
-                             updateStatus('情報源を整理しています...');
-                        }
+                    if (data.answer) {
+                        contentBuffer += data.answer;
                         
+                        const trimmedBuffer = contentBuffer.trim();
+                        // JSONパターンの検出と非表示制御
+                        const isJsonPattern = trimmedBuffer.startsWith('{') || trimmedBuffer.startsWith('```');
+
                         setMessages((prev) =>
-                            prev.map((msg) =>
-                              msg.id === aiMessageId
-                                ? { ...msg, text: '' } // 本文はまだ見せない
-                                : msg
-                            )
+                            prev.map((msg) => {
+                                if (msg.id !== aiMessageId) return msg;
+                                if (isJsonPattern) {
+                                    return { ...msg, text: '', processStatus: '回答を生成・整形しています...' };
+                                } else {
+                                    return { ...msg, text: contentBuffer, processStatus: null };
+                                }
+                            })
                         );
-
-                    } else {
-                      updateStatus(null); 
-                      
-                      setMessages((prev) =>
-                        prev.map((msg) =>
-                          msg.id === aiMessageId
-                            ? { ...msg, text: contentBuffer }
-                            : msg
-                        )
-                      );
                     }
-                  }
-                } 
-                
-                else if (data.event === 'message_end') {
-                  const citations = data.metadata?.retriever_resources || [];
-                  if (citations.length > 0 && !hasParsedCitations) {
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === aiMessageId
-                          ? { ...msg, citations: mapCitations(citations) }
-                          : msg
-                      )
-                    );
-                  }
-                  if (data.message_id) {
-                    fetchSuggestions(data.message_id, aiMessageId, isStreamingAnimation, pendingSuggestions);
-                  }
-                }
-                
-                else if (data.event === 'workflow_finished') {
-                  updateStatus(null); // ステータス消去
+                } else if (data.event === 'message_end') {
+                    const citations = data.metadata?.retriever_resources || [];
+                    if (citations.length > 0) {
+                         setMessages((prev) => prev.map(msg => msg.id === aiMessageId ? { ...msg, citations: mapCitations(citations) } : msg));
+                    }
+                    if (data.message_id) {
+                         // ★★★ 修正: 3秒後に1回だけ取得する (リトライなし) ★★★
+                         setTimeout(() => {
+                            fetchSuggestions(data.message_id, aiMessageId);
+                         }, 3000); 
+                    }
+                } else if (data.event === 'workflow_finished') {
+                    updateStatus(null);
+                    
+                    // 最終的な回答テキストのパース処理
+                    const currentMsg = messages.find(m => m.id === aiMessageId);
+                    let finalText = contentBuffer;
+                    let finalCitations = currentMsg?.citations || [];
 
-                  const currentMsg = messages.find(m => m.id === aiMessageId);
-                  let finalText = contentBuffer;
-                  let finalCitations = currentMsg?.citations || [];
-                  let isJsonFormat = false;
+                    const parsed = parseLlmResponse(finalText);
 
-                  try {
-                    const trimmedText = finalText.trim();
-                    if (trimmedText.startsWith('{') && trimmedText.endsWith('}')) {
-                      const parsed = JSON.parse(trimmedText);
-                      if (parsed.answer) {
+                    if (parsed.isParsed) {
                         finalText = parsed.answer;
-                        isJsonFormat = true;
-                        if (parsed.citations && Array.isArray(parsed.citations)) {
-                          finalCitations = mapCitationsFromLLM(parsed.citations);
+                        if (parsed.citations && parsed.citations.length > 0) {
+                            finalCitations = mapCitationsFromLLM(parsed.citations);
                         }
-                      }
-                    }
-                  } catch (e) { /* ignore */ }
 
-                  if (isJsonFormat && finalText) {
-                    hasParsedCitations = true;
-                    isStreamingAnimation = true;
-                    let charIndex = 0;
-                    const streamInterval = setInterval(() => {
-                      if (charIndex <= finalText.length) {
-                        const displayText = finalText.substring(0, charIndex);
-                        setMessages((prev) =>
-                          prev.map((msg) =>
-                            msg.id === aiMessageId
-                              ? { ...msg, text: displayText }
-                              : msg
-                          )
-                        );
-                        charIndex += 1;
-                      } else {
-                        clearInterval(streamInterval);
-                        isStreamingAnimation = false;
+                        let charIndex = 0;
+                        const streamInterval = setInterval(() => {
+                          if (charIndex <= finalText.length) {
+                            const displayText = finalText.substring(0, charIndex);
+                            setMessages((prev) =>
+                              prev.map((msg) =>
+                                msg.id === aiMessageId
+                                  ? { 
+                                      ...msg, 
+                                      text: displayText,
+                                      processStatus: null 
+                                    }
+                                  : msg
+                              )
+                            );
+                            charIndex += 1; 
+                          } else {
+                            clearInterval(streamInterval);
+                            setMessages((prev) =>
+                              prev.map((msg) =>
+                                msg.id === aiMessageId
+                                  ? { 
+                                      ...msg, 
+                                      citations: finalCitations, 
+                                      isStreaming: false,
+                                      processStatus: null 
+                                    }
+                                  : msg
+                              )
+                            );
+                            setIsLoading(false);
+                          }
+                        }, 10); 
+                    } else {
                         setMessages((prev) =>
                           prev.map((msg) =>
                             msg.id === aiMessageId
                               ? { 
                                   ...msg, 
+                                  text: finalText, 
                                   citations: finalCitations, 
-                                  suggestions: pendingSuggestions, 
                                   isStreaming: false,
-                                  processStatus: null // 念のため
+                                  processStatus: null
                                 }
                               : msg
                           )
                         );
                         setIsLoading(false);
-                      }
-                    }, 20);
-                  } else {
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === aiMessageId
-                          ? { 
-                              ...msg, 
-                              text: finalText, 
-                              citations: finalCitations, 
-                              isStreaming: false,
-                              processStatus: null
-                            }
-                          : msg
-                      )
-                    );
-                    setIsLoading(false);
-                  }
+                    }
                 }
-                // ... error handlings ...
-              } catch (e) {
-                 // ignore parse error
-              }
+              } catch (e) { /* ignore */ }
             }
           }
         }
-      } catch (error) {
+        if (isLoading) {
+            setIsLoading(false);
+            setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, isStreaming: false, processStatus: null } : msg));
+        }
+
+    } catch (error) {
         handleApiError(error.message, aiMessageId);
-      }
     }
   };
 
-  // --- 以下のヘルパー関数は変更なし ---
-  const fetchSuggestions = async (messageId, aiMessageId, isStreamingAnimationActive, pendingSuggestionsRef) => {
-      addLog(`[API] Fetching suggestions for message_id: ${messageId}`, 'info');
+  // --- ヘルパー関数 ---
+
+  // ★★★ 修正: ループを削除し、1回だけfetchする単純な関数に戻す ★★★
+  const fetchSuggestions = async (messageId, aiMessageId) => {
       try {
         const response = await fetch(
           `${DIFY_API_URL}/messages/${messageId}/suggested?user=${USER_ID}`,
@@ -413,25 +391,19 @@ const ChatArea = (props) => {
             headers: { Authorization: `Bearer ${DIFY_API_KEY}` },
           }
         );
-        if (!response.ok) {
-             return;
-        }
-        const result = await response.json();
-        if (result.result === 'success' && result.data) {
-            if (isStreamingAnimationActive) {
-                pendingSuggestionsRef.length = 0;
-                pendingSuggestionsRef.push(...result.data);
+        
+        if (response.ok) {
+            const result = await response.json();
+            if (result.result === 'success' && result.data && result.data.length > 0) {
+                setMessages((prev) => prev.map((msg) => msg.id === aiMessageId ? { ...msg, suggestions: result.data } : msg));
             } else {
-                setMessages((prev) =>
-                    prev.map((msg) =>
-                    msg.id === aiMessageId
-                        ? { ...msg, suggestions: result.data }
-                        : msg
-                    )
-                );
+                // データがない場合のログ（デバッグ用）
+                console.log('[Suggestions] Empty data received (Delayed Fetch).');
             }
         }
-      } catch (error) { /*...*/ }
+      } catch (error) {
+          console.warn('[Suggestions] Fetch failed:', error);
+      }
   };
 
   const mapCitations = (resources) => {
@@ -460,10 +432,7 @@ const ChatArea = (props) => {
           <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
         </div>
         <div className="debug-controls">
-          <button 
-            className="debug-copy-button-topbar" 
-            onClick={handleCopyLogs}
-          >
+          <button className="debug-copy-button-topbar" onClick={handleCopyLogs}>
             {copyButtonText}
           </button>
         </div>
@@ -471,7 +440,7 @@ const ChatArea = (props) => {
 
       <ChatHistory
         messages={messages}
-        onSuggestionClick={handleSendMessage}
+        onSuggestionClick={(q) => handleSendMessage(q, null)}
         isLoading={isLoading}
         onSendMessage={handleSendMessage}
       />

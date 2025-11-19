@@ -1,21 +1,18 @@
 // src/components/MessageBlock.jsx
 import React from 'react';
-import './styles/MessageBlock.css'; // 既存のインポート
+import './styles/MessageBlock.css'; 
 
 import MarkdownRenderer from './MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
-// ★ 追加: インジケーターのインポート
 import ProcessStatusIndicator from './ProcessStatusIndicator';
 
 /**
- * 1つのQ&Aペアを表示 (5.1)
- * @param {object} message - メッセージオブジェクト
- * @param {function} onSuggestionClick - 提案クリック時に実行する関数
+ * 1つのQ&Aペアを表示
  */
 const MessageBlock = ({ message, onSuggestionClick }) => {
-  // ★ 修正: processStatus を分割代入に追加
-  const { role, text, citations, suggestions, isStreaming, processStatus } = message;
+  // ★ files を分割代入
+  const { role, text, citations, suggestions, isStreaming, processStatus, files } = message;
   const isAi = role === 'ai';
 
   return (
@@ -33,31 +30,49 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
         {isAi ? 'AI' : 'あなた'}
       </div>
 
-      {/* アイコンと吹き出しを内包するコンテナ */}
+      {/* メッセージコンテナ */}
       <div
         className={`message-container ${
           isAi ? 'message-container-ai' : 'message-container-user'
         }`}
       >
-        {/* アイコン (吹き出しの外) */}
+        {/* アイコン */}
         <div style={{ width: '32px', height: '32px', flexShrink: 0, marginTop: '4px' }}>
           {isAi ? <AssistantIcon /> : <UserIcon />}
         </div>
 
-        {/* コンテンツ本体 (これが吹き出しとなる) */}
+        {/* コンテンツ本体 */}
         <div
           className={`message-content ${
             isAi ? 'message-content-ai' : 'message-content-user'
           }`}
         >
-          {/* ★ 追加: プロセスインジケーター (AIかつストリーミング中のみ表示) */}
+          
+          {/* ★ 追加: 添付ファイル表示 (ユーザー側) */}
+          {!isAi && files && files.length > 0 && (
+             <div className="message-file-attachment" style={{
+                 display: 'inline-flex',
+                 alignItems: 'center',
+                 marginBottom: '8px',
+                 padding: '6px 10px',
+                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                 borderRadius: '6px',
+                 fontSize: '0.9rem',
+                 border: '1px solid rgba(255,255,255,0.3)'
+             }}>
+                 <span style={{ marginRight: '6px' }}>📄</span>
+                 {files[0].name}
+             </div>
+          )}
+
+          {/* プロセスインジケーター */}
           {isAi && isStreaming && (
             <ProcessStatusIndicator status={processStatus} />
           )}
 
-          {/* 本文 (T-06) */}
+          {/* 本文 */}
           <MarkdownRenderer
-            content={text || ''} // textが空でもインジケーターが出るのでOK
+            content={text || ''}
             isStreaming={isAi && isStreaming}
             citations={citations}
           />
@@ -65,9 +80,7 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
           {/* AIの回答の場合のみ、出典と提案を表示 */}
           {isAi && text && !isStreaming && (
             <>
-              {/* 出典リスト (T-09) */}
               <CitationList citations={citations} />
-              {/* 提案ボタン (T-11) */}
               <SuggestionButtons
                 suggestions={suggestions}
                 onSuggestionClick={onSuggestionClick}
@@ -80,8 +93,7 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   );
 };
 
-// === 🔽 アイコン定義 (変更なし) 🔽 ===
-
+// === アイコン定義 (変更なし) ===
 const UserIcon = () => (
     <div style={{
         display: 'flex',
@@ -120,7 +132,5 @@ const LogoIcon = () => (
         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
     </svg>
 );
-
-// === 🔼 アイコン定義 🔼 ===
 
 export default MessageBlock;
