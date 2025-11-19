@@ -1,6 +1,6 @@
 /* src/components/styles/MessageBlock.css */
 
-/* --- ★ アニメーション定義 (T-12) --- */
+/* --- アニメーション定義 --- */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -11,281 +11,304 @@
     transform: translateY(0);
   }
 }
-/* --- --- */
 
-/* メッセージブロック全体 */
+/* --- メッセージブロック全体 --- */
 .message-block {
   display: flex;
   flex-direction: column;
-  max-width: 100%; /* ★最大幅は .chat-row が担当 */
+  max-width: 100%;
 }
 
-/* ★プロトタイプ準拠: アイコンと吹き出しのコンテナ */
+/* アイコンと吹き出しのコンテナ */
 .message-container {
   display: flex;
-  align-items: flex-start; /* アイコンと吹き出しを上揃え */
-  gap: 12px; /* アイコンと吹き出しの間隔 */
+  align-items: flex-start;
+  gap: 12px;
 }
 
-/* ★ユーザー用 (右寄せ) */
+/* ユーザー用 (右寄せ) */
 .message-container-user {
   justify-content: flex-end;
-  flex-direction: row-reverse; /* アイコンと吹き出しを反転 */
+  flex-direction: row-reverse;
 }
 
-/* ★役割（User / AI）のラベル (プロトタイプには無いが、既存のものを流用) */
+/* 役割ラベル */
 .message-role {
   font-size: 0.9rem;
   font-weight: 700;
   margin-bottom: 4px;
   padding: 0 4px;
-  
-  /* ★アイコンの幅を考慮したマージン */
-  /* (アイコンサイズ 32px + gap 12px = 44px) */
-  margin-left: 44px;
+  margin-left: 44px; /* アイコン幅(32)+gap(12) */
 }
 
-/* ★AIの役割ラベル */
 .message-role-ai {
   color: #4A4A4A;
   text-align: left;
 }
 
-/* ★ユーザーの役割ラベル */
 .message-role-user {
-  color: var(--color-user-bg); /* ★ユーザーの青色に変更 */
+  color: var(--color-user-bg);
   text-align: right;
   margin-left: 0;
-  margin-right: 44px; /* ★右寄せの場合 */
+  margin-right: 44px;
 }
 
-
-/* メッセージ本体のコンテナ (共通の吹き出しスタイル) */
+/* --- メッセージ本体 (吹き出し) --- */
 .message-content {
   font-size: 1rem;
-  line-height: 1.7;
+  /* ベースの行間設定 */
+  line-height: 1.6; 
   color: var(--color-text-dark);
   word-wrap: break-word;
   padding: 12px 16px;
-  border-radius: 12px; /* ★rounded-lg */
-  max-width: 90%; /* ★吹き出しが横幅いっぱいにならないように */
+  border-radius: 12px;
+  max-width: 90%;
 }
 
-/* AIの回答コンテナ（本文、出典、提案を内包） */
+/* AIの吹き出し */
 .message-content-ai {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  /* コンテンツ間の余白 */
+  gap: 12px; 
   
-  /* ★AI吹き出しスタイル (プロトタイプ準拠) */
-  background-color: var(--color-ai-bg); /* ★明るいグレー (bg-gray-100) */
-  border: 1px solid var(--color-border); /* ★境界線を追加 */
+  background-color: var(--color-ai-bg);
+  border: 1px solid var(--color-border);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* ★ユーザー吹き出しスタイル (プロトタイプ準拠) */
+/* ユーザーの吹き出し */
 .message-content-user {
-  background-color: var(--color-user-bg); /* ★プロトタイプ準拠 (青 bg-blue-600) */
-  color: var(--color-primary-text); /* ★ロゴの白 */
+  background-color: var(--color-user-bg);
+  color: var(--color-primary-text);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* ユーザー吹き出し内のリンク色を調整 */
 .message-content-user a {
-  color: #A5B4FC; /* ★青背景でも見やすいリンク色 (light-blue) */
+  color: #A5B4FC;
   text-decoration: underline;
 }
 .message-content-user a:hover {
   text-decoration: none;
 }
 
-/* Markdownレンダラーのスタイル（本文） */
+/* --- ★★★ Markdownレンダリングスタイルの修正 (ここが重要) ★★★ --- */
+
 .markdown-renderer {
-  white-space: pre-wrap;
+  /* ★重要: pre-wrap を削除し、ブラウザ標準のテキスト折り返しに戻す */
+  /* white-space: pre-wrap; <-- 削除 */
+  font-size: 0.95rem;
 }
 
-.markdown-renderer p {
+/* 最初と最後の要素の余白をカット (吹き出し内でバランスを良くする) */
+.markdown-renderer > *:first-child {
   margin-top: 0;
-  margin-bottom: 1em;
 }
-.markdown-renderer p:last-child {
+.markdown-renderer > *:last-child {
   margin-bottom: 0;
 }
 
-.markdown-renderer ul,
-.markdown-renderer ol {
-  padding-left: 24px;
+/* 段落 */
+.markdown-renderer p {
+  margin-top: 0;
+  margin-bottom: 1em; /* 適度な行間 */
 }
 
-/* ... (Markdownの code, pre, a などのスタイルは変更なし) ... */
+/* 見出し (メリハリをつける) */
+.markdown-renderer h1,
+.markdown-renderer h2,
+.markdown-renderer h3 {
+  font-weight: 700;
+  line-height: 1.4;
+  margin-top: 1.5em; /* 上を少し空ける */
+  margin-bottom: 0.5em; /* 下は詰める */
+  color: #111827; /* 濃い黒で強調 */
+}
+/* h1, h2には下線を引いて区切りを明確に */
+.markdown-renderer h1,
+.markdown-renderer h2 {
+  border-bottom: 1px solid #E5E7EB;
+  padding-bottom: 0.3em;
+}
+
+/* 太字 */
+.markdown-renderer strong {
+  font-weight: 700;
+  color: #111827; /* 強調色 */
+}
+
+/* --- リストの修正 (位置ずれ防止) --- */
+.markdown-renderer ul,
+.markdown-renderer ol {
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 1.5em; /* インデント調整 */
+}
+
+.markdown-renderer li {
+  margin-bottom: 0.25em; /* リスト項目の間隔 */
+  line-height: 1.6;
+}
+
+/* ★重要: Markdownパーサーが li の中に p を入れた場合の余白打ち消し */
+.markdown-renderer li p {
+  margin-bottom: 0;
+  display: inline-block; /* または inline */
+}
+
+/* コードブロック */
+.markdown-renderer pre {
+  background-color: #1F2937; /* ダークモード背景 */
+  color: #F3F4F6;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+  font-size: 0.85em;
+}
+
 .markdown-renderer code {
-  font-family: 'Courier New', Courier, monospace;
-  background-color: rgba(0, 0, 0, 0.05);
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+}
+
+/* インラインコード */
+.markdown-renderer :not(pre) > code {
+  background-color: #E5E7EB;
+  color: #B91C1C; /* 赤文字で強調 */
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.9em;
 }
-.message-content-user code {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: var(--color-primary-text);
-}
-.markdown-renderer pre {
-  background-color: #2d2d2d;
-  color: #f8f8f2;
-  padding: 16px;
-  border-radius: 8px;
-  overflow-x: auto;
-}
-.markdown-renderer pre code {
-  background-color: transparent;
-  padding: 0;
-}
+
+/* リンク */
 .markdown-renderer a {
-  color: #1A73E8;
+  color: #2563EB;
   text-decoration: none;
 }
 .markdown-renderer a:hover {
   text-decoration: underline;
 }
 
+/* 引用 (Blockquote) */
+.markdown-renderer blockquote {
+  border-left: 4px solid #D1D5DB;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #6B7280;
+  font-style: italic;
+}
 
-/* --- 出典リスト (T-09) --- */
+
+/* --- 出典リスト --- */
 .citation-list {
-  /* ★ 修正(1): 境界線の色を --color-border に統一 */
-  border-top: 1px solid var(--color-border); 
+  border-top: 1px solid var(--color-border);
   padding-top: 12px;
-  margin-top: 12px; /* ★本文とのマージンを gap から分離 */
-
-  /* ★ アニメーション適用 */
-  opacity: 0; /* 初期状態 */
+  margin-top: 4px; /* gapがあるのでマージンは控えめに */
+  
+  opacity: 0;
   animation: fadeInUp 0.4s ease-out forwards;
-  animation-delay: 0.1s; /* 本文表示から一呼吸おく */
+  animation-delay: 0.1s;
 }
 
 .citation-title {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-text-light); /* ★文字色を更新 */
-  margin-bottom: 8px;
+  color: var(--color-text-light);
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* ★ 修正(2): CitationItem.jsx のための Flexbox スタイル */
 .citation-item {
-  display: flex; /* ★ Flexboxに変更 */
-  align-items: center; /* ★ 縦方向中央揃え */
-  margin-bottom: 6px;
-  font-size: 0.875rem; /* 14px */
-  line-height: 1.25rem;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
-/* ★ 削除 (古い .citation-link) - .citation-item にマージ */
-/*
-.citation-link { ... }
-*/
-
-/* ★ 削除 (古い .citation-index) - CitationItem.jsx で不要に */
-/*
-.citation-index { ... }
-*/
-
-
-/* --- ★ 修正(3): CitationItem.jsx で利用するスタイルを追記 ★ --- */
-
-/* ファビコン用のスタイル */
 .citation-favicon {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px; /* アイコンとテキストの間隔 */
-  flex-shrink: 0; /* コンテナが縮んでもアイコンサイズを維持 */
-  border-radius: 4px; /* 少し角丸にする */
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  flex-shrink: 0;
+  border-radius: 2px;
 }
 
-/* リンク（タイトル）用のスタイル */
 .citation-link {
-  color: var(--color-user-bg); /* ★プロトタイプ準拠 (青) */
+  color: var(--color-user-bg);
   text-decoration: none;
-  
-  /* タイトルが長い場合に省略 (...) する */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 .citation-link:hover {
   text-decoration: underline;
 }
 
-/* ファイル名（リンクなし）用のスタイル */
 .citation-text {
-  color: var(--color-text-dark); /* 通常のテキスト色 */
+  color: var(--color-text-dark);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* --- --- 修正(3) ここまで --- --- */
-
-
-/* --- 提案ボタン (T-11) --- */
+/* --- 提案ボタン --- */
 .suggestion-buttons {
-  /* ★ 修正: 境界線の色を --color-border に統一 & マージン調整 */
-  border-top: 1px solid var(--color-border); 
+  border-top: 1px solid var(--color-border);
   padding-top: 12px;
-  margin-top: 12px; /* ★本文とのマージンを gap から分離 */
-  
+  margin-top: 4px;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
 
-  /* ★ アニメーション適用 (出典より少し遅らせる) */
-  opacity: 0; /* 初期状態 */
+  opacity: 0;
   animation: fadeInUp 0.4s ease-out forwards;
   animation-delay: 0.2s;
 }
 
 .suggestion-title {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-text-light); /* ★文字色を更新 */
-  margin-bottom: 4px;
+  color: var(--color-text-light);
+  margin-bottom: 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .suggestion-button {
   font-family: var(--font-family-base);
-  font-size: 0.9rem;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border); /* ★境界線色を更新 */
-  border-radius: 20px;
-  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白) */
-  color: var(--color-user-bg); /* ★プロトタイプ準拠 (青文字) */
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background-color: var(--color-bg-white);
+  color: var(--color-user-bg);
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  transition: all 0.2s;
   text-align: left;
+  line-height: 1.4;
 }
 
 .suggestion-button:hover {
-  background-color: #F0F0F5; /* ★プロトタイプ準拠 (薄いグレー) */
-  border-color: #9CA3AF;
-  color: #1D4ED8; /* ★プロトタイプ準拠 (濃い青) */
+  background-color: #EFF6FF; /* 薄い青 */
+  border-color: var(--color-user-bg);
 }
 
-/* ★ 本文中の脚注 [1] (sup) のためのスタイル */
+/* インライン脚注 [1] */
 .inline-citation {
   display: inline-block;
-  vertical-align: super; /* <sup> タグの挙動 */
-  font-size: 0.75em; /* 少し小さく */
+  vertical-align: super;
+  font-size: 0.7em;
   line-height: 1;
   font-weight: 700;
-  color: var(--color-user-bg); /* 出典リンクと同じ青色 */
-  padding: 0 2px;
-  cursor: default;
-  
-  /* Safari/Chromeでの選択範囲のズレを防止 */
+  color: var(--color-user-bg);
+  padding: 0 1px;
   position: relative;
-  top: -0.3em;
+  top: -0.2em;
   margin: 0 1px;
+  cursor: default;
 }
