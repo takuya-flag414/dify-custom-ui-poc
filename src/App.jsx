@@ -31,6 +31,9 @@ function App() {
   const [conversationId, setConversationId] = useState(null);
   const [mockMode, setMockMode] = useState('FE');
 
+  // ★追加: Sticky File Context (現在アクティブな添付ファイル情報)
+  const [activeContextFile, setActiveContextFile] = useState(null);
+
   // 会話リスト State
   const [conversations, setConversations] = useState([]);
 
@@ -195,6 +198,10 @@ function App() {
   const handleSetConversationId = async (id) => {
     addLog(`[App] Conversation changed to: ${id}`, 'info');
 
+    // ★追加: 会話切り替え時にコンテキストをリセット（Phase 1仕様）
+    // これにより、別のチャットに移動した際に古いファイルのコンテキストが混ざるのを防ぐ
+    setActiveContextFile(null);
+
     if (id === null) {
       setMessages([]);
       setConversationId(null);
@@ -259,8 +266,7 @@ function App() {
             role: 'user',
             text: item.query,
             timestamp: timestamp,
-            // 履歴APIからはファイル情報が message_files として返る場合があるが、今回は簡易的に省略
-            // 必要であれば item.message_files をマップする
+            // 履歴APIからはファイル情報が message_files として返る場合がある
             files: item.message_files ? item.message_files.map(f => ({ name: f.url ? '添付ファイル' : 'File', type: 'document' })) : []
           });
         }
@@ -269,13 +275,11 @@ function App() {
             let aiText = item.answer;
             let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
 
-            // ★★★ 修正: パーサーユーティリティを使用 ★★★
             const parsed = parseLlmResponse(aiText);
             
             // パース成功、もしくは出典情報が含まれている場合はそちらを優先
             if (parsed.isParsed || parsed.citations.length > 0) {
                 aiText = parsed.answer;
-                // JSON内のcitationsがある場合、APIのretriever_resourcesより優先、または補完
                 if (parsed.citations && Array.isArray(parsed.citations) && parsed.citations.length > 0) {
                     aiCitations = mapCitationsFromLLM(parsed.citations);
                 }
@@ -346,6 +350,9 @@ function App() {
         onUpdateMessageHistory={handleUpdateMessageHistory}
         handleCopyLogs={handleCopyLogs}
         copyButtonText={copyButtonText}
+        // ★追加: アクティブコンテキストのステートをChatAreaへ渡す
+        activeContextFile={activeContextFile}
+        setActiveContextFile={setActiveContextFile}
       />
     </div>
   );

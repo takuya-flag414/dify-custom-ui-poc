@@ -6,6 +6,7 @@ import './styles/ChatArea.css';
 import MockModeSelect from './MockModeSelect';
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
+import FileContextIndicator from './FileContextIndicator';
 
 // ストリーミング用モックデータのインポート
 import { mockStreamResponse } from '../mockData';
@@ -50,6 +51,8 @@ const ChatArea = (props) => {
     copyButtonText,
     onConversationCreated,
     onUpdateMessageHistory,
+    activeContextFile,
+    setActiveContextFile,
   } = props;
 
   useEffect(() => {
@@ -79,7 +82,7 @@ const ChatArea = (props) => {
   };
 
   const handleSendMessage = async (text, attachment = null) => {
-    addLog(`[ChatArea] Sending: "${text}", Mode: ${mockMode}, File: ${attachment ? attachment.name : 'None'}`, 'info');
+    addLog(`[ChatArea] Sending: "${text}", Mode: ${mockMode}, NewFile: ${attachment ? attachment.name : 'None'}, ActiveContext: ${activeContextFile ? activeContextFile.name : 'None'}`, 'info');
 
     let uploadedFileId = null;
     let displayFiles = [];
@@ -89,6 +92,9 @@ const ChatArea = (props) => {
         if (attachment) {
             addLog('[ChatArea] BE Mode active. SKIPPING file upload (Mocking).', 'warn');
             displayFiles = [{ name: `(Mock) ${attachment.name}`, type: 'document' }];
+            setActiveContextFile({ id: 'mock_id', name: attachment.name, type: 'document' });
+        } else if (activeContextFile) {
+             addLog('[ChatArea] BE Mode. Keeping mock context.', 'info');
         }
     }
     // Case 2: 本番 (OFF) モード
@@ -99,23 +105,28 @@ const ChatArea = (props) => {
                 addLog('[ChatArea] Uploading file to Dify...', 'info');
                 const uploadRes = await uploadFile(attachment, USER_ID, DIFY_API_URL, DIFY_API_KEY);
                 uploadedFileId = uploadRes.id;
+                const newContextFile = { id: uploadedFileId, name: attachment.name, type: 'document' };
                 displayFiles = [{ name: attachment.name, type: 'document' }];
-                addLog(`[ChatArea] Upload success. ID: ${uploadedFileId}`, 'info');
+                addLog(`[ChatArea] Upload success. ID: ${uploadedFileId}. Setting Sticky Context.`, 'info');
+                setActiveContextFile(newContextFile);
             } catch (e) {
                 handleApiError(`ファイルアップロード失敗: ${e.message}`, `err_${Date.now()}`);
                 setIsLoading(false); 
                 return;
             }
+        } else if (activeContextFile) {
+            uploadedFileId = activeContextFile.id;
+            addLog(`[ChatArea] Using Sticky Context File ID: ${uploadedFileId}`, 'info');
         }
     }
     // Case 3: FE Mockモード
     else {
         if (attachment) {
             displayFiles = [{ name: attachment.name, type: 'document' }];
+            setActiveContextFile({ id: 'fe_mock_id', name: attachment.name, type: 'document' });
         }
     }
 
-    // ユーザーメッセージ表示
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       text: text,
@@ -126,7 +137,6 @@ const ChatArea = (props) => {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    // AIメッセージ枠
     const aiMessageId = `msg_${Date.now()}_ai`;
     const aiMessage = {
       id: aiMessageId,
@@ -140,16 +150,13 @@ const ChatArea = (props) => {
     };
     setMessages((prev) => [...prev, aiMessage]);
 
-    // --- FE Mock Logic ---
     if (mockMode === 'FE') {
       addLog('[ChatArea] FE Mock Mode started.', 'info');
-      
       if (!conversationId) {
         const mockNewId = `mock_conv_${Date.now()}`;
         onConversationCreated(mockNewId, text || attachment?.name || '新規チャット');
       }
       const mockResponseText = mockStreamResponse.text;
-      
       setTimeout(() => {
         setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, processStatus: '外部情報を検索しています...' } : msg));
       }, 500);
@@ -161,32 +168,13 @@ const ChatArea = (props) => {
         let index = 0;
         const streamInterval = setInterval(() => {
           if (index < mockResponseText.length) {
-            // Mockモードも少し加速させる
             const step = 3;
             const chunk = mockResponseText.substring(index, index + step);
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === aiMessageId ? { ...msg, text: msg.text + chunk } : msg
-              )
-            );
+            setMessages((prev) => prev.map((msg) => msg.id === aiMessageId ? { ...msg, text: msg.text + chunk } : msg));
             index += step;
           } else {
             clearInterval(streamInterval);
-            addLog('[ChatArea] FE Mock stream finished.', 'info');
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === aiMessageId
-                  ? { 
-                      ...msg, 
-                      text: mockResponseText, // 確実に全文表示
-                      citations: mockStreamResponse.citations, 
-                      suggestions: mockStreamResponse.suggestions, 
-                      isStreaming: false,
-                      processStatus: null 
-                    }
-                  : msg
-              )
-            );
+            setMessages((prev) => prev.map((msg) => msg.id === aiMessageId ? { ...msg, text: mockResponseText, citations: mockStreamResponse.citations, suggestions: mockStreamResponse.suggestions, isStreaming: false, processStatus: null } : msg));
             setIsLoading(false);
           }
         }, 10);
@@ -194,19 +182,12 @@ const ChatArea = (props) => {
       return;
     }
 
-    // --- API Request ---
     if (!DIFY_API_KEY || !DIFY_API_URL) {
       handleApiError('API KEY or URL missing.', aiMessageId);
       return;
     }
 
-    const filesPayload = uploadedFileId ? [
-        {
-            type: 'document',
-            transfer_method: 'local_file',
-            upload_file_id: uploadedFileId
-        }
-    ] : [];
+    const filesPayload = uploadedFileId ? [{ type: 'document', transfer_method: 'local_file', upload_file_id: uploadedFileId }] : [];
 
     const requestBody = {
       inputs: {
@@ -275,21 +256,13 @@ const ChatArea = (props) => {
                 else if (data.event === 'message') {
                     if (data.answer) {
                         contentBuffer += data.answer;
-                        
                         const trimmedBuffer = contentBuffer.trim();
-                        // JSONパターンの検出と非表示制御
                         const isJsonPattern = trimmedBuffer.startsWith('{') || trimmedBuffer.startsWith('```');
-
-                        setMessages((prev) =>
-                            prev.map((msg) => {
-                                if (msg.id !== aiMessageId) return msg;
-                                if (isJsonPattern) {
-                                    return { ...msg, text: '', processStatus: '回答を生成・整形しています...' };
-                                } else {
-                                    return { ...msg, text: contentBuffer, processStatus: null };
-                                }
-                            })
-                        );
+                        setMessages((prev) => prev.map((msg) => {
+                            if (msg.id !== aiMessageId) return msg;
+                            if (isJsonPattern) return { ...msg, text: '', processStatus: '回答を生成・整形しています...' };
+                            else return { ...msg, text: contentBuffer, processStatus: null };
+                        }));
                     }
                 } else if (data.event === 'message_end') {
                     const citations = data.metadata?.retriever_resources || [];
@@ -297,79 +270,31 @@ const ChatArea = (props) => {
                          setMessages((prev) => prev.map(msg => msg.id === aiMessageId ? { ...msg, citations: mapCitations(citations) } : msg));
                     }
                     if (data.message_id) {
-                         // 3秒後に1回だけ取得する (リトライなし)
-                         setTimeout(() => {
-                            fetchSuggestions(data.message_id, aiMessageId);
-                         }, 3000); 
+                         setTimeout(() => { fetchSuggestions(data.message_id, aiMessageId); }, 3000); 
                     }
                 } else if (data.event === 'workflow_finished') {
                     updateStatus(null);
-                    
-                    // 最終的な回答テキストのパース処理
                     const currentMsg = messages.find(m => m.id === aiMessageId);
                     let finalText = contentBuffer;
                     let finalCitations = currentMsg?.citations || [];
-
                     const parsed = parseLlmResponse(finalText);
-
                     if (parsed.isParsed) {
                         finalText = parsed.answer;
-                        if (parsed.citations && parsed.citations.length > 0) {
-                            finalCitations = mapCitationsFromLLM(parsed.citations);
-                        }
-
+                        if (parsed.citations && parsed.citations.length > 0) finalCitations = mapCitationsFromLLM(parsed.citations);
                         let charIndex = 0;
-                        
-                        // ★修正点: 描画速度の最適化 (10ms -> 5ms, 可変ステップ)
                         const streamInterval = setInterval(() => {
                           if (charIndex <= finalText.length) {
                             const displayText = finalText.substring(0, charIndex);
-                            setMessages((prev) =>
-                              prev.map((msg) =>
-                                msg.id === aiMessageId
-                                  ? { 
-                                      ...msg, 
-                                      text: displayText,
-                                      processStatus: null 
-                                    }
-                                  : msg
-                              )
-                            );
-                            // 長文の場合は1フレームに5文字、通常は3文字進める
-                            const step = finalText.length > 500 ? 5 : 3;
-                            charIndex += step; 
+                            setMessages((prev) => prev.map((msg) => msg.id === aiMessageId ? { ...msg, text: displayText, processStatus: null } : msg));
+                            charIndex += 5; 
                           } else {
                             clearInterval(streamInterval);
-                            setMessages((prev) =>
-                              prev.map((msg) =>
-                                msg.id === aiMessageId
-                                  ? { 
-                                      ...msg, 
-                                      text: finalText, 
-                                      citations: finalCitations, 
-                                      isStreaming: false,
-                                      processStatus: null 
-                                    }
-                                  : msg
-                              )
-                            );
+                            setMessages((prev) => prev.map((msg) => msg.id === aiMessageId ? { ...msg, text: finalText, citations: finalCitations, isStreaming: false, processStatus: null } : msg));
                             setIsLoading(false);
                           }
                         }, 5); 
                     } else {
-                        setMessages((prev) =>
-                          prev.map((msg) =>
-                            msg.id === aiMessageId
-                              ? { 
-                                  ...msg, 
-                                  text: finalText, 
-                                  citations: finalCitations, 
-                                  isStreaming: false,
-                                  processStatus: null
-                                }
-                              : msg
-                          )
-                        );
+                        setMessages((prev) => prev.map((msg) => msg.id === aiMessageId ? { ...msg, text: finalText, citations: finalCitations, isStreaming: false, processStatus: null } : msg));
                         setIsLoading(false);
                     }
                 }
@@ -381,36 +306,23 @@ const ChatArea = (props) => {
             setIsLoading(false);
             setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, isStreaming: false, processStatus: null } : msg));
         }
-
     } catch (error) {
         handleApiError(error.message, aiMessageId);
     }
   };
 
-  // --- ヘルパー関数 ---
-
   const fetchSuggestions = async (messageId, aiMessageId) => {
       try {
-        const response = await fetch(
-          `${DIFY_API_URL}/messages/${messageId}/suggested?user=${USER_ID}`,
-          {
-            method: 'GET',
-            headers: { Authorization: `Bearer ${DIFY_API_KEY}` },
-          }
-        );
-        
+        const response = await fetch(`${DIFY_API_URL}/messages/${messageId}/suggested?user=${USER_ID}`, {
+            method: 'GET', headers: { Authorization: `Bearer ${DIFY_API_KEY}` }
+        });
         if (response.ok) {
             const result = await response.json();
             if (result.result === 'success' && result.data && result.data.length > 0) {
                 setMessages((prev) => prev.map((msg) => msg.id === aiMessageId ? { ...msg, suggestions: result.data } : msg));
-            } else {
-                // データがない場合のログ（デバッグ用）
-                console.log('[Suggestions] Empty data received (Delayed Fetch).');
             }
         }
-      } catch (error) {
-          console.warn('[Suggestions] Fetch failed:', error);
-      }
+      } catch (error) { console.warn('[Suggestions] Fetch failed:', error); }
   };
 
   const mapCitations = (resources) => {
@@ -452,12 +364,19 @@ const ChatArea = (props) => {
         onSendMessage={handleSendMessage}
       />
       
+      {/* ★修正: 入力エリアとインジケーターをWrapperで囲み最下部に固定 */ }
       {(messages.length > 0 || isLoading) && (
-        <ChatInput 
-          isLoading={isLoading} 
-          onSendMessage={handleSendMessage} 
-          isCentered={false}
-        />
+        <div className="bottom-controls-wrapper">
+          <FileContextIndicator 
+            file={activeContextFile} 
+            onClear={() => setActiveContextFile(null)} 
+          />
+          <ChatInput 
+            isLoading={isLoading} 
+            onSendMessage={handleSendMessage} 
+            isCentered={false}
+          />
+        </div>
       )}
     </div>
   );
