@@ -2,18 +2,43 @@
 
 .citation-container {
   margin-top: var(--space-4);
-  border-top: 1px dashed var(--color-border);
   padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border);
   animation: fadeIn 0.5s ease-out;
 }
 
-.citation-label {
+/* 大見出し「出典」 */
+.citation-header-label {
   font-size: var(--text-xs);
   font-weight: var(--font-bold);
+  color: var(--color-text-main);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.citation-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4); /* グループ間の間隔 */
+}
+
+/* 各グループ（WEB/社内/ファイル） */
+.citation-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* グループ見出し */
+.citation-group-label {
+  font-size: 10px;
+  font-weight: var(--font-bold);
   color: var(--color-text-muted);
-  margin-bottom: var(--space-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  padding-left: 2px;
 }
 
 .citation-list {
@@ -22,37 +47,45 @@
   gap: var(--space-2);
 }
 
+/* 個別の出典カード */
 .citation-item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  background-color: var(--color-bg-body); /* 薄いグレー背景 */
+  padding: 8px 12px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   text-decoration: none;
   transition: all 0.2s ease;
-  border: 1px solid transparent;
   width: fit-content;
   max-width: 100%;
+  box-shadow: var(--shadow-sm);
 }
 
-/* リンクがある場合（Web）のホバー効果 */
+/* リンクがある場合のホバー */
 .citation-item[href]:hover {
-  background-color: var(--color-bg-surface);
-  border-color: var(--color-primary-200);
-  box-shadow: var(--shadow-sm);
-  transform: translateX(2px);
+  border-color: var(--color-primary);
+  background-color: var(--color-bg-body);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 /* アイコンラッパー */
-.citation-icon {
+.citation-icon-wrapper {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-md);
-  flex-shrink: 0;
+}
+
+/* 実際に表示されるアイコン画像/SVG */
+.citation-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 /* ソース名テキスト */
@@ -63,17 +96,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 300px; /* 長すぎるファイル名は省略 */
-}
-
-/* タイプバッジ (Web, RAG等) - オプション */
-.citation-type-badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  margin-left: auto;
-  font-weight: bold;
-  text-transform: uppercase;
+  max-width: 400px;
+  line-height: 1.4;
 }
 
 @keyframes fadeIn {
