@@ -5,8 +5,8 @@ import MarkdownRenderer from './MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
 import ProcessStatusIndicator from './ProcessStatusIndicator';
+import FileIcon from './FileIcon'; // ★新規インポート
 
-// ★ 修正: アイコンを 'AssistantIcon' として定義し、名前付きエクスポートを追加
 export const AssistantIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
@@ -19,39 +19,33 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
 
   return (
     <div className="message-block">
-      {/* Container: Reverse for User */}
       <div className={`message-container ${!isAi ? 'message-container-user' : ''}`}>
         
-        {/* Avatar */}
         <div className={isAi ? 'avatar-ai' : 'avatar-user'}>
-          {/* ★ 修正: 内部でも AssistantIcon を使用 */}
           {isAi ? <AssistantIcon /> : 'You'}
         </div>
 
-        {/* Content Bubble */}
         <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
           
-          {/* File Attachment Display */}
+          {/* ★ 修正: FileIcon を使用した添付表示 */}
           {!isAi && files && files.length > 0 && (
              <div className="file-attachment-chip">
-                 <span>📄</span>
-                 {files[0].name}
+                 {/* アイコン自体が白いので、そのまま配置しても青背景と相性が良い */}
+                 <FileIcon filename={files[0].name} />
+                 <span className="file-attachment-name">{files[0].name}</span>
              </div>
           )}
 
-          {/* Process Indicator (Thinking...) */}
           {isAi && isStreaming && (
             <ProcessStatusIndicator status={processStatus} />
           )}
 
-          {/* Markdown Body */}
           <MarkdownRenderer
             content={text || ''}
             isStreaming={isAi && isStreaming}
             citations={citations}
           />
 
-          {/* Footer Elements (Citations & Suggestions) */}
           {isAi && text && !isStreaming && (
             <>
               <CitationList citations={citations} />

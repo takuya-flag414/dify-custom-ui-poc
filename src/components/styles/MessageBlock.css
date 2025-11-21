@@ -279,3 +279,14 @@
   border-color: var(--color-border);
   color: var(--color-text-main);
 }
+
+/* ファイル名が長い場合の省略 (In Message) */
+.file-attachment-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  display: inline-block;
+  vertical-align: middle;
+  color: inherit; /* 親の文字色を継承 */
+}

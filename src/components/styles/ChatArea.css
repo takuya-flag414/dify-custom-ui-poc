@@ -106,11 +106,12 @@
   margin-right: 4px;
 }
 
-/* --- Input Area --- */
+/* --- Input Area Container --- */
 .chat-input-container,
 .chat-input-container-centered {
   width: 100%;
   padding: var(--space-4) var(--space-6) var(--space-6);
+  /* 下からフェードアウトするような背景グラデーション */
   background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0));
   z-index: 10;
   display: flex;
@@ -123,19 +124,24 @@
   bottom: 0;
 }
 
-/* Form Styling */
+/* --- Form Styling (Integrated Layout) --- */
 .chat-input-form {
   width: 100%;
   max-width: 800px;
   background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-2xl); /* 丸みを帯びた形状 */
-  padding: var(--space-2); /* 内側余白 */
+  padding: var(--space-2); /* 全体の内側余白 */
   box-shadow: var(--shadow-lg); /* 浮いている影 */
+  
+  /* 縦積みレイアウト: 上段にプレビュー、下段に入力行 */
   display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  
   transition: all 0.2s ease;
+  position: relative;
 }
 
 /* Focus State */
@@ -144,6 +150,66 @@
   box-shadow: var(--ring-focus), var(--shadow-lg);
 }
 
+/* --- Section 1: File Preview (Integrated) --- */
+.file-preview-integrated {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  
+  /* 入力フォーム内の「チップ」としてデザイン */
+  background-color: var(--color-bg-body); /* 薄いグレー */
+  border-radius: var(--radius-lg);
+  padding: 6px 10px;
+  margin-bottom: 6px; /* テキストエリアとの間隔 */
+  margin-left: 4px;
+  margin-right: 4px;
+  
+  width: fit-content;
+  max-width: 100%;
+  
+  animation: fadeInUp 0.2s ease-out;
+}
+
+.file-preview-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  margin-left: 4px;
+}
+.file-preview-close:hover { 
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--color-text-main); 
+}
+
+.file-preview-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  display: inline-block;
+  vertical-align: middle;
+  font-weight: var(--font-medium);
+  font-size: var(--text-sm);
+  color: var(--color-text-main);
+}
+
+/* --- Section 2: Input Controls Row --- */
+.chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+/* Textarea */
 .chat-input-textarea {
   flex-grow: 1;
   border: none;
@@ -198,33 +264,3 @@
   background-color: var(--color-border);
   cursor: not-allowed;
 }
-
-/* --- File Preview (Input Area) --- */
-.file-preview-wrapper {
-  position: absolute;
-  top: -40px; /* 入力欄の上に表示 */
-  left: var(--space-6);
-  background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 4px 10px;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--color-text-sub);
-  box-shadow: var(--shadow-sm);
-  animation: fadeInUp 0.2s ease-out;
-}
-
-.file-preview-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  padding: 2px;
-  display: flex;
-  align-items: center;
-}
-.file-preview-close:hover { color: var(--color-error); }

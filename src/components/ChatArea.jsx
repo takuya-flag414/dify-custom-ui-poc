@@ -161,13 +161,15 @@ const ChatArea = (props) => {
         let index = 0;
         const streamInterval = setInterval(() => {
           if (index < mockResponseText.length) {
-            const char = mockResponseText[index];
+            // Mockモードも少し加速させる
+            const step = 3;
+            const chunk = mockResponseText.substring(index, index + step);
             setMessages((prev) =>
               prev.map((msg) =>
-                msg.id === aiMessageId ? { ...msg, text: msg.text + char } : msg
+                msg.id === aiMessageId ? { ...msg, text: msg.text + chunk } : msg
               )
             );
-            index++;
+            index += step;
           } else {
             clearInterval(streamInterval);
             addLog('[ChatArea] FE Mock stream finished.', 'info');
@@ -176,6 +178,7 @@ const ChatArea = (props) => {
                 msg.id === aiMessageId
                   ? { 
                       ...msg, 
+                      text: mockResponseText, // 確実に全文表示
                       citations: mockStreamResponse.citations, 
                       suggestions: mockStreamResponse.suggestions, 
                       isStreaming: false,
@@ -186,7 +189,7 @@ const ChatArea = (props) => {
             );
             setIsLoading(false);
           }
-        }, 20);
+        }, 10);
       }, 3000);
       return;
     }
@@ -294,7 +297,7 @@ const ChatArea = (props) => {
                          setMessages((prev) => prev.map(msg => msg.id === aiMessageId ? { ...msg, citations: mapCitations(citations) } : msg));
                     }
                     if (data.message_id) {
-                         // ★★★ 修正: 3秒後に1回だけ取得する (リトライなし) ★★★
+                         // 3秒後に1回だけ取得する (リトライなし)
                          setTimeout(() => {
                             fetchSuggestions(data.message_id, aiMessageId);
                          }, 3000); 
@@ -316,6 +319,8 @@ const ChatArea = (props) => {
                         }
 
                         let charIndex = 0;
+                        
+                        // ★修正点: 描画速度の最適化 (10ms -> 5ms, 可変ステップ)
                         const streamInterval = setInterval(() => {
                           if (charIndex <= finalText.length) {
                             const displayText = finalText.substring(0, charIndex);
@@ -330,7 +335,9 @@ const ChatArea = (props) => {
                                   : msg
                               )
                             );
-                            charIndex += 1; 
+                            // 長文の場合は1フレームに5文字、通常は3文字進める
+                            const step = finalText.length > 500 ? 5 : 3;
+                            charIndex += step; 
                           } else {
                             clearInterval(streamInterval);
                             setMessages((prev) =>
@@ -338,6 +345,7 @@ const ChatArea = (props) => {
                                 msg.id === aiMessageId
                                   ? { 
                                       ...msg, 
+                                      text: finalText, 
                                       citations: finalCitations, 
                                       isStreaming: false,
                                       processStatus: null 
@@ -347,7 +355,7 @@ const ChatArea = (props) => {
                             );
                             setIsLoading(false);
                           }
-                        }, 10); 
+                        }, 5); 
                     } else {
                         setMessages((prev) =>
                           prev.map((msg) =>
@@ -381,7 +389,6 @@ const ChatArea = (props) => {
 
   // --- ヘルパー関数 ---
 
-  // ★★★ 修正: ループを削除し、1回だけfetchする単純な関数に戻す ★★★
   const fetchSuggestions = async (messageId, aiMessageId) => {
       try {
         const response = await fetch(
