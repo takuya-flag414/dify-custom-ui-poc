@@ -1,30 +1,40 @@
 // src/components/CitationList.jsx
 import React from 'react';
-import './styles/MessageBlock.css';
-import CitationItem from './CitationItem'; // ★ 新しいコンポーネントをインポート
+import './styles/CitationList.css';
+// ★修正: 統合コンポーネントをインポート
+import { SourceIcon } from './FileIcons';
 
-/**
- * 出典リスト表示 (T-09, P-3)
- * @param {Array} citations - ChatAreaから渡される実データ
- */
 const CitationList = ({ citations }) => {
-  // citationsが空配列、またはnull/undefinedの場合は何も表示しない
-  if (!citations || citations.length === 0) {
-    return null;
-  }
-
-  // ★ T-03時点のダミー表示は削除済み
+  if (!citations || citations.length === 0) return null;
 
   return (
-    <div className="citation-list">
-      <h4 className="citation-title">出典</h4>
-      {/* ★ propsで渡された実データを CitationItem コンポーネントに渡す [cite: 358] */}
-      {citations.map((citation, index) => (
-        <CitationItem 
-          key={citation.id || index} 
-          citation={citation} 
-        />
-      ))}
+    <div className="citation-container">
+      <div className="citation-label">出典</div>
+      <div className="citation-list">
+        {citations.map((cite, index) => {
+          const Wrapper = cite.url ? 'a' : 'div';
+          const props = cite.url 
+            ? { href: cite.url, target: '_blank', rel: 'noopener noreferrer' } 
+            : {};
+
+          return (
+            <Wrapper 
+              key={cite.id || index} 
+              className="citation-item" 
+              {...props}
+            >
+              {/* ★修正: SourceIconを使用 */}
+              <div className="citation-icon-wrapper">
+                <SourceIcon type={cite.type} source={cite.source} />
+              </div>
+              
+              <span className="citation-source" title={cite.source}>
+                {cite.source}
+              </span>
+            </Wrapper>
+          );
+        })}
+      </div>
     </div>
   );
 };

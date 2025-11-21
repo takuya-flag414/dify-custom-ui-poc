@@ -8,19 +8,14 @@ import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
 import FileContextIndicator from './FileContextIndicator';
 
-// ストリーミング用モックデータのインポート
 import { mockStreamResponse } from '../mockData';
-// APIクライアントのインポート
 import { uploadFile } from '../api/dify';
-// ユーティリティのインポート
 import { parseLlmResponse } from '../utils/responseParser';
 
-// --- PoC API設定 ---
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 const USER_ID = 'poc-user-01';
 
-// BEモック用の注入データ
 const MOCK_PERPLEXITY_JSON = JSON.stringify({
   "search_results": [
     {
@@ -87,17 +82,15 @@ const ChatArea = (props) => {
     let uploadedFileId = null;
     let displayFiles = [];
 
-    // Case 1: BE Mockモード
+    // --- ファイル処理ロジック ---
     if (mockMode === 'BE') {
         if (attachment) {
-            addLog('[ChatArea] BE Mode active. SKIPPING file upload (Mocking).', 'warn');
             displayFiles = [{ name: `(Mock) ${attachment.name}`, type: 'document' }];
             setActiveContextFile({ id: 'mock_id', name: attachment.name, type: 'document' });
         } else if (activeContextFile) {
-             addLog('[ChatArea] BE Mode. Keeping mock context.', 'info');
+             // Keep context
         }
     }
-    // Case 2: 本番 (OFF) モード
     else if (mockMode === 'OFF') {
         if (attachment) {
             setIsLoading(true); 
@@ -119,7 +112,6 @@ const ChatArea = (props) => {
             addLog(`[ChatArea] Using Sticky Context File ID: ${uploadedFileId}`, 'info');
         }
     }
-    // Case 3: FE Mockモード
     else {
         if (attachment) {
             displayFiles = [{ name: attachment.name, type: 'document' }];
@@ -127,6 +119,7 @@ const ChatArea = (props) => {
         }
     }
 
+    // ユーザーメッセージ
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       text: text,
@@ -137,8 +130,9 @@ const ChatArea = (props) => {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
+    // AIメッセージ枠
     const aiMessageId = `msg_${Date.now()}_ai`;
-    const aiMessage = {
+    setMessages((prev) => [...prev, {
       id: aiMessageId,
       text: '',
       role: 'ai',
@@ -147,19 +141,15 @@ const ChatArea = (props) => {
       isStreaming: true,
       timestamp: new Date().toISOString(),
       processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : 'AIが思考を開始しました...', 
-    };
-    setMessages((prev) => [...prev, aiMessage]);
+    }]);
 
+    // --- FE Mock Logic ---
     if (mockMode === 'FE') {
-      addLog('[ChatArea] FE Mock Mode started.', 'info');
       if (!conversationId) {
         const mockNewId = `mock_conv_${Date.now()}`;
         onConversationCreated(mockNewId, text || attachment?.name || '新規チャット');
       }
       const mockResponseText = mockStreamResponse.text;
-      setTimeout(() => {
-        setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, processStatus: '外部情報を検索しています...' } : msg));
-      }, 500);
       setTimeout(() => {
         setMessages(prev => prev.map(msg => msg.id === aiMessageId ? { ...msg, processStatus: '回答を生成しています...' } : msg));
       }, 1500);
@@ -178,10 +168,11 @@ const ChatArea = (props) => {
             setIsLoading(false);
           }
         }, 10);
-      }, 3000);
+      }, 2000);
       return;
     }
 
+    // --- API Request ---
     if (!DIFY_API_KEY || !DIFY_API_URL) {
       handleApiError('API KEY or URL missing.', aiMessageId);
       return;
@@ -229,7 +220,6 @@ const ChatArea = (props) => {
         while (true) {
           const { value, done } = await reader.read();
           if (done) break;
-
           buffer += value;
           const lines = buffer.split('\n');
           buffer = lines.pop() || '';
@@ -238,16 +228,13 @@ const ChatArea = (props) => {
             if (line.startsWith('data: ')) {
               const dataLine = line.substring(6).trim();
               if (!dataLine) continue;
-
               try {
                 const data = JSON.parse(dataLine);
-
                 if (data.conversation_id && !conversationId && !isConversationCreatedLocally) {
                      isConversationCreatedLocally = true;
                      const title = text || (attachment ? attachment.name : '新規チャット');
                      onConversationCreated(data.conversation_id, title);
                 }
-
                 if (data.event === 'node_started') {
                     const nodeType = data.data?.node_type;
                     if (nodeType === 'llm') updateStatus('AIが思考しています...');
@@ -311,6 +298,7 @@ const ChatArea = (props) => {
     }
   };
 
+  // Helper Functions
   const fetchSuggestions = async (messageId, aiMessageId) => {
       try {
         const response = await fetch(`${DIFY_API_URL}/messages/${messageId}/suggested?user=${USER_ID}`, {
@@ -324,26 +312,12 @@ const ChatArea = (props) => {
         }
       } catch (error) { console.warn('[Suggestions] Fetch failed:', error); }
   };
-
-  const mapCitations = (resources) => {
-      return resources.map((res, index) => ({
-        id: res.document_id || `cite_${index}`,
-        type: res.document_url ? 'web' : 'file',
-        source: `[${index + 1}] ${res.document_name || '不明な出典'}`,
-        url: res.document_url || null,
-      }));
-  };
-
-  const mapCitationsFromLLM = (citations) => {
-      if (!citations || !Array.isArray(citations)) return [];
-      return citations.map((cite, index) => ({
-        id: `cite_llm_${index}`,
-        type: cite.url ? 'web' : 'file',
-        source: `[${index + 1}] ${cite.source || '不明な出典'}`,
-        url: cite.url || null,
-      }));
-  };
+  const mapCitations = (resources) => { return resources.map((res, index) => ({ id: res.document_id || `cite_${index}`, type: res.document_url ? 'web' : 'file', source: `[${index + 1}] ${res.document_name || '不明な出典'}`, url: res.document_url || null, })); };
+  const mapCitationsFromLLM = (citations) => { if (!citations || !Array.isArray(citations)) return []; return citations.map((cite, index) => ({ id: `cite_llm_${index}`, type: cite.url ? 'web' : 'file', source: `[${index + 1}] ${cite.source || '不明な出典'}`, url: cite.url || null, })); };
   
+  // ★追加: 初期状態かどうかの判定
+  const isInitialState = messages.length === 0;
+
   return (
     <div className="chat-area">
       <div className="top-bar-container">
@@ -357,26 +331,52 @@ const ChatArea = (props) => {
         </div>
       </div>
 
-      <ChatHistory
-        messages={messages}
-        onSuggestionClick={(q) => handleSendMessage(q, null)}
-        isLoading={isLoading}
-        onSendMessage={handleSendMessage}
-      />
-      
-      {/* ★修正: 入力エリアとインジケーターをWrapperで囲み最下部に固定 */ }
-      {(messages.length > 0 || isLoading) && (
-        <div className="bottom-controls-wrapper">
-          <FileContextIndicator 
-            file={activeContextFile} 
-            onClear={() => setActiveContextFile(null)} 
-          />
-          <ChatInput 
-            isLoading={isLoading} 
-            onSendMessage={handleSendMessage} 
-            isCentered={false}
-          />
+      {/* ★修正: 初期表示と会話中でレイアウトを分岐 */}
+      {isInitialState ? (
+        /* 初期表示: 中央揃えレイアウト */
+        <div className="initial-view-container">
+          <div className="initial-content">
+            <div className="initial-header">
+              <h2 className="initial-title">お困りのことはありますか？</h2>
+              <p className="initial-subtitle">社内情報やWebから情報を検索して回答します。</p>
+            </div>
+            
+            {/* 初期表示用の入力欄配置 */}
+            <div className="initial-input-wrapper">
+              <FileContextIndicator 
+                file={activeContextFile} 
+                onClear={() => setActiveContextFile(null)} 
+              />
+              <ChatInput 
+                isLoading={isLoading} 
+                onSendMessage={handleSendMessage} 
+                isCentered={true} 
+              />
+            </div>
+          </div>
         </div>
+      ) : (
+        /* 会話中: 履歴リスト + 下部固定入力欄 */
+        <>
+          <ChatHistory
+            messages={messages}
+            onSuggestionClick={(q) => handleSendMessage(q, null)}
+            isLoading={isLoading}
+            onSendMessage={handleSendMessage}
+          />
+          
+          <div className="bottom-controls-wrapper">
+            <FileContextIndicator 
+              file={activeContextFile} 
+              onClear={() => setActiveContextFile(null)} 
+            />
+            <ChatInput 
+              isLoading={isLoading} 
+              onSendMessage={handleSendMessage} 
+              isCentered={false} 
+            />
+          </div>
+        </>
       )}
     </div>
   );

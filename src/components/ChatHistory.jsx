@@ -1,113 +1,129 @@
 // src/components/ChatHistory.jsx
 import React, { useEffect, useRef } from 'react';
-import './styles/ChatArea.css'; // 既存のインポート
-import MessageBlock from './MessageBlock';
-import ChatInput from './ChatInput'; // ★中央配置のためにインポート
-import { AssistantIcon } from './MessageBlock'; // ★アイコンをインポート
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import './styles/ChatHistory.css';
+import './styles/MessageBlock.css';
+import CitationList from './CitationList';
+// ★追加: FileIconをインポート
+import FileIcon from './FileIcon';
 
-/**
- * ★ ISO文字列 (timestamp) を "HH:MM" 形式に変換するヘルパー
- * @param {string} isoString
- */
-const formatTimestamp = (isoString) => {
-  if (!isoString) return '';
-  try {
-    const date = new Date(isoString);
-    // toLocaleTimeString を使い、 'ja-JP' 形式の時・分（2桁）で表示
-    return date.toLocaleTimeString('ja-JP', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch (e) {
-    console.warn('[ChatHistory] Invalid timestamp format:', isoString);
-    return ''; // 不正な日付の場合
-  }
-};
+const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage }) => {
+  const messagesEndRef = useRef(null);
 
-
-/**
- * チャット履歴表示エリア (T-06)
- * @param {Array} messages - App.jsxから渡される
- * @param {function} onSuggestionClick - ChatAreaから渡される
- * @param {boolean} isLoading - ★中央配置のために ChatArea から渡される
- * @param {function} onSendMessage - ★中央配置のために ChatArea から渡される
- */
-const ChatHistory = ({
-  messages,
-  onSuggestionClick,
-  isLoading,
-  onSendMessage,
-}) => {
-  const endOfMessagesRef = useRef(null);
-
-  // メッセージが更新されるたびに一番下にスクロールする (T-06)
   const scrollToBottom = () => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]); // messages が変わるたびに実行
+  }, [messages, isLoading]);
+
+  if (!messages || messages.length === 0) {
+    return null; 
+  }
 
   return (
     <div className="chat-history">
-      {/* ★★★ プロトタイプ準拠: 中央配置のロジック ★★★ */}
-      {messages.length === 0 && !isLoading ? (
-        // 初期表示状態 (新基本設計書 5.2.1)
-        <div className="chat-history-empty">
-          
-          {/* ★プロトタイプ風ヘッダー */}
-          <div className="initial-message-header">
-            <div style={{ width: '40px', height: '40px' }}> {/* アイコンサイズ調整 */}
-              <AssistantIcon />
-            </div>
-            <h2 className="initial-message-title">
-              お困りのことはありますか？
-            </h2>
-          </div>
-          
-          {/* ★中央配置の入力フォーム */}
-          <ChatInput
-            isLoading={isLoading}
-            onSendMessage={onSendMessage}
-            isCentered={true} // ★中央配置フラグ
-          />
-
-        </div>
-      ) : (
-        // 履歴表示状態 (新基本設計書 5.2.2)
-        // ★★★ 修正: 時刻表示のためにJSX構造を変更 ★★★
-        messages.map((msg) => (
-          // ★ ステップ2-1: ラッパーを追加
-          <div
-            key={msg.id}
-            className={`chat-row-wrapper ${
-              msg.role === 'user' ? 'chat-row-wrapper-user' : 'chat-row-wrapper-ai'
-            }`}
-          >
-            {/* 既存の行 */}
-            <div
-              className={`chat-row ${
-                msg.role === 'user' ? 'chat-row-user' : 'chat-row-ai'
-              }`}
-            >
-              <MessageBlock
-                message={msg}
-                onSuggestionClick={onSuggestionClick} // ★ T-11対応: propsを渡す
-              />
-            </div>
+      {messages.map((msg) => (
+        <div key={msg.id} className="chat-row-wrapper">
+          <div className={`chat-row ${msg.role === 'user' ? 'chat-row-user' : 'chat-row-ai'}`}>
             
-            {/* ★ ステップ2-2: ユーザーかつ時刻が存在する場合のみ表示 */}
-            {msg.role === 'user' && msg.timestamp && (
-              <span className="user-timestamp">
-                {formatTimestamp(msg.timestamp)}
-              </span>
+            {/* AI Avatar */}
+            {msg.role === 'ai' && (
+              <div className="avatar-ai">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"></path>
+                </svg>
+              </div>
+            )}
+
+            {/* Message Content */}
+            {msg.role === 'user' ? (
+              <div className="message-bubble user-bubble">
+                <div className="message-text">{msg.text}</div>
+                {msg.files && msg.files.length > 0 && (
+                  <div className="message-files">
+                    {msg.files.map((f, idx) => (
+                      <div key={idx} className="attached-file-chip">
+                        {/* ★修正: FileIconを使用 */}
+                        <FileIcon filename={f.name} className="w-4 h-4" />
+                        <span className="file-name">{f.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="message-bubble ai-bubble">
+                <div className="message-markdown">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
+                    }}
+                  >
+                    {msg.text}
+                  </ReactMarkdown>
+                </div>
+                {msg.processStatus && (
+                  <div className="process-status">
+                    <span className="loading-dots">●</span> {msg.processStatus}
+                  </div>
+                )}
+                <CitationList citations={msg.citations} />
+                {msg.suggestions && msg.suggestions.length > 0 && !msg.isStreaming && (
+                  <div className="suggestion-container">
+                    <div className="suggestion-label">関連する質問</div>
+                    <div className="suggestion-list">
+                      {msg.suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          className="suggestion-chip"
+                          onClick={() => onSuggestionClick(suggestion)}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* User Avatar */}
+            {msg.role === 'user' && (
+              <div className="avatar-user">
+                <span>You</span>
+              </div>
             )}
           </div>
-        ))
+          
+          {/* Timestamp */}
+          <div className={`user-timestamp ${msg.role === 'ai' ? 'ai-timestamp' : ''}`}>
+            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
+      ))}
+      
+      {/* Loading Indicator */}
+      {isLoading && messages[messages.length - 1]?.role === 'user' && (
+        <div className="chat-row-wrapper">
+          <div className="chat-row chat-row-ai">
+            <div className="avatar-ai">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"></path>
+               </svg>
+            </div>
+            <div className="message-bubble ai-bubble">
+              <div className="typing-indicator">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
-      {/* スクロール用の空要素 */}
-      <div ref={endOfMessagesRef} />
+      <div ref={messagesEndRef} />
     </div>
   );
 };

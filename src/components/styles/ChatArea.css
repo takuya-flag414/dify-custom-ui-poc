@@ -17,8 +17,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: rgba(255, 255, 255, 0.8); /* すりガラス効果用ベース */
-  backdrop-filter: blur(12px); /* Apple風すりガラス */
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
@@ -26,26 +26,68 @@
   z-index: 20;
 }
 
-/* ★修正: 入力エリアとインジケーターをまとめるラッパー */
+/* --- Initial View (Centered) --- */
+.initial-view-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  width: 100%;
+  height: calc(100vh - 60px); /* Top barの高さを引く */
+}
+
+.initial-content {
+  width: 100%;
+  max-width: 720px; /* 中央配置時の最大幅 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.initial-header {
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.initial-title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-main);
+  margin-bottom: var(--space-3);
+}
+
+.initial-subtitle {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+}
+
+.initial-input-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* --- Bottom Controls (Sticky Footer) --- */
 .bottom-controls-wrapper {
-  position: sticky; /* 画面下部に追従 */
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
-  /* 背景グラデーションはこのラッパーが一括管理 */
-  background: linear-gradient(to top, var(--color-bg-subtle) 90%, rgba(255,255,255,0));
+  background: linear-gradient(to top, var(--color-bg-surface) 85%, rgba(255,255,255,0));
   padding-top: var(--space-4);
-  padding-bottom: var(--space-6); /* 下部に少し余白 */
+  padding-bottom: var(--space-6);
   z-index: 20;
   width: 100%;
-  
-  /* ★Flexboxで縦積みにする設定を追加 */
   display: flex;
   flex-direction: column;
-  gap: var(--space-2); /* インジケーターと入力欄の間隔 */
+  gap: var(--space-2);
 }
 
-/* Mock Mode Controls (Debug) */
+/* Mock Mode Controls */
 .mock-mode-controls {
   display: flex;
   align-items: center;
@@ -62,121 +104,63 @@
   background-color: var(--color-bg-surface);
 }
 
-/* --- Chat History --- */
+/* --- Chat History Area --- */
 .chat-history {
   flex-grow: 1;
   overflow-y: auto;
   padding: var(--space-6);
-  /* 入力欄の高さ分だけ余白を確保（重なり防止の安全策） */
   padding-bottom: 20px; 
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* Empty State */
-.chat-history-empty {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 600px;
-  color: var(--color-text-muted);
-}
-
-.initial-message-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  margin-bottom: var(--space-8);
-}
-
-.initial-message-title {
-  font-size: var(--text-xl);
-  font-weight: var(--font-bold);
-  color: var(--color-text-main);
-  margin: 0;
-}
-
-/* Row Wrapper (Message + Timestamp) */
-.chat-row-wrapper {
-  width: 100%;
-  max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: var(--space-6);
-}
-
-.chat-row {
-  display: flex;
-  width: 100%;
-}
-
-.chat-row-user { justify-content: flex-end; }
-.chat-row-ai { justify-content: flex-start; }
-
-.user-timestamp {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  text-align: right;
-  margin-top: var(--space-1);
-  margin-right: 4px;
-}
-
 /* --- Input Area Container --- */
-/* ★修正: 絶対配置を解除し、ラッパー内で自然にスタックさせる */
+/* 通常（下部）モード */
 .chat-input-container {
   width: 100%;
-  padding: 0 var(--space-6); /* 上下のパディングはラッパーが持つので削除 */
-  background: transparent; /* 背景はラッパーに任せる */
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  position: relative; /* absoluteから変更 */
-  bottom: auto; /* 0から変更 */
-}
-
-/* Centered Mode (Initial State) - こちらは単独で中央配置なので絶対配置のまま維持でもOKだが、今回は使用箇所で切り替えている想定 */
-.chat-input-container-centered {
-  width: 100%;
-  padding: var(--space-4) var(--space-6) var(--space-6);
+  padding: 0 var(--space-6);
   background: transparent;
   z-index: 10;
   display: flex;
   justify-content: center;
-  position: absolute; /* 初期表示のみ中央寄せのため絶対配置 */
-  bottom: 0;
+  position: relative;
 }
 
-/* --- Form Styling (Integrated Layout) --- */
+/* 中央配置モード (Initial) */
+.chat-input-container-centered {
+  width: 100%;
+  padding: 0; /* Wrapperのpaddingに任せる */
+  background: transparent;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+/* --- Form Styling --- */
 .chat-input-form {
   width: 100%;
-  max-width: 800px;
+  max-width: 800px; /* 入力欄の最大幅 */
   background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-2xl);
   padding: var(--space-2);
   box-shadow: var(--shadow-lg);
-  
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 0;
-  
   transition: all 0.2s ease;
   position: relative;
 }
 
-/* Focus State */
 .chat-input-form:focus-within {
   border-color: var(--color-primary);
   box-shadow: var(--ring-focus), var(--shadow-lg);
 }
 
-/* --- Section 1: File Preview (Integrated) --- */
+/* File Preview Chip */
 .file-preview-integrated {
   display: flex;
   align-items: center;
@@ -189,7 +173,7 @@
   margin-right: 4px;
   width: fit-content;
   max-width: 100%;
-  animation: fadeInUp 0.2s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .file-preview-close {
@@ -216,14 +200,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
-  display: inline-block;
-  vertical-align: middle;
   font-weight: var(--font-medium);
   font-size: var(--text-sm);
   color: var(--color-text-main);
 }
 
-/* --- Section 2: Input Controls Row --- */
+/* Input Controls Row */
 .chat-input-row {
   display: flex;
   align-items: flex-end;
@@ -285,4 +267,9 @@
 .chat-input-button:disabled {
   background-color: var(--color-border);
   cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
