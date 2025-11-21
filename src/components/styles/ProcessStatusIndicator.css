@@ -1,41 +1,26 @@
 /* src/components/styles/ProcessStatusIndicator.css */
 
-@keyframes pulse-opacity {
-  0% { opacity: 0.6; }
+@keyframes pulse-fade {
+  0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-@keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .process-status-container {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 8px 12px 8px; /* 下に余白を持たせて本文と分離 */
-  font-family: var(--font-family-base);
-  animation: slide-in 0.3s ease-out;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  animation: fadeInUp 0.3s ease-out;
 }
 
 .process-status-icon {
+  display: inline-block;
+  animation: pulse-fade 1.5s infinite ease-in-out;
   font-size: 1rem;
-  line-height: 1;
-  /* アイコンをゆっくり点滅させる */
-  animation: pulse-opacity 1.5s infinite ease-in-out;
 }
 
 .process-status-text {
-  font-size: 0.75rem; /* 12px */
-  font-weight: 500;
-  color: var(--color-text-light); /* グレー (#6B7280) */
-  white-space: nowrap;
+  font-weight: var(--font-medium);
 }

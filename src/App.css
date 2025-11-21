@@ -1,33 +1,21 @@
 /* src/App.css */
 
-/* アプリケーション全体コンテナ */
 .app {
   display: flex;
-  height: 100vh; /* 画面全体の高さ */
-  width: 100vw; /* 画面全体の幅 */
-  overflow: hidden; /* はみ出しを隠す */
-  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白背景) */
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--color-bg-body);
 }
 
-/* サイドバー */
-.sidebar {
-  width: 260px;
-  flex-shrink: 0; /* サイドバーの幅を固定 */
-  background-color: var(--color-sidebar-bg); /* ★プロトタイプ準拠 (グレー) */
-  color: var(--color-text-dark); /* ★プロトタイプ準拠 (黒文字) */
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--color-border); /* ★プロトタイプ準拠 (境界線) */
-}
+/* サイドバーは Sidebar.css で定義
+  メインエリアは ChatArea.css で定義 
+  ここではレイアウトの配置のみを行う
+*/
 
-/* チャットエリア（メインコンテンツ） */
-.chat-area {
-  flex-grow: 1; /* 残りの幅すべてを使用 */
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-bg-white); /* ★プロトタイプ準拠 (白背景) */
-  height: 100vh; /* 高さを画面全体に */
-  max-height: 100vh; /* 高さが画面を超えないように */
-  position: relative; /* スティッキーな子の基準点 */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+  /* モバイル対応はPhase 2以降の詳細要件だが、最低限崩れないように */
 }

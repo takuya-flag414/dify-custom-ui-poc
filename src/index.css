@@ -1,53 +1,101 @@
 /* src/index.css */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
-/* --- カラーパレット定義 (プロトタイプ準拠に更新) --- */
 :root {
-  --font-family-base: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  /* --- Typography --- */
+  --font-family-base: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   
-  /* ロゴカラー (既存) */
-  --color-primary-dark: #2C3A5A; /* ロゴのネイビー (旧 ユーザー吹き出し) */
-  --color-primary-text: #F5F5F5; /* ロゴの白 */
-  --color-accent-red: #E60012;  /* ロゴの赤 */
+  /* Font Sizes */
+  --text-xs: 0.75rem;   /* 12px */
+  --text-sm: 0.875rem;  /* 14px */
+  --text-base: 1rem;    /* 16px */
+  --text-lg: 1.125rem;  /* 18px */
+  --text-xl: 1.25rem;   /* 20px */
   
-  /* UI基本色 (プロトタイプ準拠) */
-  --color-bg-body: #F3F4F6;     /* 全体の背景 (bg-gray-100) */
-  --color-bg-white: #FFFFFF;    /* メインエリアの背景 (bg-white) */
-  --color-text-dark: #1F2937;   /* 基本のテキスト黒 (text-gray-800) */
-  --color-text-light: #6B7280; /* 薄いテキスト (text-gray-500) */
-  --color-border: #D1D5DB;     /* 境界線 (border-gray-300) */
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-bold: 700;
 
-  /* コンポーネント色 (プロトタイプ準拠) */
-  --color-sidebar-bg: #F3F4F6;    /* サイドバー背景 (bg-gray-100) */
-  --color-user-bg: #2563EB;      /* ユーザー吹き出し (bg-blue-600) */
-  --color-ai-bg: #F3F4F6;        /* AI吹き出し (bg-gray-100) */
-  --color-button-dark: #1F2937;  /* 送信ボタン (bg-gray-800) */
-  --color-button-dark-hover: #374151; /* 送信ボタンホバー (bg-gray-700) */
+  /* --- Color Palette (Based on DESIGN_RULE.md) --- */
+  /* Primary (Blue) */
+  --color-primary: #3B82F6;       /* blue-500: 主要アクション */
+  --color-primary-hover: #2563EB; /* blue-600: ホバー */
+  --color-primary-active: #1D4ED8;/* blue-700: アクティブ/テキスト */
+  --color-primary-bg: #EFF6FF;    /* blue-50: 背景用 */
+  --color-primary-bg-hover: #DBEAFE; /* blue-100: ホバー背景 */
+
+  /* Text Colors */
+  --color-text-main: #111827;     /* gray-900: 主要テキスト */
+  --color-text-sub: #374151;      /* gray-700: 補助テキスト */
+  --color-text-muted: #6B7280;    /* gray-500: 非重要テキスト */
+  --color-text-white: #FFFFFF;    /* 反転テキスト */
+
+  /* Background Colors */
+  --color-bg-body: #F3F4F6;       /* gray-100: アプリ背景 */
+  --color-bg-surface: #FFFFFF;    /* white: カード/メインエリア */
+  --color-bg-sidebar: #F9FAFB;    /* gray-50: サイドバー */
+  
+  /* Border Colors */
+  --color-border: #E5E7EB;        /* gray-200: 薄い区切り線 */
+  --color-border-strong: #D1D5DB; /* gray-300: 明確な境界線 */
+
+  /* Semantic Colors */
+  --color-error: #DC2626;         /* red-600 */
+  --color-success: #059669;       /* green-600 */
+
+  /* --- Spacing --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* --- Border Radius --- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;   /* 小ボタン, 入力欄 */
+  --radius-xl: 12px;  /* 標準ボタン */
+  --radius-2xl: 16px; /* カード, メッセージバブル */
+  --radius-full: 9999px;
+
+  /* --- Shadows (Apple-like Soft Shadows) --- */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Focus Ring (Accessibility) */
+  --ring-focus: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
-/* --- --- */
 
 body {
   margin: 0;
   padding: 0;
   font-family: var(--font-family-base);
+  background-color: var(--color-bg-body);
+  color: var(--color-text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-bg-body); /* アプリ全体の背景色を更新 */
-  color: var(--color-text-dark); /* デフォルトの文字色 */
 }
 
-/* ボックスサイズの計算をボーダーボックスに統一 */
-*,
-*::before,
-*::after {
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
-/* html, body, #root が画面全体の高さを取るように設定 */
-html,
-body,
-#root {
-  height: 100%;
+/* Custom Scrollbar (Webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
 }

@@ -1,314 +1,281 @@
 /* src/components/styles/MessageBlock.css */
 
-/* --- アニメーション定義 --- */
+/* Animation */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- メッセージブロック全体 --- */
+/* --- Message Block --- */
 .message-block {
   display: flex;
   flex-direction: column;
   max-width: 100%;
+  animation: fadeInUp 0.3s ease-out forwards;
 }
 
-/* アイコンと吹き出しのコンテナ */
+/* Container */
 .message-container {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
-/* ユーザー用 (右寄せ) */
 .message-container-user {
-  justify-content: flex-end;
   flex-direction: row-reverse;
 }
 
-/* 役割ラベル */
-.message-role {
-  font-size: 0.9rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-  padding: 0 4px;
-  margin-left: 44px; /* アイコン幅(32)+gap(12) */
-}
-
-.message-role-ai {
-  color: #4A4A4A;
-  text-align: left;
-}
-
-.message-role-user {
-  color: var(--color-user-bg);
-  text-align: right;
-  margin-left: 0;
-  margin-right: 44px;
-}
-
-/* --- メッセージ本体 (吹き出し) --- */
-.message-content {
-  font-size: 1rem;
-  /* ベースの行間設定 */
-  line-height: 1.6; 
-  color: var(--color-text-dark);
-  word-wrap: break-word;
-  padding: 12px 16px;
-  border-radius: 12px;
-  max-width: 90%;
-}
-
-/* AIの吹き出し */
-.message-content-ai {
+/* Avatars (CSS Class Control) */
+.avatar-user, .avatar-ai {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
-  /* コンテンツ間の余白 */
-  gap: 12px; 
-  
-  background-color: var(--color-ai-bg);
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-user {
+  background-color: var(--color-primary); /* Blue */
+  color: white;
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+}
+
+.avatar-ai {
+  background-color: var(--color-text-main); /* Dark Gray/Black */
+  color: white;
+}
+
+/* Role Label (Hidden or Minimal) */
+.message-role {
+  display: none; /* Apple風デザインではアイコンと配置で自明なため非表示 */
+}
+
+/* --- Bubbles --- */
+.message-content {
+  font-size: var(--text-base);
+  line-height: 1.6;
+  word-wrap: break-word;
+  padding: var(--space-3) var(--space-4);
+  max-width: 100%; /* 親で制御 */
+}
+
+/* AI Bubble */
+.message-content-ai {
+  background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color: var(--color-text-main);
+  border-radius: 4px var(--radius-2xl) var(--radius-2xl) var(--radius-2xl); /* 左上だけ角張らせる */
+  box-shadow: var(--shadow-sm);
 }
 
-/* ユーザーの吹き出し */
+/* User Bubble */
 .message-content-user {
-  background-color: var(--color-user-bg);
-  color: var(--color-primary-text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
+  border-radius: var(--radius-2xl) 4px var(--radius-2xl) var(--radius-2xl); /* 右上だけ角張らせる */
+  box-shadow: var(--shadow-sm);
 }
 
+/* ユーザー内のリンクは白文字で見やすく */
 .message-content-user a {
-  color: #A5B4FC;
+  color: white;
   text-decoration: underline;
 }
-.message-content-user a:hover {
-  text-decoration: none;
-}
 
-/* --- ★★★ Markdownレンダリングスタイルの修正 (ここが重要) ★★★ --- */
-
+/* --- Markdown Styles (Inside AI Bubble) --- */
 .markdown-renderer {
-  /* ★重要: pre-wrap を削除し、ブラウザ標準のテキスト折り返しに戻す */
-  /* white-space: pre-wrap; <-- 削除 */
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
-/* 最初と最後の要素の余白をカット (吹き出し内でバランスを良くする) */
-.markdown-renderer > *:first-child {
-  margin-top: 0;
-}
-.markdown-renderer > *:last-child {
-  margin-bottom: 0;
-}
+.markdown-renderer > *:first-child { margin-top: 0; }
+.markdown-renderer > *:last-child { margin-bottom: 0; }
 
-/* 段落 */
 .markdown-renderer p {
-  margin-top: 0;
-  margin-bottom: 1em; /* 適度な行間 */
+  margin-bottom: 0.8em;
 }
 
-/* 見出し (メリハリをつける) */
 .markdown-renderer h1,
 .markdown-renderer h2,
 .markdown-renderer h3 {
-  font-weight: 700;
-  line-height: 1.4;
-  margin-top: 1.5em; /* 上を少し空ける */
-  margin-bottom: 0.5em; /* 下は詰める */
-  color: #111827; /* 濃い黒で強調 */
-}
-/* h1, h2には下線を引いて区切りを明確に */
-.markdown-renderer h1,
-.markdown-renderer h2 {
-  border-bottom: 1px solid #E5E7EB;
-  padding-bottom: 0.3em;
+  font-weight: var(--font-bold);
+  color: var(--color-text-main);
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
 }
 
-/* 太字 */
-.markdown-renderer strong {
-  font-weight: 700;
-  color: #111827; /* 強調色 */
-}
+.markdown-renderer h1 { font-size: var(--text-lg); border-bottom: 1px solid var(--color-border); padding-bottom: 0.3em; }
+.markdown-renderer h2 { font-size: var(--text-base); }
+.markdown-renderer strong { font-weight: var(--font-bold); }
 
-/* --- リストの修正 (位置ずれ防止) --- */
-.markdown-renderer ul,
-.markdown-renderer ol {
-  margin-top: 0.5em;
+/* Lists */
+.markdown-renderer ul, .markdown-renderer ol {
+  padding-left: 1.5em;
   margin-bottom: 1em;
-  padding-left: 1.5em; /* インデント調整 */
 }
-
 .markdown-renderer li {
-  margin-bottom: 0.25em; /* リスト項目の間隔 */
-  line-height: 1.6;
+  margin-bottom: 0.25em;
 }
 
-/* ★重要: Markdownパーサーが li の中に p を入れた場合の余白打ち消し */
-.markdown-renderer li p {
-  margin-bottom: 0;
-  display: inline-block; /* または inline */
-}
-
-/* コードブロック */
+/* Code Blocks */
 .markdown-renderer pre {
-  background-color: #1F2937; /* ダークモード背景 */
+  background-color: #1F2937; /* Dark background for code */
   color: #F3F4F6;
-  padding: 12px;
-  border-radius: 6px;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
   overflow-x: auto;
-  margin: 1em 0;
+  margin: 0.8em 0;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 0.85em;
 }
 
-.markdown-renderer code {
-  font-family: Consolas, Monaco, 'Andale Mono', monospace;
-}
-
-/* インラインコード */
 .markdown-renderer :not(pre) > code {
-  background-color: #E5E7EB;
-  color: #B91C1C; /* 赤文字で強調 */
+  background-color: rgba(0,0,0,0.05);
+  color: #C026D3; /* Purple/Pink text for inline code */
   padding: 2px 4px;
   border-radius: 4px;
+  font-family: monospace;
   font-size: 0.9em;
 }
 
-/* リンク */
+.markdown-renderer blockquote {
+  border-left: 3px solid var(--color-border-strong);
+  padding-left: 1em;
+  color: var(--color-text-sub);
+  font-style: italic;
+  margin: 1em 0;
+}
+
 .markdown-renderer a {
-  color: #2563EB;
+  color: var(--color-primary);
   text-decoration: none;
 }
 .markdown-renderer a:hover {
   text-decoration: underline;
 }
 
-/* 引用 (Blockquote) */
-.markdown-renderer blockquote {
-  border-left: 4px solid #D1D5DB;
-  margin: 1em 0;
-  padding-left: 1em;
-  color: #6B7280;
-  font-style: italic;
+/* Inline Citation [1] */
+.inline-citation {
+  font-size: 0.75em;
+  color: var(--color-primary);
+  font-weight: var(--font-bold);
+  vertical-align: super;
+  margin-left: 2px;
+  cursor: default;
 }
 
-
-/* --- 出典リスト --- */
+/* --- Citation List (Card Style) --- */
 .citation-list {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--color-border);
-  padding-top: 12px;
-  margin-top: 4px; /* gapがあるのでマージンは控えめに */
-  
-  opacity: 0;
   animation: fadeInUp 0.4s ease-out forwards;
-  animation-delay: 0.1s;
 }
 
 .citation-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-text-light);
-  margin-bottom: 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .citation-item {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  background-color: var(--color-bg-body); /* 少しグレー */
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  color: var(--color-text-sub);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.citation-item:hover {
+  background-color: white;
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .citation-favicon {
   width: 14px;
   height: 14px;
-  margin-right: 6px;
-  flex-shrink: 0;
+  margin-right: 8px;
   border-radius: 2px;
 }
 
 .citation-link {
-  color: var(--color-user-bg);
+  color: inherit;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-}
-.citation-link:hover {
-  text-decoration: underline;
+  flex-grow: 1;
 }
 
-.citation-text {
-  color: var(--color-text-dark);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* --- 提案ボタン --- */
+/* --- Suggestion Buttons (Pill Style) --- */
 .suggestion-buttons {
-  border-top: 1px solid var(--color-border);
-  padding-top: 12px;
-  margin-top: 4px;
-
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-border); /* 点線で軽く区切る */
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-
-  opacity: 0;
-  animation: fadeInUp 0.4s ease-out forwards;
-  animation-delay: 0.2s;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .suggestion-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-text-light);
-  margin-bottom: 2px;
+  width: 100%;
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .suggestion-button {
-  font-family: var(--font-family-base);
-  font-size: 0.85rem;
+  background-color: white;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
   padding: 6px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background-color: var(--color-bg-white);
-  color: var(--color-user-bg);
+  border-radius: var(--radius-full); /* Pill shape */
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
-  line-height: 1.4;
 }
 
 .suggestion-button:hover {
-  background-color: #EFF6FF; /* 薄い青 */
-  border-color: var(--color-user-bg);
+  background-color: var(--color-primary-bg);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
 }
 
-/* インライン脚注 [1] */
-.inline-citation {
-  display: inline-block;
-  vertical-align: super;
-  font-size: 0.7em;
-  line-height: 1;
-  font-weight: 700;
-  color: var(--color-user-bg);
-  padding: 0 1px;
-  position: relative;
-  top: -0.2em;
-  margin: 0 1px;
-  cursor: default;
+/* --- File Attachment (In Message) --- */
+.file-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding: 6px 12px;
+  background-color: rgba(255, 255, 255, 0.2); /* ユーザー(青)背景での透過 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  color: white;
+}
+/* AI側でファイルを表示する場合のスタイル (必要なら) */
+.message-content-ai .file-attachment-chip {
+  background-color: var(--color-bg-body);
+  border-color: var(--color-border);
+  color: var(--color-text-main);
 }
