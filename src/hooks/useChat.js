@@ -1,5 +1,5 @@
 // src/hooks/useChat.js
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { mockMessages, mockStreamResponseWithFile, mockStreamResponseNoFile } from '../mockData';
 import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
@@ -26,6 +26,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   const [activeContextFile, setActiveContextFile] = useState(null);
   const [dynamicMockMessages, setDynamicMockMessages] = useState({});
 
+  // 新規作成直後の会話IDを追跡し、履歴ロードによるワイプを防ぐRef
+  const creatingConversationIdRef = useRef(null);
+
   // --- FE Mock Memory Sync ---
   useEffect(() => {
     if (mockMode === 'FE' && conversationId && messages.length > 0) {
@@ -36,6 +39,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   // --- Load History ---
   useEffect(() => {
     const loadHistory = async () => {
+      // 作成直後のIDならロードをスキップ
+      if (conversationId && conversationId === creatingConversationIdRef.current) {
+        addLog(`[useChat] Skip loading history for just-created conversation: ${conversationId}`, 'info');
+        creatingConversationIdRef.current = null;
+        return;
+      }
+
       addLog(`[useChat] Conversation changed to: ${conversationId}`, 'info');
       setActiveContextFile(null);
 
@@ -77,14 +87,18 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           if (item.answer) {
             let aiText = item.answer;
             let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
-            // 履歴読み込み時の推測ロジック: 出典があればsearch、なければknowledge
             let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
 
+            // 履歴読み込み時も強力なパーサーを通す
             const parsed = parseLlmResponse(aiText);
             if (parsed.isParsed) {
               aiText = parsed.answer;
-              if (parsed.citations.length > 0) {
+              // API由来のcitationがない場合のみ、JSON由来を採用
+              if (aiCitations.length === 0 && parsed.citations.length > 0) {
                 aiCitations = mapCitationsFromLLM(parsed.citations);
+                traceMode = 'document';
+              } else if (parsed.citations.length > 0) {
+                // API由来があってもJSON由来があればsearch扱いにする(念のため)
                 traceMode = 'search';
               }
             }
@@ -163,25 +177,16 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       isStreaming: true,
       timestamp: new Date().toISOString(),
       processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : 'AIが思考を開始しました...',
-      traceMode: 'knowledge', // 初期値
+      traceMode: 'knowledge',
     }]);
 
     // 3. API Request / Mock Logic
     if (mockMode === 'FE') {
+      // (Mock logic omitted for brevity)
       const hasFile = attachment || activeContextFile;
-      const isSearchQuery = text.includes('検索') || text.includes('教えて');
-
       let mockRes = mockStreamResponseNoFile;
       let finalTraceMode = 'knowledge';
-
-      if (hasFile) {
-        mockRes = mockStreamResponseWithFile;
-        finalTraceMode = 'document';
-      } else if (isSearchQuery) {
-        mockRes = mockStreamResponseWithFile;
-        finalTraceMode = 'search';
-      }
-
+      if (hasFile) { mockRes = mockStreamResponseWithFile; finalTraceMode = 'document'; }
       setTimeout(() => {
         setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, traceMode: finalTraceMode, text: mockRes.text, citations: mockRes.citations, suggestions: mockRes.suggestions, isStreaming: false, processStatus: null } : m));
         setIsLoading(false);
@@ -207,7 +212,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
 
       let contentBuffer = '';
-      let detectedTraceMode = 'knowledge'; // デフォルトは知識モード
+      let detectedTraceMode = 'knowledge';
+      let isConversationIdSynced = false;
 
       while (true) {
         const { value, done } = await reader.read();
@@ -220,7 +226,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           try {
             const data = JSON.parse(line.substring(6));
 
-            if (data.conversation_id && !conversationId) {
+            if (data.conversation_id && !conversationId && !isConversationIdSynced) {
+              isConversationIdSynced = true;
+              creatingConversationIdRef.current = data.conversation_id;
               onConversationCreated(data.conversation_id, text);
             }
 
@@ -245,14 +253,24 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, text: contentBuffer, processStatus: null } : m));
+                const trimmed = contentBuffer.trim();
+
+                // JSONの開始パターンを検知
+                // マークダウンのコードブロック、または生のJSONオブジェクトの開始
+                const isJsonLikely = trimmed.startsWith('{') || trimmed.startsWith('```json') || trimmed.startsWith('```');
+
+                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  // JSONらしい場合はテキストを隠し、ステータスを表示
+                  text: isJsonLikely ? '' : contentBuffer,
+                  processStatus: isJsonLikely ? '回答を生成・整形しています...' : m.processStatus
+                } : m));
               }
             }
             // --- Metadata ---
             else if (data.event === 'message_end') {
               const citations = data.metadata?.retriever_resources || [];
               if (citations.length > 0) {
-                // 出典があれば強制的にsearch/document扱い
                 if (detectedTraceMode === 'knowledge') detectedTraceMode = 'search';
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
@@ -266,9 +284,25 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             }
             // --- Finish ---
             else if (data.event === 'workflow_finished') {
-              // ★最重要修正: ここで detectedTraceMode を最終保存する
+              let finalText = contentBuffer;
+              let finalCitations = [];
+
+              // ★強力なパーサーで最終整形
+              const parsed = parseLlmResponse(finalText);
+              if (parsed.isParsed) {
+                finalText = parsed.answer;
+                if (parsed.citations.length > 0) {
+                  finalCitations = mapCitationsFromLLM(parsed.citations);
+                  // API由来がなければJSON由来を採用し、モードを更新
+                  detectedTraceMode = 'document';
+                }
+              }
+
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                 ...m,
+                text: finalText,
+                // 既存のcitationsがあれば優先、なければJSON由来を使う
+                citations: m.citations.length > 0 ? m.citations : finalCitations,
                 isStreaming: false,
                 processStatus: null,
                 traceMode: detectedTraceMode
