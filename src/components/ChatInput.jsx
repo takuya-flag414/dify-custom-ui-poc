@@ -2,8 +2,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './styles/ChatArea.css';
 import FileIcon from './FileIcon';
+import DomainTagger from './DomainTagger';
 
-// Integrated Lock Icon
+// Globe Icon
+const GlobeIcon = ({ active }) => (
+  <svg
+    width="20" height="20" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    className={`transition-colors duration-300 ${active ? 'text-blue-500' : 'text-gray-400'}`}
+  >
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="2" y1="12" x2="22" y2="12"></line>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+  </svg>
+);
+
 const LockIcon = () => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -11,11 +24,36 @@ const LockIcon = () => (
   </svg>
 );
 
-const ChatInput = ({ isLoading, onSendMessage, isCentered, activeContextFile, setActiveContextFile }) => {
+const ChatInput = ({
+  isLoading,
+  onSendMessage,
+  isCentered,
+  activeContextFile,
+  setActiveContextFile,
+  domainFilters,
+  setDomainFilters,
+  forceSearch,
+  setForceSearch
+}) => {
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
+
+  const [showSearchOptions, setShowSearchOptions] = useState(false);
+  const searchOptionsRef = useRef(null);
+
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchOptionsRef.current && !searchOptionsRef.current.contains(event.target)) {
+        setShowSearchOptions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -36,18 +74,18 @@ const ChatInput = ({ isLoading, onSendMessage, isCentered, activeContextFile, se
     if ((!text.trim() && !file) || isLoading) return;
     onSendMessage(text, file);
     setText('');
-    setFile(null); // Clear temp file
+    setFile(null);
+    setShowSearchOptions(false);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
-      e.target.value = ''; // Reset input
+      e.target.value = '';
     }
   };
 
-  // Sticky File Clear
   const handleClearContext = () => {
     setActiveContextFile(null);
   };
@@ -56,7 +94,7 @@ const ChatInput = ({ isLoading, onSendMessage, isCentered, activeContextFile, se
     <div className={isCentered ? "chat-input-container-centered" : "chat-input-container"}>
       <div className={`chat-input-form ${activeContextFile ? 'has-context' : ''}`}>
 
-        {/* A. Sticky Context File (Conversation Scope) */}
+        {/* Sticky Context File */}
         {activeContextFile && (
           <div className="flex items-center gap-2 p-2 mb-2 bg-blue-50 border border-blue-100 rounded-lg animate-fade-in mx-1">
             <div className="flex items-center justify-center w-6 h-6 bg-blue-100 rounded text-blue-600">
@@ -74,7 +112,7 @@ const ChatInput = ({ isLoading, onSendMessage, isCentered, activeContextFile, se
           </div>
         )}
 
-        {/* B. Temporary Attachment (One-time) */}
+        {/* Temporary Attachment */}
         {file && (
           <div className="file-preview-integrated">
             <FileIcon filename={file.name} className="w-6 h-6" />
@@ -86,11 +124,11 @@ const ChatInput = ({ isLoading, onSendMessage, isCentered, activeContextFile, se
         )}
 
         {/* Input Row */}
-        <div className="chat-input-row">
+        <div className="chat-input-row relative" ref={searchOptionsRef}>
           <button
             className="chat-input-attach-btn"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading || !!activeContextFile} // Disable if sticky exists (Phase 1 limit)
+            disabled={isLoading || !!activeContextFile}
             title="ファイルを添付"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -105,10 +143,36 @@ const ChatInput = ({ isLoading, onSendMessage, isCentered, activeContextFile, se
             accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
           />
 
+          {/* Search Settings Trigger (開閉のみ) */}
+          <button
+            className={`chat-input-attach-btn ml-1 ${forceSearch ? 'bg-blue-50' : ''}`}
+            onClick={() => setShowSearchOptions(!showSearchOptions)}
+            disabled={isLoading}
+            title="検索設定を開く"
+          >
+            <GlobeIcon active={forceSearch} />
+          </button>
+
+          {/* Search Options Popover */}
+          {showSearchOptions && (
+            <div className="search-options-popover">
+              <DomainTagger
+                filters={domainFilters}
+                setFilters={setDomainFilters}
+                forceSearch={forceSearch}       // ★ 追加
+                setForceSearch={setForceSearch} // ★ 追加
+              />
+            </div>
+          )}
+
           <textarea
             ref={textareaRef}
             className="chat-input-textarea"
-            placeholder={isLoading ? "AIが思考中です..." : (activeContextFile ? "このファイルについて質問..." : "メッセージを入力 (AIが検索を判断します)...")}
+            placeholder={
+              isLoading
+                ? "AIが思考中です..."
+                : (forceSearch ? "Web検索したい内容を入力..." : "メッセージを入力 (AIが検索を判断します)...")
+            }
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}

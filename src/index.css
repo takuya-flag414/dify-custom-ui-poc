@@ -4,17 +4,25 @@
 :root {
   /* --- Typography --- */
   --font-family-base: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  
+
   /* Font Sizes */
-  --text-xs: 0.75rem;   /* 12px */
-  --text-sm: 0.875rem;  /* 14px */
-  --text-base: 1rem;    /* 16px */
-  --text-lg: 1.125rem;  /* 18px */
-  --text-xl: 1.25rem;   /* 20px */
-  --text-2xl: 1.5rem;    /* 24px */
-  --text-3xl: 1.875rem;  /* 30px */
-  --text-4xl: 2.25rem;   /* 36px */
-  
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+
   /* Font Weights */
   --font-normal: 400;
   --font-medium: 500;
@@ -22,30 +30,46 @@
 
   /* --- Color Palette (Based on DESIGN_RULE.md) --- */
   /* Primary (Blue) */
-  --color-primary: #3B82F6;       /* blue-500: 主要アクション */
-  --color-primary-hover: #2563EB; /* blue-600: ホバー */
-  --color-primary-active: #1D4ED8;/* blue-700: アクティブ/テキスト */
-  --color-primary-bg: #EFF6FF;    /* blue-50: 背景用 */
-  --color-primary-bg-hover: #DBEAFE; /* blue-100: ホバー背景 */
+  --color-primary: #3B82F6;
+  /* blue-500: 主要アクション */
+  --color-primary-hover: #2563EB;
+  /* blue-600: ホバー */
+  --color-primary-active: #1D4ED8;
+  /* blue-700: アクティブ/テキスト */
+  --color-primary-bg: #EFF6FF;
+  /* blue-50: 背景用 */
+  --color-primary-bg-hover: #DBEAFE;
+  /* blue-100: ホバー背景 */
 
   /* Text Colors */
-  --color-text-main: #111827;     /* gray-900: 主要テキスト */
-  --color-text-sub: #374151;      /* gray-700: 補助テキスト */
-  --color-text-muted: #6B7280;    /* gray-500: 非重要テキスト */
-  --color-text-white: #FFFFFF;    /* 反転テキスト */
+  --color-text-main: #111827;
+  /* gray-900: 主要テキスト */
+  --color-text-sub: #374151;
+  /* gray-700: 補助テキスト */
+  --color-text-muted: #6B7280;
+  /* gray-500: 非重要テキスト */
+  --color-text-white: #FFFFFF;
+  /* 反転テキスト */
 
   /* Background Colors */
-  --color-bg-body: #F3F4F6;       /* gray-100: アプリ背景 */
-  --color-bg-surface: #FFFFFF;    /* white: カード/メインエリア */
-  --color-bg-sidebar: #F9FAFB;    /* gray-50: サイドバー */
-  
+  --color-bg-body: #F3F4F6;
+  /* gray-100: アプリ背景 */
+  --color-bg-surface: #FFFFFF;
+  /* white: カード/メインエリア */
+  --color-bg-sidebar: #F9FAFB;
+  /* gray-50: サイドバー */
+
   /* Border Colors */
-  --color-border: #E5E7EB;        /* gray-200: 薄い区切り線 */
-  --color-border-strong: #D1D5DB; /* gray-300: 明確な境界線 */
+  --color-border: #E5E7EB;
+  /* gray-200: 薄い区切り線 */
+  --color-border-strong: #D1D5DB;
+  /* gray-300: 明確な境界線 */
 
   /* Semantic Colors */
-  --color-error: #DC2626;         /* red-600 */
-  --color-success: #059669;       /* green-600 */
+  --color-error: #DC2626;
+  /* red-600 */
+  --color-success: #059669;
+  /* green-600 */
 
   /* --- Spacing --- */
   --space-1: 4px;
@@ -59,16 +83,19 @@
   /* --- Border Radius --- */
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 8px;   /* 小ボタン, 入力欄 */
-  --radius-xl: 12px;  /* 標準ボタン */
-  --radius-2xl: 16px; /* カード, メッセージバブル */
+  --radius-lg: 8px;
+  /* 小ボタン, 入力欄 */
+  --radius-xl: 12px;
+  /* 標準ボタン */
+  --radius-2xl: 16px;
+  /* カード, メッセージバブル */
   --radius-full: 9999px;
 
   /* --- Shadows (Apple-like Soft Shadows) --- */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
+
   /* Focus Ring (Accessibility) */
   --ring-focus: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
@@ -83,7 +110,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -92,13 +121,432 @@ body {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #D1D5DB;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #9CA3AF;
+}
+
+/* src/index.css の末尾に追加 */
+
+/* --- Tagging UI (Domain Filter) --- */
+.domain-tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 6px;
+  /* 少し狭めてタイトに */
+  background-color: var(--color-bg-surface);
+  /* body色ではなく白背景に */
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  min-height: 40px;
+  align-items: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.domain-tag-container:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.domain-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 4px 10px;
+  /* 右側(×ボタン側)を少し狭く */
+  border-radius: 6px;
+  /* radius-md相当。少し角張らせてチップ感を出す */
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  line-height: 1;
+  transition: all 0.2s ease;
+  user-select: none;
+  cursor: default;
+}
+
+/* Allow (Blue) */
+.domain-tag.allow {
+  background-color: #EFF6FF;
+  /* blue-50 */
+  color: #2563EB;
+  /* blue-600 */
+  border: 1px solid #DBEAFE;
+  /* blue-100 */
+}
+
+/* Deny (Red) */
+.domain-tag.deny {
+  background-color: #FEF2F2;
+  /* red-50 */
+  color: #DC2626;
+  /* red-600 */
+  border: 1px solid #FEE2E2;
+  /* red-100 */
+}
+
+/* Input Field */
+.domain-input {
+  flex: 1;
+  min-width: 120px;
+  background: transparent;
+  border: none;
+  font-size: var(--text-sm);
+  color: var(--color-text-main);
+  outline: none;
+  padding: 4px;
+  height: 24px;
+  /* タグの高さに合わせる */
+}
+
+.domain-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Close Button (New Style) */
+.domain-tag-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background-color: transparent;
+  color: currentColor;
+  /* 親の文字色(青/赤)を継承 */
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  transition: all 0.2s ease;
+}
+
+/* Hover Effect */
+.domain-tag-close:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.08);
+  /* わずかな背景色 */
+}
+
+/* SVG Icon Size Adjustment */
+.domain-tag-close svg {
+  width: 10px;
+  height: 10px;
+  stroke-width: 2.5;
+  /* 線を少し太くして視認性向上 */
+}
+
+/* --- Search Options Popover --- */
+.search-options-popover {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: var(--space-2);
+  width: 320px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-4);
+  z-index: 50;
+  animation: popover-slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom left;
+}
+
+@keyframes popover-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --- Toggle Switch (iOS Style) --- */
+.toggle-switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  /* 高さを広げて押しやすく */
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.toggle-switch-container:hover {
+  background-color: #F9FAFB;
+}
+
+.toggle-switch-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* タイトルと説明の間隔 */
+}
+
+.toggle-switch-title {
+  font-size: 14px;
+  /* text-sm */
+  font-weight: var(--font-medium);
+  color: var(--color-text-main);
+}
+
+.toggle-switch-desc {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* Switch Body */
+.toggle-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 44px;
+  /* 少し大きく */
+  height: 26px;
+  background-color: #E5E7EB;
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.toggle-input::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* バウンス効果 */
+}
+
+.toggle-input:checked {
+  background-color: var(--color-primary);
+}
+
+.toggle-input:checked::after {
+  transform: translateX(18px);
+}
+
+/* --- Empty State Message --- */
+.empty-state-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0 24px 0;
+  /* 上下の余白をたっぷりと */
+  text-align: center;
+  background-color: transparent;
+}
+
+/* --- Domain Wizard UI (Refined) --- */
+.domain-wizard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: fadeIn 0.2s ease-out;
+  padding: 4px 0;
+}
+
+.wizard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  /* ヘッダー下の余白 */
+  position: relative;
+}
+
+.wizard-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--color-text-main);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.wizard-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  padding: 4px 8px 4px 0;
+  cursor: pointer;
+  font-weight: var(--font-normal);
+  transition: opacity 0.2s;
+}
+
+.wizard-back-btn:hover {
+  opacity: 0.7;
+}
+
+.segmented-control {
+  display: flex;
+  background-color: #F3F4F6;
+  padding: 3px;
+  border-radius: 10px;
+  position: relative;
+  height: 36px;
+  /* 高さを固定して安定感を */
+}
+
+.segmented-option {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 1;
+  color: var(--color-text-sub);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.segmented-option.selected {
+  background-color: white;
+  color: var(--color-text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.segmented-option.selected.deny-mode {
+  color: var(--color-error);
+}
+
+.wizard-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: 2px;
+}
+
+.wizard-input {
+  width: 100%;
+  height: 44px;
+  /* タッチしやすい高さ */
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--color-text-main);
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.wizard-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.wizard-description {
+  font-size: 12px;
+  color: #6B7280;
+  line-height: 1.6;
+  margin-top: 6px;
+  margin-left: 2px;
+}
+
+/* Buttons */
+.btn-add-url {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  /* 縦幅を広げる */
+  margin-top: 16px;
+  /* 上との距離を離す */
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  color: var(--color-text-sub);
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  /* 丸みを増やす */
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add-url:hover {
+  background-color: #F3F4F6;
+  color: var(--color-text-main);
+  border-color: #D1D5DB;
+}
+
+.btn-primary-action {
+  width: 100%;
+  height: 44px;
+  /* 高さ統一 */
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 14px;
+  font-weight: var(--font-bold);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+  /* ボタン上の余白もしっかり取る */
+}
+
+.btn-primary-action:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary-action:disabled {
+  background-color: #E5E7EB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- Empty State Message --- */
+.empty-state-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  text-align: center;
+  background-color: transparent;
+  /* 枠線なし */
 }

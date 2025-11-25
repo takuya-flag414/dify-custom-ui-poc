@@ -1,5 +1,5 @@
 // src/hooks/useChat.js
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { mockMessages, mockStreamResponseWithFile, mockStreamResponseNoFile } from '../mockData';
 import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
@@ -26,7 +26,22 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   const [activeContextFile, setActiveContextFile] = useState(null);
   const [dynamicMockMessages, setDynamicMockMessages] = useState({});
 
+  // Domain Filters State
+  const [domainFilters, setDomainFilters] = useState([]);
+  const filtersMapRef = useRef({});
+
+  // ★ New: Force Search State
+  const [forceSearch, setForceSearch] = useState(false);
+
   const creatingConversationIdRef = useRef(null);
+
+  // Wrapper to update filters and persist map
+  const updateDomainFilters = (newFilters) => {
+    setDomainFilters(newFilters);
+    if (conversationId) {
+      filtersMapRef.current[conversationId] = newFilters;
+    }
+  };
 
   // --- FE Mock Memory Sync ---
   useEffect(() => {
@@ -38,6 +53,14 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   // --- Load History ---
   useEffect(() => {
     const loadHistory = async () => {
+      // Restore Filters
+      const savedFilters = filtersMapRef.current[conversationId] || [];
+      setDomainFilters(savedFilters);
+
+      // Note: Force Searchの設定は会話ごとに維持するか、グローバルにするか？
+      // ここでは「会話を切り替えても設定をリセットしない（ユーザーの今の意思を尊重）」設計とします。
+      // もしリセットしたい場合はここで setForceSearch(false); してください。
+
       if (conversationId && conversationId === creatingConversationIdRef.current) {
         addLog(`[useChat] Skip loading history for just-created conversation: ${conversationId}`, 'info');
         creatingConversationIdRef.current = null;
@@ -125,10 +148,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     let uploadedFileId = null;
     let displayFiles = [];
 
-    // 補正用に現在のファイル名を保持
     const currentFileName = attachment?.name || activeContextFile?.name;
 
-    // 1. File Upload / Context Handling
+    // 1. File Upload
     if (mockMode === 'OFF') {
       if (attachment) {
         setIsLoading(true);
@@ -154,7 +176,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       }
     }
 
-    // 2. Optimistic UI Update
+    // 2. Optimistic UI
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       role: 'user',
@@ -174,7 +196,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       suggestions: [],
       isStreaming: true,
       timestamp: new Date().toISOString(),
-      processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : 'AIが思考を開始しました...',
+      processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : (forceSearch ? 'Web検索を開始します(強制)...' : 'AIが思考を開始しました...'),
       traceMode: 'knowledge',
     }]);
 
@@ -191,10 +213,21 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       return;
     }
 
+    // ★ Force Search Logic
+    const domainFilterString = domainFilters.length > 0 ? domainFilters.join(', ') : '';
+    const searchModeValue = forceSearch ? 'force' : 'auto';
+
+    addLog(`[Search Mode] ${searchModeValue.toUpperCase()}`, 'info');
+    if (domainFilters.length > 0) {
+      addLog(`[Domain Filter] Applying: ${domainFilterString}`, 'info');
+    }
+
     const requestBody = {
       inputs: {
         isDebugMode: mockMode === 'BE',
         mock_perplexity_text: mockMode === 'BE' ? MOCK_PERPLEXITY_JSON : '',
+        domain_filter: domainFilterString,
+        search_mode: searchModeValue, // ★ Inject Variable
       },
       query: text,
       user: USER_ID,
@@ -225,6 +258,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             if (data.conversation_id && !conversationId && !isConversationIdSynced) {
               isConversationIdSynced = true;
               creatingConversationIdRef.current = data.conversation_id;
+
+              if (domainFilters.length > 0) {
+                filtersMapRef.current[data.conversation_id] = domainFilters;
+              }
               onConversationCreated(data.conversation_id, text);
             }
 
@@ -272,24 +309,18 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               if (parsed.isParsed) {
                 finalText = parsed.answer;
                 if (parsed.citations.length > 0) {
-                  // ★★★ Smart Fail-Safe Implementation ★★★
                   finalCitations = mapCitationsFromLLM(parsed.citations).map(citation => {
-                    // 1. ファイル名が存在し、かつURLを持たない(Webでない)出典に対してチェック
                     if (currentFileName && !citation.url) {
                       const lowerSource = citation.source.toLowerCase();
                       const lowerCurrent = currentFileName.toLowerCase();
-                      const currentBase = lowerCurrent.substring(0, lowerCurrent.lastIndexOf('.')); // 拡張子なし
+                      const currentBase = lowerCurrent.substring(0, lowerCurrent.lastIndexOf('.'));
 
-                      // 2. マッチング判定 (出典名がファイル名の一部である、またはその逆)
-                      // 例: source="提案資料" vs current="提案資料.pdf" -> true
                       if (lowerCurrent.includes(lowerSource) || lowerSource.includes(currentBase)) {
-                        // 3. マッチし、かつ拡張子が欠けていそうな場合、正しいファイル名に補正
                         return { ...citation, source: `[1] ${currentFileName}` };
                       }
                     }
                     return citation;
                   });
-
                   detectedTraceMode = 'document';
                 }
               }
@@ -323,5 +354,16 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     } catch (e) { /* ignore */ }
   };
 
-  return { messages, setMessages, isLoading, activeContextFile, setActiveContextFile, handleSendMessage };
+  return {
+    messages,
+    setMessages,
+    isLoading,
+    activeContextFile,
+    setActiveContextFile,
+    handleSendMessage,
+    domainFilters,
+    setDomainFilters: updateDomainFilters,
+    forceSearch,    // ★ Exposed
+    setForceSearch  // ★ Exposed
+  };
 };

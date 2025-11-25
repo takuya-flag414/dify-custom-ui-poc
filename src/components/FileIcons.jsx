@@ -39,9 +39,23 @@ export const SourceIcon = ({ type, source, url, className = "citation-icon-img" 
 
   // 1. Web (External)
   if (type === 'web') {
-    if (url && !faviconError) {
+    let isValidUrl = false;
+    let domainUrl = '';
+
+    // ★ Crash対策: URLの構文解析を try-catch で囲む
+    try {
+      if (url && (url.startsWith('http') || url.startsWith('https'))) {
+        domainUrl = new URL(url).origin;
+        isValidUrl = true;
+      }
+    } catch (e) {
+      // URLが無効な場合は無視してフォールバック処理へ進む
+    }
+
+    // 有効なURLかつ画像エラーが起きていない場合のみFaviconを表示
+    if (isValidUrl && !faviconError) {
       // Google S2 Favicon API
-      const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${new URL(url).origin}`;
+      const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain_url=${domainUrl}`;
       return (
         <img
           src={faviconUrl}
@@ -52,6 +66,7 @@ export const SourceIcon = ({ type, source, url, className = "citation-icon-img" 
         />
       );
     }
+    // フォールバック: 地球儀アイコン
     return <div className={className} style={{ color: '#6366F1' }}><GlobeIcon /></div>;
   }
 

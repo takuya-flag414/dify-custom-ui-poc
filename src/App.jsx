@@ -3,11 +3,9 @@ import { useState } from 'react';
 import './App.css';
 import './index.css';
 
-// コンポーネント
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 
-// フック
 import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';
 import { useChat } from './hooks/useChat';
@@ -17,13 +15,12 @@ function App() {
 
   const { addLog, handleCopyLogs, copyButtonText } = useLogger();
 
-  // 1. handleDeleteConversation を分割代入で取得
   const {
     conversations,
     conversationId,
     setConversationId,
     handleConversationCreated,
-    handleDeleteConversation // [追加]
+    handleDeleteConversation
   } = useConversations(mockMode, addLog);
 
   const {
@@ -34,6 +31,10 @@ function App() {
     activeContextFile,
     setActiveContextFile,
     handleSendMessage,
+    domainFilters,
+    setDomainFilters,
+    forceSearch,    // ★ New
+    setForceSearch  // ★ New
   } = useChat(mockMode, conversationId, addLog, handleConversationCreated);
 
   return (
@@ -42,7 +43,7 @@ function App() {
         conversationId={conversationId}
         setConversationId={setConversationId}
         conversations={conversations}
-        onDeleteConversation={handleDeleteConversation} // [追加] Sidebarへ渡す
+        onDeleteConversation={handleDeleteConversation}
       />
       <ChatArea
         messages={messages}
@@ -59,6 +60,10 @@ function App() {
         activeContextFile={activeContextFile}
         setActiveContextFile={setActiveContextFile}
         onSendMessage={handleSendMessage}
+        domainFilters={domainFilters}
+        setDomainFilters={setDomainFilters}
+        forceSearch={forceSearch}       // ★ Pass Down
+        setForceSearch={setForceSearch} // ★ Pass Down
       />
     </div>
   );
