@@ -1,101 +1,105 @@
 // src/components/MarkdownRenderer.jsx
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm'; // GFM (テーブル、取り消し線など) をサポート
-import './styles/MessageBlock.css'; // .markdown-renderer スタイル
+import remarkGfm from 'remark-gfm';
+import { SourceIcon } from './FileIcons';
+import './styles/MessageBlock.css';
 
 /**
- * ★ 脚注 [1] を <sup>1</sup> に変換、または無効な番号 [5] を削除するロジック
- * @param {Array} children - ReactMarkdown の p/li タグの子要素
- * @param {number} citationCount - 出典リストの実際の件数 (e.g., 2)
+ * インライン出典 [1] をクリック可能なバッジに変換
  */
-const renderWithInlineCitations = (children, citationCount) => {
+const renderWithInlineCitations = (children, citations, messageId) => {
   if (!children) return null;
-  
-  // children が配列でない場合 (単一の文字列など) も配列化して処理
   const childrenArray = Array.isArray(children) ? children : [children];
-
   const newChildren = [];
+  const citationCount = citations ? citations.length : 0;
 
   childrenArray.forEach((child, i) => {
-    // 子要素がテキストノードの場合のみ処理
     if (typeof child === 'string') {
-      // 正規表現で [1] や [12] のような形式を検索
-      // (\s*) を追加して前後のスペースも保持しつつ分割
-      const parts = child.split(/(\[\d+\])/g); 
-      
+      // [1] や [12] を検出して分割
+      const parts = child.split(/(\[\d+\])/g);
       parts.forEach((part, j) => {
-        // [1] や [12] にマッチした場合
         if (/^\[\d+\]$/.test(part)) {
-          const numberStr = part.replace(/[\[\]]/g, ''); // [ ] を削除
+          const numberStr = part.replace(/[\[\]]/g, '');
           const number = parseInt(numberStr, 10);
-          
-          // 数値が 0 より大きく、かつ実際の出典件数以下の場合のみ <sup> タグに変換
+
+          // 有効な出典番号であればバッジ化
           if (number > 0 && number <= citationCount) {
+            const citation = citations[number - 1];
+
             newChildren.push(
-              <sup key={`${i}-${j}`} className="inline-citation">
-                {number}
-              </sup>
+              <span key={`${i}-${j}`} className="citation-badge-wrapper">
+                <a
+                  href={`#citation-${messageId}-${number}`}
+                  className="citation-badge"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById(`citation-${messageId}-${number}`);
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      el.classList.add('highlight-citation');
+                      setTimeout(() => el.classList.remove('highlight-citation'), 2000);
+                    }
+                  }}
+                >
+                  {number}
+                </a>
+
+                {/* ホバー時に表示するツールチップ */}
+                <div className="citation-tooltip">
+                  <div className="citation-tooltip-content">
+                    <div className="citation-tooltip-icon">
+                      <SourceIcon
+                        type={citation.type === 'dataset' ? 'rag' : citation.type}
+                        source={citation.source}
+                        url={citation.url}
+                        className="w-4 h-4"
+                      />
+                    </div>
+                    <div className="citation-tooltip-text">
+                      <div className="citation-tooltip-title">
+                        {citation.source.replace(/^\[\d+\]\s*/, '')}
+                      </div>
+                      {citation.url && (
+                        <div className="citation-tooltip-url">{citation.url}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </span>
             );
           }
-          // 無効な番号 (例: [5]) は表示しない (newChildrenにpushしない)ことで削除
-
         } else if (part) {
-          // 通常のテキストや空文字はそのまま追加
           newChildren.push(part);
         }
       });
     } else {
-      // テキストノード以外 (例: <a>, <strong> タグなど) は再帰的に処理せずそのまま追加
-      // (必要ならここでも再帰処理が可能だが、通常は不要)
       newChildren.push(child);
     }
   });
-
   return newChildren;
 };
 
-
-/**
- * AI回答の本文をMarkdownで描画 (T-06)
- * @param {string} content - Markdown形式のテキスト
- * @param {boolean} isStreaming - ストリーミング中かどうかのフラグ
- * @param {Array} citations - 出典配列
- */
-const MarkdownRenderer = ({ content, isStreaming = false, citations = [] }) => {
-
+const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messageId }) => {
   if (isStreaming) {
-    // ストリーミング中は Markdown パースせず、生テキストを表示
-    return (
-      <div className="markdown-renderer">
-        {content}
-      </div>
-    );
+    return <div className="markdown-renderer blinking-cursor">{content}</div>;
   }
 
-  // 実際の出典件数を取得
-  const citationCount = citations ? citations.length : 0;
-
-  // ストリーミング完了後は ReactMarkdown でパース
   return (
     <div className="markdown-renderer">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          // リンクを新しいタブで開く
           a: ({ node, ...props }) => (
             <a {...props} target="_blank" rel="noopener noreferrer" />
           ),
-          // ★ 修正: p (段落) タグ内のテキスト処理
           p: ({ node, children, ...props }) => {
-            const processedChildren = renderWithInlineCitations(children, citationCount);
-            return <p {...props}>{processedChildren}</p>;
+            const processed = renderWithInlineCitations(children, citations, messageId);
+            return <p {...props}>{processed}</p>;
           },
-          // ★ 追加: li (リスト項目) タグ内のテキスト処理
-          // これにより、箇条書き内の [1] も正しくパースされる
           li: ({ node, children, ...props }) => {
-             const processedChildren = renderWithInlineCitations(children, citationCount);
-             return <li {...props}>{processedChildren}</li>;
+            const processed = renderWithInlineCitations(children, citations, messageId);
+            return <li {...props}>{processed}</li>;
           }
         }}
       >
@@ -105,4 +109,4 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [] }) => {
   );
 };
 
-export default MarkdownRenderer;
+export default React.memo(MarkdownRenderer);
