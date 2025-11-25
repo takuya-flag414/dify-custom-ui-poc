@@ -3,11 +3,11 @@ import { useState } from 'react';
 import './App.css';
 import './index.css';
 
-// コンポーネントのインポート
+// コンポーネント
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 
-// カスタムフックのインポート
+// フック
 import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';
 import { useChat } from './hooks/useChat';
@@ -15,13 +15,15 @@ import { useChat } from './hooks/useChat';
 function App() {
   const [mockMode, setMockMode] = useState('FE');
 
-  // カスタムフックの初期化
   const { addLog, handleCopyLogs, copyButtonText } = useLogger();
+
+  // 1. handleDeleteConversation を分割代入で取得
   const {
     conversations,
     conversationId,
     setConversationId,
-    handleConversationCreated
+    handleConversationCreated,
+    handleDeleteConversation // [追加]
   } = useConversations(mockMode, addLog);
 
   const {
@@ -40,6 +42,7 @@ function App() {
         conversationId={conversationId}
         setConversationId={setConversationId}
         conversations={conversations}
+        onDeleteConversation={handleDeleteConversation} // [追加] Sidebarへ渡す
       />
       <ChatArea
         messages={messages}

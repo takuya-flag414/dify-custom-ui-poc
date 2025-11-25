@@ -98,7 +98,7 @@ export const sendChatMessageApi = async (payload, apiUrl, apiKey) => {
     const errorData = await response.json();
     throw new Error(errorData.message || errorData.code || 'API Error');
   }
-  
+
   return response;
 };
 
@@ -114,12 +114,39 @@ export const fetchSuggestionsApi = async (messageId, user, apiUrl, apiKey) => {
     method: 'GET',
     headers: { Authorization: `Bearer ${apiKey}` }
   });
-  
+
   if (!response.ok) {
     // 失敗しても致命的ではないため、nullを返すかエラーを投げるか呼び出し元で判断
     // ここではエラーを投げる
     throw new Error(`Failed to fetch suggestions: ${response.status}`);
   }
-  
+
   return await response.json();
+};
+
+/**
+ * [追加] 会話を削除する
+ * @param {string} conversationId - 削除対象の会話ID
+ * @param {string} user - ユーザーID
+ * @param {string} apiUrl - APIのベースURL
+ * @param {string} apiKey - APIキー
+ * @returns {Promise<boolean>} 成功すればtrue
+ */
+export const deleteConversationApi = async (conversationId, user, apiUrl, apiKey) => {
+  const response = await fetch(`${apiUrl}/conversations/${conversationId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({ user }), // マニュアルに従いuserを含める
+  });
+
+  if (response.status !== 204) {
+    // 204 No Content 以外はエラーとみなす
+    const errorText = await response.text(); // エラー時はJSONとは限らないためtextで取得
+    throw new Error(`Delete failed: ${response.status} ${errorText}`);
+  }
+
+  return true;
 };

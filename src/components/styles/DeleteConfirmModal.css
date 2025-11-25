@@ -1,0 +1,118 @@
+/* src/components/styles/DeleteConfirmModal.css */
+
+/* オーバーレイ（背景） */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    /* 少し濃いめのマスク */
+    backdrop-filter: blur(4px);
+    /* Apple風のぼかし効果 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    /* 最前面 */
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* モーダル本体 */
+.modal-content {
+    background-color: white;
+    width: 90%;
+    max-width: 400px;
+    border-radius: var(--radius-3xl);
+    /* 24px: 親しみやすい丸み */
+    padding: var(--space-6);
+    box-shadow: var(--shadow-xl);
+    transform: scale(1);
+    animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    /* バウンドするような心地よい動き */
+}
+
+/* タイトル */
+.modal-title {
+    margin: 0 0 var(--space-2) 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    text-align: center;
+}
+
+/* 説明文 */
+.modal-description {
+    margin: 0 0 var(--space-6) 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-sub);
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ボタンエリア */
+.modal-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: stretch;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: var(--space-3) 0;
+    border-radius: var(--radius-xl);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+/* キャンセルボタン */
+.modal-btn-cancel {
+    background-color: var(--color-bg-surface);
+    /* gray-50 */
+    color: var(--color-text-main);
+}
+
+.modal-btn-cancel:hover {
+    background-color: var(--color-border);
+    /* gray-200 */
+}
+
+/* 削除ボタン (Danger) */
+.modal-btn-delete {
+    background-color: #DC2626;
+    /* red-600 */
+    color: white;
+}
+
+.modal-btn-delete:hover {
+    background-color: #B91C1C;
+    /* red-700 */
+    box-shadow: var(--shadow-md);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
