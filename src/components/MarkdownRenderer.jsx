@@ -1,5 +1,5 @@
 // src/components/MarkdownRenderer.jsx
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SourceIcon } from './FileIcons';
@@ -16,17 +16,14 @@ const renderWithInlineCitations = (children, citations, messageId) => {
 
   childrenArray.forEach((child, i) => {
     if (typeof child === 'string') {
-      // [1] や [12] を検出して分割
       const parts = child.split(/(\[\d+\])/g);
       parts.forEach((part, j) => {
         if (/^\[\d+\]$/.test(part)) {
           const numberStr = part.replace(/[\[\]]/g, '');
           const number = parseInt(numberStr, 10);
 
-          // 有効な出典番号であればバッジ化
           if (number > 0 && number <= citationCount) {
             const citation = citations[number - 1];
-
             newChildren.push(
               <span key={`${i}-${j}`} className="citation-badge-wrapper">
                 <a
@@ -44,8 +41,6 @@ const renderWithInlineCitations = (children, citations, messageId) => {
                 >
                   {number}
                 </a>
-
-                {/* ホバー時に表示するツールチップ */}
                 <div className="citation-tooltip">
                   <div className="citation-tooltip-content">
                     <div className="citation-tooltip-icon">
@@ -68,6 +63,8 @@ const renderWithInlineCitations = (children, citations, messageId) => {
                 </div>
               </span>
             );
+          } else {
+            newChildren.push(part);
           }
         } else if (part) {
           newChildren.push(part);
@@ -81,8 +78,62 @@ const renderWithInlineCitations = (children, citations, messageId) => {
 };
 
 const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messageId }) => {
-  if (isStreaming) {
-    return <div className="markdown-renderer blinking-cursor">{content}</div>;
+  const [displayMode, setDisplayMode] = useState(isStreaming ? 'streaming' : 'done');
+  const [typedContent, setTypedContent] = useState('');
+
+  const prevStreamingRef = useRef(isStreaming);
+
+  useEffect(() => {
+    if (isStreaming) {
+      setDisplayMode('streaming');
+      setTypedContent('');
+    }
+    else if (prevStreamingRef.current === true && isStreaming === false) {
+      setDisplayMode('typing');
+      let currentIndex = 0;
+      const fullText = content || '';
+
+      // --- UX改善: 高速タイピング設定 ---
+      const typingInterval = 5; // 更新間隔 (ms)
+      const charsPerTick = 3;   // 一度の更新で進める文字数
+
+      const intervalId = setInterval(() => {
+        if (currentIndex < fullText.length) {
+          currentIndex += charsPerTick;
+          // インデックスが長さを超えないようにクランプ
+          const nextIndex = Math.min(currentIndex, fullText.length);
+          setTypedContent(fullText.substring(0, nextIndex));
+
+          if (nextIndex >= fullText.length) {
+            clearInterval(intervalId);
+            setDisplayMode('done');
+          }
+        } else {
+          clearInterval(intervalId);
+          setDisplayMode('done');
+        }
+      }, typingInterval);
+
+      return () => clearInterval(intervalId);
+    }
+    else if (displayMode === 'streaming' && !isStreaming) {
+      setDisplayMode('done');
+    }
+
+    prevStreamingRef.current = isStreaming;
+  }, [isStreaming, content]);
+
+  if (displayMode === 'streaming') {
+    return <div className="markdown-renderer blinking-cursor"></div>;
+  }
+
+  if (displayMode === 'typing') {
+    return (
+      <div className="markdown-renderer">
+        <span style={{ whiteSpace: 'pre-wrap' }}>{typedContent}</span>
+        <span className="blinking-cursor"></span>
+      </div>
+    );
   }
 
   return (

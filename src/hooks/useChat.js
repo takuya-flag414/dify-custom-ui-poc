@@ -26,7 +26,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   const [activeContextFile, setActiveContextFile] = useState(null);
   const [dynamicMockMessages, setDynamicMockMessages] = useState({});
 
-  // 新規作成直後の会話IDを追跡し、履歴ロードによるワイプを防ぐRef
   const creatingConversationIdRef = useRef(null);
 
   // --- FE Mock Memory Sync ---
@@ -39,7 +38,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   // --- Load History ---
   useEffect(() => {
     const loadHistory = async () => {
-      // 作成直後のIDならロードをスキップ
       if (conversationId && conversationId === creatingConversationIdRef.current) {
         addLog(`[useChat] Skip loading history for just-created conversation: ${conversationId}`, 'info');
         creatingConversationIdRef.current = null;
@@ -63,7 +61,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         return;
       }
 
-      // API Real History
       setIsLoading(true);
       setMessages([]);
       try {
@@ -89,16 +86,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
             let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
 
-            // 履歴読み込み時も強力なパーサーを通す
             const parsed = parseLlmResponse(aiText);
             if (parsed.isParsed) {
               aiText = parsed.answer;
-              // API由来のcitationがない場合のみ、JSON由来を採用
               if (aiCitations.length === 0 && parsed.citations.length > 0) {
                 aiCitations = mapCitationsFromLLM(parsed.citations);
                 traceMode = 'document';
               } else if (parsed.citations.length > 0) {
-                // API由来があってもJSON由来があればsearch扱いにする(念のため)
                 traceMode = 'search';
               }
             }
@@ -131,6 +125,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     let uploadedFileId = null;
     let displayFiles = [];
 
+    // 補正用に現在のファイル名を保持
+    const currentFileName = attachment?.name || activeContextFile?.name;
+
     // 1. File Upload / Context Handling
     if (mockMode === 'OFF') {
       if (attachment) {
@@ -148,6 +145,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         }
       } else if (activeContextFile) {
         uploadedFileId = activeContextFile.id;
+        displayFiles = [{ name: activeContextFile.name }];
       }
     } else {
       if (attachment) {
@@ -180,9 +178,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       traceMode: 'knowledge',
     }]);
 
-    // 3. API Request / Mock Logic
+    // 3. API Request
     if (mockMode === 'FE') {
-      // (Mock logic omitted for brevity)
       const hasFile = attachment || activeContextFile;
       let mockRes = mockStreamResponseNoFile;
       let finalTraceMode = 'knowledge';
@@ -194,7 +191,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       return;
     }
 
-    // Real API Call
     const requestBody = {
       inputs: {
         isDebugMode: mockMode === 'BE',
@@ -232,43 +228,30 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               onConversationCreated(data.conversation_id, text);
             }
 
-            // --- Status & Trace Logic ---
             if (data.event === 'node_started') {
               const nodeType = data.data?.node_type;
               const title = data.data?.title;
-
               if (nodeType === 'tool' || (title && title.includes('Perplexity'))) {
                 detectedTraceMode = 'search';
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, processStatus: 'Webから最新情報を探しています...', traceMode: 'search' } : m));
-              }
-              else if (nodeType === 'document-extractor') {
+              } else if (nodeType === 'document-extractor') {
                 detectedTraceMode = 'document';
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, processStatus: '資料を読み込んでいます...', traceMode: 'document' } : m));
-              }
-              else if (nodeType === 'llm' && detectedTraceMode === 'knowledge') {
+              } else if (nodeType === 'llm' && detectedTraceMode === 'knowledge') {
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, processStatus: '回答を生成しています...' } : m));
               }
-            }
-            // --- Content Streaming ---
-            else if (data.event === 'message') {
+            } else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
                 const trimmed = contentBuffer.trim();
-
-                // JSONの開始パターンを検知
-                // マークダウンのコードブロック、または生のJSONオブジェクトの開始
                 const isJsonLikely = trimmed.startsWith('{') || trimmed.startsWith('```json') || trimmed.startsWith('```');
-
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
-                  // JSONらしい場合はテキストを隠し、ステータスを表示
                   text: isJsonLikely ? '' : contentBuffer,
                   processStatus: isJsonLikely ? '回答を生成・整形しています...' : m.processStatus
                 } : m));
               }
-            }
-            // --- Metadata ---
-            else if (data.event === 'message_end') {
+            } else if (data.event === 'message_end') {
               const citations = data.metadata?.retriever_resources || [];
               if (citations.length > 0) {
                 if (detectedTraceMode === 'knowledge') detectedTraceMode = 'search';
@@ -281,19 +264,32 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               if (data.message_id) {
                 fetchSuggestions(data.message_id, aiMessageId);
               }
-            }
-            // --- Finish ---
-            else if (data.event === 'workflow_finished') {
+            } else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
 
-              // ★強力なパーサーで最終整形
               const parsed = parseLlmResponse(finalText);
               if (parsed.isParsed) {
                 finalText = parsed.answer;
                 if (parsed.citations.length > 0) {
-                  finalCitations = mapCitationsFromLLM(parsed.citations);
-                  // API由来がなければJSON由来を採用し、モードを更新
+                  // ★★★ Smart Fail-Safe Implementation ★★★
+                  finalCitations = mapCitationsFromLLM(parsed.citations).map(citation => {
+                    // 1. ファイル名が存在し、かつURLを持たない(Webでない)出典に対してチェック
+                    if (currentFileName && !citation.url) {
+                      const lowerSource = citation.source.toLowerCase();
+                      const lowerCurrent = currentFileName.toLowerCase();
+                      const currentBase = lowerCurrent.substring(0, lowerCurrent.lastIndexOf('.')); // 拡張子なし
+
+                      // 2. マッチング判定 (出典名がファイル名の一部である、またはその逆)
+                      // 例: source="提案資料" vs current="提案資料.pdf" -> true
+                      if (lowerCurrent.includes(lowerSource) || lowerSource.includes(currentBase)) {
+                        // 3. マッチし、かつ拡張子が欠けていそうな場合、正しいファイル名に補正
+                        return { ...citation, source: `[1] ${currentFileName}` };
+                      }
+                    }
+                    return citation;
+                  });
+
                   detectedTraceMode = 'document';
                 }
               }
@@ -301,7 +297,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                 ...m,
                 text: finalText,
-                // 既存のcitationsがあれば優先、なければJSON由来を使う
                 citations: m.citations.length > 0 ? m.citations : finalCitations,
                 isStreaming: false,
                 processStatus: null,
