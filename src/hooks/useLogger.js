@@ -48,8 +48,20 @@ export const useLogger = () => {
     logContent += '\n\n';
 
     logContent += '--- Conversation Logs (JSON) ---\n';
+
+    let messagesToLog = messages;
+    if (!Array.isArray(messages)) {
+      addLog('[useLogger] handleCopyLogs received non-array messages. Defaulting to empty array.', 'warn');
+      messagesToLog = [];
+    }
+
     try {
-      logContent += JSON.stringify(messages, null, 2);
+      // 循環参照回避のための簡易的な置換関数 (必要であれば)
+      const safeStringify = (key, value) => {
+        if (key === 'view' || key === 'parent') return undefined; // React要素などを除外
+        return value;
+      };
+      logContent += JSON.stringify(messagesToLog, safeStringify, 2);
     } catch (error) {
       addLog(`[useLogger] Failed to stringify messages: ${error.message}`, 'error');
       logContent += 'Failed to stringify conversation logs.';

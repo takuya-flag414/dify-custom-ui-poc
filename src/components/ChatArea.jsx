@@ -32,7 +32,7 @@ const ChatArea = (props) => {
           <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
         </div>
         <div className="debug-controls">
-          <button className="debug-copy-button-topbar" onClick={handleCopyLogs}>
+          <button className="debug-copy-button-topbar" onClick={() => handleCopyLogs(messages)}>
             {copyButtonText}
           </button>
         </div>
