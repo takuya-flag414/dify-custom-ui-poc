@@ -5,6 +5,7 @@ import MarkdownRenderer from './MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
 import ProcessStatusIndicator from './ProcessStatusIndicator';
+import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from './FileIcon';
 
 export const AssistantIcon = () => (
@@ -14,28 +15,30 @@ export const AssistantIcon = () => (
 );
 
 const MessageBlock = ({ message, onSuggestionClick }) => {
-  const { role, text, citations, suggestions, isStreaming, processStatus, files, id, messageId } = message;
+  const { role, text, citations, suggestions, isStreaming, processStatus, files, traceMode, messageId, id } = message;
   const isAi = role === 'ai';
+  const uniqueMessageId = messageId || id || `msg_${Date.now()}`;
 
-  // メッセージの一意なIDを取得（フォールバック処理付き）
-  const uniqueMessageId = messageId || id || `msg_fallback_${Date.now()}_${Math.random()}`;
+  // 出典を表示するかどうかの判定
+  // searchモード または documentモード、あるいは citations が存在する場合
+  const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
+
+  // 知識バッジを表示するかどうかの判定
+  // AI発言かつストリーミング終了後で、知識モードの場合
+  const showKnowledgeBadge = isAi && !isStreaming && traceMode === 'knowledge';
 
   return (
     <div className="message-block">
       <div className={`message-container ${!isAi ? 'message-container-user' : ''}`}>
 
-        {/* アバター */}
         <div className={isAi ? 'avatar-ai' : 'avatar-user'}>
           {isAi ? <AssistantIcon /> : 'You'}
         </div>
 
-        {/* コンテンツエリア */}
         <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
-
-          {/* ★修正: 全てを包むバブルラッパーを追加 */}
           <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
 
-            {/* 1. 添付ファイル (User) */}
+            {/* User: File Attachment */}
             {!isAi && files && files.length > 0 && (
               <div className="file-attachment-chip">
                 <FileIcon filename={files[0].name} />
@@ -43,12 +46,10 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
               </div>
             )}
 
-            {/* 2. 進捗ステータス (AI) - バブルの中に配置 */}
-            {isAi && isStreaming && (
-              <ProcessStatusIndicator status={processStatus} />
-            )}
+            {/* AI: Status */}
+            {isAi && isStreaming && <ProcessStatusIndicator status={processStatus} />}
 
-            {/* 3. 本文 (Markdown) */}
+            {/* Markdown Content */}
             <MarkdownRenderer
               content={text || ''}
               isStreaming={isAi && isStreaming}
@@ -57,10 +58,20 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
             />
           </div>
 
-          {/* 4. 出典・提案 (バブルの外に配置) */}
-          {isAi && text && !isStreaming && (
+          {/* Footer Area (Outside Bubble) */}
+          {isAi && !isStreaming && (
             <>
-              <CitationList citations={citations} messageId={uniqueMessageId} />
+              {/* Case 1: Citations (Web/Doc) */}
+              {showCitations && (
+                <CitationList citations={citations} messageId={uniqueMessageId} />
+              )}
+
+              {/* Case 2: Knowledge Badge (No Search) */}
+              {showKnowledgeBadge && (
+                <AiKnowledgeBadge />
+              )}
+
+              {/* Suggestions */}
               <SuggestionButtons
                 suggestions={suggestions}
                 onSuggestionClick={onSuggestionClick}
@@ -73,22 +84,13 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   );
 };
 
-const arePropsEqual = (prevProps, nextProps) => {
-  const prevMsg = prevProps.message;
-  const nextMsg = nextProps.message;
-
-  return (
-    prevMsg.id === nextMsg.id &&
-    prevMsg.text === nextMsg.text &&
-    prevMsg.isStreaming === nextMsg.isStreaming &&
-    prevMsg.processStatus === nextMsg.processStatus &&
-    prevMsg.role === nextMsg.role &&
-    // 配列の比較は簡易的に長さチェック＋中身の参照チェックなどが理想だが、
-    // ここでは厳密なDeepEqualまではせず、主要なプロパティの変化を見る
-    prevMsg.citations === nextMsg.citations && 
-    prevMsg.suggestions === nextMsg.suggestions &&
-    prevMsg.files === nextMsg.files
-  );
+// Deep compare needed for array props to avoid re-renders
+const arePropsEqual = (prev, next) => {
+  const p = prev.message;
+  const n = next.message;
+  return p.id === n.id && p.text === n.text && p.isStreaming === n.isStreaming
+    && p.processStatus === n.processStatus && p.traceMode === n.traceMode
+    && p.citations === n.citations && p.suggestions === n.suggestions;
 };
 
 export default React.memo(MessageBlock, arePropsEqual);
