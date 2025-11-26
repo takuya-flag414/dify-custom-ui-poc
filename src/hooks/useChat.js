@@ -32,6 +32,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
   // ★ New: Force Search State
   const [forceSearch, setForceSearch] = useState(false);
+  
+  // ★ Fix: Use ref to track latest forceSearch state for async access
+  const forceSearchRef = useRef(forceSearch);
+  
+  useEffect(() => {
+    forceSearchRef.current = forceSearch;
+  }, [forceSearch]);
 
   const creatingConversationIdRef = useRef(null);
 
@@ -196,7 +203,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       suggestions: [],
       isStreaming: true,
       timestamp: new Date().toISOString(),
-      processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : (forceSearch ? 'Web検索を開始します(強制)...' : 'AIが思考を開始しました...'),
+      processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : (forceSearchRef.current ? 'Web検索を開始します(強制)...' : 'AIが思考を開始しました...'),
       traceMode: 'knowledge',
     }]);
 
@@ -215,7 +222,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
     // ★ Force Search Logic
     const domainFilterString = domainFilters.length > 0 ? domainFilters.join(', ') : '';
-    const searchModeValue = forceSearch ? 'force' : 'auto';
+    const searchModeValue = forceSearchRef.current ? 'force' : 'auto';
 
     addLog(`[Search Mode] ${searchModeValue.toUpperCase()}`, 'info');
     if (domainFilters.length > 0) {
