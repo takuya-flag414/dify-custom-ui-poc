@@ -372,17 +372,19 @@
   height: 10px;
 }
 
-/* 削除ボタン */
+/* 削除ボタン (修正版) */
 .context-file-close {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  /* 押しやすいサイズに拡大 */
+  height: 30px;
   border: none;
   background: transparent;
-  color: var(--color-primary-bg-hover);
-  /* 通常時は目立たせない */
+  /* 修正: コントラストの高い青色に変更 */
+  color: var(--color-primary);
+  /* blue-500 */
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -391,12 +393,22 @@
   margin-left: var(--space-1);
 }
 
+/* 修正: SVGアイコンのサイズを少し大きく */
+.context-file-close svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+  /* 線を少し太くして視認性向上 */
+}
+
 .context-file-close:hover {
-  background-color: rgba(255, 255, 255, 0.9);
+  /* 修正: 背景を真っ白にして強調 */
+  background-color: #FFFFFF;
   color: var(--color-error);
   /* red-600 */
-  box-shadow: var(--shadow-sm);
-  transform: scale(1.05);
+  /* 修正: 影を少し強く */
+  box-shadow: var(--shadow-md);
+  transform: scale(1.08);
 }
 
 @keyframes contextFadeIn {
