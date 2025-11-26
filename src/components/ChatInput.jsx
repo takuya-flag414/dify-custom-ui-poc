@@ -96,18 +96,28 @@ const ChatInput = ({
 
         {/* Sticky Context File */}
         {activeContextFile && (
-          <div className="flex items-center gap-2 p-2 mb-2 bg-blue-50 border border-blue-100 rounded-lg animate-fade-in mx-1">
-            <div className="flex items-center justify-center w-6 h-6 bg-blue-100 rounded text-blue-600">
-              <FileIcon filename={activeContextFile.name} className="w-4 h-4" />
+          <div className="context-file-sticky">
+            <div className="context-file-icon-wrapper">
+              <FileIcon filename={activeContextFile.name} />
             </div>
-            <div className="flex-1 min-w-0 flex flex-col">
-              <span className="text-xs font-semibold text-blue-700 truncate">{activeContextFile.name}</span>
-              <span className="text-[10px] text-blue-500 flex items-center gap-1">
+            <div className="context-file-info">
+              <span className="context-file-name" title={activeContextFile.name}>
+                {activeContextFile.name}
+              </span>
+              <span className="context-file-status">
                 <LockIcon /> 会話のコンテキストとして保持中
               </span>
             </div>
-            <button onClick={handleClearContext} className="p-1 hover:bg-blue-100 rounded-full text-blue-400 hover:text-red-500 transition-colors">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            <button
+              onClick={handleClearContext}
+              className="context-file-close"
+              title="コンテキストを解除"
+              aria-label="コンテキストを解除"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </button>
           </div>
         )}
