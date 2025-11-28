@@ -1,17 +1,16 @@
 // src/components/MessageBlock.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/MessageBlock.css';
 import MarkdownRenderer from './MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
-// import ProcessStatusIndicator from './ProcessStatusIndicator'; // 削除またはコメントアウト
-import ThinkingProcess from './ThinkingProcess'; // ★ New
-import SkeletonLoader from './SkeletonLoader';   // ★ New
+import ThinkingProcess from './ThinkingProcess';
+import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from './FileIcon';
 
 export const AssistantIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" />
   </svg>
 );
@@ -20,26 +19,30 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   const {
     role,
     text,
+    rawContent, // ★ New
     citations,
     suggestions,
     isStreaming,
-    thoughtProcess, // ★ useChatから受け取る配列
+    thoughtProcess,
     files,
     traceMode,
     messageId,
     id
   } = message;
 
+  const [showRaw, setShowRaw] = useState(false); // ★ New: Rawモード管理
+
+  // ストリーミング終了時にRawモードを解除
+  useEffect(() => {
+    if (!isStreaming) {
+      setShowRaw(false);
+    }
+  }, [isStreaming]);
+
   const isAi = role === 'ai';
   const uniqueMessageId = messageId || id || `msg_${Date.now()}`;
-
-  // テキストがまだ空かどうか
   const isTextEmpty = !text || text.length === 0;
-
-  // 出典を表示するかどうかの判定
   const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
-
-  // 知識バッジを表示するかどうかの判定
   const showKnowledgeBadge = isAi && !isStreaming && traceMode === 'knowledge';
 
   return (
@@ -53,6 +56,17 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
         <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
           <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
 
+            {/* Debug: Raw Toggle Button (AI & Streaming only) */}
+            {isAi && isStreaming && (
+              <button
+                className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
+                onClick={() => setShowRaw(!showRaw)}
+                title="生成中の生データを表示"
+              >
+                ⚡️ Raw
+              </button>
+            )}
+
             {/* User: File Attachment */}
             {!isAi && files && files.length > 0 && (
               <div className="file-attachment-chip">
@@ -61,46 +75,42 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
               </div>
             )}
 
-            {/* AI: Plan A+ Thinking Process Timeline */}
-            {isAi && thoughtProcess && thoughtProcess.length > 0 && (
+            {/* AI: Thinking Process */}
+            {isAi && thoughtProcess && thoughtProcess.length > 0 && !showRaw && (
               <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
             )}
 
-            {/* AI: Plan B Skeleton Loader (思考中またはテキスト生成開始直前) */}
-            {isAi && isStreaming && isTextEmpty && (
+            {/* AI: Skeleton Loader */}
+            {isAi && isStreaming && isTextEmpty && !showRaw && (
               <SkeletonLoader />
             )}
 
-            {/* Markdown Content (テキストがある場合のみ表示) */}
-            {!isTextEmpty && (
-              <MarkdownRenderer
-                content={text || ''}
-                isStreaming={isAi && isStreaming}
-                citations={citations}
-                messageId={uniqueMessageId}
-              />
+            {/* Content Area */}
+            {showRaw ? (
+              // Raw Data View
+              <pre className="raw-content-view">
+                {rawContent || '(データ受信待機中...)'}
+              </pre>
+            ) : (
+              // Normal Markdown View
+              !isTextEmpty && (
+                <MarkdownRenderer
+                  content={text || ''}
+                  isStreaming={isAi && isStreaming}
+                  citations={citations}
+                  messageId={uniqueMessageId}
+                />
+              )
             )}
 
           </div>
 
-          {/* Footer Area (Outside Bubble) */}
+          {/* Footer Area */}
           {isAi && !isStreaming && (
             <>
-              {/* Case 1: Citations (Web/Doc) */}
-              {showCitations && (
-                <CitationList citations={citations} messageId={uniqueMessageId} />
-              )}
-
-              {/* Case 2: Knowledge Badge (No Search) */}
-              {showKnowledgeBadge && (
-                <AiKnowledgeBadge />
-              )}
-
-              {/* Suggestions */}
-              <SuggestionButtons
-                suggestions={suggestions}
-                onSuggestionClick={onSuggestionClick}
-              />
+              {showCitations && <CitationList citations={citations} messageId={uniqueMessageId} />}
+              {showKnowledgeBadge && <AiKnowledgeBadge />}
+              <SuggestionButtons suggestions={suggestions} onSuggestionClick={onSuggestionClick} />
             </>
           )}
         </div>
@@ -115,11 +125,11 @@ const arePropsEqual = (prev, next) => {
   const n = next.message;
   return p.id === n.id
     && p.text === n.text
+    && p.rawContent === n.rawContent // ★ New check
     && p.isStreaming === n.isStreaming
     && p.traceMode === n.traceMode
     && p.citations === n.citations
     && p.suggestions === n.suggestions
-    // 思考プロセスの差分比較を追加
     && JSON.stringify(p.thoughtProcess) === JSON.stringify(n.thoughtProcess);
 };
 

@@ -443,3 +443,56 @@
   background-color: #DBEAFE;
   /* blue-100 */
 }
+
+/* Raw Toggle Button */
+.raw-toggle-btn {
+  position: absolute;
+  top: -24px;
+  right: 0;
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  /* gray-400 */
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.raw-toggle-btn:hover {
+  color: #3B82F6;
+  /* blue-500 */
+  background-color: #EFF6FF;
+  /* blue-50 */
+}
+
+.raw-toggle-btn.active {
+  color: #FFFFFF;
+  background-color: #3B82F6;
+}
+
+/* Raw Content View (Terminal style) */
+.raw-content-view {
+  background-color: #111827;
+  /* gray-900 */
+  color: #10B981;
+  /* green-500 (Matrix like) */
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  min-height: 60px;
+  margin: 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid #374151;
+  /* gray-700 */
+}

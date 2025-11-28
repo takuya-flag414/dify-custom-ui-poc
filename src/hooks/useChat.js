@@ -9,6 +9,7 @@ const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 const USER_ID = 'poc-user-01';
 
+// バックエンドモックモード用のダミー検索結果
 const MOCK_PERPLEXITY_JSON = JSON.stringify({
   "search_results": [
     {
@@ -32,6 +33,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
   // Force Search State
   const [forceSearch, setForceSearch] = useState(false);
+  // 非同期処理内で最新のstateを参照するためのRef
   const forceSearchRef = useRef(forceSearch);
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
   const creatingConversationIdRef = useRef(null);
 
+  // 会話ごとにフィルタ設定を記憶・復元するラッパー
   const updateDomainFilters = (newFilters) => {
     setDomainFilters(newFilters);
     if (conversationId) {
@@ -48,6 +51,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   };
 
   // --- FE Mock Memory Sync ---
+  // フロントエンドモック時に、会話切り替えでチャット履歴が消えないようにメモリに保存
   useEffect(() => {
     if (mockMode === 'FE' && conversationId && messages.length > 0) {
       setDynamicMockMessages((prev) => ({ ...prev, [conversationId]: messages }));
@@ -57,9 +61,11 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   // --- Load History ---
   useEffect(() => {
     const loadHistory = async () => {
+      // フィルタ設定の復元
       const savedFilters = filtersMapRef.current[conversationId] || [];
       setDomainFilters(savedFilters);
 
+      // 新規作成直後のリロード回避
       if (conversationId && conversationId === creatingConversationIdRef.current) {
         addLog(`[useChat] Skip loading history for just-created conversation: ${conversationId}`, 'info');
         creatingConversationIdRef.current = null;
@@ -74,6 +80,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         return;
       }
 
+      // FEモックモードの履歴ロード
       if (mockMode === 'FE') {
         if (dynamicMockMessages[conversationId]) {
           setMessages(dynamicMockMessages[conversationId]);
@@ -83,16 +90,19 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         return;
       }
 
+      // リアルAPIからの履歴ロード
       setIsLoading(true);
       setMessages([]);
       try {
         const historyData = await fetchMessagesApi(conversationId, USER_ID, DIFY_API_URL, DIFY_API_KEY);
+        // APIは新しい順で返すが、UI表示用に古い順にソート
         const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
         const newMessages = [];
         for (const item of chronologicalMessages) {
           const timestamp = item.created_at ? new Date(item.created_at * 1000).toISOString() : new Date().toISOString();
 
+          // ユーザーメッセージ
           if (item.query) {
             newMessages.push({
               id: `${item.id}_user`,
@@ -103,11 +113,14 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             });
           }
 
+          // AIメッセージ
           if (item.answer) {
             let aiText = item.answer;
+            // Dify API標準の出典情報
             let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
             let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
 
+            // LLMが生成したJSON内の出典情報をパース試行
             const parsed = parseLlmResponse(aiText);
             if (parsed.isParsed) {
               aiText = parsed.answer;
@@ -123,12 +136,14 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               id: item.id,
               role: 'ai',
               text: aiText,
+              rawContent: item.answer, // 履歴ロード時は整形前テキストをそのままRawとする
               citations: aiCitations,
               suggestions: [],
               isStreaming: false,
               timestamp: timestamp,
               traceMode: traceMode,
-              thoughtProcess: [],
+              thoughtProcess: [], // 過去ログなので思考プロセスは完了済み（空）とする
+              processStatus: null
             });
           }
         }
@@ -150,7 +165,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
     const currentFileName = attachment?.name || activeContextFile?.name;
 
-    // 1. File Upload
+    // 1. File Upload Processing
     if (mockMode === 'OFF') {
       if (attachment) {
         setIsLoading(true);
@@ -170,13 +185,14 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         displayFiles = [{ name: activeContextFile.name }];
       }
     } else {
+      // Mock upload
       if (attachment) {
         displayFiles = [{ name: attachment.name }];
         setActiveContextFile({ id: 'mock_id', name: attachment.name });
       }
     }
 
-    // 2. Optimistic UI
+    // 2. Optimistic UI Updates
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       role: 'user',
@@ -191,19 +207,20 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     setMessages(prev => [...prev, {
       id: aiMessageId,
       role: 'ai',
-      text: '',
+      text: '',           // 表示用テキスト（パース済み）
+      rawContent: '',     // ★ New: 受信した生データ（デバッグ用）
       citations: [],
       suggestions: [],
       isStreaming: true,
       timestamp: new Date().toISOString(),
       traceMode: 'knowledge',
-      thoughtProcess: [],
-      processStatus: null
+      thoughtProcess: [], // ★ New: 思考プロセスの配列初期化
+      processStatus: null // Deprecated
     }]);
 
-    // 3. API Request
+    // 3. API Request Execution
     if (mockMode === 'FE') {
-      // FE Mock Logic (Simple simulation)
+      // --- FrontEnd Mock Logic ---
       const hasFile = attachment || activeContextFile;
       let mockRes = mockStreamResponseNoFile;
       let finalTraceMode = 'knowledge';
@@ -234,6 +251,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         }
       }
 
+      // ★ FE Mock: 思考プロセスのアニメーションシミュレーション
       const simulateSteps = async () => {
         // Step 1: 意図解析
         setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -253,13 +271,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         } : m));
         await new Promise(r => setTimeout(r, 1200));
 
-        // Step 3: 回答生成 (★追加)
+        // Step 3: 回答生成
         setMessages(prev => prev.map(m => m.id === aiMessageId ? {
           ...m,
           thoughtProcess: [
             { id: 'step1', title: 'ユーザーの意図を解析中...', status: 'done' },
             { id: 'step2', title: toolTitle, status: 'done' },
-            { id: 'step3', title: '検索結果を読解し、回答を生成中...', status: 'processing' }
+            { id: 'step3', title: '情報を整理して回答を生成中...', status: 'processing' }
           ]
         } : m));
         await new Promise(r => setTimeout(r, 800));
@@ -269,6 +287,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           ...m,
           traceMode: finalTraceMode,
           text: finalText,
+          rawContent: mockRes.text, // モックも生データを入れる
           citations: finalCitations,
           suggestions: mockRes.suggestions,
           isStreaming: false,
@@ -305,7 +324,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       const response = await sendChatMessageApi(requestBody, DIFY_API_URL, DIFY_API_KEY);
       const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
 
-      let contentBuffer = '';
+      let contentBuffer = ''; // これがRawデータそのもの
       let detectedTraceMode = 'knowledge';
       let isConversationIdSynced = false;
 
@@ -320,6 +339,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           try {
             const data = JSON.parse(line.substring(6));
 
+            // Conversation IDの同期
             if (data.conversation_id && !conversationId && !isConversationIdSynced) {
               isConversationIdSynced = true;
               creatingConversationIdRef.current = data.conversation_id;
@@ -329,13 +349,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               onConversationCreated(data.conversation_id, text);
             }
 
-            // ★ Workflow Node Event Handling (Enhanced)
+            // ★ Workflow Node Event Handling (Timeline Visualization)
             if (data.event === 'node_started') {
               const nodeType = data.data?.node_type;
               const title = data.data?.title;
               const nodeId = data.data?.node_id || `node_${Date.now()}`;
 
-              // 重要なノード判定ロジックを緩和: すべてのLLMを含める
+              // 重要なノード判定: すべてのLLMを含めることで最後の生成ステップも可視化
               const isSignificantNode =
                 nodeType === 'tool' ||
                 nodeType === 'document-extractor' ||
@@ -344,7 +364,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               if (isSignificantNode) {
                 let displayTitle = title;
 
-                // タイトル分岐の強化
+                // タイトルとモードの知能的振り分け
                 if (title && (title.includes('Intent') || title.includes('Classif') || title.includes('意図'))) {
                   displayTitle = '質問の意図を解析中...';
                 } else if ((title && title.includes('Perplexity')) || nodeType === 'tool') {
@@ -384,15 +404,20 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               if (data.answer) {
                 contentBuffer += data.answer;
 
+                // ★ Streaming Parser: 部分抽出ロジックの適用
                 const parsed = parseLlmResponse(contentBuffer);
+
+                // JSON構造かどうかを判定
                 const isJsonStructure = contentBuffer.trim().startsWith('{') || contentBuffer.trim().startsWith('```');
+
+                // パース成功ならanswerを表示、失敗ならJSON以外はそのまま表示、JSON途中なら空（スケルトン）
                 const textToDisplay = parsed.isParsed ? parsed.answer : (isJsonStructure ? '' : contentBuffer);
 
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
                   text: textToDisplay,
-                  // ★修正: テキストが流れ始めても、現在のステップ(回答生成)は 'processing' のまま維持する
-                  // 完了にするのは node_finished か workflow_finished のタイミング
+                  rawContent: contentBuffer, // ★ New: 生データをリアルタイム更新
+                  // ★処理中ステータス維持: テキストが流れても回答生成ステップは 'processing' のまま
                   thoughtProcess: m.thoughtProcess
                 } : m));
               }
@@ -415,11 +440,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               let finalText = contentBuffer;
               let finalCitations = [];
 
+              // 最終的なパース処理
               const parsed = parseLlmResponse(finalText);
               if (parsed.isParsed) {
                 finalText = parsed.answer;
                 if (parsed.citations.length > 0) {
                   finalCitations = mapCitationsFromLLM(parsed.citations).map(citation => {
+                    // ファイル名とのマッチング処理
                     if (currentFileName && !citation.url) {
                       const lowerSource = citation.source.toLowerCase();
                       const lowerCurrent = currentFileName.toLowerCase();
@@ -437,6 +464,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                 ...m,
                 text: finalText,
+                rawContent: contentBuffer, // 最終Rawデータ
                 citations: m.citations.length > 0 ? m.citations : finalCitations,
                 isStreaming: false,
                 traceMode: detectedTraceMode,
