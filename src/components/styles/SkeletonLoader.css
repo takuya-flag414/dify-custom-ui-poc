@@ -1,0 +1,56 @@
+/* src/components/styles/SkeletonLoader.css */
+
+.skeleton-loader {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 0;
+    width: 100%;
+    max-width: 600px;
+}
+
+.skeleton-line {
+    height: 14px;
+    background-color: #F3F4F6;
+    /* gray-100 */
+    border-radius: 4px;
+    animation: shimmer 2s infinite ease-in-out;
+    transform-origin: left;
+}
+
+.width-70 {
+    width: 70%;
+}
+
+.width-90 {
+    width: 90%;
+}
+
+.width-40 {
+    width: 40%;
+}
+
+.delay-100 {
+    animation-delay: 0.1s;
+}
+
+.delay-200 {
+    animation-delay: 0.2s;
+}
+
+@keyframes shimmer {
+    0% {
+        opacity: 0.6;
+        transform: scaleX(0.98);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: scaleX(0.98);
+    }
+}

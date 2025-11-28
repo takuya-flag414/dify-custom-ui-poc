@@ -1,0 +1,170 @@
+/* src/components/styles/ThinkingProcess.css */
+
+.thinking-process-container {
+    margin-bottom: 16px;
+    background-color: var(--color-bg-surface-secondary, #F9FAFB);
+    /* gray-50 */
+    border: 1px solid var(--color-border, #E5E7EB);
+    /* gray-200 */
+    border-radius: var(--radius-xl, 12px);
+    overflow: hidden;
+    font-size: var(--text-sm, 14px);
+    transition: all 0.3s ease;
+}
+
+.thinking-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--color-text-secondary, #4B5563);
+    transition: background-color 0.2s;
+}
+
+.thinking-header:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.thinking-icon-wrapper {
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.thinking-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #E5E7EB;
+    border-top-color: var(--color-primary, #3B82F6);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.thinking-check-icon {
+    color: var(--color-success, #10B981);
+}
+
+.thinking-summary-text {
+    flex: 1;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.thinking-chevron {
+    opacity: 0.5;
+    transition: transform 0.3s ease;
+}
+
+.thinking-chevron.rotate {
+    transform: rotate(180deg);
+}
+
+/* Steps List */
+.thinking-steps-list {
+    padding: 4px 14px 14px 14px;
+    animation: slideDown 0.3s ease-out;
+    border-top: 1px solid transparent;
+}
+
+.thinking-header.expanded+.thinking-steps-list {
+    border-top-color: var(--color-border-light, #F3F4F6);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.thinking-step-item {
+    display: flex;
+    gap: 12px;
+    min-height: 24px;
+}
+
+.step-line-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 18px;
+    /* icon wrapper width */
+}
+
+.step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #D1D5DB;
+    /* gray-300 */
+    margin-top: 6px;
+    transition: all 0.3s;
+    z-index: 1;
+}
+
+.step-dot.processing {
+    background-color: var(--color-primary, #3B82F6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    animation: pulse-dot 1.5s infinite;
+}
+
+.step-dot.done {
+    background-color: var(--color-success, #10B981);
+}
+
+.step-line {
+    flex: 1;
+    width: 1px;
+    background-color: #E5E7EB;
+    margin-top: -2px;
+    margin-bottom: -4px;
+    min-height: 12px;
+}
+
+.step-title {
+    padding-top: 1px;
+    color: #6B7280;
+    line-height: 1.4;
+}
+
+.thinking-step-item.processing .step-title {
+    color: var(--color-text-primary, #111827);
+    font-weight: 500;
+}
+
+@keyframes pulse-dot {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+}

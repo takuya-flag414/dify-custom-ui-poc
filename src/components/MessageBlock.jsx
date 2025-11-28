@@ -4,7 +4,9 @@ import './styles/MessageBlock.css';
 import MarkdownRenderer from './MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
-import ProcessStatusIndicator from './ProcessStatusIndicator';
+// import ProcessStatusIndicator from './ProcessStatusIndicator'; // 削除またはコメントアウト
+import ThinkingProcess from './ThinkingProcess'; // ★ New
+import SkeletonLoader from './SkeletonLoader';   // ★ New
 import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from './FileIcon';
 
@@ -15,16 +17,29 @@ export const AssistantIcon = () => (
 );
 
 const MessageBlock = ({ message, onSuggestionClick }) => {
-  const { role, text, citations, suggestions, isStreaming, processStatus, files, traceMode, messageId, id } = message;
+  const {
+    role,
+    text,
+    citations,
+    suggestions,
+    isStreaming,
+    thoughtProcess, // ★ useChatから受け取る配列
+    files,
+    traceMode,
+    messageId,
+    id
+  } = message;
+
   const isAi = role === 'ai';
   const uniqueMessageId = messageId || id || `msg_${Date.now()}`;
 
+  // テキストがまだ空かどうか
+  const isTextEmpty = !text || text.length === 0;
+
   // 出典を表示するかどうかの判定
-  // searchモード または documentモード、あるいは citations が存在する場合
   const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
 
   // 知識バッジを表示するかどうかの判定
-  // AI発言かつストリーミング終了後で、知識モードの場合
   const showKnowledgeBadge = isAi && !isStreaming && traceMode === 'knowledge';
 
   return (
@@ -46,16 +61,26 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
               </div>
             )}
 
-            {/* AI: Status */}
-            {isAi && isStreaming && <ProcessStatusIndicator status={processStatus} />}
+            {/* AI: Plan A+ Thinking Process Timeline */}
+            {isAi && thoughtProcess && thoughtProcess.length > 0 && (
+              <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
+            )}
 
-            {/* Markdown Content */}
-            <MarkdownRenderer
-              content={text || ''}
-              isStreaming={isAi && isStreaming}
-              citations={citations}
-              messageId={uniqueMessageId}
-            />
+            {/* AI: Plan B Skeleton Loader (思考中またはテキスト生成開始直前) */}
+            {isAi && isStreaming && isTextEmpty && (
+              <SkeletonLoader />
+            )}
+
+            {/* Markdown Content (テキストがある場合のみ表示) */}
+            {!isTextEmpty && (
+              <MarkdownRenderer
+                content={text || ''}
+                isStreaming={isAi && isStreaming}
+                citations={citations}
+                messageId={uniqueMessageId}
+              />
+            )}
+
           </div>
 
           {/* Footer Area (Outside Bubble) */}
@@ -84,13 +109,18 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   );
 };
 
-// Deep compare needed for array props to avoid re-renders
+// Deep compare
 const arePropsEqual = (prev, next) => {
   const p = prev.message;
   const n = next.message;
-  return p.id === n.id && p.text === n.text && p.isStreaming === n.isStreaming
-    && p.processStatus === n.processStatus && p.traceMode === n.traceMode
-    && p.citations === n.citations && p.suggestions === n.suggestions;
+  return p.id === n.id
+    && p.text === n.text
+    && p.isStreaming === n.isStreaming
+    && p.traceMode === n.traceMode
+    && p.citations === n.citations
+    && p.suggestions === n.suggestions
+    // 思考プロセスの差分比較を追加
+    && JSON.stringify(p.thoughtProcess) === JSON.stringify(n.thoughtProcess);
 };
 
 export default React.memo(MessageBlock, arePropsEqual);

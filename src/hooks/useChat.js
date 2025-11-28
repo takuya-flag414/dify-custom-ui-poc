@@ -30,10 +30,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   const [domainFilters, setDomainFilters] = useState([]);
   const filtersMapRef = useRef({});
 
-  // ★ New: Force Search State
+  // Force Search State
   const [forceSearch, setForceSearch] = useState(false);
-
-  // ★ Fix: Use ref to track latest forceSearch state for async access
   const forceSearchRef = useRef(forceSearch);
 
   useEffect(() => {
@@ -42,7 +40,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
   const creatingConversationIdRef = useRef(null);
 
-  // Wrapper to update filters and persist map
   const updateDomainFilters = (newFilters) => {
     setDomainFilters(newFilters);
     if (conversationId) {
@@ -60,13 +57,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   // --- Load History ---
   useEffect(() => {
     const loadHistory = async () => {
-      // Restore Filters
       const savedFilters = filtersMapRef.current[conversationId] || [];
       setDomainFilters(savedFilters);
-
-      // Note: Force Searchの設定は会話ごとに維持するか、グローバルにするか？
-      // ここでは「会話を切り替えても設定をリセットしない（ユーザーの今の意思を尊重）」設計とします。
-      // もしリセットしたい場合はここで setForceSearch(false); してください。
 
       if (conversationId && conversationId === creatingConversationIdRef.current) {
         addLog(`[useChat] Skip loading history for just-created conversation: ${conversationId}`, 'info');
@@ -136,6 +128,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               isStreaming: false,
               timestamp: timestamp,
               traceMode: traceMode,
+              thoughtProcess: [],
             });
           }
         }
@@ -203,27 +196,25 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       suggestions: [],
       isStreaming: true,
       timestamp: new Date().toISOString(),
-      processStatus: uploadedFileId ? 'ドキュメントを解析しています...' : (forceSearchRef.current ? 'Web検索を開始します(強制)...' : 'AIが思考を開始しました...'),
       traceMode: 'knowledge',
+      thoughtProcess: [],
+      processStatus: null
     }]);
 
     // 3. API Request
     if (mockMode === 'FE') {
+      // FE Mock Logic (Simple simulation)
       const hasFile = attachment || activeContextFile;
       let mockRes = mockStreamResponseNoFile;
-
-      // Determine base response and initial trace mode
       let finalTraceMode = 'knowledge';
 
       if (hasFile) {
         mockRes = mockStreamResponseWithFile;
         finalTraceMode = 'document';
       } else if (mockRes.citations && mockRes.citations.length > 0) {
-        // If no file but has citations, it's likely search/rag
         finalTraceMode = 'search';
       }
 
-      // Replace placeholders if file exists
       let finalText = mockRes.text;
       let finalCitations = mockRes.citations;
 
@@ -235,16 +226,45 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         }));
       }
 
-      // ★ Simulate Conversation Creation
       if (!conversationId) {
         const newMockId = `mock_gen_${Date.now()}`;
-        creatingConversationIdRef.current = newMockId; // Prevent history reload clearing state
+        creatingConversationIdRef.current = newMockId;
         if (onConversationCreated) {
           onConversationCreated(newMockId, text);
         }
       }
 
-      setTimeout(() => {
+      const simulateSteps = async () => {
+        // Step 1: 意図解析
+        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+          ...m,
+          thoughtProcess: [{ id: 'step1', title: 'ユーザーの意図を解析中...', status: 'processing' }]
+        } : m));
+        await new Promise(r => setTimeout(r, 600));
+
+        // Step 2: ツール実行
+        const toolTitle = hasFile ? `ドキュメント「${currentFileName}」を読込中...` : 'Webから最新情報を検索中...';
+        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+          ...m,
+          thoughtProcess: [
+            { id: 'step1', title: 'ユーザーの意図を解析中...', status: 'done' },
+            { id: 'step2', title: toolTitle, status: 'processing' }
+          ]
+        } : m));
+        await new Promise(r => setTimeout(r, 1200));
+
+        // Step 3: 回答生成 (★追加)
+        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+          ...m,
+          thoughtProcess: [
+            { id: 'step1', title: 'ユーザーの意図を解析中...', status: 'done' },
+            { id: 'step2', title: toolTitle, status: 'done' },
+            { id: 'step3', title: '検索結果を読解し、回答を生成中...', status: 'processing' }
+          ]
+        } : m));
+        await new Promise(r => setTimeout(r, 800));
+
+        // 完了
         setMessages(prev => prev.map(m => m.id === aiMessageId ? {
           ...m,
           traceMode: finalTraceMode,
@@ -252,28 +272,27 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           citations: finalCitations,
           suggestions: mockRes.suggestions,
           isStreaming: false,
-          processStatus: null
+          thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'done' }))
         } : m));
         setIsLoading(false);
-      }, 2000);
+      };
+
+      simulateSteps();
       return;
     }
 
-    // ★ Force Search Logic
+    // --- Real API Logic ---
     const domainFilterString = domainFilters.length > 0 ? domainFilters.join(', ') : '';
     const searchModeValue = forceSearchRef.current ? 'force' : 'auto';
 
     addLog(`[Search Mode] ${searchModeValue.toUpperCase()}`, 'info');
-    if (domainFilters.length > 0) {
-      addLog(`[Domain Filter] Applying: ${domainFilterString}`, 'info');
-    }
 
     const requestBody = {
       inputs: {
         isDebugMode: mockMode === 'BE',
         mock_perplexity_text: mockMode === 'BE' ? MOCK_PERPLEXITY_JSON : '',
         domain_filter: domainFilterString,
-        search_mode: searchModeValue, // ★ Inject Variable
+        search_mode: searchModeValue,
       },
       query: text,
       user: USER_ID,
@@ -304,37 +323,81 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             if (data.conversation_id && !conversationId && !isConversationIdSynced) {
               isConversationIdSynced = true;
               creatingConversationIdRef.current = data.conversation_id;
-
               if (domainFilters.length > 0) {
                 filtersMapRef.current[data.conversation_id] = domainFilters;
               }
               onConversationCreated(data.conversation_id, text);
             }
 
+            // ★ Workflow Node Event Handling (Enhanced)
             if (data.event === 'node_started') {
               const nodeType = data.data?.node_type;
               const title = data.data?.title;
-              if (nodeType === 'tool' || (title && title.includes('Perplexity'))) {
-                detectedTraceMode = 'search';
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, processStatus: 'Webから最新情報を探しています...', traceMode: 'search' } : m));
-              } else if (nodeType === 'document-extractor') {
-                detectedTraceMode = 'document';
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, processStatus: '資料を読み込んでいます...', traceMode: 'document' } : m));
-              } else if (nodeType === 'llm' && detectedTraceMode === 'knowledge') {
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, processStatus: '回答を生成しています...' } : m));
-              }
-            } else if (data.event === 'message') {
-              if (data.answer) {
-                contentBuffer += data.answer;
-                const trimmed = contentBuffer.trim();
-                const isJsonLikely = trimmed.startsWith('{') || trimmed.startsWith('```json') || trimmed.startsWith('```');
+              const nodeId = data.data?.node_id || `node_${Date.now()}`;
+
+              // 重要なノード判定ロジックを緩和: すべてのLLMを含める
+              const isSignificantNode =
+                nodeType === 'tool' ||
+                nodeType === 'document-extractor' ||
+                nodeType === 'llm';
+
+              if (isSignificantNode) {
+                let displayTitle = title;
+
+                // タイトル分岐の強化
+                if (title && (title.includes('Intent') || title.includes('Classif') || title.includes('意図'))) {
+                  displayTitle = '質問の意図を解析中...';
+                } else if ((title && title.includes('Perplexity')) || nodeType === 'tool') {
+                  displayTitle = 'Webから最新情報を検索中...';
+                  detectedTraceMode = 'search';
+                } else if (nodeType === 'document-extractor') {
+                  displayTitle = 'ドキュメントを読込中...';
+                  detectedTraceMode = 'document';
+                } else if (nodeType === 'llm') {
+                  // 最後の回答生成LLM用タイトル
+                  displayTitle = '情報を整理して回答を生成中...';
+                }
+
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
-                  text: isJsonLikely ? '' : contentBuffer,
-                  processStatus: isJsonLikely ? '回答を生成・整形しています...' : m.processStatus
+                  traceMode: detectedTraceMode,
+                  thoughtProcess: [
+                    ...m.thoughtProcess.map(t => ({ ...t, status: 'done' })), // 前のステップを完了
+                    { id: nodeId, title: displayTitle, status: 'processing' } // 新しいステップを開始
+                  ]
                 } : m));
               }
-            } else if (data.event === 'message_end') {
+            }
+            else if (data.event === 'node_finished') {
+              // 完了したノードをマーク
+              const nodeId = data.data?.node_id;
+              if (nodeId) {
+                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  thoughtProcess: m.thoughtProcess.map(t =>
+                    t.id === nodeId ? { ...t, status: 'done' } : t
+                  )
+                } : m));
+              }
+            }
+            else if (data.event === 'message') {
+              if (data.answer) {
+                contentBuffer += data.answer;
+
+                const parsed = parseLlmResponse(contentBuffer);
+                const isJsonStructure = contentBuffer.trim().startsWith('{') || contentBuffer.trim().startsWith('```');
+                const textToDisplay = parsed.isParsed ? parsed.answer : (isJsonStructure ? '' : contentBuffer);
+
+                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  text: textToDisplay,
+                  // ★修正: テキストが流れ始めても、現在のステップ(回答生成)は 'processing' のまま維持する
+                  // 完了にするのは node_finished か workflow_finished のタイミング
+                  thoughtProcess: m.thoughtProcess
+                } : m));
+              }
+            }
+            else if (data.event === 'message_end') {
               const citations = data.metadata?.retriever_resources || [];
               if (citations.length > 0) {
                 if (detectedTraceMode === 'knowledge') detectedTraceMode = 'search';
@@ -347,7 +410,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               if (data.message_id) {
                 fetchSuggestions(data.message_id, aiMessageId);
               }
-            } else if (data.event === 'workflow_finished') {
+            }
+            else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
 
@@ -360,7 +424,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                       const lowerSource = citation.source.toLowerCase();
                       const lowerCurrent = currentFileName.toLowerCase();
                       const currentBase = lowerCurrent.substring(0, lowerCurrent.lastIndexOf('.'));
-
                       if (lowerCurrent.includes(lowerSource) || lowerSource.includes(currentBase)) {
                         return { ...citation, source: `[1] ${currentFileName}` };
                       }
@@ -376,8 +439,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                 text: finalText,
                 citations: m.citations.length > 0 ? m.citations : finalCitations,
                 isStreaming: false,
-                processStatus: null,
-                traceMode: detectedTraceMode
+                traceMode: detectedTraceMode,
+                // Workflow完了時は確実に全てdoneにする
+                thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'done' }))
               } : m));
             }
           } catch (e) { console.warn('JSON Parse Error', e); }
@@ -386,7 +450,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       setIsLoading(false);
     } catch (error) {
       addLog(`[API Error] ${error.message}`, 'error');
-      setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, text: `エラー: ${error.message}`, isStreaming: false, processStatus: null } : m));
+      setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+        ...m,
+        text: `エラー: ${error.message}`,
+        isStreaming: false,
+        thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'error' }))
+      } : m));
       setIsLoading(false);
     }
   };
@@ -409,7 +478,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     handleSendMessage,
     domainFilters,
     setDomainFilters: updateDomainFilters,
-    forceSearch,    // ★ Exposed
-    setForceSearch  // ★ Exposed
+    forceSearch,
+    setForceSearch
   };
 };
