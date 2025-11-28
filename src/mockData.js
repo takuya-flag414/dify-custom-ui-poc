@@ -2,15 +2,16 @@
 
 /**
  * FEモード検証用のモックデータ定義
+ * Updated: 2025-11-28
  */
 
 // サイドバー用の会話リスト
 export const mockConversations = [
-  { id: 'mock_1', name: '📝 Markdown要素テスト' },
-  { id: 'mock_2', name: '📚 複合出典テスト' },
-  { id: 'mock_3', name: '⚠️ エラー表示テスト' },
-  { id: 'mock_4', name: '📜 長文スクロールテスト' },
-  { id: 'mock_5', name: '📎 多様なファイル形式テスト' },
+  { id: 'mock_1', name: '🤖 AI Assistant Demo' },
+  { id: 'mock_2', name: '💻 Code Generation Test' },
+  { id: 'mock_3', name: '📊 Market Analysis (Table)' },
+  { id: 'mock_4', name: '🎨 Creative Studio (MD)' },
+  { id: 'mock_5', name: '🐛 Error Simulation' },
 ];
 
 // 履歴読み込み用のメッセージデータ (IDで紐づけ)
@@ -19,88 +20,32 @@ export const mockMessages = {
     {
       id: 'm1_u1',
       role: 'user',
-      text: 'Markdownの様々な要素を表示してください。',
+      text: 'このAIアシスタントは何ができますか？',
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     },
     {
       id: 'm1_a1',
       role: 'ai',
-      text: `# Markdown要素の表示テスト
+      text: `# AIアシスタント機能紹介
 
-このレスポンスでは、様々なMarkdown要素を網羅的にテストします。
+私は**高度なAIアシスタント**です。以下のようなタスクをお手伝いできます。
 
-## 見出しレベル2
+## 主な機能
 
-### 見出しレベル3
+1.  **質問への回答**: 日常的な疑問から専門的な知識まで幅広くお答えします。
+2.  **文章作成**: ブログ記事、メール、レポートなどの下書きを作成します。
+3.  **コード生成**: Python, JavaScript, Reactなどのプログラミングコードを生成・解説します。
+4.  **データ分析**: 提供されたデータを分析し、洞察を提供します。
 
-#### 見出しレベル4
+## 特徴
 
-## リスト表示
+*   ✨ **高速な応答**: リアルタイムに近い速度で回答を生成します。
+*   📚 **豊富な知識**: 最新の情報を踏まえた回答を心がけています。
+*   🔒 **セキュリティ**: 会話内容は安全に保護されます。
 
-### 順序なしリスト
-- 項目1
-- 項目2
-  - ネストした項目2-1
-  - ネストした項目2-2
-- 項目3
-
-### 順序付きリスト
-1. 最初のステップ
-2. 次のステップ
-3. 最後のステップ
-
-## テキスト装飾
-
-これは**太字**のテキストです。これは*斜体*のテキストです。これは\`インラインコード\`です。
-
-## コードブロック
-
-\`\`\`javascript
-const greeting = (name) => {
-  console.log(\`Hello, \${name}!\`);
-  return true;
-};
-
-greeting('World');
-\`\`\`
-
-\`\`\`python
-def calculate_sum(a, b):
-    """2つの数値の合計を計算"""
-    return a + b
-
-result = calculate_sum(10, 20)
-print(f"Result: {result}")
-\`\`\`
-
-## テーブル
-
-| 項目 | 説明 | 優先度 |
-|------|------|--------|
-| タスク1 | 重要な作業 | 高 |
-| タスク2 | 通常の作業 | 中 |
-| タスク3 | 補助的な作業 | 低 |
-
-## 引用
-
-> これは引用ブロックです。
-> 複数行にわたる引用も可能です。
-> 
-> 段落を分けることもできます。
-
-## リンク
-
-詳細は[公式ドキュメント](https://example.com/docs)をご確認ください[1]。
-
-## 水平線
-
----
-
-以上、様々なMarkdown要素の表示例でした。`,
-      citations: [
-        { id: 'c1', type: 'web', source: 'Markdown公式ガイド', url: 'https://www.markdownguide.org' }
-      ],
-      suggestions: ['コードブロックの詳細', 'テーブルの使い方', '他の要素は?'],
+何かお手伝いできることはありますか？`,
+      citations: [],
+      suggestions: ['コードを書いて', 'ニュースを教えて', '分析をお願い'],
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 + 5000).toISOString(),
     }
   ],
@@ -108,53 +53,57 @@ print(f"Result: {result}")
     {
       id: 'm2_u1',
       role: 'user',
-      text: '来期の予算計画について、社内規定と市場動向を踏まえて教えて。',
+      text: 'ReactとTailwind CSSを使って、モダンなカードコンポーネントを作って。',
       timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
     },
     {
       id: 'm2_a1',
       role: 'ai',
-      text: `来期の予算計画策定における重要ポイントをまとめました。
+      text: `はい、ReactとTailwind CSSを使用したモダンなカードコンポーネントの例です。
+ガラスモーフィズム（Glassmorphism）効果を取り入れたデザインにしました。
 
-## 1. 社内規定に基づく要件
+\`\`\`jsx
+import React from 'react';
 
-経理規程第12条により、**11月末までに一次案の提出**が義務付けられています[1]。また、今年度よりIT投資枠の申請フローが変更されています[2]。
+const ModernCard = ({ title, description, imageUrl }) => {
+  return (
+    <div className="max-w-sm rounded-2xl overflow-hidden shadow-lg bg-white/30 backdrop-blur-md border border-white/20">
+      {imageUrl && (
+        <img className="w-full h-48 object-cover" src={imageUrl} alt={title} />
+      )}
+      <div className="px-6 py-4">
+        <div className="font-bold text-xl mb-2 text-gray-800">{title}</div>
+        <p className="text-gray-700 text-base">
+          {description}
+        </p>
+      </div>
+      <div className="px-6 pt-4 pb-2">
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+          詳細を見る
+        </button>
+      </div>
+    </div>
+  );
+};
 
-### 主な変更点
-- 申請書類のデジタル化
-- 承認プロセスの簡素化
-- 四半期ごとの進捗報告
+export default ModernCard;
+\`\`\`
 
-## 2. 市場動向 (Web情報)
+### 使用方法
 
-最新の市場調査によると、SaaS関連のコストは年々上昇傾向にあり、**15%のバッファ**を見込むことが推奨されています[3]。
+このコンポーネントは以下のように使用します。
 
-### 注目すべきトレンド
-1. クラウドサービスの価格改定
-2. セキュリティ対策費の増加
-3. AI関連ツールへの投資拡大
+\`\`\`jsx
+<ModernCard
+  title="美しい風景"
+  description="このカードはTailwind CSSのbackdrop-blurユーティリティを使用して、背景をぼかす効果を実現しています。"
+  imageUrl="https://example.com/image.jpg"
+/>
+\`\`\`
 
-## 3. 過去のデータ分析
-
-昨年度の予算消化率は98%でした。詳細な内訳は添付のエクセルファイルを参照しました[4]。
-
-### 部門別消化率
-- 開発部門: 99%
-- 営業部門: 97%
-- 管理部門: 96%
-
-## 推奨アクション
-
-1. 早期の一次案作成
-2. IT投資枠の適切な見積もり
-3. 市場動向を踏まえた余裕の確保`,
-      citations: [
-        { id: 'c_rag_1', type: 'rag', source: '経理規程集 第4版', url: null },
-        { id: 'c_doc_1', type: 'document', source: 'IT投資ガイドライン改正案.docx', url: null },
-        { id: 'c_web_1', type: 'web', source: '2025年 SaaS市場トレンドレポート', url: 'https://example.com/report' },
-        { id: 'c_doc_2', type: 'document', source: '2024年度_予算消化実績.xlsx', url: null }
-      ],
-      suggestions: ['IT投資枠の上限は?', '経理規程のリンクは?', '過去3年の推移は?'],
+Tailwindの設定で \`backdrop-filter\` が有効になっていることを確認してください。`,
+      citations: [],
+      suggestions: ['ボタンの色を変えたい', 'ダークモード対応は？', 'TypeScript版は？'],
       timestamp: new Date(Date.now() - 1000 * 60 * 30 + 5000).toISOString(),
     }
   ],
@@ -162,171 +111,104 @@ print(f"Result: {result}")
     {
       id: 'm3_u1',
       role: 'user',
-      text: 'エラー時の表示はどうなりますか?',
-      timestamp: new Date(Date.now() - 1000 * 60).toISOString(),
+      text: '2024年の主要なSaaS市場の成長率を表で比較したいです。',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
     },
     {
       id: 'm3_a1',
       role: 'ai',
-      text: `**エラーが発生しました**
+      text: `2024年のSaaS市場における主要セクターの成長率予測をまとめました。
 
-申し訳ありませんが、システム内部で予期せぬエラーが発生しました。
+## SaaS市場成長率比較 (2024年予測)
 
-以下の点をご確認ください:
-- ネットワーク接続
-- 入力内容の妥当性
-- システムステータス
+| セクター | 成長率 (YoY) | 市場規模 (億ドル) | トレンド |
+| :--- | :---: | :---: | :--- |
+| **AI & 機械学習** | 35% 🚀 | 500 | 生成AIの爆発的普及 |
+| **サイバーセキュリティ** | 15% | 800 | ゼロトラスト需要の増加 |
+| **コラボレーション** | 10% | 450 | ハイブリッドワークの定着 |
+| **CRM / Sales** | 12% | 900 | データ主導の顧客管理 |
+| **HR Tech** | 8% | 300 | 従業員体験(EX)の重視 |
 
-問題が解決しない場合は、システム管理者にお問い合わせください。`,
-      citations: [],
-      suggestions: ['再試行する', 'ヘルプを見る'],
-      timestamp: new Date(Date.now() - 1000 * 60 + 1000).toISOString(),
+### 分析
+
+*   **AI分野**が圧倒的な成長を見せており、多くの企業が予算を重点配分しています[1]。
+*   **セキュリティ**は依然として優先度が高く、安定した成長を続けています[2]。
+
+詳細なレポートが必要な場合はお知らせください。`,
+      citations: [
+        { id: 'c1', type: 'web', source: 'Gartner Market Forecast 2024', url: 'https://example.com/gartner' },
+        { id: 'c2', type: 'web', source: 'IDC SaaS Tracker', url: 'https://example.com/idc' }
+      ],
+      suggestions: ['AI分野の詳細', '2025年の予測は？', '日本市場の動向'],
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 + 5000).toISOString(),
     }
   ],
   'mock_4': [
     {
       id: 'm4_u1',
       role: 'user',
-      text: '長文のレスポンスでスクロール動作を確認したいです。',
+      text: 'Markdownの表示テストをしたいので、複雑な構造の文章を作って。',
       timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
     },
     {
       id: 'm4_a1',
       role: 'ai',
-      text: `# 長文レスポンステスト
+      text: `# Markdown表示テスト用ドキュメント
 
-このレスポンスは、スクロール動作を確認するための長文テストです。
+これはMarkdownのレンダリング能力をテストするための**複雑なドキュメント**です。
 
-## セクション1: イントロダクション
+## 1. テキスト装飾
 
-長文のコンテンツを表示する際、適切なスクロール動作が重要です。ユーザーは快適に情報を閲覧できる必要があります。
+*   通常テキスト
+*   *イタリック（強調）*
+*   **ボールド（強い強調）**
+*   ***イタリックかつボールド***
+*   ~~取り消し線~~
+*   \`インラインコード\`
 
-このテストでは、以下の点を確認します:
-- スクロールバーの表示
-- スムーズなスクロール動作
-- コンテンツの可読性
-- レイアウトの崩れがないこと
+## 2. リスト構造
 
-## セクション2: 詳細な説明
+### 順序なしリスト
+- レベル1
+  - レベル2
+    - レベル3
+      - レベル4
 
-### 2.1 技術的背景
+### 順序付きリスト
+1. 手順A
+2. 手順B
+   1. 詳細B-1
+   2. 詳細B-2
+3. 手順C
 
-現代のWebアプリケーションでは、大量のテキストコンテンツを扱うことが一般的です。特にAIチャットボットのような対話型インターフェースでは、長文の回答が頻繁に生成されます。
+## 3. 引用 (Blockquote)
 
-適切なスクロール実装により、ユーザー体験が大きく向上します。以下のような要素が重要です:
+> "成功とは、失敗から失敗へと、情熱を失わずに進む能力のことだ。"
+>
+> — *ウィンストン・チャーチル*
 
-1. **パフォーマンス**: 大量のコンテンツでもスムーズに動作
-2. **アクセシビリティ**: キーボード操作やスクリーンリーダーへの対応
-3. **レスポンシブデザイン**: 様々な画面サイズでの適切な表示
+## 4. 数式 (KaTeX/MathJax対応の場合)
 
-### 2.2 実装のベストプラクティス
+もし数式プラグインが入っていれば、以下のように表示されます。
 
-#### CSSによる制御
+$$
+E = mc^2
+$$
 
-\`\`\`css
-.message-content {
-  max-height: 600px;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-}
-\`\`\`
+## 5. リンクと画像
 
-#### JavaScriptによる拡張
+[Google](https://google.com) へのリンクです。
 
-\`\`\`javascript
-const scrollToBottom = () => {
-  const container = document.querySelector('.chat-container');
-  container.scrollTop = container.scrollHeight;
-};
-\`\`\`
+![ダミー画像](https://via.placeholder.com/150 "プレースホルダー")
 
-## セクション3: ユースケース
-
-### 3.1 ビジネス文書の要約
-
-長文のビジネス文書を要約する際、元の文書の構造を保ちながら重要なポイントを抽出する必要があります。
-
-例えば:
-- 経営報告書
-- 技術仕様書
-- 契約書類
-- 市場調査レポート
-
-### 3.2 技術ドキュメント
-
-技術ドキュメントでは、詳細な説明とコード例が含まれることが多く、適切なフォーマットが重要です。
-
-\`\`\`python
-class DocumentProcessor:
-    def __init__(self, config):
-        self.config = config
-        self.processed_count = 0
-    
-    def process(self, document):
-        """ドキュメントを処理"""
-        # 前処理
-        cleaned = self.clean(document)
-        
-        # 分析
-        analysis = self.analyze(cleaned)
-        
-        # 後処理
-        result = self.format(analysis)
-        
-        self.processed_count += 1
-        return result
-\`\`\`
-
-## セクション4: データと統計
-
-### 4.1 パフォーマンス指標
-
-| 指標 | 目標値 | 現在値 | 状態 |
-|------|--------|--------|------|
-| 初期表示速度 | < 1秒 | 0.8秒 | ✅ 良好 |
-| スクロール応答 | < 16ms | 12ms | ✅ 良好 |
-| メモリ使用量 | < 50MB | 45MB | ✅ 良好 |
-
-### 4.2 ユーザー満足度
-
-調査結果によると、適切なスクロール実装により:
-- ユーザー満足度が25%向上
-- 離脱率が15%減少
-- 平均セッション時間が30%増加
-
-## セクション5: まとめ
-
-長文コンテンツの適切な表示は、ユーザー体験の重要な要素です。
-
-### 重要なポイント
-
-1. **パフォーマンス最適化**
-   - 仮想スクロールの活用
-   - 遅延読み込みの実装
-   - メモリ管理の最適化
-
-2. **アクセシビリティ**
-   - キーボードナビゲーション
-   - スクリーンリーダー対応
-   - 適切なARIA属性
-
-3. **ユーザビリティ**
-   - 直感的な操作
-   - 視覚的なフィードバック
-   - レスポンシブデザイン
-
-## 参考資料
-
-詳細な実装ガイドは、以下のドキュメントを参照してください[1][2]。
-
+## 6. 水平線
+---
+セクションの区切りです。
 ---
 
-このテストにより、長文コンテンツのスクロール動作が適切に機能していることを確認できます。`,
-      citations: [
-        { id: 'c1', type: 'web', source: 'Web Performance Best Practices', url: 'https://web.dev/performance' },
-        { id: 'c2', type: 'rag', source: 'UI/UX設計ガイドライン v3.0', url: null }
-      ],
-      suggestions: ['パフォーマンス改善方法は?', 'アクセシビリティの詳細', '他の最適化手法'],
+以上です。`,
+      citations: [],
+      suggestions: ['もっと複雑に', '数式を詳しく', 'テーブルを追加'],
       timestamp: new Date(Date.now() - 1000 * 60 * 15 + 5000).toISOString(),
     }
   ],
@@ -334,197 +216,97 @@ class DocumentProcessor:
     {
       id: 'm5_u1',
       role: 'user',
-      text: '様々なファイル形式のアイコン表示を確認したいです。',
+      text: 'システムエラーが発生した場合の表示を確認したい。',
       timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
     },
     {
       id: 'm5_a1',
       role: 'ai',
-      text: `# ファイル形式アイコンテスト
+      text: `申し訳ありません。システム内部でエラーが発生しました。
 
-様々なファイル形式のアイコンが正しく表示されることを確認します。
+**エラー詳細:**
+\`500 Internal Server Error\`
 
-## ドキュメントファイル
-
-以下のドキュメントファイルを参照しました:
-
-- **PDFファイル**: 報告書や公式文書[1]
-- **Wordファイル**: 提案書やレポート[2]
-- **PowerPointファイル**: プレゼンテーション資料[3]
-
-## データファイル
-
-データ分析には以下のファイルを使用しました:
-
-- **Excelファイル**: 予算データと統計[4]
-- **CSVファイル**: ログデータ[5]
-
-## テキストファイル
-
-設定ファイルやドキュメント:
-
-- **テキストファイル**: 設定情報[6]
-- **Markdownファイル**: ドキュメント[7]
-
-## 画像ファイル
-
-参考資料として以下の画像を確認しました:
-
-- **JPEGファイル**: 写真データ[8]
-- **PNGファイル**: 図表やスクリーンショット[9]
-
-## まとめ
-
-各ファイル形式に対応したアイコンが、統一されたデザインで表示されていることを確認してください。`,
-      citations: [
-        { id: 'c1', type: 'document', source: '年次報告書_2024.pdf', url: null },
-        { id: 'c2', type: 'document', source: '新規事業提案書.docx', url: null },
-        { id: 'c3', type: 'document', source: '四半期レビュー.pptx', url: null },
-        { id: 'c4', type: 'document', source: '予算データ_Q4.xlsx', url: null },
-        { id: 'c5', type: 'document', source: 'access_log_2024.csv', url: null },
-        { id: 'c6', type: 'document', source: 'config.txt', url: null },
-        { id: 'c7', type: 'document', source: 'README.md', url: null },
-        { id: 'c8', type: 'document', source: 'team_photo.jpg', url: null },
-        { id: 'c9', type: 'document', source: 'architecture_diagram.png', url: null }
-      ],
-      suggestions: ['他の形式は対応?', 'アイコンのカスタマイズ', 'ファイルサイズ制限は?'],
-      timestamp: new Date(Date.now() - 1000 * 60 * 5 + 5000).toISOString(),
+再試行するか、しばらく待ってからアクセスしてください。`,
+      citations: [],
+      suggestions: ['再試行', 'サポートに連絡'],
+      timestamp: new Date(Date.now() - 1000 * 60 * 5 + 1000).toISOString(),
     }
   ]
 };
 
 // ファイルアップロード時のテンプレート回答
 export const mockStreamResponseWithFile = {
-  text: `添付いただいた**{filename}**を詳しく分析しました。
+  text: `アップロードされたファイル **{filename}** を解析しました。
 
-## 📄 ドキュメント分析結果
+## 📄 ファイル概要
 
-このファイルには以下の重要な情報が含まれています:
+このドキュメントは、**2025年度のプロジェクト計画書**のようです。以下の主要なセクションが含まれています。
 
-### 主要トピック
-ファイル内容を分析した結果、以下のような構造になっています[1]:
+1.  **プロジェクトの目的**: 業務効率化とコスト削減
+2.  **スコープ**: 国内全拠点への新システム導入
+3.  **スケジュール**: 4月開始、10月本稼働予定
 
-1. **概要セクション**: 全体の目的と背景
-2. **詳細セクション**: 具体的なデータと分析
-3. **結論セクション**: まとめと推奨事項
+### 💡 重要なポイント
 
-### キーポイント
+*   **予算**: 総額5,000万円が計上されています[1]。
+*   **リスク**: レガシーシステムからのデータ移行に懸念点が挙げられています[2]。
+*   **体制**: プロジェクトマネージャー1名、開発メンバー5名の体制です。
 
-重要なポイントを抽出しました:
+### 📊 データ分析
 
-- **ポイント1**: 主要な発見事項
-- **ポイント2**: 注目すべきデータ
-- **ポイント3**: 推奨されるアクション
+ファイル内のデータを分析した結果、Q3にリソースが不足する可能性があります。
 
-## 🔍 関連情報
+> "10月のリリース直前は、テスト工数が現在の見積もりの1.5倍必要になる可能性がある。"
 
-ファイル内容に関連して、以下の追加情報も参照しました:
-
-### 社内ナレッジベース
-社内のドキュメントには、関連する以下の情報があります[2]:
-- 過去の類似案件
-- ベストプラクティス
-- 参考資料
-
-### 最新のWeb情報
-外部の最新情報も確認しました[3]:
-- 業界トレンド
-- 技術動向
-- 市場分析
-
-## 💡 次のステップ
-
-ファイルの内容を踏まえ、以下のアクションをお勧めします:
-
-1. 重要なポイントの詳細確認
-2. 関連ドキュメントとの照合
-3. 具体的な実行計画の策定
-
-ご質問があれば、ファイルの特定部分について詳しく説明できます。`,
+この点について、追加の対策を検討することをお勧めします。`,
   citations: [
-    { id: 'file_cite', type: 'document', source: '{filename}', url: null },
-    { id: 'rag_cite', type: 'rag', source: '関連する社内ドキュメント', url: null },
-    { id: 'web_cite', type: 'web', source: '業界最新トレンド', url: 'https://example.com/trends' }
+    { id: 'file_cite_1', type: 'document', source: '{filename} (P.3)', url: null },
+    { id: 'file_cite_2', type: 'document', source: '{filename} (P.12)', url: null },
+    { id: 'web_cite', type: 'web', source: 'システム移行のベストプラクティス', url: 'https://example.com/migration' }
   ],
   suggestions: [
-    'ファイルの要約を教えて',
-    '重要なポイントを詳しく',
-    '関連する他の情報は?'
+    'リスク対策案を教えて',
+    'スケジュールの詳細',
+    '予算の内訳は？'
   ]
 };
 
 // ファイルなし時のテンプレート回答
 export const mockStreamResponseNoFile = {
-  text: `ご質問について、Web検索と社内ナレッジベースから情報を収集しました。
+  text: `ご質問ありがとうございます。Web検索とデータベースを参照して回答を作成しました。
 
-## 🔍 検索結果
+## 🔍 調査結果
 
-### Web情報
+最新の情報によると、以下のトレンドが確認されています。
 
-最新の公開情報によると、以下のような状況です[1]:
+### 1. 主要な動向
+現在、この分野では**自動化とAIの統合**が急速に進んでいます[1]。特に、生成AIを活用した業務プロセスの最適化が注目されています。
 
-#### 主要なトレンド
-1. **トレンド1**: 業界全体の動向
-2. **トレンド2**: 技術的な進展
-3. **トレンド3**: 市場の変化
+### 2. 具体的な事例
+*   **企業A**: カスタマーサポートの80%を自動化
+*   **企業B**: データ分析時間を1/10に短縮
 
-#### 注目すべきポイント
-- 新しい技術の台頭
-- 規制環境の変化
-- ユーザーニーズの多様化
+## 📈 統計データ
 
-### 社内ナレッジ
+| 項目 | 2023年 | 2024年(予測) |
+| :--- | :---: | :---: |
+| 市場規模 | 100億ドル | 150億ドル |
+| 導入企業率 | 35% | 60% |
 
-社内のドキュメントには次の記載があります[2]:
+## 💡 考察
 
-#### 社内ガイドライン
-- 標準的なアプローチ
-- 承認プロセス
-- 品質基準
+この傾向は今後も続くと予想されます。早期の導入が競争優位性につながるでしょう[2]。
 
-#### ベストプラクティス
-- 過去の成功事例
-- 推奨される手法
-- 避けるべき落とし穴
-
-## 📊 追加情報
-
-関連する情報として、以下も参考になります[3]:
-
-### 実践的なアドバイス
-1. まず基本的なアプローチを確認
-2. 社内規定に準拠
-3. 最新のトレンドを考慮
-
-### リスクと対策
-- 想定されるリスク
-- 軽減策
-- モニタリング方法
-
-## 💡 推奨事項
-
-上記の情報を踏まえ、以下をお勧めします:
-
-1. **短期的なアクション**
-   - 基本方針の確認
-   - 関係者との調整
-   - 初期計画の策定
-
-2. **中長期的な視点**
-   - 継続的な改善
-   - トレンドの追跡
-   - 柔軟な対応
-
-詳細が必要な部分があれば、お気軽にお尋ねください。`,
+さらに詳しい情報が必要な場合は、特定のトピックについて深掘りできますので、お申し付けください。`,
   citations: [
-    { id: 'web1', type: 'web', source: '公式ドキュメント', url: 'https://example.com/docs' },
-    { id: 'rag1', type: 'rag', source: '社内ガイドライン v2.1', url: null },
-    { id: 'web2', type: 'web', source: 'ベストプラクティス集', url: 'https://example.com/best-practices' }
+    { id: 'web1', type: 'web', source: 'Tech Trends 2025', url: 'https://example.com/trends' },
+    { id: 'rag1', type: 'rag', source: '社内レポート_v2.pdf', url: null }
   ],
   suggestions: [
-    '具体的な手順を教えて',
-    '社内規定の詳細は?',
-    '他の事例はある?'
+    'もっと詳しく教えて',
+    '導入のメリットは？',
+    'コスト感を知りたい'
   ]
 };
 

@@ -32,10 +32,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
   // ★ New: Force Search State
   const [forceSearch, setForceSearch] = useState(false);
-  
+
   // ★ Fix: Use ref to track latest forceSearch state for async access
   const forceSearchRef = useRef(forceSearch);
-  
+
   useEffect(() => {
     forceSearchRef.current = forceSearch;
   }, [forceSearch]);
@@ -211,10 +211,49 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     if (mockMode === 'FE') {
       const hasFile = attachment || activeContextFile;
       let mockRes = mockStreamResponseNoFile;
+
+      // Determine base response and initial trace mode
       let finalTraceMode = 'knowledge';
-      if (hasFile) { mockRes = mockStreamResponseWithFile; finalTraceMode = 'document'; }
+
+      if (hasFile) {
+        mockRes = mockStreamResponseWithFile;
+        finalTraceMode = 'document';
+      } else if (mockRes.citations && mockRes.citations.length > 0) {
+        // If no file but has citations, it's likely search/rag
+        finalTraceMode = 'search';
+      }
+
+      // Replace placeholders if file exists
+      let finalText = mockRes.text;
+      let finalCitations = mockRes.citations;
+
+      if (hasFile && currentFileName) {
+        finalText = finalText.replace(/{filename}/g, currentFileName);
+        finalCitations = finalCitations.map(c => ({
+          ...c,
+          source: c.source.replace(/{filename}/g, currentFileName)
+        }));
+      }
+
+      // ★ Simulate Conversation Creation
+      if (!conversationId) {
+        const newMockId = `mock_gen_${Date.now()}`;
+        creatingConversationIdRef.current = newMockId; // Prevent history reload clearing state
+        if (onConversationCreated) {
+          onConversationCreated(newMockId, text);
+        }
+      }
+
       setTimeout(() => {
-        setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, traceMode: finalTraceMode, text: mockRes.text, citations: mockRes.citations, suggestions: mockRes.suggestions, isStreaming: false, processStatus: null } : m));
+        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+          ...m,
+          traceMode: finalTraceMode,
+          text: finalText,
+          citations: finalCitations,
+          suggestions: mockRes.suggestions,
+          isStreaming: false,
+          processStatus: null
+        } : m));
         setIsLoading(false);
       }, 2000);
       return;
