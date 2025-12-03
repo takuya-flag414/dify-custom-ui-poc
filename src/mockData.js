@@ -1,11 +1,11 @@
 // src/mockData.js
 
 /**
- * FEモード検証用のモックデータ定義
- * Updated: 2025-11-28
+ * FEモード検証用のモックデータ定義 (全8パターン網羅版)
+ * Updated: 2025-12-03
  */
 
-// サイドバー用の会話リスト
+// サイドバー用の会話リスト (既存のまま)
 export const mockConversations = [
   { id: 'mock_1', name: '🤖 AI Assistant Demo' },
   { id: 'mock_2', name: '💻 Code Generation Test' },
@@ -14,301 +14,153 @@ export const mockConversations = [
   { id: 'mock_5', name: '🐛 Error Simulation' },
 ];
 
-// 履歴読み込み用のメッセージデータ (IDで紐づけ)
-export const mockMessages = {
-  'mock_1': [
-    {
-      id: 'm1_u1',
-      role: 'user',
-      text: 'このAIアシスタントは何ができますか？',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    },
-    {
-      id: 'm1_a1',
-      role: 'ai',
-      text: `# AIアシスタント機能紹介
+export const mockMessages = {}; // (既存の履歴データは省略しますが、必要なら前回のコードを使用してください)
 
-私は**高度なAIアシスタント**です。以下のようなタスクをお手伝いできます。
+// --- 8 Patterns of Mock Responses ---
 
-## 主な機能
+// P1: Pure (File:×, RAG:×, Web:×)
+export const mockResPure = {
+  text: `ご質問ありがとうございます。私の学習データに基づいて回答します。
 
-1.  **質問への回答**: 日常的な疑問から専門的な知識まで幅広くお答えします。
-2.  **文章作成**: ブログ記事、メール、レポートなどの下書きを作成します。
-3.  **コード生成**: Python, JavaScript, Reactなどのプログラミングコードを生成・解説します。
-4.  **データ分析**: 提供されたデータを分析し、洞察を提供します。
+ご質問の内容については、一般的に以下のことが言えます。
+* **基本概念**: 目的を達成するための体系的なアプローチが重要です。
+* **一般的な手法**: 計画、実行、評価、改善のサイクル（PDCA）を回すことが推奨されます。
 
-## 特徴
-
-*   ✨ **高速な応答**: リアルタイムに近い速度で回答を生成します。
-*   📚 **豊富な知識**: 最新の情報を踏まえた回答を心がけています。
-*   🔒 **セキュリティ**: 会話内容は安全に保護されます。
-
-何かお手伝いできることはありますか？`,
-      citations: [],
-      suggestions: ['コードを書いて', 'ニュースを教えて', '分析をお願い'],
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 + 5000).toISOString(),
-    }
-  ],
-  'mock_2': [
-    {
-      id: 'm2_u1',
-      role: 'user',
-      text: 'ReactとTailwind CSSを使って、モダンなカードコンポーネントを作って。',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    },
-    {
-      id: 'm2_a1',
-      role: 'ai',
-      text: `はい、ReactとTailwind CSSを使用したモダンなカードコンポーネントの例です。
-ガラスモーフィズム（Glassmorphism）効果を取り入れたデザインにしました。
-
-\`\`\`jsx
-import React from 'react';
-
-const ModernCard = ({ title, description, imageUrl }) => {
-  return (
-    <div className="max-w-sm rounded-2xl overflow-hidden shadow-lg bg-white/30 backdrop-blur-md border border-white/20">
-      {imageUrl && (
-        <img className="w-full h-48 object-cover" src={imageUrl} alt={title} />
-      )}
-      <div className="px-6 py-4">
-        <div className="font-bold text-xl mb-2 text-gray-800">{title}</div>
-        <p className="text-gray-700 text-base">
-          {description}
-        </p>
-      </div>
-      <div className="px-6 pt-4 pb-2">
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
-          詳細を見る
-        </button>
-      </div>
-    </div>
-  );
+なお、私は現在、**外部ネットワーク**や**社内データベース**には接続しておらず、アップロードされたファイルもありません。
+最新情報や固有の規定については、検索設定を有効にするか、ファイルを添付してください。`,
+  citations: [],
+  suggestions: ['Web検索を有効にするには？', '社内情報を検索したい', 'ファイルを添付する']
 };
 
-export default ModernCard;
-\`\`\`
+// P2: Web Only (File:×, RAG:×, Web:○)
+export const mockResWebOnly = {
+  text: `Web検索を実行し、最新情報を収集しました。
 
-### 使用方法
+## 🌐 Web検索結果
+最新のトレンドによると、以下の点が注目されています。
 
-このコンポーネントは以下のように使用します。
+1.  **市場の動向**: 2025年にかけて、AI技術の統合が加速すると予測されています[1]。
+2.  **主要なニュース**: 大手テック企業が新たなプラットフォームを発表しました[2]。
 
-\`\`\`jsx
-<ModernCard
-  title="美しい風景"
-  description="このカードはTailwind CSSのbackdrop-blurユーティリティを使用して、背景をぼかす効果を実現しています。"
-  imageUrl="https://example.com/image.jpg"
-/>
-\`\`\`
-
-Tailwindの設定で \`backdrop-filter\` が有効になっていることを確認してください。`,
-      citations: [],
-      suggestions: ['ボタンの色を変えたい', 'ダークモード対応は？', 'TypeScript版は？'],
-      timestamp: new Date(Date.now() - 1000 * 60 * 30 + 5000).toISOString(),
-    }
-  ],
-  'mock_3': [
-    {
-      id: 'm3_u1',
-      role: 'user',
-      text: '2024年の主要なSaaS市場の成長率を表で比較したいです。',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-    },
-    {
-      id: 'm3_a1',
-      role: 'ai',
-      text: `2024年のSaaS市場における主要セクターの成長率予測をまとめました。
-
-## SaaS市場成長率比較 (2024年予測)
-
-| セクター | 成長率 (YoY) | 市場規模 (億ドル) | トレンド |
-| :--- | :---: | :---: | :--- |
-| **AI & 機械学習** | 35% 🚀 | 500 | 生成AIの爆発的普及 |
-| **サイバーセキュリティ** | 15% | 800 | ゼロトラスト需要の増加 |
-| **コラボレーション** | 10% | 450 | ハイブリッドワークの定着 |
-| **CRM / Sales** | 12% | 900 | データ主導の顧客管理 |
-| **HR Tech** | 8% | 300 | 従業員体験(EX)の重視 |
-
-### 分析
-
-*   **AI分野**が圧倒的な成長を見せており、多くの企業が予算を重点配分しています[1]。
-*   **セキュリティ**は依然として優先度が高く、安定した成長を続けています[2]。
-
-詳細なレポートが必要な場合はお知らせください。`,
-      citations: [
-        { id: 'c1', type: 'web', source: 'Gartner Market Forecast 2024', url: 'https://example.com/gartner' },
-        { id: 'c2', type: 'web', source: 'IDC SaaS Tracker', url: 'https://example.com/idc' }
-      ],
-      suggestions: ['AI分野の詳細', '2025年の予測は？', '日本市場の動向'],
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 + 5000).toISOString(),
-    }
-  ],
-  'mock_4': [
-    {
-      id: 'm4_u1',
-      role: 'user',
-      text: 'Markdownの表示テストをしたいので、複雑な構造の文章を作って。',
-      timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    },
-    {
-      id: 'm4_a1',
-      role: 'ai',
-      text: `# Markdown表示テスト用ドキュメント
-
-これはMarkdownのレンダリング能力をテストするための**複雑なドキュメント**です。
-
-## 1. テキスト装飾
-
-*   通常テキスト
-*   *イタリック（強調）*
-*   **ボールド（強い強調）**
-*   ***イタリックかつボールド***
-*   ~~取り消し線~~
-*   \`インラインコード\`
-
-## 2. リスト構造
-
-### 順序なしリスト
-- レベル1
-  - レベル2
-    - レベル3
-      - レベル4
-
-### 順序付きリスト
-1. 手順A
-2. 手順B
-   1. 詳細B-1
-   2. 詳細B-2
-3. 手順C
-
-## 3. 引用 (Blockquote)
-
-> "成功とは、失敗から失敗へと、情熱を失わずに進む能力のことだ。"
->
-> — *ウィンストン・チャーチル*
-
-## 4. 数式 (KaTeX/MathJax対応の場合)
-
-もし数式プラグインが入っていれば、以下のように表示されます。
-
-$$
-E = mc^2
-$$
-
-## 5. リンクと画像
-
-[Google](https://google.com) へのリンクです。
-
-![ダミー画像](https://via.placeholder.com/150 "プレースホルダー")
-
-## 6. 水平線
----
-セクションの区切りです。
----
-
-以上です。`,
-      citations: [],
-      suggestions: ['もっと複雑に', '数式を詳しく', 'テーブルを追加'],
-      timestamp: new Date(Date.now() - 1000 * 60 * 15 + 5000).toISOString(),
-    }
-  ],
-  'mock_5': [
-    {
-      id: 'm5_u1',
-      role: 'user',
-      text: 'システムエラーが発生した場合の表示を確認したい。',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    },
-    {
-      id: 'm5_a1',
-      role: 'ai',
-      text: `申し訳ありません。システム内部でエラーが発生しました。
-
-**エラー詳細:**
-\`500 Internal Server Error\`
-
-再試行するか、しばらく待ってからアクセスしてください。`,
-      citations: [],
-      suggestions: ['再試行', 'サポートに連絡'],
-      timestamp: new Date(Date.now() - 1000 * 60 * 5 + 1000).toISOString(),
-    }
-  ]
-};
-
-// ファイルアップロード時のテンプレート回答
-export const mockStreamResponseWithFile = {
-  text: `アップロードされたファイル **{filename}** を解析しました。
-
-## 📄 ファイル概要
-
-このドキュメントは、**2025年度のプロジェクト計画書**のようです。以下の主要なセクションが含まれています。
-
-1.  **プロジェクトの目的**: 業務効率化とコスト削減
-2.  **スコープ**: 国内全拠点への新システム導入
-3.  **スケジュール**: 4月開始、10月本稼働予定
-
-### 💡 重要なポイント
-
-*   **予算**: 総額5,000万円が計上されています[1]。
-*   **リスク**: レガシーシステムからのデータ移行に懸念点が挙げられています[2]。
-*   **体制**: プロジェクトマネージャー1名、開発メンバー5名の体制です。
-
-### 📊 データ分析
-
-ファイル内のデータを分析した結果、Q3にリソースが不足する可能性があります。
-
-> "10月のリリース直前は、テスト工数が現在の見積もりの1.5倍必要になる可能性がある。"
-
-この点について、追加の対策を検討することをお勧めします。`,
+※社内情報は参照していません。`,
   citations: [
-    { id: 'file_cite_1', type: 'document', source: '{filename} (P.3)', url: null },
-    { id: 'file_cite_2', type: 'document', source: '{filename} (P.12)', url: null },
-    { id: 'web_cite', type: 'web', source: 'システム移行のベストプラクティス', url: 'https://example.com/migration' }
+    { id: 'w1', type: 'web', source: 'Tech News Daily 2025', url: 'https://example.com/news' },
+    { id: 'w2', type: 'web', source: 'Global Market Report', url: 'https://example.com/market' }
   ],
-  suggestions: [
-    'リスク対策案を教えて',
-    'スケジュールの詳細',
-    '予算の内訳は？'
-  ]
+  suggestions: ['さらに詳しく検索', '関連企業は？']
 };
 
-// ファイルなし時のテンプレート回答
-export const mockStreamResponseNoFile = {
-  text: `ご質問ありがとうございます。Web検索とデータベースを参照して回答を作成しました。
+// P3: RAG Only (File:×, RAG:○, Web:×)
+export const mockResRagOnly = {
+  text: `社内ナレッジベースを検索しました。
+
+## 📚 社内規定に基づく回答
+社内データベースによると、以下の規定が該当します。
+
+1.  **申請フロー**: ワークフローシステムから「申請A」を選択してください[1]。
+2.  **承認権限**: 課長以上の承認が必要です[2]。
+
+※Web上の情報は参照していません。`,
+  citations: [
+    { id: 'r1', type: 'rag', source: '社内規定集_第3版.pdf', url: null },
+    { id: 'r2', type: 'rag', source: '業務マニュアル_v2.docx', url: null }
+  ],
+  suggestions: ['申請書のフォーマットは？', '緊急時の連絡先']
+};
+
+// P4: Hybrid (File:×, RAG:○, Web:○)
+export const mockResHybrid = {
+  text: `社内情報とWeb情報を統合して回答します。
 
 ## 🔍 調査結果
 
-最新の情報によると、以下のトレンドが確認されています。
+### 社内の状況
+現在の社内規定では、クラウドサービスの利用にはセキュリティ審査が必要です[1]。
 
-### 1. 主要な動向
-現在、この分野では**自動化とAIの統合**が急速に進んでいます[1]。特に、生成AIを活用した業務プロセスの最適化が注目されています。
+### 世の中の動向
+一方、Web上の情報によると、同種のサービスでは多要素認証が標準化しています[2]。
 
-### 2. 具体的な事例
-*   **企業A**: カスタマーサポートの80%を自動化
-*   **企業B**: データ分析時間を1/10に短縮
-
-## 📈 統計データ
-
-| 項目 | 2023年 | 2024年(予測) |
-| :--- | :---: | :---: |
-| 市場規模 | 100億ドル | 150億ドル |
-| 導入企業率 | 35% | 60% |
-
-## 💡 考察
-
-この傾向は今後も続くと予想されます。早期の導入が競争優位性につながるでしょう[2]。
-
-さらに詳しい情報が必要な場合は、特定のトピックについて深掘りできますので、お申し付けください。`,
+これらを踏まえ、導入の際はセキュリティ設定を強化することをお勧めします。`,
   citations: [
-    { id: 'web1', type: 'web', source: 'Tech Trends 2025', url: 'https://example.com/trends' },
-    { id: 'rag1', type: 'rag', source: '社内レポート_v2.pdf', url: null }
+    { id: 'r1', type: 'rag', source: 'ITセキュリティガイドライン.pdf', url: null },
+    { id: 'w1', type: 'web', source: 'Cloud Security Trends', url: 'https://example.com/sec' }
   ],
-  suggestions: [
-    'もっと詳しく教えて',
-    '導入のメリットは？',
-    'コスト感を知りたい'
-  ]
+  suggestions: ['審査の申請方法は？', '推奨設定は？']
 };
 
-// 既存のテンプレート(後方互換性のため残す)
-export const mockStreamResponse = mockStreamResponseNoFile;
+// P5: File Only (File:○, RAG:×, Web:×)
+export const mockResFileOnly = {
+  text: `アップロードされたファイル **{filename}** を解析しました。
+
+## 📄 ファイル概要
+このドキュメントには、以下の重要事項が記載されています。
+
+* **売上目標**: 前年比120%増[1]
+* **課題**: 人材不足とシステム老朽化[2]
+
+※社内規定やWeb情報は参照せず、このファイルの内容のみに基づき分析しました。`,
+  citations: [
+    { id: 'f1', type: 'document', source: '{filename} (P.1)', url: null },
+    { id: 'f2', type: 'document', source: '{filename} (P.5)', url: null }
+  ],
+  suggestions: ['課題の対策は？', 'スケジュールの詳細は？']
+};
+
+// P6: File + Web (File:○, RAG:×, Web:○)
+export const mockResFileWeb = {
+  text: `ファイル **{filename}** を解析し、Web情報で補完しました。
+
+## 📄 ファイルの分析
+ファイル内で言及されている技術「Quantum-X」について確認しました[1]。
+
+## 🌐 Webでの評価
+Web検索によると、「Quantum-X」は次世代の標準技術として注目されていますが、コスト面での課題も指摘されています[2]。
+
+ファイルの提案内容は、市場のトレンドと合致していますが、コストについては再検討の余地があります。`,
+  citations: [
+    { id: 'f1', type: 'document', source: '{filename} (P.3)', url: null },
+    { id: 'w1', type: 'web', source: 'Tech Review: Quantum-X', url: 'https://example.com/review' }
+  ],
+  suggestions: ['コスト削減案は？', '競合技術は？']
+};
+
+// P7: File + RAG (File:○, RAG:○, Web:×)
+export const mockResFileRag = {
+  text: `ファイル **{filename}** と社内規定を照合しました。
+
+## ✅ コンプライアンス・チェック結果
+
+1.  **経費精算**: ファイル内の出張費規定[1]は、社内の旅費規定[2]と一致しています。
+2.  **契約条件**: 支払いサイトについて、社内標準（月末締め翌月末払い）との乖離が見られます。
+
+契約条件については、法務部への相談をお勧めします。`,
+  citations: [
+    { id: 'f1', type: 'document', source: '{filename} (P.8)', url: null },
+    { id: 'r1', type: 'rag', source: '旅費交通費規定.pdf', url: null }
+  ],
+  suggestions: ['法務部の連絡先', '支払いサイトの修正案']
+};
+
+// P8: Full (File:○, RAG:○, Web:○)
+export const mockResFull = {
+  text: `ファイル **{filename}**、社内ナレッジ、Web情報を総合的に分析しました。
+
+## 📊 総合分析レポート
+
+### 1. 提案内容の妥当性 (File)
+提案書のプロジェクト計画[1]は、概ね実行可能です。
+
+### 2. 社内規定との整合性 (RAG)
+社内のプロジェクト管理規定[2]に準拠しており、承認プロセスに進むことができます。
+
+### 3. 市場競争力 (Web)
+Web上の競合調査[3]と比較しても、本提案の独自性は高く評価できます。
+
+**結論**: このプロジェクトを推進することを推奨します。`,
+  citations: [
+    { id: 'f1', type: 'document', source: '{filename} (P.2)', url: null },
+    { id: 'r1', type: 'rag', source: 'プロジェクト管理規定.pdf', url: null },
+    { id: 'w1', type: 'web', source: 'Market Insight 2025', url: 'https://example.com/insight' }
+  ],
+  suggestions: ['次のステップは？', 'リスク要因は？']
+};

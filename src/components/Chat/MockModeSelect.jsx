@@ -1,4 +1,4 @@
-// src/components/MockModeSelect.jsx
+// src/components/Chat/MockModeSelect.jsx
 import React from 'react';
 // ★ .css のインポートを削除 (ChatArea.css が担当)
 // import './styles/ChatArea.css'; 

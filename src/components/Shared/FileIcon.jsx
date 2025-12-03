@@ -1,4 +1,4 @@
-// src/components/FileIcon.jsx
+// src/components/Shared/FileIcon.jsx
 import React from 'react';
 
 /**
@@ -30,39 +30,39 @@ const FileIcon = ({ filename, className = "w-6 h-6" }) => {
   const style = colors[ext] || colors.default;
 
   return (
-    <svg 
-      viewBox="0 0 24 24" 
-      fill="none" 
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       style={{ width: '24px', height: '24px' }} // デフォルトサイズ
     >
       {/* ベースの紙 (白背景 + 影) */}
-      <path 
-        d="M4 4C4 2.89543 4.89543 2 6 2H14L20 8V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4Z" 
-        fill="white" 
-        stroke="#E5E7EB" 
-        strokeWidth="1" 
+      <path
+        d="M4 4C4 2.89543 4.89543 2 6 2H14L20 8V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4Z"
+        fill="white"
+        stroke="#E5E7EB"
+        strokeWidth="1"
       />
-      
+
       {/* 折り返し部分 */}
-      <path 
-        d="M14 2V8H20" 
-        fill="#F3F4F6" 
-        stroke="#E5E7EB" 
-        strokeWidth="1" 
+      <path
+        d="M14 2V8H20"
+        fill="#F3F4F6"
+        stroke="#E5E7EB"
+        strokeWidth="1"
       />
 
       {/* 拡張子バッジ (背景色) */}
-      <rect 
-        x="5.5" 
-        y="11" 
-        width="13" 
-        height="7" 
-        rx="1" 
-        fill={style.bg} 
+      <rect
+        x="5.5"
+        y="11"
+        width="13"
+        height="7"
+        rx="1"
+        fill={style.bg}
       />
-      
+
       {/* 拡張子テキスト */}
       <text
         x="12"

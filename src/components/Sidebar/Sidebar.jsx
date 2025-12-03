@@ -1,4 +1,4 @@
-// src/components/Sidebar.jsx
+// src/components/Sidebar/Sidebar.jsx
 import React, { useState } from 'react';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import './Sidebar.css';

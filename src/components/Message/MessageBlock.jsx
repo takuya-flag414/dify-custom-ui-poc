@@ -1,4 +1,4 @@
-// src/components/MessageBlock.jsx
+// src/components/Message/MessageBlock.jsx
 import React, { useState, useEffect } from 'react';
 import './MessageBlock.css';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';

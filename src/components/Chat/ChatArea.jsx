@@ -19,10 +19,9 @@ const ChatArea = (props) => {
     activeContextFile,
     setActiveContextFile,
     onSendMessage,
-    domainFilters,
-    setDomainFilters,
-    forceSearch,    // ★ Accept
-    setForceSearch  // ★ Accept
+    // ★ 更新: 従来のバラバラなprops (domainFilters等) を削除し、統合オブジェクトを受け取る
+    searchSettings,
+    setSearchSettings
   } = props;
 
   const isInitialState = messages.length === 0;
@@ -55,10 +54,9 @@ const ChatArea = (props) => {
                 isCentered={true}
                 activeContextFile={activeContextFile}
                 setActiveContextFile={setActiveContextFile}
-                domainFilters={domainFilters}
-                setDomainFilters={setDomainFilters}
-                forceSearch={forceSearch}         // ★ Pass Down
-                setForceSearch={setForceSearch}   // ★ Pass Down
+                // ★ 更新: Pass Down
+                searchSettings={searchSettings}
+                setSearchSettings={setSearchSettings}
               />
             </div>
           </div>
@@ -79,10 +77,9 @@ const ChatArea = (props) => {
               isCentered={false}
               activeContextFile={activeContextFile}
               setActiveContextFile={setActiveContextFile}
-              domainFilters={domainFilters}
-              setDomainFilters={setDomainFilters}
-              forceSearch={forceSearch}         // ★ Pass Down
-              setForceSearch={setForceSearch}   // ★ Pass Down
+              // ★ 更新: Pass Down
+              searchSettings={searchSettings}
+              setSearchSettings={setSearchSettings}
             />
           </div>
         </>

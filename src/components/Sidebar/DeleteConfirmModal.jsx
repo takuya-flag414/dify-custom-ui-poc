@@ -1,4 +1,4 @@
-// src/components/DeleteConfirmModal.jsx
+// src/components/Sidebar/DeleteConfirmModal.jsx
 import React from 'react';
 import './DeleteConfirmModal.css'; // 次のステップで作成
 

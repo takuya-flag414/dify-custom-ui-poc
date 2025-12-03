@@ -1,4 +1,4 @@
-// src/components/SuggestionButtons.jsx
+// src/components/Message/SuggestionButtons.jsx
 import React from 'react';
 import './MessageBlock.css';
 

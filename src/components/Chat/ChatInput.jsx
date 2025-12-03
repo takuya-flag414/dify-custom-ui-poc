@@ -1,21 +1,32 @@
-// src/components/ChatInput.jsx
+// src/components/chat/ChatInput.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import './ChatArea.css';
+import '../Chat/ChatArea.css'; // スタイルは共通のものを使用
 import FileIcon from '../Shared/FileIcon';
-import DomainTagger from '../Shared/DomainTagger';
+import ContextSelector from '../Shared/ContextSelector';
 
-// Globe Icon
-const GlobeIcon = ({ active }) => (
-  <svg
-    width="20" height="20" viewBox="0 0 24 24"
-    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-    className={`transition-colors duration-300 ${active ? 'text-blue-500' : 'text-gray-400'}`}
-  >
-    <circle cx="12" cy="12" r="10"></circle>
-    <line x1="2" y1="12" x2="22" y2="12"></line>
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path>
-  </svg>
-);
+// Context Control Icon (Globe + Status Dot)
+const ContextControlIcon = ({ settings }) => {
+  const isWebActive = settings.webMode !== 'off';
+  const isRagActive = settings.ragEnabled;
+
+  return (
+    <div className="relative">
+      <svg
+        width="20" height="20" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        className={`transition-colors duration-300 ${isWebActive ? 'text-blue-500' : 'text-gray-400'}`}
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path>
+      </svg>
+      {/* RAG Active Indicator (Green Dot) */}
+      {isRagActive && (
+        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
+      )}
+    </div>
+  );
+};
 
 const LockIcon = () => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -24,16 +35,18 @@ const LockIcon = () => (
   </svg>
 );
 
+// デフォルト設定（安全策）
+const DEFAULT_SETTINGS = { ragEnabled: true, webMode: 'auto', domainFilters: [] };
+
 const ChatInput = ({
   isLoading,
   onSendMessage,
   isCentered,
   activeContextFile,
   setActiveContextFile,
-  domainFilters,
-  setDomainFilters,
-  forceSearch,
-  setForceSearch
+  // ★ 安全策: undefinedの場合にデフォルト値を使用
+  searchSettings = DEFAULT_SETTINGS,
+  setSearchSettings = () => { }
 }) => {
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
@@ -88,6 +101,20 @@ const ChatInput = ({
 
   const handleClearContext = () => {
     setActiveContextFile(null);
+  };
+
+  // プレースホルダーの動的生成
+  const getPlaceholder = () => {
+    if (isLoading) return "AIが思考中です...";
+
+    const parts = [];
+    if (searchSettings.webMode === 'force') parts.push("Web検索");
+    if (searchSettings.ragEnabled) parts.push("社内情報");
+
+    if (parts.length > 0) {
+      return `メッセージを入力 (${parts.join('と')}を参照)...`;
+    }
+    return "メッセージを入力...";
   };
 
   return (
@@ -153,24 +180,22 @@ const ChatInput = ({
             accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
           />
 
-          {/* Search Settings Trigger (開閉のみ) */}
+          {/* Context Control Trigger */}
           <button
-            className={`chat-input-attach-btn ml-1 ${forceSearch ? 'bg-blue-50' : ''}`}
+            className={`chat-input-attach-btn ml-1 ${showSearchOptions ? 'bg-gray-100' : ''}`}
             onClick={() => setShowSearchOptions(!showSearchOptions)}
             disabled={isLoading}
-            title="検索設定を開く"
+            title="検索ソース設定を開く"
           >
-            <GlobeIcon active={forceSearch} />
+            <ContextControlIcon settings={searchSettings} />
           </button>
 
-          {/* Search Options Popover */}
+          {/* Context Selector Popover */}
           {showSearchOptions && (
             <div className="search-options-popover">
-              <DomainTagger
-                filters={domainFilters}
-                setFilters={setDomainFilters}
-                forceSearch={forceSearch}       // ★ 追加
-                setForceSearch={setForceSearch} // ★ 追加
+              <ContextSelector
+                settings={searchSettings}
+                onSettingsChange={setSearchSettings}
               />
             </div>
           )}
@@ -178,11 +203,7 @@ const ChatInput = ({
           <textarea
             ref={textareaRef}
             className="chat-input-textarea"
-            placeholder={
-              isLoading
-                ? "AIが思考中です..."
-                : (forceSearch ? "Web検索したい内容を入力..." : "メッセージを入力 (AIが検索を判断します)...")
-            }
+            placeholder={getPlaceholder()}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}

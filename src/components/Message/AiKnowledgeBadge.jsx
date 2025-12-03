@@ -1,4 +1,4 @@
-// src/components/AiKnowledgeBadge.jsx
+// src/components/Message/AiKnowledgeBadge.jsx
 import React from 'react';
 import './AiKnowledgeBadge.css';
 

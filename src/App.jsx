@@ -31,10 +31,9 @@ function App() {
     activeContextFile,
     setActiveContextFile,
     handleSendMessage,
-    domainFilters,
-    setDomainFilters,
-    forceSearch,    // ★ New
-    setForceSearch  // ★ New
+    // ★ 更新: 新しい検索設定Stateを受け取る
+    searchSettings,
+    setSearchSettings
   } = useChat(mockMode, conversationId, addLog, handleConversationCreated);
 
   return (
@@ -60,10 +59,9 @@ function App() {
         activeContextFile={activeContextFile}
         setActiveContextFile={setActiveContextFile}
         onSendMessage={handleSendMessage}
-        domainFilters={domainFilters}
-        setDomainFilters={setDomainFilters}
-        forceSearch={forceSearch}       // ★ Pass Down
-        setForceSearch={setForceSearch} // ★ Pass Down
+        // ★ 更新: ChatAreaに新しい設定オブジェクトを渡す
+        searchSettings={searchSettings}
+        setSearchSettings={setSearchSettings}
       />
     </div>
   );

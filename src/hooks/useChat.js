@@ -1,6 +1,11 @@
 // src/hooks/useChat.js
 import { useState, useEffect, useRef } from 'react';
-import { mockMessages, mockStreamResponseWithFile, mockStreamResponseNoFile } from '../mockData';
+// ★ New: 8パターンのモックをインポート
+import {
+  mockMessages,
+  mockResPure, mockResWebOnly, mockResRagOnly, mockResHybrid,
+  mockResFileOnly, mockResFileWeb, mockResFileRag, mockResFull
+} from '../mockData';
 import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMapper';
@@ -8,18 +13,13 @@ import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMappe
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 const USER_ID = 'poc-user-01';
+const MOCK_PERPLEXITY_JSON = JSON.stringify({ "search_results": [], "answer": "Mock Answer" }); // 簡略化
 
-// バックエンドモックモード用のダミー検索結果
-const MOCK_PERPLEXITY_JSON = JSON.stringify({
-  "search_results": [
-    {
-      "url": "https://netlab.click/todayis/1118",
-      "snippet": "2025年11月18日は「土木の日」「いい家の日」「森とふるさとの日」など、様々な記念日が制定されています。",
-      "title": "今日は何の日？ 2025年11月18日の記念日まとめ｜ねとらぼ"
-    }
-  ],
-  "answer": "2025年11月18日は、「土木の日」など様々な記念日があります。"
-});
+const DEFAULT_SEARCH_SETTINGS = {
+  ragEnabled: true,
+  webMode: 'auto',
+  domainFilters: []
+};
 
 export const useChat = (mockMode, conversationId, addLog, onConversationCreated) => {
   const [messages, setMessages] = useState([]);
@@ -27,45 +27,36 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
   const [activeContextFile, setActiveContextFile] = useState(null);
   const [dynamicMockMessages, setDynamicMockMessages] = useState({});
 
-  // Domain Filters State
-  const [domainFilters, setDomainFilters] = useState([]);
-  const filtersMapRef = useRef({});
-
-  // Force Search State
-  const [forceSearch, setForceSearch] = useState(false);
-  // 非同期処理内で最新のstateを参照するためのRef
-  const forceSearchRef = useRef(forceSearch);
+  const [searchSettings, setSearchSettings] = useState(DEFAULT_SEARCH_SETTINGS);
+  const searchSettingsRef = useRef(searchSettings);
 
   useEffect(() => {
-    forceSearchRef.current = forceSearch;
-  }, [forceSearch]);
+    searchSettingsRef.current = searchSettings;
+  }, [searchSettings]);
 
   const creatingConversationIdRef = useRef(null);
+  const settingsMapRef = useRef({});
 
-  // 会話ごとにフィルタ設定を記憶・復元するラッパー
-  const updateDomainFilters = (newFilters) => {
-    setDomainFilters(newFilters);
+  const updateSearchSettings = (newSettings) => {
+    setSearchSettings(newSettings);
+    const filterCount = newSettings.domainFilters.length;
+    addLog(`[Search Settings Updated] RAG: ${newSettings.ragEnabled}, Web: ${newSettings.webMode.toUpperCase()}, Filters: ${filterCount}`, 'info');
     if (conversationId) {
-      filtersMapRef.current[conversationId] = newFilters;
+      settingsMapRef.current[conversationId] = newSettings;
     }
   };
 
-  // --- FE Mock Memory Sync ---
-  // フロントエンドモック時に、会話切り替えでチャット履歴が消えないようにメモリに保存
   useEffect(() => {
     if (mockMode === 'FE' && conversationId && messages.length > 0) {
       setDynamicMockMessages((prev) => ({ ...prev, [conversationId]: messages }));
     }
   }, [messages, mockMode, conversationId]);
 
-  // --- Load History ---
   useEffect(() => {
     const loadHistory = async () => {
-      // フィルタ設定の復元
-      const savedFilters = filtersMapRef.current[conversationId] || [];
-      setDomainFilters(savedFilters);
+      const savedSettings = settingsMapRef.current[conversationId] || DEFAULT_SEARCH_SETTINGS;
+      setSearchSettings(savedSettings);
 
-      // 新規作成直後のリロード回避
       if (conversationId && conversationId === creatingConversationIdRef.current) {
         addLog(`[useChat] Skip loading history for just-created conversation: ${conversationId}`, 'info');
         creatingConversationIdRef.current = null;
@@ -73,6 +64,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       }
 
       addLog(`[useChat] Conversation changed to: ${conversationId}`, 'info');
+      addLog(`[Search Settings Loaded] RAG: ${savedSettings.ragEnabled}, Web: ${savedSettings.webMode.toUpperCase()}`, 'info');
+
       setActiveContextFile(null);
 
       if (conversationId === null) {
@@ -80,7 +73,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         return;
       }
 
-      // FEモックモードの履歴ロード
       if (mockMode === 'FE') {
         if (dynamicMockMessages[conversationId]) {
           setMessages(dynamicMockMessages[conversationId]);
@@ -90,19 +82,15 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         return;
       }
 
-      // リアルAPIからの履歴ロード
       setIsLoading(true);
       setMessages([]);
       try {
         const historyData = await fetchMessagesApi(conversationId, USER_ID, DIFY_API_URL, DIFY_API_KEY);
-        // APIは新しい順で返すが、UI表示用に古い順にソート
         const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
         const newMessages = [];
         for (const item of chronologicalMessages) {
           const timestamp = item.created_at ? new Date(item.created_at * 1000).toISOString() : new Date().toISOString();
-
-          // ユーザーメッセージ
           if (item.query) {
             newMessages.push({
               id: `${item.id}_user`,
@@ -112,15 +100,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               files: item.message_files ? item.message_files.map(f => ({ name: f.url ? '添付ファイル' : 'File' })) : []
             });
           }
-
-          // AIメッセージ
           if (item.answer) {
             let aiText = item.answer;
-            // Dify API標準の出典情報
             let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
             let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
-
-            // LLMが生成したJSON内の出典情報をパース試行
             const parsed = parseLlmResponse(aiText);
             if (parsed.isParsed) {
               aiText = parsed.answer;
@@ -131,18 +114,17 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                 traceMode = 'search';
               }
             }
-
             newMessages.push({
               id: item.id,
               role: 'ai',
               text: aiText,
-              rawContent: item.answer, // 履歴ロード時は整形前テキストをそのままRawとする
+              rawContent: item.answer,
               citations: aiCitations,
               suggestions: [],
               isStreaming: false,
               timestamp: timestamp,
               traceMode: traceMode,
-              thoughtProcess: [], // 過去ログなので思考プロセスは完了済み（空）とする
+              thoughtProcess: [],
               processStatus: null
             });
           }
@@ -158,14 +140,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     loadHistory();
   }, [conversationId, mockMode, addLog]);
 
-  // --- Send Message ---
   const handleSendMessage = async (text, attachment = null) => {
     let uploadedFileId = null;
     let displayFiles = [];
 
     const currentFileName = attachment?.name || activeContextFile?.name;
+    const currentSettings = searchSettingsRef.current;
 
-    // 1. File Upload Processing
     if (mockMode === 'OFF') {
       if (attachment) {
         setIsLoading(true);
@@ -185,14 +166,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         displayFiles = [{ name: activeContextFile.name }];
       }
     } else {
-      // Mock upload
       if (attachment) {
         displayFiles = [{ name: attachment.name }];
         setActiveContextFile({ id: 'mock_id', name: attachment.name });
       }
     }
 
-    // 2. Optimistic UI Updates
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       role: 'user',
@@ -207,34 +186,74 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     setMessages(prev => [...prev, {
       id: aiMessageId,
       role: 'ai',
-      text: '',           // 表示用テキスト（パース済み）
-      rawContent: '',     // ★ New: 受信した生データ（デバッグ用）
+      text: '',
+      rawContent: '',
       citations: [],
       suggestions: [],
       isStreaming: true,
       timestamp: new Date().toISOString(),
       traceMode: 'knowledge',
-      thoughtProcess: [], // ★ New: 思考プロセスの配列初期化
-      processStatus: null // Deprecated
+      thoughtProcess: [],
+      processStatus: null
     }]);
 
-    // 3. API Request Execution
+    // ------------------------------------------------------------------
+    // FE Mock Logic (Refined 8 Patterns)
+    // ------------------------------------------------------------------
     if (mockMode === 'FE') {
-      // --- FrontEnd Mock Logic ---
-      const hasFile = attachment || activeContextFile;
-      let mockRes = mockStreamResponseNoFile;
+      const hasFile = !!(attachment || activeContextFile);
+      const useRag = currentSettings.ragEnabled;
+      const useWeb = currentSettings.webMode !== 'off';
+
+      let mockRes;
       let finalTraceMode = 'knowledge';
 
-      if (hasFile) {
-        mockRes = mockStreamResponseWithFile;
-        finalTraceMode = 'document';
-      } else if (mockRes.citations && mockRes.citations.length > 0) {
+      // ★ 8パターン判定ロジック
+      if (!hasFile && !useRag && !useWeb) {
+        // P1: Pure
+        mockRes = mockResPure;
+        finalTraceMode = 'knowledge';
+      }
+      else if (!hasFile && !useRag && useWeb) {
+        // P2: Web Only
+        mockRes = mockResWebOnly;
         finalTraceMode = 'search';
+      }
+      else if (!hasFile && useRag && !useWeb) {
+        // P3: RAG Only
+        mockRes = mockResRagOnly;
+        finalTraceMode = 'document';
+      }
+      else if (!hasFile && useRag && useWeb) {
+        // P4: Hybrid (RAG + Web)
+        mockRes = mockResHybrid;
+        finalTraceMode = 'search';
+      }
+      else if (hasFile && !useRag && !useWeb) {
+        // P5: File Only
+        mockRes = mockResFileOnly;
+        finalTraceMode = 'document';
+      }
+      else if (hasFile && !useRag && useWeb) {
+        // P6: File + Web
+        mockRes = mockResFileWeb;
+        finalTraceMode = 'document';
+      }
+      else if (hasFile && useRag && !useWeb) {
+        // P7: File + RAG
+        mockRes = mockResFileRag;
+        finalTraceMode = 'document';
+      }
+      else if (hasFile && useRag && useWeb) {
+        // P8: Full (File + RAG + Web)
+        mockRes = mockResFull;
+        finalTraceMode = 'document';
       }
 
       let finalText = mockRes.text;
-      let finalCitations = mockRes.citations;
+      let finalCitations = [...(mockRes.citations || [])];
 
+      // File名の置換
       if (hasFile && currentFileName) {
         finalText = finalText.replace(/{filename}/g, currentFileName);
         finalCitations = finalCitations.map(c => ({
@@ -246,52 +265,96 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       if (!conversationId) {
         const newMockId = `mock_gen_${Date.now()}`;
         creatingConversationIdRef.current = newMockId;
+        settingsMapRef.current[newMockId] = currentSettings;
         if (onConversationCreated) {
           onConversationCreated(newMockId, text);
         }
       }
 
-      // ★ FE Mock: 思考プロセスのアニメーションシミュレーション
+      // 4. 思考プロセスのアニメーション (改修: ステップ分離版)
       const simulateSteps = async () => {
-        // Step 1: 意図解析
-        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-          ...m,
-          thoughtProcess: [{ id: 'step1', title: 'ユーザーの意図を解析中...', status: 'processing' }]
-        } : m));
+        let steps = [];
+        const updateSteps = (newSteps) => {
+          setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, thoughtProcess: newSteps } : m));
+        };
+
+        // Helper: 全ステップをdoneにする
+        const markAllDone = (currentSteps) => currentSteps.map(s => ({ ...s, status: 'done' }));
+
+        // --- Step 1: 意図解析 ---
+        steps.push({ id: 'step1', title: 'ユーザーの意図を解析中...', status: 'processing' });
+        updateSteps(steps);
         await new Promise(r => setTimeout(r, 600));
+        steps = markAllDone(steps);
 
-        // Step 2: ツール実行
-        const toolTitle = hasFile ? `ドキュメント「${currentFileName}」を読込中...` : 'Webから最新情報を検索中...';
-        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-          ...m,
-          thoughtProcess: [
-            { id: 'step1', title: 'ユーザーの意図を解析中...', status: 'done' },
-            { id: 'step2', title: toolTitle, status: 'processing' }
-          ]
-        } : m));
-        await new Promise(r => setTimeout(r, 1200));
+        // --- Step 2: ファイル読込 (あれば) ---
+        if (hasFile) {
+          steps.push({
+            id: 'step_file',
+            title: `ドキュメント「${currentFileName}」を読込中...`,
+            status: 'processing'
+          });
+          updateSteps(steps);
+          await new Promise(r => setTimeout(r, 800)); // ファイル解析の時間
+          steps = markAllDone(steps);
+        }
 
-        // Step 3: 回答生成
-        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-          ...m,
-          thoughtProcess: [
-            { id: 'step1', title: 'ユーザーの意図を解析中...', status: 'done' },
-            { id: 'step2', title: toolTitle, status: 'done' },
-            { id: 'step3', title: '情報を整理して回答を生成中...', status: 'processing' }
-          ]
-        } : m));
+        // --- Step 3: 社内ナレッジ検索 (あれば) ---
+        if (useRag) {
+          steps.push({
+            id: 'step_rag',
+            title: '📚 社内ナレッジベースを検索中...',
+            status: 'processing'
+          });
+          updateSteps(steps);
+          await new Promise(r => setTimeout(r, 800)); // 検索の時間
+          steps = markAllDone(steps);
+        }
+
+        // --- Step 4: Web検索 (あれば) ---
+        if (useWeb) {
+          const webTitle = currentSettings.webMode === 'force'
+            ? '🌐 ユーザーの指示によりWebを強制検索中...'
+            : '🌐 Webから最新情報を検索中...';
+
+          steps.push({
+            id: 'step_web',
+            title: webTitle,
+            status: 'processing'
+          });
+          updateSteps(steps);
+          await new Promise(r => setTimeout(r, 1200)); // Web検索は少し長めに
+          steps = markAllDone(steps);
+        }
+
+        // --- Step 5: 純粋知識参照 (何も外部ソースがない場合) ---
+        if (!hasFile && !useRag && !useWeb) {
+          steps.push({
+            id: 'step_pure',
+            title: '学習済み知識を参照中...',
+            status: 'processing'
+          });
+          updateSteps(steps);
+          await new Promise(r => setTimeout(r, 600));
+          steps = markAllDone(steps);
+        }
+
+        // --- Step 6: 回答生成 (共通) ---
+        steps.push({ id: 'step_gen', title: '情報を整理して回答を生成中...', status: 'processing' });
+        updateSteps(steps);
         await new Promise(r => setTimeout(r, 800));
+        steps = markAllDone(steps);
 
-        // 完了
+        // 完了処理
         setMessages(prev => prev.map(m => m.id === aiMessageId ? {
           ...m,
           traceMode: finalTraceMode,
           text: finalText,
-          rawContent: mockRes.text, // モックも生データを入れる
+          rawContent: mockRes.text,
           citations: finalCitations,
           suggestions: mockRes.suggestions,
           isStreaming: false,
-          thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'done' }))
+          thoughtProcess: steps
         } : m));
         setIsLoading(false);
       };
@@ -300,18 +363,20 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       return;
     }
 
-    // --- Real API Logic ---
-    const domainFilterString = domainFilters.length > 0 ? domainFilters.join(', ') : '';
-    const searchModeValue = forceSearchRef.current ? 'force' : 'auto';
+    // --- Real API Logic (Backend Mode) ---
+    const domainFilterString = currentSettings.domainFilters.length > 0 ? currentSettings.domainFilters.join(', ') : '';
+    const searchModeValue = currentSettings.webMode;
 
-    addLog(`[Search Mode] ${searchModeValue.toUpperCase()}`, 'info');
+    addLog(`[API Request] Sending message with Settings -> RAG: ${currentSettings.ragEnabled}, Web: ${searchModeValue}, Domain: ${domainFilterString || '(none)'}`, 'info');
 
     const requestBody = {
       inputs: {
         isDebugMode: mockMode === 'BE',
         mock_perplexity_text: mockMode === 'BE' ? MOCK_PERPLEXITY_JSON : '',
+        rag_enabled: currentSettings.ragEnabled,
+        web_search_mode: searchModeValue,
+        search_mode: searchModeValue === 'force' ? 'force' : 'auto',
         domain_filter: domainFilterString,
-        search_mode: searchModeValue,
       },
       query: text,
       user: USER_ID,
@@ -324,7 +389,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       const response = await sendChatMessageApi(requestBody, DIFY_API_URL, DIFY_API_KEY);
       const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
 
-      let contentBuffer = ''; // これがRawデータそのもの
+      let contentBuffer = '';
       let detectedTraceMode = 'knowledge';
       let isConversationIdSynced = false;
 
@@ -339,33 +404,28 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           try {
             const data = JSON.parse(line.substring(6));
 
-            // Conversation IDの同期
             if (data.conversation_id && !conversationId && !isConversationIdSynced) {
               isConversationIdSynced = true;
               creatingConversationIdRef.current = data.conversation_id;
-              if (domainFilters.length > 0) {
-                filtersMapRef.current[data.conversation_id] = domainFilters;
-              }
+              settingsMapRef.current[data.conversation_id] = currentSettings;
+              addLog(`[Search Settings Synced] Settings saved for new conversation: ${data.conversation_id}`, 'info');
               onConversationCreated(data.conversation_id, text);
             }
 
-            // ★ Workflow Node Event Handling (Timeline Visualization)
             if (data.event === 'node_started') {
               const nodeType = data.data?.node_type;
               const title = data.data?.title;
               const nodeId = data.data?.node_id || `node_${Date.now()}`;
 
-              // 重要なノード判定: すべてのLLMを含めることで最後の生成ステップも可視化
               const isSignificantNode =
                 nodeType === 'tool' ||
                 nodeType === 'document-extractor' ||
-                nodeType === 'llm';
+                nodeType === 'llm' ||
+                (title && title.includes('Knowledge'));
 
               if (isSignificantNode) {
                 let displayTitle = title;
-
-                // タイトルとモードの知能的振り分け
-                if (title && (title.includes('Intent') || title.includes('Classif') || title.includes('意図'))) {
+                if (title && (title.includes('Intent') || title.includes('Classif'))) {
                   displayTitle = '質問の意図を解析中...';
                 } else if ((title && title.includes('Perplexity')) || nodeType === 'tool') {
                   displayTitle = 'Webから最新情報を検索中...';
@@ -373,8 +433,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                 } else if (nodeType === 'document-extractor') {
                   displayTitle = 'ドキュメントを読込中...';
                   detectedTraceMode = 'document';
+                } else if (title && title.includes('Knowledge')) {
+                  displayTitle = '社内ナレッジベースを検索中...';
+                  detectedTraceMode = 'document';
                 } else if (nodeType === 'llm') {
-                  // 最後の回答生成LLM用タイトル
                   displayTitle = '情報を整理して回答を生成中...';
                 }
 
@@ -382,42 +444,31 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                   ...m,
                   traceMode: detectedTraceMode,
                   thoughtProcess: [
-                    ...m.thoughtProcess.map(t => ({ ...t, status: 'done' })), // 前のステップを完了
-                    { id: nodeId, title: displayTitle, status: 'processing' } // 新しいステップを開始
+                    ...m.thoughtProcess.map(t => ({ ...t, status: 'done' })),
+                    { id: nodeId, title: displayTitle, status: 'processing' }
                   ]
                 } : m));
               }
             }
             else if (data.event === 'node_finished') {
-              // 完了したノードをマーク
               const nodeId = data.data?.node_id;
               if (nodeId) {
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
-                  thoughtProcess: m.thoughtProcess.map(t =>
-                    t.id === nodeId ? { ...t, status: 'done' } : t
-                  )
+                  thoughtProcess: m.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
                 } : m));
               }
             }
             else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
-
-                // ★ Streaming Parser: 部分抽出ロジックの適用
                 const parsed = parseLlmResponse(contentBuffer);
-
-                // JSON構造かどうかを判定
                 const isJsonStructure = contentBuffer.trim().startsWith('{') || contentBuffer.trim().startsWith('```');
-
-                // パース成功ならanswerを表示、失敗ならJSON以外はそのまま表示、JSON途中なら空（スケルトン）
                 const textToDisplay = parsed.isParsed ? parsed.answer : (isJsonStructure ? '' : contentBuffer);
-
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
                   text: textToDisplay,
-                  rawContent: contentBuffer, // ★ New: 生データをリアルタイム更新
-                  // ★処理中ステータス維持: テキストが流れても回答生成ステップは 'processing' のまま
+                  rawContent: contentBuffer,
                   thoughtProcess: m.thoughtProcess
                 } : m));
               }
@@ -439,14 +490,11 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
-
-              // 最終的なパース処理
               const parsed = parseLlmResponse(finalText);
               if (parsed.isParsed) {
                 finalText = parsed.answer;
                 if (parsed.citations.length > 0) {
                   finalCitations = mapCitationsFromLLM(parsed.citations).map(citation => {
-                    // ファイル名とのマッチング処理
                     if (currentFileName && !citation.url) {
                       const lowerSource = citation.source.toLowerCase();
                       const lowerCurrent = currentFileName.toLowerCase();
@@ -460,15 +508,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                   detectedTraceMode = 'document';
                 }
               }
-
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                 ...m,
                 text: finalText,
-                rawContent: contentBuffer, // 最終Rawデータ
+                rawContent: contentBuffer,
                 citations: m.citations.length > 0 ? m.citations : finalCitations,
                 isStreaming: false,
                 traceMode: detectedTraceMode,
-                // Workflow完了時は確実に全てdoneにする
                 thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'done' }))
               } : m));
             }
@@ -501,12 +547,15 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     messages,
     setMessages,
     isLoading,
+    setIsLoading,
     activeContextFile,
     setActiveContextFile,
     handleSendMessage,
-    domainFilters,
-    setDomainFilters: updateDomainFilters,
-    forceSearch,
-    setForceSearch
+    searchSettings,
+    setSearchSettings: updateSearchSettings,
+    domainFilters: searchSettings.domainFilters,
+    setDomainFilters: (filters) => updateSearchSettings({ ...searchSettings, domainFilters: filters }),
+    forceSearch: searchSettings.webMode === 'force',
+    setForceSearch: (force) => updateSearchSettings({ ...searchSettings, webMode: force ? 'force' : 'auto' })
   };
 };

@@ -1,4 +1,4 @@
-// src/components/DomainTagger.jsx
+// src/components/Shared/DomainTagger.jsx
 import React, { useState } from 'react';
 
 const DomainTagger = ({ filters, setFilters, forceSearch, setForceSearch }) => {

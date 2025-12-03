@@ -1,4 +1,4 @@
-// src/components/ThinkingProcess.jsx
+// src/components/Message/ThinkingProcess.jsx
 import React, { useState, useEffect } from 'react';
 import './ThinkingProcess.css';
 

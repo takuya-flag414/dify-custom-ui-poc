@@ -1,4 +1,4 @@
-// src/components/ChatHistory.jsx
+// src/components/Chat/ChatHistory.jsx
 import React, { useEffect, useRef } from 'react';
 import './ChatHistory.css';
 import MessageBlock from '../Message/MessageBlock';

@@ -1,4 +1,4 @@
-// src/components/FileIcons.jsx
+// src/components/Shared/FileIcons.jsx
 import React, { useState } from 'react';
 import FileIcon from './FileIcon';
 
