@@ -1,6 +1,6 @@
 // src/components/ThinkingProcess.jsx
 import React, { useState, useEffect } from 'react';
-import './styles/ThinkingProcess.css';
+import './ThinkingProcess.css';
 
 const ThinkingProcess = ({ steps, isStreaming }) => {
     const [isExpanded, setIsExpanded] = useState(true);

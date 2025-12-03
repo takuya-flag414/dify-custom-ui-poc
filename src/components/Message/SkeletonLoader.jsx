@@ -1,6 +1,6 @@
 // src/components/SkeletonLoader.jsx
 import React from 'react';
-import './styles/SkeletonLoader.css';
+import './SkeletonLoader.css';
 
 const SkeletonLoader = () => {
     return (

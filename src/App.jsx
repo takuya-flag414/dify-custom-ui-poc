@@ -3,8 +3,8 @@ import { useState } from 'react';
 import './App.css';
 import './index.css';
 
-import Sidebar from './components/Sidebar';
-import ChatArea from './components/ChatArea';
+import Sidebar from './components/Sidebar/Sidebar';
+import ChatArea from './components/Chat/ChatArea';
 
 import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';

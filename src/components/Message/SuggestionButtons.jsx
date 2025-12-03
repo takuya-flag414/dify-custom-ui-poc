@@ -1,6 +1,6 @@
 // src/components/SuggestionButtons.jsx
 import React from 'react';
-import './styles/MessageBlock.css';
+import './MessageBlock.css';
 
 /**
  * プロアクティブ提案ボタン (T-11, P-3)

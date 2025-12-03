@@ -1,7 +1,7 @@
-// src/components/ChatArea.jsx
+// src/components/Chat/ChatArea.jsx
 import React from 'react';
-import '../App.css';
-import './styles/ChatArea.css';
+import '../../App.css';
+import './ChatArea.css';
 
 import MockModeSelect from './MockModeSelect';
 import ChatHistory from './ChatHistory';

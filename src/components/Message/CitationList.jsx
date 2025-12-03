@@ -1,7 +1,7 @@
-// src/components/CitationList.jsx
+// src/components/Message/CitationList.jsx
 import React from 'react';
-import './styles/CitationList.css';
-import { SourceIcon } from './FileIcons'; // FileIcons (複数形) からインポート
+import './CitationList.css';
+import { SourceIcon } from '../Shared/FileIcons'; // FileIcons (複数形) からインポート
 
 const CitationList = ({ citations, messageId }) => {
   const [isOpen, setIsOpen] = React.useState(false);

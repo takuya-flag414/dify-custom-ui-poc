@@ -1,10 +1,10 @@
-// src/components/MarkdownRenderer.jsx
+// src/components/Shared/MarkdownRenderer.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SourceIcon } from './FileIcons';
-import './styles/MessageBlock.css';
-import { useLogger } from '../hooks/useLogger';
+import '../Message/MessageBlock.css';
+import { useLogger } from '../../hooks/useLogger';
 
 /**
  * インライン出典 [1] をクリック可能なバッジに変換

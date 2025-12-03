@@ -1,16 +1,16 @@
 // src/components/MessageBlock.jsx
 import React, { useState, useEffect } from 'react';
-import './styles/MessageBlock.css';
-import MarkdownRenderer from './MarkdownRenderer';
+import './MessageBlock.css';
+import MarkdownRenderer from '../Shared/MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
 import ThinkingProcess from './ThinkingProcess';
 import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
-import FileIcon from './FileIcon';
+import FileIcon from '../Shared/FileIcon';
 
 export const AssistantIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" />
   </svg>
 );

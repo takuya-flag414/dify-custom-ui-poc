@@ -1,6 +1,6 @@
 // src/components/AiKnowledgeBadge.jsx
 import React from 'react';
-import './styles/AiKnowledgeBadge.css';
+import './AiKnowledgeBadge.css';
 
 const SparklesIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

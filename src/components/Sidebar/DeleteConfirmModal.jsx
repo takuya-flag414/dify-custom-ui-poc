@@ -1,6 +1,6 @@
 // src/components/DeleteConfirmModal.jsx
 import React from 'react';
-import './styles/DeleteConfirmModal.css'; // 次のステップで作成
+import './DeleteConfirmModal.css'; // 次のステップで作成
 
 /**
  * 削除確認モーダル
