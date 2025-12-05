@@ -1,6 +1,5 @@
 // src/hooks/useChat.js
 import { useState, useEffect, useRef } from 'react';
-// ★ New: 8パターンのモックをインポート
 import {
   mockMessages,
   mockResPure, mockResWebOnly, mockResRagOnly, mockResHybrid,
@@ -13,7 +12,6 @@ import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMappe
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 const USER_ID = 'poc-user-01';
-const MOCK_PERPLEXITY_JSON = JSON.stringify({ "search_results": [], "answer": "Mock Answer" }); // 簡略化
 
 const DEFAULT_SEARCH_SETTINGS = {
   ragEnabled: true,
@@ -109,7 +107,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               aiText = parsed.answer;
               if (aiCitations.length === 0 && parsed.citations.length > 0) {
                 aiCitations = mapCitationsFromLLM(parsed.citations);
-                traceMode = 'document';
+                // 履歴ロード時もtype判定を簡易的に行う
+                if (aiCitations.some(c => c.type === 'web')) traceMode = 'search';
+                else if (aiCitations.some(c => c.type === 'rag')) traceMode = 'knowledge';
+                else traceMode = 'document';
               } else if (parsed.citations.length > 0) {
                 traceMode = 'search';
               }
@@ -197,9 +198,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       processStatus: null
     }]);
 
-    // ------------------------------------------------------------------
-    // FE Mock Logic (Refined 8 Patterns)
-    // ------------------------------------------------------------------
     if (mockMode === 'FE') {
       const hasFile = !!(attachment || activeContextFile);
       const useRag = currentSettings.ragEnabled;
@@ -208,52 +206,19 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       let mockRes;
       let finalTraceMode = 'knowledge';
 
-      // ★ 8パターン判定ロジック
-      if (!hasFile && !useRag && !useWeb) {
-        // P1: Pure
-        mockRes = mockResPure;
-        finalTraceMode = 'knowledge';
-      }
-      else if (!hasFile && !useRag && useWeb) {
-        // P2: Web Only
-        mockRes = mockResWebOnly;
-        finalTraceMode = 'search';
-      }
-      else if (!hasFile && useRag && !useWeb) {
-        // P3: RAG Only
-        mockRes = mockResRagOnly;
-        finalTraceMode = 'document';
-      }
-      else if (!hasFile && useRag && useWeb) {
-        // P4: Hybrid (RAG + Web)
-        mockRes = mockResHybrid;
-        finalTraceMode = 'search';
-      }
-      else if (hasFile && !useRag && !useWeb) {
-        // P5: File Only
-        mockRes = mockResFileOnly;
-        finalTraceMode = 'document';
-      }
-      else if (hasFile && !useRag && useWeb) {
-        // P6: File + Web
-        mockRes = mockResFileWeb;
-        finalTraceMode = 'document';
-      }
-      else if (hasFile && useRag && !useWeb) {
-        // P7: File + RAG
-        mockRes = mockResFileRag;
-        finalTraceMode = 'document';
-      }
-      else if (hasFile && useRag && useWeb) {
-        // P8: Full (File + RAG + Web)
-        mockRes = mockResFull;
-        finalTraceMode = 'document';
-      }
+      // 8パターン判定ロジック
+      if (!hasFile && !useRag && !useWeb) { mockRes = mockResPure; finalTraceMode = 'knowledge'; }
+      else if (!hasFile && !useRag && useWeb) { mockRes = mockResWebOnly; finalTraceMode = 'search'; }
+      else if (!hasFile && useRag && !useWeb) { mockRes = mockResRagOnly; finalTraceMode = 'document'; } // RAGはKnowledgeバッジだがモック仕様上document扱いにしておく
+      else if (!hasFile && useRag && useWeb) { mockRes = mockResHybrid; finalTraceMode = 'search'; }
+      else if (hasFile && !useRag && !useWeb) { mockRes = mockResFileOnly; finalTraceMode = 'document'; }
+      else if (hasFile && !useRag && useWeb) { mockRes = mockResFileWeb; finalTraceMode = 'document'; }
+      else if (hasFile && useRag && !useWeb) { mockRes = mockResFileRag; finalTraceMode = 'document'; }
+      else if (hasFile && useRag && useWeb) { mockRes = mockResFull; finalTraceMode = 'document'; }
 
       let finalText = mockRes.text;
       let finalCitations = [...(mockRes.citations || [])];
 
-      // File名の置換
       if (hasFile && currentFileName) {
         finalText = finalText.replace(/{filename}/g, currentFileName);
         finalCitations = finalCitations.map(c => ({
@@ -271,81 +236,52 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         }
       }
 
-      // 4. 思考プロセスのアニメーション (改修: ステップ分離版)
       const simulateSteps = async () => {
         let steps = [];
         const updateSteps = (newSteps) => {
           setMessages(prev => prev.map(m => m.id === aiMessageId ? { ...m, thoughtProcess: newSteps } : m));
         };
-
-        // Helper: 全ステップをdoneにする
         const markAllDone = (currentSteps) => currentSteps.map(s => ({ ...s, status: 'done' }));
 
-        // --- Step 1: 意図解析 ---
         steps.push({ id: 'step1', title: 'ユーザーの意図を解析中...', status: 'processing' });
         updateSteps(steps);
         await new Promise(r => setTimeout(r, 600));
         steps = markAllDone(steps);
 
-        // --- Step 2: ファイル読込 (あれば) ---
         if (hasFile) {
-          steps.push({
-            id: 'step_file',
-            title: `ドキュメント「${currentFileName}」を読込中...`,
-            status: 'processing'
-          });
+          steps.push({ id: 'step_file', title: `ドキュメント「${currentFileName}」を読込中...`, status: 'processing' });
           updateSteps(steps);
-          await new Promise(r => setTimeout(r, 800)); // ファイル解析の時間
+          await new Promise(r => setTimeout(r, 800));
           steps = markAllDone(steps);
         }
 
-        // --- Step 3: 社内ナレッジ検索 (あれば) ---
         if (useRag) {
-          steps.push({
-            id: 'step_rag',
-            title: '📚 社内ナレッジベースを検索中...',
-            status: 'processing'
-          });
+          steps.push({ id: 'step_rag', title: '📚 社内ナレッジベースを検索中...', status: 'processing' });
           updateSteps(steps);
-          await new Promise(r => setTimeout(r, 800)); // 検索の時間
+          await new Promise(r => setTimeout(r, 800));
           steps = markAllDone(steps);
         }
 
-        // --- Step 4: Web検索 (あれば) ---
         if (useWeb) {
-          const webTitle = currentSettings.webMode === 'force'
-            ? '🌐 ユーザーの指示によりWebを強制検索中...'
-            : '🌐 Webから最新情報を検索中...';
-
-          steps.push({
-            id: 'step_web',
-            title: webTitle,
-            status: 'processing'
-          });
+          const webTitle = currentSettings.webMode === 'force' ? '🌐 ユーザーの指示によりWebを強制検索中...' : '🌐 Webから最新情報を検索中...';
+          steps.push({ id: 'step_web', title: webTitle, status: 'processing' });
           updateSteps(steps);
-          await new Promise(r => setTimeout(r, 1200)); // Web検索は少し長めに
+          await new Promise(r => setTimeout(r, 1200));
           steps = markAllDone(steps);
         }
 
-        // --- Step 5: 純粋知識参照 (何も外部ソースがない場合) ---
         if (!hasFile && !useRag && !useWeb) {
-          steps.push({
-            id: 'step_pure',
-            title: '学習済み知識を参照中...',
-            status: 'processing'
-          });
+          steps.push({ id: 'step_pure', title: '学習済み知識を参照中...', status: 'processing' });
           updateSteps(steps);
           await new Promise(r => setTimeout(r, 600));
           steps = markAllDone(steps);
         }
 
-        // --- Step 6: 回答生成 (共通) ---
         steps.push({ id: 'step_gen', title: '情報を整理して回答を生成中...', status: 'processing' });
         updateSteps(steps);
         await new Promise(r => setTimeout(r, 800));
         steps = markAllDone(steps);
 
-        // 完了処理
         setMessages(prev => prev.map(m => m.id === aiMessageId ? {
           ...m,
           traceMode: finalTraceMode,
@@ -372,8 +308,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
     const requestBody = {
       inputs: {
         isDebugMode: mockMode === 'BE',
-        mock_perplexity_text: mockMode === 'BE' ? MOCK_PERPLEXITY_JSON : '',
-        rag_enabled: currentSettings.ragEnabled,
+        rag_enabled: currentSettings.ragEnabled ? 'true' : 'false',
         web_search_mode: searchModeValue,
         search_mode: searchModeValue === 'force' ? 'force' : 'auto',
         domain_filter: domainFilterString,
@@ -418,26 +353,32 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               const nodeId = data.data?.node_id || `node_${Date.now()}`;
 
               const isSignificantNode =
-                nodeType === 'tool' ||
                 nodeType === 'document-extractor' ||
-                nodeType === 'llm' ||
-                (title && title.includes('Knowledge'));
+                (title && title.includes('Intent')) ||
+                nodeType === 'tool' ||
+                (title && title.includes('Web')) ||
+                nodeType === 'llm';
 
               if (isSignificantNode) {
                 let displayTitle = title;
-                if (title && (title.includes('Intent') || title.includes('Classif'))) {
+
+                if (nodeType === 'document-extractor') {
+                  displayTitle = '添付ファイルを解析中...';
+                  detectedTraceMode = 'document';
+                }
+                else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
                   displayTitle = '質問の意図を解析中...';
-                } else if ((title && title.includes('Perplexity')) || nodeType === 'tool') {
+                }
+                else if (nodeType === 'tool' || (title && title.includes('Perplexity'))) {
                   displayTitle = 'Webから最新情報を検索中...';
                   detectedTraceMode = 'search';
-                } else if (nodeType === 'document-extractor') {
-                  displayTitle = 'ドキュメントを読込中...';
-                  detectedTraceMode = 'document';
-                } else if (title && title.includes('Knowledge')) {
-                  displayTitle = '社内ナレッジベースを検索中...';
-                  detectedTraceMode = 'document';
-                } else if (nodeType === 'llm') {
-                  displayTitle = '情報を整理して回答を生成中...';
+                }
+                else if (nodeType === 'llm') {
+                  if (!title.includes('Intent') && !title.includes('Classifier')) {
+                    displayTitle = '情報を整理して回答を生成中...';
+                  } else {
+                    displayTitle = '質問の意図を解析中...';
+                  }
                 }
 
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -490,22 +431,40 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
             else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
+
+              // ★更新: API生データをログ出力
+              addLog(`[API Response Raw] ${contentBuffer}`, 'info');
+
               const parsed = parseLlmResponse(finalText);
               if (parsed.isParsed) {
                 finalText = parsed.answer;
                 if (parsed.citations.length > 0) {
+                  // ★更新: 出典タイプに応じたマッピングロジック
                   finalCitations = mapCitationsFromLLM(parsed.citations).map(citation => {
+                    // RAGやWebの場合は、ファイル名マッチングをスキップ
+                    if (citation.type === 'rag' || citation.type === 'web') {
+                      return citation;
+                    }
+                    // Documentの場合はファイル名マッチングを試行
                     if (currentFileName && !citation.url) {
                       const lowerSource = citation.source.toLowerCase();
                       const lowerCurrent = currentFileName.toLowerCase();
                       const currentBase = lowerCurrent.substring(0, lowerCurrent.lastIndexOf('.'));
                       if (lowerCurrent.includes(lowerSource) || lowerSource.includes(currentBase)) {
-                        return { ...citation, source: `[1] ${currentFileName}` };
+                        return { ...citation, source: `[1] ${currentFileName}`, type: 'document' };
                       }
                     }
                     return citation;
                   });
-                  detectedTraceMode = 'document';
+
+                  // ★更新: TraceModeの厳密な判定
+                  if (finalCitations.some(c => c.type === 'web')) {
+                    detectedTraceMode = 'search';
+                  } else if (finalCitations.some(c => c.type === 'rag')) {
+                    detectedTraceMode = 'knowledge';
+                  } else if (finalCitations.some(c => c.type === 'document' || c.type === 'file')) {
+                    detectedTraceMode = 'document';
+                  }
                 }
               }
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
