@@ -118,21 +118,68 @@
     min-height: 24px;
 }
 
-.step-line-container {
+.step-icon-column {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 18px;
+    width: 24px; /* アイコンが入る幅を確保 */
+    margin-right: 8px;
 }
 
-.step-dot {
-    width: 8px;
-    height: 8px;
+.step-icon-circle {
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background-color: #D1D5DB;
-    margin-top: 6px;
-    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F3F4F6; /* gray-100 */
+    color: #9CA3AF; /* gray-400 */
+    transition: all 0.3s ease;
     z-index: 1;
+}
+
+/* SVGのサイズ調整 */
+.step-icon-circle svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* アクティブ（処理中）状態 */
+.step-icon-circle.processing {
+    background-color: #EFF6FF; /* blue-50 */
+    color: #3B82F6; /* blue-500 */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    /* パルスアニメーション */
+    animation: pulse-icon 1.5s infinite;
+}
+
+/* 完了状態 */
+.step-icon-circle.done {
+    background-color: #F3F4F6;
+    color: #6B7280; /* gray-500: 完了したら目立たなくするのがApple流 */
+    /* 成功色にしたい場合は以下 */
+    /* color: #10B981; */
+}
+
+/* 線の位置調整 */
+.step-line {
+    flex: 1;
+    width: 1px;
+    background-color: #E5E7EB;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+/* ヘッダーの完了アイコン */
+.thinking-done-icon {
+    color: #6B7280; /* グレーで落ち着かせる */
+}
+
+@keyframes pulse-icon {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 .step-dot.processing {
@@ -181,3 +228,4 @@
         opacity: 0.8;
     }
 }
+

@@ -283,7 +283,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
                const isWebSearchNode = (nodeType === 'tool') && (title && (title.includes('Web') || title.includes('Search') || title.includes('Perplexity')));
                
-               // ★ 修正: 表示対象ノードを厳選 (重複・ノイズを除去)
+               // 表示対象ノードを厳選 (Assigner等は除外)
                const isSignificantNode = 
                  nodeType === 'document-extractor' || 
                  (title && (title.includes('Intent') || title.includes('Classifier'))) ||
@@ -297,41 +297,48 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
                if (isSignificantNode && !isAssigner) {
                   let displayTitle = title;
-                  
+                  let iconType = 'default'; // ★ 追加: アイコン種別
+
                   // 1. ファイル解析
                   if (nodeType === 'document-extractor') {
                     const currentFileName = activeContextFile?.name || '添付ファイル';
-                    displayTitle = `📄 ドキュメント「${currentFileName}」を解析中...`;
+                    displayTitle = `ドキュメント「${currentFileName}」を解析中...`; // 絵文字削除
                     detectedTraceMode = 'document';
+                    iconType = 'document'; // ★ 設定
                   }
                   // 2. 意図分類
                   else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
-                    displayTitle = '🤔 質問の意図を解析中...';
+                    displayTitle = '質問の意図を解析中...';
+                    iconType = 'router';
                   }
                   // 3. クエリ最適化 (Query Rewriter)
                   else if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
-                    displayTitle = '✍️ 検索クエリを最適化中...';
+                    displayTitle = '質問の要点を整理中...';
+                    iconType = 'reasoning'; // AIの思考系
                   }
                   // 4. Web検索
                   else if (isWebSearchNode) {
                     const query = inputs.query || capturedOptimizedQuery || text;
-                    displayTitle = `🌐 Web検索: "${query}"`;
+                    displayTitle = `Web検索: "${query}"`;
                     detectedTraceMode = 'search';
+                    iconType = 'search';
                   }
                   // 5. RAG検索
                   else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
                     const query = inputs.query || capturedOptimizedQuery;
                     if (query) {
-                        displayTitle = `📚 社内知識を検索: "${query}"`;
+                        displayTitle = `社内知識を検索: "${query}"`;
                     } else {
-                        displayTitle = '📚 社内ナレッジベースを検索中...';
+                        displayTitle = '社内ナレッジベースを検索中...';
                     }
                     detectedTraceMode = 'knowledge';
+                    iconType = 'retrieval';
                   }
                   // 6. LLM (回答生成)
                   else if (nodeType === 'llm') {
                     if (!title.includes('Intent') && !title.includes('Classifier') && !title.includes('Rewriter')) {
-                       displayTitle = '💡 情報を整理して回答を生成中...';
+                       displayTitle = '情報を整理して回答を生成中...';
+                       iconType = 'writing';
                     }
                   }
 
@@ -340,7 +347,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                     traceMode: detectedTraceMode,
                     thoughtProcess: [
                       ...m.thoughtProcess.map(t => ({ ...t, status: 'done' })), 
-                      { id: nodeId, title: displayTitle, status: 'processing' }
+                      // ★ iconType を保存
+                      { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
                     ]
                   } : m));
                }
@@ -362,10 +370,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 if (title && (title.includes('Intent') || title.includes('Classifier')) && outputs?.text) {
                     const decision = outputs.text.trim();
                     let resultText = '';
-                    if (decision.includes('SEARCH')) resultText = '✅ 判定: Web検索モード';
-                    else if (decision.includes('CHAT')) resultText = '✅ 判定: 雑談モード';
-                    else if (decision.includes('LOGICAL')) resultText = '✅ 判定: 論理回答モード';
-                    else if (decision.includes('ANSWER')) resultText = '✅ 判定: 内部知識モード';
+                    if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
+                    else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
+                    else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
+                    else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
                     
                     if (resultText) {
                          setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -399,7 +407,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 } : m));
               }
             }
-            // 完了処理
+            // 完了処理 (message_end)
             else if (data.event === 'message_end') {
               const citations = data.metadata?.retriever_resources || [];
               if (citations.length > 0) {
@@ -413,6 +421,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 fetchSuggestions(data.message_id, aiMessageId);
               }
             }
+            // ★ ワークフロー完了 (workflow_finished)
             else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
@@ -432,7 +441,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 citations: m.citations.length > 0 ? m.citations : finalCitations,
                 isStreaming: false,
                 traceMode: detectedTraceMode,
-                thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'done' }))
+                thoughtProcess: m.thoughtProcess.map(t => {
+                    // もし最後のステップが「生成中」なら「完了」に書き換え
+                    if (t.title === '情報を整理して回答を生成中...') {
+                      return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };
+                    }
+                    return { ...t, status: 'done' };
+                })
               } : m));
             }
           } catch (e) {
