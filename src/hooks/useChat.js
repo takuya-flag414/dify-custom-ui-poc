@@ -301,10 +301,11 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
                   // 1. ファイル解析
                   if (nodeType === 'document-extractor') {
-                    const currentFileName = activeContextFile?.name || '添付ファイル';
-                    displayTitle = `ドキュメント「${currentFileName}」を解析中...`; // 絵文字削除
+                    // もし currentFileName が未定義なら attachment.name を参照、それもなければフォールバック
+                    const fileNameToDisplay = currentFileName || attachment?.name || '添付ファイル';
+                    displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
                     detectedTraceMode = 'document';
-                    iconType = 'document'; // ★ 設定
+                    iconType = 'document';
                   }
                   // 2. 意図分類
                   else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
@@ -361,8 +362,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
                 // A. Query Rewriter の出力をキャプチャ
                 if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
-                    if (outputs && outputs.text) {
-                        capturedOptimizedQuery = outputs.text.trim();
+                    // ★ 修正: outputs.text だけでなく outputs.answer もチェックする
+                    if (outputs) {
+                        const generatedText = outputs.text || outputs.answer;
+                        if (generatedText) {
+                            capturedOptimizedQuery = generatedText.trim();
+                        }
                     }
                 }
 
