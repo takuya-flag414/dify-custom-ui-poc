@@ -58,6 +58,19 @@ function App() {
     handleConversationUpdated // [New] Pass it here
   );
 
+  // --- 【修正】モード切り替え時の安全なハンドラー ---
+  const handleMockModeChange = (newMode) => {
+    setMockMode(newMode);
+    
+    // モード変更時は、旧モードのIDが残っているとAPIエラーになるため
+    // 会話IDとメッセージ表示を強制的にリセットする
+    setConversationId(null);
+    setMessages([]);
+    
+    addLog(`[App] Mode changed to ${newMode}. Conversation reset.`, 'info');
+  };
+  // ----------------------------------------------
+
   const appStyle = {
     '--sidebar-width': isSidebarCollapsed ? '68px' : '260px',
   };
@@ -81,7 +94,7 @@ function App() {
         isLoading={isLoading}
         setIsLoading={setIsLoading}
         mockMode={mockMode}
-        setMockMode={setMockMode}
+        setMockMode={handleMockModeChange} // 【修正】直接setMockModeを渡さず、ラッパーを渡す
         conversationId={conversationId}
         addLog={addLog}
         onConversationCreated={handleConversationCreated}

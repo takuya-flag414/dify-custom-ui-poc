@@ -70,12 +70,20 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         return;
       }
 
+      // --- Mock Mode Logic ---
       if (mockMode === 'FE') {
         if (dynamicMockMessages[conversationId]) {
           setMessages(dynamicMockMessages[conversationId]);
         } else {
           setMessages(mockMessages[conversationId] || []);
         }
+        return;
+      }
+
+      // Real API Mode: IDの形式チェック (Safety Net)
+      // Realモードなのに "mock_" で始まるIDや、明らかにUUIDでないIDが来たら無視する
+      if (typeof conversationId === 'string' && conversationId.startsWith('mock_')) {
+        addLog(`[useChat] Skipping API call for mock ID in Real mode: ${conversationId}`, 'warn');
         return;
       }
 
