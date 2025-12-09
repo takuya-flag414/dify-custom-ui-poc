@@ -37,13 +37,14 @@ function App() {
     handleDeleteConversation,
     handleRenameConversation,
     handlePinConversation,
-    handleConversationUpdated, // [New]
+    handleConversationUpdated,
   } = useConversations(mockMode, addLog);
 
   const {
     messages,
     setMessages,
-    isLoading,
+    isGenerating, // ★ 生成中
+    isHistoryLoading, // ★ 履歴読み込み中
     setIsLoading,
     activeContextFile,
     setActiveContextFile,
@@ -55,21 +56,15 @@ function App() {
     conversationId,
     addLog,
     handleConversationCreated,
-    handleConversationUpdated // [New] Pass it here
+    handleConversationUpdated
   );
 
-  // --- 【修正】モード切り替え時の安全なハンドラー ---
   const handleMockModeChange = (newMode) => {
     setMockMode(newMode);
-    
-    // モード変更時は、旧モードのIDが残っているとAPIエラーになるため
-    // 会話IDとメッセージ表示を強制的にリセットする
     setConversationId(null);
     setMessages([]);
-    
     addLog(`[App] Mode changed to ${newMode}. Conversation reset.`, 'info');
   };
-  // ----------------------------------------------
 
   const appStyle = {
     '--sidebar-width': isSidebarCollapsed ? '68px' : '260px',
@@ -91,10 +86,12 @@ function App() {
       <ChatArea
         messages={messages}
         setMessages={setMessages}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
+        // ★ ステータスを分けて渡す
+        isGenerating={isGenerating}
+        isHistoryLoading={isHistoryLoading}
+        
         mockMode={mockMode}
-        setMockMode={handleMockModeChange} // 【修正】直接setMockModeを渡さず、ラッパーを渡す
+        setMockMode={handleMockModeChange}
         conversationId={conversationId}
         addLog={addLog}
         onConversationCreated={handleConversationCreated}

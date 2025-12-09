@@ -1,6 +1,6 @@
 // src/components/chat/ChatInput.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import '../Chat/ChatArea.css'; // スタイルは共通のものを使用
+import '../Chat/ChatArea.css';
 import FileIcon from '../Shared/FileIcon';
 import ContextSelector from '../Shared/ContextSelector';
 
@@ -20,7 +20,6 @@ const ContextControlIcon = ({ settings }) => {
         <line x1="2" y1="12" x2="22" y2="12"></line>
         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path>
       </svg>
-      {/* RAG Active Indicator (Green Dot) */}
       {isRagActive && (
         <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
       )}
@@ -35,16 +34,15 @@ const LockIcon = () => (
   </svg>
 );
 
-// デフォルト設定（安全策）
 const DEFAULT_SETTINGS = { ragEnabled: true, webMode: 'auto', domainFilters: [] };
 
 const ChatInput = ({
-  isLoading,
+  isLoading,         // 汎用的なローディング（入力無効化用）
+  isHistoryLoading,  // ★ 追加: 履歴読み込み中かどうか
   onSendMessage,
   isCentered,
   activeContextFile,
   setActiveContextFile,
-  // ★ 安全策: undefinedの場合にデフォルト値を使用
   searchSettings = DEFAULT_SETTINGS,
   setSearchSettings = () => { }
 }) => {
@@ -57,7 +55,6 @@ const ChatInput = ({
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Close popover when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchOptionsRef.current && !searchOptionsRef.current.contains(event.target)) {
@@ -105,6 +102,8 @@ const ChatInput = ({
 
   // プレースホルダーの動的生成
   const getPlaceholder = () => {
+    // ★ 変更: ステータスに応じたメッセージ
+    if (isHistoryLoading) return "履歴を読み込んでいます...";
     if (isLoading) return "AIが思考中です...";
 
     const parts = [];
@@ -190,7 +189,6 @@ const ChatInput = ({
             <ContextControlIcon settings={searchSettings} />
           </button>
 
-          {/* Context Selector Popover */}
           {showSearchOptions && (
             <div className="search-options-popover">
               <ContextSelector
@@ -228,7 +226,6 @@ const ChatInput = ({
         </div>
       </div>
 
-      {/* ★ 追加: AI免責事項 (DESIGN_RULE.md 準拠) */}
       <p className="chat-input-disclaimer">
         AIは不正確な情報を表示することがあるため、生成された回答を再確認するようにしてください。
       </p>

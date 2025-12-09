@@ -6,11 +6,13 @@ import './ChatArea.css';
 import MockModeSelect from './MockModeSelect';
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
+import HistorySkeleton from './HistorySkeleton';
 
 const ChatArea = (props) => {
   const {
     messages,
-    isLoading,
+    isGenerating, // AI回答生成中
+    isHistoryLoading, // 履歴読み込み中
     mockMode,
     setMockMode,
     conversationId,
@@ -19,12 +21,12 @@ const ChatArea = (props) => {
     activeContextFile,
     setActiveContextFile,
     onSendMessage,
-    // ★ 更新: 従来のバラバラなprops (domainFilters等) を削除し、統合オブジェクトを受け取る
     searchSettings,
     setSearchSettings
   } = props;
 
-  const isInitialState = messages.length === 0;
+  // 初期状態: メッセージ0件 かつ 履歴ロード中でない
+  const isInitialState = messages.length === 0 && !isHistoryLoading;
 
   return (
     <div className="chat-area">
@@ -39,22 +41,38 @@ const ChatArea = (props) => {
         </div>
       </div>
 
-      {isInitialState ? (
+      {isHistoryLoading ? (
+        /* 履歴読み込み中: スケルトン表示 */
+        <>
+          <HistorySkeleton />
+          <div className="bottom-controls-wrapper">
+            <ChatInput
+              isLoading={true} 
+              isHistoryLoading={true}
+              onSendMessage={() => {}}
+              isCentered={false}
+              activeContextFile={activeContextFile}
+              setActiveContextFile={setActiveContextFile}
+              searchSettings={searchSettings}
+              setSearchSettings={setSearchSettings}
+            />
+          </div>
+        </>
+      ) : isInitialState ? (
+        /* 初期画面 */
         <div className="initial-view-container">
           <div className="initial-content">
             <div className="initial-header">
               <h2 className="initial-title">お困りのことはありますか？</h2>
               <p className="initial-subtitle">社内情報やWebから情報を検索して回答します。</p>
             </div>
-
             <div className="initial-input-wrapper">
               <ChatInput
-                isLoading={isLoading}
+                isLoading={isGenerating}
                 onSendMessage={onSendMessage}
                 isCentered={true}
                 activeContextFile={activeContextFile}
                 setActiveContextFile={setActiveContextFile}
-                // ★ 更新: Pass Down
                 searchSettings={searchSettings}
                 setSearchSettings={setSearchSettings}
               />
@@ -62,22 +80,21 @@ const ChatArea = (props) => {
           </div>
         </div>
       ) : (
+        /* 通常会話画面 */
         <>
           <ChatHistory
             messages={messages}
             onSuggestionClick={(q) => onSendMessage(q, null)}
-            isLoading={isLoading}
+            isLoading={isGenerating}
             onSendMessage={onSendMessage}
           />
-
           <div className="bottom-controls-wrapper">
             <ChatInput
-              isLoading={isLoading}
+              isLoading={isGenerating}
               onSendMessage={onSendMessage}
               isCentered={false}
               activeContextFile={activeContextFile}
               setActiveContextFile={setActiveContextFile}
-              // ★ 更新: Pass Down
               searchSettings={searchSettings}
               setSearchSettings={setSearchSettings}
             />
