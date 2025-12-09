@@ -1,21 +1,27 @@
 /* src/App.css */
 
 .app {
-  display: flex;
+  display: grid;
+  /* 列定義: 変数を使用し、デフォルト値を260pxに設定 */
+  grid-template-columns: var(--sidebar-width, 260px) 1fr;
+  /* 行定義 */
+  grid-template-rows: 1fr;
+
+  /* アニメーション: Macのような「慣性」を感じさせるイージング */
+  transition: grid-template-columns 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: grid-template-columns;
+
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   background-color: var(--color-bg-body);
 }
 
-/* サイドバーは Sidebar.css で定義
-  メインエリアは ChatArea.css で定義 
-  ここではレイアウトの配置のみを行う
-*/
-
+/* モバイル対応: 既存ロジック維持 */
 @media (max-width: 768px) {
   .app {
+    display: flex;
     flex-direction: column;
+    /* モバイルではサイドバー幅変数は無視される（または別途制御） */
   }
-  /* モバイル対応はPhase 2以降の詳細要件だが、最低限崩れないように */
 }

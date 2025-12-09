@@ -1,15 +1,12 @@
 // src/components/Shared/MarkdownRenderer.jsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SourceIcon } from './FileIcons';
 import '../Message/MessageBlock.css';
 import { useLogger } from '../../hooks/useLogger';
 
-/**
- * インライン出典 [1] をクリック可能なバッジに変換
- * 修正: div を span に変更して p タグ内でのネストエラーを回避
- */
+// --- Helper: Inline Citation Renderer ---
 const renderWithInlineCitations = (children, citations, messageId) => {
   if (!children) return null;
   const childrenArray = Array.isArray(children) ? children : [children];
@@ -79,7 +76,7 @@ const renderWithInlineCitations = (children, citations, messageId) => {
   return newChildren;
 };
 
-// ログ出力用ラッパーコンポーネント (useEffectで副作用としてログ出力)
+// --- Helper: Log Wrapper ---
 const LoggedElement = ({ as: Component, logTag, content, logFunction, children, ...props }) => {
   useEffect(() => {
     if (logFunction) {
@@ -90,34 +87,98 @@ const LoggedElement = ({ as: Component, logTag, content, logFunction, children, 
   return <Component {...props}>{children}</Component>;
 };
 
+// --- New Component: CodeBlock with Copy Button ---
+const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  // 言語名の抽出 (例: language-js -> js)
+  const match = /language-(\w+)/.exec(className || '');
+  const lang = match ? match[1] : (inline ? '' : 'text');
+  const codeText = String(children).replace(/\n$/, '');
+
+  useEffect(() => {
+    if (logFunction) {
+      logFunction(inline ? 'code-inline' : 'code-block', codeText);
+    }
+  }, [inline, codeText, logFunction]);
+
+  // インラインコードの場合は単純なcodeタグを返す
+  if (inline) {
+    return (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    );
+  }
+
+  // ブロックコードの場合はヘッダー付きのUIを返す
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(codeText);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  };
+
+  return (
+    <div className="code-block-wrapper">
+      <div className="code-block-header">
+        <span className="code-block-lang">{lang}</span>
+        <button
+          className={`code-block-copy-btn ${isCopied ? 'copied' : ''}`}
+          onClick={handleCopy}
+          aria-label="Copy code"
+        >
+          {isCopied ? (
+            /* Check Icon */
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          ) : (
+            /* Copy Icon */
+            <div className="code-copy-content">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Copy</span>
+            </div>
+          )}
+        </button>
+      </div>
+      <pre className={className} {...props}>
+        <code>{children}</code>
+      </pre>
+    </div>
+  );
+};
+
 const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messageId }) => {
   const [displayMode, setDisplayMode] = useState(isStreaming ? 'streaming' : 'done');
   const [typedContent, setTypedContent] = useState('');
   const { addLog } = useLogger();
 
   const prevStreamingRef = useRef(isStreaming);
-  // ログ出力済みフラグ（再レンダリング時の重複ログ防止）
   const loggedElementsRef = useRef(new Set());
 
   useEffect(() => {
     if (isStreaming) {
       setDisplayMode('streaming');
       setTypedContent('');
-      loggedElementsRef.current.clear(); // ストリーミング開始時にログ履歴をクリア
+      loggedElementsRef.current.clear();
     }
     else if (prevStreamingRef.current === true && isStreaming === false) {
       setDisplayMode('typing');
       let currentIndex = 0;
       const fullText = content || '';
-
-      // --- UX改善: 高速タイピング設定 ---
-      const typingInterval = 5; // 更新間隔 (ms)
-      const charsPerTick = 3;   // 一度の更新で進める文字数
+      const typingInterval = 5;
+      const charsPerTick = 3;
 
       const intervalId = setInterval(() => {
         if (currentIndex < fullText.length) {
           currentIndex += charsPerTick;
-          // インデックスが長さを超えないようにクランプ
           const nextIndex = Math.min(currentIndex, fullText.length);
           setTypedContent(fullText.substring(0, nextIndex));
 
@@ -140,41 +201,32 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
     prevStreamingRef.current = isStreaming;
   }, [isStreaming, content]);
 
-  // レンダリングログ出力ヘルパー (useCallbackで安定化)
   const logMarkdownRender = useCallback((tag, contentSnippet) => {
-    if (displayMode !== 'done') return; // タイピング完了後のみログ出力
-
+    if (displayMode !== 'done') return;
     const logKey = `${tag}-${contentSnippet?.substring(0, 20)}`;
     if (loggedElementsRef.current.has(logKey)) return;
 
     loggedElementsRef.current.add(logKey);
     const message = `Rendered [${tag}]: ${contentSnippet?.substring(0, 50)}${contentSnippet?.length > 50 ? '...' : ''}`;
-    // コンソールには詳細に出す
     console.log(`%c[Markdown] ${message}`, 'color: #4caf50; font-weight: bold;');
-    // システムログにも記録
     addLog(message, 'info');
   }, [displayMode, addLog]);
 
-  // 未反映Markdown検出ヘルパー
   const checkUnrenderedMarkdown = useCallback((text) => {
     if (displayMode !== 'done' || typeof text !== 'string') return;
-
-    // 一般的なMarkdown記法の正規表現（簡易版）
     const patterns = [
       { name: 'Bold', regex: /\*\*[^*]+\*\*/ },
-      { name: 'Italic', regex: /(?<!\*)\*[^*]+\*(?!\*)/ }, // 単独の*
+      { name: 'Italic', regex: /(?<!\*)\*[^*]+\*(?!\*)/ },
       { name: 'Header', regex: /^#{1,6}\s/m },
       { name: 'Link', regex: /\[.+\]\(.+\)/ },
       { name: 'List', regex: /^[\*\-\+]\s/m },
       { name: 'Code', regex: /`[^`]+`/ }
     ];
-
     patterns.forEach(({ name, regex }) => {
       if (regex.test(text)) {
         const match = text.match(regex)[0];
         const logKey = `warning-${name}-${match.substring(0, 20)}`;
         if (loggedElementsRef.current.has(logKey)) return;
-
         loggedElementsRef.current.add(logKey);
         const message = `Potential unrendered Markdown (${name}) detected: "${match}"`;
         console.warn(`[Markdown Warning] ${message}`);
@@ -183,16 +235,11 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
     });
   }, [displayMode, addLog]);
 
-  // Markdownのレンダリング前処理
-  // CommonMarkの仕様上、句読点(％など)の後ろに**があり、その直後が文字(スペースや句読点以外)の場合、
-  // 太字の閉じタグとして認識されない問題を回避するため、一時的に句読点(@@FIX@@)を挿入する。
-  // 例: "10％**です" -> "10％**@@FIX@@です"
-  const processedContent = React.useMemo(() => {
+  const processedContent = useMemo(() => {
     if (!content) return '';
     return content.replace(/([％！？。、])\*\*(?![ \t\r\n\v\f　、。，．！？])/g, '$1**@@FIX@@');
   }, [content]);
 
-  // 子要素から @@FIX@@ を除去するヘルパー
   const cleanChildren = useCallback((children) => {
     return React.Children.map(children, child => {
       if (typeof child === 'string') {
@@ -265,13 +312,18 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
               {cleanChildren(children)}
             </LoggedElement>
           ),
+          // ★ 更新: CodeBlockコンポーネントを使用
           code: ({ node, inline, className, children, ...props }) => (
-            <LoggedElement as="code" logTag={inline ? 'code-inline' : 'code-block'} content={String(children)} logFunction={logMarkdownRender} className={className} {...props}>
+            <CodeBlock
+              inline={inline}
+              className={className}
+              logFunction={logMarkdownRender}
+              {...props}
+            >
               {cleanChildren(children)}
-            </LoggedElement>
+            </CodeBlock>
           ),
           p: ({ node, children, ...props }) => {
-            // テキストノードの子要素をチェック (useEffectで副作用として実行)
             useEffect(() => {
               React.Children.forEach(children, child => {
                 if (typeof child === 'string') {
@@ -280,7 +332,6 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
               });
             }, [children]);
 
-            // @@FIX@@ を除去してから引用処理
             const cleaned = cleanChildren(children);
             const processed = renderWithInlineCitations(cleaned, citations, messageId);
             return <p {...props}>{processed}</p>;

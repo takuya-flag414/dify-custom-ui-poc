@@ -19,7 +19,7 @@ const DEFAULT_SEARCH_SETTINGS = {
   domainFilters: []
 };
 
-export const useChat = (mockMode, conversationId, addLog, onConversationCreated) => {
+export const useChat = (mockMode, conversationId, addLog, onConversationCreated, onConversationUpdated) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeContextFile, setActiveContextFile] = useState(null);
@@ -62,8 +62,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       }
 
       addLog(`[useChat] Conversation changed to: ${conversationId}`, 'info');
-      addLog(`[Search Settings Loaded] RAG: ${savedSettings.ragEnabled}, Web: ${savedSettings.webMode.toUpperCase()}`, 'info');
-
+      
       setActiveContextFile(null);
 
       if (conversationId === null) {
@@ -107,7 +106,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               aiText = parsed.answer;
               if (aiCitations.length === 0 && parsed.citations.length > 0) {
                 aiCitations = mapCitationsFromLLM(parsed.citations);
-                // 履歴ロード時もtype判定を簡易的に行う
                 if (aiCitations.some(c => c.type === 'web')) traceMode = 'search';
                 else if (aiCitations.some(c => c.type === 'rag')) traceMode = 'knowledge';
                 else traceMode = 'document';
@@ -147,6 +145,11 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
 
     const currentFileName = attachment?.name || activeContextFile?.name;
     const currentSettings = searchSettingsRef.current;
+
+    // 楽観的更新
+    if (conversationId && onConversationUpdated) {
+      onConversationUpdated(conversationId);
+    }
 
     if (mockMode === 'OFF') {
       if (attachment) {
@@ -198,6 +201,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       processStatus: null
     }]);
 
+    // --- Mock Mode Logic ---
     if (mockMode === 'FE') {
       const hasFile = !!(attachment || activeContextFile);
       const useRag = currentSettings.ragEnabled;
@@ -206,10 +210,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       let mockRes;
       let finalTraceMode = 'knowledge';
 
-      // 8パターン判定ロジック
       if (!hasFile && !useRag && !useWeb) { mockRes = mockResPure; finalTraceMode = 'knowledge'; }
       else if (!hasFile && !useRag && useWeb) { mockRes = mockResWebOnly; finalTraceMode = 'search'; }
-      else if (!hasFile && useRag && !useWeb) { mockRes = mockResRagOnly; finalTraceMode = 'document'; } // RAGはKnowledgeバッジだがモック仕様上document扱いにしておく
+      else if (!hasFile && useRag && !useWeb) { mockRes = mockResRagOnly; finalTraceMode = 'document'; }
       else if (!hasFile && useRag && useWeb) { mockRes = mockResHybrid; finalTraceMode = 'search'; }
       else if (hasFile && !useRag && !useWeb) { mockRes = mockResFileOnly; finalTraceMode = 'document'; }
       else if (hasFile && !useRag && useWeb) { mockRes = mockResFileWeb; finalTraceMode = 'document'; }
@@ -236,6 +239,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         }
       }
 
+      // --- [修正] 思考プロセスシミュレーションの復活 ---
       const simulateSteps = async () => {
         let steps = [];
         const updateSteps = (newSteps) => {
@@ -243,11 +247,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
         };
         const markAllDone = (currentSteps) => currentSteps.map(s => ({ ...s, status: 'done' }));
 
+        // 1. 意図解析
         steps.push({ id: 'step1', title: 'ユーザーの意図を解析中...', status: 'processing' });
         updateSteps(steps);
         await new Promise(r => setTimeout(r, 600));
         steps = markAllDone(steps);
 
+        // 2. ファイル解析 (条件付き)
         if (hasFile) {
           steps.push({ id: 'step_file', title: `ドキュメント「${currentFileName}」を読込中...`, status: 'processing' });
           updateSteps(steps);
@@ -255,6 +261,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           steps = markAllDone(steps);
         }
 
+        // 3. RAG検索 (条件付き)
         if (useRag) {
           steps.push({ id: 'step_rag', title: '📚 社内ナレッジベースを検索中...', status: 'processing' });
           updateSteps(steps);
@@ -262,6 +269,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           steps = markAllDone(steps);
         }
 
+        // 4. Web検索 (条件付き)
         if (useWeb) {
           const webTitle = currentSettings.webMode === 'force' ? '🌐 ユーザーの指示によりWebを強制検索中...' : '🌐 Webから最新情報を検索中...';
           steps.push({ id: 'step_web', title: webTitle, status: 'processing' });
@@ -270,6 +278,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           steps = markAllDone(steps);
         }
 
+        // 5. 純粋なLLM思考 (ファイル/RAG/WebすべてOFFの場合)
         if (!hasFile && !useRag && !useWeb) {
           steps.push({ id: 'step_pure', title: '学習済み知識を参照中...', status: 'processing' });
           updateSteps(steps);
@@ -277,11 +286,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
           steps = markAllDone(steps);
         }
 
+        // 6. 回答生成
         steps.push({ id: 'step_gen', title: '情報を整理して回答を生成中...', status: 'processing' });
         updateSteps(steps);
         await new Promise(r => setTimeout(r, 800));
         steps = markAllDone(steps);
 
+        // 完了処理
         setMessages(prev => prev.map(m => m.id === aiMessageId ? {
           ...m,
           traceMode: finalTraceMode,
@@ -299,11 +310,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
       return;
     }
 
-    // --- Real API Logic (Backend Mode) ---
+    // --- Real API Mode Logic ---
     const domainFilterString = currentSettings.domainFilters.length > 0 ? currentSettings.domainFilters.join(', ') : '';
     const searchModeValue = currentSettings.webMode;
-
-    addLog(`[API Request] Sending message with Settings -> RAG: ${currentSettings.ragEnabled}, Web: ${searchModeValue}, Domain: ${domainFilterString || '(none)'}`, 'info');
 
     const requestBody = {
       inputs: {
@@ -343,7 +352,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               isConversationIdSynced = true;
               creatingConversationIdRef.current = data.conversation_id;
               settingsMapRef.current[data.conversation_id] = currentSettings;
-              addLog(`[Search Settings Synced] Settings saved for new conversation: ${data.conversation_id}`, 'info');
               onConversationCreated(data.conversation_id, text);
             }
 
@@ -432,20 +440,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
               let finalText = contentBuffer;
               let finalCitations = [];
 
-              // ★更新: API生データをログ出力
-              addLog(`[API Response Raw] ${contentBuffer}`, 'info');
-
               const parsed = parseLlmResponse(finalText);
               if (parsed.isParsed) {
                 finalText = parsed.answer;
                 if (parsed.citations.length > 0) {
-                  // ★更新: 出典タイプに応じたマッピングロジック
                   finalCitations = mapCitationsFromLLM(parsed.citations).map(citation => {
-                    // RAGやWebの場合は、ファイル名マッチングをスキップ
-                    if (citation.type === 'rag' || citation.type === 'web') {
-                      return citation;
-                    }
-                    // Documentの場合はファイル名マッチングを試行
+                    if (citation.type === 'rag' || citation.type === 'web') return citation;
                     if (currentFileName && !citation.url) {
                       const lowerSource = citation.source.toLowerCase();
                       const lowerCurrent = currentFileName.toLowerCase();
@@ -456,15 +456,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                     }
                     return citation;
                   });
-
-                  // ★更新: TraceModeの厳密な判定
-                  if (finalCitations.some(c => c.type === 'web')) {
-                    detectedTraceMode = 'search';
-                  } else if (finalCitations.some(c => c.type === 'rag')) {
-                    detectedTraceMode = 'knowledge';
-                  } else if (finalCitations.some(c => c.type === 'document' || c.type === 'file')) {
-                    detectedTraceMode = 'document';
-                  }
+                  
+                  if (finalCitations.some(c => c.type === 'web')) detectedTraceMode = 'search';
+                  else if (finalCitations.some(c => c.type === 'rag')) detectedTraceMode = 'knowledge';
+                  else if (finalCitations.some(c => c.type === 'document')) detectedTraceMode = 'document';
                 }
               }
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -477,7 +472,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated)
                 thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'done' }))
               } : m));
             }
-          } catch (e) { console.warn('JSON Parse Error', e); }
+          } catch (e) { /* ignore */ }
         }
       }
       setIsLoading(false);

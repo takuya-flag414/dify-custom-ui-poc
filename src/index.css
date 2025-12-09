@@ -745,3 +745,22 @@ body {
 .text-link:hover {
   text-decoration: underline;
 }
+
+/* --- Layout Dimensions --- */
+:root {
+  /* デフォルト値 */
+  --sidebar-width: 260px;
+}
+
+/* Responsive Adjustments */
+@media (min-width: 1600px) {
+  :root {
+    --sidebar-width: 280px;
+  }
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --sidebar-width: 240px;
+  }
+}

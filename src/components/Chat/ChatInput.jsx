@@ -227,6 +227,11 @@ const ChatInput = ({
           </button>
         </div>
       </div>
+
+      {/* ★ 追加: AI免責事項 (DESIGN_RULE.md 準拠) */}
+      <p className="chat-input-disclaimer">
+        AIは不正確な情報を表示することがあるため、生成された回答を再確認するようにしてください。
+      </p>
     </div>
   );
 };

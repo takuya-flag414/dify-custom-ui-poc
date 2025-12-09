@@ -13,14 +13,31 @@ import { useChat } from './hooks/useChat';
 function App() {
   const [mockMode, setMockMode] = useState('FE');
 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebar_collapsed');
+    return saved === 'true';
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const newState = !prev;
+      localStorage.setItem('sidebar_collapsed', newState.toString());
+      return newState;
+    });
+  };
+
   const { addLog, handleCopyLogs, copyButtonText } = useLogger();
 
   const {
     conversations,
     conversationId,
     setConversationId,
+    pinnedIds,
     handleConversationCreated,
-    handleDeleteConversation
+    handleDeleteConversation,
+    handleRenameConversation,
+    handlePinConversation,
+    handleConversationUpdated, // [New]
   } = useConversations(mockMode, addLog);
 
   const {
@@ -31,18 +48,32 @@ function App() {
     activeContextFile,
     setActiveContextFile,
     handleSendMessage,
-    // ★ 更新: 新しい検索設定Stateを受け取る
     searchSettings,
     setSearchSettings
-  } = useChat(mockMode, conversationId, addLog, handleConversationCreated);
+  } = useChat(
+    mockMode,
+    conversationId,
+    addLog,
+    handleConversationCreated,
+    handleConversationUpdated // [New] Pass it here
+  );
+
+  const appStyle = {
+    '--sidebar-width': isSidebarCollapsed ? '68px' : '260px',
+  };
 
   return (
-    <div className="app">
+    <div className="app" style={appStyle}>
       <Sidebar
         conversationId={conversationId}
         setConversationId={setConversationId}
         conversations={conversations}
+        pinnedIds={pinnedIds}
         onDeleteConversation={handleDeleteConversation}
+        onRenameConversation={handleRenameConversation}
+        onPinConversation={handlePinConversation}
+        isCollapsed={isSidebarCollapsed}
+        toggleSidebar={toggleSidebar}
       />
       <ChatArea
         messages={messages}
@@ -59,9 +90,9 @@ function App() {
         activeContextFile={activeContextFile}
         setActiveContextFile={setActiveContextFile}
         onSendMessage={handleSendMessage}
-        // ★ 更新: ChatAreaに新しい設定オブジェクトを渡す
         searchSettings={searchSettings}
         setSearchSettings={setSearchSettings}
+        isSidebarCollapsed={isSidebarCollapsed}
       />
     </div>
   );

@@ -44,6 +44,7 @@
   flex-shrink: 0;
   font-size: 14px;
   font-weight: 600;
+  margin-top: 4px;
 }
 
 .avatar-ai {
@@ -61,32 +62,50 @@
   font-size: 12px;
 }
 
-/* コンテンツエリア */
+/* コンテンツエリア全体 */
 .message-content {
   flex: 1;
   min-width: 0;
-  /* Flexbox内でのテキスト折り返し用 */
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-width: 85%;
+  /* ★ 追加: コンテンツが少なくてもFlex親の幅いっぱいまで広げる */
+  width: 100%;
 }
 
 .message-content-user {
   align-items: flex-end;
+  /* ユーザーコンテンツは右寄せ */
 }
 
-/* バブル (吹き出し) */
+/* バブルとボタンを横並びにする行ラッパー */
+.message-bubble-row {
+  display: flex;
+  align-items: flex-end;
+  /* 下揃えでボタンを表示 */
+  gap: 8px;
+  width: 100%;
+}
+
+/* ユーザーの場合は右寄せ */
+.message-content-user .message-bubble-row {
+  justify-content: flex-end;
+}
+
+/* バブル (吹き出し) 共通 */
 .message-bubble {
   padding: 12px 16px;
   border-radius: 16px;
   font-size: 15px;
   line-height: 1.6;
   position: relative;
-  max-width: 100%;
   word-break: break-word;
+  /* max-width は親の row で制御されるため削除、または 100% に */
+  max-width: 100%;
 }
 
-/* AIのバブル: 白背景、ボーダーあり、カード風 */
+/* AIのバブル */
 .ai-bubble {
   background-color: #FFFFFF;
   color: #111827;
@@ -94,24 +113,97 @@
   border: 1px solid #E5E7EB;
   /* gray-200 */
   border-radius: 12px;
+  border-top-left-radius: 4px;
   padding: 24px;
-  /* 画像に合わせてパディングを広めに */
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  /* わずかな影 */
+
+  /* ★ 追加: AIのバブルは常に利用可能な最大幅を占有する */
+  /* これにより、文字数が少ない生成初期でも幅が縮まない */
+  flex: 1;
 }
 
-/* ユーザーのバブル: 青背景、白文字 */
+/* ユーザーのバブル */
 .user-bubble {
   background-color: #3B82F6;
   /* blue-500 */
   color: #FFFFFF;
   border-radius: 12px;
   border-top-right-radius: 4px;
-  /* 吹き出しっぽく */
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  /* ユーザー側は flex: 1 を指定せず、コンテンツ幅（なりゆき）にする */
 }
 
-/* Markdown Styles within Message */
+/* --- Copy Button Styles --- */
+.copy-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  flex-shrink: 0;
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.copy-btn::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+}
+
+.message-container:hover .copy-btn,
+.copy-btn:focus,
+.copy-btn.copied {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.copy-btn-ai {
+  background-color: #F3F4F6;
+  color: var(--color-text-muted);
+}
+
+.copy-btn-ai:hover {
+  background-color: #E5E7EB;
+  color: var(--color-text-primary);
+}
+
+.copy-btn-user {
+  background-color: transparent;
+  color: var(--color-text-muted);
+}
+
+.copy-btn-user:hover {
+  background-color: #E5E7EB;
+  color: var(--color-primary);
+}
+
+.copy-btn.copied {
+  background-color: var(--color-success) !important;
+  color: white !important;
+  opacity: 1;
+}
+
+/* Footer Area Wrapper */
+.message-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* --- Markdown Styles within Message (既存維持) --- */
 .markdown-renderer>*:first-child {
   margin-top: 0;
 }
@@ -126,15 +218,12 @@
 
 .markdown-renderer a {
   color: #2563EB;
-  /* blue-600 */
   text-decoration: none;
   font-weight: 500;
 }
 
-/* ユーザーバブル内のリンク色調整 */
 .user-bubble .markdown-renderer a {
   color: #EFF6FF;
-  /* blue-50 */
   text-decoration: underline;
 }
 
@@ -152,46 +241,117 @@
   margin-bottom: 0.5em;
 }
 
+/* Inline Code Style */
 .markdown-renderer code {
   background-color: #F3F4F6;
-  /* gray-100 */
   padding: 2px 4px;
   border-radius: 4px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9em;
   color: #BE185D;
-  /* pink-700 */
 }
 
-.markdown-renderer pre {
-  background-color: #1F2937;
-  /* gray-800 */
-  color: #F9FAFB;
-  /* gray-50 */
-  padding: 16px;
-  border-radius: 8px;
-  overflow-x: auto;
+/* --- Code Block Wrapper (IDE-like Style) --- */
+.code-block-wrapper {
   margin-bottom: 1em;
+  border-radius: 8px;
+  overflow: hidden;
+  /* ヘッダーとpreを角丸に収める */
+  border: 1px solid #374151;
+  /* Dark border */
+  background-color: #1F2937;
+  /* Dark background */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Code Block Header */
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background-color: #374151;
+  /* Slightly lighter than code bg */
+  border-bottom: 1px solid #4B5563;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.code-block-lang {
+  color: #E5E7EB;
+  /* gray-200 */
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Code Block Copy Button */
+.code-block-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9CA3AF;
+  /* gray-400 */
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+}
+
+.code-block-copy-btn:hover {
+  color: #F3F4F6;
+  /* gray-100 */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.code-block-copy-btn.copied {
+  color: #10B981;
+  /* emerald-500 */
+}
+
+.code-copy-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Override pre styles for Code Block Wrapper */
+.markdown-renderer pre {
+  margin: 0;
+  /* ラッパーでマージンを制御するためリセット */
+  padding: 16px;
+  background-color: transparent;
+  /* ラッパーの背景色を使用 */
+  color: #F9FAFB;
+  border-radius: 0;
+  /* ラッパーで角丸にするためリセット */
+  overflow-x: auto;
+  border: none;
+  box-shadow: none;
 }
 
 .markdown-renderer pre code {
   background-color: transparent;
   color: inherit;
   padding: 0;
+  border-radius: 0;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .markdown-renderer blockquote {
   border-left: 4px solid #E5E7EB;
-  /* gray-200 */
   padding-left: 16px;
   margin-left: 0;
   margin-bottom: 1em;
   color: #4B5563;
-  /* gray-600 */
   font-style: italic;
 }
 
-/* Markdown Tables */
 .markdown-renderer table {
   width: 100%;
   border-collapse: collapse;
@@ -202,25 +362,21 @@
 .markdown-renderer th,
 .markdown-renderer td {
   border: 1px solid #E5E7EB;
-  /* gray-200 */
   padding: 8px 12px;
   text-align: left;
 }
 
 .markdown-renderer th {
   background-color: #F9FAFB;
-  /* gray-50 */
   font-weight: 600;
   color: #374151;
-  /* gray-700 */
 }
 
 .markdown-renderer tr:nth-child(even) {
   background-color: #F9FAFB;
-  /* gray-50 */
 }
 
-/* Citation Badge [1] */
+/* Citation Badge */
 .citation-badge {
   display: inline-flex;
   align-items: center;
@@ -229,18 +385,16 @@
   font-size: 10px;
   font-weight: 700;
   color: #2563EB;
-  /* blue-600 */
   background-color: #EFF6FF;
-  /* blue-50 */
   border-radius: 6px;
   padding: 0 4px;
   margin: 0 2px;
-  text-decoration: none !important;
   cursor: pointer;
   border: 1px solid rgba(37, 99, 235, 0.2);
   transition: all 0.2s ease;
   height: 16px;
   min-width: 16px;
+  text-decoration: none !important;
 }
 
 .citation-badge:hover {
@@ -250,13 +404,12 @@
   box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
-/* Citation Badge Wrapper for Tooltip positioning */
 .citation-badge-wrapper {
   position: relative;
   display: inline-block;
 }
 
-/* Tooltip Styles */
+/* Tooltip */
 .citation-tooltip {
   position: absolute;
   bottom: 100%;
@@ -274,7 +427,6 @@
   visibility: hidden;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
-  /* Prevent tooltip from interfering with mouse */
 }
 
 .citation-badge-wrapper:hover .citation-tooltip {
@@ -304,7 +456,6 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: #111827;
-  line-height: 1.25;
   margin-bottom: 2px;
   word-break: break-word;
 }
@@ -318,7 +469,6 @@
   max-width: 200px;
 }
 
-/* Add a small arrow */
 .citation-tooltip::after {
   content: '';
   position: absolute;
@@ -330,7 +480,6 @@
   border-color: white transparent transparent transparent;
 }
 
-/* Add a border arrow for better visibility on white backgrounds */
 .citation-tooltip::before {
   content: '';
   position: absolute;
@@ -357,7 +506,7 @@
   }
 }
 
-/* File Attachment Chip (User) */
+/* File Attachment Chip */
 .file-attachment-chip {
   display: inline-flex;
   align-items: center;
@@ -372,7 +521,6 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* User Bubble Context for File Attachment */
 .user-bubble .file-attachment-chip {
   background-color: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -384,7 +532,7 @@
   font-weight: 500;
 }
 
-/* Suggestion Buttons (Related Questions) */
+/* Suggestion Buttons */
 .suggestion-container {
   margin-top: 16px;
   display: flex;
@@ -397,7 +545,6 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: #6b7280;
-  /* gray-500 */
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 4px;
@@ -412,12 +559,9 @@
 .suggestion-chip {
   background-color: white;
   border: 1px solid #E5E7EB;
-  /* gray-200 */
   color: #374151;
-  /* gray-700 */
   padding: 8px 16px;
   border-radius: 9999px;
-  /* Pill shape */
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -429,11 +573,8 @@
 
 .suggestion-chip:hover {
   background-color: #EFF6FF;
-  /* blue-50 */
   border-color: #3B82F6;
-  /* blue-500 */
   color: #2563EB;
-  /* blue-600 */
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
@@ -441,7 +582,6 @@
 .suggestion-chip:active {
   transform: translateY(0);
   background-color: #DBEAFE;
-  /* blue-100 */
 }
 
 /* Raw Toggle Button */
@@ -454,7 +594,6 @@
   font-size: 11px;
   font-weight: 600;
   color: #9CA3AF;
-  /* gray-400 */
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
@@ -466,9 +605,7 @@
 
 .raw-toggle-btn:hover {
   color: #3B82F6;
-  /* blue-500 */
   background-color: #EFF6FF;
-  /* blue-50 */
 }
 
 .raw-toggle-btn.active {
@@ -476,12 +613,10 @@
   background-color: #3B82F6;
 }
 
-/* Raw Content View (Terminal style) */
+/* Raw Content View */
 .raw-content-view {
   background-color: #111827;
-  /* gray-900 */
   color: #10B981;
-  /* green-500 (Matrix like) */
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 12px;
   line-height: 1.5;
@@ -494,5 +629,4 @@
   margin: 0;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
   border: 1px solid #374151;
-  /* gray-700 */
 }

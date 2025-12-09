@@ -7,14 +7,17 @@
   width: 100%;
 }
 
-/* 大見出し「出典」 */
+/* Header Label */
 .citation-header-label {
   font-size: 0.75rem;
   font-weight: 600;
   color: #6b7280;
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  /* Gridの展開余白で制御するためmarginリセット */
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  padding-bottom: 8px;
+  /* タップエリア確保 */
 }
 
 /* Collapsible Header Styles */
@@ -32,7 +35,7 @@
 }
 
 .citation-toggle-icon {
-  transition: transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   color: #9ca3af;
 }
 
@@ -40,12 +43,35 @@
   transform: rotate(180deg);
 }
 
+/* --- Accordion Animation (CSS Grid Method) --- */
+.citation-accordion-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.citation-accordion-grid.expanded {
+  grid-template-rows: 1fr;
+}
+
+.citation-accordion-overflow {
+  overflow: hidden;
+}
+
+/* Groups Container */
 .citation-groups {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 12px;
-  animation: fadeIn 0.3s ease-out;
+  /* Margin-top is moved to padding inside the group for cleaner transition */
+  padding-top: 4px;
+  padding-bottom: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.citation-accordion-grid.expanded .citation-groups {
+  opacity: 1;
 }
 
 .citation-group {
@@ -69,14 +95,12 @@
   gap: 8px;
 }
 
-/* 個別の出典カード */
+/* Individual Citation Item */
 .citation-item {
   display: grid;
-  /* レイアウト変更: [番号] [アイコン] [テキスト] */
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 12px;
-
   padding: 8px 12px;
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -95,7 +119,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
 }
 
-/* 1. 番号バッジ */
+/* 1. Number Badge */
 .citation-number-badge {
   display: flex;
   align-items: center;
@@ -111,7 +135,7 @@
   border: 1px solid #e5e7eb;
 }
 
-/* 2. アイコンラッパー */
+/* 2. Icon Wrapper */
 .citation-icon-wrapper {
   flex-shrink: 0;
   width: 24px;
@@ -127,7 +151,7 @@
   object-fit: contain;
 }
 
-/* 3. テキストコンテンツ */
+/* 3. Text Content */
 .citation-content {
   display: flex;
   flex-direction: column;
@@ -154,33 +178,16 @@
   margin-top: 2px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ハイライトアニメーション (DESIGN_RULE準拠) */
+/* Highlight Animation */
 .citation-item.highlight-citation {
-  /* Primary Blue: blue-50 背景 */
   background-color: #EFF6FF;
-  /* Primary Blue: blue-500 境界線 */
   border-color: #3B82F6;
-  /* 影の強化 (shadow-md) */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  /* スムーズなトランジション (200ms) */
   transition: all 0.2s ease-in-out;
-  /* わずかな拡大効果 */
   transform: scale(1.02);
 }
 
-/* スマホ対応 */
+/* Mobile Responsive */
 @media (max-width: 640px) {
   .citation-item {
     width: 100%;

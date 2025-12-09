@@ -1,126 +1,315 @@
 // src/components/Sidebar/Sidebar.jsx
-import React, { useState } from 'react';
-import DeleteConfirmModal from './DeleteConfirmModal';
+import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import DeletePopover from './DeletePopover';
+import ContextMenu from './ContextMenu';
+import { groupConversationsByDate } from '../../utils/dateUtils';
 import './Sidebar.css';
 
 /**
- * サイドバー
- * @param {string} conversationId - 現在選択中の会話ID
- * @param {function} setConversationId - 会話選択用セッター
- * @param {Array} conversations - 会話リスト
- * @param {function} onDeleteConversation - [追加] 削除用関数 (App.jsxから渡される)
+ * 自動拡張するインライン編集用テキストエリア
  */
+const RenameInput = ({ initialValue, onSave, onCancel }) => {
+  const [value, setValue] = useState(initialValue);
+  const textareaRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [value]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (value.trim()) {
+        onSave(value.trim());
+      } else {
+        onCancel();
+      }
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  const handleBlur = () => {
+    if (value.trim()) {
+      onSave(value.trim());
+    } else {
+      onCancel();
+    }
+  };
+
+  return (
+    <textarea
+      ref={textareaRef}
+      className="conversation-rename-textarea"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onKeyDown={handleKeyDown}
+      onBlur={handleBlur}
+      autoFocus
+      rows={1}
+      onClick={(e) => e.stopPropagation()}
+    />
+  );
+};
+
 const Sidebar = ({
   conversationId,
   setConversationId,
   conversations,
-  onDeleteConversation, // New prop
+  pinnedIds,
+  onDeleteConversation,
+  onRenameConversation,
+  onPinConversation,
+  isCollapsed,
+  toggleSidebar,
 }) => {
-  // モーダル制御用のState
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null); // { id, name }
+  const [menuConfig, setMenuConfig] = useState({
+    isOpen: false,
+    targetConv: null,
+    anchorRect: null,
+  });
 
-  const handleNewChat = () => {
-    setConversationId(null);
+  const [deletePopoverConfig, setDeletePopoverConfig] = useState({
+    isOpen: false,
+    targetConv: null,
+    anchorRect: null,
+  });
+
+  const [renamingId, setRenamingId] = useState(null);
+
+  const groupedConversations = useMemo(() => {
+    return groupConversationsByDate(conversations, pinnedIds);
+  }, [conversations, pinnedIds]);
+
+  const handleNewChat = () => setConversationId(null);
+  const handleSelectConversation = (id) => setConversationId(id);
+
+  const handleMenuOpen = (e, conv) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuConfig({ isOpen: true, targetConv: conv, anchorRect: rect });
   };
 
-  const handleSelectConversation = (id) => {
-    setConversationId(id);
+  const handleMenuClose = () => {
+    setMenuConfig((prev) => ({ ...prev, isOpen: false }));
   };
 
-  // 削除アイコンクリック時（モーダルを開く）
-  const handleClickDelete = (e, conv) => {
-    e.stopPropagation(); // 親要素のonClick（チャット選択）が発火するのを防ぐ
-    setDeleteTarget(conv);
-    setIsDeleteModalOpen(true);
-  };
-
-  // 削除実行
-  const handleConfirmDelete = () => {
-    if (deleteTarget) {
-      onDeleteConversation(deleteTarget.id);
+  const handleTriggerRename = () => {
+    const target = menuConfig.targetConv;
+    if (target) {
+      setRenamingId(target.id);
     }
-    setIsDeleteModalOpen(false);
-    setDeleteTarget(null);
+    handleMenuClose();
   };
 
-  // キャンセル
-  const handleCloseModal = () => {
-    setIsDeleteModalOpen(false);
-    setDeleteTarget(null);
+  const handleTriggerPin = () => {
+    const target = menuConfig.targetConv;
+    if (target) {
+      onPinConversation(target.id);
+    }
+    handleMenuClose();
+  };
+
+  const handleTriggerDelete = () => {
+    const target = menuConfig.targetConv;
+    const rect = menuConfig.anchorRect;
+    setDeletePopoverConfig({ isOpen: true, targetConv: target, anchorRect: rect });
+    handleMenuClose();
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletePopoverConfig.targetConv) {
+      onDeleteConversation(deletePopoverConfig.targetConv.id);
+    }
+    setDeletePopoverConfig((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleSaveRename = (newName) => {
+    if (renamingId) {
+      onRenameConversation(renamingId, newName);
+    }
+    setRenamingId(null);
+  };
+
+  const handleCancelRename = () => {
+    setRenamingId(null);
+  };
+
+  const smoothTransition = { duration: 0.25, ease: [0.2, 0, 0, 1] };
+
+  const itemVariants = {
+    hidden: {
+      opacity: 0, height: 0, marginBottom: 0, scale: 0.98,
+      transition: { duration: 0.2, ease: "easeInOut" }
+    },
+    visible: {
+      opacity: 1, height: 'auto', marginBottom: 4, scale: 1,
+      transition: smoothTransition
+    },
+    exit: {
+      opacity: 0, height: 0, marginBottom: 0, scale: 0.98,
+      transition: { duration: 0.15, ease: "easeOut" }
+    }
   };
 
   return (
-    <div className="sidebar">
-      {/* --- ヘッダーと新規チャット --- */}
+    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      {/* Header */}
       <div className="sidebar-header">
-        <div style={{ color: '#2563EB', width: '32px', height: '32px' }}>
-          <LogoIcon />
+        <div className="sidebar-brand-area">
+          <div className="brand-logo"><LogoIcon /></div>
+          <h1 className="sidebar-title">社内AI (PoC)</h1>
         </div>
-        <h1 className="sidebar-title">社内AI (PoC)</h1>
+        <button
+          className="sidebar-toggle-btn"
+          onClick={toggleSidebar}
+          title={isCollapsed ? "サイドバーを開く" : "サイドバーを閉じる"}
+        >
+          <SidebarToggleIcon isCollapsed={isCollapsed} />
+        </button>
       </div>
 
-      <button className="new-chat-button" onClick={handleNewChat}>
-        <NewChatIcon />
-        新しいチャット
-      </button>
+      {/* New Chat Button */}
+      <div className="new-chat-wrapper">
+        <motion.button
+          className="new-chat-button"
+          onClick={handleNewChat}
+          whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+          whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
+          title={isCollapsed ? "新しいチャット" : ""}
+        >
+          <div className="new-chat-icon"><NewChatIcon /></div>
+          <span className="new-chat-text">新しいチャット</span>
+        </motion.button>
+      </div>
 
-      {/* --- 会話履歴リスト --- */}
+      {/* Conversation List */}
       <div className="conversation-list">
-        {conversations.map((conv) => (
-          <div
-            key={conv.id}
-            className={`conversation-item group ${ // 'group'クラスを追加し、子要素のホバー制御を可能に
-              conv.id === conversationId ? 'active' : ''
-              }`}
-            onClick={() => handleSelectConversation(conv.id)}
-          >
-            {/* テキスト部分（長文省略対応） */}
-            <span className="conversation-name">{conv.name}</span>
+        {conversations.length === 0 ? (
+          <div className="empty-state-message">履歴はありません</div>
+        ) : (
+          groupedConversations.map((group) => (
+            <div key={group.key} className="sidebar-group">
+              {!isCollapsed && <div className="group-title">{group.title}</div>}
 
-            {/* 削除ボタン（ホバー時のみ表示） */}
-            <button
-              className="delete-icon-button"
-              onClick={(e) => handleClickDelete(e, conv)}
-              title="このチャットを削除"
-            >
-              <TrashIcon />
-            </button>
-          </div>
-        ))}
+              <AnimatePresence initial={false} mode='popLayout'>
+                {group.items.map((conv) => {
+                  const isPinned = pinnedIds.includes(conv.id);
+                  const isRenaming = renamingId === conv.id;
+
+                  return (
+                    <motion.div
+                      key={conv.id}
+                      layout
+                      layoutId={conv.id}
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      transition={smoothTransition}
+                      whileHover={isRenaming ? {} : { scale: 1.01, x: 2, transition: { duration: 0.2 } }}
+                      whileTap={isRenaming ? {} : { scale: 0.99, transition: { duration: 0.1 } }}
+                      className={`conversation-item group ${conv.id === conversationId ? 'active' : ''}`}
+                      onClick={() => !isRenaming && handleSelectConversation(conv.id)}
+                    >
+                      {/* --- ラッパー: テキストまたは編集フォーム --- */}
+                      <div className="conversation-name-wrapper">
+                        {isRenaming ? (
+                          <RenameInput
+                            initialValue={conv.name}
+                            onSave={handleSaveRename}
+                            onCancel={handleCancelRename}
+                          />
+                        ) : (
+                          <span className="conversation-name" title={conv.name}>
+                            {conv.name}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* --- アイコン類 (縮小禁止) --- */}
+                      {!isRenaming && (
+                        <>
+                          {isPinned && !isCollapsed && (
+                            <span className="pinned-indicator" title="固定済み">
+                              <PinIconSmall />
+                            </span>
+                          )}
+
+                          <motion.button
+                            className="delete-icon-button"
+                            onClick={(e) => handleMenuOpen(e, conv)}
+                            title="メニュー"
+                            whileHover={{ scale: 1.1, color: 'var(--color-text-main)', transition: { duration: 0.2 } }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <MoreIcon />
+                          </motion.button>
+                        </>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          ))
+        )}
       </div>
 
-      {/* --- 削除確認モーダル --- */}
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCloseModal}
+      <ContextMenu
+        isOpen={menuConfig.isOpen}
+        anchorRect={menuConfig.anchorRect}
+        onClose={handleMenuClose}
+        onRename={handleTriggerRename}
+        onPin={handleTriggerPin}
+        onDelete={handleTriggerDelete}
+        isPinned={menuConfig.targetConv && pinnedIds.includes(menuConfig.targetConv.id)}
+      />
+
+      <DeletePopover
+        isOpen={deletePopoverConfig.isOpen}
+        anchorRect={deletePopoverConfig.anchorRect}
+        onClose={() => setDeletePopoverConfig(prev => ({ ...prev, isOpen: false }))}
         onConfirm={handleConfirmDelete}
-        conversationName={deleteTarget?.name || ''}
+        conversationName={deletePopoverConfig.targetConv?.name || ''}
       />
     </div>
   );
 };
 
-// === Icons ===
-
+// --- Icons (変更なし) ---
 const LogoIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" />
   </svg>
 );
-
 const NewChatIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M12 17V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M9.5 14.5L12 12L14.5 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
-const TrashIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 6H5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M8 6V4C8 3.46957 8.21071 3 8.58579 2.62513C8.96086 2.25026 9.46957 2.04061 10 2.04061H14C14.5304 2.04061 15.0391 2.25026 15.4142 2.62513C15.7893 3 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+const MoreIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="19" cy="12" r="1" />
+    <circle cx="5" cy="12" r="1" />
+  </svg>
+);
+const PinIconSmall = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary)', marginLeft: 'auto', marginRight: '4px' }}>
+    <line x1="12" y1="17" x2="12" y2="22"></line>
+    <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"></path>
+  </svg>
+);
+const SidebarToggleIcon = ({ isCollapsed }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <line x1="9" y1="3" x2="9" y2="21" />
+    {isCollapsed ? <path d="M13 10L15 12L13 14" /> : <path d="M15 14L13 12L15 10" />}
   </svg>
 );
 

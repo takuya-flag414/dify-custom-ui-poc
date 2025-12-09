@@ -8,6 +8,7 @@ import ThinkingProcess from './ThinkingProcess';
 import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from '../Shared/FileIcon';
+import CopyButton from '../Shared/CopyButton';
 
 export const AssistantIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -19,7 +20,7 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   const {
     role,
     text,
-    rawContent, // ★ New
+    rawContent,
     citations,
     suggestions,
     isStreaming,
@@ -30,9 +31,8 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
     id
   } = message;
 
-  const [showRaw, setShowRaw] = useState(false); // ★ New: Rawモード管理
+  const [showRaw, setShowRaw] = useState(false);
 
-  // ストリーミング終了時にRawモードを解除
   useEffect(() => {
     if (!isStreaming) {
       setShowRaw(false);
@@ -45,73 +45,99 @@ const MessageBlock = ({ message, onSuggestionClick }) => {
   const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
   const showKnowledgeBadge = isAi && !isStreaming && traceMode === 'knowledge';
 
+  const textToCopy = rawContent || text || '';
+
+  // コピーボタンのレンダリングヘルパー
+  const renderCopyButton = () => {
+    if (isStreaming || isTextEmpty) return null;
+    return (
+      <CopyButton
+        text={textToCopy}
+        isAi={isAi}
+        className={isAi ? 'copy-btn-ai' : 'copy-btn-user'}
+      />
+    );
+  };
+
   return (
     <div className="message-block">
-      <div className={`message-container ${!isAi ? 'message-container-user' : ''}`}>
+      {/* groupクラスを追加し、ホバー検知の親とする */}
+      <div className={`message-container ${!isAi ? 'message-container-user' : ''} group`}>
 
         <div className={isAi ? 'avatar-ai' : 'avatar-user'}>
           {isAi ? <AssistantIcon /> : 'You'}
         </div>
 
         <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
-          <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
 
-            {/* Debug: Raw Toggle Button (AI & Streaming only) */}
-            {isAi && isStreaming && (
-              <button
-                className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
-                onClick={() => setShowRaw(!showRaw)}
-                title="生成中の生データを表示"
-              >
-                ⚡️ Raw
-              </button>
-            )}
+          {/* バブルとボタンを横並びにするラッパー */}
+          <div className="message-bubble-row">
 
-            {/* User: File Attachment */}
-            {!isAi && files && files.length > 0 && (
-              <div className="file-attachment-chip">
-                <FileIcon filename={files[0].name} />
-                <span className="file-attachment-name">{files[0].name}</span>
-              </div>
-            )}
+            {/* Userの場合: 左側にボタン配置 */}
+            {!isAi && renderCopyButton()}
 
-            {/* AI: Thinking Process */}
-            {isAi && thoughtProcess && thoughtProcess.length > 0 && !showRaw && (
-              <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
-            )}
+            <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
 
-            {/* AI: Skeleton Loader */}
-            {isAi && isStreaming && isTextEmpty && !showRaw && (
-              <SkeletonLoader />
-            )}
+              {/* Debug: Raw Toggle Button (AI & Streaming only) */}
+              {isAi && isStreaming && (
+                <button
+                  className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
+                  onClick={() => setShowRaw(!showRaw)}
+                  title="生成中の生データを表示"
+                >
+                  ⚡️ Raw
+                </button>
+              )}
 
-            {/* Content Area */}
-            {showRaw ? (
-              // Raw Data View
-              <pre className="raw-content-view">
-                {rawContent || '(データ受信待機中...)'}
-              </pre>
-            ) : (
-              // Normal Markdown View
-              !isTextEmpty && (
-                <MarkdownRenderer
-                  content={text || ''}
-                  isStreaming={isAi && isStreaming}
-                  citations={citations}
-                  messageId={uniqueMessageId}
-                />
-              )
-            )}
+              {/* User: File Attachment */}
+              {!isAi && files && files.length > 0 && (
+                <div className="file-attachment-chip">
+                  <FileIcon filename={files[0].name} />
+                  <span className="file-attachment-name">{files[0].name}</span>
+                </div>
+              )}
+
+              {/* AI: Thinking Process */}
+              {isAi && thoughtProcess && thoughtProcess.length > 0 && !showRaw && (
+                <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
+              )}
+
+              {/* AI: Skeleton Loader */}
+              {isAi && isStreaming && isTextEmpty && !showRaw && (
+                <SkeletonLoader />
+              )}
+
+              {/* Content Area */}
+              {showRaw ? (
+                // Raw Data View
+                <pre className="raw-content-view">
+                  {rawContent || '(データ受信待機中...)'}
+                </pre>
+              ) : (
+                // Normal Markdown View
+                !isTextEmpty && (
+                  <MarkdownRenderer
+                    content={text || ''}
+                    isStreaming={isAi && isStreaming}
+                    citations={citations}
+                    messageId={uniqueMessageId}
+                  />
+                )
+              )}
+            </div>
+
+            {/* AIの場合: 右側にボタン配置 */}
+            {isAi && renderCopyButton()}
 
           </div>
 
-          {/* Footer Area */}
+          {/* Footer Area (出典、バッジ、提案) */}
           {isAi && !isStreaming && (
-            <>
+            <div className="message-footer">
               {showCitations && <CitationList citations={citations} messageId={uniqueMessageId} />}
               {showKnowledgeBadge && <AiKnowledgeBadge />}
               <SuggestionButtons suggestions={suggestions} onSuggestionClick={onSuggestionClick} />
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -125,7 +151,7 @@ const arePropsEqual = (prev, next) => {
   const n = next.message;
   return p.id === n.id
     && p.text === n.text
-    && p.rawContent === n.rawContent // ★ New check
+    && p.rawContent === n.rawContent
     && p.isStreaming === n.isStreaming
     && p.traceMode === n.traceMode
     && p.citations === n.citations
