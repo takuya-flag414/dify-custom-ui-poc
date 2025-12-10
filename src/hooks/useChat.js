@@ -8,7 +8,6 @@ import {
 import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMapper';
-import { formatConversationHistory } from '../utils/historyFormatter';
 
 const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
 const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
@@ -233,17 +232,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       weekday: 'long', hour: '2-digit', minute: '2-digit'
     });
 
-    // 現在の messages (State) は今回の発言を含まない「過去ログ」として機能します
-    const previousConversations = formatConversationHistory(messages);
-
-    // ログ出力: BEモード または OFFモード(本番) の場合、送信内容を出力
-    if (mockMode === 'BE' || mockMode === 'OFF') {
-      addLog(
-        `[Context Injection] Sending History (${previousConversations.length} chars):\n---\n${previousConversations}\n---`,
-        'info' // 目立つように info レベルで出力
-      );
-    }
-
     const requestBody = {
       inputs: {
         isDebugMode: mockMode === 'BE',
@@ -252,8 +240,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         search_mode: searchModeValue === 'force' ? 'force' : 'auto',
         domain_filter: domainFilterString,
         current_time: currentTimeStr, // ★ ここで時間を注入
-        // Difyの「開始」ノードに追加した変数名と一致させること
-        previous_conversations: previousConversations
+
       },
       query: text,
       user: USER_ID,
