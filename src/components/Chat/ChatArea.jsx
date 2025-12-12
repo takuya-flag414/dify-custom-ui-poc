@@ -5,21 +5,21 @@ import './ChatArea.css';
 
 import MockModeSelect from './MockModeSelect';
 import ChatHistory from './ChatHistory';
-import ChatInput from './ChatInput';
+import ChatInput from './ChatInput'; // パス修正の可能性あり（構成によります）
 import HistorySkeleton from './HistorySkeleton';
 
 const ChatArea = (props) => {
   const {
     messages,
-    isGenerating, // AI回答生成中
-    isHistoryLoading, // 履歴読み込み中
+    isGenerating,
+    isHistoryLoading,
     mockMode,
     setMockMode,
     conversationId,
     handleCopyLogs,
     copyButtonText,
-    activeContextFile,
-    setActiveContextFile,
+    activeContextFiles, // ★変更: 複数形
+    setActiveContextFiles, // ★変更: 複数形
     onSendMessage,
     searchSettings,
     setSearchSettings
@@ -51,8 +51,8 @@ const ChatArea = (props) => {
               isHistoryLoading={true}
               onSendMessage={() => {}}
               isCentered={false}
-              activeContextFile={activeContextFile}
-              setActiveContextFile={setActiveContextFile}
+              activeContextFiles={activeContextFiles} // ★変更
+              setActiveContextFiles={setActiveContextFiles} // ★変更
               searchSettings={searchSettings}
               setSearchSettings={setSearchSettings}
             />
@@ -71,8 +71,8 @@ const ChatArea = (props) => {
                 isLoading={isGenerating}
                 onSendMessage={onSendMessage}
                 isCentered={true}
-                activeContextFile={activeContextFile}
-                setActiveContextFile={setActiveContextFile}
+                activeContextFiles={activeContextFiles} // ★変更
+                setActiveContextFiles={setActiveContextFiles} // ★変更
                 searchSettings={searchSettings}
                 setSearchSettings={setSearchSettings}
               />
@@ -84,7 +84,7 @@ const ChatArea = (props) => {
         <>
           <ChatHistory
             messages={messages}
-            onSuggestionClick={(q) => onSendMessage(q, null)}
+            onSuggestionClick={(q) => onSendMessage(q, [])} // ★変更: ファイル引数は空配列に
             isLoading={isGenerating}
             onSendMessage={onSendMessage}
           />
@@ -93,8 +93,8 @@ const ChatArea = (props) => {
               isLoading={isGenerating}
               onSendMessage={onSendMessage}
               isCentered={false}
-              activeContextFile={activeContextFile}
-              setActiveContextFile={setActiveContextFile}
+              activeContextFiles={activeContextFiles} // ★変更
+              setActiveContextFiles={setActiveContextFiles} // ★変更
               searchSettings={searchSettings}
               setSearchSettings={setSearchSettings}
             />

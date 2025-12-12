@@ -43,11 +43,11 @@ function App() {
   const {
     messages,
     setMessages,
-    isGenerating, // ★ 生成中
-    isHistoryLoading, // ★ 履歴読み込み中
+    isGenerating,
+    isHistoryLoading,
     setIsLoading,
-    activeContextFile,
-    setActiveContextFile,
+    activeContextFiles, // ★変更: 複数形に変更
+    setActiveContextFiles, // ★変更: 複数形に変更
     handleSendMessage,
     searchSettings,
     setSearchSettings
@@ -86,7 +86,6 @@ function App() {
       <ChatArea
         messages={messages}
         setMessages={setMessages}
-        // ★ ステータスを分けて渡す
         isGenerating={isGenerating}
         isHistoryLoading={isHistoryLoading}
         
@@ -97,8 +96,10 @@ function App() {
         onConversationCreated={handleConversationCreated}
         handleCopyLogs={handleCopyLogs}
         copyButtonText={copyButtonText}
-        activeContextFile={activeContextFile}
-        setActiveContextFile={setActiveContextFile}
+        
+        activeContextFiles={activeContextFiles} // ★変更: 複数形Props
+        setActiveContextFiles={setActiveContextFiles} // ★変更: 複数形Props
+        
         onSendMessage={handleSendMessage}
         searchSettings={searchSettings}
         setSearchSettings={setSearchSettings}

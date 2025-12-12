@@ -16,7 +16,6 @@ export const AssistantIcon = () => (
   </svg>
 );
 
-// ★ Propsに className と style を追加
 const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
   const {
     role,
@@ -60,7 +59,6 @@ const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
   };
 
   return (
-    // ★ ここで className と style を適用
     <div className={`message-block ${className || ''}`} style={style}>
       <div className={`message-container ${!isAi ? 'message-container-user' : ''} group`}>
 
@@ -84,10 +82,15 @@ const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
                 </button>
               )}
 
+              {/* ★変更: 複数ファイル表示に対応 */ }
               {!isAi && files && files.length > 0 && (
-                <div className="file-attachment-chip">
-                  <FileIcon filename={files[0].name} />
-                  <span className="file-attachment-name">{files[0].name}</span>
+                <div className="file-attachments-wrapper">
+                  {files.map((file, index) => (
+                    <div key={index} className="file-attachment-chip">
+                      <FileIcon filename={file.name} />
+                      <span className="file-attachment-name">{file.name}</span>
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -131,12 +134,10 @@ const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
   );
 };
 
-// Deep compare
 const arePropsEqual = (prev, next) => {
   const p = prev.message;
   const n = next.message;
   
-  // ★ styleやclassNameが変わった場合も再レンダリングが必要
   if (prev.className !== next.className || JSON.stringify(prev.style) !== JSON.stringify(next.style)) {
     return false;
   }
@@ -148,7 +149,9 @@ const arePropsEqual = (prev, next) => {
     && p.traceMode === n.traceMode
     && p.citations === n.citations
     && p.suggestions === n.suggestions
-    && JSON.stringify(p.thoughtProcess) === JSON.stringify(n.thoughtProcess);
+    && JSON.stringify(p.thoughtProcess) === JSON.stringify(n.thoughtProcess)
+    // ファイル数や内容が変わった場合も再レンダリング
+    && JSON.stringify(p.files) === JSON.stringify(n.files); 
 };
 
 export default React.memo(MessageBlock, arePropsEqual);

@@ -434,3 +434,125 @@
   pointer-events: none;
   user-select: text;
 }
+
+/* --- Sticky Context File Area (Card Grid Layout) --- */
+
+/* コンテナ全体: 薄いグレーの背景でエリアを区切る */
+.context-file-sticky {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  
+  background-color: var(--color-bg-sidebar); /* #F9FAFB */
+  border: 1px solid var(--color-border);     /* #E5E7EB */
+  border-radius: var(--radius-xl);           /* 12px */
+  
+  padding: var(--space-3);                   /* 12px */
+  margin: var(--space-2);                    /* 8px */
+  
+  animation: contextFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ヘッダー: 控えめなラベル */
+.context-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-1);
+  color: var(--color-text-muted); /* #6B7280 */
+}
+
+.context-header-text {
+  font-size: 11px;
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+/* ロックアイコンの微調整 */
+.context-header svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0.8;
+}
+
+/* カードを並べるラッパー (Flex Wrap) */
+.context-chips-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  
+  /* ファイルが多い場合はスクロールさせる */
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 4px; /* スクロールバーとの干渉防止 */
+}
+
+/* 個別のファイルカード (White Chip) */
+.context-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  
+  background-color: var(--color-bg-surface); /* #FFFFFF */
+  border: 1px solid var(--color-border);     /* #E5E7EB */
+  border-radius: var(--radius-lg);           /* 8px */
+  padding: 6px 10px;
+  
+  box-shadow: var(--shadow-sm);              /* Apple風の微細な影 */
+  
+  min-width: 0; /* Flexbox内での縮小許可 */
+  max-width: 240px; /* カードの最大幅制限 */
+  
+  cursor: default;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+/* ホバー時のインタラクション (浮き上がる演出) */
+.context-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-bg-hover); /* 薄い青枠 */
+}
+
+/* カード内のアイコン */
+.context-chip-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary); /* #3B82F6 */
+}
+
+.context-chip-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* カード内のファイル名 */
+.context-chip-name {
+  font-size: var(--text-xs); /* 12px */
+  font-weight: var(--font-medium);
+  color: var(--color-text-main); /* #111827 */
+  
+  /* 長い名前を...で省略 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* アニメーション定義 */
+@keyframes contextFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

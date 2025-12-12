@@ -48,17 +48,13 @@
 }
 
 .avatar-ai {
-  background-color: #EFF6FF;
-  /* blue-50 */
-  color: #3B82F6;
-  /* blue-500 */
+  background-color: #EFF6FF; /* blue-50 */
+  color: #3B82F6; /* blue-500 */
 }
 
 .avatar-user {
-  background-color: #F3F4F6;
-  /* gray-100 */
-  color: #4B5563;
-  /* gray-600 */
+  background-color: #F3F4F6; /* gray-100 */
+  color: #4B5563; /* gray-600 */
   font-size: 12px;
 }
 
@@ -70,20 +66,17 @@
   flex-direction: column;
   gap: 8px;
   max-width: 85%;
-  /* ★ 追加: コンテンツが少なくてもFlex親の幅いっぱいまで広げる */
   width: 100%;
 }
 
 .message-content-user {
-  align-items: flex-end;
-  /* ユーザーコンテンツは右寄せ */
+  align-items: flex-end; /* ユーザーコンテンツは右寄せ */
 }
 
 /* バブルとボタンを横並びにする行ラッパー */
 .message-bubble-row {
   display: flex;
-  align-items: flex-end;
-  /* 下揃えでボタンを表示 */
+  align-items: flex-end; /* 下揃えでボタンを表示 */
   gap: 8px;
   width: 100%;
 }
@@ -101,37 +94,28 @@
   line-height: 1.6;
   position: relative;
   word-break: break-word;
-  /* max-width は親の row で制御されるため削除、または 100% に */
   max-width: 100%;
 }
 
 /* AIのバブル */
 .ai-bubble {
   background-color: #FFFFFF;
-  color: #111827;
-  /* gray-900 */
-  border: 1px solid #E5E7EB;
-  /* gray-200 */
+  color: #111827; /* gray-900 */
+  border: 1px solid #E5E7EB; /* gray-200 */
   border-radius: 12px;
   border-top-left-radius: 4px;
   padding: 24px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-  /* ★ 追加: AIのバブルは常に利用可能な最大幅を占有する */
-  /* これにより、文字数が少ない生成初期でも幅が縮まない */
   flex: 1;
 }
 
 /* ユーザーのバブル */
 .user-bubble {
-  background-color: #3B82F6;
-  /* blue-500 */
+  background-color: #3B82F6; /* blue-500 */
   color: #FFFFFF;
   border-radius: 12px;
   border-top-right-radius: 4px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-  /* ユーザー側は flex: 1 を指定せず、コンテンツ幅（なりゆき）にする */
 }
 
 /* --- Copy Button Styles --- */
@@ -256,11 +240,8 @@
   margin-bottom: 1em;
   border-radius: 8px;
   overflow: hidden;
-  /* ヘッダーとpreを角丸に収める */
-  border: 1px solid #374151;
-  /* Dark border */
-  background-color: #1F2937;
-  /* Dark background */
+  border: 1px solid #374151; /* Dark border */
+  background-color: #1F2937; /* Dark background */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -270,15 +251,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 12px;
-  background-color: #374151;
-  /* Slightly lighter than code bg */
+  background-color: #374151; /* Slightly lighter than code bg */
   border-bottom: 1px solid #4B5563;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .code-block-lang {
-  color: #E5E7EB;
-  /* gray-200 */
+  color: #E5E7EB; /* gray-200 */
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -293,8 +272,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #9CA3AF;
-  /* gray-400 */
+  color: #9CA3AF; /* gray-400 */
   padding: 4px;
   border-radius: 4px;
   transition: all 0.2s;
@@ -302,14 +280,12 @@
 }
 
 .code-block-copy-btn:hover {
-  color: #F3F4F6;
-  /* gray-100 */
+  color: #F3F4F6; /* gray-100 */
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .code-block-copy-btn.copied {
-  color: #10B981;
-  /* emerald-500 */
+  color: #10B981; /* emerald-500 */
 }
 
 .code-copy-content {
@@ -321,13 +297,10 @@
 /* Override pre styles for Code Block Wrapper */
 .markdown-renderer pre {
   margin: 0;
-  /* ラッパーでマージンを制御するためリセット */
   padding: 16px;
   background-color: transparent;
-  /* ラッパーの背景色を使用 */
   color: #F9FAFB;
   border-radius: 0;
-  /* ラッパーで角丸にするためリセット */
   overflow-x: auto;
   border: none;
   box-shadow: none;
@@ -507,6 +480,16 @@
 }
 
 /* File Attachment Chip */
+/* ★変更: ファイル添付のラッパー */
+.file-attachments-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+/* File Attachment Chip */
 .file-attachment-chip {
   display: inline-flex;
   align-items: center;
@@ -515,10 +498,11 @@
   border: 1px solid #E5E7EB;
   padding: 6px 12px;
   border-radius: 8px;
-  margin-bottom: 8px;
+  /* margin-bottom: 8px;  <-- Wrapperのgapで制御するため削除 */
   font-size: 13px;
   color: #374151;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  max-width: 100%; /* 親要素からはみ出さないように */
 }
 
 .user-bubble .file-attachment-chip {
@@ -530,7 +514,12 @@
 
 .file-attachment-name {
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px; /* 長いファイル名を省略 */
 }
+
 
 /* Suggestion Buttons */
 .suggestion-container {

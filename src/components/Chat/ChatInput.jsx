@@ -1,10 +1,11 @@
-// src/components/chat/ChatInput.jsx
+// src/components/Chat/ChatInput.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import '../Chat/ChatArea.css';
-import FileIcon from '../Shared/FileIcon';
+import AttachmentPopover from '../Chat/AttachmentPopover';
 import ContextSelector from '../Shared/ContextSelector';
 
-// Context Control Icon (Globe + Status Dot)
+// --- Icons ---
+
 const ContextControlIcon = ({ settings }) => {
   const isWebActive = settings.webMode !== 'off';
   const isRagActive = settings.ragEnabled;
@@ -27,36 +28,48 @@ const ContextControlIcon = ({ settings }) => {
   );
 };
 
-const LockIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+const AttachmentIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
   </svg>
 );
 
-const DEFAULT_SETTINGS = { ragEnabled: true, webMode: 'auto', domainFilters: [] };
+const SendIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13"></line>
+    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+  </svg>
+);
+
+// --- Main Component ---
 
 const ChatInput = ({
   isLoading,
   isHistoryLoading,
   onSendMessage,
   isCentered,
-  activeContextFile,
-  setActiveContextFile,
-  searchSettings = DEFAULT_SETTINGS,
-  setSearchSettings = () => { }
+  activeContextFiles = [], // ★変更: sessionFiles から activeContextFiles へ
+  searchSettings,
+  setSearchSettings
 }) => {
   const [text, setText] = useState('');
-  const [file, setFile] = useState(null);
-
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  
+  // Popover State
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showSearchOptions, setShowSearchOptions] = useState(false);
+  
+  const popoverRef = useRef(null);
   const searchOptionsRef = useRef(null);
-
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  // 外側クリック検知
   useEffect(() => {
     const handleClickOutside = (event) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+        setIsPopoverOpen(false);
+      }
       if (searchOptionsRef.current && !searchOptionsRef.current.contains(event.target)) {
         setShowSearchOptions(false);
       }
@@ -65,6 +78,7 @@ const ChatInput = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // テキストエリア自動リサイズ
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -81,30 +95,36 @@ const ChatInput = ({
   };
 
   const handleSend = () => {
-    if ((!text.trim() && !file) || isLoading) return;
-    onSendMessage(text, file);
+    if ((!text.trim() && selectedFiles.length === 0) || isLoading) return;
+    onSendMessage(text, selectedFiles);
     setText('');
-    setFile(null);
-    setShowSearchOptions(false);
+    setSelectedFiles([]);
+    setIsPopoverOpen(false);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setSelectedFiles(prev => [...prev, ...newFiles]);
       e.target.value = '';
+      setIsPopoverOpen(true);
     }
   };
 
-  // ★ 削除: handleClearContext は不要になったため削除
+  const removeSelectedFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const totalFiles = activeContextFiles.length + selectedFiles.length;
 
   const getPlaceholder = () => {
     if (isHistoryLoading) return "履歴を読み込んでいます...";
     if (isLoading) return "AIが思考中です...";
 
     const parts = [];
-    if (searchSettings.webMode === 'force') parts.push("Web検索");
-    if (searchSettings.ragEnabled) parts.push("社内情報");
+    if (searchSettings?.webMode === 'force') parts.push("Web検索");
+    if (searchSettings?.ragEnabled) parts.push("社内情報");
 
     if (parts.length > 0) {
       return `メッセージを入力 (${parts.join('と')}を参照)...`;
@@ -114,80 +134,70 @@ const ChatInput = ({
 
   return (
     <div className={isCentered ? "chat-input-container-centered" : "chat-input-container"}>
-      <div className={`chat-input-form ${activeContextFile ? 'has-context' : ''}`}>
-
-        {/* Sticky Context File (ReadOnly Mode) */}
-        {activeContextFile && (
-          <div 
-            className="context-file-sticky locked" 
-            title="このファイルはこのチャットの前提情報として固定されています。変更するには新しいチャットを開始してください。"
-          >
-            <div className="context-file-icon-wrapper">
-              <FileIcon filename={activeContextFile.name} />
-            </div>
-            <div className="context-file-info">
-              <span className="context-file-name" title={activeContextFile.name}>
-                {activeContextFile.name}
-              </span>
-              <span className="context-file-status">
-                <LockIcon /> このチャットの参照ファイル
-              </span>
-            </div>
-            {/* ★ 削除: 削除ボタン (context-file-close) を撤廃 */}
-          </div>
-        )}
-
-        {/* Temporary Attachment (New Upload) */}
-        {file && (
-          <div className="file-preview-integrated">
-            <FileIcon filename={file.name} className="w-6 h-6" />
-            <span className="file-preview-name">{file.name}</span>
-            <button className="file-preview-close" onClick={() => setFile(null)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-            </button>
-          </div>
-        )}
-
+      <div className="chat-input-form">
+        
         {/* Input Row */}
-        <div className="chat-input-row relative" ref={searchOptionsRef}>
-          {/* ★ 変更なし: activeContextFileがある場合は disabled になるロジックを維持 
-             これにより「追加」も「削除」もできない状態（＝固定）になります。
-          */}
-          <button
-            className="chat-input-attach-btn"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading || !!activeContextFile}
-            title={activeContextFile ? "このチャットではファイルを変更できません" : "ファイルを添付"}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-            </svg>
-          </button>
+        <div className="chat-input-row relative">
+          
+          {/* Attachment Button & Popover Wrapper */}
+          <div className="relative" ref={popoverRef}>
+            <button
+              className={`chat-input-attach-btn ${isPopoverOpen ? 'bg-gray-100 text-blue-500' : ''}`}
+              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              disabled={isLoading}
+              title="参照ファイルを確認・追加"
+            >
+              <AttachmentIcon />
+              {/* Badge Indicator */}
+              {totalFiles > 0 && (
+                <span className="absolute top-1 right-1 flex h-2.5 w-2.5 pointer-events-none">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500 border border-white"></span>
+                </span>
+              )}
+            </button>
+
+            {/* Popover Component */}
+            {isPopoverOpen && (
+              <AttachmentPopover
+                activeContextFiles={activeContextFiles} // ★変更: Props名を統一
+                selectedFiles={selectedFiles}
+                onRemoveSelected={removeSelectedFile}
+                onAddFileClick={() => fileInputRef.current?.click()}
+                onClose={() => setIsPopoverOpen(false)}
+                isLoading={isLoading}
+              />
+            )}
+          </div>
+          
           <input
             type="file"
             ref={fileInputRef}
             style={{ display: 'none' }}
             onChange={handleFileChange}
             accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
+            multiple
           />
 
-          <button
-            className={`chat-input-attach-btn ml-1 ${showSearchOptions ? 'bg-gray-100' : ''}`}
-            onClick={() => setShowSearchOptions(!showSearchOptions)}
-            disabled={isLoading}
-            title="検索ソース設定を開く"
-          >
-            <ContextControlIcon settings={searchSettings} />
-          </button>
-
-          {showSearchOptions && (
-            <div className="search-options-popover">
-              <ContextSelector
-                settings={searchSettings}
-                onSettingsChange={setSearchSettings}
-              />
-            </div>
-          )}
+          {/* Context Settings */}
+          <div className="relative" ref={searchOptionsRef}>
+            <button
+              className={`chat-input-attach-btn ml-1 ${showSearchOptions ? 'bg-gray-100' : ''}`}
+              onClick={() => setShowSearchOptions(!showSearchOptions)}
+              disabled={isLoading}
+              title="検索ソース設定"
+            >
+              <ContextControlIcon settings={searchSettings || {}} />
+            </button>
+            {showSearchOptions && (
+              <div className="search-options-popover">
+                <ContextSelector
+                  settings={searchSettings}
+                  onSettingsChange={setSearchSettings}
+                />
+              </div>
+            )}
+          </div>
 
           <textarea
             ref={textareaRef}
@@ -203,15 +213,12 @@ const ChatInput = ({
           <button
             className="chat-input-button"
             onClick={handleSend}
-            disabled={isLoading || (!text.trim() && !file)}
+            disabled={isLoading || (!text.trim() && selectedFiles.length === 0)}
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
+              <SendIcon />
             )}
           </button>
         </div>
