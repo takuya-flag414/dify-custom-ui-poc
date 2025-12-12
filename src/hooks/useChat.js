@@ -7,8 +7,6 @@ import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi }
 import { parseLlmResponse } from '../utils/responseParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMapper';
 
-const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
-const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 const USER_ID = 'poc-user-01';
 
 const DEFAULT_SEARCH_SETTINGS = {
@@ -17,17 +15,17 @@ const DEFAULT_SEARCH_SETTINGS = {
   domainFilters: []
 };
 
-export const useChat = (mockMode, conversationId, addLog, onConversationCreated, onConversationUpdated) => {
+export const useChat = (mockMode, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl) => {
   const [messages, setMessages] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
-  
+
   // 内部的には sessionFiles として管理するが、外部へは activeContextFiles として公開する
   const [sessionFiles, setSessionFiles] = useState([]);
-  
+
   const [dynamicMockMessages, setDynamicMockMessages] = useState({});
   const [searchSettings, setSearchSettings] = useState(DEFAULT_SEARCH_SETTINGS);
-  
+
   const searchSettingsRef = useRef(searchSettings);
   const currentMockScenarioRef = useRef('pure');
   const creatingConversationIdRef = useRef(null);
@@ -59,12 +57,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       if (conversationId && conversationId === creatingConversationIdRef.current) {
         addLog(`[useChat] Skip loading/resetting history for just-created conversation: ${conversationId}`, 'info');
         creatingConversationIdRef.current = null;
-        return; 
+        return;
       }
 
       addLog(`[useChat] Conversation changed to: ${conversationId}`, 'info');
-      
-      setSessionFiles([]); 
+
+      setSessionFiles([]);
 
       if (conversationId === null) {
         setMessages([]);
@@ -85,11 +83,11 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           } else {
             loadedMessages = mockMessages[conversationId] || [];
           }
-          
+
           setMessages(loadedMessages);
 
           const restoredFiles = [];
-          const seenFileNames = new Set(); 
+          const seenFileNames = new Set();
 
           loadedMessages.forEach(msg => {
             if (msg.role === 'user' && msg.files && msg.files.length > 0) {
@@ -97,7 +95,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 if (!seenFileNames.has(f.name)) {
                   seenFileNames.add(f.name);
                   restoredFiles.push({
-                    id: f.id || `mock_file_${Date.now()}_${Math.random()}`, 
+                    id: f.id || `mock_file_${Date.now()}_${Math.random()}`,
                     name: f.name,
                     type: 'document'
                   });
@@ -116,7 +114,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           if (typeof conversationId === 'string' && conversationId.startsWith('mock_')) {
             addLog(`[useChat] Skipping API call for mock ID in Real mode: ${conversationId}`, 'warn');
           } else {
-            const historyData = await fetchMessagesApi(conversationId, USER_ID, DIFY_API_URL, DIFY_API_KEY);
+            const historyData = await fetchMessagesApi(conversationId, USER_ID, apiUrl, apiKey);
             const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
             const newMessages = [];
@@ -125,13 +123,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
             for (const item of chronologicalMessages) {
               const timestamp = item.created_at ? new Date(item.created_at * 1000).toISOString() : new Date().toISOString();
-              
+
               if (item.query) {
                 const msgFiles = item.message_files ? item.message_files.map(f => {
-                  const fileData = { 
-                    id: f.id, 
+                  const fileData = {
+                    id: f.id,
                     name: f.url ? decodeURIComponent(f.url.split('/').pop().split('?')[0]) : 'Attached File',
-                    type: f.type 
+                    type: f.type
                   };
 
                   if (f.id && !seenFileIds.has(f.id)) {
@@ -155,7 +153,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
                 let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
                 const parsed = parseLlmResponse(aiText);
-                
+
                 if (parsed.isParsed) {
                   aiText = parsed.answer;
                   if (aiCitations.length === 0 && parsed.citations.length > 0) {
@@ -182,9 +180,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 });
               }
             }
-            
+
             setMessages(newMessages);
-            
+
             if (restoredFiles.length > 0) {
               setSessionFiles(restoredFiles);
               addLog(`[History] Restored ${restoredFiles.length} files from history.`, 'info');
@@ -216,15 +214,15 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       if (attachments.length > 0) {
         setIsGenerating(true);
         try {
-          const uploadPromises = attachments.map(file => 
-            uploadFile(file, USER_ID, DIFY_API_URL, DIFY_API_KEY)
+          const uploadPromises = attachments.map(file =>
+            uploadFile(file, USER_ID, apiUrl, apiKey)
               .then(res => ({ id: res.id, name: file.name, type: 'document' }))
           );
-          
+
           const uploadedFiles = await Promise.all(uploadPromises);
           uploadedFileIds = uploadedFiles.map(f => f.id);
           displayFiles = uploadedFiles.map(f => ({ name: f.name }));
-          
+
           setSessionFiles(prev => [...prev, ...uploadedFiles]);
 
         } catch (e) {
@@ -236,9 +234,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
     } else {
       if (attachments.length > 0) {
         displayFiles = attachments.map(f => ({ name: f.name }));
-        const mockFiles = attachments.map((f, i) => ({ 
-          id: `mock_file_${Date.now()}_${i}`, 
-          name: f.name 
+        const mockFiles = attachments.map((f, i) => ({
+          id: `mock_file_${Date.now()}_${i}`,
+          name: f.name
         }));
         setSessionFiles(prev => [...prev, ...mockFiles]);
         uploadedFileIds = mockFiles.map(f => f.id);
@@ -277,7 +275,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         const useWeb = currentSettings.webMode !== 'off';
         const hasFile = (attachments.length > 0 || sessionFiles.length > 0);
 
-        let scenarioKey = 'pure'; 
+        let scenarioKey = 'pure';
         if (!hasFile && !useRag && useWeb) scenarioKey = 'web_only';
         else if (!hasFile && useRag && !useWeb) scenarioKey = 'rag_only';
         else if (!hasFile && useRag && useWeb) scenarioKey = 'hybrid';
@@ -292,10 +290,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         if (!targetConvId) {
           const newMockId = `mock_gen_${Date.now()}`;
           targetConvId = newMockId;
-          creatingConversationIdRef.current = newMockId; 
+          creatingConversationIdRef.current = newMockId;
           settingsMapRef.current[newMockId] = currentSettings;
           if (onConversationCreated) {
-             onConversationCreated(newMockId, text);
+            onConversationCreated(newMockId, text);
           }
         }
 
@@ -333,7 +331,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           }))
         };
 
-        const response = await sendChatMessageApi(requestBody, DIFY_API_URL, DIFY_API_KEY);
+        const response = await sendChatMessageApi(requestBody, apiUrl, apiKey);
         reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
       }
 
@@ -356,148 +354,148 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
             if (data.conversation_id && !conversationId && !isConversationIdSynced) {
               isConversationIdSynced = true;
               if (mockMode !== 'FE') {
-                creatingConversationIdRef.current = data.conversation_id; 
+                creatingConversationIdRef.current = data.conversation_id;
                 settingsMapRef.current[data.conversation_id] = currentSettings;
                 onConversationCreated(data.conversation_id, text);
               }
             }
 
             if (data.event === 'node_started') {
-               const nodeType = data.data?.node_type;
-               const title = data.data?.title;
-               const nodeId = data.data?.node_id || `node_${Date.now()}`;
-               const inputs = data.data?.inputs || {};
-               const isWebSearchNode = (nodeType === 'tool') && (title && (title.includes('Web') || title.includes('Search') || title.includes('Perplexity')));
-               const isSignificantNode = nodeType === 'document-extractor' || (title && (title.includes('Intent') || title.includes('Classifier'))) || (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) || isWebSearchNode || nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ')) || nodeType === 'llm';
-               const isAssigner = nodeType === 'assigner' || (title && (title.includes('変数') || title.includes('Variable') || title.includes('Set Opt')));
+              const nodeType = data.data?.node_type;
+              const title = data.data?.title;
+              const nodeId = data.data?.node_id || `node_${Date.now()}`;
+              const inputs = data.data?.inputs || {};
+              const isWebSearchNode = (nodeType === 'tool') && (title && (title.includes('Web') || title.includes('Search') || title.includes('Perplexity')));
+              const isSignificantNode = nodeType === 'document-extractor' || (title && (title.includes('Intent') || title.includes('Classifier'))) || (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) || isWebSearchNode || nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ')) || nodeType === 'llm';
+              const isAssigner = nodeType === 'assigner' || (title && (title.includes('変数') || title.includes('Variable') || title.includes('Set Opt')));
 
-               if (isSignificantNode && !isAssigner) {
-                 let displayTitle = title;
-                 let iconType = 'default';
-                 if (nodeType === 'document-extractor') {
-                   const fileNameToDisplay = currentDisplayFileName || '添付ファイル';
-                   displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
-                   detectedTraceMode = 'document';
-                   iconType = 'document';
-                 }
-                 else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
-                   displayTitle = '質問の意図を解析中...';
-                   iconType = 'router';
-                 }
-                 else if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
-                   displayTitle = '質問の要点を整理中...';
-                   iconType = 'reasoning';
-                 }
-                 else if (isWebSearchNode) {
-                   const query = inputs.query || capturedOptimizedQuery || text;
-                   displayTitle = `Web検索: "${query}"`;
-                   detectedTraceMode = 'search';
-                   iconType = 'search';
-                 }
-                 else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
-                   const query = inputs.query || capturedOptimizedQuery;
-                   displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
-                   detectedTraceMode = 'knowledge';
-                   iconType = 'retrieval';
-                 }
-                 else if (nodeType === 'llm') {
-                   if (!title.includes('Intent') && !title.includes('Classifier') && !title.includes('Rewriter')) {
-                     displayTitle = '情報を整理して回答を生成中...';
-                     iconType = 'writing';
-                   }
-                 }
-                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                   ...m,
-                   traceMode: detectedTraceMode,
-                   thoughtProcess: [
-                     ...m.thoughtProcess.map(t => ({ ...t, status: 'done' })),
-                     { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
-                   ]
-                 } : m));
-               }
-            }
-            else if (data.event === 'node_finished') {
-                const nodeId = data.data?.node_id;
-                const title = data.data?.title;
-                const outputs = data.data?.outputs;
-                if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
-                    const generatedText = outputs?.text || outputs?.answer;
-                    if (generatedText) capturedOptimizedQuery = generatedText.trim();
+              if (isSignificantNode && !isAssigner) {
+                let displayTitle = title;
+                let iconType = 'default';
+                if (nodeType === 'document-extractor') {
+                  const fileNameToDisplay = currentDisplayFileName || '添付ファイル';
+                  displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
+                  detectedTraceMode = 'document';
+                  iconType = 'document';
                 }
-                if (title && (title.includes('Intent') || title.includes('Classifier')) && outputs?.text) {
-                    const decision = outputs.text.trim();
-                    let resultText = '';
-                    if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
-                    else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
-                    else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
-                    else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
-                    else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
-                    if (resultText && nodeId) {
-                        setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                            ...m,
-                            thoughtProcess: m.thoughtProcess.map(t =>
-                                t.id === nodeId ? { ...t, title: resultText, status: 'done' } : t
-                            )
-                        } : m));
-                    }
-                } else if (nodeId) {
-                    setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                        ...m,
-                        thoughtProcess: m.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
-                    } : m));
+                else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
+                  displayTitle = '質問の意図を解析中...';
+                  iconType = 'router';
                 }
-            }
-            else if (data.event === 'message') {
-                if (data.answer) {
-                    contentBuffer += data.answer;
-                    const parsed = parseLlmResponse(contentBuffer);
-                    const isJsonStructure = contentBuffer.trim().startsWith('{') || contentBuffer.trim().startsWith('```');
-                    const textToDisplay = parsed.isParsed ? parsed.answer : (isJsonStructure ? '' : contentBuffer);
-                    setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                        ...m,
-                        text: textToDisplay,
-                        rawContent: contentBuffer,
-                        thoughtProcess: m.thoughtProcess
-                    } : m));
+                else if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
+                  displayTitle = '質問の要点を整理中...';
+                  iconType = 'reasoning';
                 }
-            }
-            else if (data.event === 'message_end') {
-                const citations = data.metadata?.retriever_resources || [];
-                if (citations.length > 0) {
-                    setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                        ...m,
-                        citations: mapCitationsFromApi(citations),
-                        traceMode: detectedTraceMode
-                    } : m));
+                else if (isWebSearchNode) {
+                  const query = inputs.query || capturedOptimizedQuery || text;
+                  displayTitle = `Web検索: "${query}"`;
+                  detectedTraceMode = 'search';
+                  iconType = 'search';
                 }
-                if (data.message_id) {
-                    fetchSuggestions(data.message_id, aiMessageId);
+                else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
+                  const query = inputs.query || capturedOptimizedQuery;
+                  displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
+                  detectedTraceMode = 'knowledge';
+                  iconType = 'retrieval';
                 }
-            }
-            else if (data.event === 'workflow_finished') {
-                let finalText = contentBuffer;
-                let finalCitations = [];
-                const parsed = parseLlmResponse(finalText);
-                if (parsed.isParsed) {
-                    finalText = parsed.answer;
-                    if (parsed.citations.length > 0) {
-                        finalCitations = mapCitationsFromLLM(parsed.citations);
-                    }
+                else if (nodeType === 'llm') {
+                  if (!title.includes('Intent') && !title.includes('Classifier') && !title.includes('Rewriter')) {
+                    displayTitle = '情報を整理して回答を生成中...';
+                    iconType = 'writing';
+                  }
                 }
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                    ...m,
-                    text: finalText,
-                    rawContent: contentBuffer,
-                    citations: m.citations.length > 0 ? m.citations : finalCitations,
-                    isStreaming: false,
-                    traceMode: detectedTraceMode,
-                    thoughtProcess: m.thoughtProcess.map(t => {
-                        if (t.title === '情報を整理して回答を生成中...') {
-                            return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };
-                        }
-                        return { ...t, status: 'done' };
-                    })
+                  ...m,
+                  traceMode: detectedTraceMode,
+                  thoughtProcess: [
+                    ...m.thoughtProcess.map(t => ({ ...t, status: 'done' })),
+                    { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
+                  ]
                 } : m));
+              }
+            }
+            else if (data.event === 'node_finished') {
+              const nodeId = data.data?.node_id;
+              const title = data.data?.title;
+              const outputs = data.data?.outputs;
+              if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
+                const generatedText = outputs?.text || outputs?.answer;
+                if (generatedText) capturedOptimizedQuery = generatedText.trim();
+              }
+              if (title && (title.includes('Intent') || title.includes('Classifier')) && outputs?.text) {
+                const decision = outputs.text.trim();
+                let resultText = '';
+                if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
+                else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
+                else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
+                else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
+                else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
+                if (resultText && nodeId) {
+                  setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                    ...m,
+                    thoughtProcess: m.thoughtProcess.map(t =>
+                      t.id === nodeId ? { ...t, title: resultText, status: 'done' } : t
+                    )
+                  } : m));
+                }
+              } else if (nodeId) {
+                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  thoughtProcess: m.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
+                } : m));
+              }
+            }
+            else if (data.event === 'message') {
+              if (data.answer) {
+                contentBuffer += data.answer;
+                const parsed = parseLlmResponse(contentBuffer);
+                const isJsonStructure = contentBuffer.trim().startsWith('{') || contentBuffer.trim().startsWith('```');
+                const textToDisplay = parsed.isParsed ? parsed.answer : (isJsonStructure ? '' : contentBuffer);
+                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  text: textToDisplay,
+                  rawContent: contentBuffer,
+                  thoughtProcess: m.thoughtProcess
+                } : m));
+              }
+            }
+            else if (data.event === 'message_end') {
+              const citations = data.metadata?.retriever_resources || [];
+              if (citations.length > 0) {
+                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  citations: mapCitationsFromApi(citations),
+                  traceMode: detectedTraceMode
+                } : m));
+              }
+              if (data.message_id) {
+                fetchSuggestions(data.message_id, aiMessageId);
+              }
+            }
+            else if (data.event === 'workflow_finished') {
+              let finalText = contentBuffer;
+              let finalCitations = [];
+              const parsed = parseLlmResponse(finalText);
+              if (parsed.isParsed) {
+                finalText = parsed.answer;
+                if (parsed.citations.length > 0) {
+                  finalCitations = mapCitationsFromLLM(parsed.citations);
+                }
+              }
+              setMessages(prev => prev.map(m => m.id === aiMessageId ? {
+                ...m,
+                text: finalText,
+                rawContent: contentBuffer,
+                citations: m.citations.length > 0 ? m.citations : finalCitations,
+                isStreaming: false,
+                traceMode: detectedTraceMode,
+                thoughtProcess: m.thoughtProcess.map(t => {
+                  if (t.title === '情報を整理して回答を生成中...') {
+                    return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };
+                  }
+                  return { ...t, status: 'done' };
+                })
+              } : m));
             }
           } catch (e) {
             console.error('Stream Parse Error:', e);

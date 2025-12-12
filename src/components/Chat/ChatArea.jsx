@@ -33,6 +33,12 @@ const ChatArea = (props) => {
       <div className="top-bar-container">
         <div className="mock-mode-controls">
           <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
+          <button
+            className="api-config-button"
+            onClick={props.onOpenConfig}
+          >
+            API設定
+          </button>
         </div>
         <div className="debug-controls">
           <button className="debug-copy-button-topbar" onClick={() => handleCopyLogs(messages)}>
@@ -47,9 +53,9 @@ const ChatArea = (props) => {
           <HistorySkeleton />
           <div className="bottom-controls-wrapper">
             <ChatInput
-              isLoading={true} 
+              isLoading={true}
               isHistoryLoading={true}
-              onSendMessage={() => {}}
+              onSendMessage={() => { }}
               isCentered={false}
               activeContextFiles={activeContextFiles} // ★変更
               setActiveContextFiles={setActiveContextFiles} // ★変更

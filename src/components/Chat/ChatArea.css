@@ -556,3 +556,25 @@
     transform: translateY(0);
   }
 }
+
+/* API Config Button */
+.api-config-button {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.api-config-button:hover {
+  background-color: var(--color-bg-sidebar);
+  border-color: var(--color-text-sub);
+}

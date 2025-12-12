@@ -1,17 +1,14 @@
-// src/hooks/useConversations.js
 import { useState, useEffect, useCallback } from 'react';
 import { fetchConversationsApi, deleteConversationApi, renameConversationApi } from '../api/dify';
 import { mockConversations } from '../mockData';
 
-const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY;
-const DIFY_API_URL = import.meta.env.VITE_DIFY_API_URL;
 const USER_ID = 'poc-user-01';
 const PINNED_STORAGE_KEY = 'dify_pinned_conversations';
 
-export const useConversations = (mockMode, addLog) => {
+export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
   const [conversations, setConversations] = useState([]);
   const [conversationId, setConversationId] = useState(null);
-  
+
   const [pinnedIds, setPinnedIds] = useState(() => {
     try {
       const saved = localStorage.getItem(PINNED_STORAGE_KEY);
@@ -29,7 +26,7 @@ export const useConversations = (mockMode, addLog) => {
     const fetchConversations = async () => {
       if (mockMode === 'FE') {
         addLog('[useConversations] FE Mock mode. Loading rich dummy conversations.', 'info');
-        
+
         const now = new Date();
         const enrichedMock = mockConversations.map((conv, index) => {
           const fakeDate = new Date(now);
@@ -37,7 +34,7 @@ export const useConversations = (mockMode, addLog) => {
           if (index === 2) fakeDate.setDate(now.getDate() - 3);
           if (index === 3) fakeDate.setDate(now.getDate() - 10);
           if (index >= 4) fakeDate.setDate(now.getDate() - 60);
-          
+
           return {
             ...conv,
             created_at: Math.floor(fakeDate.getTime() / 1000)
@@ -49,14 +46,14 @@ export const useConversations = (mockMode, addLog) => {
       }
 
       addLog('[useConversations] Fetching REAL conversations list...', 'info');
-      if (!DIFY_API_KEY || !DIFY_API_URL) {
+      if (!apiKey || !apiUrl) {
         addLog('[useConversations Error] API KEY or URL not set.', 'error');
         setConversations([]);
         return;
       }
 
       try {
-        const data = await fetchConversationsApi(USER_ID, DIFY_API_URL, DIFY_API_KEY);
+        const data = await fetchConversationsApi(USER_ID, apiUrl, apiKey);
         setConversations(data.data || []);
         addLog(`[useConversations] Fetched ${data.data?.length || 0} conversations.`, 'info');
       } catch (error) {
@@ -70,12 +67,12 @@ export const useConversations = (mockMode, addLog) => {
 
   const handleConversationCreated = useCallback((newId, newTitle) => {
     addLog(`[useConversations] New conversation created: ${newId}`, 'info');
-    const newConv = { 
-      id: newId, 
+    const newConv = {
+      id: newId,
       name: newTitle,
-      created_at: Math.floor(Date.now() / 1000) 
+      created_at: Math.floor(Date.now() / 1000)
     };
-    
+
     setConversations((prev) => {
       if (prev.some(c => c.id === newId)) return prev;
       return [newConv, ...prev];
@@ -95,7 +92,7 @@ export const useConversations = (mockMode, addLog) => {
     }
 
     try {
-      await deleteConversationApi(targetId, USER_ID, DIFY_API_URL, DIFY_API_KEY);
+      await deleteConversationApi(targetId, USER_ID, apiUrl, apiKey);
       setConversations((prev) => prev.filter((c) => c.id !== targetId));
       setPinnedIds(prev => prev.filter(id => id !== targetId));
 
@@ -114,7 +111,7 @@ export const useConversations = (mockMode, addLog) => {
     addLog(`[useConversations] Renaming conversation: ${targetId} -> ${newName}`, 'info');
 
     if (mockMode === 'FE') {
-      setConversations(prev => prev.map(c => 
+      setConversations(prev => prev.map(c =>
         c.id === targetId ? { ...c, name: newName } : c
       ));
       addLog(`[useConversations] Renamed (Mock): ${newName}`, 'success');
@@ -122,8 +119,8 @@ export const useConversations = (mockMode, addLog) => {
     }
 
     try {
-      await renameConversationApi(targetId, newName, USER_ID, DIFY_API_URL, DIFY_API_KEY);
-      setConversations(prev => prev.map(c => 
+      await renameConversationApi(targetId, newName, USER_ID, apiUrl, apiKey);
+      setConversations(prev => prev.map(c =>
         c.id === targetId ? { ...c, name: newName } : c
       ));
       addLog(`[useConversations] Successfully renamed.`, 'success');
@@ -136,10 +133,10 @@ export const useConversations = (mockMode, addLog) => {
   const handlePinConversation = useCallback((targetId) => {
     setPinnedIds(prev => {
       const isPinned = prev.includes(targetId);
-      const newPinned = isPinned 
+      const newPinned = isPinned
         ? prev.filter(id => id !== targetId)
         : [...prev, targetId];
-      
+
       addLog(`[useConversations] Toggled pin for ${targetId}. Pinned: ${!isPinned}`, 'info');
       return newPinned;
     });

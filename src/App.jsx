@@ -1,17 +1,22 @@
-// src/App.jsx
 import { useState } from 'react';
 import './App.css';
 import './index.css';
 
 import Sidebar from './components/Sidebar/Sidebar';
 import ChatArea from './components/Chat/ChatArea';
+import ApiConfigModal from './components/Shared/ApiConfigModal';
 
 import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';
 import { useChat } from './hooks/useChat';
+import { useApiConfig } from './hooks/useApiConfig';
 
 function App() {
   const [mockMode, setMockMode] = useState('FE');
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+
+  // API Config Hook
+  const { apiKey, apiUrl, saveConfig } = useApiConfig();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebar_collapsed');
@@ -38,7 +43,7 @@ function App() {
     handleRenameConversation,
     handlePinConversation,
     handleConversationUpdated,
-  } = useConversations(mockMode, addLog);
+  } = useConversations(mockMode, addLog, apiKey, apiUrl);
 
   const {
     messages,
@@ -56,7 +61,9 @@ function App() {
     conversationId,
     addLog,
     handleConversationCreated,
-    handleConversationUpdated
+    handleConversationUpdated,
+    apiKey,
+    apiUrl
   );
 
   const handleMockModeChange = (newMode) => {
@@ -72,6 +79,13 @@ function App() {
 
   return (
     <div className="app" style={appStyle}>
+      <ApiConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        currentApiKey={apiKey}
+        currentApiUrl={apiUrl}
+        onSave={saveConfig}
+      />
       <Sidebar
         conversationId={conversationId}
         setConversationId={setConversationId}
@@ -88,7 +102,7 @@ function App() {
         setMessages={setMessages}
         isGenerating={isGenerating}
         isHistoryLoading={isHistoryLoading}
-        
+
         mockMode={mockMode}
         setMockMode={handleMockModeChange}
         conversationId={conversationId}
@@ -96,14 +110,16 @@ function App() {
         onConversationCreated={handleConversationCreated}
         handleCopyLogs={handleCopyLogs}
         copyButtonText={copyButtonText}
-        
+
         activeContextFiles={activeContextFiles} // ★変更: 複数形Props
         setActiveContextFiles={setActiveContextFiles} // ★変更: 複数形Props
-        
+
         onSendMessage={handleSendMessage}
         searchSettings={searchSettings}
         setSearchSettings={setSearchSettings}
         isSidebarCollapsed={isSidebarCollapsed}
+
+        onOpenConfig={() => setIsConfigModalOpen(true)}
       />
     </div>
   );
