@@ -28,7 +28,7 @@ const ContextControlIcon = ({ settings }) => {
 };
 
 const LockIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </svg>
@@ -37,8 +37,8 @@ const LockIcon = () => (
 const DEFAULT_SETTINGS = { ragEnabled: true, webMode: 'auto', domainFilters: [] };
 
 const ChatInput = ({
-  isLoading,         // 汎用的なローディング（入力無効化用）
-  isHistoryLoading,  // ★ 追加: 履歴読み込み中かどうか
+  isLoading,
+  isHistoryLoading,
   onSendMessage,
   isCentered,
   activeContextFile,
@@ -96,13 +96,9 @@ const ChatInput = ({
     }
   };
 
-  const handleClearContext = () => {
-    setActiveContextFile(null);
-  };
+  // ★ 削除: handleClearContext は不要になったため削除
 
-  // プレースホルダーの動的生成
   const getPlaceholder = () => {
-    // ★ 変更: ステータスに応じたメッセージ
     if (isHistoryLoading) return "履歴を読み込んでいます...";
     if (isLoading) return "AIが思考中です...";
 
@@ -120,9 +116,12 @@ const ChatInput = ({
     <div className={isCentered ? "chat-input-container-centered" : "chat-input-container"}>
       <div className={`chat-input-form ${activeContextFile ? 'has-context' : ''}`}>
 
-        {/* Sticky Context File */}
+        {/* Sticky Context File (ReadOnly Mode) */}
         {activeContextFile && (
-          <div className="context-file-sticky">
+          <div 
+            className="context-file-sticky locked" 
+            title="このファイルはこのチャットの前提情報として固定されています。変更するには新しいチャットを開始してください。"
+          >
             <div className="context-file-icon-wrapper">
               <FileIcon filename={activeContextFile.name} />
             </div>
@@ -131,24 +130,14 @@ const ChatInput = ({
                 {activeContextFile.name}
               </span>
               <span className="context-file-status">
-                <LockIcon /> 会話のコンテキストとして保持中
+                <LockIcon /> このチャットの参照ファイル
               </span>
             </div>
-            <button
-              onClick={handleClearContext}
-              className="context-file-close"
-              title="コンテキストを解除"
-              aria-label="コンテキストを解除"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
+            {/* ★ 削除: 削除ボタン (context-file-close) を撤廃 */}
           </div>
         )}
 
-        {/* Temporary Attachment */}
+        {/* Temporary Attachment (New Upload) */}
         {file && (
           <div className="file-preview-integrated">
             <FileIcon filename={file.name} className="w-6 h-6" />
@@ -161,11 +150,14 @@ const ChatInput = ({
 
         {/* Input Row */}
         <div className="chat-input-row relative" ref={searchOptionsRef}>
+          {/* ★ 変更なし: activeContextFileがある場合は disabled になるロジックを維持 
+             これにより「追加」も「削除」もできない状態（＝固定）になります。
+          */}
           <button
             className="chat-input-attach-btn"
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading || !!activeContextFile}
-            title="ファイルを添付"
+            title={activeContextFile ? "このチャットではファイルを変更できません" : "ファイルを添付"}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
@@ -179,7 +171,6 @@ const ChatInput = ({
             accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
           />
 
-          {/* Context Control Trigger */}
           <button
             className={`chat-input-attach-btn ml-1 ${showSearchOptions ? 'bg-gray-100' : ''}`}
             onClick={() => setShowSearchOptions(!showSearchOptions)}

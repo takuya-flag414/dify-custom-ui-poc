@@ -323,28 +323,39 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background-color: var(--color-primary-bg);
-  border: 1px solid var(--color-primary-bg-hover);
+  /* ★変更: 青背景から、落ち着いたグレー背景に変更 */
+  background-color: #F9FAFB; /* gray-50 */
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-2) var(--space-3);
   margin: var(--space-1) var(--space-1) var(--space-2) var(--space-1);
   animation: contextFadeIn 0.2s ease-out;
   position: relative;
   overflow: hidden;
+  /* ★追加: インタラクティブでないことを示す */
+  cursor: default;
+  user-select: none;
 }
 
-/* アイコンラッパー: 視認性を高める背景 */
+/* ★追加: ロックされた状態のスタイル */
+.context-file-sticky.locked {
+  background-color: #F3F4F6; /* gray-100 */
+  border-color: #E5E7EB;
+}
+
+/* アイコンラッパー: 背景色を調整 */
 .context-file-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  background-color: rgba(255, 255, 255, 0.7);
+  /* ★変更: 白背景で少し浮かせる */
+  background-color: #FFFFFF;
   border-radius: var(--radius-md);
-  color: var(--color-primary);
+  color: var(--color-primary); /* アイコンの色は青のままでOK */
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--color-border);
 }
 
 /* FileIconコンポーネント内のSVGサイズ制御 */
@@ -367,7 +378,8 @@
 .context-file-name {
   font-size: var(--text-sm);
   font-weight: var(--font-bold);
-  color: var(--color-primary-active);
+  /* ★変更: テキスト色を少し落ち着かせる */
+  color: var(--color-text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -376,7 +388,8 @@
 
 .context-file-status {
   font-size: 11px;
-  color: var(--color-primary);
+  /* ★変更: ステータス色をグレー（説明的）に */
+  color: var(--color-text-muted);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -390,36 +403,7 @@
   height: 10px;
 }
 
-/* 削除ボタン */
-.context-file-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: none;
-  background: transparent;
-  color: var(--color-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  padding: 0;
-  margin-left: var(--space-1);
-}
 
-.context-file-close svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.5;
-}
-
-.context-file-close:hover {
-  background-color: #FFFFFF;
-  color: var(--color-error);
-  box-shadow: var(--shadow-md);
-  transform: scale(1.08);
-}
 
 @keyframes contextFadeIn {
   from {
