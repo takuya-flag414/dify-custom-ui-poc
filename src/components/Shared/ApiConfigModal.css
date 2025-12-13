@@ -1,0 +1,141 @@
+/* src/components/Shared/ApiConfigModal.css */
+.api-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    /* Apple-like glass effect */
+    animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.api-modal-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    /* Slight transparency */
+    border-radius: var(--radius-2xl);
+    /* 16px or 24px as per modal spec */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    /* Soft, deep shadow */
+    width: 100%;
+    max-width: 32rem;
+    padding: var(--space-8);
+    margin: 0 var(--space-4);
+    transform: scale(1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    /* Inner light border */
+    transition: all 0.2s;
+}
+
+.api-modal-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    margin-bottom: var(--space-6);
+    letter-spacing: -0.02em;
+    /* Tighter tracking for headings */
+}
+
+.api-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.api-modal-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.api-modal-label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text-sub);
+    margin-bottom: var(--space-2);
+}
+
+.api-modal-input {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+    color: var(--color-text-main);
+    outline: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* Subtle inset shadow hint */
+}
+
+.api-modal-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    /* Soft accessible focus ring */
+}
+
+.api-modal-input::placeholder {
+    color: #9CA3AF;
+}
+
+.api-modal-actions {
+    margin-top: var(--space-8);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    /* Slightly tighter gap */
+}
+
+.api-modal-btn-cancel {
+    padding: 10px 20px;
+    border-radius: var(--radius-xl);
+    background-color: #FFFFFF;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-sub);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+}
+
+.api-modal-btn-cancel:hover {
+    background-color: #F9FAFB;
+    border-color: #D1D5DB;
+    color: var(--color-text-main);
+}
+
+.api-modal-btn-save {
+    padding: 10px 24px;
+    border-radius: var(--radius-xl);
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    font-weight: var(--font-medium);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.api-modal-btn-save:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
