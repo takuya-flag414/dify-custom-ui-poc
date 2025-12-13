@@ -62,9 +62,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
       addLog(`[useChat] Conversation changed to: ${conversationId}`, 'info');
 
+      // 既存セッションファイルのクリア
       setSessionFiles([]);
 
-      if (conversationId === null) {
+      if (!conversationId) {
         setMessages([]);
         setIsHistoryLoading(false);
         return;
@@ -75,6 +76,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
       try {
         if (mockMode === 'FE') {
+          // --- FE Mock Mode Logic ---
           await new Promise(r => setTimeout(r, 800));
 
           let loadedMessages = [];
@@ -110,11 +112,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           }
 
         } else {
-          // Real API Logic
+          // --- Real API Logic (ここが修正の主眼) ---
           if (typeof conversationId === 'string' && conversationId.startsWith('mock_')) {
             addLog(`[useChat] Skipping API call for mock ID in Real mode: ${conversationId}`, 'warn');
           } else {
             const historyData = await fetchMessagesApi(conversationId, USER_ID, apiUrl, apiKey);
+            // Dify APIは新しい順で返すため、古い順（時系列）にソート
             const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
             const newMessages = [];
@@ -124,14 +127,43 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
             for (const item of chronologicalMessages) {
               const timestamp = item.created_at ? new Date(item.created_at * 1000).toISOString() : new Date().toISOString();
 
+              // User Message Processing
               if (item.query) {
+                // message_files からファイル情報を復元
                 const msgFiles = item.message_files ? item.message_files.map(f => {
+                  // ★修正: ファイル名取得ロジックの強化
+                  let fileName = 'Attached File';
+
+                  if (f.name) {
+                    fileName = f.name;
+                  } else if (f.filename) { // 一部のAPIバージョン対応
+                    fileName = f.filename;
+                  } else if (f.url) {
+                    try {
+                      // URLからファイル名を抽出
+                      const decodedUrl = decodeURIComponent(f.url);
+                      const urlFileName = decodedUrl.split('/').pop().split('?')[0];
+
+                      // Dify特有の隠蔽されたファイル名を検知して置換
+                      if (urlFileName === 'file-preview' || urlFileName.includes('image_preview')) {
+                        // 拡張子が推定できれば付ける、できなければ汎用名
+                        const ext = f.mime_type ? `.${f.mime_type.split('/')[1]}` : '';
+                        fileName = `添付ファイル${ext}`;
+                      } else {
+                        fileName = urlFileName;
+                      }
+                    } catch (e) {
+                      fileName = '添付ファイル';
+                    }
+                  }
+
                   const fileData = {
                     id: f.id,
-                    name: f.url ? decodeURIComponent(f.url.split('/').pop().split('?')[0]) : 'Attached File',
-                    type: f.type
+                    name: fileName,
+                    type: f.type || 'document'
                   };
 
+                  // sessionFiles復元用にリストアップ（重複除外）
                   if (f.id && !seenFileIds.has(f.id)) {
                     seenFileIds.add(f.id);
                     restoredFiles.push(fileData);
@@ -148,14 +180,18 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 });
               }
 
+              // AI Message Processing
               if (item.answer) {
                 let aiText = item.answer;
                 let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
                 let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
+
+                // Markdownパース (JSON構造が含まれる場合の対応)
                 const parsed = parseLlmResponse(aiText);
 
                 if (parsed.isParsed) {
                   aiText = parsed.answer;
+                  // Citationsの結合ロジック
                   if (aiCitations.length === 0 && parsed.citations.length > 0) {
                     aiCitations = mapCitationsFromLLM(parsed.citations);
                     if (aiCitations.some(c => c.type === 'web')) traceMode = 'search';
@@ -171,7 +207,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                   text: aiText,
                   rawContent: item.answer,
                   citations: aiCitations,
-                  suggestions: [],
+                  suggestions: [], // 履歴APIにはsuggestionは含まれないため空
                   isStreaming: false,
                   timestamp: timestamp,
                   traceMode: traceMode,
@@ -183,6 +219,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
             setMessages(newMessages);
 
+            // ★重要: 復元したファイルをセッション状態にセット
             if (restoredFiles.length > 0) {
               setSessionFiles(restoredFiles);
               addLog(`[History] Restored ${restoredFiles.length} files from history.`, 'info');
@@ -197,7 +234,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       }
     };
     loadHistory();
-  }, [conversationId, mockMode, addLog]);
+  }, [conversationId, mockMode, addLog, apiKey, apiUrl]);
 
   // --- メッセージ送信処理 ---
   const handleSendMessage = async (text, attachments = []) => {
@@ -223,7 +260,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           uploadedFileIds = uploadedFiles.map(f => f.id);
           displayFiles = uploadedFiles.map(f => ({ name: f.name }));
 
-          // セッションファイルリストを更新（既存 + 新規）
+          // セッションファイルリストを更新（表示用）
           setSessionFiles(prev => [...prev, ...uploadedFiles]);
 
         } catch (e) {
@@ -275,7 +312,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
     let reader;
     try {
       if (mockMode === 'FE') {
-        // --- FE Mock Mode Logic ---
+        // --- FE Mock Mode Logic (省略なし) ---
         const useRag = currentSettings.ragEnabled;
         const useWeb = currentSettings.webMode !== 'off';
         const hasFile = (attachments.length > 0 || sessionFiles.length > 0);
@@ -317,10 +354,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           weekday: 'long', hour: '2-digit', minute: '2-digit'
         });
 
-        // ★Fix: 既存のセッションファイルIDと、今回アップロードしたファイルIDをマージ
-        // setSessionFilesは非同期のため、ここでは直接計算して最新の状態を作る
-        const existingFileIds = sessionFiles.map(f => f.id);
-        const allActiveFileIds = Array.from(new Set([...existingFileIds, ...uploadedFileIds]));
+        // ★修正: 以前のファイルID (existingFileIds) は送信しない
+        // Difyワークフロー側で変数を保持させるため、APIには「今回の新規ファイル」だけ送ればOK
 
         const requestBody = {
           inputs: {
@@ -335,8 +370,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           user: USER_ID,
           conversation_id: conversationId || '',
           response_mode: 'streaming',
-          // ★Fix: 結合された全てのファイルIDを送信
-          files: allActiveFileIds.map(id => ({
+          // ★修正: ここを uploadedFileIds のみに戻す
+          files: uploadedFileIds.map(id => ({
             type: 'document',
             transfer_method: 'local_file',
             upload_file_id: id
@@ -347,13 +382,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
       }
 
-      // --- Stream Handling ---
+      // --- Stream Handling (変更なし) ---
       let contentBuffer = '';
       let detectedTraceMode = 'knowledge';
       let isConversationIdSynced = false;
       let capturedOptimizedQuery = null;
 
-      // 思考プロセス表示用：今回添付があればそれを、なければ既存の最後のファイル名を表示
       const currentDisplayFileName = attachments.length > 0
         ? attachments[0].name
         : (sessionFiles.length > 0 ? sessionFiles[sessionFiles.length - 1].name : null);
@@ -377,6 +411,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               }
             }
 
+            // ... (Node Event Handling: node_started, node_finished などは変更なし) ...
+
             if (data.event === 'node_started') {
               const nodeType = data.data?.node_type;
               const title = data.data?.title;
@@ -387,6 +423,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               const isAssigner = nodeType === 'assigner' || (title && (title.includes('変数') || title.includes('Variable') || title.includes('Set Opt')));
 
               if (isSignificantNode && !isAssigner) {
+                // ... (省略: 前回のコードと同じ)
                 let displayTitle = title;
                 let iconType = 'default';
                 if (nodeType === 'document-extractor') {
@@ -394,28 +431,23 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                   displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
                   detectedTraceMode = 'document';
                   iconType = 'document';
-                }
-                else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
+                } else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
                   displayTitle = '質問の意図を解析中...';
                   iconType = 'router';
-                }
-                else if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
+                } else if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
                   displayTitle = '質問の要点を整理中...';
                   iconType = 'reasoning';
-                }
-                else if (isWebSearchNode) {
+                } else if (isWebSearchNode) {
                   const query = inputs.query || capturedOptimizedQuery || text;
                   displayTitle = `Web検索: "${query}"`;
                   detectedTraceMode = 'search';
                   iconType = 'search';
-                }
-                else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
+                } else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
                   const query = inputs.query || capturedOptimizedQuery;
                   displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
                   detectedTraceMode = 'knowledge';
                   iconType = 'retrieval';
-                }
-                else if (nodeType === 'llm') {
+                } else if (nodeType === 'llm') {
                   if (!title.includes('Intent') && !title.includes('Classifier') && !title.includes('Rewriter')) {
                     displayTitle = '情報を整理して回答を生成中...';
                     iconType = 'writing';
@@ -462,6 +494,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 } : m));
               }
             }
+
             else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
@@ -486,7 +519,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 } : m));
               }
               if (data.message_id) {
-                // message_id が確定したタイミングでサジェストを取得
                 fetchSuggestions(data.message_id, aiMessageId);
               }
             }
