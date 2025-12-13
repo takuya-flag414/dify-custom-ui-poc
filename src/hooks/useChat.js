@@ -209,7 +209,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       onConversationUpdated(conversationId);
     }
 
-    // 2. ファイルアップロード
+    // 1. ファイルアップロード処理
     if (mockMode === 'OFF') {
       if (attachments.length > 0) {
         setIsGenerating(true);
@@ -223,6 +223,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           uploadedFileIds = uploadedFiles.map(f => f.id);
           displayFiles = uploadedFiles.map(f => ({ name: f.name }));
 
+          // セッションファイルリストを更新（既存 + 新規）
           setSessionFiles(prev => [...prev, ...uploadedFiles]);
 
         } catch (e) {
@@ -232,6 +233,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         }
       }
     } else {
+      // Mock Mode
       if (attachments.length > 0) {
         displayFiles = attachments.map(f => ({ name: f.name }));
         const mockFiles = attachments.map((f, i) => ({
@@ -243,6 +245,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       }
     }
 
+    // 2. ユーザーメッセージをUIに追加
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       role: 'user',
@@ -253,6 +256,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
     setMessages(prev => [...prev, userMessage]);
     setIsGenerating(true);
 
+    // 3. AIメッセージのプレースホルダー生成
     const aiMessageId = `msg_${Date.now()}_ai`;
     setMessages(prev => [...prev, {
       id: aiMessageId,
@@ -271,6 +275,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
     let reader;
     try {
       if (mockMode === 'FE') {
+        // --- FE Mock Mode Logic ---
         const useRag = currentSettings.ragEnabled;
         const useWeb = currentSettings.webMode !== 'off';
         const hasFile = (attachments.length > 0 || sessionFiles.length > 0);
@@ -303,6 +308,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         reader = stream.pipeThrough(new TextDecoderStream()).getReader();
 
       } else {
+        // --- Real API / BE Mock Logic ---
         const domainFilterString = currentSettings.domainFilters.length > 0 ? currentSettings.domainFilters.join(', ') : '';
         const searchModeValue = currentSettings.webMode;
         const now = new Date();
@@ -310,6 +316,11 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           year: 'numeric', month: 'long', day: 'numeric',
           weekday: 'long', hour: '2-digit', minute: '2-digit'
         });
+
+        // ★Fix: 既存のセッションファイルIDと、今回アップロードしたファイルIDをマージ
+        // setSessionFilesは非同期のため、ここでは直接計算して最新の状態を作る
+        const existingFileIds = sessionFiles.map(f => f.id);
+        const allActiveFileIds = Array.from(new Set([...existingFileIds, ...uploadedFileIds]));
 
         const requestBody = {
           inputs: {
@@ -324,7 +335,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           user: USER_ID,
           conversation_id: conversationId || '',
           response_mode: 'streaming',
-          files: uploadedFileIds.map(id => ({
+          // ★Fix: 結合された全てのファイルIDを送信
+          files: allActiveFileIds.map(id => ({
             type: 'document',
             transfer_method: 'local_file',
             upload_file_id: id
@@ -335,11 +347,16 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
       }
 
+      // --- Stream Handling ---
       let contentBuffer = '';
       let detectedTraceMode = 'knowledge';
       let isConversationIdSynced = false;
       let capturedOptimizedQuery = null;
-      const currentDisplayFileName = attachments.length > 0 ? attachments[0].name : (sessionFiles.length > 0 ? sessionFiles[sessionFiles.length - 1].name : null);
+
+      // 思考プロセス表示用：今回添付があればそれを、なければ既存の最後のファイル名を表示
+      const currentDisplayFileName = attachments.length > 0
+        ? attachments[0].name
+        : (sessionFiles.length > 0 ? sessionFiles[sessionFiles.length - 1].name : null);
 
       while (true) {
         const { value, done } = await reader.read();
@@ -469,6 +486,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 } : m));
               }
               if (data.message_id) {
+                // message_id が確定したタイミングでサジェストを取得
                 fetchSuggestions(data.message_id, aiMessageId);
               }
             }
@@ -525,12 +543,17 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, suggestions: mockData } : m));
         return;
       }
-      const res = await fetchSuggestionsApi(msgId, USER_ID, DIFY_API_URL, DIFY_API_KEY);
+
+      // ★Fix: DIFY_API_URL/KEY ではなく、スコープ内の変数(apiUrl, apiKey)を使用
+      const res = await fetchSuggestionsApi(msgId, USER_ID, apiUrl, apiKey);
+
       if (res.result === 'success') {
         setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, suggestions: res.data } : m));
       }
     } catch (e) {
-      // ignore
+      // ★Fix: エラーを握りつぶさずログに出力（デバッグ用）
+      addLog(`[Suggestions Error] ${e.message}`, 'error');
+      console.error('[Suggestions Error]', e);
     }
   };
 
