@@ -48,13 +48,17 @@
 }
 
 .avatar-ai {
-  background-color: #EFF6FF; /* blue-50 */
-  color: #3B82F6; /* blue-500 */
+  background-color: #EFF6FF;
+  /* blue-50 */
+  color: #3B82F6;
+  /* blue-500 */
 }
 
 .avatar-user {
-  background-color: #F3F4F6; /* gray-100 */
-  color: #4B5563; /* gray-600 */
+  background-color: #F3F4F6;
+  /* gray-100 */
+  color: #4B5563;
+  /* gray-600 */
   font-size: 12px;
 }
 
@@ -70,13 +74,15 @@
 }
 
 .message-content-user {
-  align-items: flex-end; /* ユーザーコンテンツは右寄せ */
+  align-items: flex-end;
+  /* ユーザーコンテンツは右寄せ */
 }
 
 /* バブルとボタンを横並びにする行ラッパー */
 .message-bubble-row {
   display: flex;
-  align-items: flex-end; /* 下揃えでボタンを表示 */
+  align-items: flex-end;
+  /* 下揃えでボタンを表示 */
   gap: 8px;
   width: 100%;
 }
@@ -93,15 +99,26 @@
   font-size: 15px;
   line-height: 1.6;
   position: relative;
+
+  /* ★変更: 折り返し設定を強化 */
   word-break: break-word;
+  /* 既存 */
+  overflow-wrap: break-word;
+  /* 追加: 長い単語も強制的に折り返す標準プロパティ */
+
   max-width: 100%;
+
+  /* ★追加: Flexアイテムとしての縮小を許可 */
+  min-width: 0;
 }
 
 /* AIのバブル */
 .ai-bubble {
   background-color: #FFFFFF;
-  color: #111827; /* gray-900 */
-  border: 1px solid #E5E7EB; /* gray-200 */
+  color: #111827;
+  /* gray-900 */
+  border: 1px solid #E5E7EB;
+  /* gray-200 */
   border-radius: 12px;
   border-top-left-radius: 4px;
   padding: 24px;
@@ -111,7 +128,8 @@
 
 /* ユーザーのバブル */
 .user-bubble {
-  background-color: #3B82F6; /* blue-500 */
+  background-color: #3B82F6;
+  /* blue-500 */
   color: #FFFFFF;
   border-radius: 12px;
   border-top-right-radius: 4px;
@@ -240,8 +258,10 @@
   margin-bottom: 1em;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #374151; /* Dark border */
-  background-color: #1F2937; /* Dark background */
+  border: 1px solid #374151;
+  /* Dark border */
+  background-color: #1F2937;
+  /* Dark background */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -251,13 +271,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 12px;
-  background-color: #374151; /* Slightly lighter than code bg */
+  background-color: #374151;
+  /* Slightly lighter than code bg */
   border-bottom: 1px solid #4B5563;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .code-block-lang {
-  color: #E5E7EB; /* gray-200 */
+  color: #E5E7EB;
+  /* gray-200 */
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -272,7 +294,8 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #9CA3AF; /* gray-400 */
+  color: #9CA3AF;
+  /* gray-400 */
   padding: 4px;
   border-radius: 4px;
   transition: all 0.2s;
@@ -280,12 +303,14 @@
 }
 
 .code-block-copy-btn:hover {
-  color: #F3F4F6; /* gray-100 */
+  color: #F3F4F6;
+  /* gray-100 */
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .code-block-copy-btn.copied {
-  color: #10B981; /* emerald-500 */
+  color: #10B981;
+  /* emerald-500 */
 }
 
 .code-copy-content {
@@ -502,7 +527,8 @@
   font-size: 13px;
   color: #374151;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  max-width: 100%; /* 親要素からはみ出さないように */
+  max-width: 100%;
+  /* 親要素からはみ出さないように */
 }
 
 .user-bubble .file-attachment-chip {
@@ -517,7 +543,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px; /* 長いファイル名を省略 */
+  max-width: 200px;
+  /* 長いファイル名を省略 */
 }
 
 
@@ -628,6 +655,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -636,7 +664,8 @@
 
 /* アニメーション適用クラス */
 .message-animate-enter {
-  opacity: 0; /* 初期状態は非表示 */
+  opacity: 0;
+  /* 初期状態は非表示 */
   animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   will-change: opacity, transform;
 }

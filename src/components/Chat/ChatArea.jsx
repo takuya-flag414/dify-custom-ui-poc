@@ -3,9 +3,8 @@ import React from 'react';
 import '../../App.css';
 import './ChatArea.css';
 
-import MockModeSelect from './MockModeSelect';
 import ChatHistory from './ChatHistory';
-import ChatInput from './ChatInput'; // パス修正の可能性あり（構成によります）
+import ChatInput from './ChatInput';
 import HistorySkeleton from './HistorySkeleton';
 
 const ChatArea = (props) => {
@@ -13,16 +12,14 @@ const ChatArea = (props) => {
     messages,
     isGenerating,
     isHistoryLoading,
-    mockMode,
-    setMockMode,
-    conversationId,
-    handleCopyLogs,
-    copyButtonText,
-    activeContextFiles, // ★変更: 複数形
-    setActiveContextFiles, // ★変更: 複数形
+    // mockMode, setMockMode, handleCopyLogs... などのトップバー用Propsは削除（App側でHeaderに渡すため）
+    activeContextFiles,
+    setActiveContextFiles,
     onSendMessage,
     searchSettings,
-    setSearchSettings
+    setSearchSettings,
+    onOpenConfig,
+    onOpenArtifact
   } = props;
 
   // 初期状態: メッセージ0件 かつ 履歴ロード中でない
@@ -30,25 +27,9 @@ const ChatArea = (props) => {
 
   return (
     <div className="chat-area">
-      <div className="top-bar-container">
-        <div className="mock-mode-controls">
-          <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
-          <button
-            className="api-config-button"
-            onClick={props.onOpenConfig}
-          >
-            API設定
-          </button>
-        </div>
-        <div className="debug-controls">
-          <button className="debug-copy-button-topbar" onClick={() => handleCopyLogs(messages)}>
-            {copyButtonText}
-          </button>
-        </div>
-      </div>
+      {/* ★削除: top-bar-container */}
 
       {isHistoryLoading ? (
-        /* 履歴読み込み中: スケルトン表示 */
         <>
           <HistorySkeleton />
           <div className="bottom-controls-wrapper">
@@ -57,15 +38,14 @@ const ChatArea = (props) => {
               isHistoryLoading={true}
               onSendMessage={() => { }}
               isCentered={false}
-              activeContextFiles={activeContextFiles} // ★変更
-              setActiveContextFiles={setActiveContextFiles} // ★変更
+              activeContextFiles={activeContextFiles}
+              setActiveContextFiles={setActiveContextFiles}
               searchSettings={searchSettings}
               setSearchSettings={setSearchSettings}
             />
           </div>
         </>
       ) : isInitialState ? (
-        /* 初期画面 */
         <div className="initial-view-container">
           <div className="initial-content">
             <div className="initial-header">
@@ -77,30 +57,32 @@ const ChatArea = (props) => {
                 isLoading={isGenerating}
                 onSendMessage={onSendMessage}
                 isCentered={true}
-                activeContextFiles={activeContextFiles} // ★変更
-                setActiveContextFiles={setActiveContextFiles} // ★変更
+                activeContextFiles={activeContextFiles}
+                setActiveContextFiles={setActiveContextFiles}
                 searchSettings={searchSettings}
                 setSearchSettings={setSearchSettings}
+                onOpenConfig={onOpenConfig}
               />
             </div>
           </div>
         </div>
       ) : (
-        /* 通常会話画面 */
         <>
           <ChatHistory
             messages={messages}
-            onSuggestionClick={(q) => onSendMessage(q, [])} // ★変更: ファイル引数は空配列に
+            onSuggestionClick={(q) => onSendMessage(q, [])}
             isLoading={isGenerating}
             onSendMessage={onSendMessage}
+            onOpenConfig={onOpenConfig}
+            onOpenArtifact={onOpenArtifact}
           />
           <div className="bottom-controls-wrapper">
             <ChatInput
               isLoading={isGenerating}
               onSendMessage={onSendMessage}
               isCentered={false}
-              activeContextFiles={activeContextFiles} // ★変更
-              setActiveContextFiles={setActiveContextFiles} // ★変更
+              activeContextFiles={activeContextFiles}
+              setActiveContextFiles={setActiveContextFiles}
               searchSettings={searchSettings}
               setSearchSettings={setSearchSettings}
             />

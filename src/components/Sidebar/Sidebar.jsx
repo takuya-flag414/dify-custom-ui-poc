@@ -157,7 +157,10 @@ const Sidebar = ({
   };
 
   return (
-    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}
+      data-tutorial="sidebar" // ★追加: サイドバー全体をターゲット
+    >
+
       {/* Header */}
       <div className="sidebar-header">
         <div className="sidebar-brand-area">

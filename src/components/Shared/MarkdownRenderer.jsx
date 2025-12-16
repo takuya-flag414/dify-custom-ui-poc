@@ -3,10 +3,12 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SourceIcon } from './FileIcons';
+import ArtifactCard from '../Artifacts/ArtifactCard'; // 追加: アーティファクト用カード
 import '../Message/MessageBlock.css';
 import { useLogger } from '../../hooks/useLogger';
 
 // --- Helper: Inline Citation Renderer ---
+// 文中の [1] などをインタラクティブなバッジに変換する
 const renderWithInlineCitations = (children, citations, messageId) => {
   if (!children) return null;
   const childrenArray = Array.isArray(children) ? children : [children];
@@ -77,6 +79,7 @@ const renderWithInlineCitations = (children, citations, messageId) => {
 };
 
 // --- Helper: Log Wrapper ---
+// レンダリング状況をログ出力するラッパー
 const LoggedElement = ({ as: Component, logTag, content, logFunction, children, ...props }) => {
   useEffect(() => {
     if (logFunction) {
@@ -87,7 +90,8 @@ const LoggedElement = ({ as: Component, logTag, content, logFunction, children, 
   return <Component {...props}>{children}</Component>;
 };
 
-// --- New Component: CodeBlock with Copy Button ---
+// --- Component: CodeBlock with Copy Button ---
+// コードブロックの表示（コピーボタン付き）
 const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -155,7 +159,8 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
   );
 };
 
-const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messageId }) => {
+// --- Main Component: MarkdownRenderer ---
+const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messageId, onOpenArtifact }) => {
   const [displayMode, setDisplayMode] = useState(isStreaming ? 'streaming' : 'done');
   const [typedContent, setTypedContent] = useState('');
   const { addLog } = useLogger();
@@ -163,13 +168,16 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
   const prevStreamingRef = useRef(isStreaming);
   const loggedElementsRef = useRef(new Set());
 
+  // --- 1. Typing Effect Logic (タイピング演出制御) ---
   useEffect(() => {
     if (isStreaming) {
+      // ストリーミング中は常に「受信中」モード
       setDisplayMode('streaming');
       setTypedContent('');
       loggedElementsRef.current.clear();
     }
     else if (prevStreamingRef.current === true && isStreaming === false) {
+      // ストリーミング終了直後 -> 高速タイピング演出へ移行
       setDisplayMode('typing');
       let currentIndex = 0;
       const fullText = content || '';
@@ -195,12 +203,68 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
       return () => clearInterval(intervalId);
     }
     else if (displayMode === 'streaming' && !isStreaming) {
+      // その他のケースで完了した場合
       setDisplayMode('done');
     }
 
     prevStreamingRef.current = isStreaming;
   }, [isStreaming, content]);
 
+  // --- 2. Artifact Parsing Logic (成果物タグの解析) ---
+  const parseArtifacts = useMemo(() => {
+    // タイピング中は途中経過テキスト、完了後は全文を使用
+    const textToRender = displayMode === 'typing' ? typedContent : content || '';
+
+    // Regex: :::artifact{...} ... :::
+    // capture 1: attributes string (e.g. type="code" title="Foo")
+    // capture 2: content body
+    const artifactRegex = /:::artifact\{([^}]+)\}\n([\s\S]*?)\n:::/g;
+
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    // テキスト全体を走査して分割
+    while ((match = artifactRegex.exec(textToRender)) !== null) {
+      // A. マッチ箇所の前の通常テキスト
+      if (match.index > lastIndex) {
+        parts.push({
+          type: 'text',
+          content: textToRender.substring(lastIndex, match.index)
+        });
+      }
+
+      // B. Artifact属性のパース
+      const attrStr = match[1];
+      const attributes = {};
+      const attrMatcher = /(\w+)="([^"]+)"/g;
+      let attrMatch;
+      while ((attrMatch = attrMatcher.exec(attrStr)) !== null) {
+        attributes[attrMatch[1]] = attrMatch[2];
+      }
+
+      // C. Artifactパーツとして追加
+      parts.push({
+        type: 'artifact',
+        attributes: attributes,
+        content: match[2] // Artifactの中身（コード等）
+      });
+
+      lastIndex = artifactRegex.lastIndex;
+    }
+
+    // D. 残りのテキスト
+    if (lastIndex < textToRender.length) {
+      parts.push({
+        type: 'text',
+        content: textToRender.substring(lastIndex)
+      });
+    }
+
+    return parts;
+  }, [content, typedContent, displayMode]);
+
+  // --- 3. Logging Logic & Helpers ---
   const logMarkdownRender = useCallback((tag, contentSnippet) => {
     if (displayMode !== 'done') return;
     const logKey = `${tag}-${contentSnippet?.substring(0, 20)}`;
@@ -208,7 +272,7 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
 
     loggedElementsRef.current.add(logKey);
     const message = `Rendered [${tag}]: ${contentSnippet?.substring(0, 50)}${contentSnippet?.length > 50 ? '...' : ''}`;
-    console.log(`%c[Markdown] ${message}`, 'color: #4caf50; font-weight: bold;');
+    // console.log(`%c[Markdown] ${message}`, 'color: #4caf50; font-weight: bold;');
     addLog(message, 'info');
   }, [displayMode, addLog]);
 
@@ -235,120 +299,141 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
     });
   }, [displayMode, addLog]);
 
-  const processedContent = useMemo(() => {
-    if (!content) return '';
-    return content.replace(/([％！？。、])\*\*(?![ \t\r\n\v\f　、。，．！？])/g, '$1**@@FIX@@');
-  }, [content]);
-
   const cleanChildren = useCallback((children) => {
     return React.Children.map(children, child => {
       if (typeof child === 'string') {
+        // 日本語特有のMarkdown崩れ防止用ハックの除去
         return child.replace(/@@FIX@@/g, '');
       }
       return child;
     });
   }, []);
 
+  // --- 4. Render Phase ---
+
+  // ストリーミング中のカーソル表示のみの状態
   if (displayMode === 'streaming') {
     return <div className="markdown-renderer blinking-cursor"></div>;
   }
 
-  if (displayMode === 'typing') {
-    return (
-      <div className="markdown-renderer">
-        <span style={{ whiteSpace: 'pre-wrap' }}>{typedContent}</span>
-        <span className="blinking-cursor"></span>
-      </div>
-    );
-  }
-
   return (
     <div className="markdown-renderer">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          a: ({ node, children, ...props }) => (
-            <LoggedElement as="a" logTag="a" content={String(children)} logFunction={logMarkdownRender} {...props} target="_blank" rel="noopener noreferrer">
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          h1: ({ node, children, ...props }) => (
-            <LoggedElement as="h1" logTag="h1" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          h2: ({ node, children, ...props }) => (
-            <LoggedElement as="h2" logTag="h2" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          h3: ({ node, children, ...props }) => (
-            <LoggedElement as="h3" logTag="h3" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          h4: ({ node, children, ...props }) => (
-            <LoggedElement as="h4" logTag="h4" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          h5: ({ node, children, ...props }) => (
-            <LoggedElement as="h5" logTag="h5" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          h6: ({ node, children, ...props }) => (
-            <LoggedElement as="h6" logTag="h6" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          strong: ({ node, children, ...props }) => (
-            <LoggedElement as="strong" logTag="strong" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          em: ({ node, children, ...props }) => (
-            <LoggedElement as="em" logTag="em" content={String(children)} logFunction={logMarkdownRender} {...props}>
-              {cleanChildren(children)}
-            </LoggedElement>
-          ),
-          // ★ 更新: CodeBlockコンポーネントを使用
-          code: ({ node, inline, className, children, ...props }) => (
-            <CodeBlock
-              inline={inline}
-              className={className}
-              logFunction={logMarkdownRender}
-              {...props}
-            >
-              {cleanChildren(children)}
-            </CodeBlock>
-          ),
-          p: ({ node, children, ...props }) => {
-            useEffect(() => {
-              React.Children.forEach(children, child => {
-                if (typeof child === 'string') {
-                  checkUnrenderedMarkdown(child);
+      {parseArtifacts.map((part, index) => {
+        // --- Artifact Card (成果物) ---
+        if (part.type === 'artifact') {
+          return (
+            <ArtifactCard
+              key={`art-${index}`}
+              title={part.attributes.title || 'Untitled'}
+              type={part.attributes.type || 'code'}
+              content={part.content}
+              onClick={(artifact) => {
+                if (onOpenArtifact) {
+                  onOpenArtifact(artifact);
+                } else {
+                  console.warn('onOpenArtifact prop is missing in MarkdownRenderer');
                 }
-              });
-            }, [children]);
+              }}
+            />
+          );
+        } else {
+          // --- Normal Markdown Text ---
+          // 事前処理: 日本語Markdownの記号干渉を防ぐためのハック
+          const processedContent = part.content.replace(/([％！？。、])\*\*(?![ \t\r\n\v\f　、。，．！？])/g, '$1**@@FIX@@');
 
-            const cleaned = cleanChildren(children);
-            const processed = renderWithInlineCitations(cleaned, citations, messageId);
-            return <p {...props}>{processed}</p>;
-          },
-          li: ({ node, children, ...props }) => {
-            const cleaned = cleanChildren(children);
-            const processed = renderWithInlineCitations(cleaned, citations, messageId);
-            return (
-              <LoggedElement as="li" logTag="li" content={String(children)} logFunction={logMarkdownRender} {...props}>
-                {processed}
-              </LoggedElement>
-            );
-          }
-        }}
-      >
-        {processedContent}
-      </ReactMarkdown>
+          return (
+            <ReactMarkdown
+              key={`md-${index}`}
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a: ({ node, children, ...props }) => (
+                  <LoggedElement as="a" logTag="a" content={String(children)} logFunction={logMarkdownRender} {...props} target="_blank" rel="noopener noreferrer">
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                h1: ({ node, children, ...props }) => (
+                  <LoggedElement as="h1" logTag="h1" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                h2: ({ node, children, ...props }) => (
+                  <LoggedElement as="h2" logTag="h2" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                h3: ({ node, children, ...props }) => (
+                  <LoggedElement as="h3" logTag="h3" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                h4: ({ node, children, ...props }) => (
+                  <LoggedElement as="h4" logTag="h4" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                h5: ({ node, children, ...props }) => (
+                  <LoggedElement as="h5" logTag="h5" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                h6: ({ node, children, ...props }) => (
+                  <LoggedElement as="h6" logTag="h6" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                strong: ({ node, children, ...props }) => (
+                  <LoggedElement as="strong" logTag="strong" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                em: ({ node, children, ...props }) => (
+                  <LoggedElement as="em" logTag="em" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {cleanChildren(children)}
+                  </LoggedElement>
+                ),
+                // Code Block (with Copy Button)
+                code: ({ node, inline, className, children, ...props }) => (
+                  <CodeBlock
+                    inline={inline}
+                    className={className}
+                    logFunction={logMarkdownRender}
+                    {...props}
+                  >
+                    {cleanChildren(children)}
+                  </CodeBlock>
+                ),
+                // Paragraph (with Citations check)
+                p: ({ node, children, ...props }) => {
+                  useEffect(() => {
+                    React.Children.forEach(children, child => {
+                      if (typeof child === 'string') {
+                        checkUnrenderedMarkdown(child);
+                      }
+                    });
+                  }, [children]);
+
+                  const cleaned = cleanChildren(children);
+                  const processed = renderWithInlineCitations(cleaned, citations, messageId);
+                  return <p {...props}>{processed}</p>;
+                },
+                // List Item (with Citations check)
+                li: ({ node, children, ...props }) => {
+                  const cleaned = cleanChildren(children);
+                  const processed = renderWithInlineCitations(cleaned, citations, messageId);
+                  return (
+                    <LoggedElement as="li" logTag="li" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                      {processed}
+                    </LoggedElement>
+                  );
+                }
+              }}
+            >
+              {processedContent}
+            </ReactMarkdown>
+          );
+        }
+      })}
+      {displayMode === 'typing' && <span className="blinking-cursor"></span>}
     </div>
   );
 };

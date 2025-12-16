@@ -1,0 +1,111 @@
+/* src/components/Message/SystemErrorBlock.css */
+
+.system-error-block {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 24px auto;
+    padding: 0 16px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.system-error-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background-color: #FEF2F2;
+    /* red-50 */
+    border: 1px solid #FECACA;
+    /* red-200 */
+    border-radius: 12px;
+    padding: 16px;
+    color: #991B1B;
+    /* red-800 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* アイコンエリア */
+.system-error-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: #DC2626;
+    /* red-600 */
+    margin-top: 2px;
+}
+
+.system-error-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.system-error-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.system-error-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #B91C1C;
+    /* red-700 */
+    margin-bottom: 12px;
+}
+
+/* アクションボタン群 */
+.system-error-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.error-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #FFFFFF;
+    border: 1px solid #FCA5A5;
+    /* red-300 */
+    color: #B91C1C;
+    /* red-700 */
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.error-action-btn:hover {
+    background-color: #FEE2E2;
+    /* red-100 */
+    border-color: #EF4444;
+    /* red-500 */
+    transform: translateY(-1px);
+}
+
+.error-action-btn:active {
+    transform: translateY(0);
+}
+
+.error-action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

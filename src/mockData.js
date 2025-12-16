@@ -12,6 +12,7 @@ export const mockConversations = [
   { id: 'mock_3', name: '📊 Market Analysis (Table)' },
   { id: 'mock_4', name: '🎨 Creative Studio (MD)' },
   { id: 'mock_5', name: '🐛 Error Simulation' },
+  { id: 'mock_6', name: '📦 Artifacts Demo' }, 
 ];
 
 // 会話履歴データ (サイドバーのIDとキーを一致させる)
@@ -111,6 +112,62 @@ export const mockMessages = {
       rawContent: '申し訳ありません。一時的なシステムエラーが発生しました。\nしばらく経ってから再試行してください。',
       citations: [],
       suggestions: ['再試行'],
+      isStreaming: false,
+      traceMode: 'knowledge',
+      thoughtProcess: []
+    }
+  ],
+
+  'mock_6': [
+    {
+      id: 'msg_6_1',
+      role: 'user',
+      text: '新プロジェクト「Alpha」のキックオフ議事録を作成して。Artifactとして表示してほしい。',
+      timestamp: '2025-12-06T15:00:00Z',
+      files: []
+    },
+    {
+      id: 'msg_6_2',
+      role: 'ai',
+      text: `承知いたしました。プロジェクト「Alpha」のキックオフミーティング議事録（ドラフト）を作成しました。
+以下のカードをクリックして、右側のパネルで内容をご確認ください。
+
+:::artifact{type="markdown" title="2025-12-06_Project_Alpha_Kickoff.md"}
+# 議事録: Project Alpha キックオフ
+
+**日時**: 2025年12月6日 10:00 - 11:00  
+**場所**: オンライン (Zoom)  
+**参加者**: 佐藤(PM)、田中(Dev)、鈴木(Design)、高橋(Sales)
+
+---
+
+## 1. プロジェクト概要
+**Project Alpha** は、社内業務の効率化を目指す次世代AIアシスタントの開発プロジェクトです。既存のチャットボットをリプレイスし、RAG（検索拡張生成）とWeb検索を統合したハイブリッドな検索体験を提供します。
+
+## 2. 決定事項
+* **リリース目標**: 2026年3月末日（β版は1月末）
+* **開発体制**: アジャイル（2週間スプリント）
+* **使用技術**: 
+    * Frontend: React + Vite
+    * Backend: Python (FastAPI) + Dify
+    * Infra: AWS
+
+## 3. アクションアイテム
+| タスク | 担当者 | 期限 |
+| :--- | :--- | :--- |
+| 要件定義書の初稿作成 | 佐藤 | 12/10 |
+| Dify環境の構築 | 田中 | 12/13 |
+| UIデザイン案の作成 | 鈴木 | 12/15 |
+
+## 4. 次回予定
+* **日時**: 12月13日(金) 10:00〜
+* **議題**: UIデザインレビュー、環境構築状況の確認
+:::
+
+内容に修正が必要な場合は、チャットで指示してください。`,
+      rawContent: '...', // (省略)
+      citations: [],
+      suggestions: ['アジェンダを追加して', '参加者を追加', 'Markdownをダウンロード'],
       isStreaming: false,
       traceMode: 'knowledge',
       thoughtProcess: []

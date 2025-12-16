@@ -1,0 +1,219 @@
+/* src/components/Layout/Header.css */
+
+.app-header {
+    height: 56px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+    z-index: 20;
+    width: 100%;
+}
+
+.header-left,
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* --- Ghost Button Style --- */
+.header-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+
+    border: 1px solid transparent;
+    /* 枠線のちらつき防止 */
+    background-color: transparent;
+    border-radius: 8px;
+    /* 少し丸みを増やす */
+
+    color: var(--color-text-sub);
+    font-size: 12px;
+    font-weight: 600;
+    /* フォントを少し太く */
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    white-space: nowrap;
+}
+
+.header-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
+    transform: translateY(-1px);
+    /* ホバー時の浮き上がり */
+}
+
+.header-btn:active {
+    background-color: rgba(0, 0, 0, 0.08);
+    transform: translateY(0);
+}
+
+.header-btn svg {
+    color: var(--color-text-muted);
+    transition: color 0.2s;
+}
+
+.header-btn:hover svg {
+    color: var(--color-text-main);
+}
+
+/* ★追加: Copied State (Green Style) */
+.header-btn.copied {
+    background-color: #ECFDF5;
+    /* Green-50 */
+    color: #059669;
+    /* Green-600 */
+    border-color: #A7F3D0;
+    /* Green-200 */
+    pointer-events: none;
+    /* 連打防止 */
+    box-shadow: none;
+    transform: none;
+}
+
+.header-btn.copied svg {
+    color: #059669;
+}
+
+/* Divider */
+.header-divider {
+    width: 1px;
+    height: 20px;
+    background-color: var(--color-border);
+    margin: 0 4px;
+}
+
+/* --- Custom Mock Dropdown (Replaces Native Select) --- */
+/* (以下、前回のドロップダウン用CSSはそのまま維持してください) */
+.mock-mode-wrapper {
+    position: relative;
+}
+
+.mock-trigger-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 12px;
+    background-color: #F3F4F6;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    color: var(--color-text-main);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    white-space: nowrap;
+}
+
+.mock-trigger-btn:hover,
+.mock-trigger-btn.open {
+    background-color: #E5E7EB;
+}
+
+.mock-trigger-btn.open {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    border-color: var(--color-primary);
+}
+
+.mock-trigger-icon {
+    color: var(--color-text-sub);
+}
+
+.mock-trigger-chevron {
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease;
+}
+
+.mock-trigger-btn.open .mock-trigger-chevron {
+    transform: rotate(180deg);
+}
+
+.mock-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06),
+        0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+    z-index: 100;
+    transform-origin: top left;
+    animation: dropdownEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.mock-dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.mock-dropdown-item:hover {
+    background-color: #F3F4F6;
+    color: var(--color-text-main);
+}
+
+.mock-dropdown-item.selected {
+    background-color: #EFF6FF;
+    color: var(--color-primary);
+}
+
+.item-icon {
+    margin-right: 10px;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+}
+
+.mock-dropdown-item:hover .item-icon {
+    color: var(--color-text-main);
+}
+
+.mock-dropdown-item.selected .item-icon {
+    color: var(--color-primary);
+}
+
+.item-label {
+    flex: 1;
+}
+
+.item-check {
+    margin-left: 8px;
+    color: var(--color-primary);
+}

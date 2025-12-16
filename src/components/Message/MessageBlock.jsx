@@ -16,7 +16,7 @@ export const AssistantIcon = () => (
   </svg>
 );
 
-const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
+const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArtifact }) => {
   const {
     role,
     text,
@@ -82,7 +82,7 @@ const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
                 </button>
               )}
 
-              {/* ★変更: 複数ファイル表示に対応 */ }
+              {/* ★変更: 複数ファイル表示に対応 */}
               {!isAi && files && files.length > 0 && (
                 <div className="file-attachments-wrapper">
                   {files.map((file, index) => (
@@ -113,6 +113,7 @@ const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
                     isStreaming={isAi && isStreaming}
                     citations={citations}
                     messageId={uniqueMessageId}
+                    onOpenArtifact={onOpenArtifact}
                   />
                 )
               )}
@@ -137,7 +138,7 @@ const MessageBlock = ({ message, onSuggestionClick, className, style }) => {
 const arePropsEqual = (prev, next) => {
   const p = prev.message;
   const n = next.message;
-  
+
   if (prev.className !== next.className || JSON.stringify(prev.style) !== JSON.stringify(next.style)) {
     return false;
   }
@@ -151,7 +152,7 @@ const arePropsEqual = (prev, next) => {
     && p.suggestions === n.suggestions
     && JSON.stringify(p.thoughtProcess) === JSON.stringify(n.thoughtProcess)
     // ファイル数や内容が変わった場合も再レンダリング
-    && JSON.stringify(p.files) === JSON.stringify(n.files); 
+    && JSON.stringify(p.files) === JSON.stringify(n.files);
 };
 
 export default React.memo(MessageBlock, arePropsEqual);

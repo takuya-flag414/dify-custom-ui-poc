@@ -6,6 +6,7 @@ import { scenarios, scenarioSuggestions } from '../mocks/scenarios';
 import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMapper';
+import { createConfigError } from '../utils/errorHandler';
 
 const USER_ID = 'poc-user-01';
 
@@ -116,6 +117,14 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           if (typeof conversationId === 'string' && conversationId.startsWith('mock_')) {
             addLog(`[useChat] Skipping API call for mock ID in Real mode: ${conversationId}`, 'warn');
           } else {
+
+            // APIキーとURLの存在チェック
+            if (!apiKey || !apiUrl) {
+              setMessages([createConfigError()]); // 即座にエラー表示
+              setIsHistoryLoading(false);
+              return;
+            }
+
             const historyData = await fetchMessagesApi(conversationId, USER_ID, apiUrl, apiKey);
             // Dify APIは新しい順で返すため、古い順（時系列）にソート
             const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
@@ -228,7 +237,14 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         }
       } catch (error) {
         addLog(`[History Error] ${error.message}`, 'error');
-        setMessages([{ id: 'err', role: 'ai', text: '履歴の読み込みに失敗しました。', timestamp: new Date().toISOString() }]);
+        // ★修正: エラー専用オブジェクトを追加
+        setMessages([{ 
+          id: 'err_history_load', 
+          role: 'system', 
+          type: 'error', 
+          rawError: error.message,
+          timestamp: new Date().toISOString() 
+        }]);
       } finally {
         setIsHistoryLoading(false);
       }
@@ -238,6 +254,26 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
   // --- メッセージ送信処理 ---
   const handleSendMessage = async (text, attachments = []) => {
+    // 送信前の設定チェック (FE Modeでない場合)
+    if ((mockMode === 'OFF' || mockMode === 'BE' ) && (!apiKey || !apiUrl)) {
+      // ユーザーメッセージを表示
+      const userMessage = {
+        id: `msg_${Date.now()}_user`,
+        role: 'user',
+        text: text,
+        timestamp: new Date().toISOString(),
+        files: attachments.map(f => ({ name: f.name }))
+      };
+      setMessages(prev => [...prev, userMessage]);
+      
+      // 直後にエラーメッセージを表示して終了
+      setTimeout(() => {
+        setMessages(prev => [...prev, createConfigError()]);
+      }, 200);
+      
+      return; // 処理中断
+    }
+    
     let uploadedFileIds = [];
     let displayFiles = [];
     const currentSettings = searchSettingsRef.current;
@@ -556,12 +592,21 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
     } catch (error) {
       addLog(`[Stream Error] ${error.message}`, 'error');
-      setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-        ...m,
-        text: `エラー: ${error.message}`,
-        isStreaming: false,
-        thoughtProcess: m.thoughtProcess.map(t => ({ ...t, status: 'error' }))
-      } : m));
+      // AIメッセージをエラーメッセージへ置換
+      setMessages(prev => prev.map(m => {
+        if (m.id === aiMessageId) {
+          return {
+            ...m,
+            role: 'system', // AIではなくシステムメッセージとして扱う
+            type: 'error',  // タイプ指定
+            text: '',       // テキストは空に（二重表示防止）
+            rawError: error.message, // 元のエラーメッセージを保持
+            isStreaming: false,
+            thoughtProcess: []
+          };
+        }
+        return m;
+      }));
       setIsGenerating(false);
     }
   };

@@ -1,241 +1,302 @@
 // src/components/Shared/ContextSelector.jsx
-import React, { useState } from 'react';
-// FileIcon等は必要に応じてインポート
+import React, { useState, useMemo } from 'react';
+import './ContextSelector.css';
 
-/**
- * ContextSelector
- * 検索設定（RAG有効化、Web検索モード、ドメインフィルタ）を一元管理するUI
- * CSS: src/index.css に準拠
- */
+// --- Icons (SVG) ---
+const iconProps = {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+};
+
+const CheckIcon = ({ className }) => (
+    <svg className={className} {...iconProps}>
+        <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+);
+
+const ChevronRightIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);
+
+const ChevronLeftIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+);
+
+// 🌐 Web
+const GlobeIcon = () => (
+    <svg {...iconProps}>
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path>
+    </svg>
+);
+
+// 📚 Database
+const DatabaseIcon = () => (
+    <svg {...iconProps}>
+        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+    </svg>
+);
+
+// ✨ Auto
+const SparklesIcon = () => (
+    <svg {...iconProps}>
+        <path d="M12 2L14.4 7.2L20 9.6L14.4 12L12 17.2L9.6 12L4 9.6L9.6 7.2L12 2Z" />
+    </svg>
+);
+
+// 📚+🌐 Layers (Hybrid)
+const LayersIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+    </svg>
+);
+
+// ⚡ Fast
+const ZapIcon = () => (
+    <svg {...iconProps}>
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    </svg>
+);
+
+// --- Mode Definitions ---
+const MODES = [
+    {
+        id: 'fast',
+        label: 'Fast',
+        desc: 'AI知識ベースのみで即答',
+        icon: <ZapIcon />,
+        settings: { ragEnabled: false, webMode: 'off' },
+        colorClass: 'mode-fast'
+    },
+    {
+        id: 'standard',
+        label: 'Standard',
+        desc: '必要に応じてWeb検索をAI判断',
+        icon: <SparklesIcon />,
+        settings: { ragEnabled: false, webMode: 'auto' },
+        colorClass: 'mode-standard'
+    },
+    {
+        id: 'enterprise',
+        label: 'Enterprise',
+        desc: '社内ナレッジのみを参照',
+        icon: <DatabaseIcon />,
+        settings: { ragEnabled: true, webMode: 'off' },
+        colorClass: 'mode-enterprise'
+    },
+    {
+        id: 'deep',
+        label: 'Research',
+        desc: 'Web情報を強制的に検索',
+        icon: <GlobeIcon />,
+        settings: { ragEnabled: false, webMode: 'force' },
+        colorClass: 'mode-deep'
+    },
+    {
+        id: 'hybrid',
+        label: 'Hybrid',
+        desc: '社内とWebを統合して回答',
+        icon: <LayersIcon />,
+        settings: { ragEnabled: true, webMode: 'auto' },
+        colorClass: 'mode-hybrid'
+    }
+];
+
 const ContextSelector = ({ settings, onSettingsChange }) => {
-    // Mode: 'list' | 'wizard' (ドメイン追加ウィザード用)
-    const [uiMode, setUiMode] = useState('list');
-
-    // Wizard States
+    const [view, setView] = useState('main'); // 'main' | 'domains'
     const [urlInput, setUrlInput] = useState('');
-    const [filterType, setFilterType] = useState('allow'); // 'allow' | 'deny'
     const [errorMsg, setErrorMsg] = useState('');
 
-    // Manual Input State
-    const [manualInput, setManualInput] = useState('');
+    const currentModeId = useMemo(() => {
+        const { ragEnabled, webMode } = settings;
+        if (ragEnabled && webMode !== 'off') return 'hybrid';
+        if (ragEnabled && webMode === 'off') return 'enterprise';
+        if (!ragEnabled && webMode === 'force') return 'deep';
+        if (!ragEnabled && webMode === 'auto') return 'standard';
+        return 'fast';
+    }, [settings]);
 
-    // --- Helpers ---
-    const updateSetting = (key, value) => {
-        onSettingsChange({ ...settings, [key]: value });
+    const handleModeSelect = (modeId) => {
+        const targetMode = MODES.find(m => m.id === modeId);
+        if (targetMode) {
+            onSettingsChange({
+                ...settings,
+                ...targetMode.settings
+            });
+        }
     };
 
+    // --- Domain Management ---
     const filters = settings.domainFilters || [];
 
-    // --- List Mode Logic ---
-    const handleManualKeyDown = (e) => {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            addTag(manualInput);
-            setManualInput('');
-        } else if (e.key === 'Backspace' && !manualInput && filters.length > 0) {
-            removeTag(filters.length - 1);
-        }
-    };
-
-    const addTag = (val) => {
-        const trimmed = val.trim();
-        if (!trimmed) return;
-        if (!filters.includes(trimmed)) {
-            updateSetting('domainFilters', [...filters, trimmed]);
-        }
-    };
-
-    const removeTag = (index) => {
-        updateSetting('domainFilters', filters.filter((_, i) => i !== index));
-    };
-
-    // --- Wizard Logic ---
-    const handleUrlAdd = () => {
-        setErrorMsg('');
+    const addFilter = () => {
         if (!urlInput.trim()) return;
-
         try {
             const rawUrl = urlInput.trim();
             const safeUrl = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
             const urlObj = new URL(safeUrl);
-            let hostname = urlObj.hostname;
-            hostname = hostname.replace(/^www\./, '');
+            let hostname = urlObj.hostname.replace(/^www\./, '');
 
-            const finalTag = filterType === 'deny' ? `-${hostname}` : hostname;
-            addTag(finalTag);
-
+            if (!filters.includes(hostname)) {
+                onSettingsChange({
+                    ...settings,
+                    domainFilters: [...filters, hostname]
+                });
+            }
             setUrlInput('');
-            setUiMode('list');
+            setErrorMsg('');
         } catch (e) {
-            setErrorMsg('正しいURLを入力してください (例: https://example.com)');
+            setErrorMsg('有効なURLを入力してください');
         }
     };
 
-    // --- RENDER: Wizard View (ドメイン追加画面) ---
-    if (uiMode === 'wizard') {
+    const removeFilter = (index) => {
+        const newFilters = filters.filter((_, i) => i !== index);
+        onSettingsChange({ ...settings, domainFilters: newFilters });
+    };
+
+    // --- Render: Domain Settings View ---
+    if (view === 'domains') {
         return (
-            <div className="domain-wizard-container">
-                <div className="wizard-header">
-                    <button onClick={() => setUiMode('list')} className="wizard-back-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        戻る
+            <div className="context-selector-container">
+                <div className="domain-header">
+                    <button
+                        onClick={() => setView('main')}
+                        className="back-btn"
+                        title="戻る"
+                    >
+                        <ChevronLeftIcon />
                     </button>
-                    <span className="wizard-title">サイトを追加</span>
-                    <div style={{ width: 32 }}></div> {/* Spacer for alignment */}
+                    <span className="domain-title">検索対象サイトの設定</span>
                 </div>
 
-                <div className="segmented-control" style={{ marginBottom: '16px' }}>
-                    <div
-                        className={`segmented-option ${filterType === 'allow' ? 'selected' : ''}`}
-                        onClick={() => setFilterType('allow')}
-                    >
-                        検索対象
-                    </div>
-                    <div
-                        className={`segmented-option ${filterType === 'deny' ? 'selected deny-mode' : ''}`}
-                        onClick={() => setFilterType('deny')}
-                    >
-                        除外対象
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label className="wizard-label">URL / リンク</label>
+                <div className="domain-input-row">
                     <input
-                        className="wizard-input"
-                        placeholder="https://example.com/article..."
+                        className="domain-input-field"
+                        placeholder="example.com"
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && addFilter()}
                         autoFocus
                     />
-                    {errorMsg && <p style={{ fontSize: '11px', color: 'var(--color-error)', marginTop: '4px' }}>{errorMsg}</p>}
-                    <p className="wizard-description">
-                        URLからドメインを自動抽出し、サイト全体を対象にします。
-                    </p>
+                    <button
+                        onClick={addFilter}
+                        disabled={!urlInput}
+                        className="domain-add-btn"
+                    >
+                        追加
+                    </button>
                 </div>
+                {errorMsg && <p className="error-msg">{errorMsg}</p>}
 
-                <button
-                    className="btn-primary-action"
-                    onClick={handleUrlAdd}
-                    disabled={!urlInput}
-                >
-                    リストに追加
-                </button>
+                <p className="domain-help">
+                    特定のドメインを追加すると、そのサイト内のみを検索します。
+                </p>
+
+                <div className="domain-list">
+                    {filters.length === 0 ? (
+                        <div className="domain-empty">
+                            指定なし (Web全体を検索)
+                        </div>
+                    ) : (
+                        filters.map((filter, idx) => (
+                            <div key={idx} className="domain-item">
+                                <div className="domain-info">
+                                    <GlobeIcon />
+                                    <span>{filter}</span>
+                                </div>
+                                <button
+                                    onClick={() => removeFilter(idx)}
+                                    className="domain-delete-btn"
+                                    title="削除"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
         );
     }
 
-    // --- RENDER: Main View ---
+    // --- Render: Main Mode Selection View ---
+    const isWebActive = settings.webMode !== 'off';
+
     return (
-        <div className="context-selector-panel">
-
-            {/* 1. Internal Knowledge (RAG) Switch */}
-            <div
-                className={`rag-switch-card ${settings.ragEnabled ? 'active' : ''}`}
-                onClick={() => updateSetting('ragEnabled', !settings.ragEnabled)}
-            >
-                <div className="rag-content">
-                    <div className="rag-icon-badge">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                    </div>
-                    <div className="rag-text-group">
-                        <span className="rag-title">社内ナレッジを参照</span>
-                        <span className="rag-desc">社内ドキュメントや規定を検索します</span>
-                    </div>
-                </div>
-                {/* Visual Toggle Input */}
-                <input
-                    type="checkbox"
-                    className="toggle-input"
-                    checked={settings.ragEnabled}
-                    readOnly
-                />
+        <div className="context-selector-container">
+            <div className="context-section-label">
+                検索モード
             </div>
 
-            <hr className="context-divider" />
-
-            {/* 2. Web Search Mode (Segmented Control) */}
-            <div>
-                <div className="context-section-header">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
-                    Web検索設定
-                </div>
-
-                <div className="segmented-control">
-                    <div
-                        className={`segmented-option ${settings.webMode === 'auto' ? 'selected' : ''}`}
-                        onClick={() => updateSetting('webMode', 'auto')}
+            {MODES.map((mode) => {
+                const isActive = currentModeId === mode.id;
+                const activeClass = isActive ? `active ${mode.colorClass}` : '';
+                return (
+                    <button
+                        key={mode.id}
+                        onClick={() => handleModeSelect(mode.id)}
+                        className={`mode-item ${activeClass}`}
                     >
-                        Auto (AI判断)
-                    </div>
-                    <div
-                        className={`segmented-option ${settings.webMode === 'force' ? 'selected' : ''}`}
-                        onClick={() => updateSetting('webMode', 'force')}
-                    >
-                        Force (強制)
-                    </div>
-                    <div
-                        className={`segmented-option ${settings.webMode === 'off' ? 'selected' : ''}`}
-                        onClick={() => updateSetting('webMode', 'off')}
-                    >
-                        Off (無効)
-                    </div>
-                </div>
-            </div>
-
-            {/* 3. Domain Filter (Disabled when Web Search is Off) */}
-            <div className={`domain-filter-area ${settings.webMode === 'off' ? 'disabled' : ''}`}>
-                {filters.length === 0 ? (
-                    <div className="domain-add-btn-row" onClick={() => setUiMode('wizard')}>
-                        <div className="domain-add-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <div className="mode-icon-wrapper">
+                            {mode.icon}
                         </div>
-                        <div className="domain-add-text">
-                            <span className="domain-add-title">検索対象サイトを追加...</span>
-                            <span className="domain-add-desc">指定がない場合はWeb全体を検索</span>
+                        <div className="mode-info">
+                            <div className="mode-label">
+                                {mode.label}
+                            </div>
+                            <div className="mode-desc">
+                                {mode.desc}
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="domain-tag-container" style={{ marginTop: '8px' }}>
-                        {filters.map((filter, index) => {
-                            const isDeny = filter.startsWith('-');
-                            return (
-                                <span key={index} className={`domain-tag ${isDeny ? 'deny' : 'allow'}`}>
-                                    {isDeny ? (
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                                    ) : (
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                                    )}
-                                    <span style={{ paddingTop: '1px' }}>{filter.replace(/^-/, '')}</span>
-                                    <button onClick={() => removeTag(index)} className="domain-tag-close">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                                    </button>
-                                </span>
-                            );
-                        })}
-                        <input
-                            className="domain-input"
-                            value={manualInput}
-                            onChange={(e) => setManualInput(e.target.value)}
-                            onKeyDown={handleManualKeyDown}
-                            placeholder="入力してEnter..."
-                        />
-                    </div>
-                )}
-
-                {filters.length > 0 && (
-                    <button className="text-link" onClick={() => setUiMode('wizard')}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
-                        URLから一括追加
+                        {isActive && <CheckIcon className="check-icon" />}
                     </button>
-                )}
+                );
+            })}
+
+            {/* Advanced Settings Link (Unified List Item Style) */}
+            <div className="advanced-options-wrapper-static">
+                <div className="advanced-divider" />
+                <button
+                    onClick={() => isWebActive && setView('domains')}
+                    className={`advanced-link ${!isWebActive ? 'disabled' : ''}`}
+                    disabled={!isWebActive}
+                    title={!isWebActive ? "Web検索モードでのみ設定可能です" : ""}
+                >
+                    <div className="advanced-icon-wrapper">
+                        <GlobeIcon />
+                    </div>
+
+                    <div className="advanced-info">
+                        <div className="advanced-label">検索対象サイト</div>
+                        <div className="advanced-sub">
+                            {isWebActive
+                                ? (filters.length > 0 ? `${filters.length}件の指定あり` : 'Web全体')
+                                : 'Web検索を必要とするモードのみ'} {/* 短縮テキスト */}
+                        </div>
+                    </div>
+
+                    {isWebActive && (
+                        <span className="chevron-icon">
+                            <ChevronRightIcon />
+                        </span>
+                    )}
+                </button>
             </div>
         </div>
     );

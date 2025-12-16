@@ -1,27 +1,148 @@
 /* src/App.css */
 
 .app {
-  display: grid;
-  /* 列定義: 変数を使用し、デフォルト値を260pxに設定 */
-  grid-template-columns: var(--sidebar-width, 260px) 1fr;
-  /* 行定義 */
-  grid-template-rows: 1fr;
-
-  /* アニメーション: Macのような「慣性」を感じさせるイージング */
-  transition: grid-template-columns 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: grid-template-columns;
-
+  display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   background-color: var(--color-bg-body);
 }
 
-/* モバイル対応: 既存ロジック維持 */
+/* 右側のメインエリア全体 */
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: #F9FAFB;
+  position: relative;
+}
+
+/* ヘッダー下の作業領域 (Chat + Artifact) */
+.workspace {
+  display: grid;
+  /* デフォルト（閉）: チャットエリア全幅、パネル幅0 */
+  grid-template-columns: 100% 0fr;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+
+  /* Gridのカラム定義自体をアニメーション */
+  transition: grid-template-columns 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: grid-template-columns;
+}
+
+/* Artifact Open State: Grid Columns Change */
+.workspace.artifact-open {
+  /* 開: チャットエリア450px固定、パネルは残り全て(1fr) */
+  grid-template-columns: 450px 1fr;
+}
+
+/* --- Chat Area Wrapper --- */
+.workspace .chat-area-wrapper {
+  /* Gridセルに従う */
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+
+  /* ★修正: スクロールバー消失対策 */
+  /* 内部コンテンツが無限に伸びないよう、ここで高さを強制的に断ち切る */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* 境界線のアニメーション */
+  border-right: 1px solid transparent;
+  transition: border-right-color 0.3s ease;
+  z-index: 1;
+  position: relative;
+}
+
+.workspace .chat-area {
+  width: 100%;
+  max-width: 100%;
+  background-color: transparent;
+  height: 100%;
+}
+
+/* Artifactが開いた時だけ境界線を表示 */
+.workspace.artifact-open .chat-area-wrapper {
+  border-right-color: rgba(0, 0, 0, 0.06);
+}
+
+/* --- Artifact Panel Wrapper (Floating Island) --- */
+.artifact-panel-wrapper {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+
+  /* 初期状態 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(20px);
+  padding: 0;
+
+  /* 閉じる時のアニメーション */
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    padding 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    visibility 0.4s step-end;
+}
+
+/* Artifact Open State */
+.workspace.artifact-open .artifact-panel-wrapper {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  padding: 16px;
+
+  /* 開く時のアニメーション */
+  transition:
+    opacity 0.4s ease 0.1s,
+    transform 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+    padding 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+    visibility 0s;
+}
+
+/* モバイル対応 */
 @media (max-width: 768px) {
-  .app {
-    display: flex;
-    flex-direction: column;
-    /* モバイルではサイドバー幅変数は無視される（または別途制御） */
+  .workspace {
+    display: block;
+  }
+
+  .workspace.artifact-open {
+    grid-template-columns: 100% 0fr;
+  }
+
+  .workspace.artifact-open .chat-area-wrapper {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .artifact-panel-wrapper {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    background-color: var(--color-bg-body);
+    width: 100% !important;
+    padding: 0 !important;
+
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .workspace.artifact-open .artifact-panel-wrapper {
+    transform: translateX(0);
+    padding: 0 !important;
   }
 }

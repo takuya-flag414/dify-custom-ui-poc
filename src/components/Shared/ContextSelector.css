@@ -1,0 +1,403 @@
+/* src/components/Shared/ContextSelector.css */
+
+/* --- Container --- */
+.context-selector-container {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+    min-width: 280px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.context-section-label {
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    user-select: none;
+    margin-bottom: 4px;
+}
+
+/* --- Mode Item (Button) --- */
+.mode-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    text-align: left;
+    margin-bottom: 2px;
+}
+
+.mode-item:hover {
+    background-color: var(--color-bg-body);
+}
+
+/* --- Color Themes (Active State) --- */
+/* 1. Fast (Amber) */
+.mode-item.active.mode-fast {
+    background-color: #FFFBEB;
+    border-color: #FEF3C7;
+}
+
+.mode-item.active.mode-fast .mode-label,
+.mode-item.active.mode-fast .mode-icon-wrapper,
+.mode-item.active.mode-fast .check-icon {
+    color: #D97706;
+}
+
+/* 2. Standard (Gray/Neutral) */
+.mode-item.active.mode-standard {
+    background-color: #F3F4F6;
+    border-color: #E5E7EB;
+}
+
+.mode-item.active.mode-standard .mode-label,
+.mode-item.active.mode-standard .mode-icon-wrapper,
+.mode-item.active.mode-standard .check-icon {
+    color: #4B5563;
+}
+
+/* 3. Research (Blue) */
+.mode-item.active.mode-deep {
+    background-color: #EFF6FF;
+    border-color: #DBEAFE;
+}
+
+.mode-item.active.mode-deep .mode-label,
+.mode-item.active.mode-deep .mode-icon-wrapper,
+.mode-item.active.mode-deep .check-icon {
+    color: #2563EB;
+}
+
+/* 4. Enterprise (Green) */
+.mode-item.active.mode-enterprise {
+    background-color: #ECFDF5;
+    border-color: #D1FAE5;
+}
+
+.mode-item.active.mode-enterprise .mode-label,
+.mode-item.active.mode-enterprise .mode-icon-wrapper,
+.mode-item.active.mode-enterprise .check-icon {
+    color: #059669;
+}
+
+/* 5. Hybrid (Purple) */
+.mode-item.active.mode-hybrid {
+    background-color: #F5F3FF;
+    border-color: #EDE9FE;
+}
+
+.mode-item.active.mode-hybrid .mode-label,
+.mode-item.active.mode-hybrid .mode-icon-wrapper,
+.mode-item.active.mode-hybrid .check-icon {
+    color: #7C3AED;
+}
+
+/* Icon Area */
+.mode-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+}
+
+.mode-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mode-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-main);
+    line-height: 1.2;
+}
+
+.mode-desc {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Advanced Settings Static Wrapper --- */
+.advanced-options-wrapper-static {
+    margin-top: 4px;
+    /* 間隔調整 */
+}
+
+/* Divider */
+.advanced-divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 4px 12px 8px 12px;
+    /* インデントを持たせてリスト内の区切り線らしく */
+}
+
+/* Advanced Link (Unified with mode-item style) */
+.advanced-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    /* mode-itemと同じgap */
+    padding: 10px 12px;
+    /* mode-itemと同じpadding */
+    border-radius: 12px;
+    /* radius-xl */
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: left;
+    /* 左揃え強制 */
+}
+
+.advanced-link:hover {
+    background-color: var(--color-bg-body);
+}
+
+/* Disabled State */
+.advanced-link.disabled {
+    opacity: 0.5;
+    /* 半透明 */
+    cursor: default;
+    /* not-allowedよりも控えめに */
+    background-color: transparent !important;
+}
+
+/* Icon Wrapper */
+.advanced-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+}
+
+.advanced-link:not(.disabled):hover .advanced-icon-wrapper {
+    color: var(--color-text-main);
+}
+
+/* Label Group */
+.advanced-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.advanced-label {
+    font-size: 13px;
+    /* mode-labelと同じ */
+    font-weight: 700;
+    color: var(--color-text-main);
+    line-height: 1.2;
+}
+
+.advanced-sub {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chevron-icon {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.advanced-link:hover .chevron-icon {
+    color: var(--color-text-main);
+}
+
+/* ... (Domain View Styles - No Changes) ... */
+.domain-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background-color: var(--color-bg-body);
+    color: var(--color-text-main);
+}
+
+.domain-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.domain-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.domain-input-field {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.2s;
+    color: var(--color-text-main);
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.domain-input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    background-color: #FFFFFF;
+}
+
+.domain-add-btn {
+    padding: 0 16px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.domain-add-btn:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+}
+
+.domain-add-btn:disabled {
+    background-color: var(--color-border);
+    cursor: not-allowed;
+    color: #9CA3AF;
+}
+
+.error-msg {
+    font-size: 11px;
+    color: var(--color-error);
+    margin-top: -8px;
+    margin-bottom: 12px;
+}
+
+.domain-help {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.domain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.domain-empty {
+    padding: 16px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    background-color: var(--color-bg-body);
+    border-radius: 8px;
+    border: 1px dashed var(--color-border);
+}
+
+.domain-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: #FFFFFF;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--color-text-main);
+    transition: all 0.2s;
+}
+
+.domain-item:hover {
+    border-color: var(--color-border-strong);
+}
+
+.domain-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.domain-info svg {
+    color: var(--color-text-muted);
+}
+
+.domain-delete-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.domain-delete-btn:hover {
+    color: var(--color-error);
+    background-color: #FEF2F2;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(2px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

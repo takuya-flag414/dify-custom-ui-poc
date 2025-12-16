@@ -127,6 +127,9 @@
 .chat-history {
   flex-grow: 1;
   overflow-y: auto;
+  /* ★追加: 横スクロールを強制的に無効化 */
+  overflow-x: hidden;
+
   padding: var(--space-6);
   padding-bottom: 20px;
   display: flex;
@@ -136,10 +139,11 @@
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 
-  /* レイアウト境界のヒント */
   contain: layout;
-
   transform: translateZ(0);
+
+  /* ★追加: 幅を親要素に確実に合わせる */
+  width: 100%;
 }
 
 /* --- Input Area Container --- */
@@ -324,7 +328,8 @@
   align-items: center;
   gap: var(--space-3);
   /* ★変更: 青背景から、落ち着いたグレー背景に変更 */
-  background-color: #F9FAFB; /* gray-50 */
+  background-color: #F9FAFB;
+  /* gray-50 */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-2) var(--space-3);
@@ -339,7 +344,8 @@
 
 /* ★追加: ロックされた状態のスタイル */
 .context-file-sticky.locked {
-  background-color: #F3F4F6; /* gray-100 */
+  background-color: #F3F4F6;
+  /* gray-100 */
   border-color: #E5E7EB;
 }
 
@@ -353,7 +359,8 @@
   /* ★変更: 白背景で少し浮かせる */
   background-color: #FFFFFF;
   border-radius: var(--radius-md);
-  color: var(--color-primary); /* アイコンの色は青のままでOK */
+  color: var(--color-primary);
+  /* アイコンの色は青のままでOK */
   flex-shrink: 0;
   border: 1px solid var(--color-border);
 }
@@ -442,14 +449,19 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  
-  background-color: var(--color-bg-sidebar); /* #F9FAFB */
-  border: 1px solid var(--color-border);     /* #E5E7EB */
-  border-radius: var(--radius-xl);           /* 12px */
-  
-  padding: var(--space-3);                   /* 12px */
-  margin: var(--space-2);                    /* 8px */
-  
+
+  background-color: var(--color-bg-sidebar);
+  /* #F9FAFB */
+  border: 1px solid var(--color-border);
+  /* #E5E7EB */
+  border-radius: var(--radius-xl);
+  /* 12px */
+
+  padding: var(--space-3);
+  /* 12px */
+  margin: var(--space-2);
+  /* 8px */
+
   animation: contextFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -461,7 +473,8 @@
   align-items: center;
   gap: var(--space-2);
   padding: 0 var(--space-1);
-  color: var(--color-text-muted); /* #6B7280 */
+  color: var(--color-text-muted);
+  /* #6B7280 */
 }
 
 .context-header-text {
@@ -484,11 +497,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  
+
   /* ファイルが多い場合はスクロールさせる */
   max-height: 120px;
   overflow-y: auto;
-  padding-right: 4px; /* スクロールバーとの干渉防止 */
+  padding-right: 4px;
+  /* スクロールバーとの干渉防止 */
 }
 
 /* 個別のファイルカード (White Chip) */
@@ -496,17 +510,23 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  
-  background-color: var(--color-bg-surface); /* #FFFFFF */
-  border: 1px solid var(--color-border);     /* #E5E7EB */
-  border-radius: var(--radius-lg);           /* 8px */
+
+  background-color: var(--color-bg-surface);
+  /* #FFFFFF */
+  border: 1px solid var(--color-border);
+  /* #E5E7EB */
+  border-radius: var(--radius-lg);
+  /* 8px */
   padding: 6px 10px;
-  
-  box-shadow: var(--shadow-sm);              /* Apple風の微細な影 */
-  
-  min-width: 0; /* Flexbox内での縮小許可 */
-  max-width: 240px; /* カードの最大幅制限 */
-  
+
+  box-shadow: var(--shadow-sm);
+  /* Apple風の微細な影 */
+
+  min-width: 0;
+  /* Flexbox内での縮小許可 */
+  max-width: 240px;
+  /* カードの最大幅制限 */
+
   cursor: default;
   transition: all 0.2s ease;
   user-select: none;
@@ -516,7 +536,8 @@
 .context-chip:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-bg-hover); /* 薄い青枠 */
+  border-color: var(--color-primary-bg-hover);
+  /* 薄い青枠 */
 }
 
 /* カード内のアイコン */
@@ -525,7 +546,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary); /* #3B82F6 */
+  color: var(--color-primary);
+  /* #3B82F6 */
 }
 
 .context-chip-icon svg {
@@ -535,10 +557,12 @@
 
 /* カード内のファイル名 */
 .context-chip-name {
-  font-size: var(--text-xs); /* 12px */
+  font-size: var(--text-xs);
+  /* 12px */
   font-weight: var(--font-medium);
-  color: var(--color-text-main); /* #111827 */
-  
+  color: var(--color-text-main);
+  /* #111827 */
+
   /* 長い名前を...で省略 */
   white-space: nowrap;
   overflow: hidden;
@@ -551,6 +575,7 @@
     opacity: 0;
     transform: translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

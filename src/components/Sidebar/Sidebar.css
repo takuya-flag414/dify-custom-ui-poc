@@ -11,7 +11,15 @@
   height: 100%;
   overflow-x: hidden;
   box-sizing: border-box;
-  transition: padding 0.3s ease;
+
+  /* ★修正: Grid廃止に伴い、自身の幅を明示的に指定 */
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  /* 親がFlexになっても縮まないように固定 */
+
+  /* ★修正: 幅のアニメーションを追加 (App.cssから移動) */
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), padding 0.3s ease;
+  will-change: width;
 }
 
 .sidebar.collapsed {
@@ -19,6 +27,7 @@
   align-items: center;
 }
 
+/* 以下、既存のスタイルをそのまま維持 */
 /* --- Header --- */
 .sidebar-header {
   display: flex;
@@ -30,6 +39,7 @@
   min-height: 40px;
 }
 
+/* ... (以降のスタイルは変更なし) ... */
 .sidebar-brand-area {
   display: flex;
   align-items: center;
@@ -161,13 +171,13 @@
   padding-right: 2px;
   width: 100%;
 
-  /* フェードアウト用 (復活) */
+  /* フェードアウト用 */
   transition: opacity 0.2s ease, visibility 0.2s ease;
   opacity: 1;
   visibility: visible;
 }
 
-/* ミニモード時はリスト全体を隠す (復活) */
+/* ミニモード時はリスト全体を隠す */
 .sidebar.collapsed .conversation-list {
   opacity: 0;
   visibility: hidden;
@@ -202,7 +212,6 @@
   /* Flexboxレイアウトの強化 */
   display: flex;
   align-items: center;
-  /* justify-content: space-between; <- 削除（要素が詰まるようにする） */
   gap: var(--space-2);
 
   min-height: 44px;
@@ -210,44 +219,33 @@
   max-width: 100%;
 }
 
-/* [New] テキストとインプットを包むラッパー */
-/* Flexアイテムとして残りの空間を占有し、縮小を許可する */
+/* テキストとインプットを包むラッパー */
 .conversation-name-wrapper {
   flex: 1;
-  /* 空間を埋める */
   min-width: 0;
-  /* 重要: これがないとFlexアイテムは縮まない */
   display: flex;
-  /* 内部要素の位置揃え */
   align-items: center;
 }
 
-/* [Update] テキスト本体 */
+/* テキスト本体 */
 .conversation-name {
   display: block;
-  /* ellipsisを効かせるためにblock化 */
   width: 100%;
-  /* 親幅いっぱい */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* 末尾を...にする */
-
-  /* フォント調整 */
   line-height: 1.5;
 }
 
-/* [New] ピン留めアイコンコンテナ */
+/* ピン留めアイコンコンテナ */
 .pinned-indicator {
   flex-shrink: 0;
-  /* 縮ませない */
   display: flex;
   align-items: center;
 }
 
-/* [Update] ボタン類 */
+/* ボタン類 */
 .delete-icon-button {
-  /* 既存スタイル... */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -259,8 +257,6 @@
   cursor: pointer;
   opacity: 0;
   transition: all 0.2s ease;
-
-  /* [New] 縮小禁止設定 */
   flex-shrink: 0;
 }
 
@@ -270,7 +266,7 @@
   opacity: 1;
 }
 
-/* リネーム中のテキストエリアスタイル (変更なし) */
+/* リネーム中のテキストエリアスタイル */
 .conversation-rename-textarea {
   width: 100%;
   background-color: var(--color-bg-surface);
@@ -293,9 +289,7 @@
 /* --- Active State (選択中の会話スタイル) --- */
 .conversation-item.active {
   background-color: var(--color-primary-bg);
-  /* #EFF6FF (薄い青) */
   color: var(--color-primary-active);
-  /* #1D4ED8 (濃い青) */
   font-weight: var(--font-medium);
   border-color: transparent;
 }
@@ -303,7 +297,6 @@
 /* 選択中のアイテムをホバーした時のスタイル */
 .conversation-item.active:hover {
   background-color: var(--color-primary-bg-hover);
-  /* #DBEAFE (少し濃い薄青) */
   color: var(--color-primary-active);
 }
 

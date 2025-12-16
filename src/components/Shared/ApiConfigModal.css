@@ -1,134 +1,273 @@
 /* src/components/Shared/ApiConfigModal.css */
+
 .api-modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 50;
+    inset: 0;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    /* 背景を濃く変更: 0.2 -> 0.4 */
     background-color: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(12px);
-    /* Apple-like glass effect */
-    animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    animation: overlayFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .api-modal-container {
-    background-color: rgba(255, 255, 255, 0.95);
-    /* Slight transparency */
-    border-radius: var(--radius-2xl);
-    /* 16px or 24px as per modal spec */
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    /* Soft, deep shadow */
     width: 100%;
-    max-width: 32rem;
-    padding: var(--space-8);
-    margin: 0 var(--space-4);
-    transform: scale(1);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    /* Inner light border */
-    transition: all 0.2s;
+    max-width: 480px;
+    /* 透過度を変更: 0.85 -> 0.98 (ほぼ不透明) */
+    background-color: rgba(255, 255, 255, 0.98);
+
+    /* すりガラス効果は維持 */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(255, 255, 255, 1);
+
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+
+    padding: 0;
+    overflow: hidden;
+    transform-origin: center;
+    animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.api-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-5) var(--space-6);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .api-modal-title {
-    font-size: var(--text-2xl);
+    font-size: var(--text-lg);
     font-weight: var(--font-bold);
     color: var(--color-text-main);
-    margin-bottom: var(--space-6);
-    letter-spacing: -0.02em;
-    /* Tighter tracking for headings */
+    letter-spacing: -0.01em;
+    margin: 0;
 }
 
-.api-modal-form {
+/* Body */
+.api-modal-body {
+    padding: var(--space-6);
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
 }
 
-.api-modal-field {
+/* Input Group Styles */
+.input-group {
     display: flex;
     flex-direction: column;
+    gap: var(--space-2);
 }
 
-.api-modal-label {
-    display: block;
+.input-label {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     color: var(--color-text-sub);
-    margin-bottom: var(--space-2);
+    margin-left: 2px;
 }
 
-.api-modal-input {
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Input Field with Icons */
+.styled-input {
     width: 100%;
-    padding: 12px 16px;
-    background-color: var(--color-bg-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    padding: 10px 40px;
+    /* アイコン分のスペース */
     font-size: var(--text-base);
     color: var(--color-text-main);
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
     outline: none;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    /* Subtle inset shadow hint */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
-.api-modal-input:focus {
+.styled-input:focus {
+    background-color: #FFFFFF;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    /* Soft accessible focus ring */
 }
 
-.api-modal-input::placeholder {
-    color: #9CA3AF;
+/* Font Mono for API Key */
+.styled-input.font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.9em;
 }
 
-.api-modal-actions {
-    margin-top: var(--space-8);
+/* Icons Position */
+.input-icon-left {
+    position: absolute;
+    left: 12px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.input-action-right {
+    position: absolute;
+    right: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.icon-button {
+    padding: 4px;
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.icon-button:hover {
+    color: var(--color-text-main);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Helper Action (Cloud Button) */
+.helper-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    padding: 4px 8px;
+    font-size: var(--text-xs);
+    color: var(--color-primary);
+    background-color: var(--color-primary-bg);
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-start;
+}
+
+.helper-action:hover {
+    background-color: var(--color-primary-bg-hover);
+}
+
+/* Footer & Status */
+.api-modal-footer {
+    padding: var(--space-4) var(--space-6) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Connection Status Bar */
+.status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    background-color: #F9FAFB;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.status-bar.testing {
+    background-color: #EFF6FF;
+    color: var(--color-primary);
+}
+
+.status-bar.success {
+    background-color: #F0FDF4;
+    color: #15803D;
+    border-color: #DCFCE7;
+}
+
+.status-bar.error {
+    background-color: #FEF2F2;
+    color: #B91C1C;
+    border-color: #FEE2E2;
+}
+
+.status-text {
+    font-weight: var(--font-medium);
+}
+
+/* Action Buttons */
+.button-row {
     display: flex;
     justify-content: flex-end;
     gap: var(--space-3);
-    /* Slightly tighter gap */
 }
 
-.api-modal-btn-cancel {
-    padding: 10px 20px;
-    border-radius: var(--radius-xl);
-    background-color: #FFFFFF;
-    border: 1px solid var(--color-border);
+.btn-cancel {
+    padding: 8px 16px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     color: var(--color-text-sub);
-    font-weight: var(--font-medium);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    box-shadow: var(--shadow-sm);
     transition: all 0.2s;
 }
 
-.api-modal-btn-cancel:hover {
-    background-color: #F9FAFB;
-    border-color: #D1D5DB;
-    color: var(--color-text-main);
+.btn-cancel:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
-.api-modal-btn-save {
-    padding: 10px 24px;
-    border-radius: var(--radius-xl);
-    background-color: var(--color-primary);
+.btn-save {
+    padding: 8px 24px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     color: #FFFFFF;
-    font-weight: var(--font-medium);
+    background-color: var(--color-primary);
     border: none;
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
 }
 
-.api-modal-btn-save:hover {
+.btn-save:hover {
     background-color: var(--color-primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-md);
 }
 
-@keyframes modalFadeIn {
+.btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Animations */
+@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalScaleIn {
     from {
         opacity: 0;
         transform: scale(0.96);

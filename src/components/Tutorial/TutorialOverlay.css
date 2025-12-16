@@ -1,0 +1,166 @@
+/* src/components/Tutorial/TutorialOverlay.css */
+
+/* 全画面オーバーレイ（操作ブロック用） */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    /* 最前面 */
+    pointer-events: auto;
+    /* 下層へのクリックを遮断 */
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* SVGマスク（スポットライト効果） */
+.tutorial-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.tutorial-mask path {
+    fill: rgba(0, 0, 0, 0.5);
+    /* 背景の暗さ */
+    transition: d 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    /* 形状変化のアニメーション */
+}
+
+/* 説明カード（ポップオーバー） */
+.tutorial-popover {
+    position: absolute;
+    width: 320px;
+    background-color: var(--color-bg-surface);
+    border-radius: var(--radius-2xl);
+    padding: 24px;
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+    /* 境界線代わりの微細な影 */
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    /* 位置移動のアニメーション */
+    transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: top, left;
+}
+
+.tutorial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.tutorial-title {
+    font-size: 16px;
+    /* text-base */
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin: 0;
+}
+
+.tutorial-content {
+    font-size: 14px;
+    /* text-sm */
+    color: var(--color-text-sub);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    /* 改行を反映 */
+}
+
+/* フッター（ナビゲーション） */
+.tutorial-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+}
+
+.tutorial-progress {
+    display: flex;
+    gap: 4px;
+}
+
+.progress-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-border);
+    transition: background-color 0.3s;
+}
+
+.progress-dot.active {
+    background-color: var(--color-primary);
+}
+
+.tutorial-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.tutorial-btn {
+    padding: 6px 12px;
+    border-radius: var(--radius-lg);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.tutorial-btn.secondary {
+    background-color: transparent;
+    color: var(--color-text-sub);
+}
+
+.tutorial-btn.secondary:hover {
+    background-color: var(--color-bg-body);
+}
+
+.tutorial-btn.primary {
+    background-color: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.tutorial-btn.primary:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+}
+
+/* 終了ボタン（右上の×） */
+.tutorial-close-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    margin: -4px -4px 0 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tutorial-close-btn:hover {
+    background-color: var(--color-bg-body);
+    color: var(--color-text-main);
+}

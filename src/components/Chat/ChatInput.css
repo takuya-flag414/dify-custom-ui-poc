@@ -1,0 +1,331 @@
+/* src/components/Chat/ChatInput.css */
+
+/* --- Main Container: Floating Capsule --- */
+.input-capsule-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 15px -3px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(0, 0, 0, 0.02);
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    z-index: 20;
+}
+
+.input-capsule-container:focus-within {
+    background-color: #FFFFFF;
+    box-shadow:
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Drag & Drop Active State */
+.input-capsule-container.dragging {
+    background-color: var(--color-primary-bg);
+    border: 2px dashed var(--color-primary);
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
+    transform: scale(1.01);
+}
+
+.input-capsule-container.dragging .input-textarea,
+.input-capsule-container.dragging .right-controls,
+.input-capsule-container.dragging .action-btn-circle {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* --- File Tray --- */
+.file-tray {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 4px 16px;
+    overflow-x: auto;
+    width: 100%;
+    scrollbar-width: none;
+}
+
+.file-tray::-webkit-scrollbar {
+    display: none;
+}
+
+.file-card {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background-color: #F3F4F6;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--color-text-main);
+    user-select: none;
+    max-width: 200px;
+    animation: slideUp 0.2s ease-out;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.file-card:hover {
+    background-color: #E5E7EB;
+}
+
+.file-card.pending {
+    background-color: #EFF6FF;
+}
+
+.file-card-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+/* ★追加: ファイルアイコンのサイズ指定 (32px = 2rem) */
+.file-tray-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.file-remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: var(--color-text-sub);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+    margin-left: 2px;
+}
+
+.file-card:hover .file-remove-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.file-remove-btn:hover {
+    background-color: var(--color-error);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* --- Input Row --- */
+.input-row {
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 12px;
+    gap: 8px;
+    width: 100%;
+}
+
+.action-btn-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background-color: #F3F4F6;
+    color: var(--color-text-main);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.action-btn-circle:hover:not(:disabled) {
+    background-color: #E5E7EB;
+    transform: scale(1.05);
+}
+
+.action-btn-circle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input-textarea {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 9px 4px;
+    font-family: var(--font-family-base);
+    font-size: 15px;
+    line-height: 1.5;
+    resize: none;
+    max-height: 200px;
+    outline: none;
+    color: var(--color-text-main);
+    min-height: 36px;
+}
+
+.input-textarea::placeholder {
+    color: #9CA3AF;
+}
+
+.right-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 2px;
+}
+
+/* --- Mode Chip Styles (Updated) --- */
+.mode-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+/* 1. Fast Mode (Amber) */
+.mode-chip.mode-fast {
+    background-color: #FFFBEB;
+    /* amber-50 */
+    color: #D97706;
+    /* amber-600 */
+    border-color: #FEF3C7;
+    /* amber-100 */
+}
+
+.mode-chip.mode-fast:hover {
+    background-color: #FEF3C7;
+}
+
+/* 2. Standard Mode (Gray/Neutral) */
+.mode-chip.mode-standard {
+    background-color: #F3F4F6;
+    /* gray-100 */
+    color: #4B5563;
+    /* gray-600 */
+    border-color: transparent;
+}
+
+.mode-chip.mode-standard:hover {
+    background-color: #E5E7EB;
+}
+
+/* 3. Research (Blue) */
+.mode-chip.mode-deep {
+    background-color: #EFF6FF;
+    /* blue-50 */
+    color: #2563EB;
+    /* blue-600 */
+    border-color: #DBEAFE;
+}
+
+.mode-chip.mode-deep:hover {
+    background-color: #DBEAFE;
+}
+
+/* 4. Enterprise (Green) */
+.mode-chip.mode-enterprise {
+    background-color: #ECFDF5;
+    /* green-50 */
+    color: #059669;
+    /* green-600 */
+    border-color: #D1FAE5;
+}
+
+.mode-chip.mode-enterprise:hover {
+    background-color: #D1FAE5;
+}
+
+/* 5. Hybrid (Purple) */
+.mode-chip.mode-hybrid {
+    background-color: #F5F3FF;
+    /* violet-50 */
+    color: #7C3AED;
+    /* violet-600 */
+    border-color: #EDE9FE;
+}
+
+.mode-chip.mode-hybrid:hover {
+    background-color: #EDE9FE;
+}
+
+
+/* Send Button */
+.send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background-color: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.send-btn.active {
+    background-color: var(--color-text-main);
+    color: white;
+}
+
+.send-btn.active:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input-disclaimer {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+/* --- Popover Position --- */
+.input-capsule-container .search-options-popover {
+    left: auto !important;
+    right: 0;
+    bottom: calc(100% + 10px);
+    width: 320px;
+    transform-origin: bottom right;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
