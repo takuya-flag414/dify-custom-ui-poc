@@ -1,14 +1,14 @@
 // src/components/Shared/MarkdownRenderer.jsx
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SourceIcon } from './FileIcons';
-import ArtifactCard from '../Artifacts/ArtifactCard'; // 追加: アーティファクト用カード
+import ArtifactCard from '../Artifacts/ArtifactCard';
 import '../Message/MessageBlock.css';
 import { useLogger } from '../../hooks/useLogger';
 
 // --- Helper: Inline Citation Renderer ---
-// 文中の [1] などをインタラクティブなバッジに変換する
+// (renderWithInlineCitations, LoggedElement, CodeBlock は変更なしのため省略。元のコードを維持してください)
 const renderWithInlineCitations = (children, citations, messageId) => {
   if (!children) return null;
   const childrenArray = Array.isArray(children) ? children : [children];
@@ -78,8 +78,6 @@ const renderWithInlineCitations = (children, citations, messageId) => {
   return newChildren;
 };
 
-// --- Helper: Log Wrapper ---
-// レンダリング状況をログ出力するラッパー
 const LoggedElement = ({ as: Component, logTag, content, logFunction, children, ...props }) => {
   useEffect(() => {
     if (logFunction) {
@@ -90,12 +88,8 @@ const LoggedElement = ({ as: Component, logTag, content, logFunction, children, 
   return <Component {...props}>{children}</Component>;
 };
 
-// --- Component: CodeBlock with Copy Button ---
-// コードブロックの表示（コピーボタン付き）
 const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
   const [isCopied, setIsCopied] = useState(false);
-
-  // 言語名の抽出 (例: language-js -> js)
   const match = /language-(\w+)/.exec(className || '');
   const lang = match ? match[1] : (inline ? '' : 'text');
   const codeText = String(children).replace(/\n$/, '');
@@ -106,7 +100,6 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
     }
   }, [inline, codeText, logFunction]);
 
-  // インラインコードの場合は単純なcodeタグを返す
   if (inline) {
     return (
       <code className={className} {...props}>
@@ -115,7 +108,6 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
     );
   }
 
-  // ブロックコードの場合はヘッダー付きのUIを返す
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(codeText);
@@ -136,12 +128,10 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
           aria-label="Copy code"
         >
           {isCopied ? (
-            /* Check Icon */
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
           ) : (
-            /* Copy Icon */
             <div className="code-copy-content">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -160,8 +150,23 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
 };
 
 // --- Main Component: MarkdownRenderer ---
-const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messageId, onOpenArtifact }) => {
-  const [displayMode, setDisplayMode] = useState(isStreaming ? 'streaming' : 'done');
+const MarkdownRenderer = ({ 
+  content, 
+  isStreaming = false, 
+  // ★追加: 描画モード ('normal' | 'realtime')
+  // normal: ストリーミング中は待機 -> 完了後にタイピング演出
+  // realtime: ストリーミング中も即座に表示 (Fastモード用)
+  renderMode = 'normal',
+  citations = [], 
+  messageId, 
+  onOpenArtifact 
+}) => {
+  // 初期状態の設定: realtimeなら即 'done' (表示状態) にする
+  const [displayMode, setDisplayMode] = useState(() => {
+    if (renderMode === 'realtime') return 'done';
+    return isStreaming ? 'streaming' : 'done';
+  });
+  
   const [typedContent, setTypedContent] = useState('');
   const { addLog } = useLogger();
 
@@ -170,6 +175,13 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
 
   // --- 1. Typing Effect Logic (タイピング演出制御) ---
   useEffect(() => {
+    // realtimeモードの場合は、このEffectによる待機・演出制御をスキップして常に表示状態を維持
+    if (renderMode === 'realtime') {
+      setDisplayMode('done');
+      prevStreamingRef.current = isStreaming;
+      return;
+    }
+
     if (isStreaming) {
       // ストリーミング中は常に「受信中」モード
       setDisplayMode('streaming');
@@ -208,25 +220,21 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
     }
 
     prevStreamingRef.current = isStreaming;
-  }, [isStreaming, content]);
+  }, [isStreaming, content, renderMode]);
 
   // --- 2. Artifact Parsing Logic (成果物タグの解析) ---
   const parseArtifacts = useMemo(() => {
-    // タイピング中は途中経過テキスト、完了後は全文を使用
-    const textToRender = displayMode === 'typing' ? typedContent : content || '';
+    // normalモードのタイピング中は途中経過、それ以外（realtime含む）は全文を使用
+    const textToRender = (displayMode === 'typing' && renderMode === 'normal') ? typedContent : content || '';
 
     // Regex: :::artifact{...} ... :::
-    // capture 1: attributes string (e.g. type="code" title="Foo")
-    // capture 2: content body
     const artifactRegex = /:::artifact\{([^}]+)\}\n([\s\S]*?)\n:::/g;
 
     const parts = [];
     let lastIndex = 0;
     let match;
 
-    // テキスト全体を走査して分割
     while ((match = artifactRegex.exec(textToRender)) !== null) {
-      // A. マッチ箇所の前の通常テキスト
       if (match.index > lastIndex) {
         parts.push({
           type: 'text',
@@ -234,7 +242,6 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
         });
       }
 
-      // B. Artifact属性のパース
       const attrStr = match[1];
       const attributes = {};
       const attrMatcher = /(\w+)="([^"]+)"/g;
@@ -243,17 +250,15 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
         attributes[attrMatch[1]] = attrMatch[2];
       }
 
-      // C. Artifactパーツとして追加
       parts.push({
         type: 'artifact',
         attributes: attributes,
-        content: match[2] // Artifactの中身（コード等）
+        content: match[2]
       });
 
       lastIndex = artifactRegex.lastIndex;
     }
 
-    // D. 残りのテキスト
     if (lastIndex < textToRender.length) {
       parts.push({
         type: 'text',
@@ -262,19 +267,18 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
     }
 
     return parts;
-  }, [content, typedContent, displayMode]);
+  }, [content, typedContent, displayMode, renderMode]);
 
-  // --- 3. Logging Logic & Helpers ---
+  // --- 3. Logging Logic ---
   const logMarkdownRender = useCallback((tag, contentSnippet) => {
-    if (displayMode !== 'done') return;
+    if (displayMode !== 'done' || (isStreaming && renderMode === 'realtime')) return; // ストリーミング中はログ過多を防ぐ
     const logKey = `${tag}-${contentSnippet?.substring(0, 20)}`;
     if (loggedElementsRef.current.has(logKey)) return;
 
     loggedElementsRef.current.add(logKey);
     const message = `Rendered [${tag}]: ${contentSnippet?.substring(0, 50)}${contentSnippet?.length > 50 ? '...' : ''}`;
-    // console.log(`%c[Markdown] ${message}`, 'color: #4caf50; font-weight: bold;');
     addLog(message, 'info');
-  }, [displayMode, addLog]);
+  }, [displayMode, addLog, isStreaming, renderMode]);
 
   const checkUnrenderedMarkdown = useCallback((text) => {
     if (displayMode !== 'done' || typeof text !== 'string') return;
@@ -293,7 +297,6 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
         if (loggedElementsRef.current.has(logKey)) return;
         loggedElementsRef.current.add(logKey);
         const message = `Potential unrendered Markdown (${name}) detected: "${match}"`;
-        console.warn(`[Markdown Warning] ${message}`);
         addLog(message, 'warn');
       }
     });
@@ -302,7 +305,6 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
   const cleanChildren = useCallback((children) => {
     return React.Children.map(children, child => {
       if (typeof child === 'string') {
-        // 日本語特有のMarkdown崩れ防止用ハックの除去
         return child.replace(/@@FIX@@/g, '');
       }
       return child;
@@ -311,15 +313,17 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
 
   // --- 4. Render Phase ---
 
-  // ストリーミング中のカーソル表示のみの状態
-  if (displayMode === 'streaming') {
+  // normalモードでストリーミング待機中の場合のみカーソルだけを表示
+  if (displayMode === 'streaming' && renderMode !== 'realtime') {
     return <div className="markdown-renderer blinking-cursor"></div>;
   }
 
+  // ★変更: リアルタイムモードかつストリーミング中の場合にクラスを付与
+  const isRealtimeStreaming = isStreaming && renderMode === 'realtime';
+
   return (
-    <div className="markdown-renderer">
+    <div className={`markdown-renderer ${isRealtimeStreaming ? 'streaming-active' : ''}`}>
       {parseArtifacts.map((part, index) => {
-        // --- Artifact Card (成果物) ---
         if (part.type === 'artifact') {
           return (
             <ArtifactCard
@@ -330,15 +334,11 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
               onClick={(artifact) => {
                 if (onOpenArtifact) {
                   onOpenArtifact(artifact);
-                } else {
-                  console.warn('onOpenArtifact prop is missing in MarkdownRenderer');
                 }
               }}
             />
           );
         } else {
-          // --- Normal Markdown Text ---
-          // 事前処理: 日本語Markdownの記号干渉を防ぐためのハック
           const processedContent = part.content.replace(/([％！？。、])\*\*(?![ \t\r\n\v\f　、。，．！？])/g, '$1**@@FIX@@');
 
           return (
@@ -391,7 +391,6 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
                     {cleanChildren(children)}
                   </LoggedElement>
                 ),
-                // Code Block (with Copy Button)
                 code: ({ node, inline, className, children, ...props }) => (
                   <CodeBlock
                     inline={inline}
@@ -402,7 +401,6 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
                     {cleanChildren(children)}
                   </CodeBlock>
                 ),
-                // Paragraph (with Citations check)
                 p: ({ node, children, ...props }) => {
                   useEffect(() => {
                     React.Children.forEach(children, child => {
@@ -416,7 +414,6 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
                   const processed = renderWithInlineCitations(cleaned, citations, messageId);
                   return <p {...props}>{processed}</p>;
                 },
-                // List Item (with Citations check)
                 li: ({ node, children, ...props }) => {
                   const cleaned = cleanChildren(children);
                   const processed = renderWithInlineCitations(cleaned, citations, messageId);
@@ -433,6 +430,7 @@ const MarkdownRenderer = ({ content, isStreaming = false, citations = [], messag
           );
         }
       })}
+      {/* normalモードのタイピング中カーソル */}
       {displayMode === 'typing' && <span className="blinking-cursor"></span>}
     </div>
   );

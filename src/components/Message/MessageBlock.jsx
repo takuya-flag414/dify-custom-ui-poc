@@ -29,14 +29,12 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
     traceMode,
     messageId,
     id,
-    mode // useChatから渡されるモード情報
+    mode // 'fast' | 'normal'
   } = message;
 
-  // Fastモードかつストリーミング中なら、初期状態でRaw表示にする
-  const [showRaw, setShowRaw] = useState(() => {
-    if (isStreaming && mode === 'fast') return true;
-    return false;
-  });
+  // ★変更: FastモードでもデフォルトではRaw表示にしない
+  // ユーザーが明示的にボタンを押した時のみ生データ(JSON/Raw)を表示する
+  const [showRaw, setShowRaw] = useState(false);
 
   useEffect(() => {
     // ストリーミング終了時にRawモードを解除（通常表示に戻す）
@@ -78,8 +76,8 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
             {!isAi && renderCopyButton()}
 
             <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
-              {/* ★変更: Fastモード以外の場合のみボタンを表示する */}
-              {isAi && isStreaming && mode !== 'fast' && (
+              {/* Rawボタン: Fastモード以外でもデバッグ用に表示しても良いが、要件に従い調整可。ここでは全モードで有効化しておく */}
+              {isAi && isStreaming && (
                 <button
                   className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
                   onClick={() => setShowRaw(!showRaw)}
@@ -105,7 +103,7 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
                 <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
               )}
 
-              {isAi && isStreaming && isTextEmpty && !showRaw && (
+              {isAi && isStreaming && isTextEmpty && !showRaw && mode !== 'fast' && (
                 <SkeletonLoader />
               )}
 
@@ -125,6 +123,8 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
                   <MarkdownRenderer
                     content={text || ''}
                     isStreaming={isAi && isStreaming}
+                    // ★追加: Fastモードなら 'realtime'、それ以外は 'normal' を指定
+                    renderMode={mode === 'fast' ? 'realtime' : 'normal'}
                     citations={citations}
                     messageId={uniqueMessageId}
                     onOpenArtifact={onOpenArtifact}
