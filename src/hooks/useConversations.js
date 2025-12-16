@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchConversationsApi, deleteConversationApi, renameConversationApi } from '../api/dify';
-import { mockConversations } from '../mockData';
+import { mockConversations } from '../mocks/data';
 
 const USER_ID = 'poc-user-01';
 const PINNED_STORAGE_KEY = 'dify_pinned_conversations';

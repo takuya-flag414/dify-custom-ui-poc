@@ -1,6 +1,6 @@
 // src/hooks/useChat.js
 import { useState, useEffect, useRef } from 'react';
-import { mockMessages } from '../mockData';
+import { mockMessages } from '../mocks/data';
 import { MockStreamGenerator } from '../mocks/MockStreamGenerator';
 import { scenarios, scenarioSuggestions } from '../mocks/scenarios';
 import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi } from '../api/dify';
@@ -255,7 +255,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
   // --- メッセージ送信処理 ---
   const handleSendMessage = async (text, attachments = []) => {
     // 送信前の設定チェック (FE Modeでない場合)
-    if ((mockMode === 'OFF' || mockMode === 'BE' ) && (!apiKey || !apiUrl)) {
+    if ((mockMode === 'OFF' || mockMode === 'BE') && (!apiKey || !apiUrl)) {
       // ユーザーメッセージを表示
       const userMessage = {
         id: `msg_${Date.now()}_user`,
@@ -265,15 +265,15 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         files: attachments.map(f => ({ name: f.name }))
       };
       setMessages(prev => [...prev, userMessage]);
-      
+
       // 直後にエラーメッセージを表示して終了
       setTimeout(() => {
         setMessages(prev => [...prev, createConfigError()]);
       }, 200);
-      
+
       return; // 処理中断
     }
-    
+
     let uploadedFileIds = [];
     let displayFiles = [];
     const currentSettings = searchSettingsRef.current;
@@ -348,7 +348,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
     let reader;
     try {
       if (mockMode === 'FE') {
-        // --- FE Mock Mode Logic (省略なし) ---
+        // --- FE Mock Mode Logic ---
         const useRag = currentSettings.ragEnabled;
         const useWeb = currentSettings.webMode !== 'off';
         const hasFile = (attachments.length > 0 || sessionFiles.length > 0);
@@ -390,9 +390,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           weekday: 'long', hour: '2-digit', minute: '2-digit'
         });
 
-        // ★修正: 以前のファイルID (existingFileIds) は送信しない
-        // Difyワークフロー側で変数を保持させるため、APIには「今回の新規ファイル」だけ送ればOK
-
         const requestBody = {
           inputs: {
             isDebugMode: mockMode === 'BE',
@@ -406,7 +403,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           user: USER_ID,
           conversation_id: conversationId || '',
           response_mode: 'streaming',
-          // ★修正: ここを uploadedFileIds のみに戻す
           files: uploadedFileIds.map(id => ({
             type: 'document',
             transfer_method: 'local_file',
@@ -418,11 +414,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
       }
 
-      // --- Stream Handling (変更なし) ---
+      // --- Stream Handling ---
       let contentBuffer = '';
       let detectedTraceMode = 'knowledge';
       let isConversationIdSynced = false;
       let capturedOptimizedQuery = null;
+      // ★Protocol Lock: 'PENDING' | 'JSON' | 'RAW'
+      let protocolMode = 'PENDING';
 
       const currentDisplayFileName = attachments.length > 0
         ? attachments[0].name
@@ -447,8 +445,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               }
             }
 
-            // ... (Node Event Handling: node_started, node_finished などは変更なし) ...
-
+            // Node Events
             if (data.event === 'node_started') {
               const nodeType = data.data?.node_type;
               const title = data.data?.title;
@@ -459,7 +456,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               const isAssigner = nodeType === 'assigner' || (title && (title.includes('変数') || title.includes('Variable') || title.includes('Set Opt')));
 
               if (isSignificantNode && !isAssigner) {
-                // ... (省略: 前回のコードと同じ)
                 let displayTitle = title;
                 let iconType = 'default';
                 if (nodeType === 'document-extractor') {
@@ -531,12 +527,34 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               }
             }
 
+            // Message Event (Protocol Locking Implementation)
             else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
-                const parsed = parseLlmResponse(contentBuffer);
-                const isJsonStructure = contentBuffer.trim().startsWith('{') || contentBuffer.trim().startsWith('```');
-                const textToDisplay = parsed.isParsed ? parsed.answer : (isJsonStructure ? '' : contentBuffer);
+
+                // 1. プロトコル未確定時、最初の有意な文字でモードをロックする
+                if (protocolMode === 'PENDING') {
+                  const trimmed = contentBuffer.trimStart();
+                  if (trimmed.length > 0) {
+                    // '{' で始まればJSONモード、それ以外はRAWモードとみなす
+                    protocolMode = trimmed.startsWith('{') ? 'JSON' : 'RAW';
+                  }
+                }
+
+                // 2. モードに応じた表示テキストの決定
+                let textToDisplay = '';
+
+                if (protocolMode === 'JSON') {
+                  // JSONモード: 既存のパーサーを通して構造化データを抽出
+                  const parsed = parseLlmResponse(contentBuffer);
+                  textToDisplay = parsed.isParsed ? parsed.answer : ''; 
+                  // 部分抽出できない初期段階では空文字になる（待機）
+                } else {
+                  // RAWモード: 解析なしでバッファをそのまま表示（Fast Track用）
+                  textToDisplay = contentBuffer;
+                }
+
+                // 3. 画面更新
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
                   text: textToDisplay,
@@ -561,13 +579,19 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
             else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
-              const parsed = parseLlmResponse(finalText);
-              if (parsed.isParsed) {
-                finalText = parsed.answer;
-                if (parsed.citations.length > 0) {
-                  finalCitations = mapCitationsFromLLM(parsed.citations);
+              
+              // 最終結果の確定ロジックもモード別に分岐
+              if (protocolMode === 'JSON') {
+                const parsed = parseLlmResponse(finalText);
+                if (parsed.isParsed) {
+                  finalText = parsed.answer;
+                  if (parsed.citations.length > 0) {
+                    finalCitations = mapCitationsFromLLM(parsed.citations);
+                  }
                 }
               }
+              // RAWモードの場合は finalText = contentBuffer のままでOK
+
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                 ...m,
                 text: finalText,
@@ -597,10 +621,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         if (m.id === aiMessageId) {
           return {
             ...m,
-            role: 'system', // AIではなくシステムメッセージとして扱う
-            type: 'error',  // タイプ指定
-            text: '',       // テキストは空に（二重表示防止）
-            rawError: error.message, // 元のエラーメッセージを保持
+            role: 'system',
+            type: 'error',
+            text: '',
+            rawError: error.message,
             isStreaming: false,
             thoughtProcess: []
           };
