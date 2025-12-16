@@ -16,18 +16,20 @@ const svgProps = {
 // 🌐 Web (Fallback)
 const GlobeIcon = () => (
   <svg {...svgProps}>
-    <circle cx="12" cy="12" r="10" stroke="#6366F1" strokeWidth="2" />
-    <line x1="2" y1="12" x2="22" y2="12" stroke="#6366F1" strokeWidth="2" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="#6366F1" strokeWidth="2" />
+    {/* 色指定をCSS変数に置換 (Blue) */}
+    <circle cx="12" cy="12" r="10" stroke="var(--color-source-web)" strokeWidth="2" />
+    <line x1="2" y1="12" x2="22" y2="12" stroke="var(--color-source-web)" strokeWidth="2" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="var(--color-source-web)" strokeWidth="2" />
   </svg>
 );
 
 // 🏛️ RAG (Internal Database)
 const DatabaseIcon = () => (
   <svg {...svgProps}>
-    <ellipse cx="12" cy="5" rx="9" ry="3" stroke="#9333EA" strokeWidth="2" />
-    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="#9333EA" strokeWidth="2" />
-    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="#9333EA" strokeWidth="2" />
+    {/* 色指定をCSS変数に置換 (Green) */}
+    <ellipse cx="12" cy="5" rx="9" ry="3" stroke="var(--color-source-rag)" strokeWidth="2" />
+    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="var(--color-source-rag)" strokeWidth="2" />
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="var(--color-source-rag)" strokeWidth="2" />
   </svg>
 );
 
@@ -67,13 +69,15 @@ export const SourceIcon = ({ type, source, url, className = "citation-icon-img" 
       );
     }
     // フォールバック: 地球儀アイコン
-    return <div className={className} style={{ color: '#6366F1' }}><GlobeIcon /></div>;
+    // ★修正: inline styleの色指定をCSS変数に統一
+    return <div className={className} style={{ color: 'var(--color-source-web)' }}><GlobeIcon /></div>;
   }
 
   // 2. RAG (Internal Knowledge)
   // typeが'rag' または 'dataset' の場合にデータベースアイコンを表示
   if (type === 'rag' || type === 'dataset') {
-    return <div className={className} style={{ color: '#9333EA' }}><DatabaseIcon /></div>;
+    // ★修正: inline styleの色指定をCSS変数に統一
+    return <div className={className} style={{ color: 'var(--color-source-rag)' }}><DatabaseIcon /></div>;
   }
 
   // 3. Document / File (Extension based)

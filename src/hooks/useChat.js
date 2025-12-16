@@ -21,7 +21,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
   const [isGenerating, setIsGenerating] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
-  // 内部的には sessionFiles として管理するが、外部へは activeContextFiles として公開する
   const [sessionFiles, setSessionFiles] = useState([]);
 
   const [dynamicMockMessages, setDynamicMockMessages] = useState({});
@@ -113,20 +112,18 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           }
 
         } else {
-          // --- Real API Logic (ここが修正の主眼) ---
+          // --- Real API Logic ---
           if (typeof conversationId === 'string' && conversationId.startsWith('mock_')) {
             addLog(`[useChat] Skipping API call for mock ID in Real mode: ${conversationId}`, 'warn');
           } else {
 
-            // APIキーとURLの存在チェック
             if (!apiKey || !apiUrl) {
-              setMessages([createConfigError()]); // 即座にエラー表示
+              setMessages([createConfigError()]);
               setIsHistoryLoading(false);
               return;
             }
 
             const historyData = await fetchMessagesApi(conversationId, USER_ID, apiUrl, apiKey);
-            // Dify APIは新しい順で返すため、古い順（時系列）にソート
             const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
             const newMessages = [];
@@ -136,26 +133,20 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
             for (const item of chronologicalMessages) {
               const timestamp = item.created_at ? new Date(item.created_at * 1000).toISOString() : new Date().toISOString();
 
-              // User Message Processing
               if (item.query) {
-                // message_files からファイル情報を復元
                 const msgFiles = item.message_files ? item.message_files.map(f => {
-                  // ★修正: ファイル名取得ロジックの強化
                   let fileName = 'Attached File';
 
                   if (f.name) {
                     fileName = f.name;
-                  } else if (f.filename) { // 一部のAPIバージョン対応
+                  } else if (f.filename) {
                     fileName = f.filename;
                   } else if (f.url) {
                     try {
-                      // URLからファイル名を抽出
                       const decodedUrl = decodeURIComponent(f.url);
                       const urlFileName = decodedUrl.split('/').pop().split('?')[0];
 
-                      // Dify特有の隠蔽されたファイル名を検知して置換
                       if (urlFileName === 'file-preview' || urlFileName.includes('image_preview')) {
-                        // 拡張子が推定できれば付ける、できなければ汎用名
                         const ext = f.mime_type ? `.${f.mime_type.split('/')[1]}` : '';
                         fileName = `添付ファイル${ext}`;
                       } else {
@@ -172,7 +163,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                     type: f.type || 'document'
                   };
 
-                  // sessionFiles復元用にリストアップ（重複除外）
                   if (f.id && !seenFileIds.has(f.id)) {
                     seenFileIds.add(f.id);
                     restoredFiles.push(fileData);
@@ -189,18 +179,15 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 });
               }
 
-              // AI Message Processing
               if (item.answer) {
                 let aiText = item.answer;
                 let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
                 let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
 
-                // Markdownパース (JSON構造が含まれる場合の対応)
                 const parsed = parseLlmResponse(aiText);
 
                 if (parsed.isParsed) {
                   aiText = parsed.answer;
-                  // Citationsの結合ロジック
                   if (aiCitations.length === 0 && parsed.citations.length > 0) {
                     aiCitations = mapCitationsFromLLM(parsed.citations);
                     if (aiCitations.some(c => c.type === 'web')) traceMode = 'search';
@@ -216,7 +203,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                   text: aiText,
                   rawContent: item.answer,
                   citations: aiCitations,
-                  suggestions: [], // 履歴APIにはsuggestionは含まれないため空
+                  suggestions: [],
                   isStreaming: false,
                   timestamp: timestamp,
                   traceMode: traceMode,
@@ -228,7 +215,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
             setMessages(newMessages);
 
-            // ★重要: 復元したファイルをセッション状態にセット
             if (restoredFiles.length > 0) {
               setSessionFiles(restoredFiles);
               addLog(`[History] Restored ${restoredFiles.length} files from history.`, 'info');
@@ -237,7 +223,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         }
       } catch (error) {
         addLog(`[History Error] ${error.message}`, 'error');
-        // ★修正: エラー専用オブジェクトを追加
         setMessages([{ 
           id: 'err_history_load', 
           role: 'system', 
@@ -254,9 +239,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
   // --- メッセージ送信処理 ---
   const handleSendMessage = async (text, attachments = []) => {
-    // 送信前の設定チェック (FE Modeでない場合)
     if ((mockMode === 'OFF' || mockMode === 'BE') && (!apiKey || !apiUrl)) {
-      // ユーザーメッセージを表示
       const userMessage = {
         id: `msg_${Date.now()}_user`,
         role: 'user',
@@ -266,12 +249,11 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       };
       setMessages(prev => [...prev, userMessage]);
 
-      // 直後にエラーメッセージを表示して終了
       setTimeout(() => {
         setMessages(prev => [...prev, createConfigError()]);
       }, 200);
 
-      return; // 処理中断
+      return;
     }
 
     let uploadedFileIds = [];
@@ -282,7 +264,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       onConversationUpdated(conversationId);
     }
 
-    // 1. ファイルアップロード処理
     if (mockMode === 'OFF') {
       if (attachments.length > 0) {
         setIsGenerating(true);
@@ -296,7 +277,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
           uploadedFileIds = uploadedFiles.map(f => f.id);
           displayFiles = uploadedFiles.map(f => ({ name: f.name }));
 
-          // セッションファイルリストを更新（表示用）
           setSessionFiles(prev => [...prev, ...uploadedFiles]);
 
         } catch (e) {
@@ -306,7 +286,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         }
       }
     } else {
-      // Mock Mode
       if (attachments.length > 0) {
         displayFiles = attachments.map(f => ({ name: f.name }));
         const mockFiles = attachments.map((f, i) => ({
@@ -318,7 +297,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       }
     }
 
-    // 2. ユーザーメッセージをUIに追加
     const userMessage = {
       id: `msg_${Date.now()}_user`,
       role: 'user',
@@ -329,10 +307,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
     setMessages(prev => [...prev, userMessage]);
     setIsGenerating(true);
 
-    // 3. AIメッセージのプレースホルダー生成
     const aiMessageId = `msg_${Date.now()}_ai`;
-
-    // Fastモード判定 (RAG無効 かつ Web検索OFF)
     const isFastMode = !currentSettings.ragEnabled && currentSettings.webMode === 'off';
 
     setMessages(prev => [...prev, {
@@ -350,32 +325,33 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       mode: isFastMode ? 'fast' : 'normal'
     }]);
 
+    // ★今回の処理対象となる全ファイルリスト（履歴 + 新規添付）
+    const allActiveFiles = [...sessionFiles, ...attachments.map(f => ({ name: f.name }))];
+
     let reader;
     try {
       if (mockMode === 'FE') {
         // --- FE Mock Mode Logic ---
         const useRag = currentSettings.ragEnabled;
         const useWeb = currentSettings.webMode !== 'off';
-        const hasFile = (attachments.length > 0 || sessionFiles.length > 0);
+        const hasFile = allActiveFiles.length > 0;
 
         let scenarioKey = 'pure';
-
-        // ★追加・修正: Fast Mode判定を最優先に追加
-        // RAGもWeb検索もOFFの場合は、Fastモードとして扱う
         if (!useRag && !useWeb) {
           scenarioKey = hasFile ? 'fast_file' : 'fast_pure';
+        } else if (hasFile) {
+          if (!useRag && !useWeb) scenarioKey = 'file_only';
+          else if (!useRag && useWeb) scenarioKey = 'file_web';
+          else if (useRag && !useWeb) scenarioKey = 'file_rag';
+          else scenarioKey = 'full';
+        } else {
+          if (useRag && !useWeb) scenarioKey = 'rag_only';
+          else if (!useRag && useWeb) scenarioKey = 'web_only';
+          else if (useRag && useWeb) scenarioKey = 'hybrid';
         }
-        // 以下、既存のロジック
-        else if (!hasFile && useRag && !useWeb) scenarioKey = 'rag_only';
-        else if (!hasFile && !useRag && useWeb) scenarioKey = 'web_only';
-        else if (!hasFile && useRag && useWeb) scenarioKey = 'hybrid';
-        else if (hasFile && !useRag && !useWeb) scenarioKey = 'file_only';
-        else if (hasFile && !useRag && useWeb) scenarioKey = 'file_web';
-        else if (hasFile && useRag && !useWeb) scenarioKey = 'file_rag';
-        else if (hasFile && useRag && useWeb) scenarioKey = 'full';
 
         currentMockScenarioRef.current = scenarioKey;
-
+        
         let targetConvId = conversationId;
         if (!targetConvId) {
           const newMockId = `mock_gen_${Date.now()}`;
@@ -388,7 +364,48 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         }
 
         const generator = new MockStreamGenerator();
-        const targetScenario = scenarios[scenarioKey] || scenarios['pure'];
+        let baseScenario = scenarios[scenarioKey] || scenarios['pure'];
+        let targetScenario = [];
+
+        // ★動的ノード展開: 全シナリオ対応
+        // シナリオ内に 'document-extractor' が含まれており、かつファイルが複数ある場合、
+        // そのノードをファイル数分だけ展開する
+        if (hasFile && allActiveFiles.length > 0) {
+          baseScenario.forEach(step => {
+            if (step.data?.node_type === 'document-extractor') {
+              if (step.event === 'node_started') {
+                allActiveFiles.forEach((file, idx) => {
+                  targetScenario.push({
+                    ...step,
+                    data: {
+                      ...step.data,
+                      title: 'ドキュメント抽出',
+                      node_id: `mock_node_doc_${Date.now()}_${idx}`, 
+                      inputs: { target_file: file.name } // ★明示的にファイル名を埋め込む
+                    }
+                  });
+                });
+              } else if (step.event === 'node_finished') {
+                allActiveFiles.forEach((file, idx) => {
+                  targetScenario.push({
+                    ...step,
+                    data: {
+                      ...step.data,
+                      title: 'ドキュメント抽出',
+                      node_id: `mock_node_doc_${Date.now()}_${idx}`,
+                      status: 'succeeded'
+                    }
+                  });
+                });
+              }
+            } else {
+              targetScenario.push(step);
+            }
+          });
+        } else {
+          targetScenario = baseScenario;
+        }
+
         const stream = generator.getStream(targetScenario, targetConvId);
         reader = stream.pipeThrough(new TextDecoderStream()).getReader();
 
@@ -431,12 +448,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       let detectedTraceMode = 'knowledge';
       let isConversationIdSynced = false;
       let capturedOptimizedQuery = null;
-      // ★Protocol Lock: 'PENDING' | 'JSON' | 'RAW'
       let protocolMode = 'PENDING';
-
-      const currentDisplayFileName = attachments.length > 0
-        ? attachments[0].name
-        : (sessionFiles.length > 0 ? sessionFiles[sessionFiles.length - 1].name : null);
 
       while (true) {
         const { value, done } = await reader.read();
@@ -470,8 +482,30 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               if (isSignificantNode && !isAssigner) {
                 let displayTitle = title;
                 let iconType = 'default';
+                
+                // ★修正ポイント2: ファイル名解決ロジック (全モード共通)
                 if (nodeType === 'document-extractor') {
-                  const fileNameToDisplay = currentDisplayFileName || '添付ファイル';
+                  let fileNameToDisplay = '添付ファイル';
+
+                  // A. FE Mock: 明示的に埋め込んだ target_file を使用
+                  if (inputs.target_file) {
+                    fileNameToDisplay = inputs.target_file;
+                  }
+                  // B. Real API: inputs内の値とファイルリストを照合
+                  else {
+                    const inputValues = JSON.stringify(inputs);
+                    const matchedFile = allActiveFiles.find(f => inputValues.includes(f.name) || inputValues.includes(f.id));
+                    
+                    if (matchedFile) {
+                      fileNameToDisplay = matchedFile.name;
+                    } else if (allActiveFiles.length === 1) {
+                      fileNameToDisplay = allActiveFiles[0].name;
+                    } else if (allActiveFiles.length > 1) {
+                      // 特定不能な場合は汎用的な表現
+                      fileNameToDisplay = `${allActiveFiles.length}件のファイル`;
+                    }
+                  }
+
                   displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
                   detectedTraceMode = 'document';
                   iconType = 'document';
@@ -497,6 +531,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                     iconType = 'writing';
                   }
                 }
+                
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
                   traceMode: detectedTraceMode,
@@ -539,34 +574,26 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               }
             }
 
-            // Message Event (Protocol Locking Implementation)
             else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
 
-                // 1. プロトコル未確定時、最初の有意な文字でモードをロックする
                 if (protocolMode === 'PENDING') {
                   const trimmed = contentBuffer.trimStart();
                   if (trimmed.length > 0) {
-                    // '{' で始まればJSONモード、それ以外はRAWモードとみなす
                     protocolMode = trimmed.startsWith('{') ? 'JSON' : 'RAW';
                   }
                 }
 
-                // 2. モードに応じた表示テキストの決定
                 let textToDisplay = '';
 
                 if (protocolMode === 'JSON') {
-                  // JSONモード: 既存のパーサーを通して構造化データを抽出
                   const parsed = parseLlmResponse(contentBuffer);
                   textToDisplay = parsed.isParsed ? parsed.answer : ''; 
-                  // 部分抽出できない初期段階では空文字になる（待機）
                 } else {
-                  // RAWモード: 解析なしでバッファをそのまま表示（Fast Track用）
                   textToDisplay = contentBuffer;
                 }
 
-                // 3. 画面更新
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
                   text: textToDisplay,
@@ -592,7 +619,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               let finalText = contentBuffer;
               let finalCitations = [];
               
-              // 最終結果の確定ロジックもモード別に分岐
               if (protocolMode === 'JSON') {
                 const parsed = parseLlmResponse(finalText);
                 if (parsed.isParsed) {
@@ -602,7 +628,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                   }
                 }
               }
-              // RAWモードの場合は finalText = contentBuffer のままでOK
 
               setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                 ...m,
@@ -628,7 +653,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
     } catch (error) {
       addLog(`[Stream Error] ${error.message}`, 'error');
-      // AIメッセージをエラーメッセージへ置換
       setMessages(prev => prev.map(m => {
         if (m.id === aiMessageId) {
           return {
@@ -657,14 +681,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         return;
       }
 
-      // ★Fix: DIFY_API_URL/KEY ではなく、スコープ内の変数(apiUrl, apiKey)を使用
       const res = await fetchSuggestionsApi(msgId, USER_ID, apiUrl, apiKey);
 
       if (res.result === 'success') {
         setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, suggestions: res.data } : m));
       }
     } catch (e) {
-      // ★Fix: エラーを握りつぶさずログに出力（デバッグ用）
       addLog(`[Suggestions Error] ${e.message}`, 'error');
       console.error('[Suggestions Error]', e);
     }
@@ -676,7 +698,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
     isGenerating,
     isHistoryLoading,
     setIsLoading: setIsGenerating,
-    // ★重要変更: 内部名 sessionFiles を外部向けに activeContextFiles として公開
     activeContextFiles: sessionFiles,
     setActiveContextFiles: setSessionFiles,
     handleSendMessage,
