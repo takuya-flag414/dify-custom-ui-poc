@@ -359,8 +359,15 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         const hasFile = (attachments.length > 0 || sessionFiles.length > 0);
 
         let scenarioKey = 'pure';
-        if (!hasFile && !useRag && useWeb) scenarioKey = 'web_only';
+
+        // ★追加・修正: Fast Mode判定を最優先に追加
+        // RAGもWeb検索もOFFの場合は、Fastモードとして扱う
+        if (!useRag && !useWeb) {
+          scenarioKey = hasFile ? 'fast_file' : 'fast_pure';
+        }
+        // 以下、既存のロジック
         else if (!hasFile && useRag && !useWeb) scenarioKey = 'rag_only';
+        else if (!hasFile && !useRag && useWeb) scenarioKey = 'web_only';
         else if (!hasFile && useRag && useWeb) scenarioKey = 'hybrid';
         else if (hasFile && !useRag && !useWeb) scenarioKey = 'file_only';
         else if (hasFile && !useRag && useWeb) scenarioKey = 'file_web';

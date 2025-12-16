@@ -467,7 +467,69 @@ export const scenarios = {
       event: 'message_end',
       metadata: { retriever_resources: [] }
     }
+  ],
+
+  // =================================================================
+  // Pattern 9: Fast Mode (Pure) - ログ再現: Difyとは？
+  // =================================================================
+  'fast_pure': [
+    // Fastモード: 思考プロセス(Query Rewriter等)を省略し、即座に回答生成LLMから開始
+    {
+      event: 'node_started',
+      data: { title: 'Answer Generator', node_type: 'llm' }
+    },
+    {
+      event: 'message',
+      answer: createMockJson(
+        "### Difyとは\n\n**Dify**は、大規模言語モデル（LLM）を活用したエンタープライズ向けのAIチャットボット基盤です。このシステムは、社内向けに特化しており、OpenAIの軽量モデル「gpt-4o-mini」と、リアルタイムWeb検索機能を提供する「Perplexity API」を統合しています。\n\n#### 主な特徴\n- **コスト効率**: Difyは、テキスト対話にかかるコストを大幅に低下させることができるため、企業全体にAIアシスタントを導入する際の障壁を取り除きます。\n- **Web検索機能**: Perplexity APIを通じたWeb検索機能は、情報の取得を強化しますが、利用時には高コストが発生する可能性があります。\n- **ステートフルな対話**: Difyは対話履歴をコンテキストとして送信するため、連続した会話が可能ですが、それに伴うトークン消費が増加する特性があります。\n\nDifyは、企業の業務効率を向上させるための強力なツールとして位置付けられており、適切な管理と設定により、経済的に運用可能なAIソリューションを提供します。",
+        []
+      )
+    },
+    {
+      event: 'node_finished',
+      data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' }
+    },
+    {
+      event: 'message_end',
+      metadata: { retriever_resources: [] }
+    }
+  ],
+
+  // =================================================================
+  // Pattern 10: Fast Mode (File) - ログ再現: コスト試算PDF
+  // =================================================================
+  'fast_file': [
+    // ファイル抽出のみ実行
+    {
+      event: 'node_started',
+      data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } }
+    },
+    {
+      event: 'node_finished',
+      data: { title: 'ドキュメント抽出', status: 'succeeded' }
+    },
+    // 直ちに回答生成へ
+    {
+      event: 'node_started',
+      data: { title: 'Answer Generator', node_type: 'llm' }
+    },
+    {
+      event: 'message',
+      answer: createMockJson(
+        "### 概要\n\n本レポートは、**Dify**を基盤とした社内向けAIチャットボットの運用に関するコスト分析を提供します。特に、OpenAIの軽量モデル「gpt-4o-mini」とWeb検索機能を持つ「Perplexity API」を組み合わせた際の変動費構造に焦点を当てています。\n\n#### 主要な内容\n1. **エグゼクティブサマリー**:\n   - Difyの導入に向けた経済的実現可能性と予算策定の基礎を提供。\n   - コストの不確実性に対する詳細なシミュレーションを実施。\n\n2. **主要な発見と結論**:\n   - 知能のコモディティ化により、テキスト対話のコストが劇的に低下。\n   - Web検索機能は高コストであり、利用頻度によってコストが非対称になるリスク。\n   - Difyのアーキテクチャはトークン消費を増幅させる一方で、キャッシング機能によりコストを抑制。\n\n3. **コスト試算サマリー**:\n   - 月額コストの予測値をペルソナ別に示し、ユーザーの利用特性に基づいてコストを算出。\n\n4. **調査の背景と方法論**:\n   - 企業内での生成AI導入の必要性とリスクを明確化。\n\n5. **コスト構造の分析**:\n   - OpenAI gpt-4o-miniとPerplexity APIの価格構造と隠れたリスクを詳細に分析。\n\n6. **ペルソナ別コストシミュレーション**:\n   - Light User、Standard User、Heavy Userの3つのペルソナを定義し、それぞれの月額コストを試算。\n\n7. **戦略的推奨事項**:\n   - モデル選定の二極化、会話の要約機能の有効化、運用ガバナンスの強化などの推奨設定を提案。\n\n8. **最終結論**:\n   - Difyを利用したチャットボットの月額コストは「1社員あたりコーヒー1杯分」で運用可能。コストリスクを最小化しつつ、AIの恩恵を享受できる可能性を示唆。 \n\nこのように、Difyチャットボットの導入は、適切な管理と設定によって高いコスト効果を発揮することが期待されています。",
+        []
+      )
+    },
+    {
+      event: 'node_finished',
+      data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' }
+    },
+    {
+      event: 'message_end',
+      metadata: { retriever_resources: [] }
+    }
   ]
+
 };
 
 /**
@@ -513,5 +575,15 @@ export const scenarioSuggestions = {
     '次のステップは？',
     'リスク管理表の作成',
     'ステークホルダーへの報告'
+  ],
+  'fast_pure': [
+    'Difyのコストは？',
+    'Perplexity APIとは？',
+    'Difyの利点は？'
+  ],
+  'fast_file': [
+    'Difyとは何ですか？',
+    'gpt-4o-miniとは何ですか？',
+    'コストはどの程度かかりますか？'
   ]
 };
