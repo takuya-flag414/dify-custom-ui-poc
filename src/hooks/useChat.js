@@ -331,6 +331,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
     // 3. AIメッセージのプレースホルダー生成
     const aiMessageId = `msg_${Date.now()}_ai`;
+
+    // Fastモード判定 (RAG無効 かつ Web検索OFF)
+    const isFastMode = !currentSettings.ragEnabled && currentSettings.webMode === 'off';
+
     setMessages(prev => [...prev, {
       id: aiMessageId,
       role: 'ai',
@@ -342,7 +346,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       timestamp: new Date().toISOString(),
       traceMode: 'knowledge',
       thoughtProcess: [],
-      processStatus: null
+      processStatus: null,
+      mode: isFastMode ? 'fast' : 'normal'
     }]);
 
     let reader;

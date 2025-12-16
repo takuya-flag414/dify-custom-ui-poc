@@ -629,22 +629,68 @@
   background-color: #3B82F6;
 }
 
-/* Raw Content View */
+/* Raw Content View (Unified Style) */
 .raw-content-view {
-  background-color: #111827;
-  color: #10B981;
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  padding: 16px;
-  border-radius: 8px;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-break: break-all;
-  min-height: 60px;
+  /* 背景・色は親要素(message-bubble)を継承し、透明に設定 */
+  background-color: transparent;
+  color: var(--color-text-main);
+
+  /* ★変更: 完了後の表示と合わせるため、フォント設定をすべて親から継承します */
+  font-family: inherit; /* 等幅(monospace)を廃止し、Noto Sans JP等を適用 */
+  font-size: inherit;   /* 親の15pxを継承 */
+  line-height: inherit; /* 親の1.6を継承 */
+
+  /* 余白・枠線・影をリセット */
+  padding: 0;
   margin: 0;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-  border: 1px solid #374151;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  /* テキストの折り返し制御 */
+  overflow-x: hidden; /* 横スクロールもさせず、文書として折り返す */
+  white-space: pre-wrap; /* 改行は維持する */
+  word-break: break-word;
+
+  /* データ受信待ち時の高さ確保 */
+  min-height: 24px;
+}
+
+/* Rawモード: 待機状態のコンテナ */
+.raw-empty-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-muted); /* #6B7280 */
+  font-family: inherit; /* 親フォントを継承して違和感をなくす */
+  font-size: inherit;
+  line-height: 1.6;
+  opacity: 0.9;
+  padding: 2px 0;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 点滅するカーソル (Typewriter Effect) */
+.raw-cursor {
+  display: inline-block;
+  width: 3px; /* 視認性を高めるため少し太めに */
+  height: 1.1em; /* 行の高さに合わせる */
+  background-color: var(--color-primary); /* #3B82F6 (Brand Blue) */
+  border-radius: 1px;
+  animation: raw-blink 1s step-end infinite;
+}
+
+/* 待機メッセージテキスト */
+.raw-loading-text {
+  font-size: 0.95em;
+  font-weight: 500;
+  letter-spacing: 0.02em; /* 日本語の可読性調整 */
+}
+
+/* カーソルの点滅アニメーション */
+@keyframes raw-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 /* --- Staggered Animation Logic --- */

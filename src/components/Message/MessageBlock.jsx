@@ -28,12 +28,18 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
     files,
     traceMode,
     messageId,
-    id
+    id,
+    mode // useChatから渡されるモード情報
   } = message;
 
-  const [showRaw, setShowRaw] = useState(false);
+  // Fastモードかつストリーミング中なら、初期状態でRaw表示にする
+  const [showRaw, setShowRaw] = useState(() => {
+    if (isStreaming && mode === 'fast') return true;
+    return false;
+  });
 
   useEffect(() => {
+    // ストリーミング終了時にRawモードを解除（通常表示に戻す）
     if (!isStreaming) {
       setShowRaw(false);
     }
@@ -72,7 +78,8 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
             {!isAi && renderCopyButton()}
 
             <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
-              {isAi && isStreaming && (
+              {/* ★変更: Fastモード以外の場合のみボタンを表示する */}
+              {isAi && isStreaming && mode !== 'fast' && (
                 <button
                   className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
                   onClick={() => setShowRaw(!showRaw)}
@@ -82,7 +89,6 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
                 </button>
               )}
 
-              {/* ★変更: 複数ファイル表示に対応 */}
               {!isAi && files && files.length > 0 && (
                 <div className="file-attachments-wrapper">
                   {files.map((file, index) => (
@@ -94,7 +100,8 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
                 </div>
               )}
 
-              {isAi && thoughtProcess && thoughtProcess.length > 0 && !showRaw && (
+              {/* 思考プロセスは常に表示 */}
+              {isAi && thoughtProcess && thoughtProcess.length > 0 && (
                 <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
               )}
 
@@ -104,7 +111,14 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
 
               {showRaw ? (
                 <pre className="raw-content-view">
-                  {rawContent || '(データ受信待機中...)'}
+                  {rawContent ? (
+                    rawContent
+                  ) : (
+                    <div className="raw-empty-state">
+                      <span className="raw-cursor"></span>
+                      <span className="raw-loading-text">AIからの応答を待機しています...</span>
+                    </div>
+                  )}
                 </pre>
               ) : (
                 !isTextEmpty && (
@@ -151,7 +165,6 @@ const arePropsEqual = (prev, next) => {
     && p.citations === n.citations
     && p.suggestions === n.suggestions
     && JSON.stringify(p.thoughtProcess) === JSON.stringify(n.thoughtProcess)
-    // ファイル数や内容が変わった場合も再レンダリング
     && JSON.stringify(p.files) === JSON.stringify(n.files);
 };
 
