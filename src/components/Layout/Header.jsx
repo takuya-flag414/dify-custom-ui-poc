@@ -1,8 +1,10 @@
 // src/components/Layout/Header.jsx
 import React, { useState } from 'react';
 import MockModeSelect from '../Chat/MockModeSelect';
-import { SettingsIcon, ClipboardIcon } from '../Shared/SystemIcons';
+import { SettingsIcon, ClipboardIcon, ReviewIcon } from '../Shared/SystemIcons';
 import './Header.css';
+
+const REVIEW_URL = "https://www.notion.so/2cc8d90598a080e4b024e51b89bc7eaa";
 
 // 完了アイコン
 const CheckIcon = (props) => (
@@ -48,6 +50,17 @@ const Header = ({
 
             {/* Right: Utilities */}
             <div className="header-right">
+                <a
+                    href={REVIEW_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="header-btn"
+                    title="パイロット版のフィードバックを送る"
+                    aria-label="レビューを書く（別タブで開きます）"
+                    >
+                    <ReviewIcon width="14" height="14" />
+                    レビュー
+                </a>
                 {/* ★追加: チュートリアル開始ボタン */}
                 <button
                     className="header-btn"
