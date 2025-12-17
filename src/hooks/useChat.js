@@ -16,6 +16,78 @@ const DEFAULT_SEARCH_SETTINGS = {
   domainFilters: []
 };
 
+// パフォーマンス計測用トラッカー
+const createPerfTracker = (addLog) => ({
+  start: 0,
+  firstByte: 0,
+  firstToken: 0,
+  end: 0,
+  charCount: 0,
+  steps: [],
+  activeNodes: {},
+
+  markStart() { this.start = performance.now(); },
+  markFirstByte() { if (!this.firstByte) this.firstByte = performance.now(); },
+  markNodeStart(nodeId, title) { this.activeNodes[nodeId] = { title, start: performance.now() }; },
+  markNodeEnd(nodeId) {
+    const node = this.activeNodes[nodeId];
+    if (node) {
+      this.steps.push({ name: node.title, duration: performance.now() - node.start });
+      delete this.activeNodes[nodeId];
+    }
+  },
+  markFirstToken() { if (!this.firstToken) this.firstToken = performance.now(); },
+  incrementChars(text) { this.charCount += (text ? text.length : 0); },
+  markEnd() { this.end = performance.now(); },
+
+  logReport(query) {
+    const now = performance.now();
+    const endTime = this.end || now;
+    const totalTime = endTime - this.start;
+    const ttfb = this.firstByte ? this.firstByte - this.start : 0;
+    const ttft = this.firstToken ? this.firstToken - this.start : 0;
+    const thinkingTotal = this.steps.reduce((sum, s) => sum + s.duration, 0);
+    const displayDuration = this.firstToken ? (endTime - this.firstToken) : 0;
+    const cps = displayDuration > 0 ? (this.charCount / (displayDuration / 1000)) : 0;
+
+    // 1. 開発者ツール向けのリッチなログ（既存）
+    console.groupCollapsed(`🚀 [Perf] Message Cycle: "${query.length > 20 ? query.substring(0, 20) + '...' : query}"`);
+    console.log(`⏱️ Total Cycle: ${totalTime.toFixed(2)}ms`);
+    console.log(`📡 TTFB (Network+Upload): ${ttfb.toFixed(2)}ms`);
+    console.log(`👀 TTFT (Wait for Text): ${ttft.toFixed(2)}ms`);
+    if (this.steps.length > 0) {
+      console.log(`🧠 Thinking Process (Total: ${thinkingTotal.toFixed(2)}ms)`);
+      console.table(this.steps.map(s => ({ Step: s.name, Time: `${s.duration.toFixed(2)}ms` })));
+    }
+    if (this.firstToken) {
+       console.log(`📺 Display Duration: ${displayDuration.toFixed(2)}ms`);
+       console.log(`⚡ Throughput: ${cps.toFixed(1)} chars/sec (Total: ${this.charCount} chars)`);
+    }
+    console.groupEnd();
+
+    // 2. ★追加: 「ログをコピー」ボタン用のテキストログ保存
+    if (addLog) {
+      const shortQuery = query.length > 15 ? query.substring(0, 15) + '...' : query;
+      let logText = `[Perf] Cycle: "${shortQuery}" | Total: ${totalTime.toFixed(0)}ms | TTFB: ${ttfb.toFixed(0)}ms | TTFT: ${ttft.toFixed(0)}ms`;
+      
+      if (this.steps.length > 0) {
+        logText += ` | Thinking: ${thinkingTotal.toFixed(0)}ms (${this.steps.length} steps)`;
+      }
+      if (this.firstToken) {
+        logText += ` | Speed: ${cps.toFixed(1)} chars/s`;
+      }
+      
+      addLog(logText, 'info');
+      
+      // 思考プロセスの詳細も別行で記録（必要であれば）
+      if (this.steps.length > 0) {
+        const stepsLog = this.steps.map(s => `  - ${s.name}: ${s.duration.toFixed(0)}ms`).join('\n');
+        addLog(`[Perf Details]\n${stepsLog}`, 'debug');
+      }
+    }
+  }
+});
+
 export const useChat = (mockMode, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl) => {
   const [messages, setMessages] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -239,6 +311,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
   // --- メッセージ送信処理 ---
   const handleSendMessage = async (text, attachments = []) => {
+    // ★計測開始
+    const tracker = createPerfTracker(addLog);
+    tracker.markStart();
+
     if ((mockMode === 'OFF' || mockMode === 'BE') && (!apiKey || !apiUrl)) {
       const userMessage = {
         id: `msg_${Date.now()}_user`,
@@ -325,7 +401,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       mode: isFastMode ? 'fast' : 'normal'
     }]);
 
-    // ★今回の処理対象となる全ファイルリスト（履歴 + 新規添付）
     const allActiveFiles = [...sessionFiles, ...attachments.map(f => ({ name: f.name }))];
 
     let reader;
@@ -367,9 +442,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         let baseScenario = scenarios[scenarioKey] || scenarios['pure'];
         let targetScenario = [];
 
-        // ★動的ノード展開: 全シナリオ対応
-        // シナリオ内に 'document-extractor' が含まれており、かつファイルが複数ある場合、
-        // そのノードをファイル数分だけ展開する
         if (hasFile && allActiveFiles.length > 0) {
           baseScenario.forEach(step => {
             if (step.data?.node_type === 'document-extractor') {
@@ -381,7 +453,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                       ...step.data,
                       title: 'ドキュメント抽出',
                       node_id: `mock_node_doc_${Date.now()}_${idx}`, 
-                      inputs: { target_file: file.name } // ★明示的にファイル名を埋め込む
+                      inputs: { target_file: file.name }
                     }
                   });
                 });
@@ -452,6 +524,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
       while (true) {
         const { value, done } = await reader.read();
+        
+        // ★計測: 最初のバイト受信
+        tracker.markFirstByte();
+
         if (done) break;
 
         const lines = value.split('\n').filter(line => line.trim() !== '');
@@ -483,25 +559,18 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 let displayTitle = title;
                 let iconType = 'default';
                 
-                // ★修正ポイント2: ファイル名解決ロジック (全モード共通)
                 if (nodeType === 'document-extractor') {
                   let fileNameToDisplay = '添付ファイル';
-
-                  // A. FE Mock: 明示的に埋め込んだ target_file を使用
                   if (inputs.target_file) {
                     fileNameToDisplay = inputs.target_file;
-                  }
-                  // B. Real API: inputs内の値とファイルリストを照合
-                  else {
+                  } else {
                     const inputValues = JSON.stringify(inputs);
                     const matchedFile = allActiveFiles.find(f => inputValues.includes(f.name) || inputValues.includes(f.id));
-                    
                     if (matchedFile) {
                       fileNameToDisplay = matchedFile.name;
                     } else if (allActiveFiles.length === 1) {
                       fileNameToDisplay = allActiveFiles[0].name;
                     } else if (allActiveFiles.length > 1) {
-                      // 特定不能な場合は汎用的な表現
                       fileNameToDisplay = `${allActiveFiles.length}件のファイル`;
                     }
                   }
@@ -532,6 +601,9 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                   }
                 }
                 
+                // ★計測: ノード開始
+                tracker.markNodeStart(nodeId, displayTitle);
+
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
                   traceMode: detectedTraceMode,
@@ -546,6 +618,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               const nodeId = data.data?.node_id;
               const title = data.data?.title;
               const outputs = data.data?.outputs;
+
+              // ★計測: ノード終了
+              if (nodeId) tracker.markNodeEnd(nodeId);
+
               if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
                 const generatedText = outputs?.text || outputs?.answer;
                 if (generatedText) capturedOptimizedQuery = generatedText.trim();
@@ -577,6 +653,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
             else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
+
+                // ★計測: テキスト受信
+                tracker.markFirstToken();
+                tracker.incrementChars(data.answer);
 
                 if (protocolMode === 'PENDING') {
                   const trimmed = contentBuffer.trimStart();
@@ -650,6 +730,10 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         }
       }
       setIsGenerating(false);
+
+      // ★計測完了・レポート出力
+      tracker.markEnd();
+      tracker.logReport(text);
 
     } catch (error) {
       addLog(`[Stream Error] ${error.message}`, 'error');

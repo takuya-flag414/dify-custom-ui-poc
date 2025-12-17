@@ -1,5 +1,5 @@
 // src/components/Chat/ChatArea.jsx
-import React from 'react';
+import React, { useCallback } from 'react'; // ★追加: useCallback
 import '../../App.css';
 import './ChatArea.css';
 
@@ -12,7 +12,6 @@ const ChatArea = (props) => {
     messages,
     isGenerating,
     isHistoryLoading,
-    // mockMode, setMockMode, handleCopyLogs... などのトップバー用Propsは削除（App側でHeaderに渡すため）
     activeContextFiles,
     setActiveContextFiles,
     onSendMessage,
@@ -25,10 +24,13 @@ const ChatArea = (props) => {
   // 初期状態: メッセージ0件 かつ 履歴ロード中でない
   const isInitialState = messages.length === 0 && !isHistoryLoading;
 
+  // ★追加: 関数をメモ化して、ChatHistoryの再レンダリングを抑制する
+  const handleSuggestionClick = useCallback((q) => {
+    onSendMessage(q, []);
+  }, [onSendMessage]);
+
   return (
     <div className="chat-area">
-      {/* ★削除: top-bar-container */}
-
       {isHistoryLoading ? (
         <>
           <HistorySkeleton />
@@ -70,7 +72,7 @@ const ChatArea = (props) => {
         <>
           <ChatHistory
             messages={messages}
-            onSuggestionClick={(q) => onSendMessage(q, [])}
+            onSuggestionClick={handleSuggestionClick} // ★変更: メモ化した関数を渡す
             isLoading={isGenerating}
             onSendMessage={onSendMessage}
             onOpenConfig={onOpenConfig}

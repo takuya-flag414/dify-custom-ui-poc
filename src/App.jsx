@@ -1,5 +1,6 @@
 // src/App.jsx
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'; // ★追加: アニメーション用
 import './App.css';
 import './index.css';
 
@@ -14,7 +15,6 @@ import { useConversations } from './hooks/useConversations';
 import { useChat } from './hooks/useChat';
 import { useApiConfig } from './hooks/useApiConfig';
 
-// ★追加 1: チュートリアル関連のインポート
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
 
@@ -26,11 +26,11 @@ function App() {
   const [activeArtifact, setActiveArtifact] = useState(null);
   const [isArtifactOpen, setIsArtifactOpen] = useState(false);
 
-  // ★追加 2: チュートリアルStateの初期化
+  // チュートリアルState
   const {
     isActive: isTutorialActive,
     startTutorial,
-    ...tutorialProps // step, currentStepIndex, onNext... などをまとめて受け取る
+    ...tutorialProps
   } = useTutorial();
 
   const openArtifact = (artifact) => {
@@ -105,9 +105,37 @@ function App() {
     '--sidebar-width': isSidebarCollapsed ? '68px' : '260px',
   };
 
+  // ★追加: 画面遷移のアニメーション定義 (macOS Focus Style)
+  const pageTransitionVariants = {
+    initial: {
+      opacity: 0,
+      y: 10, // 少し下から
+      scale: 0.99, // わずかに縮小
+      filter: "blur(4px)" // ぼかしを入れるとよりリッチになる
+    },
+    enter: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: {
+        duration: 0.4,
+        ease: [0.25, 1, 0.5, 1], // Apple-like easeOut
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.99,
+      filter: "blur(2px)",
+      transition: {
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
     <div className="app" style={appStyle}>
-      {/* ★追加 3: チュートリアルオーバーレイの配置 */}
       <TutorialOverlay
         isActive={isTutorialActive}
         {...tutorialProps}
@@ -145,7 +173,6 @@ function App() {
           handleCopyLogs={handleCopyLogs}
           copyButtonText={copyButtonText}
           messages={messages}
-          // ★追加 4: 開始関数を渡す
           onStartTutorial={startTutorial}
         />
 
@@ -154,22 +181,40 @@ function App() {
 
           {/* Chat Area Wrapper */}
           <div className="chat-area-wrapper">
-            <ChatArea
-              messages={messages}
-              setMessages={setMessages}
-              isGenerating={isGenerating}
-              isHistoryLoading={isHistoryLoading}
-              conversationId={conversationId}
-              addLog={addLog}
-              onConversationCreated={handleConversationCreated}
-              activeContextFiles={activeContextFiles}
-              setActiveContextFiles={setActiveContextFiles}
-              onSendMessage={handleSendMessage}
-              searchSettings={searchSettings}
-              setSearchSettings={setSearchSettings}
-              onOpenConfig={() => setIsConfigModalOpen(true)}
-              onOpenArtifact={openArtifact}
-            />
+            {/* ★変更: AnimatePresenceでラップして遷移アニメーションを適用 */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={conversationId || 'new-chat'} // IDが変わるたびにアニメーション発火
+                className="chat-content-motion-wrapper"
+                variants={pageTransitionVariants}
+                initial="initial"
+                animate="enter"
+                exit="exit"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <ChatArea
+                  messages={messages}
+                  setMessages={setMessages}
+                  isGenerating={isGenerating}
+                  isHistoryLoading={isHistoryLoading}
+                  conversationId={conversationId}
+                  addLog={addLog}
+                  onConversationCreated={handleConversationCreated}
+                  activeContextFiles={activeContextFiles}
+                  setActiveContextFiles={setActiveContextFiles}
+                  onSendMessage={handleSendMessage}
+                  searchSettings={searchSettings}
+                  setSearchSettings={setSearchSettings}
+                  onOpenConfig={() => setIsConfigModalOpen(true)}
+                  onOpenArtifact={openArtifact}
+                />
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Artifact Panel Wrapper (Floating Island) */}

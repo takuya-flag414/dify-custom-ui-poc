@@ -32,12 +32,9 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
     mode // 'fast' | 'normal'
   } = message;
 
-  // ★変更: FastモードでもデフォルトではRaw表示にしない
-  // ユーザーが明示的にボタンを押した時のみ生データ(JSON/Raw)を表示する
   const [showRaw, setShowRaw] = useState(false);
 
   useEffect(() => {
-    // ストリーミング終了時にRawモードを解除（通常表示に戻す）
     if (!isStreaming) {
       setShowRaw(false);
     }
@@ -76,7 +73,6 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
             {!isAi && renderCopyButton()}
 
             <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
-              {/* Rawボタン: Fastモード以外でもデバッグ用に表示しても良いが、要件に従い調整可。ここでは全モードで有効化しておく */}
               {isAi && isStreaming && (
                 <button
                   className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
@@ -98,7 +94,6 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
                 </div>
               )}
 
-              {/* 思考プロセスは常に表示 */}
               {isAi && thoughtProcess && thoughtProcess.length > 0 && (
                 <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
               )}
@@ -123,7 +118,6 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
                   <MarkdownRenderer
                     content={text || ''}
                     isStreaming={isAi && isStreaming}
-                    // ★追加: Fastモードなら 'realtime'、それ以外は 'normal' を指定
                     renderMode={mode === 'fast' ? 'realtime' : 'normal'}
                     citations={citations}
                     messageId={uniqueMessageId}
@@ -149,23 +143,39 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
   );
 };
 
+// ★修正: JSON.stringifyを排除し、高速な参照比較へ変更
 const arePropsEqual = (prev, next) => {
+  // 1. メッセージオブジェクト自体の参照が同じなら、中身は変わっていないとみなす（最速）
+  if (prev.message === next.message) {
+    // ただし、親から渡される関数Propsが変わっていないかチェック
+    // (useCallbackされていれば、ここも等価になるはず)
+    return prev.onSuggestionClick === next.onSuggestionClick
+      && prev.onOpenArtifact === next.onOpenArtifact
+      && prev.className === next.className
+      && prev.style === next.style;
+  }
+
+  // 2. 参照が違う場合（ストリーミング中の更新など）、必要なフィールドだけ浅く比較
   const p = prev.message;
   const n = next.message;
 
-  if (prev.className !== next.className || JSON.stringify(prev.style) !== JSON.stringify(next.style)) {
-    return false;
-  }
-
-  return p.id === n.id
+  // 主要なプリミティブ値の比較
+  const isPrimitiveEqual =
+    p.id === n.id
     && p.text === n.text
-    && p.rawContent === n.rawContent
     && p.isStreaming === n.isStreaming
+    && p.rawContent === n.rawContent
     && p.traceMode === n.traceMode
-    && p.citations === n.citations
+    && p.mode === n.mode; // Fast/Normalモード
+
+  if (!isPrimitiveEqual) return false;
+
+  // 配列・オブジェクトの比較（参照チェックのみで高速化）
+  // ReactのState更新がイミュータブルに行われていれば、中身が変われば参照も変わるはず
+  return p.citations === n.citations
     && p.suggestions === n.suggestions
-    && JSON.stringify(p.thoughtProcess) === JSON.stringify(n.thoughtProcess)
-    && JSON.stringify(p.files) === JSON.stringify(n.files);
+    && p.thoughtProcess === n.thoughtProcess
+    && p.files === n.files;
 };
 
 export default React.memo(MessageBlock, arePropsEqual);

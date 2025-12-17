@@ -56,6 +56,63 @@ const RenameInput = ({ initialValue, onSave, onCancel }) => {
   );
 };
 
+// ★追加: アニメーション付き「Compose」アイコン
+const ComposeIcon = () => {
+  // 鉛筆のアニメーション定義
+  const pencilVariants = {
+    rest: {
+      y: 0,
+      x: 0,
+      rotate: 0
+    },
+    hover: {
+      y: -2,      // 少し持ち上げる
+      x: 2,       // 書き始める位置へ移動
+      rotate: -12, // 書く角度に傾ける
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 15
+      }
+    }
+  };
+
+  // 筆跡（Wiggle）アニメーション
+  const scribbleVariants = {
+    rest: { pathLength: 0, opacity: 0 },
+    hover: {
+      pathLength: 1,
+      opacity: 1,
+      transition: { duration: 0.3, delay: 0.1 }
+    }
+  };
+
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+      {/* 1. ノート部分（ベース） - 静止 */}
+      <path
+        d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* 2. 鉛筆部分 - 親のホバーに合わせて動く */}
+      <motion.g variants={pencilVariants}>
+        <path
+          d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="var(--color-bg-surface)" // 鉛筆の中を白くして線と重ならないように
+        />
+      </motion.g>
+    </svg>
+  );
+};
+
 const Sidebar = ({
   conversationId,
   setConversationId,
@@ -158,7 +215,7 @@ const Sidebar = ({
 
   return (
     <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}
-      data-tutorial="sidebar" // ★追加: サイドバー全体をターゲット
+      data-tutorial="sidebar"
     >
 
       {/* Header */}
@@ -176,17 +233,41 @@ const Sidebar = ({
         </button>
       </div>
 
-      {/* New Chat Button */}
+      {/* New Chat Button (Plan A: Writing Pencil) */}
       <div className="new-chat-wrapper">
         <motion.button
           className="new-chat-button"
           onClick={handleNewChat}
-          whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
-          title={isCollapsed ? "新しいチャット" : ""}
+          initial="rest"
+          whileHover="hover"
+          whileTap={{ scale: 0.98 }}
+          title={isCollapsed ? "新しいチャット (⌘N)" : "新しいチャット (⌘N)"}
         >
-          <div className="new-chat-icon"><NewChatIcon /></div>
-          <span className="new-chat-text">新しいチャット</span>
+          <div className="new-chat-icon">
+            <ComposeIcon />
+          </div>
+
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.span
+                className="new-chat-text"
+                initial={{ opacity: 0, width: 0, x: -10 }}
+                animate={{
+                  opacity: 1,
+                  width: "auto",
+                  x: 0,
+                  transition: { duration: 0.3, ease: "easeOut", delay: 0.05 }
+                }}
+                exit={{
+                  opacity: 0,
+                  width: 0,
+                  transition: { duration: 0.2 }
+                }}
+              >
+                新しいチャット
+              </motion.span>
+            )}
+          </AnimatePresence>
         </motion.button>
       </div>
 
@@ -219,7 +300,6 @@ const Sidebar = ({
                       className={`conversation-item group ${conv.id === conversationId ? 'active' : ''}`}
                       onClick={() => !isRenaming && handleSelectConversation(conv.id)}
                     >
-                      {/* --- ラッパー: テキストまたは編集フォーム --- */}
                       <div className="conversation-name-wrapper">
                         {isRenaming ? (
                           <RenameInput
@@ -234,7 +314,6 @@ const Sidebar = ({
                         )}
                       </div>
 
-                      {/* --- アイコン類 (縮小禁止) --- */}
                       {!isRenaming && (
                         <>
                           {isPinned && !isCollapsed && (
@@ -284,17 +363,13 @@ const Sidebar = ({
   );
 };
 
-// --- Icons (変更なし) ---
+// --- Icons ---
 const LogoIcon = () => (
   <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" />
   </svg>
 );
-const NewChatIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+// NewChatIcon is replaced by ComposeIcon defined above
 const MoreIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="1" />
