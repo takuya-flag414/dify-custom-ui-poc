@@ -15,8 +15,8 @@ import {
 
 const DIFY_CLOUD_URL = 'https://api.dify.ai/v1';
 
-// ★変更: addLogを受け取る
-const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave, mockMode, addLog }) => {
+// mockMode は Props として受け取りますが、もはやバリデーション緩和には使いません
+const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave, mockMode }) => {
     const [apiKey, setApiKey] = useState('');
     const [apiUrl, setApiUrl] = useState('');
     const [showKey, setShowKey] = useState(false);
@@ -27,6 +27,7 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
 
     const { checkConnection } = useApiConfig();
 
+    // モーダルが開くたびに初期化
     useEffect(() => {
         if (isOpen) {
             setApiKey(currentApiKey || '');
@@ -34,16 +35,12 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
             setStatus('idle');
             setStatusMessage('');
             setShowKey(false);
-
-            // ★追加: モーダルオープン時の状態をログ出力
-            if (addLog) {
-                addLog(`[ApiConfig] Modal Opened. MockMode: ${mockMode}, HasKey: ${!!currentApiKey}, HasUrl: ${!!currentApiUrl}`, 'debug');
-            }
         }
-    }, [isOpen, currentApiKey, currentApiUrl, mockMode, addLog]);
+    }, [isOpen, currentApiKey, currentApiUrl]);
 
     if (!isOpen) return null;
 
+    // バリデーションと整形
     const formatUrl = (url) => {
         let formatted = url.trim();
         if (formatted.endsWith('/')) {
@@ -54,16 +51,9 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
 
     const handleTestAndSave = async () => {
         const formattedUrl = formatUrl(apiUrl);
-
-        // ログ出力
-        if (addLog) {
-            addLog(`[ApiConfig] Test & Save clicked. Mode: ${mockMode}, KeyLength: ${apiKey.length}, URL: ${formattedUrl}`, 'info');
-        }
-
-        // バリデーションログ
-        if (mockMode !== 'FE' && !apiKey.trim()) {
-            const msg = 'APIキーを入力してください (Non-FE Mode)';
-            if (addLog) addLog(`[ApiConfig] Validation Failed: ${msg}`, 'warn');
+        
+        // ★変更: モードに関わらず必須チェック
+        if (!apiKey.trim()) {
             setStatus('error');
             setStatusMessage('APIキーを入力してください');
             return;
@@ -73,40 +63,31 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
         setStatusMessage('接続を確認中...');
 
         try {
-            if (addLog) addLog('[ApiConfig] Calling checkConnection...', 'debug');
-
+            // Adapterは常にリアルな通信を行うようになった
             await checkConnection(apiKey, formattedUrl, mockMode);
-
-            if (addLog) addLog('[ApiConfig] Connection check passed.', 'success');
 
             setStatus('success');
             setStatusMessage('接続に成功しました');
 
             setTimeout(() => {
-                if (addLog) addLog('[ApiConfig] Saving config and closing.', 'info');
                 onSave(apiKey, formattedUrl);
                 onClose();
             }, 1000);
 
         } catch (error) {
-            const errorMsg = error.message || '不明なエラー';
-            if (addLog) addLog(`[ApiConfig] Connection Failed: ${errorMsg}`, 'error');
-
             setStatus('error');
-            setStatusMessage(`接続失敗: ${errorMsg}`);
+            setStatusMessage(`接続失敗: ${error.message || '不明なエラー'}`);
         }
     };
 
-    // ボタンの有効化状態
-    const isFormValid = mockMode === 'FE' || (apiUrl && apiKey);
-
-    // ★追加: バリデーション状態の変化をデバッグ
-    // (頻繁に出るのを防ぐため、ボタンクリック時または値確定時に見るのが良いが、今回はデバッグのためシンプルに)
+    // ★変更: APIKeyとURLがある場合のみ有効
+    const isFormValid = apiUrl && apiKey;
 
     return (
         <div className="api-modal-overlay">
             <div className="api-modal-container">
-
+                
+                {/* Header */}
                 <div className="api-modal-header">
                     <div className="icon-wrapper">
                         <CloudIcon width="24" height="24" color="var(--color-primary)" />
@@ -117,15 +98,12 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                     </div>
                 </div>
 
+                {/* Body */}
                 <div className="api-modal-body">
+                    
+                    {/* ★変更: FEモードの警告バッジを削除 */}
 
-                    {mockMode === 'FE' && (
-                        <div className="mock-mode-info">
-                            <AlertCircleIcon width="16" height="16" />
-                            <span>現在 <strong>Frontend Mock Mode</strong> です。接続テストはシミュレーションされます。</span>
-                        </div>
-                    )}
-
+                    {/* API URL Input */}
                     <div className="input-group">
                         <label>API エンドポイント (Base URL)</label>
                         <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
@@ -150,6 +128,7 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                         </div>
                     </div>
 
+                    {/* API Key Input */}
                     <div className="input-group">
                         <label>API キー (App Key)</label>
                         <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
@@ -166,13 +145,13 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                                 placeholder="app-xxxxxxxxxxxxxxxxxxxx"
                                 className="styled-input"
                             />
-                            <button
+                            <button 
                                 className="toggle-visibility"
                                 onClick={() => setShowKey(!showKey)}
                                 tabIndex="-1"
                             >
-                                {showKey ?
-                                    <EyeOffIcon width="16" height="16" /> :
+                                {showKey ? 
+                                    <EyeOffIcon width="16" height="16" /> : 
                                     <EyeIcon width="16" height="16" />
                                 }
                             </button>
@@ -180,7 +159,9 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                     </div>
                 </div>
 
+                {/* Footer */}
                 <div className="api-modal-footer">
+                    {/* Status Bar */}
                     {status !== 'idle' && (
                         <div className={`status-bar ${status}`}>
                             {status === 'testing' && <LoaderIcon width="16" height="16" className="animate-spin" />}
@@ -190,6 +171,7 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                         </div>
                     )}
 
+                    {/* Buttons */}
                     <div className="button-row">
                         <button className="btn-cancel" onClick={onClose}>
                             キャンセル
@@ -197,9 +179,8 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                         <button
                             className="btn-save"
                             onClick={handleTestAndSave}
-                            // ボタンが無効化されている原因を知るために、無効化ロジックは厳密に
+                            // ★変更: 厳格なチェック
                             disabled={status === 'testing' || !isFormValid}
-                            title={!isFormValid ? "FEモード以外ではAPI URLとAPIキーが必須です" : ""}
                         >
                             {status === 'testing' ? '確認中...' : '接続テスト & 保存'}
                         </button>

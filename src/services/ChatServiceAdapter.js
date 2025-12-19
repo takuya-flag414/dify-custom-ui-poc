@@ -9,7 +9,7 @@ import { scenarios } from '../mocks/scenarios';
  */
 export const ChatServiceAdapter = {
 
-  // ... (uploadFile は既存のまま) ...
+  // ... (uploadFile, sendMessage は変更なしのため省略。既存のコードを維持してください) ...
   async uploadFile(file, config) {
     const { mockMode, userId, apiUrl, apiKey } = config;
 
@@ -30,7 +30,6 @@ export const ChatServiceAdapter = {
     };
   },
 
-  // ... (sendMessage は既存のまま) ...
   async sendMessage(params, config) {
      const { text, conversationId, files = [], searchSettings } = params;
      const { mockMode, userId, apiUrl, apiKey } = config;
@@ -140,17 +139,12 @@ export const ChatServiceAdapter = {
      return response.body.pipeThrough(new TextDecoderStream()).getReader();
    },
 
-  // ★追加: 接続テストの実装
+  // ★変更: 接続テストの実装 (エミュレーション撤廃)
   async testConnection(config) {
-    const { mockMode, userId, apiUrl, apiKey } = config;
+    const { userId, apiUrl, apiKey } = config;
 
-    // FEモード: 即座に成功を返す
-    if (mockMode === 'FE') {
-      await new Promise(r => setTimeout(r, 600)); // 少し待ってリアリティを出す
-      return true;
-    }
-
-    // Realモード: 実際にAPIを叩いて疎通確認
+    // ★変更: FEモードの分岐を削除し、常に実際のAPIを確認する
+    
     try {
       // ユーザーIDが無い場合は一時的なIDを使用
       const testUserId = userId || `test-user-${Date.now()}`;
