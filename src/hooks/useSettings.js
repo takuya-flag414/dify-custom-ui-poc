@@ -6,6 +6,7 @@ const DEFAULT_SETTINGS = {
   profile: {
     displayName: 'User',
     avatar: '',
+    aiStyle: 'partner', // 'efficient' | 'partner' - オンボーディングで設定
   },
   general: {
     theme: 'system', // 'light', 'dark', 'system'

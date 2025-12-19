@@ -12,7 +12,8 @@ const SettingsArea = ({
     onUpdateSettings,
     mockMode,           // 追加
     setMockMode,        // 追加
-    onOpenApiConfig     // 追加
+    onOpenApiConfig,    // 追加
+    onResetOnboarding   // 追加: オンボーディングリセット
 }) => {
     const [activeTab, setActiveTab] = useState('profile');
 
@@ -48,6 +49,7 @@ const SettingsArea = ({
                 mockMode={mockMode}
                 setMockMode={setMockMode}
                 onOpenApiConfig={onOpenApiConfig}
+                onResetOnboarding={onResetOnboarding}
             />
         </div>
     );

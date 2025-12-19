@@ -20,6 +20,9 @@ import { useSettings } from './hooks/useSettings';
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
 
+import { useOnboarding } from './hooks/useOnboarding';
+import OnboardingOverlay from './components/Onboarding/OnboardingOverlay';
+
 const generateUUID = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -92,6 +95,9 @@ function App() {
     startTutorial,
     ...tutorialProps
   } = useTutorial();
+
+  // オンボーディング（初回セットアップウィザード）
+  const onboardingState = useOnboarding();
 
   const openArtifact = (artifact) => {
     setActiveArtifact(artifact);
@@ -202,6 +208,12 @@ function App() {
 
   return (
     <div className="app" style={appStyle}>
+      {/* オンボーディングウィザード（初回起動時のみ表示） */}
+      <OnboardingOverlay
+        {...onboardingState}
+        updateSettings={updateSettings}
+      />
+
       <TutorialOverlay
         isActive={isTutorialActive}
         {...tutorialProps}
@@ -309,6 +321,7 @@ function App() {
                     mockMode={mockMode}
                     setMockMode={handleMockModeChange}
                     onOpenApiConfig={() => setIsConfigModalOpen(true)}
+                    onResetOnboarding={onboardingState.resetOnboarding}
                   />
                 </motion.div>
               )}
