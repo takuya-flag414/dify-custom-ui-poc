@@ -6,13 +6,16 @@ const DEFAULT_SETTINGS = {
   profile: {
     displayName: 'User',
     avatar: '',
-    aiStyle: 'partner', // 'efficient' | 'partner' - オンボーディングで設定
   },
   general: {
     theme: 'system', // 'light', 'dark', 'system'
     fontSize: 'medium', // 'small', 'medium', 'large'
   },
-  // 今後 prompt, rag, debug 等のカテゴリが増えます
+  prompt: {
+    aiStyle: 'partner', // 'efficient' | 'partner' - オンボーディング/プロンプト設定で変更
+    systemPrompt: '', // ユーザーが追加したい指示
+  },
+  // 今後 rag, debug 等のカテゴリが増えます
 };
 
 export const useSettings = (userId) => {
@@ -26,12 +29,24 @@ export const useSettings = (userId) => {
       const stored = localStorage.getItem(key);
       if (stored) {
         const parsed = JSON.parse(stored);
+        // 後方互換: profile.aiStyle があれば prompt.aiStyle にマイグレーション
+        const migratedAiStyle = parsed.profile?.aiStyle || parsed.prompt?.aiStyle || DEFAULT_SETTINGS.prompt.aiStyle;
+
         // デフォルト値とマージして返す（構造変更への対応）
         return {
           ...DEFAULT_SETTINGS,
           ...parsed,
-          profile: { ...DEFAULT_SETTINGS.profile, ...(parsed.profile || {}) },
+          profile: {
+            ...DEFAULT_SETTINGS.profile,
+            ...(parsed.profile || {}),
+            // 古い aiStyle は削除（prompt側で管理）
+          },
           general: { ...DEFAULT_SETTINGS.general, ...(parsed.general || {}) },
+          prompt: {
+            ...DEFAULT_SETTINGS.prompt,
+            ...(parsed.prompt || {}),
+            aiStyle: migratedAiStyle, // マイグレーション結果を反映
+          },
         };
       }
     } catch (e) {
@@ -56,11 +71,19 @@ export const useSettings = (userId) => {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
+        // 後方互換: profile.aiStyle があれば prompt.aiStyle にマイグレーション
+        const migratedAiStyle = parsed.profile?.aiStyle || parsed.prompt?.aiStyle || DEFAULT_SETTINGS.prompt.aiStyle;
+
         setSettings((prev) => ({
           ...DEFAULT_SETTINGS,
           ...parsed,
           profile: { ...DEFAULT_SETTINGS.profile, ...(parsed.profile || {}) },
           general: { ...DEFAULT_SETTINGS.general, ...(parsed.general || {}) },
+          prompt: {
+            ...DEFAULT_SETTINGS.prompt,
+            ...(parsed.prompt || {}),
+            aiStyle: migratedAiStyle,
+          },
         }));
       } catch (e) {
         console.error('[useSettings] Failed to parse settings:', e);

@@ -72,7 +72,8 @@ export const useOnboarding = () => {
             // プロファイルを永続化（updateSettingsFn は App.jsx から渡される）
             if (updateSettingsFn && tempProfile.name) {
                 updateSettingsFn('profile', 'displayName', tempProfile.name);
-                updateSettingsFn('profile', 'aiStyle', tempProfile.style);
+                // aiStyleはpromptカテゴリに保存（プロンプト設定画面でも変更可能）
+                updateSettingsFn('prompt', 'aiStyle', tempProfile.style);
             }
 
             // 完了フラグを保存

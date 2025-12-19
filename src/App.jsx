@@ -155,7 +155,8 @@ function App() {
     handleConversationCreated,
     handleConversationUpdated,
     apiKey,
-    apiUrl
+    apiUrl,
+    settings?.prompt // ★追加: AI回答スタイルとシステムプロンプトを渡す
   );
 
   const handleMockModeChange = (newMode) => {

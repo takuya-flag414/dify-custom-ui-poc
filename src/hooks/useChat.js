@@ -59,8 +59,8 @@ const createPerfTracker = (addLog) => ({
       console.table(this.steps.map(s => ({ Step: s.name, Time: `${s.duration.toFixed(2)}ms` })));
     }
     if (this.firstToken) {
-       console.log(`📺 Display Duration: ${displayDuration.toFixed(2)}ms`);
-       console.log(`⚡ Throughput: ${cps.toFixed(1)} chars/sec (Total: ${this.charCount} chars)`);
+      console.log(`📺 Display Duration: ${displayDuration.toFixed(2)}ms`);
+      console.log(`⚡ Throughput: ${cps.toFixed(1)} chars/sec (Total: ${this.charCount} chars)`);
     }
     console.groupEnd();
 
@@ -76,7 +76,7 @@ const createPerfTracker = (addLog) => ({
   }
 });
 
-export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl) => {
+export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl, promptSettings) => {
   const [messages, setMessages] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -280,12 +280,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         }
       } catch (error) {
         addLog(`[History Error] ${error.message}`, 'error');
-        setMessages([{ 
-          id: 'err_history_load', 
-          role: 'system', 
-          type: 'error', 
+        setMessages([{
+          id: 'err_history_load',
+          role: 'system',
+          type: 'error',
           rawError: error.message,
-          timestamp: new Date().toISOString() 
+          timestamp: new Date().toISOString()
         }]);
       } finally {
         setIsHistoryLoading(false);
@@ -323,11 +323,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     // 2. File Upload via Adapter
     let uploadedFileIds = [];
     let displayFiles = [];
-    
+
     if (attachments.length > 0) {
       setIsGenerating(true);
       try {
-        const uploadPromises = attachments.map(file => 
+        const uploadPromises = attachments.map(file =>
           ChatServiceAdapter.uploadFile(file, { mockMode, userId, apiUrl, apiKey })
         );
 
@@ -354,7 +354,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       files: displayFiles
     };
     setMessages(prev => [...prev, userMessage]);
-    
+
     // 4. Update UI (AI Placeholder)
     const aiMessageId = `msg_${Date.now()}_ai`;
     const isFastMode = !currentSettings.ragEnabled && currentSettings.webMode === 'off';
@@ -379,11 +379,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     let reader;
     try {
       reader = await ChatServiceAdapter.sendMessage(
-        { 
-          text, 
-          conversationId, 
-          files: sessionFiles.map(f => ({ id: f.id, name: f.name })), 
-          searchSettings: currentSettings 
+        {
+          text,
+          conversationId,
+          files: sessionFiles.map(f => ({ id: f.id, name: f.name })),
+          searchSettings: currentSettings,
+          promptSettings: promptSettings
         },
         { mockMode, userId, apiUrl, apiKey }
       );
@@ -413,11 +414,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 settingsMapRef.current[data.conversation_id] = currentSettings;
                 onConversationCreated(data.conversation_id, text);
               } else {
-                 // FEモードのID同期
-                 if(onConversationCreated && !conversationId) {
-                     onConversationCreated(data.conversation_id, text);
-                     creatingConversationIdRef.current = data.conversation_id;
-                 }
+                // FEモードのID同期
+                if (onConversationCreated && !conversationId) {
+                  onConversationCreated(data.conversation_id, text);
+                  creatingConversationIdRef.current = data.conversation_id;
+                }
               }
             }
 
@@ -427,7 +428,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
               const title = data.data?.title;
               const nodeId = data.data?.node_id || `node_${Date.now()}`;
               const inputs = data.data?.inputs || {};
-              
+
               const isWebSearchNode = (nodeType === 'tool') && (title && (title.includes('Web') || title.includes('Search') || title.includes('Perplexity')));
               const isSignificantNode = nodeType === 'document-extractor' || (title && (title.includes('Intent') || title.includes('Classifier'))) || (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) || isWebSearchNode || nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ')) || nodeType === 'llm';
               const isAssigner = nodeType === 'assigner' || (title && (title.includes('変数') || title.includes('Variable') || title.includes('Set Opt')));
@@ -435,7 +436,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
               if (isSignificantNode && !isAssigner) {
                 let displayTitle = title;
                 let iconType = 'default';
-                
+
                 if (nodeType === 'document-extractor') {
                   let fileNameToDisplay = '添付ファイル';
                   if (inputs.target_file) {
@@ -479,7 +480,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                     iconType = 'writing';
                   }
                 }
-                
+
                 tracker.markNodeStart(nodeId, displayTitle);
 
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -543,7 +544,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 let textToDisplay = '';
                 if (protocolMode === 'JSON') {
                   const parsed = parseLlmResponse(contentBuffer);
-                  textToDisplay = parsed.isParsed ? parsed.answer : ''; 
+                  textToDisplay = parsed.isParsed ? parsed.answer : '';
                 } else {
                   textToDisplay = contentBuffer;
                 }
@@ -572,7 +573,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
-              
+
               if (protocolMode === 'JSON') {
                 const parsed = parseLlmResponse(finalText);
                 if (parsed.isParsed) {

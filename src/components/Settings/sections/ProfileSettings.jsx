@@ -12,7 +12,7 @@ const ProfileSettings = ({ settings, onUpdateSettings }) => {
   const [displayName, setDisplayName] = useState('');
   const [isSaved, setIsSaved] = useState(false);
 
-  const aiStyle = settings?.profile?.aiStyle || 'partner';
+  const aiStyle = settings?.prompt?.aiStyle || 'partner';
   const StyleIcon = AI_STYLE_LABELS[aiStyle]?.icon || Sparkles;
 
   // settingsから初期値をロード
