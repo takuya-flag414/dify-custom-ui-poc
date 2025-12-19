@@ -1,20 +1,21 @@
 // src/config/settingsConfig.jsx
 import React from 'react';
-import { User, Settings, FileText, Terminal, MessageSquare } from 'lucide-react';
+import { User, Settings, FileText, Terminal, MessageSquare, BarChart2 } from 'lucide-react';
 
-// ★追加: 各コンポーネントをインポート
+// 各コンポーネントをインポート
 import ProfileSettings from '../components/Settings/sections/ProfileSettings';
 import GeneralSettings from '../components/Settings/sections/GeneralSettings';
 import PromptSettings from '../components/Settings/sections/PromptSettings';
 import RagSettings from '../components/Settings/sections/RagSettings';
 import DebugSettings from '../components/Settings/sections/DebugSettings';
+// ★追加: 管理コンソール
+import AdminSettings from '../components/Settings/sections/AdminSettings';
 
 export const settingsCategories = [
   {
     id: 'profile',
     label: 'プロフィール',
     icon: User,
-    // ★変更
     component: (props) => <ProfileSettings {...props} />,
     allowedRoles: ['user', 'admin', 'developer'],
   },
@@ -22,7 +23,6 @@ export const settingsCategories = [
     id: 'general',
     label: '一般設定',
     icon: Settings,
-    // ★変更
     component: (props) => <GeneralSettings {...props} />,
     allowedRoles: ['user', 'admin', 'developer'],
   },
@@ -30,7 +30,6 @@ export const settingsCategories = [
     id: 'prompt',
     label: 'プロンプト管理',
     icon: MessageSquare,
-    // ★変更
     component: (props) => <PromptSettings {...props} />,
     allowedRoles: ['user', 'admin', 'developer'],
   },
@@ -38,8 +37,15 @@ export const settingsCategories = [
     id: 'rag',
     label: 'RAGデータ管理',
     icon: FileText,
-    // ★変更
     component: (props) => <RagSettings {...props} />,
+    allowedRoles: ['admin', 'developer'],
+  },
+  // ★追加: 管理コンソール (Admin/Devのみ)
+  {
+    id: 'admin_console',
+    label: '管理コンソール',
+    icon: BarChart2,
+    component: (props) => <AdminSettings {...props} />,
     allowedRoles: ['admin', 'developer'],
   },
   {

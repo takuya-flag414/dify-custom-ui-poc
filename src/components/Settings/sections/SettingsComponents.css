@@ -134,7 +134,7 @@
 }
 
 .settings-btn.primary:hover {
-  background-color: var(--color-primary-dark, #2563EB);
+  background-color: var(--color-primary-hover, #2563EB);
   box-shadow: var(--shadow-sm);
 }
 

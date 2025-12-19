@@ -102,7 +102,7 @@
 }
 
 .debug-btn.primary:hover {
-    background-color: var(--color-primary-dark);
+    background-color: var(--color-primary-hover);
 }
 
 .debug-btn.danger {
