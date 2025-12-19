@@ -16,7 +16,7 @@ export const AssistantIcon = () => (
   </svg>
 );
 
-const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArtifact }) => {
+const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArtifact, userName }) => {
   const {
     role,
     text,
@@ -64,7 +64,7 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
       <div className={`message-container ${!isAi ? 'message-container-user' : ''} group`}>
 
         <div className={isAi ? 'avatar-ai' : 'avatar-user'}>
-          {isAi ? <AssistantIcon /> : 'You'}
+          {isAi ? <AssistantIcon /> : (userName?.charAt(0).toUpperCase() || 'U')}
         </div>
 
         <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>

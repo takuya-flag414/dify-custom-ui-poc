@@ -278,6 +278,7 @@ function App() {
                     setSearchSettings={setSearchSettings}
                     onOpenConfig={() => setIsConfigModalOpen(true)}
                     onOpenArtifact={openArtifact}
+                    userName={settings?.profile?.displayName || 'User'}
                   />
                 </motion.div>
               ) : (

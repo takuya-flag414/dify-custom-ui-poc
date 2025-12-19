@@ -5,7 +5,7 @@ import MessageBlock from '../Message/MessageBlock';
 // ★追加
 import SystemErrorBlock from '../Message/SystemErrorBlock';
 
-const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, onOpenConfig, onOpenArtifact }) => {
+const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, onOpenConfig, onOpenArtifact, userName }) => {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -63,6 +63,7 @@ const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, on
             onOpenArtifact={onOpenArtifact}
             className={animationClass}
             style={delayStyle}
+            userName={userName}
           />
         );
       })}

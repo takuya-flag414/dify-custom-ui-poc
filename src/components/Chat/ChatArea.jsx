@@ -18,7 +18,8 @@ const ChatArea = (props) => {
     searchSettings,
     setSearchSettings,
     onOpenConfig,
-    onOpenArtifact
+    onOpenArtifact,
+    userName
   } = props;
 
   // 初期状態: メッセージ0件 かつ 履歴ロード中でない
@@ -33,7 +34,7 @@ const ChatArea = (props) => {
     <div className="chat-area">
       {isHistoryLoading ? (
         <>
-          <HistorySkeleton />
+          <HistorySkeleton userName={userName} />
           <div className="bottom-controls-wrapper">
             <ChatInput
               isLoading={true}
@@ -77,6 +78,7 @@ const ChatArea = (props) => {
             onSendMessage={onSendMessage}
             onOpenConfig={onOpenConfig}
             onOpenArtifact={onOpenArtifact}
+            userName={userName}
           />
           <div className="bottom-controls-wrapper">
             <ChatInput

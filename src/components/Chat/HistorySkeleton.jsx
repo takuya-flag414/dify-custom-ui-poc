@@ -2,9 +2,9 @@
 import React from 'react';
 import { AssistantIcon } from '../Message/MessageBlock';
 import SkeletonLoader from '../Message/SkeletonLoader';
-import '../Message/MessageBlock.css'; 
+import '../Message/MessageBlock.css';
 
-const HistorySkeleton = () => {
+const HistorySkeleton = ({ userName }) => {
   // 1ターンのみ表示
   const dummyItems = [1];
 
@@ -15,7 +15,7 @@ const HistorySkeleton = () => {
           {/* Mock User Message (Right) */}
           <div className="message-block">
             <div className="message-container message-container-user">
-              <div className="avatar-user">You</div>
+              <div className="avatar-user">{userName?.charAt(0).toUpperCase() || 'U'}</div>
               <div className="message-content message-content-user">
                 <div className="message-bubble-row" style={{ justifyContent: 'flex-end' }}>
                   <div className="message-bubble user-bubble" style={{ width: '240px', opacity: 0.6 }}>
