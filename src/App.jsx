@@ -1,12 +1,13 @@
 // src/App.jsx
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // ★追加: アニメーション用
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
 import './index.css';
 
 import Sidebar from './components/Sidebar/Sidebar';
 import Header from './components/Layout/Header';
 import ChatArea from './components/Chat/ChatArea';
+import SettingsArea from './components/Settings/SettingsArea';
 import ApiConfigModal from './components/Shared/ApiConfigModal';
 import ArtifactPanel from './components/Artifacts/ArtifactPanel';
 
@@ -14,19 +15,52 @@ import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';
 import { useChat } from './hooks/useChat';
 import { useApiConfig } from './hooks/useApiConfig';
+import { useSettings } from './hooks/useSettings';
 
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
 
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 function App() {
   const [mockMode, setMockMode] = useState('FE');
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('chat');
 
-  // --- Artifact State ---
+  const [currentUser, setCurrentUser] = useState({
+    id: null,
+    role: 'developer',
+    name: 'Loading...',
+  });
+
+  useEffect(() => {
+    let storedUserId = localStorage.getItem('app_user_id');
+    if (!storedUserId) {
+      storedUserId = `user-${generateUUID().slice(0, 8)}`;
+      localStorage.setItem('app_user_id', storedUserId);
+      console.log('[App] New User ID generated:', storedUserId);
+    } else {
+      console.log('[App] User ID loaded:', storedUserId);
+    }
+    setCurrentUser(prev => ({
+      ...prev,
+      id: storedUserId,
+    }));
+  }, []);
+
+  const { settings, updateSettings, isLoaded: isSettingsLoaded } = useSettings(currentUser.id);
+
   const [activeArtifact, setActiveArtifact] = useState(null);
   const [isArtifactOpen, setIsArtifactOpen] = useState(false);
 
-  // チュートリアルState
   const {
     isActive: isTutorialActive,
     startTutorial,
@@ -42,7 +76,6 @@ function App() {
     setIsArtifactOpen(false);
   };
 
-  // API Config Hook
   const { apiKey, apiUrl, saveConfig } = useApiConfig();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -70,7 +103,7 @@ function App() {
     handleRenameConversation,
     handlePinConversation,
     handleConversationUpdated,
-  } = useConversations(mockMode, addLog, apiKey, apiUrl);
+  } = useConversations(mockMode, currentUser.id, addLog, apiKey, apiUrl);
 
   const {
     messages,
@@ -84,6 +117,7 @@ function App() {
     setSearchSettings
   } = useChat(
     mockMode,
+    currentUser.id,
     conversationId,
     addLog,
     handleConversationCreated,
@@ -101,17 +135,23 @@ function App() {
     addLog(`[App] Mode changed to ${newMode}. Conversation reset.`, 'info');
   };
 
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+    if (view === 'settings') {
+      setIsArtifactOpen(false);
+    }
+  };
+
   const appStyle = {
     '--sidebar-width': isSidebarCollapsed ? '68px' : '260px',
   };
 
-  // ★追加: 画面遷移のアニメーション定義 (macOS Focus Style)
   const pageTransitionVariants = {
     initial: {
       opacity: 0,
-      y: 10, // 少し下から
-      scale: 0.99, // わずかに縮小
-      filter: "blur(4px)" // ぼかしを入れるとよりリッチになる
+      y: 10,
+      scale: 0.99,
+      filter: "blur(4px)"
     },
     enter: {
       opacity: 1,
@@ -120,7 +160,7 @@ function App() {
       filter: "blur(0px)",
       transition: {
         duration: 0.4,
-        ease: [0.25, 1, 0.5, 1], // Apple-like easeOut
+        ease: [0.25, 1, 0.5, 1],
       }
     },
     exit: {
@@ -147,6 +187,8 @@ function App() {
         currentApiKey={apiKey}
         currentApiUrl={apiUrl}
         onSave={saveConfig}
+        mockMode={mockMode}
+        addLog={addLog} // ★追加: ログ出力を可能にする
       />
 
       {/* 1. Sidebar */}
@@ -160,6 +202,8 @@ function App() {
         onPinConversation={handlePinConversation}
         isCollapsed={isSidebarCollapsed}
         toggleSidebar={toggleSidebar}
+        currentView={currentView}
+        onViewChange={handleViewChange}
       />
 
       {/* 2. Main Content (Right Side) */}
@@ -181,43 +225,67 @@ function App() {
 
           {/* Chat Area Wrapper */}
           <div className="chat-area-wrapper">
-            {/* ★変更: AnimatePresenceでラップして遷移アニメーションを適用 */}
             <AnimatePresence mode="wait">
-              <motion.div
-                key={conversationId || 'new-chat'} // IDが変わるたびにアニメーション発火
-                className="chat-content-motion-wrapper"
-                variants={pageTransitionVariants}
-                initial="initial"
-                animate="enter"
-                exit="exit"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
-              >
-                <ChatArea
-                  messages={messages}
-                  setMessages={setMessages}
-                  isGenerating={isGenerating}
-                  isHistoryLoading={isHistoryLoading}
-                  conversationId={conversationId}
-                  addLog={addLog}
-                  onConversationCreated={handleConversationCreated}
-                  activeContextFiles={activeContextFiles}
-                  setActiveContextFiles={setActiveContextFiles}
-                  onSendMessage={handleSendMessage}
-                  searchSettings={searchSettings}
-                  setSearchSettings={setSearchSettings}
-                  onOpenConfig={() => setIsConfigModalOpen(true)}
-                  onOpenArtifact={openArtifact}
-                />
-              </motion.div>
+              {currentView === 'chat' ? (
+                <motion.div
+                  key="chat-view"
+                  className="chat-content-motion-wrapper"
+                  variants={pageTransitionVariants}
+                  initial="initial"
+                  animate="enter"
+                  exit="exit"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  <ChatArea
+                    messages={messages}
+                    setMessages={setMessages}
+                    isGenerating={isGenerating}
+                    isHistoryLoading={isHistoryLoading}
+                    conversationId={conversationId}
+                    addLog={addLog}
+                    onConversationCreated={handleConversationCreated}
+                    activeContextFiles={activeContextFiles}
+                    setActiveContextFiles={setActiveContextFiles}
+                    onSendMessage={handleSendMessage}
+                    searchSettings={searchSettings}
+                    setSearchSettings={setSearchSettings}
+                    onOpenConfig={() => setIsConfigModalOpen(true)}
+                    onOpenArtifact={openArtifact}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="settings-view"
+                  className="settings-content-motion-wrapper"
+                  variants={pageTransitionVariants}
+                  initial="initial"
+                  animate="enter"
+                  exit="exit"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <SettingsArea
+                    currentUser={currentUser}
+                    settings={settings}
+                    onUpdateSettings={updateSettings}
+                    mockMode={mockMode}
+                    setMockMode={handleMockModeChange}
+                    onOpenApiConfig={() => setIsConfigModalOpen(true)}
+                  />
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
 
-          {/* Artifact Panel Wrapper (Floating Island) */}
+          {/* Artifact Panel Wrapper */}
           <div className="artifact-panel-wrapper">
             <ArtifactPanel
               isOpen={isArtifactOpen}

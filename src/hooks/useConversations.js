@@ -1,11 +1,11 @@
+// src/hooks/useConversations.js
 import { useState, useEffect, useCallback } from 'react';
 import { fetchConversationsApi, deleteConversationApi, renameConversationApi } from '../api/dify';
 import { mockConversations } from '../mocks/data';
 
-const USER_ID = 'poc-user-01';
 const PINNED_STORAGE_KEY = 'dify_pinned_conversations';
 
-export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
+export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
   const [conversations, setConversations] = useState([]);
   const [conversationId, setConversationId] = useState(null);
 
@@ -46,14 +46,21 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
       }
 
       addLog('[useConversations] Fetching REAL conversations list...', 'info');
-      if (!apiKey || !apiUrl) {
-        addLog('[useConversations Error] API KEY or URL not set.', 'error');
+      
+      // ★変更: userIdがない場合も中止する
+      if (!apiKey || !apiUrl || !userId) {
+        if (!userId) {
+           addLog('[useConversations] User ID not set yet.', 'debug');
+        } else {
+           addLog('[useConversations Error] API KEY or URL not set.', 'error');
+        }
         setConversations([]);
         return;
       }
 
       try {
-        const data = await fetchConversationsApi(USER_ID, apiUrl, apiKey);
+        // ★変更: 引数のuserIdを使用
+        const data = await fetchConversationsApi(userId, apiUrl, apiKey);
         setConversations(data.data || []);
         addLog(`[useConversations] Fetched ${data.data?.length || 0} conversations.`, 'info');
       } catch (error) {
@@ -63,7 +70,7 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
     };
 
     fetchConversations();
-  }, [addLog, mockMode]);
+  }, [addLog, mockMode, apiKey, apiUrl, userId]); // ★依存配列にuserIdを追加
 
   const handleConversationCreated = useCallback((newId, newTitle) => {
     addLog(`[useConversations] New conversation created: ${newId}`, 'info');
@@ -91,8 +98,14 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
       return;
     }
 
+    if (!userId) {
+      addLog('[useConversations] Error: User ID is missing.', 'error');
+      return;
+    }
+
     try {
-      await deleteConversationApi(targetId, USER_ID, apiUrl, apiKey);
+      // ★変更: 引数のuserIdを使用
+      await deleteConversationApi(targetId, userId, apiUrl, apiKey);
       setConversations((prev) => prev.filter((c) => c.id !== targetId));
       setPinnedIds(prev => prev.filter(id => id !== targetId));
 
@@ -105,7 +118,7 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
       addLog(`[useConversations Error] Failed to delete: ${error.message}`, 'error');
       throw error;
     }
-  }, [mockMode, conversationId, addLog]);
+  }, [mockMode, conversationId, addLog, apiKey, apiUrl, userId]); // ★依存配列にuserIdを追加
 
   const handleRenameConversation = useCallback(async (targetId, newName) => {
     addLog(`[useConversations] Renaming conversation: ${targetId} -> ${newName}`, 'info');
@@ -118,8 +131,14 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
       return;
     }
 
+    if (!userId) {
+      addLog('[useConversations] Error: User ID is missing.', 'error');
+      return;
+    }
+
     try {
-      await renameConversationApi(targetId, newName, USER_ID, apiUrl, apiKey);
+      // ★変更: 引数のuserIdを使用
+      await renameConversationApi(targetId, newName, userId, apiUrl, apiKey);
       setConversations(prev => prev.map(c =>
         c.id === targetId ? { ...c, name: newName } : c
       ));
@@ -128,7 +147,7 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
       addLog(`[useConversations Error] Failed to rename: ${error.message}`, 'error');
       throw error;
     }
-  }, [mockMode, addLog]);
+  }, [mockMode, addLog, apiKey, apiUrl, userId]); // ★依存配列にuserIdを追加
 
   const handlePinConversation = useCallback((targetId) => {
     setPinnedIds(prev => {
@@ -142,7 +161,7 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
     });
   }, [addLog]);
 
-  // [New] 会話リストの順序更新（楽観的UI用）
+  // 会話リストの順序更新（楽観的UI用）
   const handleConversationUpdated = useCallback((targetId) => {
     setConversations((prev) => {
       const targetIndex = prev.findIndex(c => c.id === targetId);
@@ -168,6 +187,6 @@ export const useConversations = (mockMode, addLog, apiKey, apiUrl) => {
     handleDeleteConversation,
     handleRenameConversation,
     handlePinConversation,
-    handleConversationUpdated, // [New] エクスポート
+    handleConversationUpdated,
   };
 };

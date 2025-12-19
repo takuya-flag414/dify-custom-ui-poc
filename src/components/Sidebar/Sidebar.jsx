@@ -1,6 +1,7 @@
 // src/components/Sidebar/Sidebar.jsx
 import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Settings as SettingsIcon } from 'lucide-react'; // ★追加: Lucideアイコン
 import DeletePopover from './DeletePopover';
 import ContextMenu from './ContextMenu';
 import { groupConversationsByDate } from '../../utils/dateUtils';
@@ -56,57 +57,27 @@ const RenameInput = ({ initialValue, onSave, onCancel }) => {
   );
 };
 
-// ★追加: アニメーション付き「Compose」アイコン
+// アニメーション付き「Compose」アイコン
 const ComposeIcon = () => {
-  // 鉛筆のアニメーション定義
   const pencilVariants = {
-    rest: {
-      y: 0,
-      x: 0,
-      rotate: 0
-    },
+    rest: { y: 0, x: 0, rotate: 0 },
     hover: {
-      y: -2,      // 少し持ち上げる
-      x: 2,       // 書き始める位置へ移動
-      rotate: -12, // 書く角度に傾ける
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 15
-      }
-    }
-  };
-
-  // 筆跡（Wiggle）アニメーション
-  const scribbleVariants = {
-    rest: { pathLength: 0, opacity: 0 },
-    hover: {
-      pathLength: 1,
-      opacity: 1,
-      transition: { duration: 0.3, delay: 0.1 }
+      y: -2, x: 2, rotate: -12,
+      transition: { type: "spring", stiffness: 300, damping: 15 }
     }
   };
 
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
-      {/* 1. ノート部分（ベース） - 静止 */}
       <path
         d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
       />
-
-      {/* 2. 鉛筆部分 - 親のホバーに合わせて動く */}
       <motion.g variants={pencilVariants}>
         <path
           d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="var(--color-bg-surface)" // 鉛筆の中を白くして線と重ならないように
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          fill="var(--color-bg-surface)"
         />
       </motion.g>
     </svg>
@@ -123,6 +94,9 @@ const Sidebar = ({
   onPinConversation,
   isCollapsed,
   toggleSidebar,
+  // ★追加Props
+  currentView,
+  onViewChange
 }) => {
   const [menuConfig, setMenuConfig] = useState({
     isOpen: false,
@@ -142,8 +116,27 @@ const Sidebar = ({
     return groupConversationsByDate(conversations, pinnedIds);
   }, [conversations, pinnedIds]);
 
-  const handleNewChat = () => setConversationId(null);
-  const handleSelectConversation = (id) => setConversationId(id);
+  // ★変更: チャット画面へ戻ってから新規作成
+  const handleNewChat = () => {
+    if (onViewChange) onViewChange('chat');
+    setConversationId(null);
+  };
+
+  // ★変更: チャット画面へ戻ってから選択
+  const handleSelectConversation = (id) => {
+    if (onViewChange) onViewChange('chat');
+    setConversationId(id);
+  };
+
+  // ★追加: チャット画面へ戻るハンドラ
+  const handleGoToChat = () => {
+    if (onViewChange) onViewChange('chat');
+  };
+
+  // ★追加: 設定画面へ行くハンドラ
+  const handleGoToSettings = () => {
+    if (onViewChange) onViewChange('settings');
+  };
 
   const handleMenuOpen = (e, conv) => {
     e.stopPropagation();
@@ -214,13 +207,17 @@ const Sidebar = ({
   };
 
   return (
-    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}
-      data-tutorial="sidebar"
+    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`} data-tutorial="sidebar"
+      style={{ display: 'flex', flexDirection: 'column', height: '100%' }} // フレックスレイアウトを明示
     >
 
       {/* Header */}
       <div className="sidebar-header">
-        <div className="sidebar-brand-area">
+        <div
+          className="sidebar-brand-area"
+          onClick={handleGoToChat} // クリックでチャットへ戻る
+          style={{ cursor: 'pointer' }}
+        >
           <div className="brand-logo"><LogoIcon /></div>
           <h1 className="sidebar-title">社内AI (PoC)</h1>
         </div>
@@ -233,10 +230,10 @@ const Sidebar = ({
         </button>
       </div>
 
-      {/* New Chat Button (Plan A: Writing Pencil) */}
+      {/* New Chat Button */}
       <div className="new-chat-wrapper">
         <motion.button
-          className="new-chat-button"
+          className={`new-chat-button ${currentView === 'chat' && !conversationId ? 'active' : ''}`}
           onClick={handleNewChat}
           initial="rest"
           whileHover="hover"
@@ -272,7 +269,7 @@ const Sidebar = ({
       </div>
 
       {/* Conversation List */}
-      <div className="conversation-list">
+      <div className="conversation-list" style={{ flex: 1, overflowY: 'auto' }}>
         {conversations.length === 0 ? (
           <div className="empty-state-message">履歴はありません</div>
         ) : (
@@ -284,6 +281,7 @@ const Sidebar = ({
                 {group.items.map((conv) => {
                   const isPinned = pinnedIds.includes(conv.id);
                   const isRenaming = renamingId === conv.id;
+                  const isActive = currentView === 'chat' && conv.id === conversationId;
 
                   return (
                     <motion.div
@@ -297,7 +295,7 @@ const Sidebar = ({
                       transition={smoothTransition}
                       whileHover={isRenaming ? {} : { scale: 1.01, x: 2, transition: { duration: 0.2 } }}
                       whileTap={isRenaming ? {} : { scale: 0.99, transition: { duration: 0.1 } }}
-                      className={`conversation-item group ${conv.id === conversationId ? 'active' : ''}`}
+                      className={`conversation-item group ${isActive ? 'active' : ''}`}
                       onClick={() => !isRenaming && handleSelectConversation(conv.id)}
                     >
                       <div className="conversation-name-wrapper">
@@ -342,6 +340,46 @@ const Sidebar = ({
         )}
       </div>
 
+      {/* ★追加: Settings Button Area (Footer) */}
+      <div
+        className="sidebar-footer"
+        style={{
+          padding: '12px',
+          borderTop: '1px solid var(--color-border)',
+          marginTop: 'auto'
+        }}
+      >
+        <motion.button
+          className={`conversation-item ${currentView === 'settings' ? 'active' : ''}`}
+          onClick={handleGoToSettings}
+          style={{ width: '100%', justifyContent: isCollapsed ? 'center' : 'flex-start', marginBottom: 0 }}
+          whileHover={{ scale: 1.01, x: 2, transition: { duration: 0.2 } }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '20px',
+            height: '20px',
+            color: currentView === 'settings' ? 'var(--color-primary)' : 'var(--color-text-sub)'
+          }}>
+            <SettingsIcon size={18} strokeWidth={2} />
+          </div>
+
+          {!isCollapsed && (
+            <span style={{
+              marginLeft: '10px',
+              fontSize: '14px',
+              fontWeight: currentView === 'settings' ? 500 : 400,
+              color: currentView === 'settings' ? 'var(--color-primary)' : 'var(--color-text-main)'
+            }}>
+              設定
+            </span>
+          )}
+        </motion.button>
+      </div>
+
       <ContextMenu
         isOpen={menuConfig.isOpen}
         anchorRect={menuConfig.anchorRect}
@@ -363,13 +401,13 @@ const Sidebar = ({
   );
 };
 
-// --- Icons ---
+// --- Icons (Existing SVGs) ---
 const LogoIcon = () => (
   <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" />
   </svg>
 );
-// NewChatIcon is replaced by ComposeIcon defined above
+
 const MoreIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="1" />
@@ -377,12 +415,14 @@ const MoreIcon = () => (
     <circle cx="5" cy="12" r="1" />
   </svg>
 );
+
 const PinIconSmall = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary)', marginLeft: 'auto', marginRight: '4px' }}>
     <line x1="12" y1="17" x2="12" y2="22"></line>
     <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"></path>
   </svg>
 );
+
 const SidebarToggleIcon = ({ isCollapsed }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />

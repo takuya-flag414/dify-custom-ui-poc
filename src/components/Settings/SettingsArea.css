@@ -1,0 +1,115 @@
+/* src/components/Settings/SettingsArea.css */
+.settings-area-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-bg-body);
+    /* 全体背景 */
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- Left Pane: Navigation --- */
+.settings-nav {
+    width: 240px;
+    flex-shrink: 0;
+    background-color: var(--color-bg-sidebar);
+    /* サイドバーと同じ背景色 */
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-4) var(--space-2);
+    overflow-y: auto;
+}
+
+.settings-nav-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    color: var(--color-text-muted);
+    padding: 0 var(--space-3);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: 2px;
+    border-radius: var(--radius-lg);
+    color: var(--color-text-sub);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.settings-nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: var(--color-text-main);
+}
+
+.settings-nav-item.active {
+    background-color: var(--color-primary-bg);
+    /* blue-50 */
+    color: var(--color-primary);
+    font-weight: var(--font-bold);
+}
+
+.settings-nav-icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2px;
+}
+
+/* --- Right Pane: Content Panel --- */
+.settings-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-surface);
+    overflow: hidden;
+}
+
+.settings-header {
+    height: 60px;
+    padding: 0 var(--space-6);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.settings-page-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+}
+
+.settings-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-6);
+}
+
+.settings-section-container {
+    max-width: 640px;
+    /* 読みやすさのため幅を制限 */
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

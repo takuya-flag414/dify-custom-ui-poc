@@ -1,14 +1,13 @@
 // src/hooks/useChat.js
 import { useState, useEffect, useRef } from 'react';
 import { mockMessages } from '../mocks/data';
-import { MockStreamGenerator } from '../mocks/MockStreamGenerator';
-import { scenarios, scenarioSuggestions } from '../mocks/scenarios';
-import { uploadFile, fetchMessagesApi, sendChatMessageApi, fetchSuggestionsApi } from '../api/dify';
+import { scenarioSuggestions } from '../mocks/scenarios';
+// ★変更: Adapterをインポート
+import { ChatServiceAdapter } from '../services/ChatServiceAdapter';
+import { fetchMessagesApi, fetchSuggestionsApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMapper';
 import { createConfigError } from '../utils/errorHandler';
-
-const USER_ID = 'poc-user-01';
 
 const DEFAULT_SEARCH_SETTINGS = {
   ragEnabled: false,
@@ -41,6 +40,7 @@ const createPerfTracker = (addLog) => ({
   markEnd() { this.end = performance.now(); },
 
   logReport(query) {
+    // 開発者ツール向けログ
     const now = performance.now();
     const endTime = this.end || now;
     const totalTime = endTime - this.start;
@@ -50,7 +50,6 @@ const createPerfTracker = (addLog) => ({
     const displayDuration = this.firstToken ? (endTime - this.firstToken) : 0;
     const cps = displayDuration > 0 ? (this.charCount / (displayDuration / 1000)) : 0;
 
-    // 1. 開発者ツール向けのリッチなログ（既存）
     console.groupCollapsed(`🚀 [Perf] Message Cycle: "${query.length > 20 ? query.substring(0, 20) + '...' : query}"`);
     console.log(`⏱️ Total Cycle: ${totalTime.toFixed(2)}ms`);
     console.log(`📡 TTFB (Network+Upload): ${ttfb.toFixed(2)}ms`);
@@ -65,30 +64,19 @@ const createPerfTracker = (addLog) => ({
     }
     console.groupEnd();
 
-    // 2. ★追加: 「ログをコピー」ボタン用のテキストログ保存
+    // アプリ内ログ出力
     if (addLog) {
       const shortQuery = query.length > 15 ? query.substring(0, 15) + '...' : query;
       let logText = `[Perf] Cycle: "${shortQuery}" | Total: ${totalTime.toFixed(0)}ms | TTFB: ${ttfb.toFixed(0)}ms | TTFT: ${ttft.toFixed(0)}ms`;
-      
       if (this.steps.length > 0) {
         logText += ` | Thinking: ${thinkingTotal.toFixed(0)}ms (${this.steps.length} steps)`;
       }
-      if (this.firstToken) {
-        logText += ` | Speed: ${cps.toFixed(1)} chars/s`;
-      }
-      
       addLog(logText, 'info');
-      
-      // 思考プロセスの詳細も別行で記録（必要であれば）
-      if (this.steps.length > 0) {
-        const stepsLog = this.steps.map(s => `  - ${s.name}: ${s.duration.toFixed(0)}ms`).join('\n');
-        addLog(`[Perf Details]\n${stepsLog}`, 'debug');
-      }
     }
   }
 });
 
-export const useChat = (mockMode, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl) => {
+export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl) => {
   const [messages, setMessages] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -99,7 +87,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
   const [searchSettings, setSearchSettings] = useState(DEFAULT_SEARCH_SETTINGS);
 
   const searchSettingsRef = useRef(searchSettings);
-  const currentMockScenarioRef = useRef('pure');
   const creatingConversationIdRef = useRef(null);
   const settingsMapRef = useRef({});
 
@@ -148,7 +135,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
       try {
         if (mockMode === 'FE') {
-          // --- FE Mock Mode Logic ---
+          // --- FE Mock Mode Logic (履歴はまだAdapter化せず維持) ---
           await new Promise(r => setTimeout(r, 800));
 
           let loadedMessages = [];
@@ -189,13 +176,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
             addLog(`[useChat] Skipping API call for mock ID in Real mode: ${conversationId}`, 'warn');
           } else {
 
-            if (!apiKey || !apiUrl) {
+            if (!apiKey || !apiUrl || !userId) {
               setMessages([createConfigError()]);
               setIsHistoryLoading(false);
               return;
             }
 
-            const historyData = await fetchMessagesApi(conversationId, USER_ID, apiUrl, apiKey);
+            const historyData = await fetchMessagesApi(conversationId, userId, apiUrl, apiKey);
             const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
             const newMessages = [];
@@ -208,7 +195,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               if (item.query) {
                 const msgFiles = item.message_files ? item.message_files.map(f => {
                   let fileName = 'Attached File';
-
                   if (f.name) {
                     fileName = f.name;
                   } else if (f.filename) {
@@ -217,7 +203,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                     try {
                       const decodedUrl = decodeURIComponent(f.url);
                       const urlFileName = decodedUrl.split('/').pop().split('?')[0];
-
                       if (urlFileName === 'file-preview' || urlFileName.includes('image_preview')) {
                         const ext = f.mime_type ? `.${f.mime_type.split('/')[1]}` : '';
                         fileName = `添付ファイル${ext}`;
@@ -307,15 +292,15 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       }
     };
     loadHistory();
-  }, [conversationId, mockMode, addLog, apiKey, apiUrl]);
+  }, [conversationId, mockMode, addLog, apiKey, apiUrl, userId]);
 
-  // --- メッセージ送信処理 ---
+  // --- メッセージ送信処理 (Adapter利用) ---
   const handleSendMessage = async (text, attachments = []) => {
-    // ★計測開始
     const tracker = createPerfTracker(addLog);
     tracker.markStart();
 
-    if ((mockMode === 'OFF' || mockMode === 'BE') && (!apiKey || !apiUrl)) {
+    // 1. Config Validation
+    if ((mockMode === 'OFF' || mockMode === 'BE') && (!apiKey || !apiUrl || !userId)) {
       const userMessage = {
         id: `msg_${Date.now()}_user`,
         role: 'user',
@@ -324,68 +309,57 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         files: attachments.map(f => ({ name: f.name }))
       };
       setMessages(prev => [...prev, userMessage]);
-
       setTimeout(() => {
         setMessages(prev => [...prev, createConfigError()]);
       }, 200);
-
       return;
     }
 
-    let uploadedFileIds = [];
-    let displayFiles = [];
     const currentSettings = searchSettingsRef.current;
-
     if (conversationId && onConversationUpdated) {
       onConversationUpdated(conversationId);
     }
 
-    if (mockMode === 'OFF') {
-      if (attachments.length > 0) {
-        setIsGenerating(true);
-        try {
-          const uploadPromises = attachments.map(file =>
-            uploadFile(file, USER_ID, apiUrl, apiKey)
-              .then(res => ({ id: res.id, name: file.name, type: 'document' }))
-          );
+    // 2. File Upload via Adapter
+    let uploadedFileIds = [];
+    let displayFiles = [];
+    
+    if (attachments.length > 0) {
+      setIsGenerating(true);
+      try {
+        const uploadPromises = attachments.map(file => 
+          ChatServiceAdapter.uploadFile(file, { mockMode, userId, apiUrl, apiKey })
+        );
 
-          const uploadedFiles = await Promise.all(uploadPromises);
-          uploadedFileIds = uploadedFiles.map(f => f.id);
-          displayFiles = uploadedFiles.map(f => ({ name: f.name }));
+        const uploadedFiles = await Promise.all(uploadPromises);
+        uploadedFileIds = uploadedFiles.map(f => f.id);
+        displayFiles = uploadedFiles.map(f => ({ name: f.name }));
 
-          setSessionFiles(prev => [...prev, ...uploadedFiles]);
+        setSessionFiles(prev => [...prev, ...uploadedFiles]);
 
-        } catch (e) {
-          addLog(`[Upload Error] ${e.message}`, 'error');
-          setIsGenerating(false);
-          return;
-        }
-      }
-    } else {
-      if (attachments.length > 0) {
-        displayFiles = attachments.map(f => ({ name: f.name }));
-        const mockFiles = attachments.map((f, i) => ({
-          id: `mock_file_${Date.now()}_${i}`,
-          name: f.name
-        }));
-        setSessionFiles(prev => [...prev, ...mockFiles]);
-        uploadedFileIds = mockFiles.map(f => f.id);
+      } catch (e) {
+        addLog(`[Upload Error] ${e.message}`, 'error');
+        setIsGenerating(false);
+        return;
       }
     }
 
+    // 3. Update UI (User Message)
+    const userMessageId = `msg_${Date.now()}_user`;
     const userMessage = {
-      id: `msg_${Date.now()}_user`,
+      id: userMessageId,
       role: 'user',
       text: text,
       timestamp: new Date().toISOString(),
       files: displayFiles
     };
     setMessages(prev => [...prev, userMessage]);
-    setIsGenerating(true);
-
+    
+    // 4. Update UI (AI Placeholder)
     const aiMessageId = `msg_${Date.now()}_ai`;
     const isFastMode = !currentSettings.ragEnabled && currentSettings.webMode === 'off';
 
+    setIsGenerating(true);
     setMessages(prev => [...prev, {
       id: aiMessageId,
       role: 'ai',
@@ -401,121 +375,20 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
       mode: isFastMode ? 'fast' : 'normal'
     }]);
 
-    const allActiveFiles = [...sessionFiles, ...attachments.map(f => ({ name: f.name }))];
-
+    // 5. Send Request via Adapter
     let reader;
     try {
-      if (mockMode === 'FE') {
-        // --- FE Mock Mode Logic ---
-        const useRag = currentSettings.ragEnabled;
-        const useWeb = currentSettings.webMode !== 'off';
-        const hasFile = allActiveFiles.length > 0;
+      reader = await ChatServiceAdapter.sendMessage(
+        { 
+          text, 
+          conversationId, 
+          files: sessionFiles.map(f => ({ id: f.id, name: f.name })), 
+          searchSettings: currentSettings 
+        },
+        { mockMode, userId, apiUrl, apiKey }
+      );
 
-        let scenarioKey = 'pure';
-        if (!useRag && !useWeb) {
-          scenarioKey = hasFile ? 'fast_file' : 'fast_pure';
-        } else if (hasFile) {
-          if (!useRag && !useWeb) scenarioKey = 'file_only';
-          else if (!useRag && useWeb) scenarioKey = 'file_web';
-          else if (useRag && !useWeb) scenarioKey = 'file_rag';
-          else scenarioKey = 'full';
-        } else {
-          if (useRag && !useWeb) scenarioKey = 'rag_only';
-          else if (!useRag && useWeb) scenarioKey = 'web_only';
-          else if (useRag && useWeb) scenarioKey = 'hybrid';
-        }
-
-        currentMockScenarioRef.current = scenarioKey;
-        
-        let targetConvId = conversationId;
-        if (!targetConvId) {
-          const newMockId = `mock_gen_${Date.now()}`;
-          targetConvId = newMockId;
-          creatingConversationIdRef.current = newMockId;
-          settingsMapRef.current[newMockId] = currentSettings;
-          if (onConversationCreated) {
-            onConversationCreated(newMockId, text);
-          }
-        }
-
-        const generator = new MockStreamGenerator();
-        let baseScenario = scenarios[scenarioKey] || scenarios['pure'];
-        let targetScenario = [];
-
-        if (hasFile && allActiveFiles.length > 0) {
-          baseScenario.forEach(step => {
-            if (step.data?.node_type === 'document-extractor') {
-              if (step.event === 'node_started') {
-                allActiveFiles.forEach((file, idx) => {
-                  targetScenario.push({
-                    ...step,
-                    data: {
-                      ...step.data,
-                      title: 'ドキュメント抽出',
-                      node_id: `mock_node_doc_${Date.now()}_${idx}`, 
-                      inputs: { target_file: file.name }
-                    }
-                  });
-                });
-              } else if (step.event === 'node_finished') {
-                allActiveFiles.forEach((file, idx) => {
-                  targetScenario.push({
-                    ...step,
-                    data: {
-                      ...step.data,
-                      title: 'ドキュメント抽出',
-                      node_id: `mock_node_doc_${Date.now()}_${idx}`,
-                      status: 'succeeded'
-                    }
-                  });
-                });
-              }
-            } else {
-              targetScenario.push(step);
-            }
-          });
-        } else {
-          targetScenario = baseScenario;
-        }
-
-        const stream = generator.getStream(targetScenario, targetConvId);
-        reader = stream.pipeThrough(new TextDecoderStream()).getReader();
-
-      } else {
-        // --- Real API / BE Mock Logic ---
-        const domainFilterString = currentSettings.domainFilters.length > 0 ? currentSettings.domainFilters.join(', ') : '';
-        const searchModeValue = currentSettings.webMode;
-        const now = new Date();
-        const currentTimeStr = now.toLocaleString('ja-JP', {
-          year: 'numeric', month: 'long', day: 'numeric',
-          weekday: 'long', hour: '2-digit', minute: '2-digit'
-        });
-
-        const requestBody = {
-          inputs: {
-            isDebugMode: mockMode === 'BE',
-            rag_enabled: currentSettings.ragEnabled ? 'true' : 'false',
-            web_search_mode: searchModeValue,
-            search_mode: searchModeValue === 'force' ? 'force' : 'auto',
-            domain_filter: domainFilterString,
-            current_time: currentTimeStr,
-          },
-          query: text,
-          user: USER_ID,
-          conversation_id: conversationId || '',
-          response_mode: 'streaming',
-          files: uploadedFileIds.map(id => ({
-            type: 'document',
-            transfer_method: 'local_file',
-            upload_file_id: id
-          }))
-        };
-
-        const response = await sendChatMessageApi(requestBody, apiUrl, apiKey);
-        reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-      }
-
-      // --- Stream Handling ---
+      // --- Stream Handling (Common Logic) ---
       let contentBuffer = '';
       let detectedTraceMode = 'knowledge';
       let isConversationIdSynced = false;
@@ -524,10 +397,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
 
       while (true) {
         const { value, done } = await reader.read();
-        
-        // ★計測: 最初のバイト受信
         tracker.markFirstByte();
-
         if (done) break;
 
         const lines = value.split('\n').filter(line => line.trim() !== '');
@@ -542,6 +412,12 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 creatingConversationIdRef.current = data.conversation_id;
                 settingsMapRef.current[data.conversation_id] = currentSettings;
                 onConversationCreated(data.conversation_id, text);
+              } else {
+                 // FEモードのID同期
+                 if(onConversationCreated && !conversationId) {
+                     onConversationCreated(data.conversation_id, text);
+                     creatingConversationIdRef.current = data.conversation_id;
+                 }
               }
             }
 
@@ -551,6 +427,7 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               const title = data.data?.title;
               const nodeId = data.data?.node_id || `node_${Date.now()}`;
               const inputs = data.data?.inputs || {};
+              
               const isWebSearchNode = (nodeType === 'tool') && (title && (title.includes('Web') || title.includes('Search') || title.includes('Perplexity')));
               const isSignificantNode = nodeType === 'document-extractor' || (title && (title.includes('Intent') || title.includes('Classifier'))) || (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) || isWebSearchNode || nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ')) || nodeType === 'llm';
               const isAssigner = nodeType === 'assigner' || (title && (title.includes('変数') || title.includes('Variable') || title.includes('Set Opt')));
@@ -564,6 +441,8 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                   if (inputs.target_file) {
                     fileNameToDisplay = inputs.target_file;
                   } else {
+                    // アップロード済みファイル一覧から推測
+                    const allActiveFiles = [...sessionFiles, ...displayFiles];
                     const inputValues = JSON.stringify(inputs);
                     const matchedFile = allActiveFiles.find(f => inputValues.includes(f.name) || inputValues.includes(f.id));
                     if (matchedFile) {
@@ -601,7 +480,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                   }
                 }
                 
-                // ★計測: ノード開始
                 tracker.markNodeStart(nodeId, displayTitle);
 
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -619,7 +497,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
               const title = data.data?.title;
               const outputs = data.data?.outputs;
 
-              // ★計測: ノード終了
               if (nodeId) tracker.markNodeEnd(nodeId);
 
               if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
@@ -653,8 +530,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
             else if (data.event === 'message') {
               if (data.answer) {
                 contentBuffer += data.answer;
-
-                // ★計測: テキスト受信
                 tracker.markFirstToken();
                 tracker.incrementChars(data.answer);
 
@@ -666,7 +541,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
                 }
 
                 let textToDisplay = '';
-
                 if (protocolMode === 'JSON') {
                   const parsed = parseLlmResponse(contentBuffer);
                   textToDisplay = parsed.isParsed ? parsed.answer : ''; 
@@ -730,8 +604,6 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
         }
       }
       setIsGenerating(false);
-
-      // ★計測完了・レポート出力
       tracker.markEnd();
       tracker.logReport(text);
 
@@ -758,15 +630,13 @@ export const useChat = (mockMode, conversationId, addLog, onConversationCreated,
   const fetchSuggestions = async (msgId, aiMsgId) => {
     try {
       if (mockMode === 'FE') {
-        const key = currentMockScenarioRef.current;
-        const mockData = scenarioSuggestions[key] || [];
+        const mockData = scenarioSuggestions['pure'] || [];
         await new Promise(resolve => setTimeout(resolve, 500));
         setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, suggestions: mockData } : m));
         return;
       }
 
-      const res = await fetchSuggestionsApi(msgId, USER_ID, apiUrl, apiKey);
-
+      const res = await fetchSuggestionsApi(msgId, userId, apiUrl, apiKey);
       if (res.result === 'success') {
         setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, suggestions: res.data } : m));
       }

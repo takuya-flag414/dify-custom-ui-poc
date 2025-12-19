@@ -1,5 +1,6 @@
 // src/components/Shared/ApiConfigModal.jsx
 import React, { useState, useEffect } from 'react';
+import { useApiConfig } from '../../hooks/useApiConfig';
 import './ApiConfigModal.css';
 import {
     ServerIcon,
@@ -14,7 +15,8 @@ import {
 
 const DIFY_CLOUD_URL = 'https://api.dify.ai/v1';
 
-const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave }) => {
+// ★変更: addLogを受け取る
+const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave, mockMode, addLog }) => {
     const [apiKey, setApiKey] = useState('');
     const [apiUrl, setApiUrl] = useState('');
     const [showKey, setShowKey] = useState(false);
@@ -23,7 +25,8 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave 
     const [status, setStatus] = useState('idle');
     const [statusMessage, setStatusMessage] = useState('');
 
-    // モーダルが開くたびに初期化
+    const { checkConnection } = useApiConfig();
+
     useEffect(() => {
         if (isOpen) {
             setApiKey(currentApiKey || '');
@@ -31,15 +34,18 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave 
             setStatus('idle');
             setStatusMessage('');
             setShowKey(false);
+
+            // ★追加: モーダルオープン時の状態をログ出力
+            if (addLog) {
+                addLog(`[ApiConfig] Modal Opened. MockMode: ${mockMode}, HasKey: ${!!currentApiKey}, HasUrl: ${!!currentApiUrl}`, 'debug');
+            }
         }
-    }, [isOpen, currentApiKey, currentApiUrl]);
+    }, [isOpen, currentApiKey, currentApiUrl, mockMode, addLog]);
 
     if (!isOpen) return null;
 
-    // バリデーションと整形
     const formatUrl = (url) => {
         let formatted = url.trim();
-        // 末尾のスラッシュ削除
         if (formatted.endsWith('/')) {
             formatted = formatted.slice(0, -1);
         }
@@ -47,156 +53,143 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave 
     };
 
     const handleTestAndSave = async () => {
-        // 簡易バリデーション
-        if (!apiUrl) {
-            setStatus('error');
-            setStatusMessage('API URLを入力してください');
-            return;
-        }
-        if (!apiKey) {
-            setStatus('error');
-            setStatusMessage('API Keyを入力してください');
-            return;
-        }
-
         const formattedUrl = formatUrl(apiUrl);
 
-        // 接続テスト開始
+        // ログ出力
+        if (addLog) {
+            addLog(`[ApiConfig] Test & Save clicked. Mode: ${mockMode}, KeyLength: ${apiKey.length}, URL: ${formattedUrl}`, 'info');
+        }
+
+        // バリデーションログ
+        if (mockMode !== 'FE' && !apiKey.trim()) {
+            const msg = 'APIキーを入力してください (Non-FE Mode)';
+            if (addLog) addLog(`[ApiConfig] Validation Failed: ${msg}`, 'warn');
+            setStatus('error');
+            setStatusMessage('APIキーを入力してください');
+            return;
+        }
+
         setStatus('testing');
-        setStatusMessage('Difyサーバーに接続中...');
+        setStatusMessage('接続を確認中...');
 
         try {
-            // Dify API仕様に基づき /info または /meta にアクセスして認証確認
-            const endpoint = formattedUrl.endsWith('/v1')
-                ? `${formattedUrl}/info`
-                : `${formattedUrl}/v1/info`;
+            if (addLog) addLog('[ApiConfig] Calling checkConnection...', 'debug');
 
-            const response = await fetch(endpoint, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            await checkConnection(apiKey, formattedUrl, mockMode);
 
-            if (response.ok) {
-                // 成功
-                setStatus('success');
-                setStatusMessage('接続成功！設定を保存しました');
+            if (addLog) addLog('[ApiConfig] Connection check passed.', 'success');
 
-                // 1秒後に保存して閉じる
-                setTimeout(() => {
-                    onSave(apiKey, formattedUrl);
-                    onClose();
-                }, 1000);
-            } else {
-                // エラーハンドリング
-                const statusText = response.status === 401 ? '認証エラー: APIキーが無効です'
-                    : response.status === 404 ? 'エラー: エンドポイントが見つかりません'
-                        : `エラー: サーバー応答 ${response.status}`;
+            setStatus('success');
+            setStatusMessage('接続に成功しました');
 
-                setStatus('error');
-                setStatusMessage(statusText);
-            }
+            setTimeout(() => {
+                if (addLog) addLog('[ApiConfig] Saving config and closing.', 'info');
+                onSave(apiKey, formattedUrl);
+                onClose();
+            }, 1000);
+
         } catch (error) {
+            const errorMsg = error.message || '不明なエラー';
+            if (addLog) addLog(`[ApiConfig] Connection Failed: ${errorMsg}`, 'error');
+
             setStatus('error');
-            setStatusMessage('通信エラー: URLを確認してください');
-            console.error('Connection Test Error:', error);
+            setStatusMessage(`接続失敗: ${errorMsg}`);
         }
     };
 
-    const handleUseCloudDefaults = () => {
-        setApiUrl(DIFY_CLOUD_URL);
-        // エラー状態からの復帰があればクリア
-        if (status === 'error') {
-            setStatus('idle');
-            setStatusMessage('');
-        }
-    };
+    // ボタンの有効化状態
+    const isFormValid = mockMode === 'FE' || (apiUrl && apiKey);
+
+    // ★追加: バリデーション状態の変化をデバッグ
+    // (頻繁に出るのを防ぐため、ボタンクリック時または値確定時に見るのが良いが、今回はデバッグのためシンプルに)
 
     return (
-        <div className="api-modal-overlay" onClick={onClose}>
-            <div className="api-modal-container" onClick={e => e.stopPropagation()}>
+        <div className="api-modal-overlay">
+            <div className="api-modal-container">
 
-                {/* Header */}
                 <div className="api-modal-header">
-                    <h2 className="api-modal-title">API接続設定</h2>
-                    {/* Closeボタンは削除 */}
+                    <div className="icon-wrapper">
+                        <CloudIcon width="24" height="24" color="var(--color-primary)" />
+                    </div>
+                    <div className="header-text">
+                        <h2>API設定</h2>
+                        <p>Dify APIとの接続設定を管理します</p>
+                    </div>
                 </div>
 
-                {/* Body */}
                 <div className="api-modal-body">
 
-                    {/* URL Input */}
+                    {mockMode === 'FE' && (
+                        <div className="mock-mode-info">
+                            <AlertCircleIcon width="16" height="16" />
+                            <span>現在 <strong>Frontend Mock Mode</strong> です。接続テストはシミュレーションされます。</span>
+                        </div>
+                    )}
+
                     <div className="input-group">
-                        <label className="input-label">Dify API URL</label>
-                        <div className="input-wrapper">
-                            <ServerIcon className="input-icon-left" width="18" height="18" />
+                        <label>API エンドポイント (Base URL)</label>
+                        <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
+                            <div className="input-icon">
+                                <ServerIcon width="18" height="18" />
+                            </div>
                             <input
                                 type="text"
-                                className="styled-input"
-                                placeholder="https://api.dify.ai/v1"
                                 value={apiUrl}
                                 onChange={(e) => {
                                     setApiUrl(e.target.value);
-                                    if (status === 'error') setStatus('idle');
+                                    setStatus('idle');
                                 }}
+                                placeholder="https://api.dify.ai/v1"
+                                className="styled-input"
                             />
                         </div>
-
-                        {/* Helper Button */}
-                        <button
-                            className="helper-action"
-                            onClick={handleUseCloudDefaults}
-                            type="button"
-                        >
-                            <CloudIcon width="14" height="14" />
-                            <span>Dify Cloud (Default) を使用</span>
-                        </button>
+                        <div className="helper-text">
+                            <span className="link-btn" onClick={() => setApiUrl(DIFY_CLOUD_URL)}>
+                                Dify Cloudのデフォルトを使用
+                            </span>
+                        </div>
                     </div>
 
-                    {/* API Key Input */}
                     <div className="input-group">
-                        <label className="input-label">API Key</label>
-                        <div className="input-wrapper">
-                            <KeyIcon className="input-icon-left" width="18" height="18" />
+                        <label>API キー (App Key)</label>
+                        <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
+                            <div className="input-icon">
+                                <KeyIcon width="18" height="18" />
+                            </div>
                             <input
                                 type={showKey ? "text" : "password"}
-                                className="styled-input font-mono"
-                                placeholder="app-xxxxxxxxxxxxxxxxxxxx"
                                 value={apiKey}
                                 onChange={(e) => {
                                     setApiKey(e.target.value);
-                                    if (status === 'error') setStatus('idle');
+                                    setStatus('idle');
                                 }}
+                                placeholder="app-xxxxxxxxxxxxxxxxxxxx"
+                                className="styled-input"
                             />
-                            <div className="input-action-right">
-                                <button
-                                    className="icon-button"
-                                    onClick={() => setShowKey(!showKey)}
-                                    type="button"
-                                    title={showKey ? "隠す" : "表示する"}
-                                >
-                                    {showKey ? <EyeOffIcon width="18" height="18" /> : <EyeIcon width="18" height="18" />}
-                                </button>
-                            </div>
+                            <button
+                                className="toggle-visibility"
+                                onClick={() => setShowKey(!showKey)}
+                                tabIndex="-1"
+                            >
+                                {showKey ?
+                                    <EyeOffIcon width="16" height="16" /> :
+                                    <EyeIcon width="16" height="16" />
+                                }
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="api-modal-footer">
-                    {/* Status Bar */}
                     {status !== 'idle' && (
                         <div className={`status-bar ${status}`}>
-                            {status === 'testing' && <LoaderIcon width="16" height="16" />}
+                            {status === 'testing' && <LoaderIcon width="16" height="16" className="animate-spin" />}
                             {status === 'success' && <CheckCircleIcon width="16" height="16" />}
                             {status === 'error' && <AlertCircleIcon width="16" height="16" />}
                             <span className="status-text">{statusMessage}</span>
                         </div>
                     )}
 
-                    {/* Buttons */}
                     <div className="button-row">
                         <button className="btn-cancel" onClick={onClose}>
                             キャンセル
@@ -204,7 +197,9 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave 
                         <button
                             className="btn-save"
                             onClick={handleTestAndSave}
-                            disabled={status === 'testing' || !apiUrl || !apiKey}
+                            // ボタンが無効化されている原因を知るために、無効化ロジックは厳密に
+                            disabled={status === 'testing' || !isFormValid}
+                            title={!isFormValid ? "FEモード以外ではAPI URLとAPIキーが必須です" : ""}
                         >
                             {status === 'testing' ? '確認中...' : '接続テスト & 保存'}
                         </button>

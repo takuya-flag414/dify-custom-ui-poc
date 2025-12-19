@@ -34,30 +34,67 @@
         0 8px 10px -6px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(0, 0, 0, 0.05);
 
-    padding: 0;
-    overflow: hidden;
-    transform-origin: center;
-    animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+
+    animation: modalSlideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Animations */
+@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Header */
 .api-modal-header {
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-5) var(--space-6);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    align-items: flex-start;
+    gap: var(--space-4);
+    background: linear-gradient(to bottom, #FFFFFF, rgba(255, 255, 255, 0.5));
 }
 
-.api-modal-title {
+.icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-xl);
+    background-color: var(--color-primary-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.header-text h2 {
     font-size: var(--text-lg);
     font-weight: var(--font-bold);
     color: var(--color-text-main);
-    letter-spacing: -0.01em;
-    margin: 0;
+    margin-bottom: 2px;
+}
+
+.header-text p {
+    font-size: var(--text-sm);
+    color: var(--color-text-sub);
 }
 
 /* Body */
@@ -65,137 +102,142 @@
     padding: var(--space-6);
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-5);
 }
 
-/* Input Group Styles */
+/* Mock Mode Badge (★追加) */
+.mock-mode-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background-color: #EFF6FF;
+    /* blue-50 */
+    border: 1px solid #DBEAFE;
+    /* blue-100 */
+    border-radius: var(--radius-lg);
+    color: #1E40AF;
+    /* blue-800 */
+    font-size: var(--text-xs);
+    line-height: 1.4;
+}
+
 .input-group {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
 }
 
-.input-label {
+.input-group label {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
-    color: var(--color-text-sub);
-    margin-left: 2px;
+    color: var(--color-text-main);
 }
 
 .input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-}
-
-/* Input Field with Icons */
-.styled-input {
-    width: 100%;
-    padding: 10px 40px;
-    /* アイコン分のスペース */
-    font-size: var(--text-base);
-    color: var(--color-text-main);
-    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-bg-body);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    outline: none;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s;
 }
 
-.styled-input:focus {
-    background-color: #FFFFFF;
+.input-wrapper:focus-within {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 2px var(--color-primary-bg);
+    background-color: #FFFFFF;
 }
 
-/* Font Mono for API Key */
-.styled-input.font-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.9em;
+.input-wrapper.error {
+    border-color: #EF4444;
+    background-color: #FEF2F2;
 }
 
-/* Icons Position */
-.input-icon-left {
-    position: absolute;
-    left: 12px;
-    color: var(--color-text-muted);
-    pointer-events: none;
-}
-
-.input-action-right {
-    position: absolute;
-    right: 8px;
+.input-icon {
+    padding-left: 12px;
+    color: var(--color-text-sub);
     display: flex;
     align-items: center;
 }
 
-.icon-button {
-    padding: 4px;
-    border-radius: var(--radius-md);
-    color: var(--color-text-muted);
-    background: transparent;
+.styled-input {
+    width: 100%;
+    padding: 10px 12px;
     border: none;
-    cursor: pointer;
-    transition: color 0.2s;
+    background: transparent;
+    font-size: var(--text-sm);
+    color: var(--color-text-main);
+    font-family: inherit;
 }
 
-.icon-button:hover {
+.styled-input:focus {
+    outline: none;
+}
+
+.toggle-visibility {
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-md);
+}
+
+.toggle-visibility:hover {
     color: var(--color-text-main);
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-/* Helper Action (Cloud Button) */
-.helper-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 4px;
-    padding: 4px 8px;
+.helper-text {
     font-size: var(--text-xs);
+    color: var(--color-text-sub);
+    text-align: right;
+}
+
+.link-btn {
     color: var(--color-primary);
-    background-color: var(--color-primary-bg);
-    border-radius: var(--radius-md);
-    border: none;
     cursor: pointer;
-    transition: all 0.2s;
-    align-self: flex-start;
+    font-weight: var(--font-medium);
 }
 
-.helper-action:hover {
-    background-color: var(--color-primary-bg-hover);
+.link-btn:hover {
+    text-decoration: underline;
 }
 
-/* Footer & Status */
+/* Footer */
 .api-modal-footer {
-    padding: var(--space-4) var(--space-6) var(--space-6);
+    padding: var(--space-4) var(--space-6);
+    background-color: var(--color-bg-surface-2);
+    border-top: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
 }
 
-/* Connection Status Bar */
+/* Status Bar */
 .status-bar {
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-xs);
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-sm);
-    background-color: #F9FAFB;
-    border: 1px solid transparent;
-    transition: all 0.3s ease;
+    gap: var(--space-2);
 }
 
 .status-bar.testing {
-    background-color: #EFF6FF;
-    color: var(--color-primary);
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-sub);
+    border: 1px solid var(--color-border);
 }
 
 .status-bar.success {
-    background-color: #F0FDF4;
-    color: #15803D;
-    border-color: #DCFCE7;
+    background-color: #ECFDF5;
+    color: #059669;
+    border: 1px solid #D1FAE5;
 }
 
 .status-bar.error {
@@ -241,40 +283,32 @@
     border-radius: var(--radius-lg);
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-save:hover {
     background-color: var(--color-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 }
 
 .btn-save:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
+    background-color: var(--color-text-sub);
+    box-shadow: none;
 }
 
-/* Animations */
-@keyframes overlayFadeIn {
+/* Animation Utilities (SystemIcons内で使われている場合) */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
     from {
-        opacity: 0;
+        transform: rotate(0deg);
     }
 
     to {
-        opacity: 1;
-    }
-}
-
-@keyframes modalScaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.96);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
+        transform: rotate(360deg);
     }
 }
