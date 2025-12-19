@@ -1,0 +1,164 @@
+/* src/components/Chat/WelcomeScreen.css */
+
+.welcome-container {
+    display: flex;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+    width: 100%;
+    min-height: 100%;
+    overflow-y: auto;
+    /* 背景色を明示的に指定 */
+    background: radial-gradient(circle at 50% 0%, var(--color-bg-secondary, #F9FAFB) 0%, transparent 70%);
+}
+
+.welcome-inner {
+    max-width: 800px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+}
+
+/* ヘッダーエリア */
+.welcome-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    animation: fadeDown 0.6s ease-out;
+}
+
+.welcome-logo-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--color-primary-lightest, #EFF6FF);
+    color: var(--color-primary, #3B82F6);
+    /* 文字色を確実に指定 */
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    /* text-4xl */
+    font-weight: 800;
+    /* extra-bold */
+    /* 【修正】グラデーションを削除し、単色で視認性を確保 */
+    color: var(--color-text-primary, #111827);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.welcome-subtitle {
+    font-size: 1.125rem;
+    /* text-lg */
+    color: var(--color-text-secondary, #4B5563);
+    max-width: 600px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* グリッドセクション */
+.welcome-grid-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.welcome-section-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #9CA3AF);
+    margin: 0 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.welcome-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2カラム */
+    gap: 1.25rem;
+}
+
+/* フッターリンク */
+.welcome-footer-links {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--color-text-muted, #9CA3AF);
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out 0.4s forwards;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-primary, #3B82F6);
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+.link-button:hover {
+    color: var(--color-primary-dark, #2563EB);
+}
+
+/* アニメーション定義 */
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .welcome-container {
+        padding: 2rem 1rem;
+        align-items: flex-start;
+        /* モバイルでは少し上寄りに */
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+    }
+
+    .welcome-grid {
+        grid-template-columns: 1fr;
+        /* モバイルは1カラム */
+        gap: 1rem;
+    }
+
+    .welcome-inner {
+        gap: 2.5rem;
+    }
+}

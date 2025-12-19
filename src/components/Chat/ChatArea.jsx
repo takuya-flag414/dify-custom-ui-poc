@@ -6,6 +6,7 @@ import './ChatArea.css';
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
 import HistorySkeleton from './HistorySkeleton';
+import WelcomeScreen from './WelcomeScreen';
 
 const ChatArea = (props) => {
   const {
@@ -19,7 +20,8 @@ const ChatArea = (props) => {
     setSearchSettings,
     onOpenConfig,
     onOpenArtifact,
-    userName
+    userName,
+    onStartTutorial
   } = props;
 
   // 初期状態: メッセージ0件 かつ 履歴ロード中でない
@@ -49,26 +51,25 @@ const ChatArea = (props) => {
           </div>
         </>
       ) : isInitialState ? (
-        <div className="initial-view-container">
-          <div className="initial-content">
-            <div className="initial-header">
-              <h2 className="initial-title">お困りのことはありますか？</h2>
-              <p className="initial-subtitle">社内情報やWebから情報を検索して回答します。</p>
-            </div>
-            <div className="initial-input-wrapper">
-              <ChatInput
-                isLoading={isGenerating}
-                onSendMessage={onSendMessage}
-                isCentered={true}
-                activeContextFiles={activeContextFiles}
-                setActiveContextFiles={setActiveContextFiles}
-                searchSettings={searchSettings}
-                setSearchSettings={setSearchSettings}
-                onOpenConfig={onOpenConfig}
-              />
-            </div>
+        <>
+          <WelcomeScreen
+            userName={userName}
+            onSendMessage={onSendMessage}
+            onStartTutorial={onStartTutorial}
+          />
+          <div className="bottom-controls-wrapper">
+            <ChatInput
+              isLoading={isGenerating}
+              onSendMessage={onSendMessage}
+              isCentered={false}
+              activeContextFiles={activeContextFiles}
+              setActiveContextFiles={setActiveContextFiles}
+              searchSettings={searchSettings}
+              setSearchSettings={setSearchSettings}
+              onOpenConfig={onOpenConfig}
+            />
           </div>
-        </div>
+        </>
       ) : (
         <>
           <ChatHistory

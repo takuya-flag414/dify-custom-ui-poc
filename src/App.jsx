@@ -35,41 +35,47 @@ function App() {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState('chat');
 
-  const [currentUser, setCurrentUser] = useState({
-    id: null,
-    role: 'developer',
-    name: 'Loading...',
-  });
+  // 【修正】初期化時に関数を実行してIDとRoleを即時決定する
+  const [currentUser, setCurrentUser] = useState(() => {
+    // 1. User ID Initialization
+    let storedUserId = null;
+    try {
+      storedUserId = localStorage.getItem('app_user_id');
+    } catch (e) {
+      console.error('Failed to read user id', e);
+    }
 
-  useEffect(() => {
-    // ========================================
-    // Role Resolution Logic (Single Source)
-    // Phase 1: localStorage から読み込み
-    // Phase 2: AuthService.getRoleFromToken() に置換予定
-    // ========================================
-
-    // 1. User IDの取得または生成
-    let storedUserId = localStorage.getItem('app_user_id');
     if (!storedUserId) {
       storedUserId = `user-${generateUUID().slice(0, 8)}`;
-      localStorage.setItem('app_user_id', storedUserId);
+      try {
+        localStorage.setItem('app_user_id', storedUserId);
+      } catch (e) {
+        console.error('Failed to save user id', e);
+      }
       console.log('[App] New User ID generated:', storedUserId);
     } else {
       console.log('[App] User ID loaded:', storedUserId);
     }
 
-    // 2. Debug Role の取得（Phase 1: localStorage、Phase 2: Entra ID Token）
-    const storedRole = localStorage.getItem('app_debug_role') || 'developer';
+    // 2. Role Initialization
+    let storedRole = 'developer';
+    try {
+      storedRole = localStorage.getItem('app_debug_role') || 'developer';
+    } catch (e) {
+      console.error('Failed to read role', e);
+    }
     console.log('[App] Debug Role loaded:', storedRole);
 
-    setCurrentUser(prev => ({
-      ...prev,
+    return {
       id: storedUserId,
       role: storedRole,
-    }));
-  }, []);
+      name: 'Loading...', // useSettingsで上書きされるため表示されません
+    };
+  });
 
-  // Role変更ハンドラー（HeaderのRoleSelectから呼び出される）
+  // 【削除】useEffect内でのUser ID生成ロジックは削除（上記のuseState初期化に移動済み）
+
+  // Role変更ハンドラー
   const handleRoleChange = (newRole) => {
     localStorage.setItem('app_debug_role', newRole);
     setCurrentUser(prev => ({ ...prev, role: newRole }));
@@ -208,7 +214,7 @@ function App() {
         currentApiUrl={apiUrl}
         onSave={saveConfig}
         mockMode={mockMode}
-        addLog={addLog} // ★追加: ログ出力を可能にする
+        addLog={addLog}
       />
 
       {/* 1. Sidebar */}
@@ -279,6 +285,7 @@ function App() {
                     onOpenConfig={() => setIsConfigModalOpen(true)}
                     onOpenArtifact={openArtifact}
                     userName={settings?.profile?.displayName || 'User'}
+                    onStartTutorial={startTutorial}
                   />
                 </motion.div>
               ) : (
