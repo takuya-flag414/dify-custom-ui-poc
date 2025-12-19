@@ -2,10 +2,12 @@
 import React from 'react';
 import { settingsCategories } from '../../config/settingsConfig';
 
-const SettingsNav = ({ activeTab, onSelectTab }) => {
-    // Phase 1: 権限チェックは簡易的に実装（すべて表示）
-    // 将来的には currentUser.role でフィルタリングする
-    const filteredCategories = settingsCategories;
+const SettingsNav = ({ activeTab, onSelectTab, currentUser }) => {
+    // RBAC: settingsConfig.jsx の allowedRoles に基づいてフィルタリング
+    const currentRole = currentUser?.role || 'user';
+    const filteredCategories = settingsCategories.filter(
+        category => category.allowedRoles.includes(currentRole)
+    );
 
     return (
         <div className="settings-nav">

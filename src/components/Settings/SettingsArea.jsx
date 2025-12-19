@@ -1,7 +1,8 @@
 // src/components/Settings/SettingsArea.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SettingsNav from './SettingsNav';
 import SettingsPanel from './SettingsPanel';
+import { settingsCategories } from '../../config/settingsConfig';
 import './SettingsArea.css';
 
 // ★変更: propsを拡張して受け取る
@@ -14,6 +15,22 @@ const SettingsArea = ({
     onOpenApiConfig     // 追加
 }) => {
     const [activeTab, setActiveTab] = useState('profile');
+
+    // Role変更時のタブリセット処理
+    useEffect(() => {
+        const currentRole = currentUser?.role || 'user';
+        const allowedCategories = settingsCategories.filter(
+            c => c.allowedRoles.includes(currentRole)
+        );
+
+        // 現在のタブがアクセス可能か確認
+        const isCurrentTabAllowed = allowedCategories.some(c => c.id === activeTab);
+
+        if (!isCurrentTabAllowed && allowedCategories.length > 0) {
+            // 最初に許可されているタブにリセット
+            setActiveTab(allowedCategories[0].id);
+        }
+    }, [currentUser?.role, activeTab]);
 
     return (
         <div className="settings-area-container">

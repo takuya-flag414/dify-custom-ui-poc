@@ -1,6 +1,7 @@
 // src/components/Layout/Header.jsx
 import React, { useState } from 'react';
 import MockModeSelect from '../Chat/MockModeSelect';
+import RoleSelect from '../Chat/RoleSelect';
 import { SettingsIcon, ClipboardIcon, ReviewIcon } from '../Shared/SystemIcons';
 import './Header.css';
 
@@ -29,7 +30,9 @@ const Header = ({
     handleCopyLogs,
     copyButtonText,
     messages,
-    onStartTutorial // ★追加: Props受け取り
+    onStartTutorial,
+    currentUser,      // ★追加
+    onRoleChange      // ★追加
 }) => {
     const [isCopied, setIsCopied] = useState(false);
 
@@ -46,6 +49,11 @@ const Header = ({
             {/* Left: Context / Environment */}
             <div className="header-left">
                 <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
+                <div className="header-divider" />
+                <RoleSelect
+                    currentRole={currentUser?.role || 'developer'}
+                    onRoleChange={onRoleChange}
+                />
             </div>
 
             {/* Right: Utilities */}
@@ -57,7 +65,7 @@ const Header = ({
                     className="header-btn"
                     title="パイロット版のフィードバックを送る"
                     aria-label="レビューを書く（別タブで開きます）"
-                    >
+                >
                     <ReviewIcon width="14" height="14" />
                     レビュー
                 </a>

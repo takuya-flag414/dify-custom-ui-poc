@@ -2,11 +2,16 @@
 import React from 'react';
 import { settingsCategories } from '../../config/settingsConfig';
 
-// ★変更: ...restProps でその他のProps（onOpenApiConfigなど）をまとめて受け取る
-const SettingsPanel = ({ activeTab, ...restProps }) => {
+// ★変更: currentUserを明示的に受け取り、restPropsで他を渡す
+const SettingsPanel = ({ activeTab, currentUser, ...restProps }) => {
+    const currentRole = currentUser?.role || 'user';
+
     const category = settingsCategories.find(c => c.id === activeTab);
 
-    if (!category) return null;
+    // カテゴリが見つからない、または権限がない場合はnullを返す
+    if (!category || !category.allowedRoles.includes(currentRole)) {
+        return null;
+    }
 
     const Component = category.component;
 
@@ -17,8 +22,8 @@ const SettingsPanel = ({ activeTab, ...restProps }) => {
             </header>
             <div className="settings-content-scroll">
                 <div className="settings-section-container">
-                    {/* ★変更: 受け取った全てのPropsをComponentへ渡す */}
-                    <Component {...restProps} />
+                    {/* ★変更: currentUserを含む全てのPropsをComponentへ渡す */}
+                    <Component currentUser={currentUser} {...restProps} />
                 </div>
             </div>
         </div>

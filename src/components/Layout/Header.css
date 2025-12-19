@@ -218,3 +218,132 @@
     color: var(--color-primary);
 }
 
+/* --- Role Select Dropdown (同様のスタイル) --- */
+.role-select-wrapper {
+    position: relative;
+}
+
+.role-trigger-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 12px;
+    background-color: #F5F3FF; /* Purple-50 */
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    color: var(--color-text-main);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    white-space: nowrap;
+}
+
+.role-trigger-btn:hover,
+.role-trigger-btn.open {
+    background-color: #EDE9FE; /* Purple-100 */
+}
+
+.role-trigger-btn.open {
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+    border-color: #8B5CF6; /* Purple-500 */
+}
+
+.role-trigger-icon {
+    color: #7C3AED; /* Purple-600 */
+}
+
+.role-trigger-chevron {
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease;
+}
+
+.role-trigger-btn.open .role-trigger-chevron {
+    transform: rotate(180deg);
+}
+
+.role-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 200px;
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06),
+        0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+    z-index: 100;
+    transform-origin: top left;
+    animation: dropdownEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.role-dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.role-dropdown-item:hover {
+    background-color: #F5F3FF; /* Purple-50 */
+    color: var(--color-text-main);
+}
+
+.role-dropdown-item.selected {
+    background-color: #EDE9FE; /* Purple-100 */
+    color: #7C3AED; /* Purple-600 */
+}
+
+.role-dropdown-item .item-icon {
+    margin-right: 10px;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+}
+
+.role-dropdown-item:hover .item-icon {
+    color: #7C3AED; /* Purple-600 */
+}
+
+.role-dropdown-item.selected .item-icon {
+    color: #7C3AED; /* Purple-600 */
+}
+
+.role-dropdown-item .item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.role-dropdown-item .item-label {
+    font-weight: 600;
+}
+
+.role-dropdown-item .item-description {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.role-dropdown-item:hover .item-description {
+    color: var(--color-text-sub);
+}
+
+.role-dropdown-item .item-check {
+    margin-left: 8px;
+    color: #7C3AED; /* Purple-600 */
+}

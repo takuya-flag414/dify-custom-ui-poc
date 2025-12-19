@@ -42,6 +42,13 @@ function App() {
   });
 
   useEffect(() => {
+    // ========================================
+    // Role Resolution Logic (Single Source)
+    // Phase 1: localStorage から読み込み
+    // Phase 2: AuthService.getRoleFromToken() に置換予定
+    // ========================================
+
+    // 1. User IDの取得または生成
     let storedUserId = localStorage.getItem('app_user_id');
     if (!storedUserId) {
       storedUserId = `user-${generateUUID().slice(0, 8)}`;
@@ -50,11 +57,24 @@ function App() {
     } else {
       console.log('[App] User ID loaded:', storedUserId);
     }
+
+    // 2. Debug Role の取得（Phase 1: localStorage、Phase 2: Entra ID Token）
+    const storedRole = localStorage.getItem('app_debug_role') || 'developer';
+    console.log('[App] Debug Role loaded:', storedRole);
+
     setCurrentUser(prev => ({
       ...prev,
       id: storedUserId,
+      role: storedRole,
     }));
   }, []);
+
+  // Role変更ハンドラー（HeaderのRoleSelectから呼び出される）
+  const handleRoleChange = (newRole) => {
+    localStorage.setItem('app_debug_role', newRole);
+    setCurrentUser(prev => ({ ...prev, role: newRole }));
+    addLog(`[App] Role changed to ${newRole}`, 'info');
+  };
 
   const { settings, updateSettings, isLoaded: isSettingsLoaded } = useSettings(currentUser.id);
 
@@ -218,6 +238,8 @@ function App() {
           copyButtonText={copyButtonText}
           messages={messages}
           onStartTutorial={startTutorial}
+          currentUser={currentUser}
+          onRoleChange={handleRoleChange}
         />
 
         {/* Workspace (Chat + Artifact) */}
