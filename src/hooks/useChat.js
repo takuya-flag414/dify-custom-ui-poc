@@ -326,6 +326,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     // 2. File Upload via Adapter
     let uploadedFileIds = [];
     let displayFiles = [];
+    let uploadedFiles = [];
 
     if (attachments.length > 0) {
       setIsGenerating(true);
@@ -334,7 +335,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
           ChatServiceAdapter.uploadFile(file, { mockMode, userId, apiUrl, apiKey })
         );
 
-        const uploadedFiles = await Promise.all(uploadPromises);
+        uploadedFiles = await Promise.all(uploadPromises);
         uploadedFileIds = uploadedFiles.map(f => f.id);
         displayFiles = uploadedFiles.map(f => ({ name: f.name }));
 
@@ -381,11 +382,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     // 5. Send Request via Adapter
     let reader;
     try {
+      // sessionFilesと新規アップロードファイルを合わせた配列を作成
+      const allFilesToSend = [...sessionFiles, ...uploadedFiles];
+
       reader = await ChatServiceAdapter.sendMessage(
         {
           text,
           conversationId,
-          files: sessionFiles.map(f => ({ id: f.id, name: f.name })),
+          files: allFilesToSend.map(f => ({ id: f.id, name: f.name })),
           searchSettings: currentSettings,
           promptSettings: promptSettings
         },
