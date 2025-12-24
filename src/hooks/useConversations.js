@@ -46,13 +46,13 @@ export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
       }
 
       addLog('[useConversations] Fetching REAL conversations list...', 'info');
-      
+
       // ★変更: userIdがない場合も中止する
       if (!apiKey || !apiUrl || !userId) {
         if (!userId) {
-           addLog('[useConversations] User ID not set yet.', 'debug');
+          addLog('[useConversations] User ID not set yet.', 'debug');
         } else {
-           addLog('[useConversations Error] API KEY or URL not set.', 'error');
+          addLog('[useConversations Error] API KEY or URL not set.', 'error');
         }
         setConversations([]);
         return;
@@ -85,7 +85,26 @@ export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
       return [newConv, ...prev];
     });
     setConversationId(newId);
-  }, [addLog]);
+
+    // ★追加: 一定時間後にタイトルを再取得（Difyが自動生成したタイトルを反映）
+    if (mockMode !== 'FE' && apiKey && apiUrl && userId) {
+      setTimeout(async () => {
+        try {
+          const data = await fetchConversationsApi(userId, apiUrl, apiKey, 1);
+          const updatedConv = data.data?.find(c => c.id === newId);
+          if (updatedConv && updatedConv.name && updatedConv.name !== newTitle) {
+            setConversations(prev => prev.map(c =>
+              c.id === newId ? { ...c, name: updatedConv.name } : c
+            ));
+            addLog(`[useConversations] Title updated: "${updatedConv.name}"`, 'info');
+          }
+        } catch (e) {
+          // サイレントに失敗（ログのみ）
+          addLog(`[useConversations] Failed to refresh title: ${e.message}`, 'warn');
+        }
+      }, 3000); // 3秒後にタイトルを再取得
+    }
+  }, [addLog, mockMode, apiKey, apiUrl, userId]);
 
   const handleDeleteConversation = useCallback(async (targetId) => {
     addLog(`[useConversations] Deleting conversation: ${targetId}`, 'info');
