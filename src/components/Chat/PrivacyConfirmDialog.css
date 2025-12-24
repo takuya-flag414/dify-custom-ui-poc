@@ -1,0 +1,164 @@
+/* src/components/Chat/PrivacyConfirmDialog.css */
+
+/* ========================================
+   Privacy Confirm Dialog
+   機密情報検知時の送信確認ダイアログ
+   ======================================== */
+
+/* オーバーレイ */
+.privacy-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: privacyFadeIn 0.15s ease-out;
+}
+
+/* ダイアログ本体 */
+.privacy-confirm-dialog {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  animation: privacyScaleIn 0.2s ease-out;
+}
+
+/* アイコン（Amber色） */
+.privacy-confirm-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-warning-amber-bg);
+  color: var(--color-warning-amber);
+}
+
+.privacy-confirm-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* タイトル */
+.privacy-confirm-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-main);
+  margin: 0 0 var(--space-4) 0;
+  line-height: 1.4;
+}
+
+/* 検知項目リスト */
+.privacy-confirm-list {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  margin: 0 0 var(--space-4) 0;
+  background: var(--color-warning-amber-bg);
+  border-radius: var(--radius-lg);
+  list-style: none;
+}
+
+.privacy-confirm-list li {
+  font-size: var(--text-sm);
+  color: var(--color-text-main);
+  padding: var(--space-1) 0;
+}
+
+.privacy-confirm-list li::before {
+  content: "• ";
+  color: var(--color-warning-amber);
+  font-weight: bold;
+}
+
+/* 確認メッセージ */
+.privacy-confirm-message {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-6) 0;
+  line-height: 1.5;
+}
+
+/* アクションボタン */
+.privacy-confirm-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.privacy-confirm-btn-cancel,
+.privacy-confirm-btn-send {
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 120px;
+}
+
+.privacy-confirm-btn-cancel {
+  background: var(--color-bg-body);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+}
+
+.privacy-confirm-btn-cancel:hover {
+  background: var(--color-hover-overlay);
+}
+
+.privacy-confirm-btn-send {
+  background: var(--color-warning-amber);
+  border: none;
+  color: white;
+}
+
+.privacy-confirm-btn-send:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* アニメーション */
+@keyframes privacyFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes privacyScaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .privacy-confirm-dialog {
+  background: var(--color-bg-surface);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .privacy-confirm-btn-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-strong);
+}
+
+[data-theme='dark'] .privacy-confirm-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}

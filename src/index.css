@@ -1,87 +1,104 @@
 /* src/index.css */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+/* ========================================
+   Design System v2.0 (Intelligence Era)
+   Based on DESIGN_RULE_V2.md
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* --- Typography --- */
-  --font-family-base: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  /* ========================================
+     Typography (V2)
+     ======================================== */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Font Sizes */
-  --text-xs: 0.75rem;
-  /* 12px */
-  --text-sm: 0.875rem;
-  /* 14px */
-  --text-base: 1rem;
-  /* 16px */
-  --text-lg: 1.125rem;
-  /* 18px */
-  --text-xl: 1.25rem;
+  /* Font Sizes - V2 Scale */
+  --text-large-title: 34px;
+  --text-title-2: 22px;
+  --text-body: 17px;
+  --text-caption: 13px;
+  --text-button: 17px;
+
+  /* Legacy compat */
+  --text-xs: 0.8125rem;
+  /* 13px */
+  --text-sm: 0.9375rem;
+  /* 15px */
+  --text-base: 1.0625rem;
+  /* 17px */
+  --text-lg: 1.25rem;
   /* 20px */
+  --text-xl: 1.375rem;
+  /* 22px */
   --text-2xl: 1.5rem;
   /* 24px */
-  --text-3xl: 1.875rem;
-  /* 30px */
-  --text-4xl: 2.25rem;
-  /* 36px */
+  --text-3xl: 2.125rem;
+  /* 34px */
 
   /* Font Weights */
   --font-normal: 400;
   --font-medium: 500;
+  --font-semibold: 600;
   --font-bold: 700;
 
-  /* --- Color Palette (Based on DESIGN_RULE.md) --- */
-  /* Primary (Blue) */
-  --color-primary: #3B82F6;
-  /* blue-500: 主要アクション */
-  --color-primary-hover: #2563EB;
-  /* blue-600: ホバー */
-  --color-primary-active: #1D4ED8;
-  /* blue-700: アクティブ/テキスト */
-  --color-primary-bg: #EFF6FF;
-  /* blue-50: 背景用 */
-  --color-primary-bg-hover: #DBEAFE;
-  /* blue-100: ホバー背景 */
+  /* Letter Spacing (Tracking) */
+  --tracking-tight: -0.022em;
+  --tracking-normal: -0.01em;
+  --tracking-wide: 0.01em;
+
+  /* ========================================
+     OKLCH Color System (V2)
+     ======================================== */
+  /* Background Layers */
+  --bg-base: oklch(99% 0 0);
+  /* App background */
+  --bg-layer-1: oklch(98% 0 0);
+  /* Sidebar, card bg */
+  --bg-layer-2: oklch(100% 0 0);
+  /* Surface, input area */
+
+  /* Primary Blue */
+  --color-primary: oklch(60% 0.2 250);
+  --color-primary-hover: oklch(55% 0.22 250);
+  --color-primary-active: oklch(50% 0.24 250);
+  --color-primary-bg: oklch(97% 0.03 250);
+  --color-primary-bg-hover: oklch(94% 0.05 250);
 
   /* Text Colors */
-  --color-text-main: #111827;
-  /* gray-900: 主要テキスト */
-  --color-text-sub: #374151;
-  /* gray-700: 補助テキスト */
-  --color-text-muted: #6B7280;
-  /* gray-500: 非重要テキスト */
+  --color-text-main: oklch(20% 0 0);
+  /* Dark gray, not pure black */
+  --color-text-sub: oklch(40% 0 0);
+  --color-text-muted: oklch(55% 0 0);
   --color-text-white: #FFFFFF;
-  /* 反転テキスト */
 
-  /* Background Colors */
-  --color-bg-body: #F3F4F6;
-  /* gray-100: アプリ背景 */
-  --color-bg-surface: #FFFFFF;
-  /* white: カード/メインエリア */
-  --color-bg-sidebar: #F9FAFB;
-  /* gray-50: サイドバー */
+  /* Background Colors (compat aliases) */
+  --color-bg-body: oklch(97% 0 0);
+  --color-bg-surface: oklch(100% 0 0);
+  --color-bg-sidebar: oklch(98% 0 0);
 
-  /* Border Colors */
-  --color-border: #E5E7EB;
-  /* gray-200: 薄い区切り線 */
-  --color-border-strong: #D1D5DB;
-  /* gray-300: 明確な境界線 */
+  /* Border Colors - 極力使用しない */
+  --color-border: oklch(92% 0 0);
+  --color-border-strong: oklch(88% 0 0);
 
   /* Semantic Colors */
-  --color-error: #DC2626;
-  /* red-600 */
-  --color-success: #059669;
-  /* green-600 */
+  --color-error: oklch(55% 0.22 25);
+  --color-success: oklch(55% 0.18 145);
 
-  /* ★追加: Source Type Colors (Semantic) */
-  /* 緑: 社内ナレッジ (Safe/Internal) - ContextSelectorのEnterpriseモードと一致 */
+  /* Warning Colors (Amber Glow) */
+  --color-warning-amber: oklch(70% 0.18 85);
+  --color-warning-amber-bg: oklch(95% 0.05 85);
+  --glow-warning:
+    inset 0 0 20px oklch(70% 0.18 85 / 0.2),
+    0 0 15px oklch(70% 0.18 85 / 0.3),
+    0 0 40px oklch(70% 0.18 85 / 0.1);
+
+  /* Source Type Colors */
   --color-source-rag: var(--color-success);
-  
-  /* 青: Web検索 (External) - ContextSelectorのResearchモードと一致 */
   --color-source-web: var(--color-primary);
-  
-  /* 紫: ハイブリッド (Mixed) */
-  --color-source-hybrid: #7C3AED; /* violet-600 */
+  --color-source-hybrid: oklch(55% 0.2 300);
 
-  /* --- Spacing --- */
+  /* ========================================
+     Spacing (8px grid)
+     ======================================== */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -89,32 +106,169 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
 
-  /* --- Border Radius --- */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  /* 小ボタン, 入力欄 */
-  --radius-xl: 12px;
-  /* 標準ボタン */
-  --radius-2xl: 16px;
-  /* カード, メッセージバブル */
+  /* ========================================
+     Border Radius (V2 - Squircle)
+     ======================================== */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  /* Chat bubble */
+  --radius-3xl: 24px;
+  /* Cards, modals */
+  --radius-4xl: 32px;
   --radius-full: 9999px;
 
-  /* --- Shadows (Apple-like Soft Shadows) --- */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* ========================================
+     Shadows & Glow (V2)
+     ======================================== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.1);
 
-  /* Focus Ring (Accessibility) */
-  --ring-focus: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  /* AI Glow Effect */
+  --glow-primary:
+    inset 0 0 20px oklch(60% 0.2 250 / 0.2),
+    0 0 15px oklch(60% 0.2 250 / 0.3),
+    0 0 40px oklch(60% 0.2 250 / 0.1);
+
+  /* Focus Ring */
+  --ring-focus: 0 0 0 3px oklch(60% 0.2 250 / 0.4);
+
+  /* ========================================
+     Glass Material (V2)
+     ======================================== */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(25px) saturate(180%);
+
+  /* UI要素用の背景色 */
+  --color-bg-header: rgba(255, 255, 255, 0.85);
+  --color-bg-input-capsule: rgba(255, 255, 255, 0.8);
+
+  /* ホバー用のオーバーレイ色 */
+  --color-hover-overlay: rgba(0, 0, 0, 0.04);
+  --color-active-overlay: rgba(0, 0, 0, 0.06);
+
+  /* モーダル背景 */
+  --color-bg-modal: rgba(255, 255, 255, 0.95);
 }
 
-/* (以下、既存スタイルは省略せずに維持) */
+/* ========================================
+   Dark Mode (V2 - OKLCH)
+   「手前にあるものほど明るく、奥にあるものほど暗い」
+   ======================================== */
+[data-theme='dark'] {
+  /* Background Layers - Pure Black + Elevation */
+  --bg-base: oklch(0% 0 0);
+  /* Pure black for OLED */
+  --bg-layer-1: oklch(18% 0 0);
+  /* Sidebar */
+  --bg-layer-2: oklch(25% 0 0);
+  /* Surface */
+
+  --color-bg-body: oklch(0% 0 0);
+  --color-bg-surface: oklch(15% 0 0);
+  --color-bg-sidebar: oklch(12% 0 0);
+
+  /* Text Colors - 高コントラスト確保 */
+  --color-text-main: oklch(98% 0 0);
+  --color-text-sub: oklch(75% 0 0);
+  --color-text-muted: oklch(60% 0 0);
+
+  /* Border Colors */
+  --color-border: oklch(25% 0 0);
+  --color-border-strong: oklch(32% 0 0);
+
+  /* Primary Blue - 明度UP */
+  --color-primary: oklch(65% 0.2 250);
+  --color-primary-hover: oklch(70% 0.22 250);
+  --color-primary-active: oklch(75% 0.24 250);
+  --color-primary-bg: oklch(25% 0.1 250);
+  --color-primary-bg-hover: oklch(30% 0.12 250);
+
+  /* Semantic Colors */
+  --color-error: oklch(65% 0.22 25);
+  --color-success: oklch(65% 0.18 145);
+  --color-source-hybrid: oklch(65% 0.2 300);
+
+  /* Warning Colors (Amber Glow) - Dark Mode */
+  --color-warning-amber: oklch(75% 0.18 85);
+  --color-warning-amber-bg: oklch(25% 0.08 85);
+  --glow-warning:
+    inset 0 0 20px oklch(75% 0.18 85 / 0.25),
+    0 0 20px oklch(75% 0.18 85 / 0.35),
+    0 0 50px oklch(75% 0.18 85 / 0.15);
+
+  /* Shadows - ダークモードでは控えめに */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 16px -4px rgba(0, 0, 0, 0.6);
+
+  /* AI Glow Effect - Dark */
+  --glow-primary:
+    inset 0 0 20px oklch(65% 0.2 250 / 0.25),
+    0 0 20px oklch(65% 0.2 250 / 0.35),
+    0 0 50px oklch(65% 0.2 250 / 0.15);
+
+  /* Focus Ring */
+  --ring-focus: 0 0 0 3px oklch(65% 0.2 250 / 0.5);
+
+  /* Glass Material - Dark */
+  --glass-bg: rgba(30, 30, 30, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  /* UI要素用の背景色 */
+  --color-bg-header: rgba(15, 15, 15, 0.95);
+  --color-bg-input-capsule: rgba(25, 25, 25, 0.9);
+
+  /* ホバー用の微調整色 */
+  --color-hover-overlay: rgba(255, 255, 255, 0.06);
+  --color-active-overlay: rgba(255, 255, 255, 0.1);
+
+  /* モーダル背景 */
+  --color-bg-modal: rgba(20, 20, 20, 0.98);
+}
+
+/* ========================================
+   V2 Material Classes
+   ======================================== */
+
+/* Glass Panel (すりガラス) */
+.material-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+}
+
+/* AI Glow (知性の発光) */
+.effect-glow {
+  box-shadow: var(--glow-primary);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Glow on focus/hover */
+.effect-glow-hover:hover,
+.effect-glow-focus:focus-within {
+  box-shadow: var(--glow-primary);
+}
+
+/* ========================================
+   Base Styles (V2)
+   ======================================== */
 body {
   margin: 0;
   padding: 0;
   font-family: var(--font-family-base);
+  font-size: var(--text-body);
+  /* 17px */
+  line-height: 1.5;
+  letter-spacing: var(--tracking-normal);
   background-color: var(--color-bg-body);
   color: var(--color-text-main);
   -webkit-font-smoothing: antialiased;
@@ -144,6 +298,15 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #9CA3AF;
+}
+
+/* Dark Mode Scrollbar */
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #48484A;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #636366;
 }
 
 /* --- Tagging UI (Domain Filter) --- */
@@ -319,7 +482,7 @@ body {
   left: 2px;
   width: 22px;
   height: 22px;
-  background-color: white;
+  background-color: var(--color-text-white);
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -414,9 +577,9 @@ body {
 }
 
 .segmented-option.selected {
-  background-color: white;
+  background-color: var(--color-bg-surface);
   color: var(--color-text-main);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .segmented-option.selected.deny-mode {
@@ -426,7 +589,7 @@ body {
 .wizard-label {
   font-size: 11px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-left: 2px;
@@ -438,8 +601,8 @@ body {
   padding: 0 12px;
   font-size: 14px;
   color: var(--color-text-main);
-  background-color: white;
-  border: 1px solid #E5E7EB;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   outline: none;
   transition: all 0.2s ease;

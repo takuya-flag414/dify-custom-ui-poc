@@ -1,9 +1,13 @@
 /* src/components/Chat/ChatHistory.jsx */
 import React, { useEffect, useRef } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import './ChatHistory.css';
 import MessageBlock from '../Message/MessageBlock';
 // ★追加
 import SystemErrorBlock from '../Message/SystemErrorBlock';
+
+// パフォーマンス制限: 50件を超えると最新メッセージのみアニメーション
+const ANIMATION_LIMIT = 50;
 
 const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, onOpenConfig, onOpenArtifact, userName }) => {
   const messagesEndRef = useRef(null);
@@ -34,39 +38,41 @@ const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, on
     return null;
   }
 
+  // パフォーマンス制限判定
+  const enableFullAnimation = messages.length <= ANIMATION_LIMIT;
+  const isNewMessage = (index) => index === messages.length - 1;
+
   return (
     <div className="chat-history">
-      {messages.map((msg, index) => {
-        // ★追加: システムエラーの場合の表示
-        if (msg.role === 'system' && msg.type === 'error') {
+      <AnimatePresence mode="popLayout">
+        {messages.map((msg, index) => {
+          // ★追加: システムエラーの場合の表示
+          if (msg.role === 'system' && msg.type === 'error') {
+            return (
+              <SystemErrorBlock
+                key={msg.id}
+                message={msg}
+                onOpenConfig={onOpenConfig}
+                onRetry={() => handleRetry(index)}
+              />
+            );
+          }
+
+          // 50件以下 OR 最新メッセージのみアニメーション有効
+          const enableAnimation = enableFullAnimation || isNewMessage(index);
+
           return (
-            <SystemErrorBlock
+            <MessageBlock
               key={msg.id}
               message={msg}
-              onOpenConfig={onOpenConfig}
-              onRetry={() => handleRetry(index)}
+              onSuggestionClick={onSuggestionClick}
+              onOpenArtifact={onOpenArtifact}
+              enableAnimation={enableAnimation}
+              userName={userName}
             />
           );
-        }
-
-        const isInstantSwap = index < 2;
-        const delayStyle = isInstantSwap
-          ? {}
-          : { animationDelay: `${(index - 2) * 0.08}s` };
-        const animationClass = isInstantSwap ? '' : 'message-animate-enter';
-
-        return (
-          <MessageBlock
-            key={msg.id}
-            message={msg}
-            onSuggestionClick={onSuggestionClick}
-            onOpenArtifact={onOpenArtifact}
-            className={animationClass}
-            style={delayStyle}
-            userName={userName}
-          />
-        );
-      })}
+        })}
+      </AnimatePresence>
 
       {/* Loading Indicator */}
       {isLoading && messages[messages.length - 1]?.role === 'user' && (

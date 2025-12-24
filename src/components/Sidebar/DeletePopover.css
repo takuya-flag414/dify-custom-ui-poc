@@ -17,14 +17,16 @@
     position: fixed;
     /* anchor座標に基づきJSで配置 */
     width: 260px;
-    background-color: var(--color-bg-surface);
+    /* V2 Glass Material */
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.05);
-    /* 繊細な境界線 */
     z-index: 9999;
     overflow: hidden;
     transform-origin: left top;
-    /* アニメーションの起点 */
 }
 
 .popover-content {
@@ -87,4 +89,11 @@
 .popover-btn.delete:hover {
     background-color: #B91C1C;
     /* red-700 */
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .popover-btn.delete:hover {
+    background-color: #991B1B;
 }

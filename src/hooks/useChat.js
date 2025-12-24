@@ -110,14 +110,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
   // --- 履歴ロード処理 ---
   useEffect(() => {
     const loadHistory = async () => {
-      const savedSettings = settingsMapRef.current[conversationId] || DEFAULT_SEARCH_SETTINGS;
-      setSearchSettings(savedSettings);
-
+      // 新規作成された会話の場合は、設定のリセットと履歴ロードをスキップ
+      // これにより、WelcomeScreenで変更した検索モードが維持される
       if (conversationId && conversationId === creatingConversationIdRef.current) {
         addLog(`[useChat] Skip loading/resetting history for just-created conversation: ${conversationId}`, 'info');
         creatingConversationIdRef.current = null;
         return;
       }
+
+      // 既存の会話を選択した場合のみ、保存された設定を復元
+      const savedSettings = settingsMapRef.current[conversationId] || DEFAULT_SEARCH_SETTINGS;
+      setSearchSettings(savedSettings);
 
       addLog(`[useChat] Conversation changed to: ${conversationId}`, 'info');
 

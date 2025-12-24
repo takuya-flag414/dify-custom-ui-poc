@@ -1,5 +1,6 @@
 // src/components/Message/MessageBlock.jsx
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import './MessageBlock.css';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
 import CitationList from './CitationList';
@@ -10,13 +11,28 @@ import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from '../Shared/FileIcon';
 import CopyButton from '../Shared/CopyButton';
 
+// Spring Physics (DESIGN_RULE準拠)
+const SPRING_CONFIG = {
+  type: "spring",
+  stiffness: 170,
+  damping: 26,
+  mass: 1
+};
+
+// メッセージ出現アニメーション
+const MESSAGE_VARIANTS = {
+  initial: { opacity: 0, y: 20, scale: 0.96 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, scale: 0.96 }
+};
+
 export const AssistantIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" />
   </svg>
 );
 
-const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArtifact, userName }) => {
+const MessageBlock = ({ message, onSuggestionClick, onOpenArtifact, userName, enableAnimation = true }) => {
   const {
     role,
     text,
@@ -60,7 +76,14 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
   };
 
   return (
-    <div className={`message-block ${className || ''}`} style={style}>
+    <motion.div
+      className="message-block"
+      variants={enableAnimation ? MESSAGE_VARIANTS : undefined}
+      initial={enableAnimation ? "initial" : false}
+      animate="animate"
+      exit={enableAnimation ? "exit" : undefined}
+      transition={SPRING_CONFIG}
+    >
       <div className={`message-container ${!isAi ? 'message-container-user' : ''} group`}>
 
         <div className={isAi ? 'avatar-ai' : 'avatar-user'}>
@@ -139,7 +162,7 @@ const MessageBlock = ({ message, onSuggestionClick, className, style, onOpenArti
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -151,8 +174,7 @@ const arePropsEqual = (prev, next) => {
     // (useCallbackされていれば、ここも等価になるはず)
     return prev.onSuggestionClick === next.onSuggestionClick
       && prev.onOpenArtifact === next.onOpenArtifact
-      && prev.className === next.className
-      && prev.style === next.style;
+      && prev.enableAnimation === next.enableAnimation;
   }
 
   // 2. 参照が違う場合（ストリーミング中の更新など）、必要なフィールドだけ浅く比較

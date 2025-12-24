@@ -1,0 +1,73 @@
+/* src/components/Onboarding/components/AnimatedBackground.css */
+
+.animated-background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, #EFF6FF 0%, #F0F9FF 50%, #F8FAFC 100%);
+    z-index: 0;
+}
+
+/* グラデーションオーブ（ぼかしのかかった大きな円） */
+.gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    will-change: transform;
+}
+
+.gradient-orb-1 {
+    width: 600px;
+    height: 600px;
+    top: -10%;
+    left: -5%;
+    background: radial-gradient(circle, #DBEAFE 0%, transparent 70%);
+}
+
+.gradient-orb-2 {
+    width: 500px;
+    height: 500px;
+    bottom: -15%;
+    right: -10%;
+    background: radial-gradient(circle, #BFDBFE 0%, transparent 70%);
+}
+
+.gradient-orb-3 {
+    width: 400px;
+    height: 400px;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, #93C5FD 0%, transparent 70%);
+    opacity: 0.4;
+}
+
+/* アクセシビリティ: モーション軽減設定 */
+@media (prefers-reduced-motion: reduce) {
+    .gradient-orb {
+        animation: none !important;
+    }
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+[data-theme='dark'] .animated-background {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+}
+
+[data-theme='dark'] .gradient-orb-1 {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+    opacity: 0.5;
+}
+
+[data-theme='dark'] .gradient-orb-2 {
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
+    opacity: 0.4;
+}
+
+[data-theme='dark'] .gradient-orb-3 {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+    opacity: 0.3;
+}

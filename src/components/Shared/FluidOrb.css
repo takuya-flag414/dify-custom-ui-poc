@@ -1,0 +1,32 @@
+/* src/components/Shared/FluidOrb.css */
+
+/* FluidOrb Container */
+.fluid-orb-container {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 4px var(--color-primary));
+}
+
+.fluid-orb-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.fluid-orb-svg circle {
+    fill: var(--color-primary);
+    opacity: 0.9;
+}
+
+/* Reduced Motion対応 */
+@media (prefers-reduced-motion: reduce) {
+    .fluid-orb-container {
+        filter: none;
+    }
+
+    .fluid-orb-svg circle {
+        animation: none;
+    }
+}

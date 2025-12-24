@@ -16,12 +16,13 @@ import { useConversations } from './hooks/useConversations';
 import { useChat } from './hooks/useChat';
 import { useApiConfig } from './hooks/useApiConfig';
 import { useSettings } from './hooks/useSettings';
+import { useTheme } from './hooks/useTheme';
 
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
 
 import { useOnboarding } from './hooks/useOnboarding';
-import OnboardingOverlay from './components/Onboarding/OnboardingOverlay';
+import OnboardingScreen from './components/Onboarding/OnboardingScreen';
 
 const generateUUID = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -34,7 +35,7 @@ const generateUUID = () => {
 };
 
 function App() {
-  const [mockMode, setMockMode] = useState('FE');
+  const [mockMode, setMockMode] = useState('OFF');
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState('chat');
 
@@ -61,9 +62,9 @@ function App() {
     }
 
     // 2. Role Initialization
-    let storedRole = 'developer';
+    let storedRole = 'user';
     try {
-      storedRole = localStorage.getItem('app_debug_role') || 'developer';
+      storedRole = localStorage.getItem('app_debug_role') || 'user';
     } catch (e) {
       console.error('Failed to read role', e);
     }
@@ -86,6 +87,9 @@ function App() {
   };
 
   const { settings, updateSettings, isLoaded: isSettingsLoaded } = useSettings(currentUser.id);
+
+  // テーマをDOMに適用
+  useTheme(settings?.general?.theme || 'system');
 
   const [activeArtifact, setActiveArtifact] = useState(null);
   const [isArtifactOpen, setIsArtifactOpen] = useState(false);
@@ -168,6 +172,23 @@ function App() {
     addLog(`[App] Mode changed to ${newMode}. Conversation reset.`, 'info');
   };
 
+  // オンボーディングリセット用ハンドラー
+  // 履歴は維持しつつ、画面を初期状態（WelcomeScreen）に戻す
+  const handleResetOnboarding = () => {
+    // 1. オンボーディング状態をリセット
+    onboardingState.resetOnboarding();
+
+    // 2. 現在の会話選択を解除（これによりWelcomeScreenが表示される）
+    setConversationId(null);
+    setMessages([]);
+
+    // 3. チャット画面に戻る
+    setCurrentView('chat');
+    setIsArtifactOpen(false);
+
+    addLog('[App] Onboarding reset. Conversation view cleared.', 'info');
+  };
+
   const handleViewChange = (view) => {
     setCurrentView(view);
     if (view === 'settings') {
@@ -207,139 +228,188 @@ function App() {
     }
   };
 
+  // アプリ登場アニメーション設定
+  const appEntranceVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      }
+    }
+  };
+
+  // Sidebar用アニメーション（左からスライドイン）
+  const sidebarVariants = {
+    hidden: { opacity: 0, x: -30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] }
+    }
+  };
+
+  // メインコンテンツ用アニメーション（フェード+上からスライド）
+  const mainContentVariants = {
+    hidden: { opacity: 0, y: 20, filter: 'blur(4px)' },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] }
+    }
+  };
+
   return (
     <div className="app" style={appStyle}>
-      {/* オンボーディングウィザード（初回起動時のみ表示） */}
-      <OnboardingOverlay
-        {...onboardingState}
-        updateSettings={updateSettings}
-      />
+      {/* オンボーディングウィザード（初回起動時のみ表示） - 全画面没入型 */}
+      <AnimatePresence>
+        {!onboardingState.isCompleted && (
+          <OnboardingScreen
+            {...onboardingState}
+            updateSettings={updateSettings}
+          />
+        )}
+      </AnimatePresence>
 
-      <TutorialOverlay
-        isActive={isTutorialActive}
-        {...tutorialProps}
-      />
+      {/* アプリ本体（isAppReadyがtrueになってから描画開始） */}
+      {onboardingState.isAppReady && (
+        <>
+          <TutorialOverlay
+            isActive={isTutorialActive}
+            {...tutorialProps}
+          />
 
-      <ApiConfigModal
-        isOpen={isConfigModalOpen}
-        onClose={() => setIsConfigModalOpen(false)}
-        currentApiKey={apiKey}
-        currentApiUrl={apiUrl}
-        onSave={saveConfig}
-        mockMode={mockMode}
-        addLog={addLog}
-      />
+          <ApiConfigModal
+            isOpen={isConfigModalOpen}
+            onClose={() => setIsConfigModalOpen(false)}
+            currentApiKey={apiKey}
+            currentApiUrl={apiUrl}
+            onSave={saveConfig}
+            mockMode={mockMode}
+            addLog={addLog}
+          />
 
-      {/* 1. Sidebar */}
-      <Sidebar
-        conversationId={conversationId}
-        setConversationId={setConversationId}
-        conversations={conversations}
-        pinnedIds={pinnedIds}
-        onDeleteConversation={handleDeleteConversation}
-        onRenameConversation={handleRenameConversation}
-        onPinConversation={handlePinConversation}
-        isCollapsed={isSidebarCollapsed}
-        toggleSidebar={toggleSidebar}
-        currentView={currentView}
-        onViewChange={handleViewChange}
-      />
+          {/* アニメーション付きレイアウト */}
+          <motion.div
+            className="app-layout"
+            variants={appEntranceVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* 1. Sidebar */}
+            <motion.div variants={sidebarVariants} className="sidebar-motion-wrapper">
+              <Sidebar
+                conversationId={conversationId}
+                setConversationId={setConversationId}
+                conversations={conversations}
+                pinnedIds={pinnedIds}
+                onDeleteConversation={handleDeleteConversation}
+                onRenameConversation={handleRenameConversation}
+                onPinConversation={handlePinConversation}
+                isCollapsed={isSidebarCollapsed}
+                toggleSidebar={toggleSidebar}
+                currentView={currentView}
+                onViewChange={handleViewChange}
+              />
+            </motion.div>
 
-      {/* 2. Main Content (Right Side) */}
-      <div className="main-container">
+            {/* 2. Main Content (Right Side) */}
+            <motion.div className="main-container" variants={mainContentVariants}>
+              {/* Header (Top Bar) */}
+              <Header
+                mockMode={mockMode}
+                setMockMode={handleMockModeChange}
+                onOpenConfig={() => setIsConfigModalOpen(true)}
+                handleCopyLogs={handleCopyLogs}
+                copyButtonText={copyButtonText}
+                messages={messages}
+                onStartTutorial={startTutorial}
+                currentUser={currentUser}
+                onRoleChange={handleRoleChange}
+              />
 
-        {/* Header (Top Bar) */}
-        <Header
-          mockMode={mockMode}
-          setMockMode={handleMockModeChange}
-          onOpenConfig={() => setIsConfigModalOpen(true)}
-          handleCopyLogs={handleCopyLogs}
-          copyButtonText={copyButtonText}
-          messages={messages}
-          onStartTutorial={startTutorial}
-          currentUser={currentUser}
-          onRoleChange={handleRoleChange}
-        />
+              {/* Workspace (Chat + Artifact) */}
+              <div className={`workspace ${isArtifactOpen ? 'artifact-open' : ''}`}>
+                {/* Chat Area Wrapper */}
+                <div className="chat-area-wrapper">
+                  <AnimatePresence mode="wait">
+                    {currentView === 'chat' ? (
+                      <motion.div
+                        key="chat-view"
+                        className="chat-content-motion-wrapper"
+                        variants={pageTransitionVariants}
+                        initial="initial"
+                        animate="enter"
+                        exit="exit"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}
+                      >
+                        <ChatArea
+                          messages={messages}
+                          setMessages={setMessages}
+                          isGenerating={isGenerating}
+                          isHistoryLoading={isHistoryLoading}
+                          conversationId={conversationId}
+                          addLog={addLog}
+                          onConversationCreated={handleConversationCreated}
+                          activeContextFiles={activeContextFiles}
+                          setActiveContextFiles={setActiveContextFiles}
+                          onSendMessage={handleSendMessage}
+                          searchSettings={searchSettings}
+                          setSearchSettings={setSearchSettings}
+                          onOpenConfig={() => setIsConfigModalOpen(true)}
+                          onOpenArtifact={openArtifact}
+                          userName={settings?.profile?.displayName || 'User'}
+                          onStartTutorial={startTutorial}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="settings-view"
+                        className="settings-content-motion-wrapper"
+                        variants={pageTransitionVariants}
+                        initial="initial"
+                        animate="enter"
+                        exit="exit"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <SettingsArea
+                          currentUser={currentUser}
+                          settings={settings}
+                          onUpdateSettings={updateSettings}
+                          mockMode={mockMode}
+                          setMockMode={handleMockModeChange}
+                          onOpenApiConfig={() => setIsConfigModalOpen(true)}
+                          onResetOnboarding={handleResetOnboarding}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-        {/* Workspace (Chat + Artifact) */}
-        <div className={`workspace ${isArtifactOpen ? 'artifact-open' : ''}`}>
-
-          {/* Chat Area Wrapper */}
-          <div className="chat-area-wrapper">
-            <AnimatePresence mode="wait">
-              {currentView === 'chat' ? (
-                <motion.div
-                  key="chat-view"
-                  className="chat-content-motion-wrapper"
-                  variants={pageTransitionVariants}
-                  initial="initial"
-                  animate="enter"
-                  exit="exit"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}
-                >
-                  <ChatArea
-                    messages={messages}
-                    setMessages={setMessages}
-                    isGenerating={isGenerating}
-                    isHistoryLoading={isHistoryLoading}
-                    conversationId={conversationId}
-                    addLog={addLog}
-                    onConversationCreated={handleConversationCreated}
-                    activeContextFiles={activeContextFiles}
-                    setActiveContextFiles={setActiveContextFiles}
-                    onSendMessage={handleSendMessage}
-                    searchSettings={searchSettings}
-                    setSearchSettings={setSearchSettings}
-                    onOpenConfig={() => setIsConfigModalOpen(true)}
-                    onOpenArtifact={openArtifact}
-                    userName={settings?.profile?.displayName || 'User'}
-                    onStartTutorial={startTutorial}
+                {/* Artifact Panel Wrapper */}
+                <div className="artifact-panel-wrapper">
+                  <ArtifactPanel
+                    isOpen={isArtifactOpen}
+                    onClose={closeArtifact}
+                    artifact={activeArtifact}
                   />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="settings-view"
-                  className="settings-content-motion-wrapper"
-                  variants={pageTransitionVariants}
-                  initial="initial"
-                  animate="enter"
-                  exit="exit"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <SettingsArea
-                    currentUser={currentUser}
-                    settings={settings}
-                    onUpdateSettings={updateSettings}
-                    mockMode={mockMode}
-                    setMockMode={handleMockModeChange}
-                    onOpenApiConfig={() => setIsConfigModalOpen(true)}
-                    onResetOnboarding={onboardingState.resetOnboarding}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Artifact Panel Wrapper */}
-          <div className="artifact-panel-wrapper">
-            <ArtifactPanel
-              isOpen={isArtifactOpen}
-              onClose={closeArtifact}
-              artifact={activeArtifact}
-            />
-          </div>
-
-        </div>
-      </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </>
+      )}
     </div>
   );
 }

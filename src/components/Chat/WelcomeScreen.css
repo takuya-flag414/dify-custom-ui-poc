@@ -8,7 +8,7 @@
     min-height: 100%;
     overflow-y: auto;
     /* 背景色を明示的に指定 */
-    background: radial-gradient(circle at 50% 0%, var(--color-bg-secondary, #F9FAFB) 0%, transparent 70%);
+    background: radial-gradient(circle at 50% 0%, var(--color-bg-sidebar) 0%, transparent 70%);
 }
 
 .welcome-inner {
@@ -32,36 +32,34 @@
 .welcome-logo-badge {
     display: inline-block;
     padding: 4px 12px;
-    background-color: var(--color-primary-lightest, #EFF6FF);
-    color: var(--color-primary, #3B82F6);
-    /* 文字色を確実に指定 */
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    border-radius: 9999px;
+    background-color: var(--color-primary-bg);
+    color: var(--color-primary);
+    font-size: var(--text-caption);
+    /* 13px */
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    border-radius: var(--radius-full);
     text-transform: uppercase;
     margin-bottom: 0.5rem;
 }
 
 .welcome-title {
-    font-size: 2.5rem;
-    /* text-4xl */
-    font-weight: 800;
-    /* extra-bold */
-    /* 【修正】グラデーションを削除し、単色で視認性を確保 */
-    color: var(--color-text-primary, #111827);
-    letter-spacing: -0.025em;
-    line-height: 1.1;
+    font-size: var(--text-large-title);
+    /* 34px */
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    letter-spacing: var(--tracking-tight);
+    line-height: 1.2;
     margin: 0;
 }
 
 .welcome-subtitle {
-    font-size: 1.125rem;
-    /* text-lg */
-    color: var(--color-text-secondary, #4B5563);
+    font-size: var(--text-body);
+    /* 17px */
+    color: var(--color-text-sub);
     max-width: 600px;
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* グリッドセクション */
@@ -74,7 +72,7 @@
 .welcome-section-label {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--color-text-muted, #9CA3AF);
+    color: var(--color-text-muted);
     margin: 0 0 0 4px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -91,7 +89,7 @@
 .welcome-footer-links {
     text-align: center;
     font-size: 0.875rem;
-    color: var(--color-text-muted, #9CA3AF);
+    color: var(--color-text-muted);
     display: flex;
     justify-content: center;
     gap: 0.5rem;
@@ -161,4 +159,11 @@
     .welcome-inner {
         gap: 2.5rem;
     }
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .welcome-logo-badge {
+    background-color: rgba(59, 130, 246, 0.15);
 }

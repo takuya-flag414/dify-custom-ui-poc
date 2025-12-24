@@ -20,8 +20,8 @@ const SettingsPanel = ({ activeTab, currentUser, ...restProps }) => {
             <header className="settings-header">
                 <h2 className="settings-page-title">{category.label}</h2>
             </header>
-            <div className="settings-content-scroll">
-                <div className="settings-section-container">
+            <div className={`settings-content-scroll ${activeTab === 'rag' ? 'full-width' : ''}`}>
+                <div className={`settings-section-container ${activeTab === 'rag' ? 'full-width' : ''}`}>
                     {/* ★変更: currentUserを含む全てのPropsをComponentへ渡す */}
                     <Component currentUser={currentUser} {...restProps} />
                 </div>

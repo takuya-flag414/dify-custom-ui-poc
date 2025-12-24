@@ -1,6 +1,7 @@
 // src/components/Message/ThinkingProcess.jsx
 import React, { useState, useEffect } from 'react';
 import './ThinkingProcess.css';
+import FluidOrb from '../Shared/FluidOrb';
 
 // --- SF Symbols風 SVG Icons ---
 const Icons = {
@@ -79,9 +80,9 @@ const ThinkingProcess = ({ steps, isStreaming }) => {
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="thinking-icon-wrapper">
-                    {/* 完了時は常にチェックマーク。進行中はスピナー */}
+                    {/* 完了時は常にチェックマーク。進行中はFluidOrb */}
                     {isStreaming && !isAllDone ? (
-                        <div className="thinking-spinner"></div>
+                        <FluidOrb />
                     ) : (
                         <div className="thinking-done-icon">
                             {Icons.check}
@@ -105,7 +106,7 @@ const ThinkingProcess = ({ steps, isStreaming }) => {
                         {steps.map((step, index) => {
                             // アイコンの取得
                             const StepIcon = Icons[step.iconType] || Icons.default;
-                            
+
                             return (
                                 <div key={step.id || index} className={`thinking-step-item ${step.status}`}>
                                     <div className="step-icon-column">

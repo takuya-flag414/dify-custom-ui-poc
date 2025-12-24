@@ -1,5 +1,6 @@
 // src/components/Chat/WelcomeScreen.jsx
 import React from 'react';
+import { motion } from 'framer-motion';
 import './WelcomeScreen.css';
 import { getTimeBasedGreeting } from '../../utils/timeUtils';
 import SuggestionCard from './SuggestionCard';
@@ -7,9 +8,31 @@ import { SearchIcon, PenToolIcon, FileTextIcon, SparklesIcon } from '../Shared/S
 
 /**
  * ようこそ画面コンポーネント
- * アクションカードは一時的に表示専用モード
+ * Framer Motionによるスタッガードアニメーション対応
  */
-const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => { // onStartTutorialを受け取る
+
+// アニメーション設定
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.08,
+            delayChildren: 0.1
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] }
+    }
+};
+
+const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
 
     const suggestions = [
@@ -20,7 +43,6 @@ const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => { // onS
             description: '就業規則や経費精算の手順を検索します',
             prompt: '社内規定から交通費の精算ルールについて教えてください'
         },
-        // ... (他の定義はそのまま)
         {
             id: 'draft',
             icon: PenToolIcon,
@@ -44,54 +66,55 @@ const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => { // onS
         },
     ];
 
-    /* // 一時的に無効化
-    const handleSuggestionClick = (prompt) => {
-        onSendMessage(prompt, []);
-    }; 
-    */
-
     return (
-        <div className="welcome-container">
+        <motion.div
+            className="welcome-container"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
             <div className="welcome-inner">
                 {/* 1. ダイナミックヘッダー */}
-                <header className="welcome-header">
+                <motion.header className="welcome-header" variants={itemVariants}>
                     <div className="welcome-logo-area">
                         <div className="welcome-logo-badge">AI Partner</div>
                     </div>
                     <h1 className="welcome-title">{greeting}</h1>
                     <p className="welcome-subtitle">{subMessage}</p>
-                </header>
+                </motion.header>
 
-                {/* 2. インテリジェント・グリッド（表示専用） */}
-                <main className="welcome-grid-section">
+                {/* 2. インテリジェント・グリッド */}
+                <motion.main className="welcome-grid-section" variants={itemVariants}>
                     <p className="welcome-section-label">おすすめのアクション</p>
                     <div className="welcome-grid">
                         {suggestions.map((item, index) => (
-                            <SuggestionCard
+                            <motion.div
                                 key={item.id}
-                                icon={item.icon}
-                                title={item.title}
-                                description={item.description}
-                                // onClickを渡さないことで、自動的に「表示専用（div）」になります
-                                // onClick={() => handleSuggestionClick(item.prompt)} 
-                                delay={index * 100}
-                            />
+                                variants={itemVariants}
+                            >
+                                <SuggestionCard
+                                    icon={item.icon}
+                                    title={item.title}
+                                    description={item.description}
+                                    delay={0} // Framer Motionでスタッガーするので遅延不要
+                                />
+                            </motion.div>
                         ))}
                     </div>
-                </main>
+                </motion.main>
 
                 {/* 3. クイックアクセス */}
-                <footer className="welcome-footer-links">
+                <motion.footer className="welcome-footer-links" variants={itemVariants}>
                     <span>お困りですか？</span>
                     <button
                         className="link-button"
-                        onClick={onStartTutorial} // ガイドツアーを起動
+                        onClick={onStartTutorial}
                     >
                         使い方のヒントを見る
                     </button>
-                </footer>
+                </motion.footer>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

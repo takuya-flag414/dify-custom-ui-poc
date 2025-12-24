@@ -1,23 +1,12 @@
 /* src/components/Message/MessageBlock.css */
 
-/* メッセージブロック全体 */
+/* メッセージブロック全体 - Framer Motion管理 */
 .message-block {
   width: 100%;
   margin-bottom: 24px;
-  animation: fadeIn 0.3s ease-in-out;
+  will-change: transform, opacity;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* コンテナ: アバター + コンテンツ */
 .message-container {
@@ -48,17 +37,13 @@
 }
 
 .avatar-ai {
-  background-color: #EFF6FF;
-  /* blue-50 */
-  color: #3B82F6;
-  /* blue-500 */
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary);
 }
 
 .avatar-user {
-  background-color: #F3F4F6;
-  /* gray-100 */
-  color: #4B5563;
-  /* gray-600 */
+  background-color: var(--color-bg-sidebar);
+  color: var(--color-text-sub);
   font-size: 12px;
 }
 
@@ -92,12 +77,15 @@
   justify-content: flex-end;
 }
 
-/* バブル (吹き出し) 共通 */
+/* バブル (吹き出し) 共通 - V2 */
 .message-bubble {
-  padding: 12px 16px;
-  border-radius: 16px;
-  font-size: 15px;
-  line-height: 1.6;
+  padding: 16px 20px;
+  border-radius: var(--radius-2xl);
+  /* 20px */
+  font-size: var(--text-body);
+  /* 17px */
+  line-height: 1.5;
+  letter-spacing: var(--tracking-normal);
   position: relative;
 
   /* 折り返し設定 */
@@ -108,28 +96,29 @@
   min-width: 0;
 }
 
-/* AIのバブル */
+/* AIのバブル - V2 Glassmorphism */
 .ai-bubble {
-  background-color: #FFFFFF;
-  color: #111827;
-  /* gray-900 */
-  border: 1px solid #E5E7EB;
-  /* gray-200 */
-  border-radius: 12px;
-  border-top-left-radius: 4px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--color-text-main);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-2xl);
+  border-top-left-radius: var(--radius-sm);
   padding: 24px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   flex: 1;
 }
 
-/* ユーザーのバブル */
+/* ユーザーのバブル - V2 グラデーション */
 .user-bubble {
-  background-color: #3B82F6;
-  /* blue-500 */
+  background: linear-gradient(135deg,
+      oklch(60% 0.2 250) 0%,
+      oklch(65% 0.18 220) 100%);
   color: #FFFFFF;
-  border-radius: 12px;
-  border-top-right-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-2xl);
+  border-top-right-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px oklch(60% 0.2 250 / 0.3);
 }
 
 /* --- Copy Button Styles --- */
@@ -168,13 +157,13 @@
 }
 
 .copy-btn-ai {
-  background-color: #F3F4F6;
+  background-color: var(--color-bg-sidebar);
   color: var(--color-text-muted);
 }
 
 .copy-btn-ai:hover {
-  background-color: #E5E7EB;
-  color: var(--color-text-primary);
+  background-color: var(--color-border-strong);
+  color: var(--color-text-main);
 }
 
 .copy-btn-user {
@@ -183,7 +172,7 @@
 }
 
 .copy-btn-user:hover {
-  background-color: #E5E7EB;
+  background-color: var(--color-border-strong);
   color: var(--color-primary);
 }
 
@@ -241,7 +230,7 @@
 
 /* Inline Code Style */
 .markdown-renderer code {
-  background-color: #F3F4F6;
+  background-color: var(--color-bg-sidebar);
   padding: 2px 4px;
   border-radius: 4px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -328,11 +317,11 @@
 }
 
 .markdown-renderer blockquote {
-  border-left: 4px solid #E5E7EB;
+  border-left: 4px solid var(--color-border-strong);
   padding-left: 16px;
   margin-left: 0;
   margin-bottom: 1em;
-  color: #4B5563;
+  color: var(--color-text-sub);
   font-style: italic;
 }
 
@@ -345,19 +334,19 @@
 
 .markdown-renderer th,
 .markdown-renderer td {
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--color-border);
   padding: 8px 12px;
   text-align: left;
 }
 
 .markdown-renderer th {
-  background-color: #F9FAFB;
+  background-color: var(--color-bg-sidebar);
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-sub);
 }
 
 .markdown-renderer tr:nth-child(even) {
-  background-color: #F9FAFB;
+  background-color: var(--color-bg-sidebar);
 }
 
 /* Citation Badge */
@@ -486,7 +475,7 @@
 
 /* ★追加: Streaming Cursor (Realtime Mode) */
 /* Markdown内の最後の要素の後ろにカーソルを表示する */
-.markdown-renderer.streaming-active > *:last-child::after {
+.markdown-renderer.streaming-active>*:last-child::after {
   content: "●";
   color: var(--color-primary);
   animation: blink 1s step-start infinite;
@@ -521,13 +510,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: white;
-  border: 1px solid #E5E7EB;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   padding: 6px 12px;
   border-radius: 8px;
   font-size: 13px;
-  color: #374151;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color: var(--color-text-sub);
+  box-shadow: var(--shadow-sm);
   max-width: 100%;
 }
 
@@ -571,16 +560,16 @@
 }
 
 .suggestion-chip {
-  background-color: white;
-  border: 1px solid #E5E7EB;
-  color: #374151;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-sub);
   padding: 8px 16px;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   text-align: left;
   line-height: 1.4;
 }
@@ -674,8 +663,15 @@
 }
 
 @keyframes raw-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
 
 /* --- Staggered Animation Logic --- */
@@ -695,4 +691,70 @@
   opacity: 0;
   animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   will-change: opacity, transform;
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .citation-badge {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #60A5FA;
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+[data-theme='dark'] .citation-badge:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+[data-theme='dark'] .citation-tooltip {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .suggestion-chip:hover {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: var(--color-primary);
+}
+
+[data-theme='dark'] .suggestion-chip:active {
+  background-color: rgba(59, 130, 246, 0.25);
+}
+
+[data-theme='dark'] .copy-btn.copied {
+  background-color: rgba(5, 150, 105, 0.2) !important;
+  color: #6EE7B7 !important;
+}
+
+/* ========================================
+   Streaming Blur Effect (Optical Blur)
+   最新行全体に霧から結像するような演出
+   ======================================== */
+.streaming-blur {
+  animation: blur-reveal 0.3s ease-out forwards;
+}
+
+@keyframes blur-reveal {
+  from {
+    filter: blur(3px);
+    opacity: 0.7;
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+/* Reduced Motion対応 */
+@media (prefers-reduced-motion: reduce) {
+  .streaming-blur {
+    animation: none;
+    filter: none;
+    opacity: 1;
+  }
+
+  .message-block {
+    will-change: auto;
+  }
 }

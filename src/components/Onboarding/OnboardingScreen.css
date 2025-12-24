@@ -1,0 +1,657 @@
+/* src/components/Onboarding/OnboardingScreen.css - V2 */
+
+/* === 全画面コンテナ === */
+.onboarding-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* === コンテンツエリア === */
+.onboarding-screen-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 800px;
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+}
+
+/* === ステップラッパー === */
+.onboarding-step-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* === 共通ステップスタイル - V2 Glassmorphism === */
+.onboarding-step-new {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-6);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-3xl);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(0, 0, 0, 0.03);
+    min-height: 440px;
+}
+
+/* === アイコンエリア === */
+.onboarding-icon-new {
+    width: 88px;
+    height: 88px;
+    margin-bottom: var(--space-6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border-radius: var(--radius-2xl);
+    color: white;
+    box-shadow:
+        0 8px 24px rgba(59, 130, 246, 0.35),
+        0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.onboarding-icon-new svg {
+    width: 44px;
+    height: 44px;
+}
+
+/* === タイポグラフィ - V2 === */
+.onboarding-title-new {
+    font-size: var(--text-large-title);
+    /* 34px */
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    margin: 0 0 var(--space-3) 0;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-tight);
+}
+
+.onboarding-subtitle-new {
+    font-size: var(--text-body);
+    /* 17px */
+    color: var(--color-text-sub);
+    margin: 0 0 var(--space-6) 0;
+    line-height: 1.5;
+    max-width: 420px;
+}
+
+.onboarding-description-new {
+    font-size: var(--text-caption);
+    /* 13px */
+    color: var(--color-text-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* === 入力フィールド - V2 === */
+.onboarding-input-new {
+    width: 100%;
+    max-width: 360px;
+    height: 60px;
+    padding: 0 var(--space-5);
+    font-size: var(--text-title-2);
+    /* 22px */
+    font-weight: var(--font-medium);
+    color: var(--color-text-main);
+    background: var(--color-bg-surface);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-xl);
+    outline: none;
+    text-align: center;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.onboarding-input-new::placeholder {
+    color: var(--color-text-muted);
+    font-weight: var(--font-normal);
+}
+
+.onboarding-input-new:focus {
+    border-color: var(--color-primary);
+    box-shadow: var(--glow-primary);
+    transform: scale(1.01);
+}
+
+.onboarding-input-hint {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--space-3);
+}
+
+/* === スタイル選択レイアウト === */
+.onboarding-style-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    width: 100%;
+    text-align: left;
+}
+
+.style-cards-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.style-preview-section {
+    display: flex;
+    flex-direction: column;
+}
+
+/* === スタイルカード - V2 === */
+.onboarding-card-new {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: left;
+}
+
+.onboarding-card-new:hover {
+    border-color: oklch(60% 0.2 250 / 0.3);
+    background: var(--color-primary-bg);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-md);
+}
+
+.onboarding-card-new.selected {
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
+    transform: scale(1.02);
+    box-shadow: var(--glow-primary);
+}
+
+.onboarding-card-icon-new {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-bg-hover);
+    border-radius: var(--radius-lg);
+    color: var(--color-primary);
+    transition: all 0.2s ease;
+}
+
+.onboarding-card-new.selected .onboarding-card-icon-new {
+    background: var(--color-primary);
+    color: white;
+}
+
+.onboarding-card-content-new {
+    flex: 1;
+    min-width: 0;
+}
+
+.onboarding-card-title-new {
+    font-size: var(--text-body);
+    /* 17px */
+    font-weight: var(--font-semibold);
+    color: var(--color-text-main);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.onboarding-card-desc-new {
+    font-size: var(--text-caption);
+    /* 13px */
+    color: var(--color-text-sub);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* === ボタン - V2 === */
+.onboarding-actions-new {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: auto;
+    padding-top: var(--space-8);
+    width: 100%;
+    max-width: 320px;
+}
+
+.onboarding-btn-new {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: 100%;
+    height: 56px;
+    font-size: var(--text-body);
+    /* 17px */
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-full);
+    /* 完全円形 */
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.onboarding-btn-primary-new {
+    background: linear-gradient(135deg,
+            oklch(60% 0.2 250) 0%,
+            oklch(55% 0.22 250) 100%);
+    color: white;
+    box-shadow: 0 4px 14px oklch(60% 0.2 250 / 0.35);
+}
+
+.onboarding-btn-primary-new:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px oklch(60% 0.2 250 / 0.4);
+}
+
+.onboarding-btn-primary-new:active {
+    transform: scale(0.95);
+}
+
+.onboarding-btn-primary-new:disabled {
+    background: var(--color-border-strong);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.onboarding-btn-secondary-new {
+    background: transparent;
+    color: var(--color-text-sub);
+}
+
+.onboarding-btn-secondary-new:hover {
+    color: var(--color-text-main);
+    background: var(--color-hover-overlay);
+    transform: scale(1.02);
+}
+
+/* === Ready画面 === */
+.onboarding-ready-icon-new {
+    width: 100px;
+    height: 100px;
+    margin-bottom: var(--space-6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    border-radius: 50%;
+    color: white;
+    box-shadow:
+        0 8px 24px rgba(16, 185, 129, 0.35),
+        0 0 0 4px rgba(16, 185, 129, 0.1);
+    animation: ready-bounce-new 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.onboarding-ready-icon-new svg {
+    width: 52px;
+    height: 52px;
+}
+
+@keyframes ready-bounce-new {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.onboarding-summary-new {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: var(--space-2);
+}
+
+.onboarding-summary-item-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--text-sm);
+    gap: var(--space-4);
+}
+
+.onboarding-summary-label-new {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    width: 80px;
+}
+
+.onboarding-summary-value-new {
+    color: var(--color-text-main);
+    font-weight: var(--font-semibold);
+    flex: 1;
+    text-align: right;
+}
+
+/* === レスポンシブ === */
+@media (max-width: 768px) {
+    .onboarding-screen-content {
+        padding: var(--space-4);
+        max-width: 100%;
+    }
+
+    .onboarding-step-new {
+        padding: var(--space-5);
+        min-height: auto;
+    }
+
+    .onboarding-style-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .style-preview-section {
+        display: none;
+    }
+
+    .onboarding-title-new {
+        font-size: var(--text-2xl);
+    }
+
+    .onboarding-subtitle-new {
+        font-size: var(--text-base);
+    }
+}
+
+/* === アクセシビリティ: モーション軽減 === */
+@media (prefers-reduced-motion: reduce) {
+    .onboarding-ready-icon-new {
+        animation: none;
+    }
+
+    .onboarding-card-new:hover {
+        transform: none;
+    }
+
+    .onboarding-btn-primary-new:hover {
+        transform: none;
+    }
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+[data-theme='dark'] .onboarding-step-new {
+    background: rgba(28, 28, 30, 0.9);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .onboarding-input-new {
+    background: rgba(51, 65, 85, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+[data-theme='dark'] .onboarding-input-new:focus {
+    border-color: var(--color-primary);
+    box-shadow:
+        0 0 0 4px rgba(59, 130, 246, 0.2),
+        0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+[data-theme='dark'] .onboarding-card-new {
+    background: rgba(51, 65, 85, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .onboarding-card-new:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+[data-theme='dark'] .onboarding-card-new.selected {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: var(--color-primary);
+}
+
+[data-theme='dark'] .onboarding-card-icon-new {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme='dark'] .onboarding-summary-new {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .onboarding-btn-secondary-new:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ========================================
+   Welcome Screen Enhancement
+   ======================================== */
+.welcome-icon-wrapper {
+    position: relative;
+    margin-bottom: var(--space-6);
+}
+
+.welcome-icon-glow {
+    position: relative;
+    z-index: 1;
+}
+
+.welcome-pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 88px;
+    height: 88px;
+    border-radius: var(--radius-2xl);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    z-index: 0;
+}
+
+.welcome-btn-pulse {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.welcome-btn-pulse svg {
+    transition: transform 0.2s ease;
+}
+
+.welcome-btn-pulse:hover svg {
+    transform: translateX(4px);
+}
+
+/* ========================================
+   Name Input Enhancement
+   ======================================== */
+.name-preview-container {
+    margin-top: var(--space-4);
+    min-height: 32px;
+}
+
+.name-preview {
+    font-size: var(--text-lg);
+    color: var(--color-text-sub);
+    font-weight: var(--font-medium);
+}
+
+.name-preview-highlight {
+    color: var(--color-primary);
+    font-weight: var(--font-bold);
+}
+
+.name-input-success {
+    border-color: #10B981 !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12) !important;
+}
+
+/* ========================================
+   Style Card Enhancement
+   ======================================== */
+.onboarding-card-new.selected {
+    transform: translateY(-4px);
+}
+
+.style-card-check {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.onboarding-card-new:not(.selected) {
+    opacity: 1;
+}
+
+.onboarding-card-new:not(.selected):not(:hover) {
+    opacity: 0.85;
+}
+
+.onboarding-card-icon-new {
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.onboarding-card-new:hover .onboarding-card-icon-new {
+    transform: scale(1.08);
+}
+
+/* ========================================
+   Ready Screen - Celebration
+   ======================================== */
+.ready-celebration-wrapper {
+    position: relative;
+    margin-bottom: var(--space-6);
+}
+
+.ready-ring-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid rgba(16, 185, 129, 0.4);
+    z-index: 0;
+}
+
+.confetti-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 2;
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.ready-btn-invite {
+    position: relative;
+    overflow: hidden;
+}
+
+.ready-btn-invite::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+    transform: translate(-50%, -50%) scale(0);
+    animation: btn-shine 2s ease-in-out infinite;
+}
+
+@keyframes btn-shine {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   Dark Mode - New Additions
+   ======================================== */
+[data-theme='dark'] .welcome-pulse-ring {
+    opacity: 0.7;
+}
+
+[data-theme='dark'] .name-preview {
+    color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .ready-ring-pulse {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* ========================================
+   Accessibility - Reduced Motion (Additions)
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    .welcome-pulse-ring {
+        display: none;
+    }
+
+    .ready-ring-pulse {
+        animation: none;
+    }
+
+    .ready-btn-invite::after {
+        animation: none;
+    }
+
+    .welcome-btn-pulse svg {
+        transition: none;
+    }
+}

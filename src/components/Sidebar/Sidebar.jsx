@@ -340,40 +340,20 @@ const Sidebar = ({
         )}
       </div>
 
-      {/* ★追加: Settings Button Area (Footer) */}
-      <div
-        className="sidebar-footer"
-        style={{
-          padding: '12px',
-          borderTop: '1px solid var(--color-border)',
-          marginTop: 'auto'
-        }}
-      >
+      {/* Settings Button Area (Footer) */}
+      <div className="sidebar-footer">
         <motion.button
-          className={`conversation-item ${currentView === 'settings' ? 'active' : ''}`}
+          className={`sidebar-footer-button ${currentView === 'settings' ? 'active' : ''}`}
           onClick={handleGoToSettings}
-          style={{ width: '100%', justifyContent: isCollapsed ? 'center' : 'flex-start', marginBottom: 0 }}
-          whileHover={{ scale: 1.01, x: 2, transition: { duration: 0.2 } }}
+          whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
           whileTap={{ scale: 0.98 }}
         >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '20px',
-            height: '20px',
-            color: currentView === 'settings' ? 'var(--color-primary)' : 'var(--color-text-sub)'
-          }}>
-            <SettingsIcon size={18} strokeWidth={2} />
+          <div className="footer-icon">
+            <SettingsIcon size={20} strokeWidth={2} />
           </div>
 
           {!isCollapsed && (
-            <span style={{
-              marginLeft: '10px',
-              fontSize: '14px',
-              fontWeight: currentView === 'settings' ? 500 : 400,
-              color: currentView === 'settings' ? 'var(--color-primary)' : 'var(--color-text-main)'
-            }}>
+            <span className="footer-text">
               設定
             </span>
           )}

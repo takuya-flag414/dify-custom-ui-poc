@@ -8,13 +8,26 @@
   background-color: var(--color-bg-body);
 }
 
+/* アプリ全体のレイアウト（アニメーション用ラッパー） */
+.app-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* Sidebarのアニメーションラッパー */
+.sidebar-motion-wrapper {
+  flex-shrink: 0;
+  height: 100%;
+}
+
 /* 右側のメインエリア全体 */
 .main-container {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background-color: #F9FAFB;
+  background-color: var(--color-bg-body);
   position: relative;
 }
 

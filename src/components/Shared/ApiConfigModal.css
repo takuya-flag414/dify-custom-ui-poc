@@ -19,15 +19,14 @@
 .api-modal-container {
     width: 100%;
     max-width: 480px;
-    /* 透過度を変更: 0.85 -> 0.98 (ほぼ不透明) */
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: var(--color-bg-modal);
 
     /* すりガラス効果は維持 */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 
     border-radius: var(--radius-2xl);
-    border: 1px solid rgba(255, 255, 255, 1);
+    border: 1px solid var(--color-border);
 
     box-shadow:
         0 20px 25px -5px rgba(0, 0, 0, 0.1),
@@ -71,7 +70,7 @@
     display: flex;
     align-items: flex-start;
     gap: var(--space-4);
-    background: linear-gradient(to bottom, #FFFFFF, rgba(255, 255, 255, 0.5));
+    background: linear-gradient(to bottom, var(--color-bg-surface), var(--color-bg-modal));
 }
 
 .icon-wrapper {
@@ -147,7 +146,7 @@
 .input-wrapper:focus-within {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 2px var(--color-primary-bg);
-    background-color: #FFFFFF;
+    background-color: var(--color-bg-surface);
 }
 
 .input-wrapper.error {
@@ -189,7 +188,7 @@
 
 .toggle-visibility:hover {
     color: var(--color-text-main);
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--color-hover-overlay);
 }
 
 .helper-text {
@@ -270,7 +269,7 @@
 }
 
 .btn-cancel:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--color-hover-overlay);
 }
 
 .btn-save {
@@ -311,4 +310,25 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .status-bar.error {
+    background-color: rgba(185, 28, 28, 0.15);
+    color: #FCA5A5;
+    border-color: rgba(185, 28, 28, 0.3);
+}
+
+[data-theme='dark'] .status-bar.success {
+    background-color: rgba(5, 150, 105, 0.15);
+    color: #6EE7B7;
+    border-color: rgba(5, 150, 105, 0.3);
+}
+
+[data-theme='dark'] .mock-mode-info {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: var(--color-primary);
 }

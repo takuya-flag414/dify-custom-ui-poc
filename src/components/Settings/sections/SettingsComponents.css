@@ -72,7 +72,7 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-  background-color: #ffffff;
+  background-color: var(--color-bg-surface);
 }
 
 .settings-input::placeholder {
@@ -97,7 +97,7 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-  background-color: #ffffff;
+  background-color: var(--color-bg-surface);
 }
 
 .settings-select {
@@ -306,4 +306,596 @@
   height: 1px;
   background: var(--color-border);
   margin: var(--space-4) 0;
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .profile-hero {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+}
+
+/* ========================================
+   RAG Knowledge Hub Styles
+   ======================================== */
+
+/* Container - フルハイトでD&D領域を確保 */
+.rag-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-6) var(--space-6) 0;
+  /* 上と左右に24pxの余白 */
+}
+
+/* Toolbar */
+.rag-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.rag-search-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.rag-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.rag-search-input {
+  width: 100%;
+  padding-left: 42px !important;
+  height: 44px;
+}
+
+.rag-view-toggle {
+  display: flex;
+  background: var(--color-bg-body);
+  border-radius: var(--radius-lg);
+  padding: 3px;
+  gap: 2px;
+}
+
+.rag-view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+}
+
+.rag-view-btn:hover {
+  color: var(--color-text-sub);
+  background: var(--color-hover-overlay);
+}
+
+.rag-view-btn.active {
+  background: var(--color-bg-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.rag-add-btn {
+  white-space: nowrap;
+}
+
+/* Grid Layout */
+.rag-file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-4);
+}
+
+/* File Card (Grid) */
+.rag-file-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: default;
+}
+
+.rag-file-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.rag-file-card.has-error {
+  border-color: var(--color-error);
+  background: rgba(220, 38, 38, 0.03);
+}
+
+.rag-file-card-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.rag-file-card:hover .rag-file-card-delete {
+  opacity: 1;
+}
+
+.rag-file-card-delete:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-error);
+}
+
+.rag-file-card-icon {
+  margin-bottom: var(--space-3);
+}
+
+.rag-file-card-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.rag-file-card-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-main);
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
+/* === Table Layout (List View) === */
+.rag-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.rag-table-header {
+  display: grid;
+  grid-template-columns: 1fr 120px 100px 120px 48px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-strong);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--color-bg-sidebar);
+}
+
+.rag-table-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.rag-table-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 100px 120px 48px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.15s ease;
+}
+
+.rag-table-row:hover {
+  background: var(--color-hover-overlay);
+}
+
+.rag-table-row.has-error {
+  background: rgba(220, 38, 38, 0.03);
+}
+
+.rag-table-cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.rag-table-cell-name {
+  gap: var(--space-3);
+}
+
+.rag-file-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rag-table-cell-date,
+.rag-table-cell-size {
+  font-size: var(--text-sm);
+  color: var(--color-text-sub);
+}
+
+.rag-table-cell-actions {
+  justify-content: flex-end;
+}
+
+.rag-table-delete-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.rag-table-row:hover .rag-table-delete-btn {
+  opacity: 1;
+}
+
+.rag-table-delete-btn:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-error);
+}
+
+/* === Content Area === */
+.rag-content-area {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* === Footer === */
+.rag-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-sidebar);
+}
+
+/* Status Badge */
+.rag-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+}
+
+.rag-status-badge svg {
+  flex-shrink: 0;
+}
+
+/* Drop Zone Overlay - RagSettings内に限定 */
+.rag-dropzone-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(59, 130, 246, 0.08);
+  border: 3px dashed var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: dropzone-appear 0.2s ease-out;
+  backdrop-filter: blur(2px);
+}
+
+@keyframes dropzone-appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.rag-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.rag-dropzone-icon {
+  color: var(--color-primary);
+  animation: dropzone-bounce 1s infinite;
+}
+
+@keyframes dropzone-bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.rag-dropzone-text {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.rag-dropzone-subtext {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Empty State */
+.rag-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+}
+
+.rag-empty-icon {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  margin-bottom: var(--space-3);
+}
+
+.rag-empty-text {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-sub);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.rag-empty-subtext {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* File Count */
+.rag-file-count {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.rag-file-count-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.rag-indexed-count {
+  color: var(--color-success);
+  font-weight: var(--font-medium);
+}
+
+/* Spin Animation */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* === Delete Confirm Dialog === */
+.rag-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.rag-confirm-dialog {
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: var(--shadow-2xl);
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.rag-confirm-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 158, 11, 0.12);
+  border-radius: 50%;
+  color: #F59E0B;
+}
+
+.rag-confirm-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-main);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.rag-confirm-filename {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+  background: var(--color-primary-bg);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  margin: 0 0 var(--space-3) 0;
+  word-break: break-all;
+}
+
+.rag-confirm-warning {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-6) 0;
+  line-height: 1.5;
+}
+
+.rag-confirm-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.rag-confirm-btn-cancel,
+.rag-confirm-btn-delete {
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rag-confirm-btn-cancel {
+  background: var(--color-bg-body);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+}
+
+.rag-confirm-btn-cancel:hover {
+  background: var(--color-hover-overlay);
+}
+
+.rag-confirm-btn-delete {
+  background: var(--color-error);
+  border: none;
+  color: white;
+}
+
+.rag-confirm-btn-delete:hover {
+  background: #c53030;
+}
+
+/* ========================================
+   RAG Knowledge Hub - Dark Mode
+   ======================================== */
+[data-theme='dark'] .rag-view-toggle {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .rag-file-card {
+  background: var(--color-bg-surface);
+  border-color: var(--color-border-strong);
+}
+
+[data-theme='dark'] .rag-file-card:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme='dark'] .rag-file-card.has-error {
+  background: rgba(255, 107, 107, 0.05);
+}
+
+[data-theme='dark'] .rag-table-header {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme='dark'] .rag-table-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .rag-table-row.has-error {
+  background: rgba(255, 107, 107, 0.05);
+}
+
+[data-theme='dark'] .rag-footer {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme='dark'] .rag-dropzone-overlay {
+  background: rgba(91, 157, 248, 0.1);
+  border-color: var(--color-primary);
+}
+
+[data-theme='dark'] .rag-dropzone-content {
+  background: var(--color-bg-surface);
+}
+
+[data-theme='dark'] .rag-file-card-delete:hover,
+[data-theme='dark'] .rag-table-delete-btn:hover {
+  background: rgba(255, 107, 107, 0.15);
 }

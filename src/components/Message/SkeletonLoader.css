@@ -11,8 +11,7 @@
 
 .skeleton-line {
     height: 14px;
-    background-color: #F3F4F6;
-    /* gray-100 */
+    background-color: var(--color-bg-sidebar);
     border-radius: 4px;
     animation: shimmer 2s infinite ease-in-out;
     transform-origin: left;
@@ -53,4 +52,11 @@
         opacity: 0.6;
         transform: scaleX(0.98);
     }
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .skeleton-line {
+    background-color: #3A3A3C;
 }

@@ -1,4 +1,4 @@
-/* src/components/Chat/AttachmentPopover.css */
+/* src/components/Chat/AttachmentPopover.css - V2 */
 
 .attachment-popover {
   position: absolute;
@@ -6,25 +6,31 @@
   left: 0;
   margin-bottom: 12px;
   width: 320px;
-  background-color: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 12px 32px -4px rgba(0, 0, 0, 0.15); /* 深い影 */
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-3xl);
+  /* 24px */
+  box-shadow: var(--shadow-lg);
   z-index: 50;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transform-origin: bottom left;
-  animation: popoverEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: popoverEnter 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes popoverEnter {
-  from { opacity: 0; transform: scale(0.95) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Header */
@@ -34,12 +40,14 @@
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--color-border);
-  background-color: rgba(249, 250, 251, 0.8); /* gray-50 with opacity */
+  background-color: rgba(249, 250, 251, 0.8);
+  /* gray-50 with opacity */
 }
 
 .popover-title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-caption);
+  /* 13px */
+  font-weight: var(--font-semibold);
   color: var(--color-text-main);
 }
 
@@ -55,7 +63,7 @@
 }
 
 .popover-close-btn:hover {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   color: var(--color-text-main);
 }
 
@@ -76,12 +84,13 @@
 }
 
 .section-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--text-caption);
+  /* 13px */
+  font-weight: var(--font-bold);
   color: var(--color-text-muted);
   padding: 4px 8px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-wide);
 }
 
 /* File Item Styling */
@@ -104,7 +113,8 @@
 /* Session Files (History) - Readonly look */
 .popover-file-item.history {
   opacity: 0.8;
-  background-color: #F9FAFB; /* gray-50 */
+  background-color: #F9FAFB;
+  /* gray-50 */
   border-color: transparent;
 }
 
@@ -114,7 +124,8 @@
 
 /* Pending Files (New) - Active look */
 .popover-file-item.pending {
-  background-color: #EFF6FF; /* blue-50 */
+  background-color: #EFF6FF;
+  /* blue-50 */
   border-color: #DBEAFE;
 }
 
@@ -127,8 +138,9 @@
 }
 
 .file-name {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  /* 13px */
+  font-weight: var(--font-medium);
   color: var(--color-text-main);
   white-space: nowrap;
   overflow: hidden;
@@ -179,15 +191,17 @@
   border: 1px dashed var(--color-border-strong);
   background-color: transparent;
   color: var(--color-primary);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  /* 13px */
+  font-weight: var(--font-medium);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .add-file-btn:hover {
   background-color: var(--color-primary-bg);
   border-color: var(--color-primary);
+  transform: scale(1.02);
 }
 
 .empty-state {

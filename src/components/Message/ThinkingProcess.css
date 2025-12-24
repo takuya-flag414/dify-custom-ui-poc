@@ -1,13 +1,14 @@
-/* src/components/styles/ThinkingProcess.css */
+/* src/components/styles/ThinkingProcess.css - V2 */
 
 .thinking-process-container {
     margin-bottom: 16px;
-    background-color: var(--color-bg-surface-secondary, #F9FAFB);
-    border: 1px solid var(--color-border, #E5E7EB);
-    border-radius: var(--radius-xl, 12px);
+    background-color: var(--color-bg-sidebar);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
     overflow: hidden;
-    font-size: var(--text-sm, 14px);
-    transition: all 0.3s ease;
+    font-size: var(--text-caption);
+    /* 13px */
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .thinking-header {
@@ -19,18 +20,18 @@
     border: none;
     cursor: pointer;
     text-align: left;
-    color: var(--color-text-secondary, #4B5563);
+    color: var(--color-text-sub);
     transition: background-color 0.2s;
     /* フォーカス時のアウトライン調整 */
     outline: none;
 }
 
 .thinking-header:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--color-primary, #3B82F6);
+    box-shadow: inset 0 0 0 2px var(--color-primary);
 }
 
 .thinking-header:hover {
-    background-color: rgba(0, 0, 0, 0.02);
+    background-color: var(--color-hover-overlay);
 }
 
 .thinking-icon-wrapper {
@@ -42,20 +43,9 @@
     height: 18px;
 }
 
-.thinking-spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid #E5E7EB;
-    border-top-color: var(--color-primary, #3B82F6);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+/* thinking-spinner は FluidOrb コンポーネントに置き換え済み */
+
 
 .thinking-check-icon {
     color: var(--color-success, #10B981);
@@ -122,7 +112,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 24px; /* アイコンが入る幅を確保 */
+    width: 24px;
+    /* アイコンが入る幅を確保 */
     margin-right: 8px;
 }
 
@@ -133,8 +124,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #F3F4F6; /* gray-100 */
-    color: #9CA3AF; /* gray-400 */
+    background-color: var(--color-bg-sidebar);
+    color: var(--color-text-muted);
     transition: all 0.3s ease;
     z-index: 1;
 }
@@ -145,41 +136,46 @@
     height: 12px;
 }
 
-/* アクティブ（処理中）状態 */
+/* アクティブ（処理中）状態 - V2 Glow */
 .step-icon-circle.processing {
-    background-color: #EFF6FF; /* blue-50 */
-    color: #3B82F6; /* blue-500 */
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    /* パルスアニメーション */
+    background-color: var(--color-primary-bg);
+    color: var(--color-primary);
+    box-shadow: var(--glow-primary);
     animation: pulse-icon 1.5s infinite;
 }
 
 /* 完了状態 */
 .step-icon-circle.done {
-    background-color: #F3F4F6;
-    color: #6B7280; /* gray-500: 完了したら目立たなくするのがApple流 */
-    /* 成功色にしたい場合は以下 */
-    /* color: #10B981; */
+    background-color: var(--color-bg-sidebar);
+    color: var(--color-text-muted);
 }
 
 /* 線の位置調整 */
 .step-line {
     flex: 1;
     width: 1px;
-    background-color: #E5E7EB;
+    background-color: var(--color-border);
     margin-top: 4px;
     margin-bottom: 4px;
 }
 
 /* ヘッダーの完了アイコン */
 .thinking-done-icon {
-    color: #6B7280; /* グレーで落ち着かせる */
+    color: var(--color-text-muted);
 }
 
 @keyframes pulse-icon {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .step-dot.processing {
@@ -195,7 +191,7 @@
 .step-line {
     flex: 1;
     width: 1px;
-    background-color: #E5E7EB;
+    background-color: var(--color-border);
     margin-top: -2px;
     margin-bottom: -4px;
     min-height: 12px;
@@ -203,12 +199,12 @@
 
 .step-title {
     padding-top: 1px;
-    color: #6B7280;
+    color: var(--color-text-muted);
     line-height: 1.4;
 }
 
 .thinking-step-item.processing .step-title {
-    color: var(--color-text-primary, #111827);
+    color: var(--color-text-main);
     font-weight: 500;
 }
 
@@ -229,3 +225,13 @@
     }
 }
 
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .step-icon-circle.processing {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme='dark'] .thinking-accordion-grid.expanded .thinking-steps-list {
+    border-top-color: var(--color-border);
+}

@@ -8,19 +8,8 @@ const GeneralSettings = ({ settings, onUpdateSettings, onResetOnboarding }) => {
   const currentFontSize = settings?.general?.fontSize || 'medium';
   const [resetConfirm, setResetConfirm] = useState(false);
 
-  // テーマ変更時の副作用 (実際にDOMクラスを切り替える)
-  useEffect(() => {
-    const root = window.document.documentElement;
-    const isDark =
-      currentTheme === 'dark' ||
-      (currentTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [currentTheme]);
+  // テーマ変更は useTheme フック (App.jsx で呼び出し) で処理されるため、
+  // ここでは設定更新のみを行う
 
   // フォントサイズ変更時の副作用
   useEffect(() => {

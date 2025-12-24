@@ -1,23 +1,22 @@
-/* src/components/styles/CitationList.css */
+/* src/components/styles/CitationList.css - V2 */
 
 .citation-container {
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border);
   width: 100%;
 }
 
-/* Header Label */
+/* Header Label - V2 */
 .citation-header-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
+  font-size: var(--text-caption);
+  /* 13px */
+  font-weight: var(--font-semibold);
+  color: var(--color-text-muted);
   margin-bottom: 0;
-  /* Gridの展開余白で制御するためmarginリセット */
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-wide);
   padding-bottom: 8px;
-  /* タップエリア確保 */
 }
 
 /* Collapsible Header Styles */
@@ -31,12 +30,12 @@
 }
 
 .collapsible-header:hover {
-  color: #374151;
+  color: var(--color-text-main);
 }
 
 .citation-toggle-icon {
-  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  color: #9ca3af;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--color-text-muted);
 }
 
 .citation-toggle-icon.open {
@@ -81,11 +80,12 @@
 }
 
 .citation-group-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: #6b7280;
+  font-size: var(--text-caption);
+  /* 13px */
+  font-weight: var(--font-bold);
+  color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-wide);
   padding-left: 2px;
 }
 
@@ -95,44 +95,45 @@
   gap: 8px;
 }
 
-/* Individual Citation Item */
+/* Individual Citation Item - V2 */
 .citation-item {
   display: grid;
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background-color: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   width: fit-content;
   max-width: 100%;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .citation-item[href]:hover {
-  border-color: #3b82f6;
-  background-color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border-color: var(--color-primary);
+  background-color: var(--color-bg-surface);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
 }
 
-/* 1. Number Badge */
+/* 1. Number Badge - V2 */
 .citation-number-badge {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 20px;
   height: 20px;
-  background-color: #ffffff;
-  color: #374151;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: bold;
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-main);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-caption);
+  /* 13px */
+  font-weight: var(--font-bold);
   flex-shrink: 0;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
 }
 
 /* 2. Icon Wrapper */
@@ -151,7 +152,7 @@
   object-fit: contain;
 }
 
-/* 3. Text Content */
+/* 3. Text Content - V2 */
 .citation-content {
   display: flex;
   flex-direction: column;
@@ -159,9 +160,10 @@
 }
 
 .citation-source {
-  font-size: 0.875rem;
-  color: #111827;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  /* 13px */
+  color: var(--color-text-main);
+  font-weight: var(--font-medium);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -170,8 +172,8 @@
 }
 
 .citation-url {
-  font-size: 10px;
-  color: #3b82f6;
+  font-size: var(--text-caption);
+  color: var(--color-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -196,4 +198,48 @@
   .citation-source {
     max-width: 100%;
   }
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+[data-theme='dark'] .citation-container {
+  border-top-color: var(--color-border);
+}
+
+[data-theme='dark'] .citation-header-label {
+  color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .collapsible-header:hover {
+  color: var(--color-text-main);
+}
+
+[data-theme='dark'] .citation-item {
+  background-color: var(--color-bg-sidebar);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .citation-item[href]:hover {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-primary);
+}
+
+[data-theme='dark'] .citation-number-badge {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-main);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .citation-source {
+  color: var(--color-text-main);
+}
+
+[data-theme='dark'] .citation-group-label {
+  color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .citation-item.highlight-citation {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: var(--color-primary);
 }

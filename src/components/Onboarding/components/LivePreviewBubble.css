@@ -1,0 +1,258 @@
+/* src/components/Onboarding/components/LivePreviewBubble.css - V2 */
+
+.live-preview-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--glass-border);
+    height: 280px;
+    overflow: hidden;
+}
+
+.live-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.live-preview-label {
+    font-size: var(--text-caption);
+    /* 13px */
+    font-weight: var(--font-medium);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+}
+
+/* AI Preview バッジ - V2 */
+.live-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: oklch(60% 0.2 250 / 0.1);
+    border-radius: var(--radius-full);
+    font-size: var(--text-caption);
+    /* 13px */
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+}
+
+.live-preview-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-primary);
+}
+
+@keyframes pulse-dot {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+/* MessageBlockを包むラッパー */
+.live-preview-message-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    align-items: flex-start;
+    /* 控えめなスクロールバー */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/* Webkit用カスタムスクロールバー */
+.live-preview-message-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.live-preview-message-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.live-preview-message-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+}
+
+.live-preview-message-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* プレビュー内のMessageBlockをスケールダウン */
+.preview-message-block {
+    transform: scale(0.85);
+    transform-origin: top left;
+    width: 118%;
+    /* スケール補正 (100 / 0.85 ≈ 118) */
+    pointer-events: none;
+    /* クリック無効化 */
+}
+
+/* プレビュー用: コピーボタンを非表示 */
+.preview-message-block .copy-btn-ai,
+.preview-message-block .copy-btn-user {
+    display: none !important;
+}
+
+/* プレビュー用: フッター（サジェスト等）を非表示 */
+.preview-message-block .message-footer {
+    display: none !important;
+}
+
+/* プレビュー用: ユーザーアバターを調整 */
+.preview-message-block .avatar-ai {
+    width: 28px;
+    height: 28px;
+}
+
+/* プレビュー用: バブルのマージン調整 */
+.preview-message-block .message-block {
+    margin: 0;
+    padding: 0;
+}
+
+.preview-message-block .message-container {
+    padding: 0;
+}
+
+.live-preview-tone-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-primary-bg);
+    border-radius: var(--radius-full);
+    align-self: center;
+    flex-shrink: 0;
+}
+
+.tone-icon {
+    font-size: 14px;
+}
+
+.tone-text {
+    font-size: var(--text-caption);
+    /* 13px */
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+}
+
+/* ========================================
+   Skeleton Loader
+   ======================================== */
+.preview-skeleton {
+    display: flex;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3);
+}
+
+.preview-skeleton-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.06) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    flex-shrink: 0;
+}
+
+.preview-skeleton-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preview-skeleton-line {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.06) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ========================================
+   Dark Mode - V2
+   ======================================== */
+[data-theme='dark'] .live-preview-container {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+}
+
+[data-theme='dark'] .live-preview-badge {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+[data-theme='dark'] .live-preview-tone-badge {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+/* ダークモード用スクロールバー */
+[data-theme='dark'] .live-preview-message-wrapper {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+[data-theme='dark'] .live-preview-message-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='dark'] .live-preview-message-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* ダークモード用スケルトン */
+[data-theme='dark'] .preview-skeleton-avatar,
+[data-theme='dark'] .preview-skeleton-line {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.06) 75%);
+    background-size: 200% 100%;
+}
+
+/* ========================================
+   Accessibility: Reduced Motion
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    .live-preview-dot {
+        animation: none;
+    }
+
+    .preview-skeleton-avatar,
+    .preview-skeleton-line {
+        animation: none;
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme='dark'] .preview-skeleton-avatar,
+    [data-theme='dark'] .preview-skeleton-line {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}

@@ -1,14 +1,10 @@
-/* src/components/Chat/ChatArea.css */
+/* src/components/Chat/ChatArea.css - V2 */
 
 /* --- Main Container --- */
 .chat-area {
-  /* ★重要: Gridアイテムとしてのサイズ拡張を封じる */
   min-height: 0;
   min-width: 0;
-
-  /* コンテナ自体はスクロールさせない（中のchat-historyだけスクロールさせる） */
   overflow: hidden;
-
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -17,7 +13,7 @@
   position: relative;
 }
 
-/* --- Top Bar --- */
+/* --- Top Bar - V2 Glassmorphism --- */
 .top-bar-container {
   height: 60px;
   padding: 0 var(--space-6);
@@ -25,16 +21,15 @@
   align-items: center;
   justify-content: space-between;
 
-  /* 背景色の透過設定 */
-  background-color: rgba(255, 255, 255, 0.96);
-  /* ほぼ不透明な白 */
+  /* V2: Glass material */
+  background: var(--color-bg-header);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
   z-index: 20;
-
-  /* 再描画範囲の限定 */
   will-change: transform;
 }
 
@@ -67,15 +62,18 @@
 }
 
 .initial-title {
-  font-size: var(--text-4xl);
+  font-size: var(--text-large-title);
+  /* 34px */
   font-weight: var(--font-bold);
   color: var(--color-text-main);
   margin-bottom: var(--space-4);
   line-height: 1.2;
+  letter-spacing: var(--tracking-tight);
 }
 
 .initial-subtitle {
-  font-size: var(--text-lg);
+  font-size: var(--text-body);
+  /* 17px */
   color: var(--color-text-sub);
   font-weight: var(--font-normal);
 }
@@ -93,7 +91,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, var(--color-bg-surface) 85%, rgba(255, 255, 255, 0));
+  background: linear-gradient(to top, var(--color-bg-surface) 85%, transparent);
   padding-top: var(--space-4);
 
   /* ★修正: 余白を削減 (24px -> 8px) */
@@ -272,7 +270,7 @@
   color: var(--color-text-muted);
 }
 
-/* Buttons */
+/* Buttons - V2 */
 .chat-input-attach-btn,
 .chat-input-button {
   flex-shrink: 0;
@@ -284,7 +282,7 @@
   justify-content: center;
   cursor: pointer;
   border: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .chat-input-attach-btn {
@@ -295,20 +293,27 @@
 .chat-input-attach-btn:hover {
   background-color: var(--color-bg-body);
   color: var(--color-text-main);
-}
-
-.chat-input-button {
-  background-color: var(--color-primary);
-  color: var(--color-text-white);
-}
-
-.chat-input-button:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
   transform: scale(1.05);
 }
 
+.chat-input-button {
+  background: linear-gradient(135deg,
+      oklch(60% 0.2 250) 0%,
+      oklch(55% 0.22 250) 100%);
+  color: white;
+}
+
+.chat-input-button:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px oklch(60% 0.2 250 / 0.3);
+}
+
+.chat-input-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
 .chat-input-button:disabled {
-  background-color: var(--color-border);
+  background: var(--color-border-strong);
   cursor: not-allowed;
 }
 
@@ -344,9 +349,8 @@
 
 /* ★追加: ロックされた状態のスタイル */
 .context-file-sticky.locked {
-  background-color: #F3F4F6;
-  /* gray-100 */
-  border-color: #E5E7EB;
+  background-color: var(--color-bg-sidebar);
+  border-color: var(--color-border);
 }
 
 /* アイコンラッパー: 背景色を調整 */
@@ -357,7 +361,7 @@
   width: 36px;
   height: 36px;
   /* ★変更: 白背景で少し浮かせる */
-  background-color: #FFFFFF;
+  background-color: var(--color-bg-surface);
   border-radius: var(--radius-md);
   color: var(--color-primary);
   /* アイコンの色は青のままでOK */
@@ -532,12 +536,11 @@
   user-select: none;
 }
 
-/* ホバー時のインタラクション (浮き上がる演出) */
+/* ホバー時のインタラクション - V2 */
 .context-chip:hover {
-  transform: translateY(-1px);
+  transform: scale(1.02);
   box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-bg-hover);
-  /* 薄い青枠 */
+  border-color: oklch(60% 0.2 250 / 0.3);
 }
 
 /* カード内のアイコン */
