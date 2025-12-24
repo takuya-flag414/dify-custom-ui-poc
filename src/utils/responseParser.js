@@ -57,12 +57,14 @@ export const parseLlmResponse = (rawText) => {
 
   let textToParse = rawText.trim();
 
-  // 1. マークダウンのコードブロック除去
-  const codeBlockRegex = /^```(?:json)?\s*([\s\S]*?)\s*(?:```)?$/i;
-  // 末尾の ``` はストリーミング中はまだ無い可能性があるので optional に変更
-  const match = textToParse.match(codeBlockRegex);
-  if (match && match[1]) {
-    textToParse = match[1].trim();
+  // 1. マークダウンのコードブロック除去（改善版）
+  // ストリーミング中は閉じの ``` がない場合も対応
+  if (textToParse.startsWith('```')) {
+    // 開始の ```json や ``` を除去
+    textToParse = textToParse.replace(/^```(?:json)?\s*\n?/, '');
+    // 末尾の ``` を除去（あれば）
+    textToParse = textToParse.replace(/\n?```\s*$/, '');
+    textToParse = textToParse.trim();
   }
 
   // 2. 厳密な JSONパースの試行 (完了後の完全なJSON用)

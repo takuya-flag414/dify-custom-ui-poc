@@ -411,6 +411,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       mode: isFastMode ? 'fast' : 'normal'
     }]);
 
+    // ★ワークフローログ: リクエスト開始
+    addLog(`[Workflow] === 新規リクエスト開始 ===`, 'info');
+    addLog(`[Workflow] 検索モード: Web=${currentSettings.webMode}, RAG=${currentSettings.ragEnabled ? 'ON' : 'OFF'}`, 'info');
+    addLog(`[Workflow] ユーザー入力: ${text}`, 'info');
+    if (displayFiles.length > 0) {
+      addLog(`[Workflow] 添付ファイル: ${displayFiles.map(f => f.name).join(', ')}`, 'info');
+    }
+
     // 5. Send Request via Adapter
     let reader;
     try {
@@ -574,7 +582,31 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
               // クエリ書き換え結果のキャプチャ
               if (title === 'LLM_Query_Rewrite') {
                 const generatedText = outputs?.text || outputs?.answer;
-                if (generatedText) capturedOptimizedQuery = generatedText.trim();
+                if (generatedText) {
+                  capturedOptimizedQuery = generatedText.trim();
+                  addLog(`[Workflow] 最適化クエリ: ${capturedOptimizedQuery}`, 'info');
+                }
+              }
+
+              // ★ワークフローログ: 中間結果の記録
+              const outputText = outputs?.text;
+              if (outputText && title) {
+                // 意図分析結果
+                if (title === 'LLM_Intent_Analysis') {
+                  addLog(`[Workflow] 意図分析結果: ${outputText}`, 'info');
+                }
+                // Perplexity検索結果
+                else if (title === 'TOOL_Perplexity_Search') {
+                  addLog(`[Workflow] Perplexity結果:\n${outputText}`, 'info');
+                }
+                // 回答生成LLMの結果
+                else if (title.startsWith('LLM_') && (
+                  title.includes('Hybrid') || title.includes('Doc') ||
+                  title.includes('Search') || title.includes('General') ||
+                  title.includes('Chat') || title.includes('Fast')
+                )) {
+                  addLog(`[Workflow] ${title} 出力:\n${outputText}`, 'info');
+                }
               }
 
               // 意図分析の結果を表示に反映
@@ -612,7 +644,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 if (protocolMode === 'PENDING') {
                   const trimmed = contentBuffer.trimStart();
                   if (trimmed.length > 0) {
-                    protocolMode = trimmed.startsWith('{') ? 'JSON' : 'RAW';
+                    // JSONモード判定: { で始まる OR ```json で始まる
+                    const looksLikeJson = trimmed.startsWith('{') ||
+                      trimmed.startsWith('```json') ||
+                      trimmed.startsWith('```\n{');
+                    protocolMode = looksLikeJson ? 'JSON' : 'RAW';
                   }
                 }
 
@@ -621,7 +657,20 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   const parsed = parseLlmResponse(contentBuffer);
                   textToDisplay = parsed.isParsed ? parsed.answer : '';
                 } else {
-                  textToDisplay = contentBuffer;
+                  // RAWモードでも、JSON構造が検出されたらパースを試みる（誤判定対策）
+                  const trimmed = contentBuffer.trim();
+                  if (trimmed.includes('"answer"') && (trimmed.startsWith('{') || trimmed.startsWith('```'))) {
+                    const parsed = parseLlmResponse(contentBuffer);
+                    if (parsed.isParsed) {
+                      textToDisplay = parsed.answer;
+                      // モードを修正（以降のストリーミングでも正しく処理）
+                      protocolMode = 'JSON';
+                    } else {
+                      textToDisplay = contentBuffer;
+                    }
+                  } else {
+                    textToDisplay = contentBuffer;
+                  }
                 }
 
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -649,8 +698,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
               let finalText = contentBuffer;
               let finalCitations = [];
 
-              if (protocolMode === 'JSON') {
-                const parsed = parseLlmResponse(finalText);
+              // ★改善: protocolModeに関係なく、コンテンツがJSON形式かチェック
+              // ストリーミング中の初期判定が誤っている場合にも対応
+              const trimmedBuffer = contentBuffer.trim();
+              const looksLikeJsonContent =
+                trimmedBuffer.startsWith('{') ||
+                trimmedBuffer.startsWith('```json') ||
+                trimmedBuffer.startsWith('```\n{') ||
+                (trimmedBuffer.includes('"answer"') && trimmedBuffer.includes('"citations"'));
+
+              if (protocolMode === 'JSON' || looksLikeJsonContent) {
+                const parsed = parseLlmResponse(contentBuffer);
                 if (parsed.isParsed) {
                   finalText = parsed.answer;
                   if (parsed.citations.length > 0) {
