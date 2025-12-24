@@ -15,6 +15,38 @@ const DEFAULT_SEARCH_SETTINGS = {
   domainFilters: []
 };
 
+// ★ノード名マッピングテーブル: YMLのノード名 → 表示テキスト・アイコン
+const NODE_DISPLAY_MAP = {
+  // LLM処理ノード - クエリ処理
+  'LLM_Query_Rewrite': { title: '質問の要点を整理中...', icon: 'reasoning' },
+  'LLM_Intent_Analysis': { title: '質問の意図を解析中...', icon: 'router' },
+
+  // LLM処理ノード - 回答生成 (Efficient スタイル)
+  'LLM_Hybrid_Efficient': { title: '情報を統合して回答を生成中...', icon: 'writing' },
+  'LLM_Doc_Efficient': { title: 'ドキュメントを分析して回答を生成中...', icon: 'writing' },
+  'LLM_Search_Efficient': { title: '検索結果から回答を生成中...', icon: 'writing' },
+  'LLM_General_Efficient': { title: '回答を生成中...', icon: 'writing' },
+  'LLM_Chat_Efficient': { title: '応答を準備中...', icon: 'writing' },
+  'LLM_Fast_Doc_Efficient': { title: 'ドキュメントを高速分析中...', icon: 'writing' },
+  'LLM_Fast_General_Efficient': { title: '高速回答を生成中...', icon: 'writing' },
+
+  // LLM処理ノード - 回答生成 (Partner スタイル)
+  'LLM_Hybrid_Partner': { title: '情報を統合して回答を生成中...', icon: 'writing' },
+  'LLM_Doc_Partner': { title: 'ドキュメントを分析して回答を生成中...', icon: 'writing' },
+  'LLM_Search_Partner': { title: '検索結果から回答を生成中...', icon: 'writing' },
+  'LLM_General_Partner': { title: '回答を生成中...', icon: 'writing' },
+  'LLM_Chat_Partner': { title: '応答を準備中...', icon: 'writing' },
+  'LLM_Fast_Doc_Partner': { title: 'ドキュメントを高速分析中...', icon: 'writing' },
+  'LLM_Fast_General_Partner': { title: '高速回答を生成中...', icon: 'writing' },
+
+  // ツールノード (動的タイトル生成)
+  'TOOL_Doc_Extractor': { title: 'ドキュメントを解析中...', icon: 'document', dynamic: 'document' },
+  'TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
+};
+
+// 表示対象外のノード接頭辞 (ゲート、変数操作、コード、出力など)
+const HIDDEN_NODE_PREFIXES = ['GATE_', 'ROUTER_', 'STYLE_Check_', 'SET_', 'CLEAR_', 'CODE_', 'ANSWER_', 'Check '];
+
 // パフォーマンス計測用トラッカー
 const createPerfTracker = (addLog) => ({
   start: 0,
@@ -436,20 +468,31 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
               const nodeId = data.data?.node_id || `node_${Date.now()}`;
               const inputs = data.data?.inputs || {};
 
-              const isWebSearchNode = (nodeType === 'tool') && (title && (title.includes('Web') || title.includes('Search') || title.includes('Perplexity')));
-              const isSignificantNode = nodeType === 'document-extractor' || (title && (title.includes('Intent') || title.includes('Classifier'))) || (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) || isWebSearchNode || nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ')) || nodeType === 'llm';
-              const isAssigner = nodeType === 'assigner' || (title && (title.includes('変数') || title.includes('Variable') || title.includes('Set Opt')));
+              // 1. 非表示ノードのスキップ
+              const isHiddenNode = HIDDEN_NODE_PREFIXES.some(prefix => title?.startsWith(prefix));
+              if (isHiddenNode) {
+                // 非表示ノードはスキップ (思考プロセスに表示しない)
+                continue;
+              }
 
-              if (isSignificantNode && !isAssigner) {
-                let displayTitle = title;
-                let iconType = 'default';
+              // 2. マッピングテーブルから表示情報を取得
+              const mapping = title ? NODE_DISPLAY_MAP[title] : null;
 
-                if (nodeType === 'document-extractor') {
+              let displayTitle = null;
+              let iconType = 'default';
+
+              if (mapping) {
+                // マッピングテーブルにマッチした場合
+                displayTitle = mapping.title;
+                iconType = mapping.icon;
+
+                // 動的タイトル生成
+                if (mapping.dynamic === 'document') {
+                  // ドキュメント抽出器: ファイル名を動的に取得
                   let fileNameToDisplay = '添付ファイル';
                   if (inputs.target_file) {
                     fileNameToDisplay = inputs.target_file;
                   } else {
-                    // アップロード済みファイル一覧から推測
                     const allActiveFiles = [...sessionFiles, ...displayFiles];
                     const inputValues = JSON.stringify(inputs);
                     const matchedFile = allActiveFiles.find(f => inputValues.includes(f.name) || inputValues.includes(f.id));
@@ -461,33 +504,54 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                       fileNameToDisplay = `${allActiveFiles.length}件のファイル`;
                     }
                   }
-
                   displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
                   detectedTraceMode = 'document';
-                  iconType = 'document';
-                } else if (title && (title.includes('Intent') || title.includes('Classifier'))) {
-                  displayTitle = '質問の意図を解析中...';
-                  iconType = 'router';
-                } else if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
-                  displayTitle = '質問の要点を整理中...';
-                  iconType = 'reasoning';
-                } else if (isWebSearchNode) {
+                } else if (mapping.dynamic === 'search') {
+                  // Web検索: クエリを動的に取得
                   const query = inputs.query || capturedOptimizedQuery || text;
                   displayTitle = `Web検索: "${query}"`;
                   detectedTraceMode = 'search';
-                  iconType = 'search';
-                } else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
-                  const query = inputs.query || capturedOptimizedQuery;
-                  displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
-                  detectedTraceMode = 'knowledge';
-                  iconType = 'retrieval';
-                } else if (nodeType === 'llm') {
-                  if (!title.includes('Intent') && !title.includes('Classifier') && !title.includes('Rewriter')) {
-                    displayTitle = '情報を整理して回答を生成中...';
-                    iconType = 'writing';
+                }
+              } else if (nodeType === 'document-extractor') {
+                // マッピングにないが document-extractor タイプの場合
+                let fileNameToDisplay = '添付ファイル';
+                if (inputs.target_file) {
+                  fileNameToDisplay = inputs.target_file;
+                } else {
+                  const allActiveFiles = [...sessionFiles, ...displayFiles];
+                  const inputValues = JSON.stringify(inputs);
+                  const matchedFile = allActiveFiles.find(f => inputValues.includes(f.name) || inputValues.includes(f.id));
+                  if (matchedFile) {
+                    fileNameToDisplay = matchedFile.name;
+                  } else if (allActiveFiles.length === 1) {
+                    fileNameToDisplay = allActiveFiles[0].name;
+                  } else if (allActiveFiles.length > 1) {
+                    fileNameToDisplay = `${allActiveFiles.length}件のファイル`;
                   }
                 }
+                displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
+                detectedTraceMode = 'document';
+                iconType = 'document';
+              } else if (nodeType === 'tool' && title?.includes('Perplexity')) {
+                // Perplexity検索のフォールバック
+                const query = inputs.query || capturedOptimizedQuery || text;
+                displayTitle = `Web検索: "${query}"`;
+                detectedTraceMode = 'search';
+                iconType = 'search';
+              } else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
+                // ナレッジ検索
+                const query = inputs.query || capturedOptimizedQuery;
+                displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
+                detectedTraceMode = 'knowledge';
+                iconType = 'retrieval';
+              } else if (nodeType === 'llm') {
+                // LLMノード (マッピングにない場合のフォールバック)
+                displayTitle = '情報を整理して回答を生成中...';
+                iconType = 'writing';
+              }
 
+              // 3. 表示対象のノードのみ思考プロセスに追加
+              if (displayTitle) {
                 tracker.markNodeStart(nodeId, displayTitle);
 
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
@@ -507,11 +571,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
               if (nodeId) tracker.markNodeEnd(nodeId);
 
-              if (title && (title.includes('Rewriter') || title.includes('Query') || title.includes('最適化'))) {
+              // クエリ書き換え結果のキャプチャ
+              if (title === 'LLM_Query_Rewrite') {
                 const generatedText = outputs?.text || outputs?.answer;
                 if (generatedText) capturedOptimizedQuery = generatedText.trim();
               }
-              if (title && (title.includes('Intent') || title.includes('Classifier')) && outputs?.text) {
+
+              // 意図分析の結果を表示に反映
+              if (title === 'LLM_Intent_Analysis' && outputs?.text) {
                 const decision = outputs.text.trim();
                 let resultText = '';
                 if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
@@ -528,6 +595,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   } : m));
                 }
               } else if (nodeId) {
+                // その他のノードは完了ステータスに更新
                 setMessages(prev => prev.map(m => m.id === aiMessageId ? {
                   ...m,
                   thoughtProcess: m.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)

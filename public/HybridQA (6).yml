@@ -1,0 +1,3557 @@
+app:
+  description: 社内AIチャットボット開発 (Phase 1) 。
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: HybridQA
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.6@e2665624a156f52160927bceac9e169bd7e5ae6b936ae82575e14c90af390e6e
+    version: null
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/perplexity:1.0.1@32531e4a1ec68754e139f29f04eaa7f51130318a908d11382a27dc05ec8d91e3
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables:
+  - description: ''
+    id: 6a708509-1da6-4c64-9f59-3667ae436705
+    name: context_file_name
+    selector:
+    - conversation
+    - context_file_name
+    value: ''
+    value_type: string
+  - description: 最適化された検索クエリ
+    id: f7d8ed98-9085-43e4-adda-9558b3de8f52
+    name: optimized_search_query
+    selector:
+    - conversation
+    - optimized_search_query
+    value: ''
+    value_type: string
+  - description: Web検索結果
+    id: 38630ad2-9d96-475b-8daa-fca4012bf7e3
+    name: context_web
+    selector:
+    - conversation
+    - context_web
+    value: ''
+    value_type: string
+  - description: RAG検索結果
+    id: ee471556-3e5c-4c12-8e2f-a89b3aab8423
+    name: context_rag
+    selector:
+    - conversation
+    - context_rag
+    value: ''
+    value_type: string
+  - description: ファイル抽出テキスト
+    id: b72b2f7b-8ca9-478d-9e1e-13e88c074c9e
+    name: context_file
+    selector:
+    - conversation
+    - context_file
+    value: []
+    value_type: array[string]
+  - description: ''
+    id: f21ecbed-b927-4f77-b16d-edc5d6b50621
+    name: input_perplexity
+    selector:
+    - conversation
+    - input_perplexity
+    value: ''
+    value_type: string
+  - description: ''
+    id: dc709b28-a14d-4585-960c-64cb3857a97a
+    name: extracted_text
+    selector:
+    - conversation
+    - extracted_text
+    value: ''
+    value_type: string
+  - description: ''
+    id: d3a4c143-2880-43da-9954-dc5984ff034a
+    name: temp_result
+    selector:
+    - conversation
+    - temp_result
+    value: ''
+    value_type: string
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - document
+      allowed_file_upload_methods:
+      - remote_url
+      - local_file
+      enabled: true
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 5
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: true
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: if-else
+      id: 1761291739140-source-1762490237953-target
+      selected: false
+      source: '1761291739140'
+      sourceHandle: source
+      target: '1762490237953'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: document-extractor
+      id: 1764913411735-true-1764913700839-target
+      selected: false
+      source: '1764913411735'
+      sourceHandle: 'true'
+      target: '1764913700839'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: if-else
+      id: 1764913830165-source-1764914026588-target
+      selected: false
+      source: '1764913830165'
+      sourceHandle: source
+      target: '1764914026588'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1764914026588-true-1764914113059-target
+      selected: false
+      source: '1764914026588'
+      sourceHandle: 'true'
+      target: '1764914113059'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1764914026588-false-1764914133340-target
+      selected: false
+      source: '1764914026588'
+      sourceHandle: 'false'
+      target: '1764914133340'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: tool
+      id: 1764914157100-true-1764914255107-target
+      selected: false
+      source: '1764914157100'
+      sourceHandle: 'true'
+      target: '1764914255107'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: tool
+        targetType: assigner
+      id: 1764914255107-source-1764914281874-target
+      selected: false
+      source: '1764914255107'
+      sourceHandle: source
+      target: '1764914281874'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: assigner
+      id: 1764914157100-false-1764914726017-target
+      selected: false
+      source: '1764914157100'
+      sourceHandle: 'false'
+      target: '1764914726017'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1762490237953-true-answer-target
+      selected: false
+      source: '1762490237953'
+      sourceHandle: 'true'
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: 1764916701592-source-1764916740679-target
+      selected: false
+      source: '1764916701592'
+      sourceHandle: source
+      target: '1764916740679'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: document-extractor
+        targetType: code
+      id: 1764913700839-source-1764924171081-target
+      selected: false
+      source: '1764913700839'
+      sourceHandle: source
+      target: '1764924171081'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: 1764924171081-source-1764913830165-target
+      selected: false
+      source: '1764924171081'
+      sourceHandle: source
+      target: '1764913830165'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: llm
+      id: 1764914113059-source-1764916701592-target
+      selected: false
+      source: '1764914113059'
+      sourceHandle: source
+      target: '1764916701592'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: llm
+      id: 1764914133340-source-1764916701592-target
+      selected: false
+      source: '1764914133340'
+      sourceHandle: source
+      target: '1764916701592'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: llm
+      id: 1764916740679-source-1764914312443-target
+      selected: false
+      source: '1764916740679'
+      sourceHandle: source
+      target: '1764914312443'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765343666910-false-1764914157100-target
+      selected: false
+      source: '1765343666910'
+      sourceHandle: 'false'
+      target: '1764914157100'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: tool
+      id: 1764914157100-1db66d52-c4bb-4b05-a087-6a73781c2d5b-1764914255107-target
+      selected: false
+      source: '1764914157100'
+      sourceHandle: 1db66d52-c4bb-4b05-a087-6a73781c2d5b
+      target: '1764914255107'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1765256779030-source-1765345427966-target
+      selected: false
+      source: '1765256779030'
+      sourceHandle: source
+      target: '1765345427966'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1764914312443-source-1765343666910-target
+      selected: false
+      source: '1764914312443'
+      sourceHandle: source
+      target: '1765343666910'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: code
+      id: 1764914726017-source-1765514869301-target
+      selected: false
+      source: '1764914726017'
+      sourceHandle: source
+      target: '1765514869301'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: code
+      id: 1764914281874-source-1765514869301-target
+      selected: false
+      source: '1764914281874'
+      sourceHandle: source
+      target: '1765514869301'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1765514869301-source-1765515071449-target
+      selected: false
+      source: '1765514869301'
+      sourceHandle: source
+      target: '1765515071449'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17655151756460-source-1765345440190-target
+      selected: false
+      source: '17655151756460'
+      sourceHandle: source
+      target: '1765345440190'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17655151779960-source-17655153615920-target
+      selected: false
+      source: '17655151779960'
+      sourceHandle: source
+      target: '17655153615920'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17655151786270-source-17655153626170-target
+      selected: false
+      source: '17655151786270'
+      sourceHandle: source
+      target: '17655153626170'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17655151791010-source-17655153635450-target
+      selected: false
+      source: '17655151791010'
+      sourceHandle: source
+      target: '17655153635450'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1764913411735-false-1764914026588-target
+      selected: false
+      source: '1764913411735'
+      sourceHandle: 'false'
+      target: '1764914026588'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1762490237953-false-1765854025663-target
+      selected: false
+      source: '1762490237953'
+      sourceHandle: 'false'
+      target: '1765854025663'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765854025663-false-1764913411735-target
+      selected: false
+      source: '1765854025663'
+      sourceHandle: 'false'
+      target: '1764913411735'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1765854614015-source-1765854668107-target
+      selected: false
+      source: '1765854614015'
+      sourceHandle: source
+      target: '1765854668107'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765854025663-true-17658598785120-target
+      selected: false
+      source: '1765854025663'
+      sourceHandle: 'true'
+      target: '17658598785120'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: document-extractor
+      id: 17658598785120-true-17658598785131-target
+      selected: false
+      source: '17658598785120'
+      sourceHandle: 'true'
+      target: '17658598785131'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: document-extractor
+        targetType: code
+      id: 17658598785131-source-17658598785133-target
+      selected: false
+      source: '17658598785131'
+      sourceHandle: source
+      target: '17658598785133'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: 17658598785133-source-17658598785132-target
+      selected: false
+      source: '17658598785133'
+      sourceHandle: source
+      target: '17658598785132'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17658599307650-source-1765859958399-target
+      selected: false
+      source: '17658599307650'
+      sourceHandle: source
+      target: '1765859958399'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: if-else
+      id: 17658598785132-source-1766549782668-target
+      selected: false
+      source: '17658598785132'
+      sourceHandle: source
+      target: '1766549782668'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 17658598785120-0703a046-f8f7-4b0e-b07b-3794eaee8f40-1766549782668-target
+      selected: false
+      source: '17658598785120'
+      sourceHandle: 0703a046-f8f7-4b0e-b07b-3794eaee8f40
+      target: '1766549782668'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1766549782668-true-1765854614015-target
+      selected: false
+      source: '1766549782668'
+      sourceHandle: 'true'
+      target: '1765854614015'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1766549782668-false-17665499392760-target
+      selected: false
+      source: '1766549782668'
+      sourceHandle: 'false'
+      target: '17665499392760'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17665499392760-source-1765854668107-target
+      selected: false
+      source: '17665499392760'
+      sourceHandle: source
+      target: '1765854668107'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 17658598785120-false-17665500741430-target
+      selected: false
+      source: '17658598785120'
+      sourceHandle: 'false'
+      target: '17665500741430'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665500741430-true-17658599307650-target
+      selected: false
+      source: '17665500741430'
+      sourceHandle: 'true'
+      target: '17658599307650'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665500741430-false-17665500976990-target
+      selected: false
+      source: '17665500741430'
+      sourceHandle: 'false'
+      target: '17665500976990'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17665500976990-source-1765859958399-target
+      selected: false
+      source: '17665500976990'
+      sourceHandle: source
+      target: '1765859958399'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765515071449-true-17665510905650-target
+      selected: false
+      source: '1765515071449'
+      sourceHandle: 'true'
+      target: '17665510905650'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665510905650-true-17655151756460-target
+      selected: false
+      source: '17665510905650'
+      sourceHandle: 'true'
+      target: '17655151756460'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765515071449-908d672e-4c25-44ac-9ee9-4f7fb1b32144-17665511081250-target
+      selected: false
+      source: '1765515071449'
+      sourceHandle: 908d672e-4c25-44ac-9ee9-4f7fb1b32144
+      target: '17665511081250'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665511081250-true-17655151779960-target
+      selected: false
+      source: '17665511081250'
+      sourceHandle: 'true'
+      target: '17655151779960'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765515071449-f10e65ad-bb00-4cdf-aabf-78811af1ba70-17665511228850-target
+      selected: false
+      source: '1765515071449'
+      sourceHandle: f10e65ad-bb00-4cdf-aabf-78811af1ba70
+      target: '17665511228850'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665511228850-true-17655151786270-target
+      selected: false
+      source: '17665511228850'
+      sourceHandle: 'true'
+      target: '17655151786270'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765515071449-false-17665511238600-target
+      selected: false
+      source: '1765515071449'
+      sourceHandle: 'false'
+      target: '17665511238600'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665511238600-true-17655151791010-target
+      selected: false
+      source: '17665511238600'
+      sourceHandle: 'true'
+      target: '17655151791010'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665510905650-false-17665511958080-target
+      selected: false
+      source: '17665510905650'
+      sourceHandle: 'false'
+      target: '17665511958080'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17665511958080-source-1765345440190-target
+      selected: false
+      source: '17665511958080'
+      sourceHandle: source
+      target: '1765345440190'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665511081250-false-17665512107830-target
+      selected: false
+      source: '17665511081250'
+      sourceHandle: 'false'
+      target: '17665512107830'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17665512107830-source-17655153615920-target
+      selected: false
+      source: '17665512107830'
+      sourceHandle: source
+      target: '17655153615920'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665511228850-false-17665512248470-target
+      selected: false
+      source: '17665511228850'
+      sourceHandle: 'false'
+      target: '17665512248470'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17665512248470-source-17655153626170-target
+      selected: false
+      source: '17665512248470'
+      sourceHandle: source
+      target: '17655153626170'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665511238600-false-17665512406710-target
+      source: '17665511238600'
+      sourceHandle: 'false'
+      target: '17665512406710'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17665512406710-source-17655153635450-target
+      source: '17665512406710'
+      sourceHandle: source
+      target: '17655153635450'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765343666910-true-17665517221250-target
+      source: '1765343666910'
+      sourceHandle: 'true'
+      target: '17665517221250'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665517221250-true-1765256779030-target
+      source: '17665517221250'
+      sourceHandle: 'true'
+      target: '1765256779030'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17665517221250-false-17665517422840-target
+      source: '17665517221250'
+      sourceHandle: 'false'
+      target: '17665517422840'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17665517422840-source-1765345427966-target
+      source: '17665517422840'
+      sourceHandle: source
+      target: '1765345427966'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 開始
+        type: start
+        variables:
+        - default: false
+          hint: ''
+          label: isDebugMode
+          max_length: 48
+          options:
+          - ''
+          placeholder: ''
+          required: false
+          type: checkbox
+          variable: isDebugMode
+        - default: ''
+          hint: ''
+          label: Search Domain Filter
+          max_length: 256
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: domain_filter
+        - default: auto
+          hint: ''
+          label: Web Search Mode
+          max_length: 48
+          options:
+          - auto
+          - force
+          - 'off'
+          placeholder: ''
+          required: true
+          type: select
+          variable: web_search_mode
+        - default: 'false'
+          hint: ''
+          label: RAG Enabled
+          max_length: 48
+          options:
+          - 'true'
+          - 'false'
+          placeholder: ''
+          required: true
+          type: select
+          variable: rag_enabled
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - document
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          default: "[\n  {\n    \"source_name\": \"社内稟議規定_2025改定版.pdf\",\n    \"content\"\
+            : \"第3条（決裁権限基準）\\n物品購入およびサービス契約における承認フローは以下の通り定める。\\n1. 10万円未満：直属の課長承認\\\
+            n2. 10万円以上50万円未満：部長承認\\n3. 50万円以上100万円未満：本部長決裁\\n4. 100万円以上：役員会決裁\\n\\\
+            n第5条（SaaS利用の特例）\\n金額に関わらず、クラウドサービス（SaaS）の新規契約においては、情報システム部による「セキュリティチェックシート」の提出と承認（決裁者：情シス部長）が必須となる。これは無料プランの業務利用も含む。\\\
+            n\\n第8条（緊急決裁）\\n災害時やシステム障害時など、緊急を要する場合は事後承認を認めるが、発生から3営業日以内に正規のフローで申請を行うこと。\"\
+            \n  },\n  {\n    \"source_name\": \"ITセキュリティガイドライン_v3.2.docx\",\n    \"\
+            content\": \"3-1. パスワードポリシー\\n社内システムおよび連携する外部クラウドサービス（SaaS）のパスワードは以下の要件を満たす必要がある。\\\
+            n- 文字数：12文字以上\\n- 構成：大文字、小文字、数字、記号の4種類すべてを混在させること\\n- 変更頻度：定期的変更は求めないが、漏洩が疑われる場合は直ちに変更すること\\\
+            n- 禁止事項：氏名、社員番号、誕生日など推測容易な文字列の使用\\n\\n4-2. 生成AIの利用規定\\n- 当社が契約している「ChatGPT\
+            \ Enterprise」および本プロジェクトで開発中の「社内AIチャットボット」以外の生成AIサービスへの業務データの入力は原則禁止とする。\\\
+            n- 翻訳DeepL（無料版）への機密情報入力は厳禁。必ずPro版アカウントを使用すること。\\n\\n5-1. デバイス管理\\n- 私物PC、私物スマートフォンの業務ネットワーク接続（BYOD）は、事前に申請し「MDM（モバイルデバイス管理ツール）」を導入した端末に限り許可する。\\\
+            n- USBメモリ等の外部記憶媒体の使用は原則禁止とする。\"\n  },\n  {\n    \"source_name\": \"旅費・経費精算規程_2024.pdf\"\
+            ,\n    \"content\": \"第2章 交通費\\n1. 通勤交通費：最も経済的な経路（最安経路）を原則とする。ただし、所要時間が最安経路の0.8倍以下となる場合は、最速経路を認める場合がある。\\\
+            n2. タクシー利用：原則禁止。ただし、終電を逃した場合（業務起因に限る）、または公共交通機関での移動が困難な重量物を運搬する場合に限り、部長承認の上で許可する。\\\
+            n3. 新幹線・特急：片道100km以上の移動において利用可。指定席利用可。グリーン車は役員のみ可。\\n\\n第4章 接待交際費\\n1.\
+            \ 会食基準：1人あたり5,000円（税込）までは会議費として処理可。\\n2. 5,000円を超える場合：事前申請必須（課長承認）。\\\
+            n3. 1人あたり10,000円を超える場合：事前申請必須（部長承認）。二次会費用の会社負担は原則認めない。\\n\\n第6章 精算期限\\\
+            n経費発生月の翌月3営業日までに「Concur」にて申請を完了すること。期限を過ぎた場合、理由書の提出が必要となる。\"\n  },\n \
+            \ {\n    \"source_name\": \"テレワーク勤務規定_v2.1.pdf\",\n    \"content\": \"\
+            1. 対象者\\n試用期間（入社3ヶ月）を終了し、業務に支障がないと所属長が認めた正社員および契約社員。\\n\\n2. 実施頻度\\n原則として週3回（月12回）までとする。ただし、育児・介護事由、または感染症拡大防止等の会社指示がある場合はこの上限を解除する。\\\
+            n\\n3. 就業場所\\n自宅、実家、または会社が契約しているシェアオフィス（WeWork等）。カフェや公共施設など、セキュリティが担保できない場所（フリーWi-Fi環境下など）での業務は禁止する。\\\
+            n\\n4. テレワーク手当\\n実施1日につき250円を支給する。これには光熱費・通信費の補助が含まれる。\\n\\n5. 勤怠管理\\\
+            n始業時および終業時に、Slackの「#勤怠連絡」チャンネルにて報告を行うこと。中抜け（通院等）がある場合も同様とする。\"\n  },\n\
+            \  {\n    \"source_name\": \"就業規則_第4章_休暇.pdf\",\n    \"content\": \"第12条（年次有給休暇）\\\
+            n入社日から6ヶ月継続勤務し、全労働日の8割以上出勤した社員に対し、10日付与する。以降、勤続年数に応じて最大20日まで付与する。有給休暇の取得単位は「1日」「半日」「1時間」とする。\\\
+            n\\n第15条（夏季休暇）\\n7月1日から9月30日までの期間において、任意の3日間を特別休暇（有給）として取得できる。業務の都合を考慮し、チーム内で調整の上取得すること。\\\
+            n\\n第18条（慶弔休暇）\\n以下の事由が発生した際、申請により特別休暇を付与する。\\n1. 本人が結婚するとき：5日\\n2. 配偶者が出産するとき：2日\\\
+            n3. 配偶者、子、父母が死亡したとき：5日\\n4. 兄弟姉妹、祖父母、配偶者の父母が死亡したとき：3日\"\n  }\n]"
+          hint: ''
+          label: Mock RAG Context
+          max_length: 10000
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: mock_rag_context
+        - default: 2025年12月10日
+          hint: ''
+          label: Current Time
+          max_length: 100
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: current_time
+        - default: partner
+          hint: ''
+          label: AI Style
+          max_length: 48
+          options:
+          - efficient
+          - partner
+          placeholder: ''
+          required: true
+          type: select
+          variable: ai_style
+        - default: ''
+          hint: ''
+          label: System Prompt
+          max_length: 1000
+          options: []
+          placeholder: ''
+          required: false
+          type: paragraph
+          variable: system_prompt
+      height: 291
+      id: '1761291739140'
+      position:
+        x: 0
+        y: 12
+      positionAbsolute:
+        x: 0
+        y: 12
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: "{\n  \"answer\": \"### ✅ Dify API 接続成功\\n\\nおめでとうございます。フロントエンドとDifyワークフローの接続が正常に確立されました。\\\
+          n\\n現在は **BE Mock Mode (isDebugMode=true)** が有効になっています。\\nこのモードでは、複雑な検索ロジック（Web/RAG）をスキップし、この固定メッセージを返しています。\\\
+          n\\n#### 次のステップ\\n実際の検索ロジックをテストするには、フロントエンド上部の **Mock Mode** を **OFF** に切り替えてください。\"\
+          ,\n  \"citations\": [\n    {\n      \"id\": \"sys_check\",\n      \"type\"\
+          : \"document\",\n      \"source\": \"System Status: OK\",\n      \"url\"\
+          : null\n    },\n    {\n      \"id\": \"mode_check\",\n      \"type\": \"\
+          web\",\n      \"source\": \"Dify Workflow Config\",\n      \"url\": \"https://cloud.dify.ai\"\
+          \n    }\n  ]\n}"
+        selected: false
+        title: ANSWER_Mock_Mode
+        type: answer
+        variables: []
+      height: 340
+      id: answer
+      position:
+        x: 704
+        y: 0
+      positionAbsolute:
+        x: 704
+        y: 0
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: beb3e487-31db-4184-84b7-da25c8dd5a6a
+            value: true
+            varType: boolean
+            variable_selector:
+            - '1761291739140'
+            - isDebugMode
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: GATE_Has_File_Context
+        type: if-else
+      height: 124
+      id: '1762490237953'
+      position:
+        x: 342
+        y: 98.61165168988839
+      positionAbsolute:
+        x: 342
+        y: 98.61165168988839
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: not empty
+            id: 286e9d1a-6318-4f5e-a14d-62beed119c97
+            value: ''
+            varType: array[file]
+            variable_selector:
+            - sys
+            - files
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: GATE_Has_File
+        type: if-else
+      height: 124
+      id: '1764913411735'
+      position:
+        x: 1066
+        y: 448
+      positionAbsolute:
+        x: 1066
+        y: 448
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        is_array_file: true
+        selected: false
+        title: TOOL_Doc_Extractor
+        type: document-extractor
+        variable_selector:
+        - sys
+        - files
+      height: 104
+      id: '1764913700839'
+      position:
+        x: 1428
+        y: 470
+      positionAbsolute:
+        x: 1428
+        y: 470
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '1764913700839'
+          - text
+          variable_selector:
+          - conversation
+          - context_file
+          write_mode: over-write
+        - input_type: variable
+          operation: over-write
+          value:
+          - '1764924171081'
+          - filename
+          variable_selector:
+          - conversation
+          - context_file_name
+          write_mode: over-write
+        selected: false
+        title: SET_File_Context
+        type: assigner
+        version: '2'
+      height: 110
+      id: '1764913830165'
+      position:
+        x: 2112
+        y: 467
+      positionAbsolute:
+        x: 2112
+        y: 467
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 65779b8a-46ee-4c2b-a526-10dcf586a9dc
+            value: 'true'
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - rag_enabled
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: GATE_RAG_Enabled
+        type: if-else
+      height: 124
+      id: '1764914026588'
+      position:
+        x: 2474
+        y: 439
+      positionAbsolute:
+        x: 2474
+        y: 439
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '1761291739140'
+          - mock_rag_context
+          variable_selector:
+          - conversation
+          - context_rag
+          write_mode: over-write
+        selected: false
+        title: SET_Mock_RAG
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1764914113059'
+      position:
+        x: 2836
+        y: 369
+      positionAbsolute:
+        x: 2836
+        y: 369
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: clear
+          value: ''
+          variable_selector:
+          - conversation
+          - context_rag
+          write_mode: over-write
+        selected: false
+        title: CLEAR_RAG_Context
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1764914133340'
+      position:
+        x: 2836
+        y: 533
+      positionAbsolute:
+        x: 2836
+        y: 533
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 8b5bbf03-da52-40c4-bd60-1f47d8756c6b
+            value: force
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - web_search_mode
+          id: 'true'
+          logical_operator: and
+        - case_id: 1db66d52-c4bb-4b05-a087-6a73781c2d5b
+          conditions:
+          - comparison_operator: is
+            id: 2d8ce6d6-fef6-4012-b6f0-25092e665cd2
+            value: auto
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - web_search_mode
+          - comparison_operator: contains
+            id: e26e2f54-b908-4d41-b481-78072949d783
+            value: SEARCH
+            varType: string
+            variable_selector:
+            - '1764914312443'
+            - text
+          id: 1db66d52-c4bb-4b05-a087-6a73781c2d5b
+          logical_operator: and
+        selected: false
+        title: GATE_Web_Search_Check
+        type: if-else
+      height: 198
+      id: '1764914157100'
+      position:
+        x: 4586
+        y: 473
+      positionAbsolute:
+        x: 4586
+        y: 473
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        is_team_authorization: true
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The text query to be processed by the AI model.
+            ja_JP: The text query to be processed by the AI model.
+            pt_BR: The text query to be processed by the AI model.
+            zh_Hans: 要由 AI 模型处理的文本查询。
+          label:
+            en_US: Query
+            ja_JP: Query
+            pt_BR: Query
+            zh_Hans: 查询
+          llm_description: ''
+          max: null
+          min: null
+          name: query
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: sonar
+          form: form
+          human_description:
+            en_US: The Perplexity AI model to use for generating the response.
+            ja_JP: The Perplexity AI model to use for generating the response.
+            pt_BR: The Perplexity AI model to use for generating the response.
+            zh_Hans: 用于生成响应的 Perplexity AI 模型。
+          label:
+            en_US: Model Name
+            ja_JP: Model Name
+            pt_BR: Model Name
+            zh_Hans: 模型名称
+          llm_description: ''
+          max: null
+          min: null
+          name: model
+          options:
+          - icon: ''
+            label:
+              en_US: sonar
+              ja_JP: sonar
+              pt_BR: sonar
+              zh_Hans: sonar
+            value: sonar
+          - icon: ''
+            label:
+              en_US: sonar-pro
+              ja_JP: sonar-pro
+              pt_BR: sonar-pro
+              zh_Hans: sonar-pro
+            value: sonar-pro
+          - icon: ''
+            label:
+              en_US: sonar-reasoning
+              ja_JP: sonar-reasoning
+              pt_BR: sonar-reasoning
+              zh_Hans: sonar-reasoning
+            value: sonar-reasoning
+          - icon: ''
+            label:
+              en_US: sonar-reasoning-pro
+              ja_JP: sonar-reasoning-pro
+              pt_BR: sonar-reasoning-pro
+              zh_Hans: sonar-reasoning-pro
+            value: sonar-reasoning-pro
+          - icon: ''
+            label:
+              en_US: sonar-deep-research
+              ja_JP: sonar-deep-research
+              pt_BR: sonar-deep-research
+              zh_Hans: sonar-deep-research
+            value: sonar-deep-research
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 4096
+          form: form
+          human_description:
+            en_US: The maximum number of tokens to generate in the response.
+            ja_JP: The maximum number of tokens to generate in the response.
+            pt_BR: O número máximo de tokens a serem gerados na resposta.
+            zh_Hans: 在响应中生成的最大令牌数。
+          label:
+            en_US: Max Tokens
+            ja_JP: Max Tokens
+            pt_BR: Máximo de Tokens
+            zh_Hans: 最大令牌数
+          llm_description: ''
+          max: 4096
+          min: 1
+          name: max_tokens
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: 0.7
+          form: form
+          human_description:
+            en_US: Controls randomness in the output. Lower values make the output
+              more focused and deterministic.
+            ja_JP: Controls randomness in the output. Lower values make the output
+              more focused and deterministic.
+            pt_BR: Controls randomness in the output. Lower values make the output
+              more focused and deterministic.
+            zh_Hans: 控制输出的随机性。较低的值使输出更加集中和确定。
+          label:
+            en_US: Temperature
+            ja_JP: Temperature
+            pt_BR: Temperatura
+            zh_Hans: 温度
+          llm_description: ''
+          max: 1
+          min: 0
+          name: temperature
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: 5
+          form: form
+          human_description:
+            en_US: The number of top results to consider for response generation.
+            ja_JP: The number of top results to consider for response generation.
+            pt_BR: The number of top results to consider for response generation.
+            zh_Hans: 用于生成响应的顶部结果数量。
+          label:
+            en_US: Top K
+            ja_JP: Top K
+            pt_BR: Top K
+            zh_Hans: 取样数量
+          llm_description: ''
+          max: 100
+          min: 1
+          name: top_k
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: 1
+          form: form
+          human_description:
+            en_US: Controls diversity via nucleus sampling.
+            ja_JP: Controls diversity via nucleus sampling.
+            pt_BR: Controls diversity via nucleus sampling.
+            zh_Hans: 通过核心采样控制多样性。
+          label:
+            en_US: Top P
+            ja_JP: Top P
+            pt_BR: Top P
+            zh_Hans: Top P
+          llm_description: ''
+          max: 1
+          min: 0.1
+          name: top_p
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: 0
+          form: form
+          human_description:
+            en_US: Positive values penalize new tokens based on whether they appear
+              in the text so far.
+            ja_JP: Positive values penalize new tokens based on whether they appear
+              in the text so far.
+            pt_BR: Positive values penalize new tokens based on whether they appear
+              in the text so far.
+            zh_Hans: 正值会根据新词元是否已经出现在文本中来对其进行惩罚。
+          label:
+            en_US: Presence Penalty
+            ja_JP: Presence Penalty
+            pt_BR: Presence Penalty
+            zh_Hans: 存在惩罚
+          llm_description: ''
+          max: 1
+          min: -1
+          name: presence_penalty
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: 1
+          form: form
+          human_description:
+            en_US: Positive values penalize new tokens based on their existing frequency
+              in the text so far.
+            ja_JP: Positive values penalize new tokens based on their existing frequency
+              in the text so far.
+            pt_BR: Positive values penalize new tokens based on their existing frequency
+              in the text so far.
+            zh_Hans: 正值会根据新词元在文本中已经出现的频率来对其进行惩罚。
+          label:
+            en_US: Frequency Penalty
+            ja_JP: Frequency Penalty
+            pt_BR: Frequency Penalty
+            zh_Hans: 频率惩罚
+          llm_description: ''
+          max: 1
+          min: 0.1
+          name: frequency_penalty
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: false
+          form: form
+          human_description:
+            en_US: Whether to return images in the response.
+            ja_JP: Whether to return images in the response.
+            pt_BR: Whether to return images in the response.
+            zh_Hans: 是否在响应中返回图像。
+          label:
+            en_US: Return Images
+            ja_JP: Return Images
+            pt_BR: Return Images
+            zh_Hans: 返回图像
+          llm_description: ''
+          max: null
+          min: null
+          name: return_images
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: boolean
+        - auto_generate: null
+          default: false
+          form: form
+          human_description:
+            en_US: Whether to return related questions in the response.
+            ja_JP: Whether to return related questions in the response.
+            pt_BR: Whether to return related questions in the response.
+            zh_Hans: 是否在响应中返回相关问题。
+          label:
+            en_US: Return Related Questions
+            ja_JP: Return Related Questions
+            pt_BR: Return Related Questions
+            zh_Hans: 返回相关问题
+          llm_description: ''
+          max: null
+          min: null
+          name: return_related_questions
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: boolean
+        - auto_generate: null
+          default: ''
+          form: form
+          human_description:
+            en_US: Domain to filter the search results. Use comma to separate multiple
+              domains. Up to 3 domains are supported.
+            ja_JP: Domain to filter the search results. Use comma to separate multiple
+              domains. Up to 3 domains are supported.
+            pt_BR: Domain to filter the search results. Use comma to separate multiple
+              domains. Up to 3 domains are supported.
+            zh_Hans: 用于过滤搜索结果的域名。使用逗号分隔多个域名。最多支持3个域名。
+          label:
+            en_US: Search Domain Filter
+            ja_JP: Search Domain Filter
+            pt_BR: Search Domain Filter
+            zh_Hans: 搜索域过滤器
+          llm_description: ''
+          max: null
+          min: null
+          name: search_domain_filter
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: month
+          form: form
+          human_description:
+            en_US: Filter for search results based on recency.
+            ja_JP: Filter for search results based on recency.
+            pt_BR: Filter for search results based on recency.
+            zh_Hans: 基于时间筛选搜索结果。
+          label:
+            en_US: Search Recency Filter
+            ja_JP: Search Recency Filter
+            pt_BR: Search Recency Filter
+            zh_Hans: 搜索时间过滤器
+          llm_description: ''
+          max: null
+          min: null
+          name: search_recency_filter
+          options:
+          - icon: ''
+            label:
+              en_US: Day
+              ja_JP: Day
+              pt_BR: Day
+              zh_Hans: 天
+            value: day
+          - icon: ''
+            label:
+              en_US: Week
+              ja_JP: Week
+              pt_BR: Week
+              zh_Hans: 周
+            value: week
+          - icon: ''
+            label:
+              en_US: Month
+              ja_JP: Month
+              pt_BR: Month
+              zh_Hans: 月
+            value: month
+          - icon: ''
+            label:
+              en_US: Year
+              ja_JP: Year
+              pt_BR: Year
+              zh_Hans: 年
+            value: year
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: low
+          form: form
+          human_description:
+            en_US: Determines how much search context is retrieved for the model.
+            ja_JP: Determines how much search context is retrieved for the model.
+            pt_BR: Determines how much search context is retrieved for the model.
+            zh_Hans: 确定模型检索的搜索上下文量。
+          label:
+            en_US: Search Context Size
+            ja_JP: Search Context Size
+            pt_BR: Search Context Size
+            zh_Hans: 搜索上下文大小
+          llm_description: ''
+          max: null
+          min: null
+          name: search_context_size
+          options:
+          - icon: ''
+            label:
+              en_US: Low
+              ja_JP: Low
+              pt_BR: Low
+              zh_Hans: 低
+            value: low
+          - icon: ''
+            label:
+              en_US: Medium
+              ja_JP: Medium
+              pt_BR: Medium
+              zh_Hans: 中等
+            value: medium
+          - icon: ''
+            label:
+              en_US: High
+              ja_JP: High
+              pt_BR: High
+              zh_Hans: 高
+            value: high
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        params:
+          frequency_penalty: ''
+          max_tokens: ''
+          model: ''
+          presence_penalty: ''
+          query: ''
+          return_images: ''
+          return_related_questions: ''
+          search_context_size: ''
+          search_domain_filter: ''
+          search_recency_filter: ''
+          temperature: ''
+          top_k: ''
+          top_p: ''
+        plugin_id: langgenius/perplexity
+        plugin_unique_identifier: langgenius/perplexity:1.0.1@32531e4a1ec68754e139f29f04eaa7f51130318a908d11382a27dc05ec8d91e3
+        provider_icon: https://cloud.dify.ai/console/api/workspaces/current/plugin/icon?tenant_id=7c8ea1f1-d371-448a-846c-af9a868d7d0f&filename=3c79dd2281a10c53fcfaee94048f879b6abfe71f510bce2561200b0f7d702871.svg
+        provider_id: langgenius/perplexity/perplexity
+        provider_name: langgenius/perplexity/perplexity
+        provider_type: builtin
+        selected: false
+        title: TOOL_Perplexity_Search
+        tool_configurations:
+          frequency_penalty:
+            type: constant
+            value: 1
+          max_tokens:
+            type: constant
+            value: 4096
+          model:
+            type: constant
+            value: sonar
+          presence_penalty:
+            type: constant
+            value: 0
+          return_images:
+            type: constant
+            value: false
+          return_related_questions:
+            type: constant
+            value: false
+          search_context_size:
+            type: constant
+            value: low
+          search_domain_filter:
+            type: mixed
+            value: '{{#1761291739140.domain_filter#}}'
+          search_recency_filter:
+            type: constant
+            value: month
+          temperature:
+            type: constant
+            value: 0.7
+          top_k:
+            type: constant
+            value: 5
+          top_p:
+            type: constant
+            value: 1
+        tool_description: Search information using Perplexity AI's language models.
+        tool_label: Perplexity Search
+        tool_name: perplexity
+        tool_node_version: '2'
+        tool_parameters:
+          query:
+            type: mixed
+            value: '{{#conversation.optimized_search_query#}}
+
+              {{#sys.query#}}
+
+
+              【重要：出力形式の強制】
+
+              あなたの回答は、後続のAIによって解析されます。以下のルールを厳守してください。
+
+
+              1. **本文中の引用**: 生成する回答の本文中には、情報の根拠となる箇所に必ず `[1]`, `[2]` のような形式で出典番号を埋め込んでください。出典番号のない記述は避けてください。
+
+              2. **出典リスト**: 回答の最下部に、使用した出典を以下のフォーマットで列挙してください。
+
+
+              Source List:
+
+              [1] Title: [ページタイトル] URL: [URL]
+
+              [2] Title: [ページタイトル] URL: [URL]'
+        type: tool
+      height: 374
+      id: '1764914255107'
+      position:
+        x: 4948
+        y: 461
+      positionAbsolute:
+        x: 4948
+        y: 461
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '1764914255107'
+          - text
+          variable_selector:
+          - conversation
+          - context_web
+          write_mode: over-write
+        selected: false
+        title: SET_Web_Context
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1764914281874'
+      position:
+        x: 5290
+        y: 606
+      positionAbsolute:
+        x: 5290
+        y: 606
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: b695f1a9-a7a1-4314-b497-cf46a845994b
+          role: system
+          text: '# Role
+
+            あなたは、ユーザーの入力とAIによる正規化済みクエリの**両方を比較分析**し、最適な処理ルートを決定する高度なルーターです。
+
+
+            # Input Data
+
+
+            ## 1. User Query (Raw Input)
+
+            {{#sys.query#}}
+
+            ※ユーザーが入力した生のテキスト。文脈、ニュアンス、意図の強さを含みます。
+
+
+            ## 2. Optimized Query (Normalized)
+
+            {{#conversation.optimized_search_query#}}
+
+            ※日付の具体化、指示語の補完、キーワード抽出が行われたテキスト。
+
+
+            # Decision Logic (Priority Order)
+
+
+            ## Step 1: Detect Chat & Greetings (雑談判定)
+
+            **User Query (Raw Input)** を最優先で評価してください。
+
+            ユーザーの生の入力が「こんにちは」「ありがとう」「なるほど」「了解」などの**単純な挨拶・相槌**である場合、たとえ Optimized Query
+            に何らかの単語が入っていたとしても、**`CHAT`** を出力してください。
+
+
+            ## Step 2: Detect External / Hybrid Search Needs (Web検索・ハイブリッド判定)
+
+            **Optimized Query** を中心に確認してください。
+
+            以下の要素が含まれる場合は、社内情報の参照が必要かどうかにかかわらず、外部情報の取得が必須であるため **`SEARCH`** を出力してください。
+
+            **（※「社内規定と法律の比較」のようなハイブリッドな質問も、ここで SEARCH と判定します）**
+
+
+            * **法務・コンプライアンス**: 「法的」「法律」「法規制」「法令」「条例」「判例」「コンプライアンス」「GDPR」「著作権」「商標」
+
+            * **市場・社会動向**: 「トレンド」「流行」「シェア」「株価」「経済指標」「ニュース」「世論」「不祥事」
+
+            * **外部評価・比較**: 「評判」「口コミ」「レビュー」「競合他社」「業界標準」「一般的な」「世間的な」
+
+            * **具体的な日時・場所**: 「2025年12月9日」「今日」「大阪の天気」など、時事性や場所性が強い情報。
+
+            * **検索の明示**: User Query に「検索して」「調べて」「ググって」という指示が含まれる場合。
+
+
+            ## Step 3: Detect Internal Resources (内部知識判定)
+
+            Step 2に該当しなかった場合のみ、こちらを評価してください。
+
+            以下の要素が含まれる場合は、内部処理（RAG/ファイル参照）で完結するため **`LOGICAL`** を出力してください。
+
+
+            * **ファイル参照**: 「添付ファイル」「これらの資料」「アップロードしたPDF」「議事録」「内容」など、**添付されたファイル群**への言及。
+
+            * **社内用語**: 「社内規定」「ガイドライン」「マニュアル」「稟議」「経費精算」「就業規則」
+
+            * **タスク指示**: 「要約して」「翻訳して」「校正して」「案出しして」
+
+
+            ## Step 4: Default Fallback
+
+            上記のいずれにも明確に該当しない場合（一般的な知識質問など）は、LLMの知識で回答するため **`LOGICAL`** を出力してください。
+
+
+            # Output Format
+
+            余計な記号を含めず、以下のいずれかの単語のみを出力してください。
+
+
+            SEARCH
+
+            LOGICAL
+
+            CHAT'
+        selected: false
+        title: LLM_Intent_Analysis
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1764914312443'
+      position:
+        x: 3882
+        y: 516
+      positionAbsolute:
+        x: 3882
+        y: 516
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: clear
+          value: ''
+          variable_selector:
+          - conversation
+          - context_web
+          write_mode: over-write
+        selected: false
+        title: CLEAR_Web_Context
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1764914726017'
+      position:
+        x: 5290
+        y: 368
+      positionAbsolute:
+        x: 5290
+        y: 368
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 6d795767-8518-4886-b2c8-f5bce5f42eaf
+          role: system
+          text: "# Role\nあなたは検索クエリ生成のスペシャリストです。\n現在の日時、ユーザーの質問、および**これまでの会話の流れ（メモリ）**を分析し、GoogleやPerplexityで検索するための「最適な検索キーワード」または「検索質問文」を生成してください。\n\
+            \n# 基準データ\nCurrent Time: {{#1761291739140.current_time#}}\n\n# コンテキスト（ファイル内容）\n\
+            {{#conversation.context_file#}}\n※ユーザーがアップロードしたファイル群のテキスト内容です。ここに含まれる専門用語や固有名詞を検索クエリに含めることが有効な場合があります。\n\
+            \n# ユーザーの質問\n{{#sys.query#}}\n\n# タスク指示\nユーザーの質問を、検索エンジンが理解しやすい**「独立した検索クエリ」**に書き換えてください。\n\
+            入力された会話履歴（Memory）は自動的に参照されます。\n\n## 重要なルール（指示語の解決）\n1. **指示語の具体化**: ユーザーが「**それ**はいつ？」「**彼**の経歴は？」のように、「それ」「これ」「彼」「彼女」「その件」などの指示語を使用した場合は、**会話履歴（直前のやり取り）**を参照し、具体的な名称（人名、プロジェクト名、トピック名など）に置き換えてください。\n\
+            \   - 例: 履歴で「iPhone 15」の話をしている → 入力「**それ**の価格は？」 → 出力「iPhone 15 価格」\n\n\
+            2. **文脈の補完**: 質問が単語のみで、文脈がないと意味が通じない場合、履歴から文脈を補完してください。\n   - 例: 履歴で「東京の天気」の話をしている\
+            \ → 入力「大阪は？」 → 出力「大阪 天気」\n\n## その他の制約\n- 挨拶（「こんにちは」等）のみの場合は、検索を行わず、入力されたテキストをそのまま出力してください。\n\
+            - 相対的な日付（「今日」「来週」）は、Current Time を基準に絶対日付（YYYY年MM月DD日）に変換してください。\n- 出力は「検索クエリ」のテキストのみを行ってください。余計な説明は不要です。"
+        selected: false
+        title: LLM_Query_Rewrite
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1764916701592'
+      position:
+        x: 3198
+        y: 516
+      positionAbsolute:
+        x: 3198
+        y: 516
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '1764916701592'
+          - text
+          variable_selector:
+          - conversation
+          - optimized_search_query
+          write_mode: over-write
+        selected: false
+        title: SET_Optimized_Query
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1764916740679'
+      position:
+        x: 3540
+        y: 518
+      positionAbsolute:
+        x: 3540
+        y: 518
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(files: list) -> dict:\n    if not files or\
+          \ len(files) == 0:\n        return {\n            \"filename\": \"[]\"\n\
+          \        }\n    \n    # ファイル名リストを作成\n    filenames = []\n    for file_obj\
+          \ in files:\n        name = file_obj.get('filename') or file_obj.get('name')\
+          \ or 'Uploaded File'\n        filenames.append(name)\n    \n    # JSON文字列として返す\
+          \ (例: '[\"Difyコスト試算.pdf\", \"LLM選定.pdf\"]')\n    return {\n        \"filename\"\
+          : json.dumps(filenames, ensure_ascii=False)\n    }"
+        code_language: python3
+        outputs:
+          filename:
+            children: null
+            type: string
+        selected: false
+        title: CODE_Extract_Filenames
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - files
+          value_type: array[file]
+          variable: files
+      height: 52
+      id: '1764924171081'
+      position:
+        x: 1770
+        y: 496
+      positionAbsolute:
+        x: 1770
+        y: 496
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: e1156068-8c73-43a4-ba64-f4811246319b
+          role: system
+          text: "# Role\nあなたは、ユーザーの業務をサポートする「有能で機転の利くAIアシスタント」です。\nユーザーからの挨拶や呼びかけに対し、**「お疲れ様です。」などのビジネス挨拶**を必ず行い、続けて簡潔に用件を伺ってください。\n\
+            \n# Guidelines\n1. **Style (Business Professional)**:\n   - **挨拶必須**:\
+            \ 回答の冒頭は必ず「お疲れ様です。」「おはようございます。」「はい、」などで始めてください。**挨拶なしで唐突に要件を聞くことは「失礼」にあたるため禁止します。**\n\
+            \   - **文体**: 礼儀正しく、かつ簡潔な「です・ます」調を使用してください。\n   - **態度**: 「優秀な秘書」のように、丁寧かつ無駄のない対応を心がけてください。\n\
+            \n2. **Output Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n   - JSON形式を厳守してください。\n\
+            \n# User Input\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。\n\
+            \n{\n  \"answer\": \"お疲れ様です。\\n\\n検索や資料作成など、何かお手伝いしましょうか？\",\n  \"citations\"\
+            : []\n}"
+        selected: false
+        title: LLM_Chat_Efficient
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1765256779030'
+      position:
+        x: 4948
+        y: 915
+      positionAbsolute:
+        x: 4948
+        y: 915
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: f4266556-5380-434d-af54-f52a7611e527
+            value: CHAT
+            varType: string
+            variable_selector:
+            - '1764914312443'
+            - text
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: Check Intent Type
+        type: if-else
+      height: 124
+      id: '1765343666910'
+      position:
+        x: 4224
+        y: 498
+      positionAbsolute:
+        x: 4224
+        y: 498
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1765256779030.text#}}{{#17665517422840.text#}}'
+        selected: false
+        title: ANSWER_Chat
+        type: answer
+        variables: []
+      height: 120
+      id: '1765345427966'
+      position:
+        x: 5379.999999999999
+        y: 940.9999999999998
+      positionAbsolute:
+        x: 5379.999999999999
+        y: 940.9999999999998
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#17655151756460.text#}}{{#17665511958080.text#}}'
+        selected: false
+        title: ANSWER_Hybrid
+        type: answer
+        variables: []
+      height: 120
+      id: '1765345440190'
+      position:
+        x: 7080
+        y: 304
+      positionAbsolute:
+        x: 7080
+        y: 304
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "def main(files: list, context_rag: str, context_web: str, context_file:\
+          \ str) -> dict:\n    # 1. 各要素の有無を判定\n    has_new_file = len(files) > 0\n\
+          \    \n    # ★修正: 過去のファイルコンテキストがあるかチェック\n    # (context_file は文字列またはリストで来る可能性があるため、文字列化して長さチェック)\n\
+          \    has_history_file = bool(context_file and len(str(context_file)) > 50)\n\
+          \    \n    # 今回または過去にファイルがあれば「ファイルあり」とみなす\n    has_file = has_new_file or\
+          \ has_history_file\n    \n    # context_rag/web は空文字や空リストの可能性を考慮\n    has_rag\
+          \ = bool(context_rag and len(str(context_rag)) > 10)\n    has_web = bool(context_web\
+          \ and len(str(context_web)) > 10)\n    \n    # 2. ルーティング判定\n    route =\
+          \ \"GENERAL\"\n    \n    if has_file:\n        if has_rag or has_web:\n\
+          \            route = \"HYBRID\"  # ファイル vs 外部情報\n        else:\n       \
+          \     route = \"DOCUMENT\" # ファイル単体\n    else:\n        if has_rag or has_web:\n\
+          \            route = \"SEARCH\"   # 検索情報のみ\n        else:\n            route\
+          \ = \"GENERAL\"  # 情報なし\n            \n    return {\n        \"route\":\
+          \ route\n    }"
+        code_language: python3
+        desc: Pattern Router
+        outputs:
+          route:
+            children: null
+            type: string
+        selected: false
+        title: CODE_Route_Decision
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - files
+          value_type: array[file]
+          variable: files
+        - value_selector:
+          - conversation
+          - context_rag
+          value_type: string
+          variable: context_rag
+        - value_selector:
+          - conversation
+          - context_web
+          value_type: string
+          variable: context_web
+        - value_selector:
+          - conversation
+          - context_file
+          value_type: array[string]
+          variable: context_file
+      height: 80
+      id: '1765514869301'
+      position:
+        x: 5652
+        y: 595
+      positionAbsolute:
+        x: 5652
+        y: 595
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 28e4a5f2-b3b8-4efb-ae77-2d478f9369b3
+            value: HYBRID
+            varType: string
+            variable_selector:
+            - '1765514869301'
+            - route
+          id: 'true'
+          logical_operator: and
+        - case_id: 908d672e-4c25-44ac-9ee9-4f7fb1b32144
+          conditions:
+          - comparison_operator: is
+            id: 9cc6ad8c-eff8-42b0-b5c0-d3b1afcb8ef0
+            value: DOCUMENT
+            varType: string
+            variable_selector:
+            - '1765514869301'
+            - route
+          id: 908d672e-4c25-44ac-9ee9-4f7fb1b32144
+          logical_operator: and
+        - case_id: f10e65ad-bb00-4cdf-aabf-78811af1ba70
+          conditions:
+          - comparison_operator: is
+            id: da0a43ed-0eb0-4602-9aff-b68d900906ef
+            value: SEARCH
+            varType: string
+            variable_selector:
+            - '1765514869301'
+            - route
+          id: f10e65ad-bb00-4cdf-aabf-78811af1ba70
+          logical_operator: and
+        selected: false
+        title: ROUTER_Response_Pattern
+        type: if-else
+      height: 220
+      id: '1765515071449'
+      position:
+        x: 5994
+        y: 525
+      positionAbsolute:
+        x: 5994
+        y: 525
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、社内外の情報を統合してJSONデータを生成する「APIエンドポイント」です。\nユーザーがアップロードした資料、社内規定(RAG)、Web情報を比較・照合し、**純粋なJSON文字列のみ**を出力してください。\n\
+            \n# Guidelines\n1. **Style (Efficient)**:\n   - **JSON内の `answer` の文体**:\
+            \ 簡潔で客観的な「です・ます」調。挨拶や前置きは削除し、「### 結論」から書き出してください。\n   - **内容**: 事実のみを抽出し、Wikipediaやレポートのように構造化してください。\n\
+            \n2. **Citation Rule (出典)**:\n   - 回答の事実には、必ず根拠となる出典番号 `[1]` `[2]` を付記してください。\n\
+            \   - 添付ファイルは必ず `citations` 配列の先頭に個別に含めてください。\n\n# Input Data\n## 1. User\
+            \ Uploaded Files\n- Names: {{#conversation.context_file_name#}}\n- Content:\
+            \ {{#conversation.context_file#}}\n\n## 2. Internal Knowledge (RAG)\n\
+            {{#conversation.context_rag#}}\n\n## 3. Web Search Results\n{{#conversation.context_web#}}\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n出力全体をMarkdownコードブロック（```json）で囲むことは厳禁です。必ず\
+            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n**注意: これはフォーマットの例です。このJSON構造自体を\
+            \ `answer` の中に書き込まないでください。**\n\n{\n  \"answer\": \"### 結論\\n\\n提案内容は規定に違反する可能性があります[1]。\\\
+            n\\n### 詳細比較\\n\\n- **提案書**: 外部送信を推奨[1]。\\n- **社内規定**: 禁止されています[2]。\"\
+            ,\n  \"citations\": [\n    { \"id\": \"cite_1\", \"type\": \"document\"\
+            , \"source\": \"ファイル名\", \"url\": null },\n    { \"id\": \"cite_2\", \"\
+            type\": \"rag\", \"source\": \"規定名\", \"url\": null },\n    { \"id\":\
+            \ \"cite_3\", \"type\": \"web\", \"source\": \"Webページ名\", \"url\": \"\
+            URL\" }\n  ]\n}\n\n# Final Constraints\n1. JSON構造を壊さないよう、`answer` 内の改行は必ず\
+            \ `\\n` に、ダブルクォーテーションは `\\\"` にエスケープしてください。\n2. `answer` フィールドの中に、上記の\
+            \ `Output Example` や `citations` リストを含めないでください。`answer` は純粋な回答テキストのみです。"
+        selected: false
+        title: LLM_Hybrid_Efficient
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17655151756460'
+      position:
+        x: 6718
+        y: 172
+      positionAbsolute:
+        x: 6718
+        y: 172
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、ドキュメントの内容を正確に読み解く「ドキュメント分析エンジン」です。\n提供されたファイルの内容のみに基づき、**JSON形式**で回答を出力してください。\n\
+            \n# Guidelines\n1. **Style (Efficient)**:\n   - **文体**: 簡潔で客観的な**「です・ます」調**を使用してください。\n\
+            \   - **構成**: 「### 要約」などの見出しを使い、事実のみを抽出してください。挨拶は不要です。\n   - **厳密性**:\
+            \ ファイルに書かれていないことは「記載なし」としてください。\n\n2. **Citation Rule (出典)**:\n   - 根拠箇所には\
+            \ `[1]` `[2]` のように、該当するファイルの番号を付記してください。\n   - `citations` 配列の先頭に、対象ファイルを必ず含めてください。\n\
+            \n# Input Data\n## File Names\n{{#conversation.context_file_name#}}\n\n\
+            ## Content\n{{#conversation.context_file#}}\n\n# User Query\n{{#sys.query#}}\n\
+            \n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
+            \n{\n  \"answer\": \"### 要約\\n\\n資料によると、2025年度の売上目標は**20%増**と設定されています[1]。\\\
+            n\\n### 課題\\n\\n- 人材不足が深刻化している[2]。\\n- 設備投資の遅れが指摘されている[1]。\",\n  \"citations\"\
+            : [\n    { \"id\": \"cite_1\", \"type\": \"document\", \"source\": \"\
+            計画書.pdf\", \"url\": null },\n    { \"id\": \"cite_2\", \"type\": \"document\"\
+            , \"source\": \"課題一覧.txt\", \"url\": null }\n  ]\n}"
+        selected: false
+        title: LLM_Doc_Efficient
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17655151779960'
+      position:
+        x: 6718
+        y: 508
+      positionAbsolute:
+        x: 6718
+        y: 508
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」です。\nユーザーの質問に対し、検索結果（RAGおよびWeb）に基づいて正確に回答してください。\n\
+            システム連携のため、**厳格なJSON形式**で出力する義務があります。\nユーザーの質問に対し、**これまでの会話の文脈（メモリ）を考慮しつつ**、提供されたデータに基づいて論理的に回答してください。\
+            \ \n\n# 重要な制約（Memory vs Fact）\n - **会話履歴（メモリ）の利用範囲**: ユーザーの意図理解や、以前の話題への言及（「先ほど申し上げた通り...」等）に使用してください。\n\
+            \ - **事実の根拠**: 回答の事実は、必ず以下の **Input Data (RAG / Web)** のみに基づいてください。会話履歴内の古い情報や、あなたの記憶にある一般知識で事実を上書きしないでください。\n\
+            \n# Input Data\n\n## 1. Internal Knowledge (RAG：社内規定)\n{{#conversation.context_rag#}}\n\
+            ※ここが空の場合、社内規定は参照していません。**この欄が空なら、社内規定情報は一切回答に含めないでください。**\n\n## 2. Web\
+            \ Search Results (Web：外部情報)\n{{#conversation.context_web#}}\n※Perplexityによる検索結果（Source\
+            \ List含む）\n※ここが空の場合、Web検索結果は取得できていません。\n\n## 3. Web Search Mode Status\n\
+            {{#1761291739140.web_search_mode#}}\n\n# User Query\n{{#sys.query#}}\n\
+            \n# User Custom Settings (Override)\nユーザーは以下の振る舞いを指定しています。**回答本文（answerフィールド）の生成において**、これらを最優先で反映してください。\n\
+            \n1. **AI Style Mode**: {{#1761291739140.ai_style#}}\n   - `efficient`\
+            \ (効率重視): \n     - **事実の羅列**: 「### 調査結果」などの見出しを使い、判明した事実を淡々と記述してください。\n\
+            \   - `partner` (思考パートナー): \n     - **見出し禁止**: 見出しは使わず、「調べてみたところ...」「一方で...」といった接続詞で文章を繋げてください。\n\
+            \     - **文脈化**: 単なる情報の提示ではなく、その情報がユーザーにとってどういう意味を持つかを示唆してください。\n\n2.\
+            \ **Additional Instructions**: \n{{#1761291739140.system_prompt#}}\n\n\
+            # Processing Steps\n\n1.  **出典リストの生成**\n    * **RAG**: 社内規定を参照した場合。`type`:\
+            \ \"rag\"。`source` はRAGデータ内の `source_name`。`url` は `null`。\n    * **Web**:\
+            \ Web検索を参照した場合。`type`: \"web\"。`source`（タイトル）と `url` は、入力された `Source List`\
+            \ から**一字一句変更せず転記**してください。**URLのnullは厳禁**です。\n    * **注意**: この検索モードではユーザーからの添付ファイルは参照されないため、`type`:\
+            \ \"document\" は使用しないでください。\n\n2.  **回答作成（情報有無の判定）**\n    * **情報がある場合**:\n\
+            \        * 社内規定とWeb情報を組み合わせて回答してください。\n        * 根拠箇所には必ず `[n]` の通し番号を付記してください。\n\
+            \    * **情報がない（Input Dataが空、または関連情報がない）場合**:\n        * **Case A (`Web\
+            \ Search Mode Status` が `force` または `auto` の場合)**:\n            * 「Web検索および社内規定を確認しましたが、関連する情報は見つかりませんでした。」と回答してください。\n\
+            \        * **Case B (`Web Search Mode Status` が `off` の場合)**:\n      \
+            \      * 「社内規定に関連情報がなく、Web検索モードもOFFのため回答できません。」と回答してください。\n\n3.  **JSON出力**\n\
+            \n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。以下のJSON文字列のみを出力してください。\n\
+            **【重要】見出し（###など）を使用する場合は、必ず直後に `\\n\\n` （改行2つ）を入れて、本文と分離してください。**\n\n\
+            ## 出力例\n{\n  \"answer\": \"### 結論\\n\\nリモートワーク手当は月額5,000円です[1]。\\n\\n###\
+            \ 他社事例\\n\\n- A社: 全額支給[2]\\n- B社: 支給なし[3]\",\n  \"citations\": [\n   \
+            \ { \"id\": \"cite_1\", \"type\": \"rag\", \"source\": \"給与規定.pdf\", \"\
+            url\": null },\n    { \"id\": \"cite_2\", \"type\": \"web\", \"source\"\
+            : \"調査.com\", \"url\": \"https://...\" }\n  ]\n}\n\n# Final Constraints\n\
+            - `type`: \"web\" のURLは必ず入力データから抽出してください（null禁止）。\n- JSONフォーマットを絶対に崩さないでください。"
+        selected: false
+        title: LLM_Search_Efficient
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17655151786270'
+      position:
+        x: 6718
+        y: 844
+      positionAbsolute:
+        x: 6718
+        y: 844
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、一般的な知識に基づいてタスクを遂行する「知識処理エンジン」です。\n現在、参照すべき外部資料は提供されていません。**JSON形式**で回答を出力してください。\n\
+            \n# Guidelines\n1. **Style (Efficient)**:\n   - **文体**: 簡潔で客観的な**「です・ます」調**を使用してください。\n\
+            \   - **構成**: 「### 回答」などの見出しを使い、定義や結論のみを記述してください。挨拶は不要です。\n   - **対応**:\
+            \ 社内規定などを聞かれた場合は、「情報なし」と回答し、Web検索モードを推奨してください。\n\n2. **Citation Rule**:\n\
+            \   - 外部コンテキストがないため、`citations` は必ず空配列 `[]` にしてください。\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
+            \n{\n  \"answer\": \"### 概要\\n\\nAI（人工知能）とは、人間の知的振る舞いを模倣するコンピュータプログラムのことです。\\\
+            n\\n### 特徴\\n\\n- **学習**: データからパターンを学ぶ。\\n- **推論**: 未知のデータに対して判断を行う。\"\
+            ,\n  \"citations\": []\n}"
+        selected: false
+        title: LLM_General_Efficient
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17655151791010'
+      position:
+        x: 6718
+        y: 1180
+      positionAbsolute:
+        x: 6718
+        y: 1180
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#17655151779960.text#}}{{#17665512107830.text#}}'
+        selected: false
+        title: ANSWER_Document
+        type: answer
+        variables: []
+      height: 120
+      id: '17655153615920'
+      position:
+        x: 7080
+        y: 512
+      positionAbsolute:
+        x: 7080
+        y: 512
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#17655151786270.text#}}{{#17665512248470.text#}}'
+        selected: false
+        title: ANSWER_Search
+        type: answer
+        variables: []
+      height: 120
+      id: '17655153626170'
+      position:
+        x: 7080
+        y: 848
+      positionAbsolute:
+        x: 7080
+        y: 848
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#17655151791010.text#}}{{#17665512406710.text#}}'
+        selected: false
+        title: ANSWER_General
+        type: answer
+        variables: []
+      height: 120
+      id: '17655153635450'
+      position:
+        x: 7080
+        y: 1184
+      positionAbsolute:
+        x: 7080
+        y: 1184
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 559b4599-c4d5-4ce5-9432-bc13d8dbf6a1
+            value: 'false'
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - rag_enabled
+          - comparison_operator: is
+            id: 56054875-b040-4282-8f3a-f21fcca7cae1
+            value: 'off'
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - web_search_mode
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: GATE_Fast_Mode
+        type: if-else
+      height: 150
+      id: '1765854025663'
+      position:
+        x: 704
+        y: 420
+      positionAbsolute:
+        x: 704
+        y: 420
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
+          role: system
+          text: "# Role\nあなたは、ユーザーがアップロードした資料から必要な情報を瞬時に抽出する「ドキュメント分析エンジン」です。\n提供された\
+            \ **File Content** の内容に基づき、ユーザーの質問に対して最短・最速で事実のみを回答してください。\n\n# Guidelines\n\
+            1. **Structure (結論ファースト)**:\n   - 挨拶や前置き（「資料を確認しました」等）は一切禁止です。\n   - 必ず「###\
+            \ 結論」という見出しから書き出してください。\n   - その後、「### 詳細」や「### 根拠」として、箇条書きを用いて情報を圧縮して提示してください。\n\
+            \n2. **Basis (事実の厳守)**:\n   - 回答の根拠は、原則として提供された **File Content** のみに求めてください。\n\
+            \   - 資料に記載がない事項については「資料には記載なし」と短く回答してください。推測で補わないでください。\n\n3. **Format**:\n\
+            \   - Markdown形式のみを出力してください。JSONは禁止です。\n\n# Input Data\n## File Name\n\
+            {{#conversation.context_file_name#}}\n\n## File Content\n{{#conversation.context_file#}}\n\
+            \n## User Query\n{{#sys.query#}}\n\n# Output Instruction\n以下のフォーマットに従って回答を出力してください。\n\
+            \n### 結論\n（ここに結論を1〜2行で記述）\n\n### 要点\n- （事実1）\n- （事実2）"
+        selected: false
+        title: LLM_Fast_Doc_Efficient
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1765854614015'
+      position:
+        x: 2836
+        y: 697
+      positionAbsolute:
+        x: 2836
+        y: 697
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1765854614015.text#}}{{#17665499392760.text#}}'
+        selected: false
+        title: ANSWER_Fast_Doc
+        type: answer
+        variables: []
+      height: 120
+      id: '1765854668107'
+      position:
+        x: 3198
+        y: 701
+      positionAbsolute:
+        x: 3198
+        y: 701
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: not empty
+            id: 286e9d1a-6318-4f5e-a14d-62beed119c97
+            value: ''
+            varType: array[file]
+            variable_selector:
+            - sys
+            - files
+          id: 'true'
+          logical_operator: and
+        - case_id: 0703a046-f8f7-4b0e-b07b-3794eaee8f40
+          conditions:
+          - comparison_operator: not empty
+            id: 6a3fe844-0041-4555-863b-878dd9045be9
+            value: ''
+            varType: array[string]
+            variable_selector:
+            - conversation
+            - context_file
+          id: 0703a046-f8f7-4b0e-b07b-3794eaee8f40
+          logical_operator: and
+        selected: false
+        title: GATE_Has_File_Fast
+        type: if-else
+      height: 172
+      id: '17658598785120'
+      position:
+        x: 1066
+        y: 652
+      positionAbsolute:
+        x: 1066
+        y: 652
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        is_array_file: true
+        selected: false
+        title: TOOL_Doc_Extractor
+        type: document-extractor
+        variable_selector:
+        - sys
+        - files
+      height: 104
+      id: '17658598785131'
+      position:
+        x: 1428
+        y: 698
+      positionAbsolute:
+        x: 1428
+        y: 698
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17658598785131'
+          - text
+          variable_selector:
+          - conversation
+          - context_file
+          write_mode: over-write
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17658598785133'
+          - filename
+          variable_selector:
+          - conversation
+          - context_file_name
+          write_mode: over-write
+        selected: false
+        title: SET_Fast_File_Context
+        type: assigner
+        version: '2'
+      height: 110
+      id: '17658598785132'
+      position:
+        x: 2112
+        y: 695
+      positionAbsolute:
+        x: 2112
+        y: 695
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(files: list) -> dict:\n    if not files or\
+          \ len(files) == 0:\n        return {\n            \"filename\": \"[]\"\n\
+          \        }\n    \n    # ファイル名リストを作成\n    filenames = []\n    for file_obj\
+          \ in files:\n        name = file_obj.get('filename') or file_obj.get('name')\
+          \ or 'Uploaded File'\n        filenames.append(name)\n    \n    # JSON文字列として返す\
+          \ (例: '[\"Difyコスト試算.pdf\", \"LLM選定.pdf\"]')\n    return {\n        \"filename\"\
+          : json.dumps(filenames, ensure_ascii=False)\n    }"
+        code_language: python3
+        outputs:
+          filename:
+            children: null
+            type: string
+        selected: false
+        title: CODE_Extract_Filenames_Fast
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - files
+          value_type: array[file]
+          variable: files
+      height: 52
+      id: '17658598785133'
+      position:
+        x: 1770
+        y: 724
+      positionAbsolute:
+        x: 1770
+        y: 724
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
+          role: system
+          text: "# Role\nあなたは、ユーザーの指示を高速かつ正確に実行する「高密度情報処理エンジン」です。\nWeb検索や社内データベースを参照しない「高速モード」で動作しています。\n\
+            感情や社交辞令（挨拶、前置き、結び）を一切排除し、**Wikipediaのように客観的かつ情報密度の高いテキスト**を出力してください。\n\
+            \n# Guidelines\n1. **Scope**:\n   - **得意領域**:\n     - 文章校正、翻訳、プログラミングコード生成。\n\
+            \     - **一般的な知識や概念の解説**（Wiki的な概要説明）。\n   - **対応**:\n     - 今日のニュースや天気などの「リアルタイム情報」、および「社内固有の規定・データ」を問われた場合は、「情報なし」と即答し、Web検索モードの利用を推奨してください。\n\
+            \     - 一般常識については、あなたの学習済み知識で回答してください。\n\n2. **Style & Tone**:\n   - **文体**:\
+            \ 簡潔で客観的な**「です・ます」調**を使用してください。\n   - **禁止事項**: 「こんにちは」「いかがでしたか？」等のメタな会話や、過度な情緒的表現は禁止です。事実を淡々と記述してください。\n\
+            \n3. **Format**:\n   - **解説タスクの場合**:\n     - **冒頭**: 対象の定義や核心を2〜3行の文章で簡潔に要約してください。\n\
+            \     - **詳細**: `### 特徴` `### 仕組み` などの見出しを使い、構造化して記述してください。\n     - **強調**:\
+            \ 重要なキーワードは**太字**にしてください。\n   - **コード/翻訳タスクの場合**:\n     - 解説を最小限にし、成果物（コードブロックや翻訳文）をメインに出力してください。\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Output Instruction\n直ちにタスクを実行し、構造化された結果を出力してください。"
+        selected: false
+        title: LLM_Fast_General_Efficient
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17658599307650'
+      position:
+        x: 1790
+        y: 906
+      positionAbsolute:
+        x: 1790
+        y: 906
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#17658599307650.text#}}{{#17665500976990.text#}}'
+        selected: false
+        title: ANSWER_Fast_General
+        type: answer
+        variables: []
+      height: 120
+      id: '1765859958399'
+      position:
+        x: 2152
+        y: 910
+      positionAbsolute:
+        x: 2152
+        y: 910
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: c54b374b-43c4-4785-a85e-4e101e2065d2
+            value: efficient
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - ai_style
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: STYLE_Check_Fast_Doc
+        type: if-else
+      height: 124
+      id: '1766549782668'
+      position:
+        x: 2474
+        y: 667
+      positionAbsolute:
+        x: 2474
+        y: 667
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
+          role: system
+          text: "# Role\nあなたは、ユーザーがアップロードした資料を丁寧に読み解く「ドキュメント分析パートナー」です。\n提供された **File\
+            \ Content** の内容に基づき、ユーザーの質問に対して分かりやすく、親身になって回答してください。\n\n# Guidelines\n\
+            1. **Tone & Manners (親しみやすさ)**:\n   - ユーザーに語りかけるような、丁寧な「です・ます」調を使用してください。\n\
+            \   - 回答の冒頭には、質問を受け止めるワンクッション（Opening Hook）を入れてください。\n     - 例：「資料を確認しました。〇〇について書かれていますね。」「その件については、P.5あたりに記載がありました。」\n\
+            \n2. **Visual Structure (視覚的な分かりやすさ)**:\n   - **絵文字の活用**: 見出しや重要なポイントには、内容に関連する絵文字（\U0001F4C4\
+            , \U0001F4A1, ⚠️, ✅など）を添えてください。\n   - **太字の活用**: 重要なキーワードや数値は**太字**で強調し、流し読みでも内容が入ってくるようにしてください。\n\
+            \   - **箇条書き**: 複数の要素がある場合は、必ずリスト形式に整理してください。\n\n3. **Content (分かりやすい解説)**:\n\
+            \   - 単に抜粋するだけでなく、「つまり、こういうことです」といった噛み砕いた説明を加えてください。\n   - 資料に記載がない場合も、「残念ながら資料には見当たりませんでしたが、一般的には〜」のように、突き放さずに回答してください。\n\
+            \n4. **Closing (次のアクション)**:\n   - 回答の最後には、ユーザーの思考を止めないための「次の提案」を行ってください。\n\
+            \     - 例：「この部分について、もっと詳しく要約しましょうか？」「関連する〇〇のデータも探してみましょうか？」\n\n# Input\
+            \ Data\n## File Name\n{{#conversation.context_file_name#}}\n\n## File\
+            \ Content\n{{#conversation.context_file#}}\n\n## User Query\n{{#sys.query#}}"
+        selected: false
+        title: LLM_Fast_Doc_Partner
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17665499392760'
+      position:
+        x: 2836
+        y: 865
+      positionAbsolute:
+        x: 2836
+        y: 865
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: c54b374b-43c4-4785-a85e-4e101e2065d2
+            value: efficient
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - ai_style
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: STYLE_Check_Fast_General
+        type: if-else
+      height: 124
+      id: '17665500741430'
+      position:
+        x: 1428
+        y: 906
+      positionAbsolute:
+        x: 1428
+        y: 906
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
+          role: system
+          text: "# Role\nあなたは、社内の頼れる「AIパートナー」です。\nWeb検索や社内データベースを参照しない「高速モード」で動作していますが、あなたの持つ一般的な知識と論理的思考力を活かし、ユーザーのタスクを親身にサポートしてください。\n\
+            \n# Guidelines\n1. **Tone & Manners**:\n   - 親しみやすく、かつ礼儀正しい「です・ます」調を使用してください。\n\
+            \   - ユーザーの意図が曖昧な場合は、「それは〇〇という意味でしょうか？」と優しく確認してください。\n\n2. **Visual Structure**:\n\
+            \   - **絵文字**: 文脈に合わせて適度な絵文字（\U0001F60A, \U0001F680, \U0001F914など）を使用し、感情を表現してください。\n\
+            \   - **読みやすさ**: 長文になる場合は適度に改行を入れ、重要な部分は**太字**にしてください。\n\n3. **Content**:\n\
+            \   - **壁打ち相手**: ただ答えるだけでなく、「良い視点ですね」「そのアイデアなら、こちらも面白いかもしれません」と、アイデアを広げる手伝いをしてください。\n\
+            \   - **機能誘導**: 最新情報や社内規定など、答えられない質問が来た場合は、「申し訳ありません、今の私（高速モード）では分かりかねます\U0001F4A6\
+            \ 画面上の **Web検索モード** をONにしていただければ、詳しくお調べできますよ！」と親切に誘導してください。\n\n4. **Closing**:\n\
+            \   - 必ず「他にもお手伝いできることはありますか？」「コードの修正が必要ならおっしゃってくださいね」といった、継続的なサポートを申し出てください。\n\
+            \n# User Query\n{{#sys.query#}}"
+        selected: false
+        title: LLM_Fast_General_Partner
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17665500976990'
+      position:
+        x: 1790
+        y: 1074
+      positionAbsolute:
+        x: 1790
+        y: 1074
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: c54b374b-43c4-4785-a85e-4e101e2065d2
+            value: efficient
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - ai_style
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: STYLE_Check_Hybrid
+        type: if-else
+      height: 124
+      id: '17665510905650'
+      position:
+        x: 6356
+        y: 285
+      positionAbsolute:
+        x: 6356
+        y: 285
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: c54b374b-43c4-4785-a85e-4e101e2065d2
+            value: efficient
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - ai_style
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: STYLE_Check_Doc
+        type: if-else
+      height: 124
+      id: '17665511081250'
+      position:
+        x: 6356
+        y: 610
+      positionAbsolute:
+        x: 6356
+        y: 610
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: c54b374b-43c4-4785-a85e-4e101e2065d2
+            value: efficient
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - ai_style
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: STYLE_Check_Search
+        type: if-else
+      height: 124
+      id: '17665511228850'
+      position:
+        x: 6356
+        y: 814
+      positionAbsolute:
+        x: 6356
+        y: 814
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: c54b374b-43c4-4785-a85e-4e101e2065d2
+            value: efficient
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - ai_style
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: STYLE_Check_General
+        type: if-else
+      height: 124
+      id: '17665511238600'
+      position:
+        x: 6356
+        y: 1150
+      positionAbsolute:
+        x: 6356
+        y: 1150
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params: {}
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、社内外の情報を統合してJSONデータを生成する「APIエンドポイント」です。\nユーザーへの親切な回答を作成し、それを**JSON形式の\
+            \ `answer` フィールドに格納して**出力してください。\n\n# Guidelines\n1. **Style (Partner)**:\n\
+            \   - **JSON内の `answer` の文体**: 親しみやすく丁寧な「です・ます」調。\n   - **導入**: 「資料と社内規定を照らし合わせて確認しました。」等のワンクッションを入れてください。\n\
+            \   - **視覚**: 文中のMarkdown（**太字**など）や絵文字（\U0001F4C4, ⚠️）は使用可能です。\n\n2.\
+            \ **Citation Rule (出典)**:\n   - 信頼性を示すため、根拠箇所には `[1]` `[2]` を付記してください。\n\
+            \   - 添付ファイルは必ず `citations` 配列の先頭に個別に含めてください。\n\n# Input Data\n## 1. User\
+            \ Uploaded Files\n- Names: {{#conversation.context_file_name#}}\n- Content:\
+            \ {{#conversation.context_file#}}\n\n## 2. Internal Knowledge (RAG)\n\
+            {{#conversation.context_rag#}}\n\n## 3. Web Search Results\n{{#conversation.context_web#}}\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n出力全体をMarkdownコードブロック（```json）で囲むことは厳禁です。必ず\
+            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n**注意: これはフォーマットの例です。このJSON構造自体を\
+            \ `answer` の中に書き込まないでください。**\n\n{\n  \"answer\": \"アップロードされた資料と社内規定を確認しました\U0001F60A\
+            \\n\\n気になったのは、提案書の中で「外部送信」が推奨されている点です[1]。\\n\\n### ⚠️ 注意点\\n\\n実は、**ITガイドラインではこの行為は禁止**されています[2]。トラブルを防ぐため、まずは情シスへ相談することをお勧めします。\"\
+            ,\n  \"citations\": [\n    { \"id\": \"cite_1\", \"type\": \"document\"\
+            , \"source\": \"ファイル名\", \"url\": null },\n    { \"id\": \"cite_2\", \"\
+            type\": \"rag\", \"source\": \"規定名\", \"url\": null },\n    { \"id\":\
+            \ \"cite_3\", \"type\": \"web\", \"source\": \"Webページ名\", \"url\": \"\
+            URL\" }\n  ]\n}\n\n# Final Constraints\n1. JSON構造を壊さないよう、`answer` 内の改行は必ず\
+            \ `\\n` に、ダブルクォーテーションは `\\\"` にエスケープしてください。\n2. `answer` フィールドの中に、上記の\
+            \ `Output Example` や `citations` リストを含めないでください。`answer` は純粋な回答テキストのみです。"
+        selected: false
+        title: LLM_Hybrid_Partner
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17665511958080'
+      position:
+        x: 6718
+        y: 340
+      positionAbsolute:
+        x: 6718
+        y: 340
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、ドキュメントを一緒に読み解く「ドキュメント分析パートナー」です。\n提供されたファイルの内容に基づき、**JSON形式**で回答を出力してください。\n\
+            \n# Guidelines\n1. **Style (Partner)**:\n   - **文体**: 丁寧な「です・ます」調で、内容を解説してください。\n\
+            \   - **導入**: 「資料全体を拝見しました。〇〇に関する記述がありますね。」等のワンクッションを入れてください。\n   - **視覚**:\
+            \ 重要なポイントに絵文字（\U0001F4C4, \U0001F4A1）を使用し、**太字**で強調してください。\n   - **補足**:\
+            \ 「この記述は、〇〇という文脈で書かれているようです」といった補足を行ってください。\n\n2. **Citation Rule (出典)**:\n\
+            \   - 根拠箇所には `[1]` `[2]` を付記してください。\n   - `citations` 配列の先頭に、対象ファイルを必ず含めてください。\n\
+            \n# Input Data\n## File Names\n{{#conversation.context_file_name#}}\n\n\
+            ## Content\n{{#conversation.context_file#}}\n\n# User Query\n{{#sys.query#}}\n\
+            \n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
+            \n{\n  \"answer\": \"資料全体を読み込みました\U0001F4C4\\n\\n特に注目すべきは、P.5にある**「人材不足」**への言及箇所です[2]。\\\
+            n\\n### \U0001F4A1 解説\\n\\nここには具体的な対策が書かれていないため、別途採用計画の資料なども確認した方が良いかもしれませんね。\\\
+            n\\n数値目標については、第3章に詳細がありました[1]。\",\n  \"citations\": [\n    { \"id\": \"\
+            cite_1\", \"type\": \"document\", \"source\": \"計画書.pdf\", \"url\": null\
+            \ },\n    { \"id\": \"cite_2\", \"type\": \"document\", \"source\": \"\
+            課題一覧.txt\", \"url\": null }\n  ]\n}"
+        selected: false
+        title: LLM_Doc_Partner
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17665512107830'
+      position:
+        x: 6718
+        y: 676
+      positionAbsolute:
+        x: 6718
+        y: 676
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」です。\nユーザーの質問に対し、検索結果（RAGおよびWeb）に基づいて正確に回答してください。\n\
+            システム連携のため、**厳格なJSON形式**で出力する義務があります。\nユーザーの質問に対し、**これまでの会話の文脈（メモリ）を考慮しつつ**、提供されたデータに基づいて論理的に回答してください。\
+            \ \n\n# 重要な制約（Memory vs Fact）\n - **会話履歴（メモリ）の利用範囲**: ユーザーの意図理解や、以前の話題への言及（「先ほど申し上げた通り...」等）に使用してください。\n\
+            \ - **事実の根拠**: 回答の事実は、必ず以下の **Input Data (RAG / Web)** のみに基づいてください。会話履歴内の古い情報や、あなたの記憶にある一般知識で事実を上書きしないでください。\n\
+            \n# Input Data\n\n## 1. Internal Knowledge (RAG：社内規定)\n{{#conversation.context_rag#}}\n\
+            ※ここが空の場合、社内規定は参照していません。**この欄が空なら、社内規定情報は一切回答に含めないでください。**\n\n## 2. Web\
+            \ Search Results (Web：外部情報)\n{{#conversation.context_web#}}\n※Perplexityによる検索結果（Source\
+            \ List含む）\n※ここが空の場合、Web検索結果は取得できていません。\n\n## 3. Web Search Mode Status\n\
+            {{#1761291739140.web_search_mode#}}\n\n# User Query\n{{#sys.query#}}\n\
+            \n# User Custom Settings (Override)\nユーザーは以下の振る舞いを指定しています。**回答本文（answerフィールド）の生成において**、これらを最優先で反映してください。\n\
+            \n1. **AI Style Mode**: {{#1761291739140.ai_style#}}\n   - `efficient`\
+            \ (効率重視): \n     - **事実の羅列**: 「### 調査結果」などの見出しを使い、判明した事実を淡々と記述してください。\n\
+            \   - `partner` (思考パートナー): \n     - **Tone & Manners**: 丁寧で親しみやすい「です・ます」調。\n\
+            \     - **Visual Structure (絵文字の多用)**: \n       - 画面を明るくするため、**絵文字（\U0001F50D\
+            , \U0001F4C8, \U0001F3E2, \U0001F4A1, ⚠️, \U0001F60Aなど）を適度な量で使用**してください。\n\
+            \       - 見出しだけでなく、文頭や文末、重要なキーワードの横にも積極的に配置し、視覚的な楽しさを演出してください。\n     -\
+            \ **Structure**: 機械的な見出し（###）は使わず、「調べてみたところ...」「一方で...」といった接続詞で文章を繋げてください。\n\
+            \n2. **Additional Instructions**: \n{{#1761291739140.system_prompt#}}\n\
+            \n# Processing Steps\n\n1.  **出典リストの生成**\n    * **RAG**: 社内規定を参照した場合。`type`:\
+            \ \"rag\"。`source` はRAGデータ内の `source_name`。`url` は `null`。\n    * **Web**:\
+            \ Web検索を参照した場合。`type`: \"web\"。`source`（タイトル）と `url` は、入力された `Source List`\
+            \ から**一字一句変更せず転記**してください。**URLのnullは厳禁**です。\n    * **注意**: この検索モードではユーザーからの添付ファイルは参照されないため、`type`:\
+            \ \"document\" は使用しないでください。\n\n2.  **回答作成（情報有無の判定）**\n    * **情報がある場合**:\n\
+            \        * 社内規定とWeb情報を組み合わせて親切に回答してください。\n        * 根拠箇所には必ず `[n]` の通し番号を付記してください。\n\
+            \    * **情報がない（Input Dataが空、または関連情報がない）場合**:\n        * **Case A (`Web\
+            \ Search Mode Status` が `force` または `auto` の場合)**:\n            * 「Web検索および社内規定を確認しましたが、残念ながらご質問に対する有効な情報は見つかりませんでした\U0001F647\
+            ‍♂️ 検索ワードを変えて再度お試しいただけますか？」と回答してください。\n        * **Case B (`Web Search\
+            \ Mode Status` が `off` の場合)**:\n            * 「申し訳ありません\U0001F4A6 社内規定には関連情報がなく、Web検索モードもOFFのため、ご質問にはお答えできません。画面上の\
+            \ Web検索モード をONにして再度お試しください！」と回答してください。\n\n3.  **JSON出力**\n\n# Output Format\
+            \ (JSON Only)\nMarkdownコードブロックは禁止です。以下のJSON文字列のみを出力してください。\n**【重要】見出し（###など）を使用する場合は、必ず直後に\
+            \ `\\n\\n` （改行2つ）を入れて、本文と分離してください。**\n\n## Output Example\n**注意: これはフォーマットの例です。このJSON構造自体を\
+            \ `answer` の中に書き込まないでください。**\n\n{\n  \"answer\": \"社内規定とWeb情報をあわせて確認しました\U0001F50D\
+            \\n\\nまず社内規定についてですが、通勤交通費の上限は**月額5万円**と定められています\U0001F3E2[1]。\\n\\n一方で、世の中の動向を調べてみると...最近は「実費精算（上限なし）」とする企業が増えているようです\U0001F4C8\
+            [2]。\\n\\n### \U0001F4A1 ポイント\\n\\n採用競争力を高めるために、この差分については検討の余地があるかもしれませんね\U0001F914\
+            \ 人事部への提案資料作成もお手伝いしますよ✨\",\n  \"citations\": [\n    { \"id\": \"cite_1\"\
+            , \"type\": \"rag\", \"source\": \"給与規定_2024.pdf\", \"url\": null },\n\
+            \    { \"id\": \"cite_2\", \"type\": \"web\", \"source\": \"2025年版 労務行政研究所調査\"\
+            , \"url\": \"https://example.com/survey\" }\n  ]\n}\n\n# Final Constraints\n\
+            - `type`: \"web\" のURLは必ず入力データから抽出してください（null禁止）。\n- JSONフォーマットを絶対に崩さないでください。"
+        selected: false
+        title: LLM_Search_Partner
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17665512248470'
+      position:
+        x: 6718
+        y: 1012
+      positionAbsolute:
+        x: 6718
+        y: 1012
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
+          role: system
+          text: "# Role\nあなたは、ユーザーとの対話を通じて思考を整理する「AIパートナー」です。\n現在、参照すべき外部資料は提供されていません。あなたの知識に基づき、**JSON形式**で回答を出力してください。\n\
+            \n# Guidelines\n1. **Style (Partner)**:\n   - **文体**: 親しみやすく丁寧な「です・ます」調で会話してください。\n\
+            \   - **導入**: 「そのご質問について、私の知識でお答えしますね。」等のワンクッションを入れてください。\n   - **視覚**:\
+            \ 絵文字（\U0001F916, ✨, \U0001F914）を活用し、楽しく読めるように工夫してください。\n   - **誘導**:\
+            \ もし社内規定などを聞かれた場合は、「申し訳ありません\U0001F4A6 関連資料をアップロードするか、**Web検索モード**をONにしていただければ詳しくお調べできます！」と親切に案内してください。\n\
+            \n2. **Citation Rule**:\n   - 外部コンテキストがないため、`citations` は必ず空配列 `[]` にしてください。\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
+            \n{\n  \"answer\": \"AI（人工知能）についてですね\U0001F916\\n\\n簡単に言うと、人間の「知的な作業」をコンピュータにお手伝いさせる技術のことです。\\\
+            n\\n### \U0001F4A1 活用例\\n\\n最近では文章作成や翻訳などが得意ですが、もし**業務での具体的な活用方法**でお悩みでしたら、どのようなタスクを任せたいか教えていただけますか？一緒に考えましょう！\"\
+            ,\n  \"citations\": []\n}"
+        selected: false
+        title: LLM_General_Partner
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17665512406710'
+      position:
+        x: 6718
+        y: 1348
+      positionAbsolute:
+        x: 6718
+        y: 1348
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: c54b374b-43c4-4785-a85e-4e101e2065d2
+            value: efficient
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - ai_style
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: STYLE_Check_Chat
+        type: if-else
+      height: 124
+      id: '17665517221250'
+      position:
+        x: 4586
+        y: 885
+      positionAbsolute:
+        x: 4586
+        y: 885
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: e1156068-8c73-43a4-ba64-f4811246319b
+          role: system
+          text: "# Role\nあなたは、社内の頼れる「AIパートナー」です。\nユーザーからの挨拶や感謝、雑談に対して、**これまでの会話の流れ（メモリ）を踏まえて**、親しみやすく温かい返答をJSON形式で返してください。\n\
+            \n# Guidelines\n1. **Style (Partner)**:\n   - **文体**: ユーザーに寄り添う、丁寧かつ親しみやすい「です・ます」調。\n\
+            \   - **視覚**: 文脈に合わせて絵文字（\U0001F44B, ✨, \U0001F375, \U0001F60A）を使用し、画面を明るくしてください。\n\
+            \   - **内容**:\n     - 挨拶には元気よく返してください。\n     - 感謝（「ありがとう」）には、「お役に立てて嬉しいです！」と素直な喜びを表現してください。\n\
+            \     - 意味のない入力（「あ」など）には、「どうされましたか？何かお困りですか？」と優しく問いかけてください。\n\n2. **Output\
+            \ Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n   - `answer` フィールドには、改行を適度に入れた読みやすい文章を入れてください。\n\
+            \n# User Input\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。\n\
+            \n{\n  \"answer\": \"こんにちは！お疲れ様です\U0001F375\\n\\n今日はどのようなお手伝いをしましょうか？\\\
+            n社内規定の確認でも、ちょっとした調べ物でも、何でもおっしゃってくださいね✨\",\n  \"citations\": []\n"
+        selected: false
+        title: LLM_Chat_Partner
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17665517422840'
+      position:
+        x: 4948
+        y: 1083.870550563296
+      positionAbsolute:
+        x: 4948
+        y: 1083.870550563296
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -2460.0415740408225
+      y: -16.68724572446456
+      zoom: 0.5743491774985191
+  rag_pipeline_variables: []
