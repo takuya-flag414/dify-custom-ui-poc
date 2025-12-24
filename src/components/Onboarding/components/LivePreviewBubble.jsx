@@ -12,13 +12,7 @@ import './LivePreviewBubble.css';
 const STYLE_PREVIEWS = {
     efficient: {
         role: 'ai',
-        text: `**結論**: 3つのポイントがあります。
-
-1. 要点を先に伝えます
-2. 箇条書きで整理します
-3. 必要最小限の説明です
-
-ご質問があればどうぞ。`,
+        text: `お疲れ様です。検索や資料作成など、何かお手伝いしましょうか？`,
         isStreaming: false,
         id: 'preview-efficient',
         tone: '簡潔・直接的',
@@ -26,11 +20,9 @@ const STYLE_PREVIEWS = {
     },
     partner: {
         role: 'ai',
-        text: `なるほど、それは興味深い視点ですね。
+        text: `こんにちは！お疲れ様です🍵
 
-少し深掘りして考えてみましょう。まず背景として、この問題にはいくつかの側面があります。
-
-あなたはどのようにお考えですか？`,
+今日はどのようなお手伝いをしましょうか？ 社内規定の確認でも、ちょっとした調べ物でも、何でもおっしゃってくださいね✨`,
         isStreaming: false,
         id: 'preview-partner',
         tone: '対話的・丁寧',
