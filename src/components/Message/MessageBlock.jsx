@@ -5,6 +5,7 @@ import './MessageBlock.css';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
 import CitationList from './CitationList';
 import SuggestionButtons from './SuggestionButtons';
+import SmartActionGroup from './SmartActionGroup';
 import ThinkingProcess from './ThinkingProcess';
 import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
@@ -32,13 +33,14 @@ export const AssistantIcon = () => (
   </svg>
 );
 
-const MessageBlock = ({ message, onSuggestionClick, onOpenArtifact, userName, enableAnimation = true }) => {
+const MessageBlock = ({ message, onSuggestionClick, onSmartActionSelect, onOpenArtifact, userName, enableAnimation = true }) => {
   const {
     role,
     text,
     rawContent,
     citations,
     suggestions,
+    smartActions,
     isStreaming,
     thoughtProcess,
     files,
@@ -157,6 +159,9 @@ const MessageBlock = ({ message, onSuggestionClick, onOpenArtifact, userName, en
             <div className="message-footer">
               {showCitations && <CitationList citations={citations} messageId={uniqueMessageId} />}
               {showKnowledgeBadge && <AiKnowledgeBadge />}
+              {smartActions && smartActions.length > 0 && (
+                <SmartActionGroup actions={smartActions} onActionSelect={onSmartActionSelect} />
+              )}
               <SuggestionButtons suggestions={suggestions} onSuggestionClick={onSuggestionClick} />
             </div>
           )}
@@ -173,6 +178,7 @@ const arePropsEqual = (prev, next) => {
     // ただし、親から渡される関数Propsが変わっていないかチェック
     // (useCallbackされていれば、ここも等価になるはず)
     return prev.onSuggestionClick === next.onSuggestionClick
+      && prev.onSmartActionSelect === next.onSmartActionSelect
       && prev.onOpenArtifact === next.onOpenArtifact
       && prev.enableAnimation === next.enableAnimation;
   }
@@ -196,6 +202,7 @@ const arePropsEqual = (prev, next) => {
   // ReactのState更新がイミュータブルに行われていれば、中身が変われば参照も変わるはず
   return p.citations === n.citations
     && p.suggestions === n.suggestions
+    && p.smartActions === n.smartActions
     && p.thoughtProcess === n.thoughtProcess
     && p.files === n.files;
 };

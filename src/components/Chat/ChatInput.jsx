@@ -258,7 +258,9 @@ const ChatInput = ({
   }, [isLoading, addFiles]);
 
   const modeInfo = useMemo(() => getModeInfo(searchSettings || { webMode: 'auto', ragEnabled: false }), [searchSettings]);
-  const hasFiles = activeContextFiles.length > 0 || selectedFiles.length > 0;
+  // 送信済みファイル（activeContextFiles）は記録として保持されるが、UIには表示しない
+  // 新規アップロードファイル（selectedFiles）のみ表示対象とする
+  const hasFiles = selectedFiles.length > 0;
   const canSend = (text.trim().length > 0 || selectedFiles.length > 0) && !isLoading;
   const placeholder = isHistoryLoading ? "履歴を読み込んでいます..." :
     isLoading ? "思考中..." : "AIに相談";
@@ -273,15 +275,10 @@ const ChatInput = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          {/* 1. File Preview Tray */}
+          {/* 1. File Preview Tray - 新規アップロードファイルのみ表示 */}
+          {/* activeContextFilesは将来の機能のために親コンポーネントで保持されているが、ここでは表示しない */}
           {hasFiles && (
             <div className="file-tray">
-              {activeContextFiles.map((file, idx) => (
-                <div key={`hist-${idx}`} className="file-card" title="会話履歴に含まれるファイル">
-                  <FileIcon filename={file.name} className="file-tray-icon" />
-                  <span className="file-card-name">{file.name}</span>
-                </div>
-              ))}
               {selectedFiles.map((file, idx) => (
                 <div key={`pend-${idx}`} className="file-card pending">
                   <FileIcon filename={file.name} className="file-tray-icon" />

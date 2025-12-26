@@ -30,13 +30,13 @@ const STYLES = [
         id: 'efficient',
         icon: EfficientIcon,
         title: '効率重視',
-        description: '結論から簡潔に。箇条書きを多用し、時間を節約します。'
+        description: '見出しと箇条書きで要点を整理。客観的・効率的に回答します。'
     },
     {
         id: 'partner',
         icon: PartnerIcon,
         title: '思考パートナー',
-        description: '背景や理由を含めて丁寧に。壁打ち相手として対話します。'
+        description: '絵文字付きで親しみやすく。対話的に寄り添いながら回答します。'
     }
 ];
 
@@ -50,7 +50,7 @@ const StepStyleSelect = ({ selectedStyle, onStyleChange, onNext, onPrev }) => {
     };
 
     return (
-        <div className="onboarding-step-new" style={{ maxWidth: '720px', width: '100%' }}>
+        <div className="onboarding-step-new" style={{ maxWidth: '820px', width: '100%' }}>
             {/* タイトル */}
             <motion.h1
                 className="onboarding-title-new"

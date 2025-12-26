@@ -115,7 +115,7 @@
 .citation-item[href]:hover {
   border-color: var(--color-primary);
   background-color: var(--color-bg-surface);
-  transform: scale(1.02);
+  transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
@@ -184,9 +184,9 @@
 .citation-item.highlight-citation {
   background-color: #EFF6FF;
   border-color: #3B82F6;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), 0 4px 12px rgba(59, 130, 246, 0.15);
   transition: all 0.2s ease-in-out;
-  transform: scale(1.02);
 }
 
 /* Mobile Responsive */
@@ -242,4 +242,5 @@
 [data-theme='dark'] .citation-item.highlight-citation {
   background-color: rgba(59, 130, 246, 0.15);
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25), 0 4px 12px rgba(59, 130, 246, 0.2);
 }

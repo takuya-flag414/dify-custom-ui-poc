@@ -144,6 +144,8 @@ function App() {
   const {
     messages,
     setMessages,
+    // ★追加: ストリーミング中メッセージ（パフォーマンス最適化）
+    streamingMessage,
     isGenerating,
     isHistoryLoading,
     activeContextFiles,
@@ -352,6 +354,7 @@ function App() {
                       >
                         <ChatArea
                           messages={messages}
+                          streamingMessage={streamingMessage}
                           setMessages={setMessages}
                           isGenerating={isGenerating}
                           isHistoryLoading={isHistoryLoading}

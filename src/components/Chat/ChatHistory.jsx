@@ -9,16 +9,18 @@ import SystemErrorBlock from '../Message/SystemErrorBlock';
 // パフォーマンス制限: 50件を超えると最新メッセージのみアニメーション
 const ANIMATION_LIMIT = 50;
 
-const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, onOpenConfig, onOpenArtifact, userName }) => {
+// ★変更: streamingMessage propsを追加（パフォーマンス最適化）
+const ChatHistory = ({ messages, streamingMessage, onSuggestionClick, onSmartActionSelect, isLoading, onSendMessage, onOpenConfig, onOpenArtifact, userName }) => {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // ★変更: streamingMessageも依存配列に追加
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]);
+  }, [messages, streamingMessage, isLoading]);
 
   // ★追加: リトライ機能
   // エラーの一つ前の「ユーザーメッセージ」を探して再送する
@@ -34,7 +36,8 @@ const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, on
     }
   };
 
-  if (!messages || messages.length === 0) {
+  // ★変更: messagesが空でもstreamingMessageがあれば表示
+  if ((!messages || messages.length === 0) && !streamingMessage) {
     return null;
   }
 
@@ -45,6 +48,7 @@ const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, on
   return (
     <div className="chat-history">
       <AnimatePresence mode="popLayout">
+        {/* ★変更: 確定メッセージのみをmessages配列からレンダリング */}
         {messages.map((msg, index) => {
           // ★追加: システムエラーの場合の表示
           if (msg.role === 'system' && msg.type === 'error') {
@@ -66,16 +70,30 @@ const ChatHistory = ({ messages, onSuggestionClick, isLoading, onSendMessage, on
               key={msg.id}
               message={msg}
               onSuggestionClick={onSuggestionClick}
+              onSmartActionSelect={onSmartActionSelect}
               onOpenArtifact={onOpenArtifact}
               enableAnimation={enableAnimation}
               userName={userName}
             />
           );
         })}
+
+        {/* ★追加: ストリーミング中のメッセージを別途表示（パフォーマンス最適化）*/}
+        {streamingMessage && (
+          <MessageBlock
+            key={streamingMessage.id}
+            message={streamingMessage}
+            onSuggestionClick={onSuggestionClick}
+            onSmartActionSelect={onSmartActionSelect}
+            onOpenArtifact={onOpenArtifact}
+            enableAnimation={true}
+            userName={userName}
+          />
+        )}
       </AnimatePresence>
 
-      {/* Loading Indicator */}
-      {isLoading && messages[messages.length - 1]?.role === 'user' && (
+      {/* Loading Indicator - ★変更: streamingMessageがある場合は非表示 */}
+      {isLoading && !streamingMessage && messages[messages.length - 1]?.role === 'user' && (
         <div className="message-block message-animate-enter">
           <div className="message-container">
             <div className="avatar-ai">

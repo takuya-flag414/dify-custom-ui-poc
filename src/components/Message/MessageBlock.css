@@ -409,6 +409,16 @@
   pointer-events: auto;
 }
 
+/* Clickable tooltip link */
+.citation-tooltip-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.citation-tooltip-link:hover {
+  border-color: var(--color-primary);
+}
+
 .citation-tooltip-content {
   display: flex;
   align-items: flex-start;
@@ -710,6 +720,22 @@
 [data-theme='dark'] .citation-tooltip {
   background-color: var(--color-bg-surface);
   border-color: var(--color-border);
+}
+
+[data-theme='dark'] .citation-tooltip-title {
+  color: var(--color-text-main);
+}
+
+[data-theme='dark'] .citation-tooltip-url {
+  color: var(--color-text-sub);
+}
+
+[data-theme='dark'] .citation-tooltip::after {
+  border-color: var(--color-bg-surface) transparent transparent transparent;
+}
+
+[data-theme='dark'] .citation-tooltip::before {
+  border-color: var(--color-border) transparent transparent transparent;
 }
 
 [data-theme='dark'] .suggestion-chip:hover {

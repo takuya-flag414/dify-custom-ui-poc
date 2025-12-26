@@ -6,6 +6,18 @@ import { SourceIcon } from '../Shared/FileIcons';
 const CitationList = ({ citations, messageId }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
+  // 出典バッジクリック時に自動展開するためのイベントリスナー
+  React.useEffect(() => {
+    const handleExpand = (e) => {
+      if (e.detail?.messageId === messageId) {
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener('expandCitationList', handleExpand);
+    return () => window.removeEventListener('expandCitationList', handleExpand);
+  }, [messageId]);
+
   if (!citations || citations.length === 0) return null;
 
   const groups = {

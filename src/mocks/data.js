@@ -2,8 +2,50 @@
 
 /**
  * FEモード検証用のモックデータ定義 (全8パターン網羅版)
- * Updated: 2025-12-03
+ * Updated: 2025-12-25
  */
+
+/**
+ * Smart Actions モックデータ (設計書 v2.0 準拠)
+ * 全5種類のAction Typeを網羅
+ */
+export const MOCK_SMART_ACTIONS = [
+  // 1. retry_mode: モードを変更して再検索
+  {
+    type: 'retry_mode',
+    label: '社内データのみで再検索',
+    icon: 'database',
+    payload: { mode: 'rag_only' }
+  },
+  // 2. suggested_question: テキストをそのまま送信
+  {
+    type: 'suggested_question',
+    label: '申請書のテンプレートは？',
+    icon: 'file-text',
+    payload: { text: '申請書のテンプレートはどこにありますか？' }
+  },
+  // 3. web_search: Web検索モードで再検索
+  {
+    type: 'web_search',
+    label: 'Web検索で再確認',
+    icon: 'globe',
+    payload: {}
+  },
+  // 4. deep_dive: より詳しく解説を求める
+  {
+    type: 'deep_dive',
+    label: 'もっと詳しく解説',
+    icon: 'sparkles',
+    payload: {}
+  },
+  // 5. navigate: 外部URLを別タブで開く
+  {
+    type: 'navigate',
+    label: '公式ドキュメントを開く',
+    icon: 'external-link',
+    payload: { url: 'https://docs.dify.ai/' }
+  }
+];
 
 // サイドバー用の会話リスト
 export const mockConversations = [

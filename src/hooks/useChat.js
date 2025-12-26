@@ -113,6 +113,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
   const [isGenerating, setIsGenerating] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
+  // ★追加: ストリーミング中のAIメッセージを別stateで管理（パフォーマンス最適化）
+  // これにより、ストリーミング中のメッセージ更新がmessages配列全体の走査を回避
+  const [streamingMessage, setStreamingMessage] = useState(null);
+  // ★追加: streamingMessageの現在値を追跡するref（workflow_finishedで直接参照するため）
+  const streamingMessageRef = useRef(null);
+
   const [sessionFiles, setSessionFiles] = useState([]);
 
   const [dynamicMockMessages, setDynamicMockMessages] = useState({});
@@ -125,6 +131,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
   useEffect(() => {
     searchSettingsRef.current = searchSettings;
   }, [searchSettings]);
+
+  // ★追加: streamingMessageが変更されたらrefも更新
+  useEffect(() => {
+    streamingMessageRef.current = streamingMessage;
+  }, [streamingMessage]);
 
   const updateSearchSettings = (newSettings) => {
     setSearchSettings(newSettings);
@@ -393,10 +404,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
     // 4. Update UI (AI Placeholder)
     const aiMessageId = `msg_${Date.now()}_ai`;
-    const isFastMode = !currentSettings.ragEnabled && currentSettings.webMode === 'off';
+    // ★変更: 全モードでリアルタイム表示を有効化
+    // 以前は !ragEnabled && webMode === 'off' のときだけ 'fast' だったが、
+    // parseLlmResponseが不完全JSONにも対応しているため、全モードで即時表示可能に
+    const isFastMode = true; // 常にリアルタイム表示を使用
 
     setIsGenerating(true);
-    setMessages(prev => [...prev, {
+    
+    // ★変更: ストリーミング中はstreamingMessage stateで管理（messages配列を更新しない）
+    const initialAiMessage = {
       id: aiMessageId,
       role: 'ai',
       text: '',
@@ -409,7 +425,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       thoughtProcess: [],
       processStatus: null,
       mode: isFastMode ? 'fast' : 'normal'
-    }]);
+    };
+    setStreamingMessage(initialAiMessage);
 
     // ★ワークフローログ: リクエスト開始
     addLog(`[Workflow] === 新規リクエスト開始 ===`, 'info');
@@ -442,6 +459,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       let isConversationIdSynced = false;
       let capturedOptimizedQuery = null;
       let protocolMode = 'PENDING';
+      
+      // 表示遅延タイマー（ちらつき防止）
+      // messageイベント受信時にタイマーを開始する（思考プロセス完了後）
+      let messageStartTime = null;
+      const DISPLAY_DELAY_MS = 150; // 0.15秒間は表示を抑制
 
       while (true) {
         const { value, done } = await reader.read();
@@ -562,14 +584,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
               if (displayTitle) {
                 tracker.markNodeStart(nodeId, displayTitle);
 
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                  ...m,
+                // ★変更: streamingMessage stateを直接更新（messages配列を走査しない）
+                setStreamingMessage(prev => prev ? {
+                  ...prev,
                   traceMode: detectedTraceMode,
                   thoughtProcess: [
-                    ...m.thoughtProcess.map(t => ({ ...t, status: 'done' })),
+                    ...prev.thoughtProcess.map(t => ({ ...t, status: 'done' })),
                     { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
                   ]
-                } : m));
+                } : prev);
               }
             }
             else if (data.event === 'node_finished') {
@@ -619,24 +642,31 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
                 else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
                 if (resultText && nodeId) {
-                  setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                    ...m,
-                    thoughtProcess: m.thoughtProcess.map(t =>
+                  // ★変更: streamingMessage stateを直接更新
+                  setStreamingMessage(prev => prev ? {
+                    ...prev,
+                    thoughtProcess: prev.thoughtProcess.map(t =>
                       t.id === nodeId ? { ...t, title: resultText, status: 'done' } : t
                     )
-                  } : m));
+                  } : prev);
                 }
               } else if (nodeId) {
                 // その他のノードは完了ステータスに更新
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                  ...m,
-                  thoughtProcess: m.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
-                } : m));
+                // ★変更: streamingMessage stateを直接更新
+                setStreamingMessage(prev => prev ? {
+                  ...prev,
+                  thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
+                } : prev);
               }
             }
 
             else if (data.event === 'message') {
               if (data.answer) {
+                // ★追加: 最初のmessageイベント受信時にタイマー開始
+                if (messageStartTime === null) {
+                  messageStartTime = Date.now();
+                }
+                
                 contentBuffer += data.answer;
                 tracker.markFirstToken();
                 tracker.incrementChars(data.answer);
@@ -653,42 +683,56 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 }
 
                 let textToDisplay = '';
-                if (protocolMode === 'JSON') {
+                
+                // ★変更: message受信開始から1秒間は表示を抑制（ちらつき防止）
+                const elapsedMs = Date.now() - messageStartTime;
+                const isDelayPeriod = elapsedMs < DISPLAY_DELAY_MS;
+                
+                if (isDelayPeriod) {
+                  // 1秒未満は表示しない（スケルトンローダーが表示される）
+                  textToDisplay = '';
+                } else if (protocolMode === 'PENDING') {
+                  // 1秒経過後でもPENDINGの場合は表示しない
+                  textToDisplay = '';
+                } else if (protocolMode === 'JSON') {
                   const parsed = parseLlmResponse(contentBuffer);
-                  textToDisplay = parsed.isParsed ? parsed.answer : '';
+                  // isParsed && answer が空でない場合のみ表示
+                  textToDisplay = (parsed.isParsed && parsed.answer) ? parsed.answer : '';
                 } else {
                   // RAWモードでも、JSON構造が検出されたらパースを試みる（誤判定対策）
                   const trimmed = contentBuffer.trim();
                   if (trimmed.includes('"answer"') && (trimmed.startsWith('{') || trimmed.startsWith('```'))) {
                     const parsed = parseLlmResponse(contentBuffer);
-                    if (parsed.isParsed) {
+                    if (parsed.isParsed && parsed.answer) {
                       textToDisplay = parsed.answer;
                       // モードを修正（以降のストリーミングでも正しく処理）
                       protocolMode = 'JSON';
                     } else {
-                      textToDisplay = contentBuffer;
+                      // パース失敗時も表示しない（ちらつき防止）
+                      textToDisplay = '';
                     }
                   } else {
                     textToDisplay = contentBuffer;
                   }
                 }
 
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                  ...m,
+                // ★変更: streamingMessage stateを直接更新（messages配列を走査しない）
+                setStreamingMessage(prev => prev ? {
+                  ...prev,
                   text: textToDisplay,
-                  rawContent: contentBuffer,
-                  thoughtProcess: m.thoughtProcess
-                } : m));
+                  rawContent: contentBuffer
+                } : prev);
               }
             }
             else if (data.event === 'message_end') {
               const citations = data.metadata?.retriever_resources || [];
               if (citations.length > 0) {
-                setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                  ...m,
+                // ★変更: streamingMessage stateを直接更新
+                setStreamingMessage(prev => prev ? {
+                  ...prev,
                   citations: mapCitationsFromApi(citations),
                   traceMode: detectedTraceMode
-                } : m));
+                } : prev);
               }
               if (data.message_id) {
                 fetchSuggestions(data.message_id, aiMessageId);
@@ -697,6 +741,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             else if (data.event === 'workflow_finished') {
               let finalText = contentBuffer;
               let finalCitations = [];
+              let smartActions = [];
 
               // ★改善: protocolModeに関係なく、コンテンツがJSON形式かチェック
               // ストリーミング中の初期判定が誤っている場合にも対応
@@ -714,23 +759,38 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   if (parsed.citations.length > 0) {
                     finalCitations = mapCitationsFromLLM(parsed.citations);
                   }
+                  // ★変更: parseLlmResponseから直接smartActionsを取得
+                  if (parsed.smartActions && parsed.smartActions.length > 0) {
+                    smartActions = parsed.smartActions;
+                    addLog(`[Workflow] Smart Actions detected: ${smartActions.length} actions`, 'info');
+                  }
                 }
               }
 
-              setMessages(prev => prev.map(m => m.id === aiMessageId ? {
-                ...m,
-                text: finalText,
-                rawContent: contentBuffer,
-                citations: m.citations.length > 0 ? m.citations : finalCitations,
-                isStreaming: false,
-                traceMode: detectedTraceMode,
-                thoughtProcess: m.thoughtProcess.map(t => {
-                  if (t.title === '情報を整理して回答を生成中...') {
-                    return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };
-                  }
-                  return { ...t, status: 'done' };
-                })
-              } : m));
+              // ★変更: streamingMessageRefから現在値を取得して、setMessagesとsetStreamingMessageを別々に呼び出す
+              // これによりsetState内からsetStateを呼び出す問題を根本的に解決
+              const currentStreamingMsg = streamingMessageRef.current;
+              if (currentStreamingMsg) {
+                const finalMessage = {
+                  ...currentStreamingMsg,
+                  text: finalText,
+                  rawContent: contentBuffer,
+                  citations: currentStreamingMsg.citations.length > 0 ? currentStreamingMsg.citations : finalCitations,
+                  smartActions: smartActions,
+                  isStreaming: false,
+                  traceMode: detectedTraceMode,
+                  thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {
+                    if (t.title === '情報を整理して回答を生成中...') {
+                      return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };
+                    }
+                    return { ...t, status: 'done' };
+                  })
+                };
+                // messages配列に確定メッセージを追加
+                setMessages(prevMsgs => [...prevMsgs, finalMessage]);
+                // streamingMessageをクリア
+                setStreamingMessage(null);
+              }
             }
           } catch (e) {
             console.error('Stream Parse Error:', e);
@@ -743,20 +803,21 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
     } catch (error) {
       addLog(`[Stream Error] ${error.message}`, 'error');
-      setMessages(prev => prev.map(m => {
-        if (m.id === aiMessageId) {
-          return {
-            ...m,
-            role: 'system',
-            type: 'error',
-            text: '',
-            rawError: error.message,
-            isStreaming: false,
-            thoughtProcess: []
-          };
-        }
-        return m;
-      }));
+      // ★変更: エラー時もstreamingMessageRefから現在値を取得して処理
+      const currentStreamingMsg = streamingMessageRef.current;
+      if (currentStreamingMsg) {
+        const errorMessage = {
+          ...currentStreamingMsg,
+          role: 'system',
+          type: 'error',
+          text: '',
+          rawError: error.message,
+          isStreaming: false,
+          thoughtProcess: []
+        };
+        setMessages(prevMsgs => [...prevMsgs, errorMessage]);
+        setStreamingMessage(null);
+      }
       setIsGenerating(false);
     }
   };
@@ -783,6 +844,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
   return {
     messages,
     setMessages,
+    // ★追加: ストリーミング中のメッセージを別途提供（パフォーマンス最適化）
+    streamingMessage,
     isGenerating,
     isHistoryLoading,
     setIsLoading: setIsGenerating,

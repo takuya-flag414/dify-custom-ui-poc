@@ -45,14 +45,14 @@ const extractPartialJson = (text) => {
 };
 
 /**
- * LLMのレスポンス（テキスト）を解析し、JSONであれば回答と出典を抽出する。
+ * LLMのレスポンス（テキスト）を解析し、JSONであれば回答と出典、Smart Actionsを抽出する。
  * ストリーミング中の不完全なJSONにも対応。
  * @param {string} rawText - LLMからの生のテキスト
- * @returns {object} { answer, citations, isParsed }
+ * @returns {object} { answer, citations, smartActions, isParsed }
  */
 export const parseLlmResponse = (rawText) => {
   if (!rawText) {
-    return { answer: '', citations: [], isParsed: false };
+    return { answer: '', citations: [], smartActions: [], isParsed: false };
   }
 
   let textToParse = rawText.trim();
@@ -72,9 +72,19 @@ export const parseLlmResponse = (rawText) => {
     if (textToParse.startsWith('{') && textToParse.endsWith('}')) {
       const parsed = JSON.parse(textToParse);
       if (parsed && typeof parsed === 'object') {
+        // ★変更: smart_actionsをJSONから直接抽出
+        let smartActions = [];
+        if (Array.isArray(parsed.smart_actions)) {
+          smartActions = parsed.smart_actions;
+        } else if (parsed.smart_actions && Array.isArray(parsed.smart_actions.suggested_actions)) {
+          // 後方互換: { smart_actions: { suggested_actions: [...] } } 形式にも対応
+          smartActions = parsed.smart_actions.suggested_actions;
+        }
+        
         return {
           answer: parsed.answer || '',
           citations: Array.isArray(parsed.citations) ? parsed.citations : [],
+          smartActions: smartActions,
           isParsed: true
         };
       }
@@ -99,9 +109,19 @@ export const parseLlmResponse = (rawText) => {
       }
     } catch (e) { }
 
+    // smart_actionsの簡易抽出（もし完了していれば）
+    let extractedSmartActions = [];
+    try {
+      const smartActionsMatch = textToParse.match(/"smart_actions"\s*:\s*(\[[\s\S]*?\])/);
+      if (smartActionsMatch) {
+        extractedSmartActions = JSON.parse(smartActionsMatch[1]);
+      }
+    } catch (e) { }
+
     return {
       answer: partialAnswer,
       citations: extractedCitations,
+      smartActions: extractedSmartActions,
       isParsed: true
     };
   }
@@ -111,6 +131,7 @@ export const parseLlmResponse = (rawText) => {
   return {
     answer: textToParse, // 生テキストをそのまま返す
     citations: [],
+    smartActions: [],
     isParsed: false
   };
 };

@@ -2,534 +2,572 @@
 
 /**
  * JSONレスポンス生成用ヘルパー
+ * @param {string} answer - 回答テキスト
+ * @param {Array} citations - 引用配列
+ * @param {Array} smartActions - Smart Actions配列（オプション）
  */
-const createMockJson = (answer, citations = []) => {
-  return JSON.stringify({
-    answer: answer,
-    citations: citations
-  });
+const createMockJson = (answer, citations = [], smartActions = []) => {
+  const obj = { answer, citations };
+  if (smartActions.length > 0) {
+    obj.smart_actions = smartActions;
+  }
+  return JSON.stringify(obj);
 };
 
 /**
- * FEモード検証用のシナリオ定義 (全8パターン網羅・ノード順序修正版)
- * 順序: Query Rewriter -> Intent Classifier -> (Execution) -> Answer
+ * JSONレスポンス生成用ヘルパー (```json コードブロック形式)
+ * この形式はLLMが```jsonで囲んで返すケースを再現するためのもの
+ * @param {string} answer - 回答テキスト
+ * @param {Array} citations - 引用配列
+ * @param {Array} smartActions - Smart Actions配列（オプション）
+ */
+const createMockJsonCodeBlock = (answer, citations = [], smartActions = []) => {
+  const jsonObj = { answer, citations };
+  if (smartActions.length > 0) {
+    jsonObj.smart_actions = smartActions;
+  }
+  return '```json\n' + JSON.stringify(jsonObj, null, 2) + '\n```';
+};
+
+// =================================================================
+// AIスタイル別 回答テンプレート定義
+// =================================================================
+
+/**
+ * スタイル別の回答スニペット
+ * - efficient: 簡潔・客観的・見出し多用・絵文字なし
+ * - partner: 親しみやすい・対話的・絵文字使用・次のアクション提案
+ */
+const styleTemplates = {
+  // ========== Fast Pure (高速モード・ファイルなし) ==========
+  // ※スピードモードはJSON形式ではないため、Smart Actionsは表示されない
+  fast_pure: {
+    efficient: "### Difyとは\n\n**Dify**は、大規模言語モデル（LLM）を活用したエンタープライズ向けのAIチャットボット基盤です。\n\n### 特徴\n- **コスト効率**: gpt-4o-miniにより、テキスト対話コストを大幅に低減\n- **Web検索**: Perplexity APIによるリアルタイム情報取得（高コスト注意）\n- **ステートフル対話**: 会話履歴を保持し、連続した対話が可能\n\n### 留意点\n本モードはWeb/RAG検索がOFFのため、最新情報や社内規定の回答には対応していません。",
+    partner: "こんにちは！🤖 Difyについてお聞きですね。\n\nDifyは、OpenAIの**gpt-4o-mini**を中心に構築された、社内向け**AIチャットボット基盤**です。Web検索（Perplexity API）との連携により、リアルタイムの情報も取得できる設計になっています。\n\n今は**高速モード**（Web/RAG OFF）で動作しているため、最新ニュースや社内規定への回答はできませんが、一般的な知識や文章作成・翻訳などはお任せください！ 💪\n\n他にも気になることがあれば、遠慮なくどうぞ！"
+  },
+
+  // ========== Fast File (高速モード・ファイルあり) ==========
+  fast_file: {
+    efficient: "### 概要\n\n本レポートは、**Dify**を基盤とした社内向けAIチャットボットの運用に関するコスト分析を提供します。\n\n### 主要ポイント\n1. **エグゼクティブサマリー**: 経済的実現可能性と予算策定の基礎を提示\n2. **コスト構造**: OpenAI gpt-4o-miniとPerplexity APIの価格分析\n3. **ペルソナ別試算**: Light/Standard/Heavyユーザー別の月額コスト\n\n### 結論\n適切な管理と設定により、月額コストは「1社員あたりコーヒー1杯分」で運用可能。",
+    partner: "資料を確認しました！📄\n\nこのドキュメントは、**Difyチャットボットのコスト試算レポート**のようですね。\n\n内容を見てみると...\n- **gpt-4o-mini**を使うことで、テキスト対話のコストがかなり抑えられること\n- 一方、**Perplexity API**（Web検索）は利用頻度によってコストが跳ね上がるリスクがあること\n- ユーザータイプ別（ライト/スタンダード/ヘビー）のシミュレーションが載っています\n\n結論として、「**1人あたり月額コーヒー1杯分**」で運用できそう、とのことです！☕\n\nもっと詳しく見たい部分はありますか？例えば「コスト内訳」や「リスク要因」などを深掘りできますよ！"
+  },
+
+  // ========== Pure (Web/RAG ON だが検索なし) ==========
+  pure: {
+    efficient: "### 概要\n\n私は社内AIアシスタントです。以下のタスクに対応可能です。\n\n- **ドキュメント解析**: アップロードされたファイルの要約・分析\n- **Web情報検索**: 最新のWeb情報の取得\n- **社内規定確認**: RAGを通じた社内ナレッジ検索\n\nご質問をお待ちしています。",
+    partner: "こんにちは！😊 私は社内AIアシスタントです。\n\nドキュメントの解析、Web情報の検索、社内規定の確認など、様々なタスクをお手伝いできます。\n\n何かお手伝いできることはありますか？"
+  },
+
+  // ========== Web Only ==========
+  web_only: {
+    efficient: "### 結論\n\nWeb検索の結果、Reactの最新トレンドとして以下が注目されています。\n\n### 詳細\n1. **React Compiler**: メモ化（useMemo, useCallback）の自動化[1]\n2. **Server Actions**: サーバーサイド処理とのシームレスな統合[2]\n\nボイラープレートコードが大幅に削減される見込みです。",
+    partner: "Reactの最新トレンドについてお調べしました！🔍\n\n調べてみたところ、2025年に注目されているのは...\n\n**React Compiler**という新機能で、今まで手動で書いていた`useMemo`や`useCallback`を**自動化**してくれるようになるんです[1]。これは開発体験がかなり変わりそうですね！\n\nそれから**Server Actions**も標準化が進んでいて、サーバーサイドとの連携がより簡単になっています[2]。\n\n他にも気になる技術があればお調べしますよ！🚀"
+  },
+
+  // ========== RAG Only (社内データモード) ==========
+  // ★smart_actionsはJSON要素として追加されるため、テンプレートからXMLタグを削除
+  rag_only: {
+    efficient: "### 回答\n\n社内規定によると、経費精算の締切は以下の通りです。\n\n- **通常経費**: 毎月第3営業日 17:00まで[1]\n- **交通費**: 月末締め、翌月第2営業日まで[2]\n\n期限を過ぎた場合、翌月処理となります。",
+    partner: "経費精算の締切についてお調べしました！📅\n\n社内規定を確認したところ...\n\n- **通常経費**は毎月**第3営業日の17:00**が締切です[1]\n- **交通費**は月末締めで、翌月**第2営業日**までに申請が必要です[2]\n\n⚠️ 期限を過ぎると翌月処理になってしまうので、お気をつけくださいね！\n\n他にも経費関連でご不明点があれば聞いてください！"
+  },
+
+  // ========== Hybrid (Web + RAG) ==========
+  hybrid: {
+    efficient: "### 結論\n\n社内外の情報を統合して回答します。\n\n### 比較分析\n\n#### 一般基準\nNISTなどのセキュリティ標準では、AIへの個人情報入力は厳格に管理すべきとされています[1]。\n\n#### 当社規定\n当社の「ITセキュリティガイドライン」においても、**顧客情報のAI入力は原則禁止**です[2]。\n\n承認済みサンドボックス環境に限り、利用が許可されています。",
+    partner: "生成AIのセキュリティ規定について、社内外の情報を照らし合わせてみました！🔐\n\nまず**世の中の標準**として、NISTなどでは「AIへの個人情報入力は厳格に管理すべき」とされています[1]。\n\n一方、**当社の規定**を確認すると...「ITセキュリティガイドライン」で**顧客情報のAI入力は原則禁止**となっていますね[2]。ただし、事前承認された**サンドボックス環境**なら利用OKとのことです。\n\n世の中の標準と比較しても、当社の規定は適切なレベルにあると言えそうです！✅\n\n他に確認したいことはありますか？"
+  },
+
+  // ========== File Only ==========
+  file_only: {
+    efficient: "### 要約\n\nアップロードされたファイルを解析しました。このドキュメントは「プロジェクトX」のキックオフ資料です[1]。\n\n### 主なポイント\n- **目的**: 業務プロセスの自動化\n- **期間**: 2025年4月〜9月\n- **体制**: 開発チーム5名",
+    partner: "ファイルを確認しました！📄\n\nこれは「**プロジェクトX**」のキックオフ資料のようですね[1]。\n\n中身を見てみると...\n- **目的**: 業務プロセスの自動化を目指すプロジェクト\n- **期間**: 2025年4月から9月までの予定\n- **体制**: 開発チーム5名で進めるようです\n\nスケジュールやコストについてもっと詳しく見てみましょうか？"
+  },
+
+  // ========== File + Web ==========
+  file_web: {
+    efficient: "### 分析結果\n\nファイル内の記述コードを最新ドキュメントと照合しました。\n\n#### 問題点\nファイル内で使用されている `componentWillMount`[1] は、Reactの最新バージョンでは**非推奨**です。\n\n#### 推奨対応\n公式ドキュメント[2]によると、代わりに `useEffect` フックの使用が推奨されています。\n\nリファクタリングを検討してください。",
+    partner: "ファイルの内容を最新のWeb情報と照らし合わせてみました！🔍\n\nファイル内で使われている`componentWillMount`[1]なんですが...実は**React最新版では非推奨**になっているんです。\n\n公式ドキュメント[2]を見ると、代わりに`useEffect`フックを使うことが推奨されていますね。\n\nこの部分のリファクタリング、お手伝いしましょうか？具体的なコード例もお見せできますよ！💡"
+  },
+
+  // ========== File + RAG ==========
+  file_rag: {
+    efficient: "### チェック結果\n\n請求書（ファイル）と社内支払い規定（RAG）を照合しました。\n\n#### 問題なし\n- **支払サイト**: 「翌月末払い」は規定[2]と一致\n\n#### 要確認\n- **費目**: 「交際費」は事前申請番号の記載が必要[2]\n- ファイル[1]内に申請番号が見当たりません\n\n確認をお願いします。",
+    partner: "請求書と社内規定を照合してみました！📋\n\n**支払サイト**については「翌月末払い」となっていて、社内規定[2]と一致しているので**問題なし**です ✅\n\nただ、**1点確認が必要**です ⚠️\n\n「交際費」として計上されていますが、規定によると**事前申請番号の記載が必須**なんです[2]。ファイル[1]を見た限り、申請番号が見当たらないので、確認していただけますか？\n\n法務部への確認が必要でしたら、連絡先もお調べしますよ！"
+  },
+
+  // ========== Full (File + Web + RAG) ==========
+  full: {
+    efficient: "### 総合分析レポート\n\n「事業計画書案」について、社内実績と市場動向の両面から分析しました。\n\n#### 計画書の分析\n提案されている「AIカスタマーサポート」機能[1]は、コスト削減効果が高いとされています。\n\n#### 社内実績\n過去の類似プロジェクト「ChatBot 2023」[2]では、導入により問い合わせが30%削減。\n\n#### 市場動向\n競合他社も同様の機能をリリース[3]。早期リリースが重要。\n\n**結論**: 本計画は妥当性が高く、推進を推奨します。",
+    partner: "事業計画書について、社内実績と市場動向の両面から分析してみました！📊\n\nまず計画書[1]で提案されている「**AIカスタマーサポート**」機能、コスト削減効果が期待できそうですね。\n\n**社内の実績**を見てみると...過去の「ChatBot 2023」プロジェクト[2]では、導入後に問い合わせが**30%削減**されたそうです！これは心強いデータですね 💪\n\n**市場動向**としては、競合他社も同様の機能をリリースし始めています[3]。競争力を維持するためにも、**早期リリース**が重要になりそうです。\n\n総合的に見て、この計画は**推進を推奨**します！✅\n\n次のステップとして、リスク管理表の作成などお手伝いしましょうか？"
+  }
+};
+
+// =================================================================
+// シナリオ定義 (AIスタイル対応版)
+// =================================================================
+
+/**
+ * FEモード検証用のシナリオ定義
+ * 
+ * 各シナリオは { efficient: [...], partner: [...] } の形式で、
+ * AIスタイルに応じて異なる回答を返します。
+ * 
+ * 後方互換のため、配列形式のシナリオも引き続きサポートされます。
  */
 export const scenarios = {
 
   // =================================================================
   // Pattern 1: Pure
   // =================================================================
-  'pure': [
-    // 1. クエリ整形 (Query Rewriter)
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: 'こんにちは' } }
-    },
-    // 2. 意図分類 (Intent Classifier)
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: 'こんにちは' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'CHAT' } }
-    },
-    // 3. 回答生成
-    {
-      event: 'node_started',
-      data: { title: 'Casual LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "こんにちは！\n私は社内AIアシスタントです。ドキュメントの解析、Web情報の検索、社内規定の確認など、様々なタスクをお手伝いできます。\n\n何かお手伝いできることはありますか？",
-        []
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Casual LLM', node_type: 'llm', status: 'succeeded' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'pure': {
+    efficient: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'こんにちは' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: 'こんにちは' } } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'CHAT' } } },
+      { event: 'node_started', data: { title: 'General LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJsonCodeBlock(styleTemplates.pure.efficient, [])
+      },
+      { event: 'node_finished', data: { title: 'General LLM', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'こんにちは' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: 'こんにちは' } } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'CHAT' } } },
+      { event: 'node_started', data: { title: 'General LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJsonCodeBlock(styleTemplates.pure.partner, [])
+      },
+      { event: 'node_finished', data: { title: 'General LLM', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
   // Pattern 2: Web Only
   // =================================================================
-  'web_only': [
-    // 1. クエリ整形 (ここが表示させたい「質問の要点を整理中...」)
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: 'React 2025 trends features' } }
-    },
-    // 2. 意図分類
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: 'Reactの最新トレンドは？' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } }
-    },
-    // 3. Web検索
-    {
-      event: 'node_started',
-      data: { title: 'Perplexity Search', node_type: 'tool', inputs: { query: 'React 2025 trends' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Perplexity Search', outputs: { text: '[Search Results...]' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'SEARCH LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### 結論\nWeb検索の結果、Reactの最新トレンドとして以下の点が注目されています。\n\n### 詳細\n1. **React Compiler**: メモ化（useMemo, useCallback）の自動化が進み、開発体験が向上しています[1]。\n2. **Server Actions**: サーバーサイド処理とのシームレスな統合が標準化されています[2]。\n\nこれにより、ボイラープレートコードが大幅に削減される見込みです。",
-        [
-          { id: 'cite_1', type: 'web', source: 'React Blog: React Compiler', url: 'https://react.dev/blog' },
-          { id: 'cite_2', type: 'web', source: 'TechCrunch: Frontend Trends 2025', url: 'https://techcrunch.com/react' }
-        ]
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'SEARCH LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'web_only': {
+    efficient: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'React 2025 trends features' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: 'Reactの最新トレンドは？' } } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool', inputs: { query: 'React 2025 trends' } } },
+      { event: 'node_finished', data: { title: 'Perplexity Search', outputs: { text: '[Search Results...]' } } },
+      { event: 'node_started', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJsonCodeBlock(
+          styleTemplates.web_only.efficient,
+          [
+            { id: 'cite_1', type: 'web', source: 'React Blog: React Compiler', url: 'https://react.dev/blog' },
+            { id: 'cite_2', type: 'web', source: 'TechCrunch: Frontend Trends 2025', url: 'https://techcrunch.com/react' }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'React 2025 trends features' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: 'Reactの最新トレンドは？' } } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool', inputs: { query: 'React 2025 trends' } } },
+      { event: 'node_finished', data: { title: 'Perplexity Search', outputs: { text: '[Search Results...]' } } },
+      { event: 'node_started', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJsonCodeBlock(
+          styleTemplates.web_only.partner,
+          [
+            { id: 'cite_1', type: 'web', source: 'React Blog: React Compiler', url: 'https://react.dev/blog' },
+            { id: 'cite_2', type: 'web', source: 'TechCrunch: Frontend Trends 2025', url: 'https://techcrunch.com/react' }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
+  // =================================================================
   // =================================================================
   // Pattern 3: RAG Only
   // =================================================================
-  'rag_only': [
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: '経費精算 締切 ルール' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: '経費精算の締切はいつ？' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval', inputs: { query: '経費精算 締切' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: '社内ナレッジ検索', outputs: { result: '[Doc chunks...]' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'SEARCH LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### 回答\n社内規定によると、経費精算の締切は以下の通りです。\n\n- **通常経費**: 毎月第3営業日 17:00まで[1]\n- **交通費**: 月末締め、翌月第2営業日まで[2]\n\n期限を過ぎた場合、翌月処理となりますのでご注意ください。",
-        [
-          { id: 'cite_1', type: 'rag', source: '経費精算マニュアル_2025年度版.pdf', url: null },
-          { id: 'cite_2', type: 'rag', source: '総務部_FAQ集.xlsx', url: null }
-        ]
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'SEARCH LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'rag_only': {
+    efficient: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: '経費精算 締切 ルール' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: '経費精算の締切はいつ？' } } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval', inputs: { query: '経費精算 締切' } } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索', outputs: { result: '[Doc chunks...]' } } },
+      { event: 'node_started', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.rag_only.efficient,
+          [
+            { id: 'cite_1', type: 'rag', source: '経費精算マニュアル_2025年度版.pdf', url: null },
+            { id: 'cite_2', type: 'rag', source: '総務部_FAQ集.xlsx', url: null }
+          ],
+          // ★全5種類のSmart Actions
+          [
+            { type: 'retry_mode', label: 'Web検索モードで再試行', icon: 'refresh-cw', payload: { mode: 'web_only' } },
+            { type: 'suggested_question', label: '申請書のテンプレートは？', icon: 'file-text', payload: { text: '経費精算の申請書テンプレートはどこにありますか？' } },
+            { type: 'web_search', label: 'Web検索で再確認', icon: 'globe', payload: {} },
+            { type: 'deep_dive', label: 'もっと詳しく解説', icon: 'sparkles', payload: {} },
+            { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: '経費精算 締切 ルール' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm', inputs: { query: '経費精算の締切はいつ？' } } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval', inputs: { query: '経費精算 締切' } } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索', outputs: { result: '[Doc chunks...]' } } },
+      { event: 'node_started', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.rag_only.partner,
+          [
+            { id: 'cite_1', type: 'rag', source: '経費精算マニュアル_2025年度版.pdf', url: null },
+            { id: 'cite_2', type: 'rag', source: '総務部_FAQ集.xlsx', url: null }
+          ],
+          // ★全5種類のSmart Actions
+          [
+            { type: 'retry_mode', label: 'Web検索モードで再試行', icon: 'refresh-cw', payload: { mode: 'web_only' } },
+            { type: 'suggested_question', label: '申請書のテンプレートは？', icon: 'file-text', payload: { text: '経費精算の申請書テンプレートはどこにありますか？' } },
+            { type: 'web_search', label: 'Web検索で再確認', icon: 'globe', payload: {} },
+            { type: 'deep_dive', label: 'もっと詳しく解説', icon: 'sparkles', payload: {} },
+            { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
   // Pattern 4: Hybrid
   // =================================================================
-  'hybrid': [
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: '生成AI セキュリティ規定' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Perplexity Search', node_type: 'tool' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Perplexity Search' }
-    },
-    {
-      event: 'node_started',
-      data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: '社内ナレッジ検索' }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'SEARCH LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### 結論\n社内外の情報を統合して回答します。\n\n### 詳細比較\n\n- **世の中の標準**: 一般的なセキュリティ標準（NIST等）では、AIへの個人情報入力は厳格に管理すべきとされています[1]。\n\n- **当社の規定**: 当社の「ITセキュリティガイドライン」においても、**顧客情報のAI入力は原則禁止**されています[2]。ただし、承認済みのサンドボックス環境に限り、利用が許可されています。\n\nWeb上の標準と比較しても、当社の規定は一般的な水準を満たしています。",
-        [
-          { id: 'cite_1', type: 'web', source: 'NIST AI Risk Management Framework', url: 'https://nist.gov/ai' },
-          { id: 'cite_2', type: 'rag', source: 'ITセキュリティガイドライン_v3.pdf', url: null }
-        ]
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'SEARCH LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'hybrid': {
+    efficient: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: '生成AI セキュリティ規定' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool' } },
+      { event: 'node_finished', data: { title: 'Perplexity Search' } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索' } },
+      { event: 'node_started', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.hybrid.efficient,
+          [
+            { id: 'cite_1', type: 'web', source: 'NIST AI Risk Management Framework', url: 'https://nist.gov/ai' },
+            { id: 'cite_2', type: 'rag', source: 'ITセキュリティガイドライン_v3.pdf', url: null }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: '生成AI セキュリティ規定' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool' } },
+      { event: 'node_finished', data: { title: 'Perplexity Search' } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索' } },
+      { event: 'node_started', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.hybrid.partner,
+          [
+            { id: 'cite_1', type: 'web', source: 'NIST AI Risk Management Framework', url: 'https://nist.gov/ai' },
+            { id: 'cite_2', type: 'rag', source: 'ITセキュリティガイドライン_v3.pdf', url: null }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
   // Pattern 5: File Only
   // =================================================================
-  'file_only': [
-    // ファイル抽出 (Fileありの場合、Query Rewriterよりも先に走る場合がありますが、YAML上は抽出→Code→Query Rewriterです)
-    {
-      event: 'node_started',
-      data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'ドキュメント抽出', outputs: { content: 'Extracting...' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: 'ProjectX Kickoff Summary' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Document LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### 要約\nアップロードされたファイルを解析しました。このドキュメントは「プロジェクトX」のキックオフ資料のようです[1]。\n\n### 主なポイント\n- **目的**: 業務プロセスの自動化[1]\n- **期間**: 2025年4月〜9月\n- **体制**: 開発チーム5名",
-        [
-          { id: 'cite_1', type: 'document', source: 'ProjectX_Kickoff.pptx', url: null }
-        ]
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Document LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'file_only': {
+    efficient: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出', outputs: { content: 'Extracting...' } } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'ProjectX Kickoff Summary' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } } },
+      { event: 'node_started', data: { title: 'Document LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.file_only.efficient,
+          [{ id: 'cite_1', type: 'document', source: 'ProjectX_Kickoff.pptx', url: null }]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Document LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出', outputs: { content: 'Extracting...' } } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'ProjectX Kickoff Summary' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } } },
+      { event: 'node_started', data: { title: 'Document LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.file_only.partner,
+          [{ id: 'cite_1', type: 'document', source: 'ProjectX_Kickoff.pptx', url: null }]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Document LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
   // Pattern 6: File + Web
   // =================================================================
-  'file_web': [
-    {
-      event: 'node_started',
-      data: { title: 'ドキュメント抽出', node_type: 'document-extractor' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'ドキュメント抽出' }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: 'File content vs React best practices' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Perplexity Search', node_type: 'tool', inputs: { query: 'File content check' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Perplexity Search' }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Hybrid LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### 分析結果\nファイル内の記述コードについて、最新のドキュメントと照らし合わせました。\n\nファイル内で使用されている `componentWillMount` [1] は、Reactの最新バージョンでは非推奨となっています。\n公式ドキュメント[2]によると、代わりに `useEffect` フックの使用が推奨されています。\n\nリファクタリングを検討することをお勧めします。",
-        [
-          { id: 'cite_1', type: 'document', source: 'LegacyCode.js', url: null },
-          { id: 'cite_2', type: 'web', source: 'React Docs: Effects', url: 'https://react.dev/reference/react/useEffect' }
-        ]
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Hybrid LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'file_web': {
+    efficient: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出' } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'File content vs React best practices' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool', inputs: { query: 'File content check' } } },
+      { event: 'node_finished', data: { title: 'Perplexity Search' } },
+      { event: 'node_started', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.file_web.efficient,
+          [
+            { id: 'cite_1', type: 'document', source: 'LegacyCode.js', url: null },
+            { id: 'cite_2', type: 'web', source: 'React Docs: Effects', url: 'https://react.dev/reference/react/useEffect' }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出' } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'File content vs React best practices' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool', inputs: { query: 'File content check' } } },
+      { event: 'node_finished', data: { title: 'Perplexity Search' } },
+      { event: 'node_started', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.file_web.partner,
+          [
+            { id: 'cite_1', type: 'document', source: 'LegacyCode.js', url: null },
+            { id: 'cite_2', type: 'web', source: 'React Docs: Effects', url: 'https://react.dev/reference/react/useEffect' }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
   // Pattern 7: File + RAG
   // =================================================================
-  'file_rag': [
-    {
-      event: 'node_started',
-      data: { title: 'ドキュメント抽出', node_type: 'document-extractor' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'ドキュメント抽出' }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: '請求書 支払い規定 チェック' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: '社内ナレッジ検索' }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Hybrid LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### チェック結果\n提出された請求書（ファイル）と、社内の支払い規定（RAG）を照合しました。\n\n1. **支払サイト**: 請求書は「翌月末払い」[1]となっていますが、社内規定[2]とも一致しており問題ありません。\n2. **費目**: 「交際費」として計上されていますが、規定により事前申請番号の記載が必要です。\n\nファイル内には申請番号が見当たらないため、確認をお願いします。",
-        [
-          { id: 'cite_1', type: 'document', source: '請求書_株式会社A.pdf', url: null },
-          { id: 'cite_2', type: 'rag', source: '購買管理規定.pdf', url: null }
-        ]
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Hybrid LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'file_rag': {
+    efficient: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出' } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: '請求書 支払い規定 チェック' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索' } },
+      { event: 'node_started', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.file_rag.efficient,
+          [
+            { id: 'cite_1', type: 'document', source: '請求書_株式会社A.pdf', url: null },
+            { id: 'cite_2', type: 'rag', source: '購買管理規定.pdf', url: null }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出' } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: '請求書 支払い規定 チェック' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'LOGICAL' } } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索' } },
+      { event: 'node_started', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.file_rag.partner,
+          [
+            { id: 'cite_1', type: 'document', source: '請求書_株式会社A.pdf', url: null },
+            { id: 'cite_2', type: 'rag', source: '購買管理規定.pdf', url: null }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
   // Pattern 8: Full
   // =================================================================
-  'full': [
-    {
-      event: 'node_started',
-      data: { title: 'ドキュメント抽出', node_type: 'document-extractor' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'ドキュメント抽出' }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Query Rewriter', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Query Rewriter', outputs: { text: 'Integrated Analysis' } }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Intent Classifier', node_type: 'llm' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } }
-    },
-    // 同時並行検索（を模倣して連続実行）
-    {
-      event: 'node_started',
-      data: { title: 'Perplexity Search', node_type: 'tool' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Perplexity Search' }
-    },
-    {
-      event: 'node_started',
-      data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' }
-    },
-    {
-      event: 'node_finished',
-      data: { title: '社内ナレッジ検索' }
-    },
-    {
-      event: 'node_started',
-      data: { title: 'Hybrid LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### 総合分析レポート\nアップロードされた「事業計画書案」について、社内実績と市場動向の両面から分析しました。\n\n### 計画書の分析\n提案されている「AIカスタマーサポート」機能[1]は、コスト削減効果が高いとされています。\n\n### 社内実績 (RAG)\n過去の類似プロジェクト「ChatBot 2023」[2]では、導入により問い合わせが30%削減された実績があり、計画の実現性は高いと判断できます。\n\n### 市場動向 (Web)\nまた、競合他社も同様の機能をリリースしており[3]、市場競争力を維持するためには早期のリリースが重要です。\n\n**結論**: 本計画は妥当性が高く、推進を推奨します。",
-        [
-          { id: 'cite_1', type: 'document', source: '2025_事業計画案.docx', url: null },
-          { id: 'cite_2', type: 'rag', source: 'プロジェクト完了報告書_ChatBot2023.pdf', url: null },
-          { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' }
-        ]
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Hybrid LLM', node_type: 'llm' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'full': {
+    efficient: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出' } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'Integrated Analysis' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool' } },
+      { event: 'node_finished', data: { title: 'Perplexity Search' } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索' } },
+      { event: 'node_started', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.full.efficient,
+          [
+            { id: 'cite_1', type: 'document', source: '2025_事業計画案.docx', url: null },
+            { id: 'cite_2', type: 'rag', source: 'プロジェクト完了報告書_ChatBot2023.pdf', url: null },
+            { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出' } },
+      { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Query Rewriter', outputs: { text: 'Integrated Analysis' } } },
+      { event: 'node_started', data: { title: 'Intent Classifier', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'Intent Classifier', outputs: { text: 'SEARCH' } } },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool' } },
+      { event: 'node_finished', data: { title: 'Perplexity Search' } },
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval' } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索' } },
+      { event: 'node_started', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          styleTemplates.full.partner,
+          [
+            { id: 'cite_1', type: 'document', source: '2025_事業計画案.docx', url: null },
+            { id: 'cite_2', type: 'rag', source: 'プロジェクト完了報告書_ChatBot2023.pdf', url: null },
+            { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' }
+          ]
+        )
+      },
+      { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
-  // Pattern 9: Fast Mode (Pure) - ログ再現: Difyとは？
+  // Pattern 9: Fast Mode (Pure)
   // =================================================================
-  'fast_pure': [
-    // Fastモード: 思考プロセス(Query Rewriter等)を省略し、即座に回答生成LLMから開始
-    {
-      event: 'node_started',
-      data: { title: 'Answer Generator', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### Difyとは\n\n**Dify**は、大規模言語モデル（LLM）を活用したエンタープライズ向けのAIチャットボット基盤です。このシステムは、社内向けに特化しており、OpenAIの軽量モデル「gpt-4o-mini」と、リアルタイムWeb検索機能を提供する「Perplexity API」を統合しています。\n\n#### 主な特徴\n- **コスト効率**: Difyは、テキスト対話にかかるコストを大幅に低下させることができるため、企業全体にAIアシスタントを導入する際の障壁を取り除きます。\n- **Web検索機能**: Perplexity APIを通じたWeb検索機能は、情報の取得を強化しますが、利用時には高コストが発生する可能性があります。\n- **ステートフルな対話**: Difyは対話履歴をコンテキストとして送信するため、連続した会話が可能ですが、それに伴うトークン消費が増加する特性があります。\n\nDifyは、企業の業務効率を向上させるための強力なツールとして位置付けられており、適切な管理と設定により、経済的に運用可能なAIソリューションを提供します。",
-        []
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ],
+  'fast_pure': {
+    efficient: [
+      { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: styleTemplates.fast_pure.efficient
+      },
+      { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: styleTemplates.fast_pure.partner
+      },
+      { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
 
   // =================================================================
-  // Pattern 10: Fast Mode (File) - ログ再現: コスト試算PDF
+  // Pattern 10: Fast Mode (File)
   // =================================================================
-  'fast_file': [
-    // ファイル抽出のみ実行
-    {
-      event: 'node_started',
-      data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } }
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'ドキュメント抽出', status: 'succeeded' }
-    },
-    // 直ちに回答生成へ
-    {
-      event: 'node_started',
-      data: { title: 'Answer Generator', node_type: 'llm' }
-    },
-    {
-      event: 'message',
-      answer: createMockJson(
-        "### 概要\n\n本レポートは、**Dify**を基盤とした社内向けAIチャットボットの運用に関するコスト分析を提供します。特に、OpenAIの軽量モデル「gpt-4o-mini」とWeb検索機能を持つ「Perplexity API」を組み合わせた際の変動費構造に焦点を当てています。\n\n#### 主要な内容\n1. **エグゼクティブサマリー**:\n   - Difyの導入に向けた経済的実現可能性と予算策定の基礎を提供。\n   - コストの不確実性に対する詳細なシミュレーションを実施。\n\n2. **主要な発見と結論**:\n   - 知能のコモディティ化により、テキスト対話のコストが劇的に低下。\n   - Web検索機能は高コストであり、利用頻度によってコストが非対称になるリスク。\n   - Difyのアーキテクチャはトークン消費を増幅させる一方で、キャッシング機能によりコストを抑制。\n\n3. **コスト試算サマリー**:\n   - 月額コストの予測値をペルソナ別に示し、ユーザーの利用特性に基づいてコストを算出。\n\n4. **調査の背景と方法論**:\n   - 企業内での生成AI導入の必要性とリスクを明確化。\n\n5. **コスト構造の分析**:\n   - OpenAI gpt-4o-miniとPerplexity APIの価格構造と隠れたリスクを詳細に分析。\n\n6. **ペルソナ別コストシミュレーション**:\n   - Light User、Standard User、Heavy Userの3つのペルソナを定義し、それぞれの月額コストを試算。\n\n7. **戦略的推奨事項**:\n   - モデル選定の二極化、会話の要約機能の有効化、運用ガバナンスの強化などの推奨設定を提案。\n\n8. **最終結論**:\n   - Difyを利用したチャットボットの月額コストは「1社員あたりコーヒー1杯分」で運用可能。コストリスクを最小化しつつ、AIの恩恵を享受できる可能性を示唆。 \n\nこのように、Difyチャットボットの導入は、適切な管理と設定によって高いコスト効果を発揮することが期待されています。",
-        []
-      )
-    },
-    {
-      event: 'node_finished',
-      data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' }
-    },
-    {
-      event: 'message_end',
-      metadata: { retriever_resources: [] }
-    }
-  ]
-
+  'fast_file': {
+    efficient: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出', status: 'succeeded' } },
+      { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(styleTemplates.fast_file.efficient, [])
+      },
+      { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } } },
+      { event: 'node_finished', data: { title: 'ドキュメント抽出', status: 'succeeded' } },
+      { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(styleTemplates.fast_file.partner, [])
+      },
+      { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  }
 };
 
 /**

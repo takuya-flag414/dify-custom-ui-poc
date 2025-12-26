@@ -32,36 +32,69 @@ const renderWithInlineCitations = (children, citations, messageId) => {
                   className="citation-badge"
                   onClick={(e) => {
                     e.preventDefault();
-                    const el = document.getElementById(`citation-${messageId}-${number}`);
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      el.classList.add('highlight-citation');
-                      setTimeout(() => el.classList.remove('highlight-citation'), 2000);
-                    }
+                    // 出典リストを自動展開するカスタムイベントを発火
+                    const expandEvent = new CustomEvent('expandCitationList', {
+                      detail: { messageId }
+                    });
+                    window.dispatchEvent(expandEvent);
+
+                    // アコーディオン展開アニメーション後にスクロール
+                    setTimeout(() => {
+                      const el = document.getElementById(`citation-${messageId}-${number}`);
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.classList.add('highlight-citation');
+                        setTimeout(() => el.classList.remove('highlight-citation'), 2000);
+                      }
+                    }, 350); // CSSアニメーション(0.3s)より少し長く待つ
                   }}
                 >
                   {number}
                 </a>
-                <span className="citation-tooltip">
-                  <span className="citation-tooltip-content">
-                    <span className="citation-tooltip-icon">
-                      <SourceIcon
-                        type={citation.type === 'dataset' ? 'rag' : citation.type}
-                        source={citation.source}
-                        url={citation.url}
-                        className="w-4 h-4"
-                      />
-                    </span>
-                    <span className="citation-tooltip-text">
-                      <span className="citation-tooltip-title" style={{ display: 'block' }}>
-                        {citation.source.replace(/^\[\d+\]\s*/, '')}
+                {citation.url ? (
+                  <a
+                    href={citation.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="citation-tooltip citation-tooltip-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="citation-tooltip-content">
+                      <span className="citation-tooltip-icon">
+                        <SourceIcon
+                          type={citation.type === 'dataset' ? 'rag' : citation.type}
+                          source={citation.source}
+                          url={citation.url}
+                          className="w-4 h-4"
+                        />
                       </span>
-                      {citation.url && (
+                      <span className="citation-tooltip-text">
+                        <span className="citation-tooltip-title" style={{ display: 'block' }}>
+                          {citation.source.replace(/^\[\d+\]\s*/, '')}
+                        </span>
                         <span className="citation-tooltip-url" style={{ display: 'block' }}>{citation.url}</span>
-                      )}
+                      </span>
+                    </span>
+                  </a>
+                ) : (
+                  <span className="citation-tooltip">
+                    <span className="citation-tooltip-content">
+                      <span className="citation-tooltip-icon">
+                        <SourceIcon
+                          type={citation.type === 'dataset' ? 'rag' : citation.type}
+                          source={citation.source}
+                          url={citation.url}
+                          className="w-4 h-4"
+                        />
+                      </span>
+                      <span className="citation-tooltip-text">
+                        <span className="citation-tooltip-title" style={{ display: 'block' }}>
+                          {citation.source.replace(/^\[\d+\]\s*/, '')}
+                        </span>
+                      </span>
                     </span>
                   </span>
-                </span>
+                )}
               </span>
             );
           } else {
@@ -150,23 +183,23 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
 };
 
 // --- Main Component: MarkdownRenderer ---
-const MarkdownRenderer = ({ 
-  content, 
-  isStreaming = false, 
+const MarkdownRenderer = ({
+  content,
+  isStreaming = false,
   // ★追加: 描画モード ('normal' | 'realtime')
   // normal: ストリーミング中は待機 -> 完了後にタイピング演出
   // realtime: ストリーミング中も即座に表示 (Fastモード用)
   renderMode = 'normal',
-  citations = [], 
-  messageId, 
-  onOpenArtifact 
+  citations = [],
+  messageId,
+  onOpenArtifact
 }) => {
   // 初期状態の設定: realtimeなら即 'done' (表示状態) にする
   const [displayMode, setDisplayMode] = useState(() => {
     if (renderMode === 'realtime') return 'done';
     return isStreaming ? 'streaming' : 'done';
   });
-  
+
   const [typedContent, setTypedContent] = useState('');
   const { addLog } = useLogger();
 
