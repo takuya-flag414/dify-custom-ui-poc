@@ -10,6 +10,7 @@ export const WIZARD_SCENARIOS = {
         id: 'search',
         title: "社内規定・マニュアル検索",
         icon: "SearchIcon",
+        recommendedMode: 'enterprise', // 社内データのみ検索
         steps: [
             {
                 id: "scope",
@@ -37,6 +38,7 @@ export const WIZARD_SCENARIOS = {
         id: 'draft',
         title: "メール・文書作成",
         icon: "PenToolIcon",
+        recommendedMode: 'fast', // 外部検索不要、LLMのみで生成
         steps: [
             {
                 id: "docType",
@@ -67,11 +69,18 @@ export const WIZARD_SCENARIOS = {
         id: 'summary',
         title: "議事録・資料の要約",
         icon: "FileTextIcon",
+        recommendedMode: 'fast', // 入力テキストのみを処理
         steps: [
             {
-                id: "text",
-                type: "text", // 本来はFile Dropzoneだが、モックなのでTextarea
-                question: "要約したいテキストを入力してください",
+                id: "source",
+                type: "chips",
+                question: "要約のソースを選択してください",
+                options: ["テキストを貼り付け", "ファイルをアップロード"]
+            },
+            {
+                id: "content",
+                type: "dynamic", // sourceの選択に応じてtext/file-uploadを切り替え
+                question: "要約したい内容を入力してください",
                 placeholder: "ここにテキストを貼り付け..."
             },
             {
@@ -82,7 +91,23 @@ export const WIZARD_SCENARIOS = {
             }
         ],
         generatePrompt: (data) => {
-            return `以下のテキストを読み込み、【${data.focus}】の形式で要約してください。\n\n${data.text}`;
+            const focus = data.focus || "要点のみ (3行)";
+
+            // ファイルアップロードの場合
+            if (data.source === "ファイルをアップロード" && Array.isArray(data.content)) {
+                const fileNames = data.content.map(sf => sf.file.name).join(', ');
+                return `以下のファイルを読み込み、【${focus}】の形式で要約してください。\n\nアップロードファイル: ${fileNames}`;
+            }
+
+            // テキスト入力の場合
+            return `以下のテキストを読み込み、【${focus}】の形式で要約してください。\n\n${data.content || ''}`;
+        },
+        // ファイル抽出用メソッド
+        getFiles: (data) => {
+            if (data.source === "ファイルをアップロード" && Array.isArray(data.content)) {
+                return data.content.map(sf => sf.file);
+            }
+            return [];
         }
     },
 
@@ -91,6 +116,7 @@ export const WIZARD_SCENARIOS = {
         id: 'idea',
         title: "アイデア出し・壁打ち",
         icon: "SparklesIcon",
+        recommendedMode: 'standard', // AIに判断を任せる
         steps: [
             {
                 id: "persona",

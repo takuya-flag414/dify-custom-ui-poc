@@ -132,6 +132,7 @@ const ChatArea = (props) => {
             userName={userName}
             onSendMessage={onSendMessage}
             onStartTutorial={onStartTutorial}
+            setSearchSettings={setSearchSettings}
           />
           <div className="bottom-controls-wrapper">
             <ChatInput

@@ -344,6 +344,56 @@
     }
 }
 
+/* === 6.5 Textarea Input (for multi-line text) === */
+.wizard-textarea {
+    width: 100%;
+    max-width: 480px;
+    min-height: 120px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.9);
+    resize: vertical;
+    transition: all 0.2s ease;
+}
+
+.wizard-textarea::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.wizard-textarea:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.5);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .wizard-textarea {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .wizard-textarea::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .wizard-textarea:focus {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.3),
+            0 0 0 4px rgba(10, 132, 255, 0.5);
+    }
+}
+
 /* === 7. Footer === */
 .wizard-footer {
     padding: 16px 24px 20px;

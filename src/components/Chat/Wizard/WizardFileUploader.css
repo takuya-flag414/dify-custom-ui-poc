@@ -1,0 +1,315 @@
+/* src/components/Chat/Wizard/WizardFileUploader.css */
+
+/**
+ * Wizard File Uploader Styles
+ * DESIGN_RULE.md準拠 - macOS Sequoia / Apple Intelligence Design System
+ */
+
+/* === Drop Zone === */
+.wizard-dropzone {
+    position: relative;
+    width: 100%;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    border-radius: 16px;
+    border: 2px dashed rgba(0, 0, 0, 0.15);
+    background: rgba(245, 245, 247, 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wizard-dropzone:hover {
+    border-color: rgba(0, 122, 255, 0.4);
+    background: rgba(0, 122, 255, 0.05);
+}
+
+.wizard-dropzone.dragging {
+    border-color: var(--ai-gradient-cyan, #00FFFF);
+    background: rgba(0, 255, 255, 0.08);
+    transform: scale(1.01);
+    box-shadow:
+        0 0 0 4px rgba(0, 255, 255, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.wizard-dropzone-icon {
+    width: 48px;
+    height: 48px;
+    color: rgba(0, 0, 0, 0.35);
+    transition: color 0.2s ease;
+}
+
+.wizard-dropzone:hover .wizard-dropzone-icon {
+    color: var(--sys-color-primary, #007AFF);
+}
+
+.wizard-dropzone.dragging .wizard-dropzone-icon {
+    color: var(--ai-gradient-cyan, #00FFFF);
+}
+
+.wizard-dropzone-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    line-height: 1.5;
+}
+
+.wizard-dropzone-text strong {
+    color: var(--sys-color-primary, #007AFF);
+    font-weight: 600;
+}
+
+.wizard-dropzone-hint {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.35);
+    margin-top: 4px;
+}
+
+/* === File List === */
+.wizard-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 16px;
+}
+
+/* === File Card === */
+.wizard-file-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+.wizard-file-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* スキャン中 */
+.wizard-file-card.scanning {
+    border-color: rgba(0, 122, 255, 0.3);
+    animation: pulse-subtle 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* 警告あり */
+.wizard-file-card.warning {
+    border-color: rgba(255, 149, 0, 0.4);
+    background: rgba(255, 149, 0, 0.05);
+}
+
+.wizard-file-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.wizard-file-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.wizard-file-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wizard-file-meta {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wizard-file-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.wizard-file-status.scanning {
+    color: var(--sys-color-primary, #007AFF);
+}
+
+.wizard-file-status.warning {
+    color: var(--sys-color-warning, #FF9500);
+}
+
+/* Shield Button */
+.wizard-file-shield {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 149, 0, 0.15);
+    color: var(--sys-color-warning, #FF9500);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wizard-file-shield:hover {
+    background: rgba(255, 149, 0, 0.25);
+}
+
+/* Remove Button */
+.wizard-file-remove {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wizard-file-remove:hover {
+    background: rgba(255, 59, 48, 0.1);
+    color: var(--sys-color-danger, #FF3B30);
+}
+
+/* === File Count Badge === */
+.wizard-file-count {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(0, 122, 255, 0.1);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sys-color-primary, #007AFF);
+    margin-top: 12px;
+}
+
+/* === Size Limit Warning === */
+.wizard-size-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255, 149, 0, 0.1);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--sys-color-warning, #FF9500);
+    margin-top: 8px;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .wizard-dropzone {
+        background: rgba(30, 30, 30, 0.6);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .wizard-dropzone:hover {
+        border-color: rgba(10, 132, 255, 0.4);
+        background: rgba(10, 132, 255, 0.08);
+    }
+
+    .wizard-dropzone-icon {
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    .wizard-dropzone:hover .wizard-dropzone-icon {
+        color: var(--sys-color-primary, #0A84FF);
+    }
+
+    .wizard-dropzone-text {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .wizard-dropzone-text strong {
+        color: var(--sys-color-primary, #0A84FF);
+    }
+
+    .wizard-dropzone-hint {
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    .wizard-file-card {
+        background: rgba(40, 40, 40, 0.8);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .wizard-file-card:hover {
+        background: rgba(50, 50, 50, 0.95);
+    }
+
+    .wizard-file-card.warning {
+        background: rgba(255, 149, 0, 0.08);
+    }
+
+    .wizard-file-icon {
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .wizard-file-name {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .wizard-file-meta {
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    .wizard-file-remove {
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    .wizard-file-remove:hover {
+        background: rgba(255, 69, 58, 0.15);
+        color: var(--sys-color-danger, #FF453A);
+    }
+}

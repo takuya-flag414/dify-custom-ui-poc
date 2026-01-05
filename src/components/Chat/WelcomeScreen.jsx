@@ -28,7 +28,16 @@ const itemVariants = {
     }
 };
 
-const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => {
+// 検索モード設定のマッピング（ContextSelectorのMODESに対応）
+const MODE_SETTINGS = {
+    standard: { ragEnabled: false, webMode: 'auto' },
+    fast: { ragEnabled: false, webMode: 'off' },
+    hybrid: { ragEnabled: true, webMode: 'auto' },
+    enterprise: { ragEnabled: true, webMode: 'off' },
+    deep: { ragEnabled: false, webMode: 'force' }
+};
+
+const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial, setSearchSettings }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
 
     // Wizard State
@@ -64,10 +73,24 @@ const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => {
         },
     ];
 
-    // Handle Card Click -> Open Wizard
+    // Handle Card Click -> Open Wizard with Auto Mode Switching
     const handleCardClick = (id) => {
         // 設定が存在する場合のみウィザードを開く
         if (WIZARD_SCENARIOS[id]) {
+            const scenario = WIZARD_SCENARIOS[id];
+
+            // 推奨モードが定義されている場合、検索設定を自動変更
+            if (scenario.recommendedMode && setSearchSettings) {
+                const modeSettings = MODE_SETTINGS[scenario.recommendedMode];
+                if (modeSettings) {
+                    setSearchSettings(prev => ({
+                        ...prev,
+                        ...modeSettings
+                    }));
+                    console.log(`🔄 検索モードを自動変更: ${scenario.recommendedMode}`);
+                }
+            }
+
             setActiveWizardId(id);
         } else {
             console.warn(`Wizard scenario not found for: ${id}`);
@@ -80,11 +103,17 @@ const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => {
         if (scenario && onSendMessage) {
             const prompt = scenario.generatePrompt(formData);
 
+            // ファイルがあれば抽出
+            const files = scenario.getFiles ? scenario.getFiles(formData) : [];
+
             // Console Log for Mock confirmation
             console.log("🤖 Generating Prompt via Wizard:", prompt);
+            if (files.length > 0) {
+                console.log("📎 Attached Files:", files.map(f => f.name));
+            }
 
-            // 実際のチャット送信処理
-            onSendMessage(prompt);
+            // 実際のチャット送信処理（ファイル付き）
+            onSendMessage(prompt, files);
 
             // Close Wizard
             setActiveWizardId(null);

@@ -7,6 +7,9 @@ import './WizardStyles.css';
 // System Icons
 import { SearchIcon, PenToolIcon, FileTextIcon, SparklesIcon } from '../../Shared/SystemIcons';
 
+// File Uploader
+import WizardFileUploader from './WizardFileUploader';
+
 /**
  * macOS Sequoia Style Capability HUD
  * Apple Intelligence デザインシステムに準拠
@@ -204,6 +207,7 @@ const CapabilityWizard = ({
                                             placeholder={currentStep.placeholder}
                                             value={formData[currentStep.id]}
                                             onChange={(val) => updateFormData(currentStep.id, val)}
+                                            formData={formData}
                                         />
                                     </motion.div>
                                 </AnimatePresence>
@@ -254,7 +258,7 @@ const ScenarioIcon = ({ iconName }) => {
 };
 
 // 入力UIのレンダラー
-const StepRenderer = ({ type, options, placeholder, value, onChange }) => {
+const StepRenderer = ({ type, options, placeholder, value, onChange, formData }) => {
     switch (type) {
         case 'chips':
             return (
@@ -279,6 +283,36 @@ const StepRenderer = ({ type, options, placeholder, value, onChange }) => {
                     placeholder={placeholder || '入力してください...'}
                     className="wizard-input"
                     autoFocus
+                />
+            );
+        case 'file-upload':
+            return (
+                <WizardFileUploader
+                    files={value || []}
+                    onChange={onChange}
+                    multiple={true}
+                />
+            );
+        case 'dynamic':
+            // formDataのsource選択に応じてUIを切り替え
+            if (formData?.source === 'ファイルをアップロード') {
+                return (
+                    <WizardFileUploader
+                        files={value || []}
+                        onChange={onChange}
+                        multiple={true}
+                    />
+                );
+            }
+            // デフォルトはテキスト入力
+            return (
+                <textarea
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={placeholder || '入力してください...'}
+                    className="wizard-textarea"
+                    autoFocus
+                    rows={5}
                 />
             );
         default:
