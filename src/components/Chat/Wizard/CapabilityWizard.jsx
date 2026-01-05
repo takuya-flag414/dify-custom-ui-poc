@@ -226,6 +226,7 @@ const CapabilityWizard = ({
                                             onChange={(val) => updateFormData(currentStep.id, val)}
                                             formData={formData}
                                             showSubject={currentStep.showSubject}
+                                            showRecipient={currentStep.showRecipient}
                                         />
                                     </motion.div>
                                 </AnimatePresence>
@@ -276,7 +277,7 @@ const ScenarioIcon = ({ iconName }) => {
 };
 
 // 入力UIのレンダラー
-const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange, formData, showSubject }) => {
+const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange, formData, showSubject, showRecipient }) => {
     switch (type) {
         case 'chips':
             return (
@@ -324,12 +325,19 @@ const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange,
             const shouldShowSubject = typeof showSubject === 'function'
                 ? showSubject(formData)
                 : !!showSubject;
+
+            // showRecipientが関数の場合はformDataで評価
+            const shouldShowRecipient = typeof showRecipient === 'function'
+                ? showRecipient(formData)
+                : !!showRecipient;
+
             return (
                 <WizardPrivacyTextarea
                     value={value || ''}
                     onChange={onChange}
                     placeholder={placeholder}
                     showSubject={shouldShowSubject}
+                    showRecipient={shouldShowRecipient}
                 />
             );
         case 'file-upload':

@@ -66,7 +66,9 @@ export const WIZARD_SCENARIOS = {
                 // 返信モードの場合のみ表示
                 conditionalShow: (formData) => formData.mode === "返信を作成",
                 // メール返信の場合は件名入力欄も表示
-                showSubject: (formData) => formData.docType === "メール返信"
+                showSubject: (formData) => formData.docType === "メール返信",
+                // 返信モードの場合は宛名入力欄を表示
+                showRecipient: (formData) => formData.mode === "返信を作成"
             },
             {
                 id: "tone",
@@ -85,14 +87,27 @@ export const WIZARD_SCENARIOS = {
             if (data.mode === "返信を作成") {
                 const replyType = data.docType === "メール返信" ? "メール" : "チャット";
 
-                // originalMessageがオブジェクト形式（件名+本文）の場合
+                // originalMessageがオブジェクト形式（宛名+件名+本文）の場合
+                let recipient = '';
+                let honorific = '';
                 let subject = '';
                 let message = '';
                 if (typeof data.originalMessage === 'object' && data.originalMessage !== null) {
+                    recipient = data.originalMessage.recipient || '';
+                    honorific = data.originalMessage.honorific || '';
                     subject = data.originalMessage.subject || '';
                     message = data.originalMessage.message || '';
                 } else {
                     message = data.originalMessage || '';
+                }
+
+                // 宛名と敬称の指定
+                let recipientSection = '';
+                if (recipient) {
+                    recipientSection = `【宛名】${recipient}\n`;
+                    if (honorific) {
+                        recipientSection += `【敬称】${honorific} (※文面ではトーンに関わらず必ずこの敬称を使用してください)\n`;
+                    }
                 }
 
                 const subjectLine = subject ? `【件名】${subject}\n` : '';
@@ -101,7 +116,7 @@ export const WIZARD_SCENARIOS = {
 
 【返信タイプ】${data.docType}
 【トーン】${data.tone}
-${subjectLine}
+${recipientSection}${subjectLine}
 【元のメッセージ】
 ${message || '(内容なし)'}
 
