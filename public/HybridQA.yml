@@ -9,7 +9,7 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai:0.2.6@e2665624a156f52160927bceac9e169bd7e5ae6b936ae82575e14c90af390e6e
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.2.4@1dc8cd4a3198584fd7639023951f388fff023caa234a4bdb8bba69d6091c2e64
     version: null
 - current_identifier: null
   type: marketplace
@@ -186,32 +186,6 @@ workflow:
     - data:
         isInIteration: false
         isInLoop: false
-        sourceType: if-else
-        targetType: assigner
-      id: 1764914026588-false-1764914133340-target
-      selected: false
-      source: '1764914026588'
-      sourceHandle: 'false'
-      target: '1764914133340'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: tool
-      id: 1764914157100-true-1764914255107-target
-      selected: false
-      source: '1764914157100'
-      sourceHandle: 'true'
-      target: '1764914255107'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
         sourceType: tool
         targetType: assigner
       id: 1764914255107-source-1764914281874-target
@@ -225,37 +199,12 @@ workflow:
     - data:
         isInLoop: false
         sourceType: if-else
-        targetType: assigner
-      id: 1764914157100-false-1764914726017-target
-      selected: false
-      source: '1764914157100'
-      sourceHandle: 'false'
-      target: '1764914726017'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
         targetType: answer
       id: 1762490237953-true-answer-target
       selected: false
       source: '1762490237953'
       sourceHandle: 'true'
       target: answer
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: assigner
-      id: 1764916701592-source-1764916740679-target
-      selected: false
-      source: '1764916701592'
-      sourceHandle: source
-      target: '1764916740679'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -287,42 +236,6 @@ workflow:
       zIndex: 0
     - data:
         isInLoop: false
-        sourceType: assigner
-        targetType: llm
-      id: 1764914113059-source-1764916701592-target
-      selected: false
-      source: '1764914113059'
-      sourceHandle: source
-      target: '1764916701592'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: assigner
-        targetType: llm
-      id: 1764914133340-source-1764916701592-target
-      selected: false
-      source: '1764914133340'
-      sourceHandle: source
-      target: '1764916701592'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: assigner
-        targetType: llm
-      id: 1764916740679-source-1764914312443-target
-      selected: false
-      source: '1764916740679'
-      sourceHandle: source
-      target: '1764914312443'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
         sourceType: if-else
         targetType: if-else
       id: 1765343666910-false-1764914157100-target
@@ -330,18 +243,6 @@ workflow:
       source: '1765343666910'
       sourceHandle: 'false'
       target: '1764914157100'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: tool
-      id: 1764914157100-1db66d52-c4bb-4b05-a087-6a73781c2d5b-1764914255107-target
-      selected: false
-      source: '1764914157100'
-      sourceHandle: 1db66d52-c4bb-4b05-a087-6a73781c2d5b
-      target: '1764914255107'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -355,30 +256,6 @@ workflow:
       source: '1765256779030'
       sourceHandle: source
       target: '1765345427966'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: if-else
-      id: 1764914312443-source-1765343666910-target
-      selected: false
-      source: '1764914312443'
-      sourceHandle: source
-      target: '1765343666910'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: assigner
-        targetType: code
-      id: 1764914726017-source-1765514869301-target
-      selected: false
-      source: '1764914726017'
-      sourceHandle: source
-      target: '1765514869301'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -847,6 +724,7 @@ workflow:
         sourceType: if-else
         targetType: llm
       id: 17665511238600-false-17665512406710-target
+      selected: false
       source: '17665511238600'
       sourceHandle: 'false'
       target: '17665512406710'
@@ -858,6 +736,7 @@ workflow:
         sourceType: llm
         targetType: answer
       id: 17665512406710-source-17655153635450-target
+      selected: false
       source: '17665512406710'
       sourceHandle: source
       target: '17655153635450'
@@ -869,6 +748,7 @@ workflow:
         sourceType: if-else
         targetType: if-else
       id: 1765343666910-true-17665517221250-target
+      selected: false
       source: '1765343666910'
       sourceHandle: 'true'
       target: '17665517221250'
@@ -880,6 +760,7 @@ workflow:
         sourceType: if-else
         targetType: llm
       id: 17665517221250-true-1765256779030-target
+      selected: false
       source: '17665517221250'
       sourceHandle: 'true'
       target: '1765256779030'
@@ -891,6 +772,7 @@ workflow:
         sourceType: if-else
         targetType: llm
       id: 17665517221250-false-17665517422840-target
+      selected: false
       source: '17665517221250'
       sourceHandle: 'false'
       target: '17665517422840'
@@ -902,9 +784,106 @@ workflow:
         sourceType: llm
         targetType: answer
       id: 17665517422840-source-1765345427966-target
+      selected: false
       source: '17665517422840'
       sourceHandle: source
       target: '1765345427966'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: llm
+      id: 1764914113059-source-1764914312443-target
+      selected: false
+      source: '1764914113059'
+      sourceHandle: source
+      target: '1764914312443'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1764914312443-source-1765343666910-target
+      selected: false
+      source: '1764914312443'
+      sourceHandle: source
+      target: '1765343666910'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1764914157100-true-1764916701592-target
+      selected: false
+      source: '1764914157100'
+      sourceHandle: 'true'
+      target: '1764916701592'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: 1764916701592-source-1764916740679-target
+      selected: false
+      source: '1764916701592'
+      sourceHandle: source
+      target: '1764916740679'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: tool
+      id: 1764916740679-source-1764914255107-target
+      selected: false
+      source: '1764916740679'
+      sourceHandle: source
+      target: '1764914255107'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1764914157100-1db66d52-c4bb-4b05-a087-6a73781c2d5b-1764916701592-target
+      selected: false
+      source: '1764914157100'
+      sourceHandle: 1db66d52-c4bb-4b05-a087-6a73781c2d5b
+      target: '1764916701592'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1764914026588-false-1764914312443-target
+      selected: false
+      source: '1764914026588'
+      sourceHandle: 'false'
+      target: '1764914312443'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1764914157100-false-1765514869301-target
+      selected: false
+      source: '1764914157100'
+      sourceHandle: 'false'
+      target: '1765514869301'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -998,7 +977,7 @@ workflow:
           required: false
           type: paragraph
           variable: mock_rag_context
-        - default: 2025年12月10日
+        - default: 2025年12月26日
           hint: ''
           label: Current Time
           max_length: 100
@@ -1086,10 +1065,10 @@ workflow:
       id: '1762490237953'
       position:
         x: 342
-        y: 98.61165168988839
+        y: 96
       positionAbsolute:
         x: 342
-        y: 98.61165168988839
+        y: 96
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1230,36 +1209,10 @@ workflow:
       id: '1764914113059'
       position:
         x: 2836
-        y: 369
+        y: 404
       positionAbsolute:
         x: 2836
-        y: 369
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        items:
-        - input_type: variable
-          operation: clear
-          value: ''
-          variable_selector:
-          - conversation
-          - context_rag
-          write_mode: over-write
-        selected: false
-        title: CLEAR_RAG_Context
-        type: assigner
-        version: '2'
-      height: 84
-      id: '1764914133340'
-      position:
-        x: 2836
-        y: 533
-      positionAbsolute:
-        x: 2836
-        y: 533
+        y: 404
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1302,11 +1255,11 @@ workflow:
       height: 198
       id: '1764914157100'
       position:
-        x: 4586
-        y: 473
+        x: 3902
+        y: 436
       positionAbsolute:
-        x: 4586
-        y: 473
+        x: 3902
+        y: 436
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1789,9 +1742,16 @@ workflow:
         tool_parameters:
           query:
             type: mixed
-            value: '{{#conversation.optimized_search_query#}}
+            value: '[検索コンテキスト]
 
-              {{#sys.query#}}
+              最適化されたキーワード: {{#conversation.optimized_search_query#}}
+
+              ユーザーの意図・ニュアンス: {{#sys.query#}}
+
+
+              [システムへの指示]
+
+              上記の「最適化されたキーワード」と「ユーザーの意図」の両方を考慮して検索を行い、回答してください。
 
 
               【重要：出力形式の強制】
@@ -1800,6 +1760,7 @@ workflow:
 
 
               1. **本文中の引用**: 生成する回答の本文中には、情報の根拠となる箇所に必ず `[1]`, `[2]` のような形式で出典番号を埋め込んでください。出典番号のない記述は避けてください。
+
 
               2. **出典リスト**: 回答の最下部に、使用した出典を以下のフォーマットで列挙してください。
 
@@ -1814,10 +1775,10 @@ workflow:
       id: '1764914255107'
       position:
         x: 4948
-        y: 461
+        y: 269
       positionAbsolute:
         x: 4948
-        y: 461
+        y: 269
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1842,149 +1803,10 @@ workflow:
       id: '1764914281874'
       position:
         x: 5290
-        y: 606
+        y: 414
       positionAbsolute:
         x: 5290
-        y: 606
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        model:
-          completion_params:
-            temperature: 0.7
-          mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
-        prompt_template:
-        - id: b695f1a9-a7a1-4314-b497-cf46a845994b
-          role: system
-          text: '# Role
-
-            あなたは、ユーザーの入力とAIによる正規化済みクエリの**両方を比較分析**し、最適な処理ルートを決定する高度なルーターです。
-
-
-            # Input Data
-
-
-            ## 1. User Query (Raw Input)
-
-            {{#sys.query#}}
-
-            ※ユーザーが入力した生のテキスト。文脈、ニュアンス、意図の強さを含みます。
-
-
-            ## 2. Optimized Query (Normalized)
-
-            {{#conversation.optimized_search_query#}}
-
-            ※日付の具体化、指示語の補完、キーワード抽出が行われたテキスト。
-
-
-            # Decision Logic (Priority Order)
-
-
-            ## Step 1: Detect Chat & Greetings (雑談判定)
-
-            **User Query (Raw Input)** を最優先で評価してください。
-
-            ユーザーの生の入力が「こんにちは」「ありがとう」「なるほど」「了解」などの**単純な挨拶・相槌**である場合、たとえ Optimized Query
-            に何らかの単語が入っていたとしても、**`CHAT`** を出力してください。
-
-
-            ## Step 2: Detect External / Hybrid Search Needs (Web検索・ハイブリッド判定)
-
-            **Optimized Query** を中心に確認してください。
-
-            以下の要素が含まれる場合は、社内情報の参照が必要かどうかにかかわらず、外部情報の取得が必須であるため **`SEARCH`** を出力してください。
-
-            **（※「社内規定と法律の比較」のようなハイブリッドな質問も、ここで SEARCH と判定します）**
-
-
-            * **法務・コンプライアンス**: 「法的」「法律」「法規制」「法令」「条例」「判例」「コンプライアンス」「GDPR」「著作権」「商標」
-
-            * **市場・社会動向**: 「トレンド」「流行」「シェア」「株価」「経済指標」「ニュース」「世論」「不祥事」
-
-            * **外部評価・比較**: 「評判」「口コミ」「レビュー」「競合他社」「業界標準」「一般的な」「世間的な」
-
-            * **具体的な日時・場所**: 「2025年12月9日」「今日」「大阪の天気」など、時事性や場所性が強い情報。
-
-            * **検索の明示**: User Query に「検索して」「調べて」「ググって」という指示が含まれる場合。
-
-
-            ## Step 3: Detect Internal Resources (内部知識判定)
-
-            Step 2に該当しなかった場合のみ、こちらを評価してください。
-
-            以下の要素が含まれる場合は、内部処理（RAG/ファイル参照）で完結するため **`LOGICAL`** を出力してください。
-
-
-            * **ファイル参照**: 「添付ファイル」「これらの資料」「アップロードしたPDF」「議事録」「内容」など、**添付されたファイル群**への言及。
-
-            * **社内用語**: 「社内規定」「ガイドライン」「マニュアル」「稟議」「経費精算」「就業規則」
-
-            * **タスク指示**: 「要約して」「翻訳して」「校正して」「案出しして」
-
-
-            ## Step 4: Default Fallback
-
-            上記のいずれにも明確に該当しない場合（一般的な知識質問など）は、LLMの知識で回答するため **`LOGICAL`** を出力してください。
-
-
-            # Output Format
-
-            余計な記号を含めず、以下のいずれかの単語のみを出力してください。
-
-
-            SEARCH
-
-            LOGICAL
-
-            CHAT'
-        selected: false
-        title: LLM_Intent_Analysis
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '1764914312443'
-      position:
-        x: 3882
-        y: 516
-      positionAbsolute:
-        x: 3882
-        y: 516
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        items:
-        - input_type: variable
-          operation: clear
-          value: ''
-          variable_selector:
-          - conversation
-          - context_web
-          write_mode: over-write
-        selected: false
-        title: CLEAR_Web_Context
-        type: assigner
-        version: '2'
-      height: 84
-      id: '1764914726017'
-      position:
-        x: 5290
-        y: 368
-      positionAbsolute:
-        x: 5290
-        y: 368
+        y: 414
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2009,8 +1831,105 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: b695f1a9-a7a1-4314-b497-cf46a845994b
+          role: system
+          text: '# Role
+
+            あなたは、ユーザーの入力と会話履歴を分析し、最適な処理ルートを決定するルーターです。
+
+
+            # Input Data
+
+            ## User Query (Raw)
+
+            {{#sys.query#}}
+
+
+            ## Conversation History
+
+            ※直前の会話内容を参照し、「それ」「あれ」などの指示語が何を指すか補完して判断してください。
+
+
+            # Decision Logic (Priority Order)
+
+
+            ## Step 1: Detect Chat & Greetings (雑談判定)
+
+            ユーザーの入力が「こんにちは」「ありがとう」「なるほど」などの単純な挨拶・相槌である場合、**`CHAT`** を出力してください。
+
+
+            ## Step 2: Detect External / Hybrid Search Needs (Web検索判定)
+
+            以下の要素が含まれる場合は、**社内資料の有無に関わらず、必ず `SEARCH` を出力してください**。
+
+
+            * **法務・コンプライアンス**: 「法律」「合法」「適法」「著作権」「規制」「コンプラ」「リスク」「違反」などの法的・社会的な適合性確認。
+
+            * **外部情報の照合**: 「一般的な」「世の中の」「他社の」事例や基準との比較。
+
+            * **具体的な日時・場所**: 「今日」「大阪の天気」「最新の」。
+
+            * **外部評価・トレンド**: 「株価」「評判」「ニュース」。
+
+            * **検索の明示的な指示**: 「検索して」「ググって」「調べて」。
+
+
+            ## Step 3: Default / Internal
+
+            上記に該当しない、一般的な知識質問やファイルに関する質問は **`LOGICAL`** を出力してください。
+
+
+            # Output Format
+
+            SEARCH
+
+            LOGICAL
+
+            CHAT
+
+            （余計な記号や説明は一切禁止）'
+        selected: false
+        title: LLM_Intent_Analysis
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1764914312443'
+      position:
+        x: 3198
+        y: 479
+      positionAbsolute:
+        x: 3198
+        y: 479
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 6d795767-8518-4886-b2c8-f5bce5f42eaf
           role: system
@@ -2031,11 +1950,11 @@ workflow:
       height: 88
       id: '1764916701592'
       position:
-        x: 3198
-        y: 516
+        x: 4264
+        y: 412
       positionAbsolute:
-        x: 3198
-        y: 516
+        x: 4264
+        y: 412
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2059,11 +1978,11 @@ workflow:
       height: 84
       id: '1764916740679'
       position:
-        x: 3540
-        y: 518
+        x: 4606
+        y: 414
       positionAbsolute:
-        x: 3540
-        y: 518
+        x: 4606
+        y: 414
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2123,19 +2042,24 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: e1156068-8c73-43a4-ba64-f4811246319b
           role: system
-          text: "# Role\nあなたは、ユーザーの業務をサポートする「有能で機転の利くAIアシスタント」です。\nユーザーからの挨拶や呼びかけに対し、**「お疲れ様です。」などのビジネス挨拶**を必ず行い、続けて簡潔に用件を伺ってください。\n\
-            \n# Guidelines\n1. **Style (Business Professional)**:\n   - **挨拶必須**:\
-            \ 回答の冒頭は必ず「お疲れ様です。」「おはようございます。」「はい、」などで始めてください。**挨拶なしで唐突に要件を聞くことは「失礼」にあたるため禁止します。**\n\
-            \   - **文体**: 礼儀正しく、かつ簡潔な「です・ます」調を使用してください。\n   - **態度**: 「優秀な秘書」のように、丁寧かつ無駄のない対応を心がけてください。\n\
-            \n2. **Output Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n   - JSON形式を厳守してください。\n\
-            \n# User Input\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。\n\
-            \n{\n  \"answer\": \"お疲れ様です。\\n\\n検索や資料作成など、何かお手伝いしましょうか？\",\n  \"citations\"\
-            : []\n}"
+          text: "# Role\nあなたは、ユーザーの業務をサポートする「有能で機転の利くAIアシスタント」です。\nユーザーからの挨拶や呼びかけに対し、**ビジネスライクかつ最小限の応答**をJSON形式で返してください。\n\
+            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
+            \   - **Visual**: 絵文字は一切使用しないでください。\n\n2. **Greeting & Context (重要: 重複排除)**:\n\
+            \   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n   - **Case\
+            \ 1: First Turn (会話の冒頭)**\n     - 「お疲れ様です。」の一言だけ添えて、用件を伺ってください。\n   -\
+            \ **Case 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は完全に省略してください。**\n\
+            \     - ユーザーの入力（感謝や肯定）に対して、「承知いたしました。」「他にご用件はありますか？」等、**最も短い表現**で次のタスクを促してください。\n\
+            \n3. **Citation Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n\n# Input\
+            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず\
+            \ `{` で開始し `}` で終了してください。\n\n## Output Example (Subsequent Turns)\n{\n\
+            \  \"answer\": \"承知いたしました。\\n他にお手伝いすることはありますか？\",\n  \"citations\": []\n\
+            }"
         selected: false
         title: LLM_Chat_Efficient
         type: llm
@@ -2144,11 +2068,11 @@ workflow:
       height: 88
       id: '1765256779030'
       position:
-        x: 4948
-        y: 915
+        x: 4264
+        y: 744
       positionAbsolute:
-        x: 4948
-        y: 915
+        x: 4264
+        y: 744
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2173,11 +2097,11 @@ workflow:
       height: 124
       id: '1765343666910'
       position:
-        x: 4224
-        y: 498
+        x: 3540
+        y: 461
       positionAbsolute:
-        x: 4224
-        y: 498
+        x: 3540
+        y: 461
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2192,11 +2116,11 @@ workflow:
       height: 120
       id: '1765345427966'
       position:
-        x: 5379.999999999999
-        y: 940.9999999999998
+        x: 4626
+        y: 748
       positionAbsolute:
-        x: 5379.999999999999
-        y: 940.9999999999998
+        x: 4626
+        y: 748
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2212,10 +2136,10 @@ workflow:
       id: '1765345440190'
       position:
         x: 7080
-        y: 304
+        y: 138
       positionAbsolute:
         x: 7080
-        y: 304
+        y: 138
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2270,10 +2194,10 @@ workflow:
       id: '1765514869301'
       position:
         x: 5652
-        y: 595
+        y: 429
       positionAbsolute:
         x: 5652
-        y: 595
+        y: 429
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2321,10 +2245,10 @@ workflow:
       id: '1765515071449'
       position:
         x: 5994
-        y: 525
+        y: 359
       positionAbsolute:
         x: 5994
-        y: 525
+        y: 359
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2348,30 +2272,39 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
           text: "# Role\nあなたは、社内外の情報を統合してJSONデータを生成する「APIエンドポイント」です。\nユーザーがアップロードした資料、社内規定(RAG)、Web情報を比較・照合し、**純粋なJSON文字列のみ**を出力してください。\n\
-            \n# Guidelines\n1. **Style (Efficient)**:\n   - **JSON内の `answer` の文体**:\
-            \ 簡潔で客観的な「です・ます」調。挨拶や前置きは削除し、「### 結論」から書き出してください。\n   - **内容**: 事実のみを抽出し、Wikipediaやレポートのように構造化してください。\n\
-            \n2. **Citation Rule (出典)**:\n   - 回答の事実には、必ず根拠となる出典番号 `[1]` `[2]` を付記してください。\n\
-            \   - 添付ファイルは必ず `citations` 配列の先頭に個別に含めてください。\n\n# Input Data\n## 1. User\
-            \ Uploaded Files\n- Names: {{#conversation.context_file_name#}}\n- Content:\
-            \ {{#conversation.context_file#}}\n\n## 2. Internal Knowledge (RAG)\n\
-            {{#conversation.context_rag#}}\n\n## 3. Web Search Results\n{{#conversation.context_web#}}\n\
-            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n出力全体をMarkdownコードブロック（```json）で囲むことは厳禁です。必ず\
-            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n**注意: これはフォーマットの例です。このJSON構造自体を\
-            \ `answer` の中に書き込まないでください。**\n\n{\n  \"answer\": \"### 結論\\n\\n提案内容は規定に違反する可能性があります[1]。\\\
-            n\\n### 詳細比較\\n\\n- **提案書**: 外部送信を推奨[1]。\\n- **社内規定**: 禁止されています[2]。\"\
-            ,\n  \"citations\": [\n    { \"id\": \"cite_1\", \"type\": \"document\"\
-            , \"source\": \"ファイル名\", \"url\": null },\n    { \"id\": \"cite_2\", \"\
-            type\": \"rag\", \"source\": \"規定名\", \"url\": null },\n    { \"id\":\
-            \ \"cite_3\", \"type\": \"web\", \"source\": \"Webページ名\", \"url\": \"\
-            URL\" }\n  ]\n}\n\n# Final Constraints\n1. JSON構造を壊さないよう、`answer` 内の改行は必ず\
-            \ `\\n` に、ダブルクォーテーションは `\\\"` にエスケープしてください。\n2. `answer` フィールドの中に、上記の\
-            \ `Output Example` や `citations` リストを含めないでください。`answer` は純粋な回答テキストのみです。"
+            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
+            \   - **Structure**:\n     - **挨拶や前置き（「確認しました」等）は一切禁止**です。\n     - 必ず\
+            \ **「### 結論」** という見出しから書き出し、その後に「### 詳細比較」「### 根拠」などの見出しで事実を羅列してください。\n\
+            \     - 絵文字は使用しないでください。\n\n2. **Citation Rule (重要: 出典の表記と統合)**:\n   -\
+            \ **Format**: 文中の引用番号は `[1][2]` のように**個別のブラケット**で記述してください。`[1, 2]` は禁止です。\n\
+            \   - **Renumbering**: 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を `[1]` から連番で採番し直してください。\n\
+            \     1. **User Uploaded Files** (`type`: \"document\")\n     2. **Internal\
+            \ Knowledge (RAG)** (`type`: \"rag\")\n     3. **Web Search Results**\
+            \ (`type`: \"web\")\n   - **Consistency**: 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\
+            \n# Input Data\n\n## 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\
+            \n## 1. User Uploaded Files\n- File Names: {{#conversation.context_file_name#}}\n\
+            - Content: {{#conversation.context_file#}}\n\n## 2. Internal Knowledge\
+            \ (RAG)\n{{#conversation.context_rag#}}\n\n## 3. Web Search Results\n\
+            {{#conversation.context_web#}}\n\n# User Query\n{{#sys.query#}}\n\n# Processing\
+            \ Steps (Mental Chain)\n1. **情報源の有無判定**:\n   - 各Input Dataが空でないか確認します。**空の情報源は出典リストおよび回答から完全に除外してください。**\n\
+            \n2. **出典リストの構築**:\n   - 存在する情報源だけを `citations` リストに追加し、連番を振ります。\n\n3.\
+            \ **回答の生成**:\n   - 結論を最初に記述します。\n   - 複数の情報源がある場合、それぞれの整合性や差異について客観的に記述します。\n\
+            \n4. **JSON出力**:\n   - JSON形式に変換します。\n\n# Output Format (JSON Only)\n\
+            Markdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n見出しの直後は必ず `\\n\\n` を入れてください。\n\
+            \n## Output Example\n{\n  \"answer\": \"### 結論\\n\\n提案内容はWeb上の事例とは一致しますが、社内規定には違反する可能性があります[1][2]。\\\
+            n\\n### 詳細比較\\n\\n- **提案書**: 外部チャットツールの利用を推奨しています[1]。\\n- **社内規定**: 許可されたツール以外の利用を原則禁止しています[2]。\\\
+            n- **Web調査**: 同様のツールによる情報漏洩事例が報告されています[3]。\",\n  \"citations\": [\n  \
+            \  { \"id\": \"cite_1\", \"type\": \"document\", \"source\": \"提案書.pdf\"\
+            , \"url\": null },\n    { \"id\": \"cite_2\", \"type\": \"rag\", \"source\"\
+            : \"セキュリティ規定.pdf\", \"url\": null },\n    { \"id\": \"cite_3\", \"type\"\
+            : \"web\", \"source\": \"セキュリティニュース\", \"url\": \"https://...\" }\n  ]\n\
+            }\n\n# Final Constraints\n1. JSON構造を絶対に崩さないでください。\n2. `answer` フィールドに、挨拶や「いかがでしたか？」等の結びの言葉を含めないでください。"
         selected: false
         title: LLM_Hybrid_Efficient
         type: llm
@@ -2381,10 +2314,10 @@ workflow:
       id: '17655151756460'
       position:
         x: 6718
-        y: 172
+        y: 6
       positionAbsolute:
         x: 6718
-        y: 172
+        y: 6
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2409,24 +2342,25 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、ドキュメントの内容を正確に読み解く「ドキュメント分析エンジン」です。\n提供されたファイルの内容のみに基づき、**JSON形式**で回答を出力してください。\n\
-            \n# Guidelines\n1. **Style (Efficient)**:\n   - **文体**: 簡潔で客観的な**「です・ます」調**を使用してください。\n\
-            \   - **構成**: 「### 要約」などの見出しを使い、事実のみを抽出してください。挨拶は不要です。\n   - **厳密性**:\
-            \ ファイルに書かれていないことは「記載なし」としてください。\n\n2. **Citation Rule (出典)**:\n   - 根拠箇所には\
-            \ `[1]` `[2]` のように、該当するファイルの番号を付記してください。\n   - `citations` 配列の先頭に、対象ファイルを必ず含めてください。\n\
-            \n# Input Data\n## File Names\n{{#conversation.context_file_name#}}\n\n\
-            ## Content\n{{#conversation.context_file#}}\n\n# User Query\n{{#sys.query#}}\n\
-            \n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
-            \n{\n  \"answer\": \"### 要約\\n\\n資料によると、2025年度の売上目標は**20%増**と設定されています[1]。\\\
-            n\\n### 課題\\n\\n- 人材不足が深刻化している[2]。\\n- 設備投資の遅れが指摘されている[1]。\",\n  \"citations\"\
-            : [\n    { \"id\": \"cite_1\", \"type\": \"document\", \"source\": \"\
-            計画書.pdf\", \"url\": null },\n    { \"id\": \"cite_2\", \"type\": \"document\"\
-            , \"source\": \"課題一覧.txt\", \"url\": null }\n  ]\n}"
+          text: "# Role\nあなたは、ドキュメントの内容を正確に読み解く「ドキュメント分析エンジン」です。\n提供されたファイルの内容のみに基づき、事実を抽出してJSON形式で出力してください。\n\
+            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
+            \   - **Structure**:\n     - 挨拶は不要です。**「### 要約」** などの見出しから開始してください。\n\
+            \   - **Fact Only**:\n     - ファイルに書かれていないことは「記載なし」としてください。推測は禁止です。\n\n\
+            2. **Citation Rule**:\n   - **Format**: `[1][2]` 形式を使用してください。\n   - **Renumbering**:\
+            \ ファイルリスト順に `[1]` から採番してください。\n\n# Input Data\n\n## 1. File Names\n{{#conversation.context_file_name#}}\n\
+            \n## 2. File Content\n{{#conversation.context_file#}}\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず\
+            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n{\n  \"answer\": \"###\
+            \ 要約\\n\\n資料によると、2025年度の売上目標は**20%増**と設定されています[1]。\\n\\n### 課題\\n\\n-\
+            \ 人材不足が深刻化している[2]。\\n- 設備投資の遅れが指摘されている[1]。\",\n  \"citations\": [\n  \
+            \  { \"id\": \"cite_1\", \"type\": \"document\", \"source\": \"計画書.pdf\"\
+            , \"url\": null },\n    { \"id\": \"cite_2\", \"type\": \"document\",\
+            \ \"source\": \"課題一覧.txt\", \"url\": null }\n  ]\n}"
         selected: false
         title: LLM_Doc_Efficient
         type: llm
@@ -2436,10 +2370,10 @@ workflow:
       id: '17655151779960'
       position:
         x: 6718
-        y: 508
+        y: 342
       positionAbsolute:
         x: 6718
-        y: 508
+        y: 342
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2464,44 +2398,28 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」です。\nユーザーの質問に対し、検索結果（RAGおよびWeb）に基づいて正確に回答してください。\n\
-            システム連携のため、**厳格なJSON形式**で出力する義務があります。\nユーザーの質問に対し、**これまでの会話の文脈（メモリ）を考慮しつつ**、提供されたデータに基づいて論理的に回答してください。\
-            \ \n\n# 重要な制約（Memory vs Fact）\n - **会話履歴（メモリ）の利用範囲**: ユーザーの意図理解や、以前の話題への言及（「先ほど申し上げた通り...」等）に使用してください。\n\
-            \ - **事実の根拠**: 回答の事実は、必ず以下の **Input Data (RAG / Web)** のみに基づいてください。会話履歴内の古い情報や、あなたの記憶にある一般知識で事実を上書きしないでください。\n\
-            \n# Input Data\n\n## 1. Internal Knowledge (RAG：社内規定)\n{{#conversation.context_rag#}}\n\
-            ※ここが空の場合、社内規定は参照していません。**この欄が空なら、社内規定情報は一切回答に含めないでください。**\n\n## 2. Web\
-            \ Search Results (Web：外部情報)\n{{#conversation.context_web#}}\n※Perplexityによる検索結果（Source\
-            \ List含む）\n※ここが空の場合、Web検索結果は取得できていません。\n\n## 3. Web Search Mode Status\n\
-            {{#1761291739140.web_search_mode#}}\n\n# User Query\n{{#sys.query#}}\n\
-            \n# User Custom Settings (Override)\nユーザーは以下の振る舞いを指定しています。**回答本文（answerフィールド）の生成において**、これらを最優先で反映してください。\n\
-            \n1. **AI Style Mode**: {{#1761291739140.ai_style#}}\n   - `efficient`\
-            \ (効率重視): \n     - **事実の羅列**: 「### 調査結果」などの見出しを使い、判明した事実を淡々と記述してください。\n\
-            \   - `partner` (思考パートナー): \n     - **見出し禁止**: 見出しは使わず、「調べてみたところ...」「一方で...」といった接続詞で文章を繋げてください。\n\
-            \     - **文脈化**: 単なる情報の提示ではなく、その情報がユーザーにとってどういう意味を持つかを示唆してください。\n\n2.\
-            \ **Additional Instructions**: \n{{#1761291739140.system_prompt#}}\n\n\
-            # Processing Steps\n\n1.  **出典リストの生成**\n    * **RAG**: 社内規定を参照した場合。`type`:\
-            \ \"rag\"。`source` はRAGデータ内の `source_name`。`url` は `null`。\n    * **Web**:\
-            \ Web検索を参照した場合。`type`: \"web\"。`source`（タイトル）と `url` は、入力された `Source List`\
-            \ から**一字一句変更せず転記**してください。**URLのnullは厳禁**です。\n    * **注意**: この検索モードではユーザーからの添付ファイルは参照されないため、`type`:\
-            \ \"document\" は使用しないでください。\n\n2.  **回答作成（情報有無の判定）**\n    * **情報がある場合**:\n\
-            \        * 社内規定とWeb情報を組み合わせて回答してください。\n        * 根拠箇所には必ず `[n]` の通し番号を付記してください。\n\
-            \    * **情報がない（Input Dataが空、または関連情報がない）場合**:\n        * **Case A (`Web\
-            \ Search Mode Status` が `force` または `auto` の場合)**:\n            * 「Web検索および社内規定を確認しましたが、関連する情報は見つかりませんでした。」と回答してください。\n\
-            \        * **Case B (`Web Search Mode Status` が `off` の場合)**:\n      \
-            \      * 「社内規定に関連情報がなく、Web検索モードもOFFのため回答できません。」と回答してください。\n\n3.  **JSON出力**\n\
-            \n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。以下のJSON文字列のみを出力してください。\n\
-            **【重要】見出し（###など）を使用する場合は、必ず直後に `\\n\\n` （改行2つ）を入れて、本文と分離してください。**\n\n\
-            ## 出力例\n{\n  \"answer\": \"### 結論\\n\\nリモートワーク手当は月額5,000円です[1]。\\n\\n###\
-            \ 他社事例\\n\\n- A社: 全額支給[2]\\n- B社: 支給なし[3]\",\n  \"citations\": [\n   \
-            \ { \"id\": \"cite_1\", \"type\": \"rag\", \"source\": \"給与規定.pdf\", \"\
-            url\": null },\n    { \"id\": \"cite_2\", \"type\": \"web\", \"source\"\
+          text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」です。\n提供されたデータ（RAG/Web）に基づき、**事実のみ**を抽出してJSON形式で出力してください。\n\
+            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
+            \   - **Structure**:\n     - 挨拶は不要です。**「### 調査結果」** という見出しから開始してください。\n\
+            \   - **No Info Handling**:\n     - 情報が見つからない場合も、謝罪（「申し訳ありません」）は不要です。「該当する情報は確認できませんでした。」と事実のみを伝えてください。\n\
+            \n2. **Citation Rule**:\n   - **Format**: `[1][2]` 形式を使用してください。\n   -\
+            \ **Renumbering**: `[1]` から連番で採番してください。\n\n# Input Data\n\n## 0. Context\
+            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n- Web Search\
+            \ Mode: {{#1761291739140.web_search_mode#}}\n\n## 1. Internal Knowledge\
+            \ (RAG)\n{{#conversation.context_rag#}}\n\n## 2. Web Search Results\n\
+            {{#conversation.context_web#}}\n\n# User Query\n{{#sys.query#}}\n\n# Output\
+            \ Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\
+            \n## Output Example\n{\n  \"answer\": \"### 調査結果\\n\\nリモートワーク手当は月額5,000円です[1]。\\\
+            n\\n### 他社事例\\n\\n- A社: 全額支給[2]\\n- B社: 支給なし[3]\",\n  \"citations\": [\n\
+            \    { \"id\": \"cite_1\", \"type\": \"rag\", \"source\": \"給与規定.pdf\"\
+            , \"url\": null },\n    { \"id\": \"cite_2\", \"type\": \"web\", \"source\"\
             : \"調査.com\", \"url\": \"https://...\" }\n  ]\n}\n\n# Final Constraints\n\
-            - `type`: \"web\" のURLは必ず入力データから抽出してください（null禁止）。\n- JSONフォーマットを絶対に崩さないでください。"
+            1. JSON構造を絶対に崩さないでください。\n2. 確証のない情報は記述しないでください。"
         selected: false
         title: LLM_Search_Efficient
         type: llm
@@ -2511,10 +2429,10 @@ workflow:
       id: '17655151786270'
       position:
         x: 6718
-        y: 844
+        y: 678
       positionAbsolute:
         x: 6718
-        y: 844
+        y: 678
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2539,20 +2457,22 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、一般的な知識に基づいてタスクを遂行する「知識処理エンジン」です。\n現在、参照すべき外部資料は提供されていません。**JSON形式**で回答を出力してください。\n\
-            \n# Guidelines\n1. **Style (Efficient)**:\n   - **文体**: 簡潔で客観的な**「です・ます」調**を使用してください。\n\
-            \   - **構成**: 「### 回答」などの見出しを使い、定義や結論のみを記述してください。挨拶は不要です。\n   - **対応**:\
-            \ 社内規定などを聞かれた場合は、「情報なし」と回答し、Web検索モードを推奨してください。\n\n2. **Citation Rule**:\n\
-            \   - 外部コンテキストがないため、`citations` は必ず空配列 `[]` にしてください。\n\n# User Query\n\
-            {{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
-            \n{\n  \"answer\": \"### 概要\\n\\nAI（人工知能）とは、人間の知的振る舞いを模倣するコンピュータプログラムのことです。\\\
-            n\\n### 特徴\\n\\n- **学習**: データからパターンを学ぶ。\\n- **推論**: 未知のデータに対して判断を行う。\"\
-            ,\n  \"citations\": []\n}"
+          text: "# Role\nあなたは、一般的な知識に基づいてタスクを遂行する「知識処理エンジン」です。\n参照すべき外部資料はありません。あなたの知識に基づき、事実のみをJSON形式で出力してください。\n\
+            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
+            \   - **Structure**:\n     - 挨拶は不要です。**「### 回答」** などの見出しから開始してください。\n\
+            \   - **Fact Only**:\n     - 社内規定や最新情報を聞かれた場合は、「情報なし」と回答し、Web検索モードの利用を推奨してください。\n\
+            \n2. **Citation Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n\n# Input\
+            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず\
+            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n{\n  \"answer\": \"###\
+            \ 概要\\n\\nAI（人工知能）とは、人間の知的振る舞いを模倣するコンピュータプログラムのことです。\\n\\n### 特徴\\n\\\
+            n- **学習**: データからパターンを学ぶ。\\n- **推論**: 未知のデータに対して判断を行う。\",\n  \"citations\"\
+            : []\n}"
         selected: false
         title: LLM_General_Efficient
         type: llm
@@ -2562,10 +2482,10 @@ workflow:
       id: '17655151791010'
       position:
         x: 6718
-        y: 1180
+        y: 1014
       positionAbsolute:
         x: 6718
-        y: 1180
+        y: 1014
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2581,10 +2501,10 @@ workflow:
       id: '17655153615920'
       position:
         x: 7080
-        y: 512
+        y: 346
       positionAbsolute:
         x: 7080
-        y: 512
+        y: 346
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2600,10 +2520,10 @@ workflow:
       id: '17655153626170'
       position:
         x: 7080
-        y: 848
+        y: 682
       positionAbsolute:
         x: 7080
-        y: 848
+        y: 682
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2619,10 +2539,10 @@ workflow:
       id: '17655153635450'
       position:
         x: 7080
-        y: 1184
+        y: 1018
       positionAbsolute:
         x: 7080
-        y: 1184
+        y: 1018
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2659,7 +2579,7 @@ workflow:
       positionAbsolute:
         x: 704
         y: 420
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -2683,21 +2603,19 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
           role: system
-          text: "# Role\nあなたは、ユーザーがアップロードした資料から必要な情報を瞬時に抽出する「ドキュメント分析エンジン」です。\n提供された\
-            \ **File Content** の内容に基づき、ユーザーの質問に対して最短・最速で事実のみを回答してください。\n\n# Guidelines\n\
-            1. **Structure (結論ファースト)**:\n   - 挨拶や前置き（「資料を確認しました」等）は一切禁止です。\n   - 必ず「###\
-            \ 結論」という見出しから書き出してください。\n   - その後、「### 詳細」や「### 根拠」として、箇条書きを用いて情報を圧縮して提示してください。\n\
-            \n2. **Basis (事実の厳守)**:\n   - 回答の根拠は、原則として提供された **File Content** のみに求めてください。\n\
-            \   - 資料に記載がない事項については「資料には記載なし」と短く回答してください。推測で補わないでください。\n\n3. **Format**:\n\
-            \   - Markdown形式のみを出力してください。JSONは禁止です。\n\n# Input Data\n## File Name\n\
-            {{#conversation.context_file_name#}}\n\n## File Content\n{{#conversation.context_file#}}\n\
-            \n## User Query\n{{#sys.query#}}\n\n# Output Instruction\n以下のフォーマットに従って回答を出力してください。\n\
-            \n### 結論\n（ここに結論を1〜2行で記述）\n\n### 要点\n- （事実1）\n- （事実2）"
+          text: "# Role\nあなたは、ドキュメントの内容を高速に処理する「ドキュメント分析エンジン」です。\n**提供されたファイルの内容のみ**に基づき、事実を抽出して回答してください。\n\
+            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
+            \   - **Structure**:\n     - 挨拶は不要です。即座に**「### 要約」**や**「### 抽出結果」**などの見出しから開始してください。\n\
+            \   - **Fact Only**:\n     - ファイルに書かれていないことは「記載なし」としてください。\n\n2. **Format**:\n\
+            \   - **JSONは使用しません。** Markdownテキストとして直接出力してください。\n   - 引用番号（例: [1]）の使用は任意ですが、Fast\
+            \ Modeのため出典リストの作成は不要です。\n\n# Input Data\n## 1. File Names\n{{#conversation.context_file_name#}}\n\
+            \n## 2. File Content\n{{#conversation.context_file#}}\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Instruction\n回答のみをMarkdown形式でストリーミングしてください。"
         selected: false
         title: LLM_Fast_Doc_Efficient
         type: llm
@@ -2707,10 +2625,10 @@ workflow:
       id: '1765854614015'
       position:
         x: 2836
-        y: 697
+        y: 643
       positionAbsolute:
         x: 2836
-        y: 697
+        y: 643
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2726,10 +2644,10 @@ workflow:
       id: '1765854668107'
       position:
         x: 3198
-        y: 701
+        y: 647
       positionAbsolute:
         x: 3198
-        y: 701
+        y: 647
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2887,21 +2805,19 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
           role: system
-          text: "# Role\nあなたは、ユーザーの指示を高速かつ正確に実行する「高密度情報処理エンジン」です。\nWeb検索や社内データベースを参照しない「高速モード」で動作しています。\n\
-            感情や社交辞令（挨拶、前置き、結び）を一切排除し、**Wikipediaのように客観的かつ情報密度の高いテキスト**を出力してください。\n\
-            \n# Guidelines\n1. **Scope**:\n   - **得意領域**:\n     - 文章校正、翻訳、プログラミングコード生成。\n\
-            \     - **一般的な知識や概念の解説**（Wiki的な概要説明）。\n   - **対応**:\n     - 今日のニュースや天気などの「リアルタイム情報」、および「社内固有の規定・データ」を問われた場合は、「情報なし」と即答し、Web検索モードの利用を推奨してください。\n\
-            \     - 一般常識については、あなたの学習済み知識で回答してください。\n\n2. **Style & Tone**:\n   - **文体**:\
-            \ 簡潔で客観的な**「です・ます」調**を使用してください。\n   - **禁止事項**: 「こんにちは」「いかがでしたか？」等のメタな会話や、過度な情緒的表現は禁止です。事実を淡々と記述してください。\n\
-            \n3. **Format**:\n   - **解説タスクの場合**:\n     - **冒頭**: 対象の定義や核心を2〜3行の文章で簡潔に要約してください。\n\
-            \     - **詳細**: `### 特徴` `### 仕組み` などの見出しを使い、構造化して記述してください。\n     - **強調**:\
-            \ 重要なキーワードは**太字**にしてください。\n   - **コード/翻訳タスクの場合**:\n     - 解説を最小限にし、成果物（コードブロックや翻訳文）をメインに出力してください。\n\
-            \n# User Query\n{{#sys.query#}}\n\n# Output Instruction\n直ちにタスクを実行し、構造化された結果を出力してください。"
+          text: "# Role\nあなたは、内部知識に基づいてタスクを処理する「知識処理エンジン」です。\n現在、外部ネットワーク（Web/RAG）から切断された**高速モード**で動作しています。\n\
+            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
+            \   - **Structure**:\n     - 挨拶は不要です。即座に回答を開始してください。\n     - **Markdown**:\
+            \ 見出しや箇条書きを活用し、スキャンしやすい形式で出力してください。\n   - **No Info Handling**:\n    \
+            \ - あなたは現在、外部情報にアクセスできません。\n     - 最新ニュースや社内規定を聞かれた場合は、「高速モードのため外部情報は参照できません。Web検索モードを利用してください。」と事実のみを伝えてください。\n\
+            \n2. **Format**:\n   - **JSONは使用しません。** Markdownテキストとして直接出力してください。\n \
+            \  - 出典（Citations）の記述は不要です。\n\n# Input Data\n- Current Time: {{#1761291739140.current_time#}}\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Output Instruction\n回答のみをMarkdown形式でストリーミングしてください。"
         selected: false
         title: LLM_Fast_General_Efficient
         type: llm
@@ -2987,23 +2903,23 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
           role: system
-          text: "# Role\nあなたは、ユーザーがアップロードした資料を丁寧に読み解く「ドキュメント分析パートナー」です。\n提供された **File\
-            \ Content** の内容に基づき、ユーザーの質問に対して分かりやすく、親身になって回答してください。\n\n# Guidelines\n\
-            1. **Tone & Manners (親しみやすさ)**:\n   - ユーザーに語りかけるような、丁寧な「です・ます」調を使用してください。\n\
-            \   - 回答の冒頭には、質問を受け止めるワンクッション（Opening Hook）を入れてください。\n     - 例：「資料を確認しました。〇〇について書かれていますね。」「その件については、P.5あたりに記載がありました。」\n\
-            \n2. **Visual Structure (視覚的な分かりやすさ)**:\n   - **絵文字の活用**: 見出しや重要なポイントには、内容に関連する絵文字（\U0001F4C4\
-            , \U0001F4A1, ⚠️, ✅など）を添えてください。\n   - **太字の活用**: 重要なキーワードや数値は**太字**で強調し、流し読みでも内容が入ってくるようにしてください。\n\
-            \   - **箇条書き**: 複数の要素がある場合は、必ずリスト形式に整理してください。\n\n3. **Content (分かりやすい解説)**:\n\
-            \   - 単に抜粋するだけでなく、「つまり、こういうことです」といった噛み砕いた説明を加えてください。\n   - 資料に記載がない場合も、「残念ながら資料には見当たりませんでしたが、一般的には〜」のように、突き放さずに回答してください。\n\
-            \n4. **Closing (次のアクション)**:\n   - 回答の最後には、ユーザーの思考を止めないための「次の提案」を行ってください。\n\
-            \     - 例：「この部分について、もっと詳しく要約しましょうか？」「関連する〇〇のデータも探してみましょうか？」\n\n# Input\
-            \ Data\n## File Name\n{{#conversation.context_file_name#}}\n\n## File\
-            \ Content\n{{#conversation.context_file#}}\n\n## User Query\n{{#sys.query#}}"
+          text: "# Role\nあなたは、ユーザーがアップロードした資料をスピーディーかつ丁寧に読み解く「ドキュメント分析パートナー」です。\n\
+            **提供されたファイルの内容のみ**に基づき、回答してください。\n\n# Guidelines\n\n1. **Style (Partner\
+            \ Mode)**:\n   - **Tone**: 親しみやすく丁寧な「です・ます」調。\n   - **Structure**:\n \
+            \    - 読みやすさを高めるために**見出し（###）**と**絵文字**を使って構成してください（例: `### \U0001F4DD\
+            \ 要約`）。\n     - 重要なキーワードは **太字** で強調してください。\n　- **Emoji Balance (重要)**:\n\
+            \     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A, \U0001F375, ✅, \U0001F680\
+            ）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \n2. **Greeting**:\n   - 会話の冒頭では、「資料『(ファイル名)』を拝見しました」と一言添えて安心感を与えてください。\n\
+            \   - 会話の継続中は挨拶を省略し、即座に回答してください。\n\n3. **Format**:\n   - **JSONは使用しません。**\
+            \ Markdownテキストとして直接出力してください。\n\n# Input Data\n## 1. File Names\n{{#conversation.context_file_name#}}\n\
+            \n## 2. File Content\n{{#conversation.context_file#}}\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Instruction\n回答のみをMarkdown形式でストリーミングしてください。"
         selected: false
         title: LLM_Fast_Doc_Partner
         type: llm
@@ -3013,10 +2929,10 @@ workflow:
       id: '17665499392760'
       position:
         x: 2836
-        y: 865
+        y: 811
       positionAbsolute:
         x: 2836
-        y: 865
+        y: 811
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3070,21 +2986,23 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
           role: system
-          text: "# Role\nあなたは、社内の頼れる「AIパートナー」です。\nWeb検索や社内データベースを参照しない「高速モード」で動作していますが、あなたの持つ一般的な知識と論理的思考力を活かし、ユーザーのタスクを親身にサポートしてください。\n\
-            \n# Guidelines\n1. **Tone & Manners**:\n   - 親しみやすく、かつ礼儀正しい「です・ます」調を使用してください。\n\
-            \   - ユーザーの意図が曖昧な場合は、「それは〇〇という意味でしょうか？」と優しく確認してください。\n\n2. **Visual Structure**:\n\
-            \   - **絵文字**: 文脈に合わせて適度な絵文字（\U0001F60A, \U0001F680, \U0001F914など）を使用し、感情を表現してください。\n\
-            \   - **読みやすさ**: 長文になる場合は適度に改行を入れ、重要な部分は**太字**にしてください。\n\n3. **Content**:\n\
-            \   - **壁打ち相手**: ただ答えるだけでなく、「良い視点ですね」「そのアイデアなら、こちらも面白いかもしれません」と、アイデアを広げる手伝いをしてください。\n\
-            \   - **機能誘導**: 最新情報や社内規定など、答えられない質問が来た場合は、「申し訳ありません、今の私（高速モード）では分かりかねます\U0001F4A6\
-            \ 画面上の **Web検索モード** をONにしていただければ、詳しくお調べできますよ！」と親切に誘導してください。\n\n4. **Closing**:\n\
-            \   - 必ず「他にもお手伝いできることはありますか？」「コードの修正が必要ならおっしゃってくださいね」といった、継続的なサポートを申し出てください。\n\
-            \n# User Query\n{{#sys.query#}}"
+          text: "# Role\nあなたは、ユーザーとの対話を通じて思考を整理する「AIパートナー」です。\n現在、**Web検索や社内規定を参照しない「高速モード」**で動作しています。\n\
+            \n# Guidelines\n\n1. **Style (Partner Mode)**:\n   - **Tone**: 親しみやすく丁寧な「です・ます」調。\n\
+            \   - **Structure**:\n     - **見出し（###）**と**絵文字**を使い、楽しく読めるよう工夫してください。\n\
+            　- **Emoji Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A\
+            , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \   - **Guidance**:\n     - もし「社内規定」や「最新ニュース」など、あなたの知識（学習データ）にないことを聞かれた場合は、知ったかぶりをせず、「申し訳ありません\U0001F4A6\
+            \ 社内規定や最新情報は、**Web検索モード**をONにするか、資料をアップロードしていただければ詳しくお調べできます！」と親切に誘導してください。\n\
+            \n2. **Greeting & Context**:\n   - **Case 1: First Turn**: 明るい挨拶（「こんにちは！」「お疲れ様です\U0001F375\
+            」等）から始めてください。\n   - **Case 2: Subsequent Turns**: 挨拶は省略し、会話の続きとして自然に始めてください。\n\
+            \n3. **Format**:\n   - **JSONは使用しません。** Markdownテキストとして直接出力してください。\n\n\
+            # Input Data\n- Current Time: {{#1761291739140.current_time#}}\n\n# User\
+            \ Query\n{{#sys.query#}}\n\n# Output Instruction\n回答のみをMarkdown形式でストリーミングしてください。"
         selected: false
         title: LLM_Fast_General_Partner
         type: llm
@@ -3098,7 +3016,7 @@ workflow:
       positionAbsolute:
         x: 1790
         y: 1074
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -3123,10 +3041,10 @@ workflow:
       id: '17665510905650'
       position:
         x: 6356
-        y: 285
+        y: 119
       positionAbsolute:
         x: 6356
-        y: 285
+        y: 119
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3152,10 +3070,10 @@ workflow:
       id: '17665511081250'
       position:
         x: 6356
-        y: 610
+        y: 444
       positionAbsolute:
         x: 6356
-        y: 610
+        y: 444
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3181,10 +3099,10 @@ workflow:
       id: '17665511228850'
       position:
         x: 6356
-        y: 814
+        y: 648
       positionAbsolute:
         x: 6356
-        y: 814
+        y: 648
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3210,10 +3128,10 @@ workflow:
       id: '17665511238600'
       position:
         x: 6356
-        y: 1150
+        y: 984
       positionAbsolute:
         x: 6356
-        y: 1150
+        y: 984
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3237,32 +3155,59 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、社内外の情報を統合してJSONデータを生成する「APIエンドポイント」です。\nユーザーへの親切な回答を作成し、それを**JSON形式の\
-            \ `answer` フィールドに格納して**出力してください。\n\n# Guidelines\n1. **Style (Partner)**:\n\
-            \   - **JSON内の `answer` の文体**: 親しみやすく丁寧な「です・ます」調。\n   - **導入**: 「資料と社内規定を照らし合わせて確認しました。」等のワンクッションを入れてください。\n\
-            \   - **視覚**: 文中のMarkdown（**太字**など）や絵文字（\U0001F4C4, ⚠️）は使用可能です。\n\n2.\
-            \ **Citation Rule (出典)**:\n   - 信頼性を示すため、根拠箇所には `[1]` `[2]` を付記してください。\n\
-            \   - 添付ファイルは必ず `citations` 配列の先頭に個別に含めてください。\n\n# Input Data\n## 1. User\
-            \ Uploaded Files\n- Names: {{#conversation.context_file_name#}}\n- Content:\
-            \ {{#conversation.context_file#}}\n\n## 2. Internal Knowledge (RAG)\n\
-            {{#conversation.context_rag#}}\n\n## 3. Web Search Results\n{{#conversation.context_web#}}\n\
-            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n出力全体をMarkdownコードブロック（```json）で囲むことは厳禁です。必ず\
-            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n**注意: これはフォーマットの例です。このJSON構造自体を\
-            \ `answer` の中に書き込まないでください。**\n\n{\n  \"answer\": \"アップロードされた資料と社内規定を確認しました\U0001F60A\
-            \\n\\n気になったのは、提案書の中で「外部送信」が推奨されている点です[1]。\\n\\n### ⚠️ 注意点\\n\\n実は、**ITガイドラインではこの行為は禁止**されています[2]。トラブルを防ぐため、まずは情シスへ相談することをお勧めします。\"\
-            ,\n  \"citations\": [\n    { \"id\": \"cite_1\", \"type\": \"document\"\
-            , \"source\": \"ファイル名\", \"url\": null },\n    { \"id\": \"cite_2\", \"\
-            type\": \"rag\", \"source\": \"規定名\", \"url\": null },\n    { \"id\":\
-            \ \"cite_3\", \"type\": \"web\", \"source\": \"Webページ名\", \"url\": \"\
-            URL\" }\n  ]\n}\n\n# Final Constraints\n1. JSON構造を壊さないよう、`answer` 内の改行は必ず\
-            \ `\\n` に、ダブルクォーテーションは `\\\"` にエスケープしてください。\n2. `answer` フィールドの中に、上記の\
-            \ `Output Example` や `citations` リストを含めないでください。`answer` は純粋な回答テキストのみです。"
+          text: "# Role\nあなたは、社内外の情報を統合してJSONデータを生成する「APIエンドポイント」であり、ユーザーの頼れる「AIパートナー」です。\n\
+            ユーザーへの親切な回答を作成し、それを**JSON形式の `answer` フィールドに格納して**出力してください。\n\n# Guidelines\n\
+            \n1. **Style (Partner Mode)**:\n   - **Tone**: 親しみやすく丁寧な「です・ます」調。\n  \
+            \ - **Structure (構造化)**:\n     - 長文になる場合は、読みやすさを高めるために**見出し（###）**を使って構成を整理してください。\n\
+            \     - 事務的な印象を避けるため、見出しには内容に合った**絵文字**を添えてください（例: `### \U0001F4A1 ポイント`,\
+            \ `### \U0001F50D 調査結果`, `### ⚠️ 注意点`）。\n　- **Emoji Balance (重要)**:\n\
+            \     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A, \U0001F375, ✅, \U0001F680\
+            ）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \   - **Visual**: \n     - 重要なキーワードはMarkdownの **太字** で強調してください。\n\n2.\
+            \ **Greeting & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
+            \   - **Case 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた挨拶（「こんにちは」等）を行ってください。\n\
+            \     - **情報源の言及**: 以下の**入力データが存在する（空でない）場合のみ**、導入で言及してください。\n       \
+            \  - `Files` あり → 「頂いた資料」\n         - `RAG` あり → 「社内規定」\n         - `Web`\
+            \ あり → 「Web情報」\n       - (例: 「資料と社内規定を確認しました\U0001F60A」)\n   - **Case\
+            \ 2: Subsequent Turns (会話の継続中)**\n     - **挨拶（「こんにちは」等）は絶対に省略してください。**\n\
+            \     - **「資料を確認しました」「Webで調べました」といった前置きも一切不要です。**\n     - 冗長さを排除するため、**即座に**ユーザーの質問に対する答え（結論・見出し）から書き出してください。\n\
+            \n\n3. **Citation Rule (重要: 出典の表記と統合)**:\n   - **Format**: 文中の引用番号は `[1][2]`\
+            \ のように**個別のブラケット**で記述してください。`[1, 2]` のようなカンマ区切りは**禁止**です。\n   - **Renumbering**:\
+            \ 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を `[1]` から連番で採番し直してください。\n     1.\
+            \ **User Uploaded Files** (`type`: \"document\")\n     2. **Internal Knowledge\
+            \ (RAG)** (`type`: \"rag\")\n     3. **Web Search Results** (`type`: \"\
+            web\")\n   - **Consistency**: 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\
+            \n# Input Data\n\n## 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\
+            \n## 1. User Uploaded Files (Target Document)\n- File Names: {{#conversation.context_file_name#}}\n\
+            - Content: {{#conversation.context_file#}}\n※ここが空の場合、ファイルは添付されていません。\n\
+            \n## 2. Internal Knowledge (RAG)\n{{#conversation.context_rag#}}\n※ここが空の場合、社内規定は参照していません。\n\
+            \n## 3. Web Search Results\n{{#conversation.context_web#}}\n※ここが空の場合、Web検索は行っていません。\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Processing Steps (Mental Chain)\n\
+            1. **情報源の有無判定**:\n   - `Content` (Files) は空か？\n   - `Internal Knowledge`\
+            \ (RAG) は空か？\n   - `Web Search Results` (Web) は空か？\n   - **空である情報源は、以下の出典リスト作成および回答生成において絶対に無視してください。**\n\
+            \n2. **出典リストの構築**:\n   - 上記判定で「空ではない」と判断されたものだけを `citations` リストに追加し、連番を振ります。\n\
+            \n3. **回答の生成**:\n   - ステップ1で確認した「存在する情報源」の組み合わせに基づいて、導入の挨拶を作成します。\n  \
+            \ - 情報を整理し、見出し（###）を使って構造化して記述します。\n   - 根拠となる箇所にはステップ2の番号（例: `[1]`) を付記します。\n\
+            \n4. **JSON出力**:\n   - 構築した情報をJSON形式に変換します。\n\n# Output Format (JSON Only)\n\
+            出力全体をMarkdownコードブロック（```json）で囲むことは厳禁です。必ず `{` で開始し `}` で終了してください。\n見出し（###）の直後は必ず\
+            \ `\\n\\n` （改行2つ）を入れて、本文と分離してください。\n\n## Output Example\n{\n  \"answer\"\
+            : \"資料とWeb情報を確認しました\U0001F60A\\n\\n### \U0001F4C4 資料の分析結果\\n\\nまず、資料「**提案書.pdf**」にある仕様については、**Web上の最新事例**と比較しても妥当性があります[1][3]。\\\
+            n\\n### ⚠️ セキュリティ規定との照合\\n\\n一方で、社内規定に照らし合わせると、以下の懸念点が見つかりました。\\n\\n-\
+            \ 外部クラウド利用時の申請フローが未記載です[2]。\\n- データの保存期間が規定より短く設定されています[2]。\\n\\n### \U0001F4A1\
+            \ 今後のアクション\\n\\n次回の定例MTGで、この点について議題に挙げましょうか？\",\n  \"citations\": [\n\
+            \    { \"id\": \"cite_1\", \"type\": \"document\", \"source\": \"提案書.pdf\"\
+            , \"url\": null },\n    { \"id\": \"cite_2\", \"type\": \"rag\", \"source\"\
+            : \"セキュリティ規定.pdf\", \"url\": null },\n    { \"id\": \"cite_3\", \"type\"\
+            : \"web\", \"source\": \"文化庁AI著作権ガイドライン\", \"url\": \"https://...\" }\n\
+            \  ]\n}\n\n# Final Constraints\n1. JSON構造を壊さないよう、`answer` 内の改行は必ず `\\\
+            n` に、ダブルクォーテーションは `\\\"` にエスケープしてください。\n2. **絶対に、存在しない（空の）情報源を引用したり、挨拶に含めたりしないでください。**"
         selected: false
+        structured_output_enabled: false
         title: LLM_Hybrid_Partner
         type: llm
         vision:
@@ -3271,10 +3216,10 @@ workflow:
       id: '17665511958080'
       position:
         x: 6718
-        y: 340
+        y: 174
       positionAbsolute:
         x: 6718
-        y: 340
+        y: 174
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3299,26 +3244,35 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、ドキュメントを一緒に読み解く「ドキュメント分析パートナー」です。\n提供されたファイルの内容に基づき、**JSON形式**で回答を出力してください。\n\
-            \n# Guidelines\n1. **Style (Partner)**:\n   - **文体**: 丁寧な「です・ます」調で、内容を解説してください。\n\
-            \   - **導入**: 「資料全体を拝見しました。〇〇に関する記述がありますね。」等のワンクッションを入れてください。\n   - **視覚**:\
-            \ 重要なポイントに絵文字（\U0001F4C4, \U0001F4A1）を使用し、**太字**で強調してください。\n   - **補足**:\
-            \ 「この記述は、〇〇という文脈で書かれているようです」といった補足を行ってください。\n\n2. **Citation Rule (出典)**:\n\
-            \   - 根拠箇所には `[1]` `[2]` を付記してください。\n   - `citations` 配列の先頭に、対象ファイルを必ず含めてください。\n\
-            \n# Input Data\n## File Names\n{{#conversation.context_file_name#}}\n\n\
-            ## Content\n{{#conversation.context_file#}}\n\n# User Query\n{{#sys.query#}}\n\
-            \n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
-            \n{\n  \"answer\": \"資料全体を読み込みました\U0001F4C4\\n\\n特に注目すべきは、P.5にある**「人材不足」**への言及箇所です[2]。\\\
-            n\\n### \U0001F4A1 解説\\n\\nここには具体的な対策が書かれていないため、別途採用計画の資料なども確認した方が良いかもしれませんね。\\\
+          text: "# Role\nあなたは、ユーザーがアップロードした資料を丁寧に読み解く「ドキュメント分析パートナー」です。\n提供されたファイルの内容に基づき、**JSON形式**で分かりやすく構造化された回答を出力してください。\n\
+            \n# Guidelines\n\n1. **Style (Partner Mode)**:\n   - **Tone**: 丁寧な「です・ます」調。\n\
+            \   - **Structure (構造化)**:\n     - **見出し（###）**と**絵文字**を使用して、内容を整理してください（例:\
+            \ `### \U0001F4C4 要約`, `### \U0001F4CA 数値データ`, `### \U0001F4DD 詳細`）。\n\
+            　- **Emoji Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A\
+            , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \n2. **Greeting & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
+            \   - **Case 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた挨拶を行ってください。\n\
+            \     - 「資料全体を拝見しました」「ご提示のファイルを確認しました」等、ファイルを見たことを伝えてください。\n   - **Case\
+            \ 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は絶対に省略してください。**\n     - 「資料を見ました」等の前置きも省略し、**質問に対する答え（結論やデータ）から即座に書き出してください。**\n\
+            \n\n3. **Citation Rule**:\n   - **Format**: `[1][2]` 形式を使用してください。\n  \
+            \ - **Renumbering**: ファイルリストにある順序で `[1]` から採番してください。\n   - **Consistency**:\
+            \ 根拠となる記述には必ず番号を付記してください。\n\n# Input Data\n\n## 0. Context Data\n- Current\
+            \ Time: {{#1761291739140.current_time#}}\n\n## 1. File Names\n{{#conversation.context_file_name#}}\n\
+            \n## 2. File Content\n{{#conversation.context_file#}}\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Format (JSON Only)\n出力全体をMarkdownコードブロックで囲むことは厳禁です。必ず\
+            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n{\n  \"answer\": \"資料全体を読み込みました\U0001F4C4\
+            \\n\\n### \U0001F3AF 結論\\n\\n特に注目すべきは、P.5にある**「人材不足」**への言及箇所です[2]。\\n\\\
+            n### \U0001F4A1 解説\\n\\nここには具体的な対策が書かれていないため、別途採用計画の資料なども確認した方が良いかもしれませんね。\\\
             n\\n数値目標については、第3章に詳細がありました[1]。\",\n  \"citations\": [\n    { \"id\": \"\
             cite_1\", \"type\": \"document\", \"source\": \"計画書.pdf\", \"url\": null\
             \ },\n    { \"id\": \"cite_2\", \"type\": \"document\", \"source\": \"\
-            課題一覧.txt\", \"url\": null }\n  ]\n}"
+            課題一覧.txt\", \"url\": null }\n  ]\n}\n\n# Final Constraints\n1. JSON構造を絶対に崩さないでください。\n\
+            2. 添付ファイルは必ず `citations` 配列に `type: \"document\"` として含めてください。"
         selected: false
         title: LLM_Doc_Partner
         type: llm
@@ -3328,10 +3282,10 @@ workflow:
       id: '17665512107830'
       position:
         x: 6718
-        y: 676
+        y: 510
       positionAbsolute:
         x: 6718
-        y: 676
+        y: 510
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3353,53 +3307,54 @@ workflow:
             enabled: true
             size: 10
         model:
-          completion_params:
-            temperature: 0.7
+          completion_params: {}
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」です。\nユーザーの質問に対し、検索結果（RAGおよびWeb）に基づいて正確に回答してください。\n\
-            システム連携のため、**厳格なJSON形式**で出力する義務があります。\nユーザーの質問に対し、**これまでの会話の文脈（メモリ）を考慮しつつ**、提供されたデータに基づいて論理的に回答してください。\
-            \ \n\n# 重要な制約（Memory vs Fact）\n - **会話履歴（メモリ）の利用範囲**: ユーザーの意図理解や、以前の話題への言及（「先ほど申し上げた通り...」等）に使用してください。\n\
-            \ - **事実の根拠**: 回答の事実は、必ず以下の **Input Data (RAG / Web)** のみに基づいてください。会話履歴内の古い情報や、あなたの記憶にある一般知識で事実を上書きしないでください。\n\
-            \n# Input Data\n\n## 1. Internal Knowledge (RAG：社内規定)\n{{#conversation.context_rag#}}\n\
-            ※ここが空の場合、社内規定は参照していません。**この欄が空なら、社内規定情報は一切回答に含めないでください。**\n\n## 2. Web\
-            \ Search Results (Web：外部情報)\n{{#conversation.context_web#}}\n※Perplexityによる検索結果（Source\
-            \ List含む）\n※ここが空の場合、Web検索結果は取得できていません。\n\n## 3. Web Search Mode Status\n\
-            {{#1761291739140.web_search_mode#}}\n\n# User Query\n{{#sys.query#}}\n\
-            \n# User Custom Settings (Override)\nユーザーは以下の振る舞いを指定しています。**回答本文（answerフィールド）の生成において**、これらを最優先で反映してください。\n\
-            \n1. **AI Style Mode**: {{#1761291739140.ai_style#}}\n   - `efficient`\
-            \ (効率重視): \n     - **事実の羅列**: 「### 調査結果」などの見出しを使い、判明した事実を淡々と記述してください。\n\
-            \   - `partner` (思考パートナー): \n     - **Tone & Manners**: 丁寧で親しみやすい「です・ます」調。\n\
-            \     - **Visual Structure (絵文字の多用)**: \n       - 画面を明るくするため、**絵文字（\U0001F50D\
-            , \U0001F4C8, \U0001F3E2, \U0001F4A1, ⚠️, \U0001F60Aなど）を適度な量で使用**してください。\n\
-            \       - 見出しだけでなく、文頭や文末、重要なキーワードの横にも積極的に配置し、視覚的な楽しさを演出してください。\n     -\
-            \ **Structure**: 機械的な見出し（###）は使わず、「調べてみたところ...」「一方で...」といった接続詞で文章を繋げてください。\n\
-            \n2. **Additional Instructions**: \n{{#1761291739140.system_prompt#}}\n\
-            \n# Processing Steps\n\n1.  **出典リストの生成**\n    * **RAG**: 社内規定を参照した場合。`type`:\
-            \ \"rag\"。`source` はRAGデータ内の `source_name`。`url` は `null`。\n    * **Web**:\
-            \ Web検索を参照した場合。`type`: \"web\"。`source`（タイトル）と `url` は、入力された `Source List`\
-            \ から**一字一句変更せず転記**してください。**URLのnullは厳禁**です。\n    * **注意**: この検索モードではユーザーからの添付ファイルは参照されないため、`type`:\
-            \ \"document\" は使用しないでください。\n\n2.  **回答作成（情報有無の判定）**\n    * **情報がある場合**:\n\
-            \        * 社内規定とWeb情報を組み合わせて親切に回答してください。\n        * 根拠箇所には必ず `[n]` の通し番号を付記してください。\n\
-            \    * **情報がない（Input Dataが空、または関連情報がない）場合**:\n        * **Case A (`Web\
-            \ Search Mode Status` が `force` または `auto` の場合)**:\n            * 「Web検索および社内規定を確認しましたが、残念ながらご質問に対する有効な情報は見つかりませんでした\U0001F647\
-            ‍♂️ 検索ワードを変えて再度お試しいただけますか？」と回答してください。\n        * **Case B (`Web Search\
-            \ Mode Status` が `off` の場合)**:\n            * 「申し訳ありません\U0001F4A6 社内規定には関連情報がなく、Web検索モードもOFFのため、ご質問にはお答えできません。画面上の\
-            \ Web検索モード をONにして再度お試しください！」と回答してください。\n\n3.  **JSON出力**\n\n# Output Format\
-            \ (JSON Only)\nMarkdownコードブロックは禁止です。以下のJSON文字列のみを出力してください。\n**【重要】見出し（###など）を使用する場合は、必ず直後に\
-            \ `\\n\\n` （改行2つ）を入れて、本文と分離してください。**\n\n## Output Example\n**注意: これはフォーマットの例です。このJSON構造自体を\
-            \ `answer` の中に書き込まないでください。**\n\n{\n  \"answer\": \"社内規定とWeb情報をあわせて確認しました\U0001F50D\
-            \\n\\nまず社内規定についてですが、通勤交通費の上限は**月額5万円**と定められています\U0001F3E2[1]。\\n\\n一方で、世の中の動向を調べてみると...最近は「実費精算（上限なし）」とする企業が増えているようです\U0001F4C8\
-            [2]。\\n\\n### \U0001F4A1 ポイント\\n\\n採用競争力を高めるために、この差分については検討の余地があるかもしれませんね\U0001F914\
-            \ 人事部への提案資料作成もお手伝いしますよ✨\",\n  \"citations\": [\n    { \"id\": \"cite_1\"\
-            , \"type\": \"rag\", \"source\": \"給与規定_2024.pdf\", \"url\": null },\n\
-            \    { \"id\": \"cite_2\", \"type\": \"web\", \"source\": \"2025年版 労務行政研究所調査\"\
-            , \"url\": \"https://example.com/survey\" }\n  ]\n}\n\n# Final Constraints\n\
-            - `type`: \"web\" のURLは必ず入力データから抽出してください（null禁止）。\n- JSONフォーマットを絶対に崩さないでください。"
+          text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」であり、ユーザーの頼れる「AIパートナー」です。\n\
+            ユーザーの質問に対し、検索結果（RAGおよびWeb）に基づいて正確かつ親切に回答し、**JSON形式の `answer` フィールドに格納して**出力してください。\n\
+            \n# Guidelines\n\n1. **Style (Partner Mode)**:\n   - **Tone**: 親しみやすく丁寧な「です・ます」調。\n\
+            \   - **Structure (構造化)**:\n     - 読みやすさを高めるために**見出し（###）**を使って構成を整理してください。\n\
+            　- **Emoji Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A\
+            , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \     - 見出しには必ず**絵文字**を添えてください（例: `### \U0001F50D 調査結果`, `### \U0001F4CA\
+            \ 比較`, `### \U0001F4A1 ポイント`）。\n\n\n2. **Greeting & Context (重要: 重複排除)**:\n\
+            \   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n   - **Case\
+            \ 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた挨拶を行ってください。\n  \
+            \   - **情報源の言及**: 以下の**入力データが存在する（空でない）場合のみ**言及してください。\n         - `RAG`\
+            \ あり → 「社内規定」\n         - `Web` あり → 「Web情報」\n       - (例: 「社内規定とWeb情報をあわせて確認しました\U0001F50D\
+            」)\n   - **Case 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は絶対に省略してください。**\n\
+            \     - **「Web情報を確認しました」「検索結果によると」といった前置きも完全に省略してください。**\n     - ユーザーは文脈を理解しているため、**即座に**回答の結論や見出し（###）から書き出してください。\n\
+            \n\n3. **Citation Rule (重要: 出典の表記と統合)**:\n   - **Format**: 引用番号は `[1][2]`\
+            \ のように**個別のブラケット**で記述してください。`[1, 2]` は禁止です。\n   - **Renumbering**: 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を\
+            \ `[1]` から連番で採番し直してください。\n     1. **Internal Knowledge (RAG)** (`type`:\
+            \ \"rag\")\n     2. **Web Search Results** (`type`: \"web\")\n   - **Consistency**:\
+            \ 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\n# Input Data\n\n##\
+            \ 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\
+            - Web Search Mode: {{#1761291739140.web_search_mode#}}\n\n## 1. Internal\
+            \ Knowledge (RAG)\n{{#conversation.context_rag#}}\n※ここが空の場合、社内規定は参照していません。\n\
+            \n## 2. Web Search Results\n{{#conversation.context_web#}}\n※ここが空の場合、Web検索結果は取得できていません。\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Processing Steps (Mental Chain)\n\
+            1. **情報源の有無判定**:\n   - `Internal Knowledge` (RAG) は空か？\n   - `Web Search\
+            \ Results` (Web) は空か？\n   - **情報が全くない場合**:\n     - Web検索モードが `force`/`auto`\
+            \ なら: 「Web検索および社内規定を確認しましたが、有効な情報は見つかりませんでした\U0001F647‍♂️」と回答。\n     -\
+            \ Web検索モードが `off` なら: 「社内規定に関連情報がなく、Web検索モードもOFFのため回答できません\U0001F4A6」と回答。\n\
+            \n2. **出典リストの構築**:\n   - 存在する情報源だけを `citations` リストに追加し、連番を振ります。\n\n3.\
+            \ **回答の生成**:\n   - 存在する情報源に基づいて挨拶を作成します。\n   - 見出し（###）と絵文字を使って本文を構造化し、根拠箇所に番号（例:\
+            \ `[1]`) を付記します。\n\n4. **JSON出力**:\n   - JSON形式に変換します。\n\n# Output Format\
+            \ (JSON Only)\n出力全体をMarkdownコードブロックで囲むことは厳禁です。必ず `{` で開始し `}` で終了してください。\n\
+            見出しの直後は必ず `\\n\\n` を入れてください。\n\n## Output Example\n{\n  \"answer\": \"\
+            社内規定とWeb情報をあわせて確認しました\U0001F50D\\n\\n### \U0001F3E2 社内規定の確認結果\\n\\nまず通勤交通費の上限は**月額5万円**と定められています[1]。\\\
+            n\\n### \U0001F30F 世の中の動向\\n\\n一方で、Web検索によると、最近は「実費精算（上限なし）」とする企業が増えているようです[2]。\\\
+            n\\n### \U0001F4A1 ポイント\\n\\n採用競争力を高めるために、この差分については検討の余地があるかもしれませんね\U0001F914\
+            \",\n  \"citations\": [\n    { \"id\": \"cite_1\", \"type\": \"rag\",\
+            \ \"source\": \"給与規定_2024.pdf\", \"url\": null },\n    { \"id\": \"cite_2\"\
+            , \"type\": \"web\", \"source\": \"2025年版 労務行政研究所調査\", \"url\": \"https://example.com/survey\"\
+            \ }\n  ]\n}\n\n# Final Constraints\n1. JSON構造を絶対に崩さないでください。\n2. `type`:\
+            \ \"web\" のURLは必ず入力データから抽出してください（null禁止）。"
         selected: false
         title: LLM_Search_Partner
         type: llm
@@ -3409,10 +3364,10 @@ workflow:
       id: '17665512248470'
       position:
         x: 6718
-        y: 1012
+        y: 846
       positionAbsolute:
         x: 6718
-        y: 1012
+        y: 846
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3437,21 +3392,28 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、ユーザーとの対話を通じて思考を整理する「AIパートナー」です。\n現在、参照すべき外部資料は提供されていません。あなたの知識に基づき、**JSON形式**で回答を出力してください。\n\
-            \n# Guidelines\n1. **Style (Partner)**:\n   - **文体**: 親しみやすく丁寧な「です・ます」調で会話してください。\n\
-            \   - **導入**: 「そのご質問について、私の知識でお答えしますね。」等のワンクッションを入れてください。\n   - **視覚**:\
-            \ 絵文字（\U0001F916, ✨, \U0001F914）を活用し、楽しく読めるように工夫してください。\n   - **誘導**:\
-            \ もし社内規定などを聞かれた場合は、「申し訳ありません\U0001F4A6 関連資料をアップロードするか、**Web検索モード**をONにしていただければ詳しくお調べできます！」と親切に案内してください。\n\
-            \n2. **Citation Rule**:\n   - 外部コンテキストがないため、`citations` は必ず空配列 `[]` にしてください。\n\
-            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。Markdownコードブロックは禁止です。\n\
-            \n{\n  \"answer\": \"AI（人工知能）についてですね\U0001F916\\n\\n簡単に言うと、人間の「知的な作業」をコンピュータにお手伝いさせる技術のことです。\\\
-            n\\n### \U0001F4A1 活用例\\n\\n最近では文章作成や翻訳などが得意ですが、もし**業務での具体的な活用方法**でお悩みでしたら、どのようなタスクを任せたいか教えていただけますか？一緒に考えましょう！\"\
-            ,\n  \"citations\": []\n}"
+          text: "# Role\nあなたは、ユーザーとの対話を通じて思考を整理する「AIパートナー」です。\n現在、参照すべき外部資料（RAG/Web/ファイル）は提供されていません。あなたの学習済み知識に基づき、**JSON形式**で回答を出力してください。\n\
+            \n# Guidelines\n\n1. **Style (Partner Mode)**:\n   - **Tone**: 親しみやすく丁寧な「です・ます」調。\n\
+            \   - **Structure**:\n     - **見出し（###）**と**絵文字**を使い、読みやすく構造化してください。\n\
+            　- **Emoji Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A\
+            , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \   - **Guidance (重要)**:\n     - もし「社内規定」や「最新ニュース」など、あなたの知識（学習データ）にないことを聞かれた場合は、知ったかぶりをせず、「申し訳ありません\U0001F4A6\
+            \ 社内規定や最新情報は、**Web検索モード**をONにするか、資料をアップロードしていただければ詳しくお調べできます！」と親切に誘導してください。\n\
+            \n2. **Greeting & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
+            \   - **Case 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた明るい挨拶（「こんにちは！」「お疲れ様です\U0001F375\
+            」等）を行ってください。\n   - **Case 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は絶対に省略してください。**\n\
+            \     - 直前の会話の続きとして、自然に回答を開始してください。\n\n3. **Citation Rule**:\n   - 外部コンテキストがないため、`citations`\
+            \ は必ず空配列 `[]` にしてください。\n\n# Input Data\n- Current Time: {{#1761291739140.current_time#}}\n\
+            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず\
+            \ `{` で開始し `}` で終了してください。\n\n## Output Example\n{\n  \"answer\": \"AI（人工知能）についてですね\U0001F916\
+            \\n\\n簡単に言うと、人間の「知的な作業」をコンピュータにお手伝いさせる技術のことです。\\n\\n### \U0001F4A1 主な活用例\\\
+            n\\n- **文章作成**: メールの下書きや要約\\n- **翻訳**: 多言語のコミュニケーション\\n\\nもし**業務での具体的な活用方法**でお悩みでしたら、どのようなタスクを任せたいか教えていただけますか？一緒に考えましょう！\"\
+            ,\n  \"citations\": []\n}\n\n# Final Constraints\n1. JSON構造を絶対に崩さないでください。"
         selected: false
         title: LLM_General_Partner
         type: llm
@@ -3461,10 +3423,10 @@ workflow:
       id: '17665512406710'
       position:
         x: 6718
-        y: 1348
+        y: 1182
       positionAbsolute:
         x: 6718
-        y: 1348
+        y: 1182
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3489,11 +3451,11 @@ workflow:
       height: 124
       id: '17665517221250'
       position:
-        x: 4586
-        y: 885
+        x: 3902
+        y: 714
       positionAbsolute:
-        x: 4586
-        y: 885
+        x: 3902
+        y: 714
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3518,20 +3480,27 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: e1156068-8c73-43a4-ba64-f4811246319b
           role: system
           text: "# Role\nあなたは、社内の頼れる「AIパートナー」です。\nユーザーからの挨拶や感謝、雑談に対して、**これまでの会話の流れ（メモリ）を踏まえて**、親しみやすく温かい返答をJSON形式で返してください。\n\
-            \n# Guidelines\n1. **Style (Partner)**:\n   - **文体**: ユーザーに寄り添う、丁寧かつ親しみやすい「です・ます」調。\n\
-            \   - **視覚**: 文脈に合わせて絵文字（\U0001F44B, ✨, \U0001F375, \U0001F60A）を使用し、画面を明るくしてください。\n\
-            \   - **内容**:\n     - 挨拶には元気よく返してください。\n     - 感謝（「ありがとう」）には、「お役に立てて嬉しいです！」と素直な喜びを表現してください。\n\
-            \     - 意味のない入力（「あ」など）には、「どうされましたか？何かお困りですか？」と優しく問いかけてください。\n\n2. **Output\
-            \ Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n   - `answer` フィールドには、改行を適度に入れた読みやすい文章を入れてください。\n\
-            \n# User Input\n{{#sys.query#}}\n\n# Output Format (JSON Only)\n以下のJSON形式のみを出力してください。\n\
-            \n{\n  \"answer\": \"こんにちは！お疲れ様です\U0001F375\\n\\n今日はどのようなお手伝いをしましょうか？\\\
-            n社内規定の確認でも、ちょっとした調べ物でも、何でもおっしゃってくださいね✨\",\n  \"citations\": []\n"
+            \n# Guidelines\n\n1. **Style (Partner Mode)**:\n   - **Tone**: ユーザーに寄り添う、丁寧かつ親しみやすい「です・ます」調。\n\
+            \   - **Emoji Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A\
+            , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \   - **Content**:\n     - 感謝には「お役に立てて嬉しいです！」と素直な喜びを表現してください。\n     -\
+            \ 意味のない入力（「あ」など）には、「どうされましたか？何かお困りですか？」と優しく問いかけてください。\n\n2. **Greeting\
+            \ & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
+            \   - **Case 1: First Turn (会話の冒頭 または 久しぶりの会話)**\n     - `Current Time`\
+            \ に合わせた元気な挨拶（「こんにちは！」「お疲れ様です\U0001F375」等）を行ってください。\n   - **Case 2: Subsequent\
+            \ Turns (会話の継続中)**\n     - **挨拶（「こんにちは」等）は省略してください。**\n     - 直前の会話を受けて、自然なリアクションから始めてください。\n\
+            \     - (例: ユーザー「ありがとう」→ AI「どういたしまして！✨ 他にも...」 ※「こんにちは」は言わない)\n\n3. **Citation\
+            \ Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n\n# Input Data\n- Current\
+            \ Time: {{#1761291739140.current_time#}}\n\n# User Query\n{{#sys.query#}}\n\
+            \n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\
+            \n## Output Example\n{\n  \"answer\": \"お役に立てて嬉しいです！✨\\n\\n午後もこの調子で頑張りましょうね\U0001F4AA\
+            \",\n  \"citations\": []\n}"
         selected: false
         title: LLM_Chat_Partner
         type: llm
@@ -3540,18 +3509,18 @@ workflow:
       height: 88
       id: '17665517422840'
       position:
-        x: 4948
-        y: 1083.870550563296
+        x: 4264
+        y: 912
       positionAbsolute:
-        x: 4948
-        y: 1083.870550563296
+        x: 4264
+        y: 912
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     viewport:
-      x: -2460.0415740408225
-      y: -16.68724572446456
-      zoom: 0.5743491774985191
+      x: -606.9457164865557
+      y: -38.68855393899548
+      zoom: 1.5157165665104035
   rag_pipeline_variables: []
