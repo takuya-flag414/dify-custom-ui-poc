@@ -293,7 +293,7 @@ const Sidebar = ({
 
         {/* 3. Scrollable List - "Clean Glass" */}
         <div className="sidebar-scroll-area scrollbar-overlay">
-          <AnimatePresence mode='wait'>
+          <AnimatePresence mode='popLayout'>
             {!isCollapsed && conversations.length > 0 && (
               <motion.div
                 key="list-container"
@@ -316,7 +316,6 @@ const Sidebar = ({
                       return (
                         <motion.div
                           key={conv.id}
-                          layout="position"
                           variants={itemVariants}
                           initial="hidden"
                           animate="visible"
