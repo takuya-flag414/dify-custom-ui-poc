@@ -64,10 +64,11 @@
     font-size: 12px;
     color: var(--color-text-main);
     user-select: none;
-    max-width: 200px;
+    max-width: 220px;
     animation: slideUp 0.2s ease-out;
     position: relative;
-    transition: background-color 0.2s;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* overflow: hidden を削除 - ポップオーバーが正しく表示されるように */
 }
 
 .file-card:hover {
@@ -78,11 +79,202 @@
     background-color: #EFF6FF;
 }
 
+/* File Card Content (Name + Status) */
+.file-card-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    gap: 2px;
+}
+
 .file-card-name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 500;
+}
+
+/* ========================================
+   File Scan States (The Intelligent Guardian)
+   ======================================== */
+
+/* Scanning State - Border Animation */
+.file-card.scanning {
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.file-card.scanning::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 10px;
+    background: conic-gradient(from 0deg,
+            transparent 0deg,
+            var(--color-primary) 60deg,
+            transparent 120deg);
+    animation: scan-border-rotate 1s linear infinite;
+    z-index: -1;
+}
+
+.file-card.scanning::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 7px;
+    background: var(--color-bg-sidebar);
+    z-index: -1;
+}
+
+@keyframes scan-border-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.file-scan-status {
+    font-size: 10px;
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+/* Warning State - Amber Glow */
+.file-card.warning {
+    background-color: var(--color-warning-amber-bg);
+    box-shadow:
+        inset 0 0 12px rgba(245, 158, 11, 0.15),
+        0 0 8px rgba(245, 158, 11, 0.25);
+    border: 1px solid var(--color-warning-amber);
+}
+
+.file-card.warning:hover {
+    background-color: rgba(245, 158, 11, 0.15);
+}
+
+.file-warning-status {
+    font-size: 10px;
+    color: var(--color-warning-amber);
+    font-weight: 600;
+}
+
+/* ========================================
+   File Privacy Shield Button (盾ボタン)
+   添付ファイルの機密情報表示用
+   ======================================== */
+
+.file-privacy-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.file-privacy-shield-btn {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-warning-amber);
+    color: white;
+    font-size: 10px;
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+}
+
+.file-privacy-shield-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.file-privacy-shield-btn:focus-visible {
+    box-shadow: var(--ring-focus);
+}
+
+.file-privacy-shield-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+.file-privacy-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: white;
+    color: var(--color-warning-amber);
+    font-size: 9px;
+    font-weight: var(--font-bold);
+}
+
+/* File Privacy Popover */
+.file-privacy-popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: 260px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-3);
+    z-index: 100;
+    animation: popover-slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: bottom right;
+}
+
+@keyframes popover-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(4px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.file-privacy-filename {
+    font-size: 11px;
+    font-weight: var(--font-medium);
+    color: var(--color-text-sub);
+    margin-bottom: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    background-color: var(--color-bg-sidebar);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dark Mode - File Privacy */
+[data-theme='dark'] .file-privacy-shield-btn {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .file-privacy-badge {
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme='dark'] .file-privacy-popover {
+    background: var(--color-bg-surface);
+    border-color: var(--color-border-strong);
+}
+
+[data-theme='dark'] .file-privacy-filename {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* ★追加: ファイルアイコンのサイズ指定 (32px = 2rem) */
@@ -585,4 +777,48 @@
 [data-theme='dark'] .privacy-detail-value {
     background-color: var(--color-warning-amber-bg);
     border-color: var(--color-warning-amber);
+}
+
+/* ========================================
+   Stop Button Styles (生成停止)
+   DESIGN_RULE準拠: AI Glow効果
+   ======================================== */
+
+.send-btn.stop-mode {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+    box-shadow:
+        0 0 15px rgba(239, 68, 68, 0.4),
+        0 0 30px rgba(239, 68, 68, 0.2);
+    animation: stop-pulse 2s ease-in-out infinite;
+}
+
+.send-btn.stop-mode:hover {
+    transform: scale(1.08);
+    box-shadow:
+        0 0 20px rgba(239, 68, 68, 0.5),
+        0 0 40px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes stop-pulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 15px rgba(239, 68, 68, 0.4),
+            0 0 30px rgba(239, 68, 68, 0.2);
+    }
+
+    50% {
+        box-shadow:
+            0 0 20px rgba(239, 68, 68, 0.5),
+            0 0 40px rgba(239, 68, 68, 0.3);
+    }
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .send-btn.stop-mode {
+    box-shadow:
+        0 0 20px rgba(239, 68, 68, 0.5),
+        0 0 40px rgba(239, 68, 68, 0.25);
 }

@@ -32,13 +32,20 @@ const renderWithInlineCitations = (children, citations, messageId) => {
                   className="citation-badge"
                   onClick={(e) => {
                     e.preventDefault();
-                    // 出典リストを自動展開するカスタムイベントを発火
+
+                    // ★Phase 3: InspectorPanel連携用イベントを発火
+                    const inspectorEvent = new CustomEvent('openInspectorCitation', {
+                      detail: { citationIndex: number, messageId }
+                    });
+                    window.dispatchEvent(inspectorEvent);
+
+                    // 従来の出典リスト展開も維持（フォールバック）
                     const expandEvent = new CustomEvent('expandCitationList', {
                       detail: { messageId }
                     });
                     window.dispatchEvent(expandEvent);
 
-                    // アコーディオン展開アニメーション後にスクロール
+                    // アコーディオン展開アニメーション後にスクロール（従来のチャット内CitationList用）
                     setTimeout(() => {
                       const el = document.getElementById(`citation-${messageId}-${number}`);
                       if (el) {
@@ -46,7 +53,7 @@ const renderWithInlineCitations = (children, citations, messageId) => {
                         el.classList.add('highlight-citation');
                         setTimeout(() => el.classList.remove('highlight-citation'), 2000);
                       }
-                    }, 350); // CSSアニメーション(0.3s)より少し長く待つ
+                    }, 350);
                   }}
                 >
                   {number}

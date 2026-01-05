@@ -1,46 +1,65 @@
 // src/hooks/useTutorial.js
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 
+/**
+ * チュートリアル（Coachmarks）管理フック
+ * macOS Sequoia スタイルのガイド付きツアー
+ */
 export const useTutorial = () => {
   const [isActive, setIsActive] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [direction, setDirection] = useState(1); // 1: forward, -1: backward
 
-  // ツアーのステップ定義
+  // ツアーのステップ定義（macOS風に刷新）
   const steps = useMemo(() => [
     {
+      target: null, // center (ウェルカム画面)
+      icon: '🤖',
+      title: 'AI Agent へようこそ',
+      content: '社内の情報について、自然な言葉で質問できるアシスタントです。\n簡単な操作を覚えましょう。',
+      position: 'center'
+    },
+    {
       target: 'input-area',
-      title: 'ここからスタート',
-      content: 'AIへの質問や指示はここに入力します。\nShift+Enterで改行も可能です。',
+      icon: '💬',
+      title: '会話を始める',
+      content: 'ここに質問を入力してください。\n例：「出張精算の手順は？」',
       position: 'top'
     },
     {
       target: 'context-selector',
-      title: '検索範囲をコントロール',
-      content: 'Web検索を行うか、社内規定（RAG）を参照するか。\nスイッチ一つで切り替えられます。',
+      icon: '🔍',
+      title: '検索ソースを選ぶ',
+      content: '🌐 Web検索 または 📚 社内規定から\n情報を取得します。',
       position: 'top'
     },
     {
       target: 'attachment-btn',
-      title: '資料を読み込ませる',
-      content: 'PDFやExcelファイルを添付して、\nその内容について分析・要約を依頼できます。',
+      icon: '📎',
+      title: 'ファイルを添付',
+      content: 'PDFやExcelを添付すると、\nその内容を読み取り分析します。',
       position: 'top'
     },
     {
       target: 'sidebar',
-      title: '会話の履歴',
-      content: '過去のやり取りは自動保存されます。\n話題を変えたい時は「新しいチャット」を押してください。',
+      icon: '📂',
+      title: '会話を管理',
+      content: '過去のやり取りはすべてここに保存されます。\nピン留めでお気に入りを整理！',
       position: 'right'
     },
     {
-      target: 'api-config',
-      title: '接続設定',
-      content: 'APIキーや接続先の変更が必要な場合は、\nここから設定画面を開けます。',
-      position: 'bottom'
+      target: null, // center (完了画面)
+      icon: '✨',
+      title: '準備完了！',
+      content: 'さあ、何でも質問してみましょう。\nいつでも「？」ボタンでこのガイドに戻れます。',
+      position: 'center',
+      isComplete: true
     }
   ], []);
 
   const startTutorial = useCallback(() => {
     setCurrentStepIndex(0);
+    setDirection(1);
     setIsActive(true);
   }, []);
 
@@ -50,6 +69,7 @@ export const useTutorial = () => {
   }, []);
 
   const nextStep = useCallback(() => {
+    setDirection(1);
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
@@ -58,19 +78,49 @@ export const useTutorial = () => {
   }, [currentStepIndex, steps.length, endTutorial]);
 
   const prevStep = useCallback(() => {
+    setDirection(-1);
     if (currentStepIndex > 0) {
       setCurrentStepIndex(prev => prev - 1);
     }
   }, [currentStepIndex]);
+
+  // キーボードナビゲーション
+  useEffect(() => {
+    if (!isActive) return;
+
+    const handleKeyDown = (e) => {
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'Enter':
+          e.preventDefault();
+          nextStep();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          prevStep();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          endTutorial();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isActive, nextStep, prevStep, endTutorial]);
 
   return {
     isActive,
     currentStepIndex,
     step: steps[currentStepIndex],
     totalSteps: steps.length,
+    direction,
     startTutorial,
     
-    // ★修正: コンポーネントのProps名に合わせて関数をマッピング
+    // ★コンポーネントのProps名に合わせて関数をマッピング
     onClose: endTutorial,
     onNext: nextStep,
     onPrev: prevStep

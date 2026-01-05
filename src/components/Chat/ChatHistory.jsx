@@ -10,7 +10,20 @@ import SystemErrorBlock from '../Message/SystemErrorBlock';
 const ANIMATION_LIMIT = 50;
 
 // ★変更: streamingMessage propsを追加（パフォーマンス最適化）
-const ChatHistory = ({ messages, streamingMessage, onSuggestionClick, onSmartActionSelect, isLoading, onSendMessage, onOpenConfig, onOpenArtifact, userName }) => {
+// ★追加: onEdit, onRegenerate props (Phase 1.5)
+const ChatHistory = ({
+  messages,
+  streamingMessage,
+  onSuggestionClick,
+  onSmartActionSelect,
+  isLoading,
+  onSendMessage,
+  onOpenConfig,
+  onOpenArtifact,
+  userName,
+  onEdit,
+  onRegenerate
+}) => {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -65,6 +78,13 @@ const ChatHistory = ({ messages, streamingMessage, onSuggestionClick, onSmartAct
           // 50件以下 OR 最新メッセージのみアニメーション有効
           const enableAnimation = enableFullAnimation || isNewMessage(index);
 
+          // ★追加: 最後のAIメッセージかどうかを判定（再送信ボタン表示用）
+          const isLastAi = (
+            msg.role === 'ai' &&
+            !streamingMessage &&
+            index === messages.length - 1
+          );
+
           return (
             <MessageBlock
               key={msg.id}
@@ -74,6 +94,9 @@ const ChatHistory = ({ messages, streamingMessage, onSuggestionClick, onSmartAct
               onOpenArtifact={onOpenArtifact}
               enableAnimation={enableAnimation}
               userName={userName}
+              onEdit={onEdit}
+              onRegenerate={onRegenerate}
+              isLastAiMessage={isLastAi}
             />
           );
         })}

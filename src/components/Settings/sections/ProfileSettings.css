@@ -1,0 +1,97 @@
+/* === Profile Hero Area (macOS Sequoia) === */
+.profile-hero {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: linear-gradient(135deg, var(--color-primary-bg) 0%, var(--bg-layer-2) 100%);
+    border-radius: 12px;
+    margin-bottom: var(--space-4);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    position: relative;
+    overflow: hidden;
+    /* Glow Effect */
+    box-shadow:
+        0 0 0 0.5px rgba(255, 255, 255, 0.3) inset,
+        0 4px 16px rgba(59, 130, 246, 0.08);
+}
+
+.profile-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
+}
+
+.profile-avatar-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    font-weight: var(--font-bold);
+    /* Enhanced Glow */
+    box-shadow:
+        0 0 0 3px var(--bg-layer-2),
+        0 0 0 4px rgba(59, 130, 246, 0.2),
+        0 8px 24px rgba(59, 130, 246, 0.35);
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.profile-info {
+    flex: 1;
+    min-width: 0;
+    z-index: 1;
+}
+
+.profile-name {
+    font-size: 18px;
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    margin: 0 0 2px 0;
+    letter-spacing: -0.01em;
+}
+
+.profile-style {
+    font-size: 13px;
+    color: var(--color-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: var(--font-medium);
+}
+
+.profile-user-id {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-top: var(--space-2);
+    font-family: monospace;
+    opacity: 0.7;
+}
+
+/* Dark Mode Overrides */
+[data-theme='dark'] .profile-hero {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 30, 30, 0.4) 100%);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset,
+        0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+[data-theme='dark'] .profile-avatar-large {
+    box-shadow:
+        0 0 0 3px var(--bg-layer-2),
+        0 0 0 4px rgba(59, 130, 246, 0.3),
+        0 8px 24px rgba(59, 130, 246, 0.4);
+}

@@ -1,4 +1,4 @@
-/* src/components/Settings/sections/DebugSettings.css */
+/* src/components/Settings/sections/DebugSettings.css (macOS Sequoia) */
 .debug-section {
     display: flex;
     flex-direction: column;
@@ -9,12 +9,21 @@
 .debug-card {
     background-color: var(--color-bg-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
+    border-radius: 12px;
     padding: var(--space-5);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    box-shadow: var(--shadow-sm);
+    /* Specular Edge */
+    box-shadow:
+        0 0 0 0.5px rgba(255, 255, 255, 0.3) inset,
+        0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='dark'] .debug-card {
+    box-shadow:
+        0 0 0 0.5px rgba(255, 255, 255, 0.08) inset,
+        0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .debug-card-header {
@@ -93,6 +102,19 @@
 
 .debug-btn:hover {
     background-color: rgba(0, 0, 0, 0.05);
+}
+
+.debug-btn:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme='dark'] .debug-btn:focus-visible {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(59, 130, 246, 0.5);
 }
 
 .debug-btn.primary {

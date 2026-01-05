@@ -30,13 +30,13 @@ const STYLES = [
         id: 'efficient',
         icon: EfficientIcon,
         title: '効率重視',
-        description: '見出しと箇条書きで要点を整理。客観的・効率的に回答します。'
+        description: '結論を先に、簡潔に回答します。ビジネスの意思決定や情報収集に最適です。'
     },
     {
         id: 'partner',
         icon: PartnerIcon,
         title: '思考パートナー',
-        description: '絵文字付きで親しみやすく。対話的に寄り添いながら回答します。'
+        description: '丁寧に対話しながら一緒に考えます。アイデア出しや学習に最適です。'
     }
 ];
 

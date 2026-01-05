@@ -4,6 +4,30 @@ import { MockStreamGenerator } from '../mocks/MockStreamGenerator';
 import { scenarios } from '../mocks/scenarios';
 
 /**
+ * Intelligence Profile ペイロードを構築する
+ * @param {Object} promptSettings - useSettingsから取得したprompt設定
+ * @param {string} displayName - profile.displayName から取得した表示名
+ * @returns {string} JSON文字列化されたペイロード
+ */
+const buildSystemPromptPayload = (promptSettings, displayName) => {
+  const payload = {
+    user_context: {
+      name: displayName || '',
+      role: promptSettings?.userProfile?.role || '',
+      department: promptSettings?.userProfile?.department || ''
+    },
+    custom_directives: {
+      free_text: promptSettings?.customInstructions || ''
+    },
+    meta: {
+      client_version: '3.0.0',
+      timestamp: new Date().toISOString()
+    }
+  };
+  return JSON.stringify(payload);
+};
+
+/**
  * チャットサービスアダプター
  * MockモードとRealモードの違いを吸収し、統一されたインターフェースを提供します。
  */
@@ -31,7 +55,7 @@ export const ChatServiceAdapter = {
   },
 
   async sendMessage(params, config) {
-    const { text, conversationId, files = [], searchSettings, promptSettings } = params;
+    const { text, conversationId, files = [], searchSettings, promptSettings, displayName } = params;
     const { mockMode, userId, apiUrl, apiKey } = config;
 
     // --- 1. FE Mock Mode ---
@@ -127,9 +151,9 @@ export const ChatServiceAdapter = {
         search_mode: searchModeValue === 'force' ? 'force' : 'auto',
         domain_filter: domainFilterString,
         current_time: currentTimeStr,
-        // ★追加: AI回答スタイルとシステムプロンプト
+        // ★ v3.0: AI回答スタイルとIntelligence Profile (JSON Injection)
         ai_style: promptSettings?.aiStyle || 'partner',
-        system_prompt: promptSettings?.systemPrompt || '',
+        system_prompt: buildSystemPromptPayload(promptSettings, displayName),
       },
       query: text,
       user: userId,

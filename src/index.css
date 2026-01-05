@@ -1,22 +1,95 @@
 /* src/index.css */
 /* ========================================
-   Design System v2.0 (Intelligence Era)
-   Based on DESIGN_RULE_V2.md
+   AI Agent Design System v3.0 (Desktop Intelligence Era)
+   Based on DESIGN_RULE.md v3.0
    ======================================== */
+
+/* Google Fonts - must be before @tailwind */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   Overlay Scrollbars (macOS Style)
+   操作時のみ表示されるスクロールバー
+   ======================================== */
+@layer base {
+
+  /* Scrollbar Overlay - Firefox */
+  .scrollbar-overlay,
+  .scrollbar-overlay * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-overlay:hover,
+  .scrollbar-overlay:hover * {
+    scrollbar-color: rgba(128, 128, 128, 0.5) transparent;
+  }
+
+  /* Scrollbar Overlay - Webkit (Chrome, Safari, Edge) */
+  .scrollbar-overlay::-webkit-scrollbar {
+    width: 14px;
+    background: transparent;
+  }
+
+  .scrollbar-overlay::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 99px;
+    border: 4px solid transparent;
+    background-clip: content-box;
+  }
+
+  /* ホバー時のみサムを表示 */
+  .scrollbar-overlay:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(128, 128, 128, 0.5);
+  }
+
+  /* 全体にデフォルト適用 */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  html:hover {
+    scrollbar-color: rgba(128, 128, 128, 0.5) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 14px;
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 99px;
+    border: 4px solid transparent;
+    background-clip: content-box;
+    transition: background-color 0.2s ease;
+  }
+
+  *:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(128, 128, 128, 0.5);
+  }
+}
 
 :root {
   /* ========================================
-     Typography (V2)
+     Typography (v3.0)
      ======================================== */
   --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Font Sizes - V2 Scale */
-  --text-large-title: 34px;
-  --text-title-2: 22px;
-  --text-body: 17px;
-  --text-caption: 13px;
-  --text-button: 17px;
+  /* Font Sizes - Chat Scale (Conversational) */
+  --text-chat-title: 22px;
+  --text-chat-body: 17px;
+  --text-chat-code: 13px;
+
+  /* Font Sizes - Admin Scale (High Density) */
+  --text-admin-label: 11px;
+  --text-admin-body: 13px;
 
   /* Legacy compat */
   --text-xs: 0.8125rem;
@@ -34,6 +107,13 @@
   --text-3xl: 2.125rem;
   /* 34px */
 
+  /* Semantic aliases */
+  --text-large-title: 34px;
+  --text-title-2: 22px;
+  --text-body: 17px;
+  --text-caption: 13px;
+  --text-button: 17px;
+
   /* Font Weights */
   --font-normal: 400;
   --font-medium: 500;
@@ -46,36 +126,40 @@
   --tracking-wide: 0.01em;
 
   /* ========================================
-     OKLCH Color System (V2)
+     OKLCH Color System (v3.0)
+     Based on DESIGN_RULE.md "3. カラーシステム"
      ======================================== */
   /* Background Layers */
   --bg-base: oklch(99% 0 0);
-  /* App background */
+  /* アプリ全体の最背景 (Wallpaper) */
   --bg-layer-1: oklch(98% 0 0);
-  /* Sidebar, card bg */
+  /* サイドバー、カード背景 */
   --bg-layer-2: oklch(100% 0 0);
-  /* Surface, input area */
+  /* 最前面サーフェス、入力エリア */
+  --bg-modal: oklch(100% 0 0 / 40%);
+  /* モーダル背景 (強いぼかし用) */
 
-  /* Primary Blue */
+  /* Primary Blue (Vivid Blue) */
   --color-primary: oklch(60% 0.2 250);
   --color-primary-hover: oklch(55% 0.22 250);
   --color-primary-active: oklch(50% 0.24 250);
   --color-primary-bg: oklch(97% 0.03 250);
   --color-primary-bg-hover: oklch(94% 0.05 250);
 
-  /* Text Colors */
+  /* Text Colors - 純黒禁止 */
   --color-text-main: oklch(20% 0 0);
-  /* Dark gray, not pure black */
-  --color-text-sub: oklch(40% 0 0);
+  /* 主要テキスト */
+  --color-text-sub: oklch(55% 0 0);
+  /* 補足テキスト */
   --color-text-muted: oklch(55% 0 0);
   --color-text-white: #FFFFFF;
 
   /* Background Colors (compat aliases) */
-  --color-bg-body: oklch(97% 0 0);
+  --color-bg-body: oklch(99% 0 0);
   --color-bg-surface: oklch(100% 0 0);
   --color-bg-sidebar: oklch(98% 0 0);
 
-  /* Border Colors - 極力使用しない */
+  /* Border Colors - 極力使用しない (Glassエッジ用) */
   --color-border: oklch(92% 0 0);
   --color-border-strong: oklch(88% 0 0);
 
@@ -159,7 +243,7 @@
 }
 
 /* ========================================
-   Dark Mode (V2 - OKLCH)
+   Dark Mode (v3.0 - OKLCH)
    「手前にあるものほど明るく、奥にあるものほど暗い」
    ======================================== */
 [data-theme='dark'] {
@@ -175,9 +259,9 @@
   --color-bg-surface: oklch(15% 0 0);
   --color-bg-sidebar: oklch(12% 0 0);
 
-  /* Text Colors - 高コントラスト確保 */
+  /* Text Colors - v3.0仕様 */
   --color-text-main: oklch(98% 0 0);
-  --color-text-sub: oklch(75% 0 0);
+  --color-text-sub: oklch(65% 0 0);
   --color-text-muted: oklch(60% 0 0);
 
   /* Border Colors */
@@ -259,7 +343,7 @@
 }
 
 /* ========================================
-   Base Styles (V2)
+   Base Styles (v3.0)
    ======================================== */
 body {
   margin: 0;
@@ -281,33 +365,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Custom Scrollbar (Webkit) */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #9CA3AF;
-}
-
-/* Dark Mode Scrollbar */
-[data-theme='dark'] ::-webkit-scrollbar-thumb {
-  background: #48484A;
-}
-
-[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
-  background: #636366;
-}
+/* Scrollbar styles are defined in @layer base above */
 
 /* --- Tagging UI (Domain Filter) --- */
 .domain-tag-container {

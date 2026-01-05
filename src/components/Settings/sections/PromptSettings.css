@@ -1,0 +1,438 @@
+/* === AI Style Settings (macOS Sequoia) === */
+
+/* スタイルカードグリッド */
+.ai-style-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+/* スタイルカード - Glassmorphism + Specular Edge */
+.ai-style-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-6);
+    border-radius: 16px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 2px solid var(--color-border);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+}
+
+[data-theme='dark'] .ai-style-card {
+    background: rgba(30, 30, 30, 0.6);
+    border-color: var(--color-border-strong);
+}
+
+.ai-style-card:hover {
+    transform: scale(1.02);
+    border-color: var(--color-primary-bg-hover);
+    background: var(--color-primary-bg);
+}
+
+[data-theme='dark'] .ai-style-card:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--color-primary);
+}
+
+.ai-style-card:active {
+    transform: scale(0.98);
+}
+
+/* Active State - Specular Edge + Glow */
+.ai-style-card.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
+    box-shadow:
+        0 0 0 0.5px rgba(255, 255, 255, 0.4) inset,
+        0 0 24px rgba(59, 130, 246, 0.2);
+}
+
+[data-theme='dark'] .ai-style-card.active {
+    background: rgba(59, 130, 246, 0.15);
+    box-shadow:
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset,
+        0 0 30px rgba(59, 130, 246, 0.25);
+}
+
+/* Focus Ring */
+.ai-style-card:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme='dark'] .ai-style-card:focus-visible {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+/* スタイルカード アイコン */
+.ai-style-card-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary-bg) 0%, rgba(59, 130, 246, 0.15) 100%);
+    margin-bottom: var(--space-4);
+    transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .ai-style-card-icon {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+}
+
+.ai-style-card-icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--color-text-sub);
+    transition: color 0.3s ease;
+}
+
+.ai-style-card.active .ai-style-card-icon {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.ai-style-card.active .ai-style-card-icon svg {
+    color: white;
+}
+
+/* スタイルカード タイトル */
+.ai-style-card-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+    transition: color 0.3s ease;
+}
+
+.ai-style-card.active .ai-style-card-title {
+    color: var(--color-primary);
+}
+
+/* スタイルカード 説明文 */
+.ai-style-card-description {
+    font-size: var(--text-sm);
+    color: var(--color-text-sub);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ai-style-card.active .ai-style-card-description {
+    color: var(--color-primary);
+}
+
+/* コンテキスト入力エリア */
+.context-input-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .context-input-card {
+    background: rgba(30, 30, 30, 0.6);
+    border-color: var(--color-border-strong);
+}
+
+.context-input-card:focus-within {
+    box-shadow: var(--glow-primary);
+    border-color: var(--color-primary);
+}
+
+.context-textarea-enhanced {
+    width: 100%;
+    min-height: 120px;
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-main);
+    font-size: var(--text-base);
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.2s ease;
+    line-height: 1.6;
+}
+
+.context-textarea-enhanced:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.context-textarea-enhanced::placeholder {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.context-char-count {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+}
+
+/* セクションヘッダー */
+.ai-style-section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.ai-style-section-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    margin: 0;
+}
+
+.ai-style-section-subtitle {
+    font-size: var(--text-sm);
+    color: var(--color-text-sub);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ========================================
+   Style Preview (Inline in AI Persona)
+   ======================================== */
+
+.style-preview-wrapper {
+    border-top: 1px solid var(--color-border);
+}
+
+/* Last child in settings-group should have bottom rounded corners */
+.settings-group>.style-preview-wrapper:last-child {
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    overflow: hidden;
+}
+
+.style-preview-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+    border-radius: 0;
+}
+
+/* Rounded corners for hover effect (last item in group when closed) */
+.settings-group>.style-preview-wrapper:last-child .style-preview-toggle {
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.style-preview-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='dark'] .style-preview-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Badge positioned before chevron */
+.style-preview-badge {
+    margin-left: auto;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-primary);
+    background-color: var(--color-primary-bg);
+    border-radius: 99px;
+}
+
+/* Chevron after badge (no auto margin) */
+.style-preview-chevron {
+    margin-left: 8px;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+}
+
+/* Smooth height animation for content */
+.style-preview-content {
+    overflow: hidden;
+    border-top: 1px solid var(--color-border);
+    background-color: #fafafa;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+[data-theme='dark'] .style-preview-content {
+    background-color: #1a1a1a;
+}
+
+/* Content inner with proper padding */
+.style-preview-text {
+    padding: 16px;
+    max-height: 280px;
+    overflow-y: auto;
+    /* Prevent width change when scrollbar appears */
+    scrollbar-gutter: stable;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-text-main);
+}
+
+.style-preview-text .preview-heading {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: 8px;
+}
+
+.style-preview-text .preview-list-item {
+    padding-left: 16px;
+    margin-bottom: 4px;
+    color: var(--color-text-sub);
+}
+
+.style-preview-text .preview-paragraph {
+    margin: 0 0 8px;
+}
+
+.style-preview-text strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* ========================================
+   Intelligence Profile (v3.0)
+   DESIGN_RULE.md v3.0 準拠
+   ======================================== */
+
+/* Profile Form Container */
+.intelligence-profile-form {
+    padding: 0 16px 16px 56px;
+}
+
+/* Ghost Input Group - macOS Finder風のシンプルなフォーム */
+.ghost-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--bg-layer-2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.ghost-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.ghost-input-row:last-child {
+    border-bottom: none;
+}
+
+.ghost-input-icon {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+/* Ghost Input - 枠線なし、下線強調なし */
+.ghost-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--color-text-main);
+    padding: 0;
+    outline: none;
+}
+
+.ghost-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.ghost-input:focus {
+    /* フォーカス時は微細なGlow */
+    text-shadow: 0 0 0 transparent;
+}
+
+/* Custom Instructions Wrapper */
+.custom-instructions-wrapper {
+    margin-bottom: 16px;
+}
+
+.custom-instructions-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+}
+
+/* Code Editor風エディタ */
+.custom-instructions-editor {
+    width: 100%;
+    min-height: 140px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background-color: var(--bg-layer-2);
+    color: var(--color-text-main);
+    font-size: 13px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-theme='dark'] .custom-instructions-editor {
+    background-color: #1a1a1a;
+}
+
+.custom-instructions-editor:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.custom-instructions-editor::placeholder {
+    color: var(--color-text-muted);
+    font-family: inherit;
+}
+
+/* Actions row */
+.intelligence-profile-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.save-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--color-success);
+}

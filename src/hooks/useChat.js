@@ -1,10 +1,10 @@
 // src/hooks/useChat.js
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { mockMessages } from '../mocks/data';
 import { scenarioSuggestions } from '../mocks/scenarios';
 // ★変更: Adapterをインポート
 import { ChatServiceAdapter } from '../services/ChatServiceAdapter';
-import { fetchMessagesApi, fetchSuggestionsApi } from '../api/dify';
+import { fetchMessagesApi, fetchSuggestionsApi, stopGenerationApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMapper';
 import { createConfigError } from '../utils/errorHandler';
@@ -127,6 +127,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
   const searchSettingsRef = useRef(searchSettings);
   const creatingConversationIdRef = useRef(null);
   const settingsMapRef = useRef({});
+
+  // ★追加: 停止機能用のRef
+  const abortControllerRef = useRef(null);
+  const currentTaskIdRef = useRef(null);
+  // ★追加: 最後のユーザーメッセージを追跡（再送信用）
+  const lastUserMessageRef = useRef(null);
 
   useEffect(() => {
     searchSettingsRef.current = searchSettings;
@@ -436,6 +442,25 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       addLog(`[Workflow] 添付ファイル: ${displayFiles.map(f => f.name).join(', ')}`, 'info');
     }
 
+    // ★ v3.0: Intelligence Profile ログ出力（デバッグ用）
+    const aiStyle = promptSettings?.aiStyle || 'partner';
+    const systemPromptPayload = {
+      user_context: {
+        name: promptSettings?.displayName || '',
+        role: promptSettings?.userProfile?.role || '',
+        department: promptSettings?.userProfile?.department || ''
+      },
+      custom_directives: {
+        free_text: promptSettings?.customInstructions || ''
+      },
+      meta: {
+        client_version: '3.0.0',
+        timestamp: new Date().toISOString()
+      }
+    };
+    addLog(`[Intelligence Profile] ai_style: ${aiStyle}`, 'info');
+    addLog(`[Intelligence Profile] system_prompt: ${JSON.stringify(systemPromptPayload, null, 2)}`, 'info');
+
     // 5. Send Request via Adapter
     let reader;
     try {
@@ -448,7 +473,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
           conversationId,
           files: allFilesToSend.map(f => ({ id: f.id, name: f.name })),
           searchSettings: currentSettings,
-          promptSettings: promptSettings
+          promptSettings: promptSettings,
+          displayName: promptSettings?.displayName || ''
         },
         { mockMode, userId, apiUrl, apiKey }
       );
@@ -489,6 +515,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   creatingConversationIdRef.current = data.conversation_id;
                 }
               }
+            }
+
+            // ★追加: task_idをキャプチャ（停止機能用）
+            if (data.task_id && !currentTaskIdRef.current) {
+              currentTaskIdRef.current = data.task_id;
             }
 
             // Node Events
@@ -827,19 +858,132 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       if (mockMode === 'FE') {
         const mockData = scenarioSuggestions['pure'] || [];
         await new Promise(resolve => setTimeout(resolve, 500));
-        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, suggestions: mockData } : m));
+        // ★変更: 停止されたメッセージにはsuggestionsを設定しない
+        setMessages(prev => prev.map(m => {
+          if (m.id === aiMsgId && !m.wasStopped) {
+            return { ...m, suggestions: mockData };
+          }
+          return m;
+        }));
         return;
       }
 
       const res = await fetchSuggestionsApi(msgId, userId, apiUrl, apiKey);
       if (res.result === 'success') {
-        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, suggestions: res.data } : m));
+        // ★変更: 停止されたメッセージにはsuggestionsを設定しない
+        setMessages(prev => prev.map(m => {
+          if (m.id === aiMsgId && !m.wasStopped) {
+            return { ...m, suggestions: res.data };
+          }
+          return m;
+        }));
       }
     } catch (e) {
       addLog(`[Suggestions Error] ${e.message}`, 'error');
       console.error('[Suggestions Error]', e);
     }
   };
+
+  // ★新規: 生成停止関数
+  const stopGeneration = useCallback(async () => {
+    addLog('[Stop] ユーザーによる生成停止を実行', 'info');
+
+    // 1. クライアント側のストリーム中断
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    // 2. サーバー側の生成停止（Real APIモードの場合のみ）
+    if (currentTaskIdRef.current && mockMode !== 'FE' && apiKey && apiUrl && userId) {
+      try {
+        await stopGenerationApi(currentTaskIdRef.current, userId, apiUrl, apiKey);
+        addLog('[Stop] サーバー側の生成を停止しました', 'info');
+      } catch (e) {
+        addLog(`[Stop] サーバー停止API失敗: ${e.message}`, 'warn');
+        // クライアント側は既に停止しているので、エラーでも続行
+      }
+    }
+
+    currentTaskIdRef.current = null;
+
+    // 3. UIステートの更新
+    // ストリーミング中のメッセージがあれば、途中までのテキストを確定メッセージとして保存
+    const currentStreaming = streamingMessageRef.current;
+    if (currentStreaming) {
+      const stoppedMessage = {
+        ...currentStreaming,
+        isStreaming: false,
+        wasStopped: true, // ★追加: 停止フラグ（suggestions等の取得をスキップ）
+        text: currentStreaming.text || '',
+        thoughtProcess: currentStreaming.thoughtProcess?.map(t => ({ ...t, status: 'done' })) || [],
+        // ★追加: 停止されたメッセージには関連する質問を表示しない
+        suggestions: [],
+        smartActions: []
+      };
+      setMessages(prev => [...prev, stoppedMessage]);
+      setStreamingMessage(null);
+    }
+
+    setIsGenerating(false);
+  }, [mockMode, apiKey, apiUrl, userId, addLog]);
+
+  // ★新規: メッセージ編集関数
+  const handleEdit = useCallback(async (messageId, newText) => {
+    addLog(`[Edit] メッセージを編集: ${messageId}`, 'info');
+
+    // 1. 対象メッセージのインデックスを探す
+    const messageIndex = messages.findIndex(m => m.id === messageId);
+    if (messageIndex === -1) {
+      addLog('[Edit] 対象メッセージが見つかりません', 'error');
+      return;
+    }
+
+    // 2. 履歴の切り詰め（対象メッセージより前のメッセージのみ残す）
+    const previousMessages = messages.slice(0, messageIndex);
+    setMessages(previousMessages);
+
+    // 3. 新規メッセージとして送信
+    await handleSendMessage(newText, []);
+  }, [messages, handleSendMessage, addLog]);
+
+  // ★新規: 再送信（再生成）関数
+  const handleRegenerate = useCallback(async () => {
+    addLog('[Regenerate] 再送信を実行', 'info');
+
+    if (messages.length === 0) {
+      addLog('[Regenerate] メッセージがありません', 'warn');
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    let targetUserMessage;
+    let truncateCount;
+
+    if (lastMessage.role === 'ai' || lastMessage.role === 'system') {
+      // 最後のメッセージがAI/システムの場合、その一つ前のユーザーメッセージを取得
+      const userMsgIndex = messages.length - 2;
+      if (userMsgIndex >= 0 && messages[userMsgIndex].role === 'user') {
+        targetUserMessage = messages[userMsgIndex];
+        truncateCount = 2; // AI回答とユーザー質問を削除
+      }
+    } else if (lastMessage.role === 'user') {
+      // 最後がユーザーで終わっている（エラー等）場合
+      targetUserMessage = lastMessage;
+      truncateCount = 1;
+    }
+
+    if (!targetUserMessage) {
+      addLog('[Regenerate] 再送信対象のユーザーメッセージが見つかりません', 'warn');
+      return;
+    }
+
+    // 履歴を切り詰め
+    setMessages(prev => prev.slice(0, prev.length - truncateCount));
+
+    // 再送信
+    await handleSendMessage(targetUserMessage.text, targetUserMessage.files || []);
+  }, [messages, handleSendMessage, addLog]);
 
   return {
     messages,
@@ -857,6 +1001,10 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     domainFilters: searchSettings.domainFilters,
     setDomainFilters: (filters) => updateSearchSettings({ ...searchSettings, domainFilters: filters }),
     forceSearch: searchSettings.webMode === 'force',
-    setForceSearch: (force) => updateSearchSettings({ ...searchSettings, webMode: force ? 'force' : 'auto' })
+    setForceSearch: (force) => updateSearchSettings({ ...searchSettings, webMode: force ? 'force' : 'auto' }),
+    // ★新規: 停止・編集・再送信機能
+    stopGeneration,
+    handleEdit,
+    handleRegenerate,
   };
 };

@@ -1,9 +1,12 @@
 // src/components/Chat/ChatInput.jsx
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ContextSelector from '../Shared/ContextSelector';
 import FileIcon from '../Shared/FileIcon';
 import PrivacyConfirmDialog from './PrivacyConfirmDialog';
+import PrivacyShieldButton from './PrivacyShieldButton';
 import { scanText } from '../../utils/privacyDetector';
+import { scanFiles, hasFileWarnings, getFileDetections, isScannableFile } from '../../utils/fileScanner';
 import './ChatInput.css';
 
 // --- Icons (SVG Definitions) ---
@@ -30,6 +33,14 @@ const SendIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="22" y1="2" x2="11" y2="13"></line>
     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+  </svg>
+);
+
+// ★追加: 停止アイコン (StopCircle)
+const StopIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <rect x="9" y="9" width="6" height="6" rx="1"></rect>
   </svg>
 );
 
@@ -140,9 +151,13 @@ const ChatInput = ({
   isCentered,
   activeContextFiles = [],
   searchSettings,
-  setSearchSettings
+  setSearchSettings,
+  // ★追加: 停止機能用Props
+  isStreaming = false,
+  onStop
 }) => {
   const [text, setText] = useState('');
+  // selectedFiles: Array<{ file: File, scanStatus: 'scanning'|'completed'|'skipped'|'error', hasWarning: boolean, detections: [] }>
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [showContextSelector, setShowContextSelector] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -150,20 +165,15 @@ const ChatInput = ({
   // Privacy detection state
   const [privacyWarning, setPrivacyWarning] = useState({ hasWarning: false, detections: [] });
   const [showPrivacyConfirm, setShowPrivacyConfirm] = useState(false);
-  const [showPrivacyDetail, setShowPrivacyDetail] = useState(false);
 
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const contextSelectorRef = useRef(null);
-  const privacyDetailRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (contextSelectorRef.current && !contextSelectorRef.current.contains(event.target)) {
         setShowContextSelector(false);
-      }
-      if (privacyDetailRef.current && !privacyDetailRef.current.contains(event.target)) {
-        setShowPrivacyDetail(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -188,7 +198,9 @@ const ChatInput = ({
 
   // 実際の送信処理
   const executeSend = useCallback(() => {
-    onSendMessage(text, selectedFiles);
+    // selectedFiles から File オブジェクトのみ抽出して送信
+    const filesToSend = selectedFiles.map(sf => sf.file);
+    onSendMessage(text, filesToSend);
     setText('');
     setSelectedFiles([]);
     setPrivacyWarning({ hasWarning: false, detections: [] });
@@ -199,8 +211,8 @@ const ChatInput = ({
   const handleSend = () => {
     if ((!text.trim() && selectedFiles.length === 0) || isLoading) return;
 
-    // 機密情報検知時は確認ダイアログを表示
-    if (privacyWarning.hasWarning) {
+    // テキストまたはファイルに機密情報が検知された場合は確認ダイアログを表示
+    if (combinedWarning) {
       setShowPrivacyConfirm(true);
       return;
     }
@@ -216,9 +228,35 @@ const ChatInput = ({
     }
   };
 
-  const addFiles = useCallback((newFiles) => {
+  const addFiles = useCallback(async (newFiles) => {
     if (newFiles && newFiles.length > 0) {
-      setSelectedFiles(prev => [...prev, ...newFiles]);
+      // 初期状態: scanningステータスで追加
+      const initialFiles = newFiles.map(file => ({
+        file,
+        scanStatus: isScannableFile(file.name) ? 'scanning' : 'skipped',
+        hasWarning: false,
+        detections: [],
+      }));
+
+      setSelectedFiles(prev => [...prev, ...initialFiles]);
+
+      // 非同期でスキャン実行
+      const scannedResults = await scanFiles(newFiles);
+
+      // スキャン結果で更新
+      setSelectedFiles(prev => {
+        // 既存のファイルを更新
+        return prev.map(sf => {
+          // scanningステータスのファイルのみ更新対象
+          if (sf.scanStatus === 'scanning') {
+            const result = scannedResults.find(r => r.file === sf.file);
+            if (result) {
+              return result;
+            }
+          }
+          return sf;
+        });
+      });
     }
   }, []);
 
@@ -232,6 +270,18 @@ const ChatInput = ({
   const removeSelectedFile = (index) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
+
+  // ファイルの警告状態を集計
+  const fileWarnings = useMemo(() => {
+    const hasWarning = hasFileWarnings(selectedFiles);
+    const detections = getFileDetections(selectedFiles);
+    return { hasWarning, detections };
+  }, [selectedFiles]);
+
+  // テキスト + ファイルの総合警告
+  const combinedWarning = useMemo(() => {
+    return privacyWarning.hasWarning || fileWarnings.hasWarning;
+  }, [privacyWarning.hasWarning, fileWarnings.hasWarning]);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -279,15 +329,33 @@ const ChatInput = ({
           {/* activeContextFilesは将来の機能のために親コンポーネントで保持されているが、ここでは表示しない */}
           {hasFiles && (
             <div className="file-tray">
-              {selectedFiles.map((file, idx) => (
-                <div key={`pend-${idx}`} className="file-card pending">
-                  <FileIcon filename={file.name} className="file-tray-icon" />
-                  <span className="file-card-name">{file.name}</span>
-                  <button className="file-remove-btn" onClick={() => removeSelectedFile(idx)} title="削除">
-                    <CloseIcon />
-                  </button>
-                </div>
-              ))}
+              {selectedFiles.map((sf, idx) => {
+                // スキャン状態に応じたクラス名を生成
+                const statusClass = sf.scanStatus === 'scanning' ? 'scanning' :
+                  sf.hasWarning ? 'warning' : '';
+                return (
+                  <div key={`pend-${idx}`} className={`file-card pending ${statusClass}`}>
+                    <FileIcon filename={sf.file.name} className="file-tray-icon" />
+                    <div className="file-card-content">
+                      <span className="file-card-name">{sf.file.name}</span>
+                      {sf.scanStatus === 'scanning' && (
+                        <span className="file-scan-status">スキャン中...</span>
+                      )}
+                    </div>
+                    {/* 盾ボタン: 警告がある場合のみ表示 */}
+                    {sf.hasWarning && (
+                      <PrivacyShieldButton
+                        detections={sf.detections}
+                        fileName={sf.file.name}
+                        size="small"
+                      />
+                    )}
+                    <button className="file-remove-btn" onClick={() => removeSelectedFile(idx)} title="削除">
+                      <CloseIcon />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -347,59 +415,46 @@ const ChatInput = ({
                 )}
               </div>
 
-              {/* Privacy Shield Indicator - ボタン化 + ポップオーバー */}
+              {/* Privacy Shield Indicator - 新コンポーネント使用 */}
               {privacyWarning.hasWarning && (
-                <div className="relative" ref={privacyDetailRef}>
-                  <button
-                    className="privacy-shield-indicator"
-                    onClick={() => setShowPrivacyDetail(!showPrivacyDetail)}
-                    aria-label="検知された機密情報を表示"
-                    aria-expanded={showPrivacyDetail}
-                  >
-                    <ShieldIcon />
-                    <span className="privacy-badge">{privacyWarning.detections.length}</span>
-                  </button>
-
-                  {/* Detail Popover */}
-                  {showPrivacyDetail && (
-                    <div className="privacy-detail-popover">
-                      <div className="privacy-detail-header">
-                        <ShieldIcon />
-                        <span>機密情報の検知</span>
-                      </div>
-                      <ul className="privacy-detail-list">
-                        {privacyWarning.detections.map((item) => (
-                          <li key={item.id}>
-                            <div className="privacy-detail-item">
-                              <div className="privacy-detail-label-row">
-                                <span className="privacy-detail-label">{item.label}</span>
-                                <span className="privacy-detail-count">({item.count}件)</span>
-                              </div>
-                              <div className="privacy-detail-matches">
-                                {item.matches.map((match, idx) => (
-                                  <code key={idx} className="privacy-detail-value">{match}</code>
-                                ))}
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="privacy-detail-footer">
-                        <span>⚠️ 送信前に確認してください</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <PrivacyShieldButton
+                  detections={privacyWarning.detections}
+                />
               )}
 
-              <button
-                className={`send-btn ${canSend ? 'active' : ''}`}
-                onClick={handleSend}
-                disabled={!canSend}
-                title="送信"
-              >
-                <SendIcon />
-              </button>
+              {/* ★変更: 送信/停止ボタンのFluid Morphing (DESIGN_RULE準拠) */}
+              <AnimatePresence mode="wait">
+                {isStreaming ? (
+                  <motion.button
+                    key="stop"
+                    className="send-btn stop-mode active"
+                    onClick={onStop}
+                    title="停止"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 170, damping: 26 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <StopIcon />
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    key="send"
+                    className={`send-btn ${canSend ? 'active' : ''}`}
+                    onClick={handleSend}
+                    disabled={!canSend}
+                    title="送信"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 170, damping: 26 }}
+                    whileTap={canSend ? { scale: 0.95 } : undefined}
+                  >
+                    <SendIcon />
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -413,6 +468,7 @@ const ChatInput = ({
       {showPrivacyConfirm && (
         <PrivacyConfirmDialog
           detections={privacyWarning.detections}
+          fileDetections={fileWarnings.detections}
           onConfirm={executeSend}
           onCancel={() => setShowPrivacyConfirm(false)}
         />

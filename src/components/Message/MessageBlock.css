@@ -157,13 +157,13 @@
 }
 
 .copy-btn-ai {
-  background-color: var(--color-bg-sidebar);
+  background-color: transparent;
   color: var(--color-text-muted);
 }
 
 .copy-btn-ai:hover {
   background-color: var(--color-border-strong);
-  color: var(--color-text-main);
+  color: var(--color-primary);
 }
 
 .copy-btn-user {
@@ -783,4 +783,179 @@
   .message-block {
     will-change: auto;
   }
+}
+
+/* ========================================
+   Edit & Regenerate Styles (Phase 1.5)
+   DESIGN_RULE準拠: Glass効果、Glow、17px
+   ======================================== */
+
+/* ユーザーメッセージ用アクションボタン群 */
+.user-action-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message-container:hover .user-action-group {
+  opacity: 1;
+}
+
+/* 編集ボタン */
+.message-edit-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--color-text-muted);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.message-edit-btn:hover {
+  background-color: var(--color-border-strong);
+  color: var(--color-primary);
+}
+
+/* 編集モードのバブル */
+.message-bubble.edit-mode {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--glow-primary);
+  padding: 16px;
+}
+
+/* 編集テキストエリア - DESIGN_RULE準拠: 17px */
+.edit-textarea {
+  width: 100%;
+  min-height: 60px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-family-base);
+  font-size: var(--text-body);
+  /* 17px */
+  line-height: 1.5;
+  letter-spacing: var(--tracking-normal);
+  color: var(--color-text-main);
+  resize: none;
+  margin-bottom: 12px;
+}
+
+.edit-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* 編集アクションボタン */
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.edit-cancel-btn,
+.edit-confirm-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+}
+
+.edit-cancel-btn {
+  background-color: var(--color-bg-sidebar);
+  color: var(--color-text-sub);
+}
+
+.edit-cancel-btn:hover {
+  background-color: var(--color-border-strong);
+  color: var(--color-text-main);
+}
+
+.edit-confirm-btn {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.edit-confirm-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.edit-confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 再送信ボタン（アイコンのみ、コピーボタンと同様） */
+.message-regenerate-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.message-container:hover .message-regenerate-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.message-regenerate-btn:hover {
+  background-color: var(--color-border-strong);
+  color: var(--color-primary);
+}
+
+/* AIメッセージ用アクションボタン群 */
+.ai-action-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  /* レイアウトシフト防止: 常にボタン2つ分のスペースを確保 */
+  min-width: 64px;
+  flex-shrink: 0;
+}
+
+/* ストリーミング中の非表示ボタン（スペースは維持） */
+.hidden-btn {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Dark Mode */
+[data-theme='dark'] .message-bubble.edit-mode {
+  background: rgba(30, 30, 30, 0.8);
+  border-color: var(--color-primary);
+}
+
+[data-theme='dark'] .edit-textarea {
+  color: var(--color-text-main);
+}
+
+[data-theme='dark'] .message-regenerate-btn:hover {
+  background-color: rgba(59, 130, 246, 0.15);
 }

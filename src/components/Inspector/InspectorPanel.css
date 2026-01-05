@@ -1,0 +1,286 @@
+/* src/components/Inspector/InspectorPanel.css */
+/* ========================================
+   Inspector Panel - v3.0
+   Glass Sandwich (Context Layer)
+   High Density UI (text-admin-body: 13px)
+   ======================================== */
+
+.inspector-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    /* Glass Sandwich applied via Tailwind in JSX */
+}
+
+/* Header */
+.inspector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.inspector-title {
+    font-size: var(--text-admin-body);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.inspector-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.inspector-close-btn:hover {
+    background-color: var(--color-hover-overlay);
+    color: var(--color-text-main);
+}
+
+/* Tabs */
+.inspector-tabs {
+    display: flex;
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.inspector-tab {
+    padding: var(--space-2) var(--space-3);
+    font-size: 12px;
+    font-weight: var(--font-medium);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.inspector-tab:hover {
+    background-color: var(--color-hover-overlay);
+    color: var(--color-text-sub);
+}
+
+.inspector-tab.active {
+    background-color: var(--color-primary-bg);
+    color: var(--color-primary);
+}
+
+.inspector-tab-badge {
+    background-color: var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 10px;
+    font-weight: var(--font-semibold);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    min-width: 18px;
+    text-align: center;
+}
+
+.inspector-tab.active .inspector-tab-badge {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Content Area */
+.inspector-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--space-3);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Empty State */
+.inspector-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: var(--space-6);
+}
+
+.inspector-empty-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--space-3);
+    opacity: 0.5;
+}
+
+.inspector-empty-text {
+    font-size: 13px;
+}
+
+/* Section Headers */
+.inspector-section {
+    margin-bottom: var(--space-4);
+}
+
+.inspector-section-header {
+    font-size: 11px;
+    font-weight: var(--font-semibold);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-2);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Citation Item in Inspector */
+.inspector-citation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: var(--space-1);
+}
+
+.inspector-citation-item:hover {
+    background-color: var(--color-hover-overlay);
+}
+
+.inspector-citation-item.highlighted {
+    background-color: var(--color-primary-bg);
+    border: 1px solid var(--color-primary);
+}
+
+.inspector-citation-badge {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: var(--font-semibold);
+}
+
+.inspector-citation-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.inspector-citation-source {
+    font-size: 13px;
+    font-weight: var(--font-medium);
+    color: var(--color-text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inspector-citation-url {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Thought Step in Inspector */
+.inspector-thought-step {
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+}
+
+.inspector-thought-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.inspector-thought-content {
+    flex: 1;
+    font-size: 13px;
+    color: var(--color-text-sub);
+}
+
+.inspector-thought-title {
+    font-weight: var(--font-medium);
+    color: var(--color-text-main);
+    margin-bottom: 2px;
+}
+
+/* Artifact Item in Inspector */
+.inspector-artifact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background-color: var(--color-bg-surface);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: var(--space-2);
+}
+
+.inspector-artifact-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.inspector-artifact-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary-bg);
+    color: var(--color-primary);
+    border-radius: var(--radius-md);
+}
+
+.inspector-artifact-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.inspector-artifact-title {
+    font-size: 13px;
+    font-weight: var(--font-medium);
+    color: var(--color-text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inspector-artifact-type {
+    font-size: 11px;
+    color: var(--color-text-muted);
+}

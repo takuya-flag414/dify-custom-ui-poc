@@ -1,0 +1,651 @@
+/* src/components/Settings/sections/SettingsCommon.css */
+
+/* =================================================================
+   Settings Design System (Shared)
+   ================================================================= */
+
+/* --- Layout Containers --- */
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px 40px;
+    max-width: 800px;
+    /* Legacy max-width */
+    margin: 0 auto;
+}
+
+/* macOS Sequoia Style Container Override */
+.settings-container.mac-style {
+    max-width: 680px;
+}
+
+.settings-section {
+    margin-bottom: var(--space-8);
+    width: 100%;
+}
+
+.settings-section-title {
+    font-size: 11px;
+    /* Admin Label */
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    padding-left: 12px;
+    text-align: left;
+}
+
+.settings-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: var(--space-4) 0;
+    border: none;
+}
+
+/* --- Card & Group Containers --- */
+
+/* v2/Admin Card */
+.settings-card {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    box-shadow: none;
+    margin-bottom: var(--space-6);
+    transition: none;
+    position: relative;
+    overflow: visible;
+}
+
+.settings-card:hover {
+    box-shadow: none;
+    border-color: transparent;
+    transform: none;
+}
+
+/* v3 macOS Inset Group (The White/Dark Island) */
+.settings-group {
+    background-color: #ffffff;
+    /* Explicit white for light mode - "白い角丸の島" */
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    /* macOS Standard Radius */
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .settings-group {
+    background-color: #1f1f1f;
+    /* Explicit dark bg for dark mode */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.settings-card-header {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-5);
+    margin-bottom: var(--space-2);
+}
+
+.settings-card-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-main);
+    margin-bottom: var(--space-2);
+    letter-spacing: var(--tracking-tight);
+}
+
+.settings-card-description {
+    font-size: var(--text-sm);
+    color: var(--color-text-sub);
+    line-height: 1.6;
+}
+
+/* --- Rows (Grid Layout & Flex Layout) --- */
+
+/* Legacy / Admin Flex Row */
+.settings-row {
+    display: flex;
+    /* Flex is default, overridden by grid in v3 */
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    /* v3: 8px 16px */
+    min-height: 48px;
+    /* v3: 44px */
+    background-color: transparent;
+    border-bottom: 1px solid var(--color-border);
+    width: 100%;
+    position: relative;
+    transition: background-color 0.15s ease;
+    cursor: default;
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    /* Subtle gray on white background */
+}
+
+[data-theme='dark'] .settings-row:not(:last-child) {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .settings-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+
+/* --- Columns --- */
+.settings-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-main);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1;
+    text-align: left;
+    padding-right: 16px;
+}
+
+.settings-label-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: 16px;
+    flex: 1;
+}
+
+.settings-label-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-main);
+    line-height: 1.3;
+}
+
+.settings-description {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+    line-height: 1.2;
+}
+
+.settings-icon-col {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: var(--color-primary);
+    width: 28px;
+    /* Fixed width for icon column */
+}
+
+.settings-icon-box {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.settings-icon-box svg {
+    width: 16px;
+    height: 16px;
+}
+
+.settings-control-col {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    min-width: 120px;
+}
+
+/* --- Form Elements: Inputs & Textareas --- */
+.settings-input {
+    height: 36px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--bg-layer-1);
+    color: var(--color-text-main);
+    font-size: 13px;
+    transition: all 0.15s ease;
+}
+
+.settings-input:focus {
+    outline: none;
+    background-color: var(--bg-layer-2);
+    border-color: var(--color-primary);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme='dark'] .settings-input:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+.settings-textarea {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--bg-layer-1);
+    color: var(--color-text-main);
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: all 0.15s ease;
+    line-height: 1.5;
+}
+
+.settings-textarea:focus {
+    outline: none;
+    background-color: var(--bg-layer-2);
+    border-color: var(--color-primary);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme='dark'] .settings-textarea:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+/* --- Form Elements: MacOS Style --- */
+
+/* Mac Select (Wrapper & Custom Icon) */
+.mac-select-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mac-select-trigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.mac-select-trigger:hover {
+    background-color: #f0f0f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .mac-select-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.mac-select-value {
+    font-size: 13px;
+    color: var(--color-text-main);
+    line-height: 1.3;
+}
+
+.mac-select-icon {
+    position: absolute;
+    right: 8px;
+    color: var(--color-text-sub);
+    pointer-events: none;
+    /* Click passes through to select */
+    z-index: 1;
+}
+
+.mac-select-wrapper:hover .mac-select-icon {
+    color: var(--color-text-main);
+}
+
+.mac-select-native:focus {
+    outline: none;
+}
+
+/* Mac Segmented Control (Pill) */
+.mac-segmented {
+    display: inline-flex;
+    padding: 2px;
+    background-color: #e5e5e5;
+    /* Subtle gray for contrast on white background */
+    border-radius: 6px;
+    position: relative;
+    z-index: 0;
+}
+
+[data-theme='dark'] .mac-segmented {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.mac-segmented-item {
+    position: relative;
+    z-index: 1;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-sub);
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mac-segmented-item:not(.active):hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: var(--color-text-main);
+}
+
+[data-theme='dark'] .mac-segmented-item:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mac-segmented-item.active {
+    color: var(--color-text-main);
+    background-color: #ffffff;
+    /* Explicit white for active segment */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme='dark'] .mac-segmented-item.active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Mac Toggle (Spring Physics) */
+.mac-toggle {
+    appearance: none;
+    width: 36px;
+    height: 20px;
+    background-color: #c7c7cc;
+    /* iOS-style off state */
+    border-radius: 99px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    outline: none;
+}
+
+.mac-toggle:hover {
+    background-color: #b0b0b5;
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.mac-toggle:checked:hover {
+    background-color: var(--color-primary-hover);
+    filter: brightness(1.1);
+}
+
+.mac-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mac-toggle:checked {
+    background-color: var(--color-primary);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.35);
+}
+
+.mac-toggle:checked::after {
+    transform: translateX(16px);
+}
+
+.mac-toggle:focus-visible {
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme='dark'] .mac-toggle:focus-visible {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+/* --- Buttons --- */
+.settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.settings-btn {
+    height: 32px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: 12px;
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    border: none;
+}
+
+.settings-btn.primary {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.settings-btn.primary:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow:
+        0 8px 24px rgba(59, 130, 246, 0.35),
+        0 0 0 0.5px rgba(255, 255, 255, 0.2) inset;
+}
+
+.settings-btn.primary:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 4px rgba(59, 130, 246, 0.4),
+        0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.settings-btn.secondary {
+    background-color: #f5f5f5;
+    /* Slight gray for contrast on white */
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+}
+
+.settings-btn.secondary:hover {
+    background-color: #ebebeb;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.settings-btn.secondary:active {
+    transform: scale(0.95);
+}
+
+[data-theme='dark'] .settings-btn.secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .settings-btn.secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.settings-btn.secondary:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme='dark'] .settings-btn.secondary:focus-visible {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+/* --- Utilities --- */
+.text-danger {
+    color: var(--color-error) !important;
+}
+
+.btn-danger-ghost {
+    color: var(--color-error);
+    font-size: 13px;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--color-error);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-danger-ghost:hover {
+    background-color: var(--color-error);
+    color: white;
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger-ghost:active {
+    transform: scale(0.96);
+}
+
+.settings-row.danger:hover {
+    background-color: rgba(239, 68, 68, 0.05);
+    /* Slight red tint on hover for danger rows */
+}
+
+/* --- Rounded Corners for Rows (since group overflow is visible) --- */
+.settings-group .settings-row:first-child {
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+
+.settings-group .settings-row:last-child {
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+/* --- Custom Mac Select Dropdown (macOS Sequoia Style) --- */
+.mac-select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 180px;
+
+    /* mat-popover Material */
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+
+    /* Specular Edge */
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        0 8px 16px rgba(0, 0, 0, 0.1),
+        0 0 0 0.5px rgba(0, 0, 0, 0.04);
+
+    padding: 6px;
+    z-index: 9999;
+    animation: macSelectIn 0.12s ease-out;
+}
+
+@keyframes macSelectIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+[data-theme='dark'] .mac-select-dropdown {
+    background: rgba(40, 40, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 8px 16px rgba(0, 0, 0, 0.3),
+        0 0 0 0.5px rgba(255, 255, 255, 0.05) inset;
+}
+
+.mac-select-option {
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #333333;
+    /* Explicit dark text */
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.15s;
+    margin-bottom: 2px;
+}
+
+[data-theme='dark'] .mac-select-option {
+    color: #e5e5e5;
+    /* Explicit light text */
+}
+
+.mac-select-option:last-child {
+    margin-bottom: 0;
+}
+
+.mac-select-option:hover {
+    background-color: var(--color-primary);
+    color: white !important;
+    /* Force white on hover */
+}
+
+.mac-select-option.selected {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.mac-select-option.selected:hover {
+    color: white !important;
+}
+
+.mac-select-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+}

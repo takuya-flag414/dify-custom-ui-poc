@@ -23,7 +23,11 @@ const ChatArea = (props) => {
     onOpenConfig,
     onOpenArtifact,
     userName,
-    onStartTutorial
+    onStartTutorial,
+    // ★追加: Phase 1.5 - 停止・編集・再送信機能
+    stopGeneration,
+    handleEdit,
+    handleRegenerate
   } = props;
 
   // 初期状態: メッセージ0件 かつ 履歴ロード中でない
@@ -105,7 +109,7 @@ const ChatArea = (props) => {
   }, [messages, onSendMessage, setSearchSettings]);
 
   return (
-    <div className="chat-area">
+    <div className={`chat-area${isInitialState ? ' chat-area-initial' : ''}`}>
       {isHistoryLoading ? (
         <>
           <HistorySkeleton userName={userName} />
@@ -154,6 +158,8 @@ const ChatArea = (props) => {
             onOpenConfig={onOpenConfig}
             onOpenArtifact={onOpenArtifact}
             userName={userName}
+            onEdit={handleEdit}
+            onRegenerate={handleRegenerate}
           />
           <div className="bottom-controls-wrapper">
             <ChatInput
@@ -164,6 +170,8 @@ const ChatArea = (props) => {
               setActiveContextFiles={setActiveContextFiles}
               searchSettings={searchSettings}
               setSearchSettings={setSearchSettings}
+              isStreaming={isGenerating && !!streamingMessage}
+              onStop={stopGeneration}
             />
           </div>
         </>

@@ -17,11 +17,12 @@ const ShieldIcon = () => (
  * React Portalで全画面オーバーレイとして表示
  * 
  * @param {Object} props
- * @param {Array<{id: string, label: string, count: number}>} props.detections - 検知された項目リスト
+ * @param {Array<{id: string, label: string, count: number}>} props.detections - テキストから検知された項目リスト
+ * @param {Array<{fileName: string, detections: Array}>} props.fileDetections - ファイルから検知された項目リスト
  * @param {Function} props.onConfirm - 送信確認時のコールバック
  * @param {Function} props.onCancel - キャンセル時のコールバック
  */
-const PrivacyConfirmDialog = ({ detections, onConfirm, onCancel }) => {
+const PrivacyConfirmDialog = ({ detections = [], fileDetections = [], onConfirm, onCancel }) => {
     // ESCキーでキャンセル
     useEffect(() => {
         const handleEsc = (e) => {
@@ -39,6 +40,9 @@ const PrivacyConfirmDialog = ({ detections, onConfirm, onCancel }) => {
         };
     }, []);
 
+    const hasTextDetections = detections.length > 0;
+    const hasFileDetections = fileDetections.length > 0;
+
     return ReactDOM.createPortal(
         <div className="privacy-confirm-overlay" onClick={onCancel}>
             <div className="privacy-confirm-dialog" onClick={(e) => e.stopPropagation()}>
@@ -52,14 +56,41 @@ const PrivacyConfirmDialog = ({ detections, onConfirm, onCancel }) => {
                     機密情報が含まれている可能性があります
                 </h3>
 
-                {/* 検知項目リスト */}
-                <ul className="privacy-confirm-list">
-                    {detections.map((item) => (
-                        <li key={item.id}>
-                            {item.label}（{item.count}件）
-                        </li>
-                    ))}
-                </ul>
+                {/* 検知項目スクロールエリア */}
+                <div className="privacy-confirm-detections-scroll">
+                    {/* テキスト入力の検知項目リスト */}
+                    {hasTextDetections && (
+                        <div className="privacy-confirm-section">
+                            <h4 className="privacy-confirm-section-title">入力テキスト</h4>
+                            <ul className="privacy-confirm-list">
+                                {detections.map((item) => (
+                                    <li key={item.id}>
+                                        {item.label}（{item.count}件）
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* ファイルの検知項目リスト */}
+                    {hasFileDetections && (
+                        <div className="privacy-confirm-section">
+                            <h4 className="privacy-confirm-section-title">添付ファイル</h4>
+                            {fileDetections.map((fileItem, idx) => (
+                                <div key={idx} className="privacy-confirm-file-item">
+                                    <span className="privacy-confirm-file-name">{fileItem.fileName}</span>
+                                    <ul className="privacy-confirm-list">
+                                        {fileItem.detections.map((item) => (
+                                            <li key={item.id}>
+                                                {item.label}（{item.count}件）
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* 確認メッセージ */}
                 <p className="privacy-confirm-message">

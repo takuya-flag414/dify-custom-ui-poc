@@ -1,6 +1,6 @@
 // src/config/settingsConfig.jsx
 import React from 'react';
-import { User, Settings, FileText, Terminal, MessageSquare, BarChart2 } from 'lucide-react';
+import { User, Settings, FileText, Terminal, MessageSquare, BarChart2, Sparkles } from 'lucide-react';
 
 // 各コンポーネントをインポート
 import ProfileSettings from '../components/Settings/sections/ProfileSettings';
@@ -28,8 +28,8 @@ export const settingsCategories = [
   },
   {
     id: 'prompt',
-    label: 'プロンプト管理',
-    icon: MessageSquare,
+    label: 'AIの振る舞い',
+    icon: Sparkles,
     component: (props) => <PromptSettings {...props} />,
     allowedRoles: ['user', 'admin', 'developer'],
   },
@@ -53,6 +53,6 @@ export const settingsCategories = [
     label: '開発者オプション',
     icon: Terminal,
     component: (props) => <DebugSettings {...props} />,
-    allowedRoles: ['developer'], 
+    allowedRoles: ['developer'],
   },
 ];

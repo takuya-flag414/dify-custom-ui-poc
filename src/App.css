@@ -1,161 +1,68 @@
 /* src/App.css */
+/* ========================================
+   App Container - v3.0
+   3-Pane Grid LayoutはAppLayout.jsxで定義
+   ======================================== */
 
 .app {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: var(--color-bg-body);
-}
-
-/* アプリ全体のレイアウト（アニメーション用ラッパー） */
-.app-layout {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-
-/* Sidebarのアニメーションラッパー */
-.sidebar-motion-wrapper {
-  flex-shrink: 0;
-  height: 100%;
-}
-
-/* 右側のメインエリア全体 */
-.main-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background-color: var(--color-bg-body);
+  background-color: var(--bg-base);
   position: relative;
 }
 
-/* ヘッダー下の作業領域 (Chat + Artifact) */
-.workspace {
-  display: grid;
-  /* デフォルト（閉）: チャットエリア全幅、パネル幅0 */
-  grid-template-columns: 100% 0fr;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-
-  /* Gridのカラム定義自体をアニメーション */
-  transition: grid-template-columns 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: grid-template-columns;
+/* --- Initial State: Ambient Mesh Gradient (Welcome Screen) --- */
+.app-initial {
+  /* Ethereal Background Colors for Light Mode */
+  --bg-mesh-1: rgba(0, 122, 255, 0.08);
+  --bg-mesh-2: rgba(255, 0, 255, 0.05);
 }
 
-/* Artifact Open State: Grid Columns Change */
-.workspace.artifact-open {
-  /* 開: チャットエリア450px固定、パネルは残り全て(1fr) */
-  grid-template-columns: 450px 1fr;
+[data-theme='dark'] .app-initial {
+  /* Ethereal Background Colors for Dark Mode */
+  --bg-mesh-1: rgba(0, 122, 255, 0.15);
+  --bg-mesh-2: rgba(100, 50, 255, 0.1);
 }
 
-/* --- Chat Area Wrapper --- */
-.workspace .chat-area-wrapper {
-  /* Gridセルに従う */
-  min-width: 0;
+.app-initial::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  margin: 0;
 
-  /* ★修正: スクロールバー消失対策 */
-  /* 内部コンテンツが無限に伸びないよう、ここで高さを強制的に断ち切る */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  /* Ambient Mesh Gradient - アプリ全体に広がる */
+  background-image:
+    radial-gradient(circle at 15% 15%, var(--bg-mesh-1) 0%, transparent 50%),
+    radial-gradient(circle at 85% 85%, var(--bg-mesh-2) 0%, transparent 50%);
+  background-size: cover;
+  background-repeat: no-repeat;
 
-  /* 境界線のアニメーション */
-  border-right: 1px solid transparent;
-  transition: border-right-color 0.3s ease;
-  z-index: 1;
-  position: relative;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.workspace .chat-area {
+/* Chat Area styles */
+.chat-area {
   width: 100%;
   max-width: 100%;
   background-color: transparent;
   height: 100%;
 }
 
-/* Artifactが開いた時だけ境界線を表示 */
-.workspace.artifact-open .chat-area-wrapper {
-  border-right-color: rgba(0, 0, 0, 0.06);
-}
-
-/* --- Artifact Panel Wrapper (Floating Island) --- */
-.artifact-panel-wrapper {
-  min-width: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-
-  /* 初期状態 */
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(20px);
-  padding: 0;
-
-  /* 閉じる時のアニメーション */
-  transition:
-    opacity 0.3s ease,
-    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    padding 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    visibility 0.4s step-end;
-}
-
-/* Artifact Open State */
-.workspace.artifact-open .artifact-panel-wrapper {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(0);
-  padding: 16px;
-
-  /* 開く時のアニメーション */
-  transition:
-    opacity 0.4s ease 0.1s,
-    transform 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-    padding 0.5s cubic-bezier(0.25, 1, 0.5, 1),
-    visibility 0s;
-}
-
-/* モバイル対応 */
+/* モバイル対応 - InspectorをFullscreen Overlay */
 @media (max-width: 768px) {
-  .workspace {
-    display: block;
-  }
-
-  .workspace.artifact-open {
-    grid-template-columns: 100% 0fr;
-  }
-
-  .workspace.artifact-open .chat-area-wrapper {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .artifact-panel-wrapper {
-    position: fixed;
+  .app-layout-inspector {
+    position: fixed !important;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
     z-index: 50;
-    background-color: var(--color-bg-body);
+    background-color: var(--bg-base);
     width: 100% !important;
-    padding: 0 !important;
-
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .workspace.artifact-open .artifact-panel-wrapper {
-    transform: translateX(0);
-    padding: 0 !important;
   }
 }

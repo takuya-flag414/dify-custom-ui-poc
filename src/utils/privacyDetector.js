@@ -53,15 +53,25 @@ const DETECTION_PATTERNS = [
     id: 'api_key',
     label: 'APIキー',
     priority: 'critical',
-    // 各種サービスのAPIキーパターン
-    pattern: /\b(sk-[a-zA-Z0-9]{20,}|AKIA[A-Z0-9]{16}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}|AIza[a-zA-Z0-9_-]{35}|sk_live_[a-zA-Z0-9]{24,}|sk_test_[a-zA-Z0-9]{24,}|xoxb-[a-zA-Z0-9-]+|xoxp-[a-zA-Z0-9-]+|[a-zA-Z0-9]{32}(?=.*[Aa][Pp][Ii].*[Kk][Ee][Yy]))\b/g,
+    // 各種サービスのAPIキーパターン（最小長で柔軟にマッチ）
+    // - OpenAI: sk- で始まる20文字以上
+    // - AWS: AKIA で始まる16文字以上
+    // - GitHub PAT Classic: ghp_ で始まる30文字以上
+    // - GitHub OAuth: gho_ で始まる30文字以上
+    // - GitHub Fine-grained PAT: github_pat_ で始まるパターン
+    // - Google Cloud: AIza で始まる30文字以上
+    // - Stripe: sk_live_ または sk_test_ で始まる20文字以上
+    // - Slack: xoxb- または xoxp- で始まるパターン
+    pattern: /\b(sk-[a-zA-Z0-9]{20,}|AKIA[A-Z0-9]{16,}|ghp_[a-zA-Z0-9]{30,}|gho_[a-zA-Z0-9]{30,}|github_pat_[a-zA-Z0-9_]+|AIza[a-zA-Z0-9_-]{30,}|sk_live_[a-zA-Z0-9]{20,}|sk_test_[a-zA-Z0-9]{20,}|xoxb-[a-zA-Z0-9-]+|xoxp-[a-zA-Z0-9-]+)\b/g,
   },
   {
     id: 'phone_number',
     label: '電話番号',
     priority: 'high',
-    // 日本の携帯電話番号（090/080/070）
-    pattern: /\b0[789]0[-\s]?\d{4}[-\s]?\d{4}\b/g,
+    // 日本の電話番号（携帯・固定両対応）
+    // 携帯: 0[789]0-XXXX-XXXX (11桁)
+    // 固定: 0X-XXXX-XXXX (10桁), 0XX-XXX-XXXX (10桁), 0XXX-XX-XXXX (10桁), 0XXXX-X-XXXX (10桁)
+    pattern: /\b(?:0[789]0[-\s]?\d{4}[-\s]?\d{4}|0\d[-\s]?\d{4}[-\s]?\d{4}|0\d{2}[-\s]?\d{3}[-\s]?\d{4}|0\d{3}[-\s]?\d{2}[-\s]?\d{4}|0\d{4}[-\s]?\d[-\s]?\d{4})\b/g,
   },
   {
     id: 'email',
@@ -89,8 +99,9 @@ const DETECTION_PATTERNS = [
     id: 'postal_code',
     label: '郵便番号',
     priority: 'medium',
-    // 日本の郵便番号パターン（前後に数字がない場合のみ）
-    pattern: /(?<!\d)〒?\s?\d{3}[-ー]\d{4}(?!\d)/g,
+    // 日本の郵便番号パターン（電話番号の一部として誤検知されないよう厳密化）
+    // 前方: 数字+ハイフンがない、後方: ハイフン+数字がない
+    pattern: /(?<!\d[-ー])〒?\s?\d{3}[-ー]\d{4}(?![-ー]\d)/g,
   },
 ];
 
@@ -113,8 +124,25 @@ function maskValue(value, type) {
       return value.replace(/\d(?=\d{4})/g, '*');
       
     case 'phone_number':
-      // 最初の3桁と最後の4桁を表示
-      return value.replace(/(\d{3})[-\s]?\d{4}[-\s]?(\d{4})/, '$1-****-$2');
+      // 電話番号のマスク処理（携帯・固定両対応）
+      // 最初の市外局番と最後の4桁を表示
+      const phoneDigits = value.replace(/[-\s]/g, '');
+      if (phoneDigits.length === 11) {
+        // 携帯電話（11桁）: 090-****-1234
+        return value.replace(/(\d{3})[-\s]?\d{4}[-\s]?(\d{4})/, '$1-****-$2');
+      } else if (phoneDigits.length === 10) {
+        // 固定電話（10桁）: 先頭2〜5桁 + **** + 末尾4桁
+        const lastFour = phoneDigits.slice(-4);
+        // ハイフンの位置から市外局番の桁数を推測
+        const hyphenMatch = value.match(/^(0\d{1,4})[-\s]/);
+        if (hyphenMatch) {
+          return `${hyphenMatch[1]}-****-${lastFour}`;
+        }
+        // ハイフンなしの場合はデフォルトで最初の3桁を表示
+        return `${phoneDigits.slice(0, 3)}-****-${lastFour}`;
+      }
+      // その他の場合はそのまま返す
+      return value;
       
     case 'email':
       // @の前を部分マスク
@@ -168,6 +196,9 @@ export function scanText(text) {
   }
 
   const detections = [];
+  // 電話番号・クレジットカード番号のマッチを記録（郵便番号の誤検知除去に使用）
+  let phoneNumberMatches = [];
+  let creditCardMatches = [];
 
   for (const patternDef of DETECTION_PATTERNS) {
     // パターンをリセット（lastIndexをクリア）
@@ -178,6 +209,32 @@ export function scanText(text) {
     let validMatches = matches;
     if (patternDef.validator) {
       validMatches = matches.filter(match => patternDef.validator(match));
+    }
+
+    // クレジットカード番号のマッチを記録
+    if (patternDef.id === 'credit_card') {
+      creditCardMatches = validMatches;
+    }
+
+    // 電話番号のマッチを記録
+    if (patternDef.id === 'phone_number') {
+      phoneNumberMatches = validMatches;
+    }
+
+    // 郵便番号の場合、電話番号・クレジットカード番号の一部として含まれるマッチを除外
+    if (patternDef.id === 'postal_code') {
+      const excludePatterns = [...phoneNumberMatches, ...creditCardMatches];
+      if (excludePatterns.length > 0) {
+        validMatches = validMatches.filter(postalMatch => {
+          // 郵便番号マッチが他のパターンの一部に含まれているかチェック
+          const postalDigits = postalMatch.replace(/[〒\s]/g, '');
+          return !excludePatterns.some(parentMatch => {
+            // 親パターンから郵便番号パターンが抽出可能かチェック
+            return parentMatch.includes(postalDigits) || 
+                   parentMatch.replace(/[-\s]/g, '').includes(postalDigits.replace(/[-ー]/g, ''));
+          });
+        });
+      }
     }
 
     if (validMatches.length > 0) {

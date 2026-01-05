@@ -1,120 +1,138 @@
 // src/components/Settings/sections/GeneralSettings.jsx
-import React, { useEffect, useState } from 'react';
-import { Moon, Sun, Monitor, RotateCcw } from 'lucide-react';
-import './SettingsComponents.css';
+import React, { useState } from 'react';
+import {
+  Moon, Sun, Monitor,
+  RotateCcw, Type, Keyboard,
+  MousePointer2, Laptop
+} from 'lucide-react';
+import { MacSettingsSection, MacSettingsRow, MacSelect } from './MacSettingsComponents';
+import './SettingsCommon.css';
+import './GeneralSettings.css';
 
 const GeneralSettings = ({ settings, onUpdateSettings, onResetOnboarding }) => {
   const currentTheme = settings?.general?.theme || 'system';
   const currentFontSize = settings?.general?.fontSize || 'medium';
+  const sendKey = settings?.general?.sendKey || 'enter';
+  const reduceMotion = settings?.general?.reduceMotion || false;
+
   const [resetConfirm, setResetConfirm] = useState(false);
 
-  // テーマ変更は useTheme フック (App.jsx で呼び出し) で処理されるため、
-  // ここでは設定更新のみを行う
-
-  // フォントサイズ変更時の副作用
-  useEffect(() => {
-    // Phase 1ではまだ実装されていないため省略
-  }, [currentFontSize]);
-
-  // オンボーディングリセットのハンドラー
   const handleResetOnboarding = () => {
     if (!resetConfirm) {
       setResetConfirm(true);
       setTimeout(() => setResetConfirm(false), 3000);
       return;
     }
-
     if (onResetOnboarding) {
       onResetOnboarding();
       setResetConfirm(false);
     }
   };
 
-  const THEME_OPTIONS = [
-    { id: 'light', label: 'ライト', icon: Sun },
-    { id: 'dark', label: 'ダーク', icon: Moon },
-    { id: 'system', label: '自動', icon: Monitor }
-  ];
-
   return (
-    <>
-      {/* 表示設定カード */}
-      <div className="settings-card">
-        <div className="settings-card-header">
-          <h3 className="settings-card-title">表示設定</h3>
-          <p className="settings-card-description">
-            アプリケーションの見た目をカスタマイズします。
-          </p>
-        </div>
+    <div className="settings-container">
 
-        <div className="settings-row">
-          <label className="settings-label">テーマ</label>
-          <div className="theme-card-grid">
-            {THEME_OPTIONS.map((theme) => {
-              const IconComponent = theme.icon;
-              const isActive = currentTheme === theme.id;
-
-              return (
-                <button
-                  key={theme.id}
-                  className={`theme-card ${isActive ? 'active' : ''}`}
-                  onClick={() => onUpdateSettings('general', 'theme', theme.id)}
-                >
-                  <IconComponent size={22} className="theme-card-icon" />
-                  <span className="theme-card-label">{theme.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="settings-row">
-          <label className="settings-label">フォントサイズ</label>
-          <select
-            className="settings-select"
-            value={currentFontSize}
-            onChange={(e) => onUpdateSettings('general', 'fontSize', e.target.value)}
-          >
-            <option value="small">小 (Small)</option>
-            <option value="medium">中 (Medium)</option>
-            <option value="large">大 (Large)</option>
-          </select>
-        </div>
-      </div>
-
-      {/* アプリ設定カード */}
-      {onResetOnboarding && (
-        <div className="settings-card">
-          <div className="settings-card-header">
-            <h3 className="settings-card-title">アプリ設定</h3>
-            <p className="settings-card-description">
-              アプリケーションの動作に関する設定です。
-            </p>
-          </div>
-
-          <div className="settings-row" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ flex: 1 }}>
-              <label className="settings-label">初回セットアップ</label>
-              <p style={{ fontSize: '13px', color: 'var(--color-text-sub)', marginTop: '4px', lineHeight: 1.5 }}>
-                オンボーディングウィザードを再度表示して、名前やAIスタイルを設定し直せます。
-              </p>
-            </div>
+      {/* === Section: Appearance === */}
+      <MacSettingsSection title="Appearance">
+        {/* Theme Selector */}
+        <MacSettingsRow
+          icon={Laptop}
+          label="外観モード"
+        >
+          <div className="mac-segmented">
             <button
-              onClick={handleResetOnboarding}
-              className="settings-btn secondary"
-              style={{
-                color: resetConfirm ? 'var(--color-error)' : undefined,
-                borderColor: resetConfirm ? 'var(--color-error)' : undefined,
-                background: resetConfirm ? 'rgba(220, 38, 38, 0.05)' : undefined,
-              }}
+              className={`mac-segmented-item ${currentTheme === 'light' ? 'active' : ''}`}
+              onClick={() => onUpdateSettings('general', 'theme', 'light')}
             >
-              <RotateCcw size={16} />
-              <span>{resetConfirm ? '確認: もう一度クリック' : 'リセット'}</span>
+              <Sun size={12} /> Light
+            </button>
+            <button
+              className={`mac-segmented-item ${currentTheme === 'dark' ? 'active' : ''}`}
+              onClick={() => onUpdateSettings('general', 'theme', 'dark')}
+            >
+              <Moon size={12} /> Dark
+            </button>
+            <button
+              className={`mac-segmented-item ${currentTheme === 'system' ? 'active' : ''}`}
+              onClick={() => onUpdateSettings('general', 'theme', 'system')}
+            >
+              <Monitor size={12} /> Auto
             </button>
           </div>
-        </div>
+        </MacSettingsRow>
+
+        {/* Font Size */}
+        <MacSettingsRow
+          icon={Type}
+          label="文字サイズ"
+        >
+          <MacSelect
+            value={currentFontSize}
+            onChange={(e) => onUpdateSettings('general', 'fontSize', e.target.value)}
+            options={[
+              { value: 'small', label: '小 (15px)' },
+              { value: 'medium', label: '標準 (17px)' },
+              { value: 'large', label: '大 (19px)' }
+            ]}
+          />
+        </MacSettingsRow>
+
+        {/* Reduce Motion - Last Item */}
+        <MacSettingsRow
+          icon={MousePointer2}
+          label="視差効果を減らす"
+          description="アニメーションを抑制し、パフォーマンスを優先します"
+          isLast
+        >
+          <input
+            type="checkbox"
+            className="mac-toggle"
+            checked={reduceMotion}
+            onChange={() => onUpdateSettings('general', 'reduceMotion', !reduceMotion)}
+          />
+        </MacSettingsRow>
+      </MacSettingsSection>
+
+      {/* === Section: Input === */}
+      <MacSettingsSection title="Input">
+        <MacSettingsRow
+          icon={Keyboard}
+          label="メッセージ送信キー"
+          isLast
+        >
+          <MacSelect
+            value={sendKey}
+            onChange={(e) => onUpdateSettings('general', 'sendKey', e.target.value)}
+            options={[
+              { value: 'enter', label: 'Enter' },
+              { value: 'ctrl_enter', label: 'Ctrl + Enter' }
+            ]}
+            style={{ minWidth: '120px' }}
+          />
+        </MacSettingsRow>
+      </MacSettingsSection>
+
+      {/* === Section: Reset (Danger) === */}
+      {onResetOnboarding && (
+        <MacSettingsSection title="Advanced">
+          <MacSettingsRow
+            icon={RotateCcw}
+            label="設定の初期化"
+            description="オンボーディング（初回ガイド）を再度表示します"
+            isLast
+            danger
+          >
+            <button
+              onClick={handleResetOnboarding}
+              className="btn-danger-ghost"
+            >
+              {resetConfirm ? '本当に実行しますか？' : 'リセット'}
+            </button>
+          </MacSettingsRow>
+        </MacSettingsSection>
       )}
-    </>
+
+    </div>
   );
 };
 

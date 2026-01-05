@@ -1,6 +1,6 @@
 // src/components/Message/MessageBlock.jsx
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './MessageBlock.css';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
 import CitationList from './CitationList';
@@ -33,7 +33,35 @@ export const AssistantIcon = () => (
   </svg>
 );
 
-const MessageBlock = ({ message, onSuggestionClick, onSmartActionSelect, onOpenArtifact, userName, enableAnimation = true }) => {
+// ★追加: 編集アイコン (鉛筆) - CopyButtonと同じサイズ16x16
+const EditIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+  </svg>
+);
+
+// ★追加: 再送信アイコン (回転矢印) - CopyButtonと同じサイズ16x16
+const RefreshIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M23 4v6h-6"></path>
+    <path d="M1 20v-6h6"></path>
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+  </svg>
+);
+
+const MessageBlock = ({
+  message,
+  onSuggestionClick,
+  onSmartActionSelect,
+  onOpenArtifact,
+  userName,
+  enableAnimation = true,
+  // ★追加: 編集・再送信用Props
+  onEdit,
+  onRegenerate,
+  isLastAiMessage = false  // 再送信ボタンを表示するかどうかの制御
+}) => {
   const {
     role,
     text,
@@ -51,6 +79,10 @@ const MessageBlock = ({ message, onSuggestionClick, onSmartActionSelect, onOpenA
   } = message;
 
   const [showRaw, setShowRaw] = useState(false);
+  // ★追加: 編集モード用State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const editTextareaRef = useRef(null);
 
   useEffect(() => {
     if (!isStreaming) {
@@ -58,22 +90,104 @@ const MessageBlock = ({ message, onSuggestionClick, onSmartActionSelect, onOpenA
     }
   }, [isStreaming]);
 
+  // ★追加: 編集モード開始時にTextareaにフォーカス
+  useEffect(() => {
+    if (isEditing && editTextareaRef.current) {
+      editTextareaRef.current.focus();
+      // カーソルを末尾に移動
+      editTextareaRef.current.setSelectionRange(editValue.length, editValue.length);
+    }
+  }, [isEditing, editValue.length]);
+
   const isAi = role === 'ai';
+  const isUser = role === 'user';
   const uniqueMessageId = messageId || id || `msg_${Date.now()}`;
   const isTextEmpty = !text || text.length === 0;
   const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
   const showKnowledgeBadge = isAi && !isStreaming && traceMode === 'knowledge';
 
-  const textToCopy = rawContent || text || '';
+  const textToCopy = text || '';
 
+  // ★追加: 編集開始
+  const handleStartEdit = useCallback(() => {
+    setEditValue(text || '');
+    setIsEditing(true);
+  }, [text]);
+
+  // ★追加: 編集確定
+  const handleConfirmEdit = useCallback(() => {
+    if (onEdit && editValue.trim()) {
+      onEdit(id, editValue.trim());
+    }
+    setIsEditing(false);
+    setEditValue('');
+  }, [onEdit, id, editValue]);
+
+  // ★追加: 編集キャンセル
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+    setEditValue('');
+  }, []);
+
+  // ★追加: 編集テキストエリアのキーハンドラ
+  const handleEditKeyDown = useCallback((e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleConfirmEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  }, [handleConfirmEdit, handleCancelEdit]);
+
+  // ★追加: 編集テキストエリアの外部クリック
+  const handleEditBlur = useCallback((e) => {
+    // relatedTargetがnullまたは編集領域外の場合のみキャンセル
+    if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
+      handleCancelEdit();
+    }
+  }, [handleCancelEdit]);
+
+  // ★変更: ストリーミング中もDOMを維持（レイアウトシフト防止）
   const renderCopyButton = () => {
-    if (isStreaming || isTextEmpty) return null;
+    if (isTextEmpty && !isStreaming) return null;
     return (
       <CopyButton
         text={textToCopy}
         isAi={isAi}
-        className={isAi ? 'copy-btn-ai' : 'copy-btn-user'}
+        className={`${isAi ? 'copy-btn-ai' : 'copy-btn-user'} ${isStreaming ? 'hidden-btn' : ''}`}
+        disabled={isStreaming}
       />
+    );
+  };
+
+  // ★追加: ユーザーメッセージの編集ボタン
+  const renderEditButton = () => {
+    if (isAi || isStreaming || isEditing) return null;
+    return (
+      <button
+        className="message-edit-btn"
+        onClick={handleStartEdit}
+        title="メッセージを編集"
+      >
+        <EditIcon />
+      </button>
+    );
+  };
+
+  // ★追加: AI回答の再送信ボタン（アイコンのみ）
+  // ストリーミング中もDOMを維持（レイアウトシフト防止）
+  const renderRegenerateButton = () => {
+    if (!isAi) return null;
+    const isHidden = isStreaming || !isLastAiMessage || !onRegenerate;
+    return (
+      <button
+        className={`message-regenerate-btn ${isHidden ? 'hidden-btn' : ''}`}
+        onClick={isHidden ? undefined : onRegenerate}
+        title="回答を再生成"
+        disabled={isHidden}
+      >
+        <RefreshIcon />
+      </button>
     );
   };
 
@@ -95,64 +209,118 @@ const MessageBlock = ({ message, onSuggestionClick, onSmartActionSelect, onOpenA
         <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
 
           <div className="message-bubble-row">
-            {!isAi && renderCopyButton()}
+            {/* ★変更: ユーザーメッセージ用のアクションボタン群 */}
+            {isUser && !isEditing && (
+              <div className="user-action-group">
+                {renderCopyButton()}
+                {renderEditButton()}
+              </div>
+            )}
 
-            <div className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}>
-              {isAi && isStreaming && (
-                <button
-                  className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
-                  onClick={() => setShowRaw(!showRaw)}
-                  title="生成中の生データを表示"
+            <AnimatePresence mode="wait">
+              {isEditing ? (
+                // ★追加: 編集モードのUI
+                <motion.div
+                  key="edit-mode"
+                  className="message-bubble user-bubble edit-mode"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={SPRING_CONFIG}
+                  onBlur={handleEditBlur}
                 >
-                  ⚡️ Raw
-                </button>
-              )}
+                  <textarea
+                    ref={editTextareaRef}
+                    className="edit-textarea"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
+                    rows={Math.min(Math.max(editValue.split('\n').length, 1), 10)}
+                  />
+                  <div className="edit-actions">
+                    <button className="edit-cancel-btn" onClick={handleCancelEdit}>
+                      キャンセル
+                    </button>
+                    <button
+                      className="edit-confirm-btn"
+                      onClick={handleConfirmEdit}
+                      disabled={!editValue.trim()}
+                    >
+                      送信
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                // 通常表示モード
+                <motion.div
+                  key="normal-mode"
+                  className={`message-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}`}
+                  initial={false}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  {isAi && isStreaming && (
+                    <button
+                      className={`raw-toggle-btn ${showRaw ? 'active' : ''}`}
+                      onClick={() => setShowRaw(!showRaw)}
+                      title="生成中の生データを表示"
+                    >
+                      ⚡️ Raw
+                    </button>
+                  )}
 
-              {!isAi && files && files.length > 0 && (
-                <div className="file-attachments-wrapper">
-                  {files.map((file, index) => (
-                    <div key={index} className="file-attachment-chip">
-                      <FileIcon filename={file.name} />
-                      <span className="file-attachment-name">{file.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {isAi && thoughtProcess && thoughtProcess.length > 0 && (
-                <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
-              )}
-
-              {isAi && isStreaming && isTextEmpty && !showRaw && mode !== 'fast' && (
-                <SkeletonLoader />
-              )}
-
-              {showRaw ? (
-                <pre className="raw-content-view">
-                  {rawContent ? (
-                    rawContent
-                  ) : (
-                    <div className="raw-empty-state">
-                      <span className="raw-cursor"></span>
-                      <span className="raw-loading-text">AIからの応答を待機しています...</span>
+                  {!isAi && files && files.length > 0 && (
+                    <div className="file-attachments-wrapper">
+                      {files.map((file, index) => (
+                        <div key={index} className="file-attachment-chip">
+                          <FileIcon filename={file.name} />
+                          <span className="file-attachment-name">{file.name}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
-                </pre>
-              ) : (
-                !isTextEmpty && (
-                  <MarkdownRenderer
-                    content={text || ''}
-                    isStreaming={isAi && isStreaming}
-                    renderMode={mode === 'fast' ? 'realtime' : 'normal'}
-                    citations={citations}
-                    messageId={uniqueMessageId}
-                    onOpenArtifact={onOpenArtifact}
-                  />
-                )
-              )}
-            </div>
 
-            {isAi && renderCopyButton()}
+                  {isAi && thoughtProcess && thoughtProcess.length > 0 && (
+                    <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
+                  )}
+
+                  {isAi && isStreaming && isTextEmpty && !showRaw && mode !== 'fast' && (
+                    <SkeletonLoader />
+                  )}
+
+                  {showRaw ? (
+                    <pre className="raw-content-view">
+                      {rawContent ? (
+                        rawContent
+                      ) : (
+                        <div className="raw-empty-state">
+                          <span className="raw-cursor"></span>
+                          <span className="raw-loading-text">AIからの応答を待機しています...</span>
+                        </div>
+                      )}
+                    </pre>
+                  ) : (
+                    !isTextEmpty && (
+                      <MarkdownRenderer
+                        content={text || ''}
+                        isStreaming={isAi && isStreaming}
+                        renderMode={mode === 'fast' ? 'realtime' : 'normal'}
+                        citations={citations}
+                        messageId={uniqueMessageId}
+                        onOpenArtifact={onOpenArtifact}
+                      />
+                    )
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ★変更: AIメッセージ用のアクションボタン群（コピー + 再生成） */}
+            {isAi && (
+              <div className="ai-action-group">
+                {renderCopyButton()}
+                {renderRegenerateButton()}
+              </div>
+            )}
           </div>
 
           {isAi && !isStreaming && (
@@ -180,7 +348,10 @@ const arePropsEqual = (prev, next) => {
     return prev.onSuggestionClick === next.onSuggestionClick
       && prev.onSmartActionSelect === next.onSmartActionSelect
       && prev.onOpenArtifact === next.onOpenArtifact
-      && prev.enableAnimation === next.enableAnimation;
+      && prev.enableAnimation === next.enableAnimation
+      && prev.onEdit === next.onEdit
+      && prev.onRegenerate === next.onRegenerate
+      && prev.isLastAiMessage === next.isLastAiMessage;
   }
 
   // 2. 参照が違う場合（ストリーミング中の更新など）、必要なフィールドだけ浅く比較

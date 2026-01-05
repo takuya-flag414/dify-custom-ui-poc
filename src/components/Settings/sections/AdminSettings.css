@@ -1,0 +1,111 @@
+/* src/components/Settings/sections/AdminSettings.css */
+
+/* === Grid Layout for Stats === */
+.mac-settings-grid-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* border-top: 1px solid var(--color-border); */
+  /* Row内の分割線は不要、またはボーダーで区切る */
+  position: relative;
+  background-color: transparent;
+}
+
+/* 枠線: 各アイテムの間に縦線を入れる macOSスタイル */
+.mac-stats-item {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  position: relative;
+  border-top: 1px solid var(--color-border);
+}
+
+.mac-stats-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  right: 0;
+  width: 1px;
+  background-color: var(--color-border);
+}
+
+.mac-stats-icon-wrapper {
+  color: var(--color-primary);
+  background-color: var(--color-primary-bg);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mac-stats-label {
+  font-size: 11px;
+  color: var(--color-text-sub);
+  font-weight: 500;
+}
+
+.mac-stats-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  letter-spacing: -0.02em;
+}
+
+/* === Chart Container (Inside Section) === */
+.mac-settings-custom-content {
+  padding: 20px;
+  /* settings-group内で背景白が適用される */
+}
+
+.admin-chart-container {
+  width: 100%;
+  height: 160px;
+}
+
+.admin-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 100%;
+  gap: 8px;
+  padding-bottom: 20px;
+  /* Labels area */
+}
+
+.admin-bar-wrapper {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.admin-bar {
+  width: 100%;
+  background-color: var(--color-primary);
+  border-radius: 4px;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  min-height: 4px;
+}
+
+.admin-bar:hover {
+  opacity: 1;
+  transform: scaleY(1.02);
+}
+
+.admin-bar-label {
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10px;
+  color: var(--color-text-sub);
+  font-weight: 500;
+}

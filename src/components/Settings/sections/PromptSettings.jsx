@@ -1,141 +1,271 @@
 // src/components/Settings/sections/PromptSettings.jsx
 import React, { useState, useEffect } from 'react';
-import { Save, Check, Zap, Sparkles, Info } from 'lucide-react';
-import './SettingsComponents.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Save, Check, Zap, Sparkles, User, Eye, ChevronDown, Briefcase, Building2 } from 'lucide-react';
+import { MacSettingsSection, MacSettingsRow } from './MacSettingsComponents';
+import './SettingsCommon.css';
+import './PromptSettings.css';
 
 const AI_STYLES = [
   {
     id: 'efficient',
     label: '効率重視',
     icon: Zap,
-    description: '結論を先に、簡潔に回答します'
+    description: '結論を先に、簡潔に回答します。'
   },
   {
     id: 'partner',
     label: '思考パートナー',
     icon: Sparkles,
-    description: '丁寧に対話しながら一緒に考えます'
+    description: '丁寧に対話しながら一緒に考えます。'
   }
 ];
 
+// プレビュー文章（StepStyleSelect.jsxと同じ内容）
+const STYLE_PREVIEWS = {
+  efficient: {
+    text: `### AIとは
+
+**AI（人工知能）** は、人間の知的活動をコンピューターで再現する技術です。
+
+### 主な種類
+- **機械学習**: データからパターンを学習
+- **深層学習**: ニューラルネットワークによる高度な処理
+- **生成AI**: テキストや画像を生成
+
+現在、業務効率化や意思決定支援に広く活用されています。`,
+    tone: '簡潔・直接的',
+    icon: '⚡'
+  },
+  partner: {
+    text: `AIについてご質問ですね！🤖
+
+AI（人工知能）は、人間の知的活動をコンピューターで再現する技術のことです。
+
+最近話題の**ChatGPT**のような生成AIや、画像を作る**DALL-E**など、色々な種類があるんですよ✨
+
+他にもAIについて気になることがあれば、お気軽に聞いてくださいね！`,
+    tone: '対話的・丁寧',
+    icon: '💭'
+  }
+};
+
 const PromptSettings = ({ settings, onUpdateSettings }) => {
   const [aiStyle, setAiStyle] = useState('partner');
-  const [systemPrompt, setSystemPrompt] = useState('');
+  // ★ v3.0: Intelligence Profile
+  const [userProfile, setUserProfile] = useState({ role: '', department: '' });
+  const [customInstructions, setCustomInstructions] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (settings?.prompt) {
       setAiStyle(settings.prompt.aiStyle || 'partner');
-      setSystemPrompt(settings.prompt.systemPrompt || '');
+      // ★ v3.0: 新しいステート構造に対応
+      setUserProfile(settings.prompt.userProfile || { role: '', department: '' });
+      setCustomInstructions(settings.prompt.customInstructions || '');
     }
   }, [settings]);
 
   const handleSaveStyle = (newStyle) => {
     setAiStyle(newStyle);
     onUpdateSettings('prompt', 'aiStyle', newStyle);
+  };
+
+  // ★ v3.0: User Profile の更新
+  const handleProfileChange = (field, value) => {
+    const newProfile = { ...userProfile, [field]: value };
+    setUserProfile(newProfile);
+  };
+
+  // ★ v3.0: Intelligence Profile 全体を保存
+  const handleSaveProfile = () => {
+    onUpdateSettings('prompt', 'userProfile', userProfile);
+    onUpdateSettings('prompt', 'customInstructions', customInstructions);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 1500);
   };
 
-  const handleSavePrompt = () => {
-    onUpdateSettings('prompt', 'systemPrompt', systemPrompt);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 1500);
-  };
+  // 変更検知
+  const hasProfileChanges =
+    JSON.stringify(userProfile) !== JSON.stringify(settings?.prompt?.userProfile || { role: '', department: '' }) ||
+    customInstructions !== (settings?.prompt?.customInstructions || '');
 
-  const hasPromptChanges = systemPrompt !== (settings?.prompt?.systemPrompt || '');
+  const currentPreview = STYLE_PREVIEWS[aiStyle] || STYLE_PREVIEWS.partner;
 
   return (
-    <>
-      {/* AI回答スタイル選択カード */}
-      <div className="settings-card">
-        <div className="settings-card-header">
-          <h3 className="settings-card-title">AI回答スタイル</h3>
-          <p className="settings-card-description">
-            AIの回答の仕方を選択します。オンボーディングで設定した値を変更できます。
-          </p>
-        </div>
-
-        <div className="settings-row">
-          <div className="theme-card-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+    <div className="settings-container">
+      {/* === Section: AI Style === */}
+      <MacSettingsSection title="AI Persona">
+        <MacSettingsRow
+          icon={Sparkles}
+          label="回答スタイル"
+          description="AIの振る舞いと性格を設定します"
+        >
+          <div className="mac-segmented">
             {AI_STYLES.map((style) => {
-              const IconComponent = style.icon;
-              const isActive = aiStyle === style.id;
-
+              const Icon = style.icon;
               return (
                 <button
                   key={style.id}
-                  className={`theme-card ${isActive ? 'active' : ''}`}
+                  className={`mac-segmented-item ${aiStyle === style.id ? 'active' : ''}`}
                   onClick={() => handleSaveStyle(style.id)}
-                  style={{ padding: 'var(--space-5)', textAlign: 'left' }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
-                    <IconComponent size={20} className="theme-card-icon" />
-                    <span className="theme-card-label" style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)' }}>
-                      {style.label}
-                    </span>
-                  </div>
-                  <p style={{
-                    fontSize: 'var(--text-xs)',
-                    color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                    margin: 0,
-                    lineHeight: 1.4
-                  }}>
-                    {style.description}
-                  </p>
+                  <Icon size={12} /> {style.label}
                 </button>
               );
             })}
           </div>
-        </div>
-      </div>
+        </MacSettingsRow>
 
-      {/* システムプロンプトカード */}
-      <div className="settings-card">
-        <div className="settings-card-header">
-          <h3 className="settings-card-title">追加指示（システムプロンプト）</h3>
-          <p className="settings-card-description">
-            AI回答スタイルに加えて、追加したい指示があれば入力してください。
-          </p>
-        </div>
-
-        <div className="settings-row">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
-            <label className="settings-label">追加プロンプト</label>
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
-              {systemPrompt.length} 文字
-            </span>
-          </div>
-          <textarea
-            className="settings-textarea"
-            value={systemPrompt}
-            onChange={(e) => setSystemPrompt(e.target.value)}
-            placeholder="例: 専門用語は使わずに説明してください。回答は箇条書きでお願いします..."
-          />
-        </div>
-
-        <div className="settings-actions">
-          <button
-            className="settings-btn primary"
-            onClick={handleSavePrompt}
-            disabled={!hasPromptChanges}
-            style={!hasPromptChanges ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+        {/* Collapsible Preview inside AI Persona section */}
+        <div className="style-preview-wrapper">
+          <div
+            className="style-preview-toggle"
+            onClick={() => setIsPreviewOpen(!isPreviewOpen)}
           >
-            {isSaved ? (
-              <>
-                <Check size={16} />
-                <span>保存しました</span>
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                <span>保存する</span>
-              </>
+            <Eye size={14} />
+            <span>回答イメージを見る</span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={aiStyle}
+                className="style-preview-badge"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+              >
+                {currentPreview.icon} {currentPreview.tone}
+              </motion.span>
+            </AnimatePresence>
+            <motion.div
+              className="style-preview-chevron"
+              animate={{ rotate: isPreviewOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown size={16} />
+            </motion.div>
+          </div>
+          <AnimatePresence>
+            {isPreviewOpen && (
+              <motion.div
+                key={`preview-${aiStyle}`}
+                className="style-preview-content"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                <div className="style-preview-text">
+                  {currentPreview.text.split('\n').map((line, i) => {
+                    const parseBold = (text) => {
+                      const parts = text.split(/(\*\*[^*]+\*\*)/g);
+                      return parts.map((part, j) => {
+                        if (part.startsWith('**') && part.endsWith('**')) {
+                          return <strong key={j}>{part.slice(2, -2)}</strong>;
+                        }
+                        return part;
+                      });
+                    };
+
+                    if (line.startsWith('### ')) {
+                      return <div key={i} className="preview-heading">{parseBold(line.replace('### ', ''))}</div>;
+                    }
+                    if (line.startsWith('- ')) {
+                      return <div key={i} className="preview-list-item">{parseBold(line.replace('- ', '• '))}</div>;
+                    }
+                    if (line.trim() === '') {
+                      return <div key={i} style={{ height: '8px' }} />;
+                    }
+                    return (
+                      <p key={i} className="preview-paragraph">
+                        {parseBold(line)}
+                      </p>
+                    );
+                  })}
+                </div>
+              </motion.div>
             )}
-          </button>
+          </AnimatePresence>
         </div>
-      </div>
-    </>
+      </MacSettingsSection>
+
+      {/* === Section: Intelligence Profile === */}
+      <MacSettingsSection title="Intelligence Profile">
+        {/* User Identity Form */}
+        <MacSettingsRow
+          icon={User}
+          label="あなたの情報"
+          description="AIがあなたの背景を理解し、より適切な回答を提供できます"
+        />
+
+        <div className="intelligence-profile-form">
+          <div className="ghost-input-group">
+            <div className="ghost-input-row">
+              <Briefcase size={14} className="ghost-input-icon" />
+              <input
+                type="text"
+                className="ghost-input"
+                placeholder="役職（例: 営業マネージャー）"
+                value={userProfile.role}
+                onChange={(e) => handleProfileChange('role', e.target.value)}
+              />
+            </div>
+            <div className="ghost-input-row">
+              <Building2 size={14} className="ghost-input-icon" />
+              <input
+                type="text"
+                className="ghost-input"
+                placeholder="部署 - 任意（例: 営業部）"
+                value={userProfile.department}
+                onChange={(e) => handleProfileChange('department', e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Custom Instructions Editor */}
+          <div className="custom-instructions-wrapper">
+            <label className="custom-instructions-label">
+              カスタム指示
+            </label>
+            <textarea
+              className="custom-instructions-editor"
+              value={customInstructions}
+              onChange={(e) => setCustomInstructions(e.target.value)}
+              placeholder={`AIへの追加指示を自由に記述できます。
+
+例:
+・結論から述べてください
+・専門用語は噛み砕いて説明してください
+・回答は箇条書きでお願いします`}
+            />
+          </div>
+
+          <div className="intelligence-profile-actions">
+            <AnimatePresence>
+              {isSaved && (
+                <motion.span
+                  className="save-indicator"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Check size={12} /> 保存しました
+                </motion.span>
+              )}
+            </AnimatePresence>
+            <button
+              className="settings-btn primary"
+              onClick={handleSaveProfile}
+              disabled={!hasProfileChanges}
+              style={!hasProfileChanges ? { opacity: 0.5 } : {}}
+            >
+              <Save size={14} /> 保存
+            </button>
+          </div>
+        </div>
+      </MacSettingsSection>
+    </div>
   );
 };
 

@@ -58,10 +58,10 @@ const DeletePopover = ({
                         ref={popoverRef}
                         className="delete-popover"
                         style={{ top: position.top, left: position.left }}
-                        initial={{ opacity: 0, scale: 0.95, x: -10 }}
+                        initial={{ opacity: 0, scale: 0.96, x: -8 }}
                         animate={{ opacity: 1, scale: 1, x: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.1 } }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
                         onClick={(e) => e.stopPropagation()} // ポップオーバー内のクリックは伝播させない
                     >
                         <div className="popover-content">

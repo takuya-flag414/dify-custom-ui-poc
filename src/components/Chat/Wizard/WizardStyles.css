@@ -1,0 +1,478 @@
+/* src/components/Chat/Wizard/WizardStyles.css */
+/* macOS Sequoia & Apple Intelligence Design System */
+
+/* === Design Tokens === */
+:root {
+    /* Font Stack */
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* AI Intelligence Gradient Colors */
+    --ai-gradient-cyan: #00FFFF;
+    --ai-gradient-magenta: #FF00FF;
+    --ai-gradient-yellow: #FFD60A;
+    --ai-gradient-blue: #007AFF;
+
+    /* System Colors */
+    --sys-color-primary: #007AFF;
+    --sys-color-primary-dark: #0A84FF;
+}
+
+/* === 1. HUD Container (mat-hud Material) === */
+.wizard-hud-container {
+    width: 560px;
+    max-width: 90vw;
+    min-height: 380px;
+
+    /* Material Recipe: mat-hud */
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+
+    /* Squircle-like corners */
+    border-radius: 22px;
+
+    /* Specular Edge Reflection */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.12),
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        0 0 0 0.5px rgba(255, 255, 255, 0.6) inset;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform-origin: center center;
+    pointer-events: auto;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .wizard-hud-container {
+        background: rgba(38, 38, 40, 0.82);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow:
+            0 24px 60px rgba(0, 0, 0, 0.35),
+            0 8px 24px rgba(0, 0, 0, 0.25),
+            0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+    }
+}
+
+/* === 2. AI Glow Button with Animated Gradient === */
+@property --ai-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes ai-spin {
+    from {
+        --ai-angle: 0deg;
+    }
+
+    to {
+        --ai-angle: 360deg;
+    }
+}
+
+.ai-glow-button {
+    position: relative;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 99px;
+    padding: 10px 20px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--sys-color-primary);
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ai-glow-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.ai-glow-button:not(:disabled):hover {
+    background: rgba(0, 0, 0, 0.08);
+    transform: scale(1.02);
+}
+
+.ai-glow-button:not(:disabled):active {
+    transform: scale(0.97);
+}
+
+/* AI Glow Effect (for final step) */
+.ai-glow-button::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    z-index: -1;
+    background: conic-gradient(from var(--ai-angle),
+            var(--ai-gradient-cyan),
+            var(--ai-gradient-magenta),
+            var(--ai-gradient-yellow),
+            var(--ai-gradient-blue),
+            var(--ai-gradient-cyan));
+    filter: blur(6px);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ai-glow-button.ai-active {
+    background: linear-gradient(135deg, var(--sys-color-primary), #5856D6);
+    color: white;
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.35);
+}
+
+.ai-glow-button.ai-active::before {
+    opacity: 1;
+    animation: ai-spin 3s linear infinite;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .ai-glow-button {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--sys-color-primary-dark);
+    }
+
+    .ai-glow-button:not(:disabled):hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .ai-glow-button.ai-active {
+        background: linear-gradient(135deg, var(--sys-color-primary-dark), #5E5CE6);
+    }
+}
+
+/* === 3. Header === */
+.wizard-header {
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-header {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+}
+
+.wizard-title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(0, 0, 0, 0.88);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-title {
+        color: rgba(255, 255, 255, 0.92);
+    }
+}
+
+.wizard-close-button {
+    margin-left: auto;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wizard-close-button:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-close-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.wizard-close-button svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.5;
+}
+
+/* === 4. Content Area === */
+.wizard-content-area {
+    flex: 1;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.wizard-question {
+    margin: 0 0 24px 0;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: rgba(0, 0, 0, 0.85);
+    text-align: center;
+    line-height: 1.4;
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-question {
+        color: rgba(255, 255, 255, 0.9);
+    }
+}
+
+/* === 5. Chips (Selection Options) === */
+.wizard-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    max-width: 480px;
+}
+
+.wizard-chip {
+    padding: 10px 18px;
+    border-radius: 99px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.wizard-chip:hover {
+    background: rgba(0, 0, 0, 0.07);
+    transform: scale(1.03);
+}
+
+.wizard-chip:active {
+    transform: scale(0.97);
+}
+
+.wizard-chip--active {
+    background: var(--sys-color-primary);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(0, 122, 255, 0.32);
+}
+
+.wizard-chip--active:hover {
+    background: var(--sys-color-primary);
+    transform: scale(1.03);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .wizard-chip {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .wizard-chip:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .wizard-chip--active {
+        background: var(--sys-color-primary-dark);
+        box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35);
+    }
+}
+
+/* === 6. Text Input === */
+.wizard-input {
+    width: 100%;
+    max-width: 420px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.9);
+    transition: all 0.2s ease;
+}
+
+.wizard-input::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.wizard-input:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.5);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .wizard-input {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .wizard-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .wizard-input:focus {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.3),
+            0 0 0 4px rgba(10, 132, 255, 0.5);
+    }
+}
+
+/* === 7. Footer === */
+.wizard-footer {
+    padding: 16px 24px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.02);
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-footer {
+        background: rgba(255, 255, 255, 0.03);
+        border-top-color: rgba(255, 255, 255, 0.06);
+    }
+}
+
+/* Back/Cancel Button (Ghost Style) */
+.wizard-back-button {
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.wizard-back-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-back-button {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .wizard-back-button:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.85);
+    }
+}
+
+/* Step Indicator */
+.wizard-step-indicator {
+    display: flex;
+    gap: 8px;
+}
+
+.wizard-step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.12);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.wizard-step-dot.active {
+    background: var(--sys-color-primary);
+    transform: scale(1.25);
+    box-shadow: 0 0 8px rgba(0, 122, 255, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-step-dot {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .wizard-step-dot.active {
+        background: var(--sys-color-primary-dark);
+        box-shadow: 0 0 8px rgba(10, 132, 255, 0.5);
+    }
+}
+
+/* === 8. Accessibility: Halo Focus Ring === */
+.wizard-chip:focus-visible,
+.wizard-input:focus-visible,
+.ai-glow-button:focus-visible,
+.wizard-back-button:focus-visible,
+.wizard-close-button:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+
+    .wizard-chip:focus-visible,
+    .wizard-input:focus-visible,
+    .ai-glow-button:focus-visible,
+    .wizard-back-button:focus-visible,
+    .wizard-close-button:focus-visible {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.4),
+            0 0 0 4px rgba(10, 132, 255, 0.6);
+    }
+}
+
+/* === 9. Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+    .ai-glow-button::before {
+        animation: none;
+    }
+
+    .wizard-chip,
+    .wizard-step-dot,
+    .wizard-hud-container,
+    .ai-glow-button {
+        transition: none !important;
+    }
+}
+
+/* === 10. Backdrop === */
+.wizard-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 998;
+}
+
+@media (prefers-color-scheme: dark) {
+    .wizard-backdrop {
+        background: rgba(0, 0, 0, 0.45);
+    }
+}

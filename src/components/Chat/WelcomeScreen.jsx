@@ -1,120 +1,155 @@
 // src/components/Chat/WelcomeScreen.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import './WelcomeScreen.css';
 import { getTimeBasedGreeting } from '../../utils/timeUtils';
 import SuggestionCard from './SuggestionCard';
 import { SearchIcon, PenToolIcon, FileTextIcon, SparklesIcon } from '../Shared/SystemIcons';
 
-/**
- * ようこそ画面コンポーネント
- * Framer Motionによるスタッガードアニメーション対応
- */
+// --- Wizard Integration ---
+import CapabilityWizard from './Wizard/CapabilityWizard';
+import { WIZARD_SCENARIOS } from './Wizard/WizardConfig';
 
-// アニメーション設定
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1
-        }
+        transition: { staggerChildren: 0.08, delayChildren: 0.1 }
     }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
+    hidden: { opacity: 0, y: 10, filter: 'blur(4px)' },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] }
+        filter: 'blur(0px)',
+        transition: { type: "spring", stiffness: 200, damping: 24, mass: 1 }
     }
 };
 
 const WelcomeScreen = ({ userName, onSendMessage, onStartTutorial }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
 
+    // Wizard State
+    const [activeWizardId, setActiveWizardId] = useState(null);
+
+    // Suggestion Cards Definition (ID must match WIZARD_SCENARIOS keys)
     const suggestions = [
         {
             id: 'search',
             icon: SearchIcon,
             title: '社内規定・マニュアル検索',
             description: '就業規則や経費精算の手順を検索します',
-            prompt: '社内規定から交通費の精算ルールについて教えてください'
+            // prompt: ... (Wizardを使うので直接のPromptは不要になりました)
         },
         {
             id: 'draft',
             icon: PenToolIcon,
             title: 'メール・文書作成',
             description: '状況に応じたビジネスメールの下書きを作成',
-            prompt: '取引先へのお礼メールの文案を作成してください'
         },
         {
             id: 'summary',
             icon: FileTextIcon,
             title: '議事録・資料の要約',
             description: '長いテキストや資料のポイントを抽出',
-            prompt: '以下のテキストを要約して、重要なポイントを箇条書きにしてください：\n'
         },
         {
             id: 'idea',
             icon: SparklesIcon,
             title: 'アイデア出し・壁打ち',
-            description: '企画案のブラッシュアップや改善案の提案',
-            prompt: '業務効率化のための新しいアイデアを3つ提案してください'
+            description: 'AIと一緒に新しい企画や解決策を考えます',
+            isAiSuggested: true
         },
     ];
 
+    // Handle Card Click -> Open Wizard
+    const handleCardClick = (id) => {
+        // 設定が存在する場合のみウィザードを開く
+        if (WIZARD_SCENARIOS[id]) {
+            setActiveWizardId(id);
+        } else {
+            console.warn(`Wizard scenario not found for: ${id}`);
+        }
+    };
+
+    // Handle Wizard Submit -> Send Message to Chat
+    const handleWizardSubmit = (formData) => {
+        const scenario = WIZARD_SCENARIOS[activeWizardId];
+        if (scenario && onSendMessage) {
+            const prompt = scenario.generatePrompt(formData);
+
+            // Console Log for Mock confirmation
+            console.log("🤖 Generating Prompt via Wizard:", prompt);
+
+            // 実際のチャット送信処理
+            onSendMessage(prompt);
+
+            // Close Wizard
+            setActiveWizardId(null);
+        }
+    };
+
     return (
-        <motion.div
-            className="welcome-container"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
-            <div className="welcome-inner">
-                {/* 1. ダイナミックヘッダー */}
+        <div className="welcome-container">
+            <motion.div
+                className="welcome-inner"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                {/* Header */}
                 <motion.header className="welcome-header" variants={itemVariants}>
-                    <div className="welcome-logo-area">
-                        <div className="welcome-logo-badge">AI Partner</div>
+                    <div className="welcome-logo-badge">
+                        Desktop Intelligence
                     </div>
                     <h1 className="welcome-title">{greeting}</h1>
-                    <p className="welcome-subtitle">{subMessage}</p>
+                    <p className="welcome-subtitle">
+                        {subMessage}<br />
+                        どのようなお手伝いが必要ですか？
+                    </p>
                 </motion.header>
 
-                {/* 2. インテリジェント・グリッド */}
+                {/* Grid */}
                 <motion.main className="welcome-grid-section" variants={itemVariants}>
-                    <p className="welcome-section-label">おすすめのアクション</p>
+                    <p className="welcome-section-label">Suggestions</p>
                     <div className="welcome-grid">
-                        {suggestions.map((item, index) => (
-                            <motion.div
+                        {suggestions.map((item) => (
+                            <SuggestionCard
                                 key={item.id}
-                                variants={itemVariants}
-                            >
-                                <SuggestionCard
-                                    icon={item.icon}
-                                    title={item.title}
-                                    description={item.description}
-                                    delay={0} // Framer Motionでスタッガーするので遅延不要
-                                />
-                            </motion.div>
+                                icon={item.icon}
+                                title={item.title}
+                                description={item.description}
+                                isAiSuggested={item.isAiSuggested}
+                                // IDを渡してハンドリング
+                                onClick={() => handleCardClick(item.id)}
+                            />
                         ))}
                     </div>
                 </motion.main>
 
-                {/* 3. クイックアクセス */}
+                {/* Footer */}
                 <motion.footer className="welcome-footer-links" variants={itemVariants}>
-                    <span>お困りですか？</span>
-                    <button
-                        className="link-button"
-                        onClick={onStartTutorial}
-                    >
-                        使い方のヒントを見る
+                    <button className="link-button" onClick={onStartTutorial}>
+                        使い方ガイドを見る
+                    </button>
+                    <span style={{ opacity: 0.3 }}>|</span>
+                    <button className="link-button" onClick={() => window.open('https://wiki.company.local', '_blank')}>
+                        システム更新情報
                     </button>
                 </motion.footer>
-            </div>
-        </motion.div>
+            </motion.div>
+
+            {/* --- Wizard Overlay --- */}
+            {/* ポータルを使わず、WelcomeScreen上にオーバーレイさせることでコンテキストを維持 */}
+            <CapabilityWizard
+                isOpen={!!activeWizardId}
+                onClose={() => setActiveWizardId(null)}
+                scenarioData={activeWizardId ? WIZARD_SCENARIOS[activeWizardId] : null}
+                onSubmit={handleWizardSubmit}
+            />
+        </div>
     );
 };
 

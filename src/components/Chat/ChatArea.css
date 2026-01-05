@@ -13,6 +13,14 @@
   position: relative;
 }
 
+/* --- Initial State Background (Welcome Screen) --- */
+/* 注意: グラデーション背景は App.css の .app-initial に定義されています。
+   これにより、HeaderとSidebarからもグラデーションが透けて見えます。 */
+.chat-area-initial {
+  background-color: transparent;
+  /* 親のグラデーションを透過 */
+}
+
 /* --- Top Bar - V2 Glassmorphism --- */
 .top-bar-container {
   height: 60px;
@@ -102,6 +110,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/* 初期状態時: 背景を透明にしてグラデーションを見せる */
+.chat-area-initial .bottom-controls-wrapper {
+  background: transparent;
 }
 
 /* Mock Mode Controls */

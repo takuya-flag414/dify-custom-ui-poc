@@ -173,3 +173,29 @@ export const renameConversationApi = async (conversationId, name, user, apiUrl, 
 
   return await response.json();
 };
+
+/**
+ * [追加] 生成を停止する（ストリーミングモード専用）
+ * @param {string} taskId - タスクID（ストリーミングチャンクから取得）
+ * @param {string} user - ユーザーID
+ * @param {string} apiUrl - APIのベースURL
+ * @param {string} apiKey - APIキー
+ * @returns {Promise<{result: string}>} 成功時は { result: 'success' }
+ */
+export const stopGenerationApi = async (taskId, user, apiUrl, apiKey) => {
+  const response = await fetch(`${apiUrl}/chat-messages/${taskId}/stop`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({ user }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Stop generation failed: ${response.status} ${errorText}`);
+  }
+
+  return await response.json();
+};

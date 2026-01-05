@@ -3,24 +3,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchConversationsApi, deleteConversationApi, renameConversationApi } from '../api/dify';
 import { mockConversations } from '../mocks/data';
 
-const PINNED_STORAGE_KEY = 'dify_pinned_conversations';
-
 export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
   const [conversations, setConversations] = useState([]);
   const [conversationId, setConversationId] = useState(null);
-
-  const [pinnedIds, setPinnedIds] = useState(() => {
-    try {
-      const saved = localStorage.getItem(PINNED_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(pinnedIds));
-  }, [pinnedIds]);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -112,7 +97,6 @@ export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
     if (mockMode === 'FE') {
       setConversations((prev) => prev.filter((c) => c.id !== targetId));
       if (conversationId === targetId) setConversationId(null);
-      setPinnedIds(prev => prev.filter(id => id !== targetId));
       addLog(`[useConversations] Deleted (Mock): ${targetId}`, 'success');
       return;
     }
@@ -123,10 +107,8 @@ export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
     }
 
     try {
-      // ★変更: 引数のuserIdを使用
       await deleteConversationApi(targetId, userId, apiUrl, apiKey);
       setConversations((prev) => prev.filter((c) => c.id !== targetId));
-      setPinnedIds(prev => prev.filter(id => id !== targetId));
 
       if (conversationId === targetId) {
         setConversationId(null);
@@ -168,17 +150,7 @@ export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
     }
   }, [mockMode, addLog, apiKey, apiUrl, userId]); // ★依存配列にuserIdを追加
 
-  const handlePinConversation = useCallback((targetId) => {
-    setPinnedIds(prev => {
-      const isPinned = prev.includes(targetId);
-      const newPinned = isPinned
-        ? prev.filter(id => id !== targetId)
-        : [...prev, targetId];
 
-      addLog(`[useConversations] Toggled pin for ${targetId}. Pinned: ${!isPinned}`, 'info');
-      return newPinned;
-    });
-  }, [addLog]);
 
   // 会話リストの順序更新（楽観的UI用）
   const handleConversationUpdated = useCallback((targetId) => {
@@ -201,11 +173,9 @@ export const useConversations = (mockMode, userId, addLog, apiKey, apiUrl) => {
     conversations,
     conversationId,
     setConversationId,
-    pinnedIds,
     handleConversationCreated,
     handleDeleteConversation,
     handleRenameConversation,
-    handlePinConversation,
     handleConversationUpdated,
   };
 };

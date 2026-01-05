@@ -13,7 +13,12 @@ const DEFAULT_SETTINGS = {
   },
   prompt: {
     aiStyle: 'partner', // 'efficient' | 'partner' - オンボーディング/プロンプト設定で変更
-    systemPrompt: '', // ユーザーが追加したい指示
+    // ★ Intelligence Profile (v3.0)
+    userProfile: {
+      role: '',       // 役職・職種
+      department: '', // 所属部署 (Optional)
+    },
+    customInstructions: '', // AIへのカスタム指示（自由記述）
   },
   // 今後 rag, debug 等のカテゴリが増えます
 };
@@ -32,6 +37,9 @@ export const useSettings = (userId) => {
         // 後方互換: profile.aiStyle があれば prompt.aiStyle にマイグレーション
         const migratedAiStyle = parsed.profile?.aiStyle || parsed.prompt?.aiStyle || DEFAULT_SETTINGS.prompt.aiStyle;
 
+        // ★ v3.0 マイグレーション: systemPrompt → customInstructions
+        const migratedCustomInstructions = parsed.prompt?.customInstructions || parsed.prompt?.systemPrompt || '';
+
         // デフォルト値とマージして返す（構造変更への対応）
         return {
           ...DEFAULT_SETTINGS,
@@ -46,6 +54,11 @@ export const useSettings = (userId) => {
             ...DEFAULT_SETTINGS.prompt,
             ...(parsed.prompt || {}),
             aiStyle: migratedAiStyle, // マイグレーション結果を反映
+            userProfile: {
+              ...DEFAULT_SETTINGS.prompt.userProfile,
+              ...(parsed.prompt?.userProfile || {}),
+            },
+            customInstructions: migratedCustomInstructions, // 旧 systemPrompt からマイグレーション
           },
         };
       }
@@ -74,6 +87,9 @@ export const useSettings = (userId) => {
         // 後方互換: profile.aiStyle があれば prompt.aiStyle にマイグレーション
         const migratedAiStyle = parsed.profile?.aiStyle || parsed.prompt?.aiStyle || DEFAULT_SETTINGS.prompt.aiStyle;
 
+        // ★ v3.0 マイグレーション: systemPrompt → customInstructions
+        const migratedCustomInstructions = parsed.prompt?.customInstructions || parsed.prompt?.systemPrompt || '';
+
         setSettings((prev) => ({
           ...DEFAULT_SETTINGS,
           ...parsed,
@@ -83,6 +99,11 @@ export const useSettings = (userId) => {
             ...DEFAULT_SETTINGS.prompt,
             ...(parsed.prompt || {}),
             aiStyle: migratedAiStyle,
+            userProfile: {
+              ...DEFAULT_SETTINGS.prompt.userProfile,
+              ...(parsed.prompt?.userProfile || {}),
+            },
+            customInstructions: migratedCustomInstructions,
           },
         }));
       } catch (e) {

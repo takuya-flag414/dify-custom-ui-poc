@@ -15,16 +15,14 @@ export const normalizeDate = (dateInput) => {
 };
 
 /**
- * 会話リストを時系列（ピン留め、今日、昨日...）にグルーピングする
+ * 会話リストを時系列（今日、昨日...）にグルーピングする
  * @param {Array} conversations - { id, name, created_at, ... }
- * @param {Array} pinnedIds - ピン留めされた会話IDの配列 [追加]
- * @returns {Array} [{ title: 'ピン留め', items: [...] }, { title: '今日', items: [...] }, ...]
+ * @returns {Array} [{ title: '今日', items: [...] }, ...]
  */
-export const groupConversationsByDate = (conversations, pinnedIds = []) => {
+export const groupConversationsByDate = (conversations) => {
   if (!conversations || conversations.length === 0) return [];
 
   const groups = {
-    pinned: [], // [追加] ピン留め用
     today: [],
     yesterday: [],
     previous7Days: [],
@@ -47,13 +45,6 @@ export const groupConversationsByDate = (conversations, pinnedIds = []) => {
   monthStart.setDate(todayStart.getDate() - 30);
 
   conversations.forEach((conv) => {
-    // 1. ピン留めされている場合は最優先で分類
-    if (pinnedIds.includes(conv.id)) {
-      groups.pinned.push(conv);
-      return;
-    }
-
-    // 2. それ以外は日付で分類
     const date = normalizeDate(conv.created_at || conv.updated_at);
     
     if (date >= todayStart) {
@@ -71,8 +62,6 @@ export const groupConversationsByDate = (conversations, pinnedIds = []) => {
 
   // 結果を配列形式で返す
   const result = [];
-  // ピン留めがあれば最上位に追加
-  if (groups.pinned.length > 0) result.push({ title: 'ピン留め', key: 'pinned', items: groups.pinned });
   
   if (groups.today.length > 0) result.push({ title: '今日', key: 'today', items: groups.today });
   if (groups.yesterday.length > 0) result.push({ title: '昨日', key: 'yesterday', items: groups.yesterday });

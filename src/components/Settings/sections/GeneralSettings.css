@@ -1,0 +1,137 @@
+/* src/components/Settings/sections/GeneralSettings.css */
+
+/* === Theme Selection Cards (Admin Scale) === */
+.settings-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+}
+
+.theme-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+}
+
+.theme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--bg-layer-1);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    height: 100%;
+}
+
+.theme-card:hover {
+    background: var(--bg-layer-2);
+    border-color: var(--color-primary);
+}
+
+.theme-card.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.theme-card-icon {
+    margin-bottom: var(--space-1);
+    color: var(--color-text-sub);
+    transition: color 0.15s ease;
+}
+
+.theme-card.active .theme-card-icon {
+    color: var(--color-primary);
+}
+
+.theme-card-label {
+    font-size: 12px;
+    font-weight: var(--font-medium);
+    color: var(--color-text-sub);
+    text-align: center;
+}
+
+.theme-card-sub {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 2px;
+}
+
+.theme-card.active .theme-card-label {
+    color: var(--color-primary);
+    font-weight: var(--font-semibold);
+}
+
+.theme-card.active .theme-card-sub {
+    color: var(--color-primary);
+    opacity: 0.8;
+}
+
+/* === Inset Grid Row adjustments specific to General (macOS Sequoia) === */
+.mac-settings-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    /* Icon | Label | Control */
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 16px;
+    position: relative;
+    transition: background-color 0.15s ease;
+    cursor: default;
+    border-radius: 0;
+}
+
+.mac-settings-row:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='dark'] .mac-settings-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* First and last child corner radius */
+.settings-group>.mac-settings-row:first-child {
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+
+.settings-group>.mac-settings-row:last-child {
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.mac-settings-row:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-border);
+    left: 48px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Focus Ring for clickable rows */
+.mac-settings-row:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+        0 0 0 4px rgba(59, 130, 246, 0.4);
+    z-index: 2;
+}
+
+[data-theme='dark'] .mac-settings-row:focus-visible {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5) inset,
+        0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+/* Dark Mode overrides for Theme Cards are handled by general theme vars usually, but verify: */
+/* No specific dark mode overrides needed if vars are set correctly, but keeping an eye out */
