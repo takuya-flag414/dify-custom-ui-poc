@@ -1,0 +1,274 @@
+/* src/components/Chat/Wizard/WizardPrivacyTextarea.css */
+
+/**
+ * Privacy-aware Textarea Styles
+ * DESIGN_RULE.md準拠 - 機密情報検知機能付きテキストエリア
+ */
+
+/* === Container === */
+.wizard-privacy-textarea {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* === Warning Banner === */
+.privacy-warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(255, 149, 0, 0.08);
+    border: 1px solid rgba(255, 149, 0, 0.2);
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.75);
+}
+
+.privacy-warning-banner svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--sys-color-warning, #FF9500);
+}
+
+.privacy-warning-banner-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.privacy-warning-banner-title {
+    font-weight: 600;
+    color: var(--sys-color-warning, #FF9500);
+}
+
+.privacy-warning-banner-desc {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .privacy-warning-banner {
+        background: rgba(255, 159, 10, 0.12);
+        border-color: rgba(255, 159, 10, 0.25);
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .privacy-warning-banner-title {
+        color: var(--sys-color-warning, #FF9F0A);
+    }
+
+    .privacy-warning-banner-desc {
+        color: rgba(255, 255, 255, 0.55);
+    }
+}
+
+/* === Subject Input === */
+.privacy-subject-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.privacy-subject-label,
+.privacy-message-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.privacy-subject-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "SF Pro", sans-serif);
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.9);
+    transition: all 0.2s ease;
+}
+
+.privacy-subject-input::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.privacy-subject-input:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.5);
+}
+
+.privacy-subject-input.has-warning {
+    border-color: rgba(255, 149, 0, 0.5);
+    background: rgba(255, 149, 0, 0.03);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+
+    .privacy-subject-label,
+    .privacy-message-label {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .privacy-subject-input {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .privacy-subject-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .privacy-subject-input:focus {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.3),
+            0 0 0 4px rgba(10, 132, 255, 0.5);
+    }
+
+    .privacy-subject-input.has-warning {
+        border-color: rgba(255, 159, 10, 0.5);
+        background: rgba(255, 159, 10, 0.08);
+    }
+}
+
+/* === Textarea === */
+.privacy-textarea-wrapper {
+    position: relative;
+}
+
+.privacy-textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "SF Pro", sans-serif);
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.9);
+    resize: vertical;
+    transition: all 0.2s ease;
+}
+
+.privacy-textarea::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.privacy-textarea:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.5);
+}
+
+/* Warning State */
+.privacy-textarea.has-warning {
+    border-color: rgba(255, 149, 0, 0.5);
+    background: rgba(255, 149, 0, 0.03);
+}
+
+.privacy-textarea.has-warning:focus {
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(255, 149, 0, 0.4);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .privacy-textarea {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .privacy-textarea::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .privacy-textarea:focus {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.3),
+            0 0 0 4px rgba(10, 132, 255, 0.5);
+    }
+
+    .privacy-textarea.has-warning {
+        border-color: rgba(255, 159, 10, 0.5);
+        background: rgba(255, 159, 10, 0.08);
+    }
+
+    .privacy-textarea.has-warning:focus {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.3),
+            0 0 0 4px rgba(255, 159, 10, 0.4);
+    }
+}
+
+/* === Detection Alert === */
+.privacy-detection-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255, 149, 0, 0.1);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sys-color-warning, #FF9500);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.privacy-detection-alert svg {
+    flex-shrink: 0;
+}
+
+.privacy-detection-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.privacy-detection-tag {
+    padding: 2px 8px;
+    background: rgba(255, 149, 0, 0.15);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .privacy-detection-alert {
+        background: rgba(255, 159, 10, 0.15);
+        color: var(--sys-color-warning, #FF9F0A);
+    }
+
+    .privacy-detection-tag {
+        background: rgba(255, 159, 10, 0.2);
+    }
+}

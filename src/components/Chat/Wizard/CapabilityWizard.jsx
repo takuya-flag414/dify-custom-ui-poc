@@ -1,5 +1,5 @@
 // src/components/Chat/Wizard/CapabilityWizard.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import './WizardStyles.css';
@@ -9,6 +9,9 @@ import { SearchIcon, PenToolIcon, FileTextIcon, SparklesIcon } from '../../Share
 
 // File Uploader
 import WizardFileUploader from './WizardFileUploader';
+
+// Privacy Textarea
+import WizardPrivacyTextarea from './WizardPrivacyTextarea';
 
 /**
  * macOS Sequoia Style Capability HUD
@@ -42,10 +45,23 @@ const CapabilityWizard = ({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onClose]);
 
+    // 条件付きステップをフィルタリングして表示可能なステップを取得
+    // NOTE: Reactのフックルールに従い、早期リターンの前に配置
+    const visibleSteps = useMemo(() => {
+        if (!scenarioData?.steps) return [];
+        return scenarioData.steps.filter(step => {
+            if (step.conditionalShow) {
+                return step.conditionalShow(formData);
+            }
+            return true;
+        });
+    }, [scenarioData?.steps, formData]);
+
+    // scenarioDataがない場合は何も表示しない
     if (!scenarioData) return null;
 
-    const currentStep = scenarioData.steps[currentStepIndex];
-    const totalSteps = scenarioData.steps.length;
+    const currentStep = visibleSteps[currentStepIndex];
+    const totalSteps = visibleSteps.length;
     const isLastStep = currentStepIndex === totalSteps - 1;
 
     // --- Handlers ---
@@ -204,10 +220,12 @@ const CapabilityWizard = ({
                                         <StepRenderer
                                             type={currentStep.type}
                                             options={currentStep.options}
+                                            getOptions={currentStep.getOptions}
                                             placeholder={currentStep.placeholder}
                                             value={formData[currentStep.id]}
                                             onChange={(val) => updateFormData(currentStep.id, val)}
                                             formData={formData}
+                                            showSubject={currentStep.showSubject}
                                         />
                                     </motion.div>
                                 </AnimatePresence>
@@ -223,7 +241,7 @@ const CapabilityWizard = ({
                                 </button>
 
                                 <div className="wizard-step-indicator" role="progressbar" aria-valuenow={currentStepIndex + 1} aria-valuemin={1} aria-valuemax={totalSteps}>
-                                    {scenarioData.steps.map((_, index) => (
+                                    {visibleSteps.map((_, index) => (
                                         <span
                                             key={index}
                                             className={`wizard-step-dot ${index === currentStepIndex ? 'active' : ''}`}
@@ -258,12 +276,28 @@ const ScenarioIcon = ({ iconName }) => {
 };
 
 // 入力UIのレンダラー
-const StepRenderer = ({ type, options, placeholder, value, onChange, formData }) => {
+const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange, formData, showSubject }) => {
     switch (type) {
         case 'chips':
             return (
                 <div className="wizard-chips-container">
                     {options.map(opt => (
+                        <button
+                            key={opt}
+                            onClick={() => onChange(opt)}
+                            className={`wizard-chip ${value === opt ? 'wizard-chip--active' : ''}`}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+            );
+        case 'dynamic-chips':
+            // formDataに応じて動的にオプションを取得
+            const dynamicOptions = getOptions ? getOptions(formData) : options || [];
+            return (
+                <div className="wizard-chips-container">
+                    {dynamicOptions.map(opt => (
                         <button
                             key={opt}
                             onClick={() => onChange(opt)}
@@ -283,6 +317,19 @@ const StepRenderer = ({ type, options, placeholder, value, onChange, formData })
                     placeholder={placeholder || '入力してください...'}
                     className="wizard-input"
                     autoFocus
+                />
+            );
+        case 'privacy-textarea':
+            // showSubjectが関数の場合はformDataで評価
+            const shouldShowSubject = typeof showSubject === 'function'
+                ? showSubject(formData)
+                : !!showSubject;
+            return (
+                <WizardPrivacyTextarea
+                    value={value || ''}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    showSubject={shouldShowSubject}
                 />
             );
         case 'file-upload':

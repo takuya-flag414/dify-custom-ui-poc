@@ -33,7 +33,7 @@ export const WIZARD_SCENARIOS = {
         }
     },
 
-    // 2. メール・文書作成
+    // 2. メール・文書作成（返信機能付き）
     draft: {
         id: 'draft',
         title: "メール・文書作成",
@@ -41,26 +41,79 @@ export const WIZARD_SCENARIOS = {
         recommendedMode: 'fast', // 外部検索不要、LLMのみで生成
         steps: [
             {
-                id: "docType",
+                id: "mode",
                 type: "chips",
+                question: "作成モードを選択してください",
+                options: ["新規作成", "返信を作成"]
+            },
+            {
+                id: "docType",
+                type: "dynamic-chips",
                 question: "作成する文書の種類は？",
-                options: ["ビジネスメール", "日報/週報", "企画書ドラフト", "謝罪文", "会議アジェンダ"]
+                // modeに応じてオプションを切り替え
+                getOptions: (formData) => {
+                    if (formData.mode === "返信を作成") {
+                        return ["メール返信", "チャット返信 (Teams/Slack等)"];
+                    }
+                    return ["ビジネスメール", "日報/週報", "企画書ドラフト", "謝罪文", "会議アジェンダ"];
+                }
+            },
+            {
+                id: "originalMessage",
+                type: "privacy-textarea",
+                question: "返信したい元のメッセージを貼り付けてください",
+                placeholder: "ここにメールやチャットの内容を貼り付け...",
+                // 返信モードの場合のみ表示
+                conditionalShow: (formData) => formData.mode === "返信を作成",
+                // メール返信の場合は件名入力欄も表示
+                showSubject: (formData) => formData.docType === "メール返信"
             },
             {
                 id: "tone",
-                type: "chips", // 本来はSlider推奨だが、モックなのでChipsで代用
-                question: "相手とトーンを設定してください",
-                options: ["社内 (カジュアル)", "社内 (標準)", "社外 (標準)", "社外 (フォーマル)"]
+                type: "chips",
+                question: "トーンを設定してください",
+                options: ["カジュアル", "標準", "フォーマル"]
             },
             {
                 id: "points",
                 type: "text",
                 question: "盛り込みたい要点を箇条書きで入力",
-                placeholder: "例: ・システム障害のお詫び\n・復旧は明日10時予定\n・原因は調査中"
+                placeholder: "例: ・了解しました\n・〇〇については確認中\n・明日までに回答予定"
             }
         ],
         generatePrompt: (data) => {
-            return `以下の条件で文書を作成してください。\n- 種類: ${data.docType}\n- トーン: ${data.tone}\n- 必須要素:\n${data.points}`;
+            if (data.mode === "返信を作成") {
+                const replyType = data.docType === "メール返信" ? "メール" : "チャット";
+
+                // originalMessageがオブジェクト形式（件名+本文）の場合
+                let subject = '';
+                let message = '';
+                if (typeof data.originalMessage === 'object' && data.originalMessage !== null) {
+                    subject = data.originalMessage.subject || '';
+                    message = data.originalMessage.message || '';
+                } else {
+                    message = data.originalMessage || '';
+                }
+
+                const subjectLine = subject ? `【件名】${subject}\n` : '';
+
+                return `以下のメッセージに${replyType}で返信を作成してください。
+
+【返信タイプ】${data.docType}
+【トーン】${data.tone}
+${subjectLine}
+【元のメッセージ】
+${message || '(内容なし)'}
+
+【返信に含める要点】
+${data.points || '(特になし)'}`;
+            }
+            // 新規作成の場合
+            return `以下の条件で文書を作成してください。
+- 種類: ${data.docType}
+- トーン: ${data.tone}
+- 必須要素:
+${data.points || '(特になし)'}`;
         }
     },
 
