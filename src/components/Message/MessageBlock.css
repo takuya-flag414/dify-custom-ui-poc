@@ -224,6 +224,24 @@
   padding-left: 1.5em;
 }
 
+/* TailwindCSS Preflightによるlist-style: noneをオーバーライド */
+.markdown-renderer ul {
+  list-style-type: disc;
+}
+
+.markdown-renderer ol {
+  list-style-type: decimal;
+}
+
+/* ネストされたリストのスタイル */
+.markdown-renderer ul ul {
+  list-style-type: circle;
+}
+
+.markdown-renderer ul ul ul {
+  list-style-type: square;
+}
+
 .markdown-renderer li {
   margin-bottom: 0.5em;
 }
