@@ -492,65 +492,121 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       let messageStartTime = null;
       const DISPLAY_DELAY_MS = 150; // 0.15秒間は表示を抑制
 
+      // ★追加: SSEチャンク分割対策用バッファ
+      // ネットワーク転送時に行の途中で分割される場合があるため、
+      // 不完全な行を次のチャンクと結合してからパースする
+      let lineBuffer = '';
+
       while (true) {
         const { value, done } = await reader.read();
         tracker.markFirstByte();
-        if (done) break;
+        if (done) {
+          // ★追加: 終了時にバッファに残ったデータも処理
+          if (lineBuffer.trim() && lineBuffer.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(lineBuffer.substring(6));
+              // 残りのデータの簡易処理（message_endなど）
+              if (data.event === 'message_end' && data.message_id) {
+                fetchSuggestions(data.message_id, aiMessageId);
+              }
+            } catch (e) {
+              // 最後のチャンクがパースできない場合は無視
+              console.warn('[Stream] Final buffer parse failed:', e.message);
+            }
+          }
+          break;
+        }
 
-        const lines = value.split('\n').filter(line => line.trim() !== '');
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const data = JSON.parse(line.substring(6));
+        // ★変更: 前回の不完全行と結合
+        lineBuffer += value;
 
-            if (data.conversation_id && !conversationId && !isConversationIdSynced) {
-              isConversationIdSynced = true;
-              if (mockMode !== 'FE') {
-                creatingConversationIdRef.current = data.conversation_id;
-                settingsMapRef.current[data.conversation_id] = currentSettings;
-                onConversationCreated(data.conversation_id, text);
-              } else {
-                // FEモードのID同期
-                if (onConversationCreated && !conversationId) {
-                  onConversationCreated(data.conversation_id, text);
+        // ★変更: 完全な行（\n\nで区切られた）のみ処理
+        // SSEは各イベントを \n\n で区切る仕様
+        const chunks = lineBuffer.split('\n\n');
+        // 最後の要素は不完全な可能性があるため、バッファに残す
+        lineBuffer = chunks.pop() || '';
+
+        for (const chunk of chunks) {
+          // 各チャンク内の行を処理（複数行のdata:がある場合も対応）
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            try {
+              const data = JSON.parse(line.substring(6));
+
+              if (data.conversation_id && !conversationId && !isConversationIdSynced) {
+                isConversationIdSynced = true;
+                if (mockMode !== 'FE') {
                   creatingConversationIdRef.current = data.conversation_id;
+                  settingsMapRef.current[data.conversation_id] = currentSettings;
+                  onConversationCreated(data.conversation_id, text);
+                } else {
+                  // FEモードのID同期
+                  if (onConversationCreated && !conversationId) {
+                    onConversationCreated(data.conversation_id, text);
+                    creatingConversationIdRef.current = data.conversation_id;
+                  }
                 }
               }
-            }
 
-            // ★追加: task_idをキャプチャ（停止機能用）
-            if (data.task_id && !currentTaskIdRef.current) {
-              currentTaskIdRef.current = data.task_id;
-            }
-
-            // Node Events
-            if (data.event === 'node_started') {
-              const nodeType = data.data?.node_type;
-              const title = data.data?.title;
-              const nodeId = data.data?.node_id || `node_${Date.now()}`;
-              const inputs = data.data?.inputs || {};
-
-              // 1. 非表示ノードのスキップ
-              const isHiddenNode = HIDDEN_NODE_PREFIXES.some(prefix => title?.startsWith(prefix));
-              if (isHiddenNode) {
-                // 非表示ノードはスキップ (思考プロセスに表示しない)
-                continue;
+              // ★追加: task_idをキャプチャ（停止機能用）
+              if (data.task_id && !currentTaskIdRef.current) {
+                currentTaskIdRef.current = data.task_id;
               }
 
-              // 2. マッピングテーブルから表示情報を取得
-              const mapping = title ? NODE_DISPLAY_MAP[title] : null;
+              // Node Events
+              if (data.event === 'node_started') {
+                const nodeType = data.data?.node_type;
+                const title = data.data?.title;
+                const nodeId = data.data?.node_id || `node_${Date.now()}`;
+                const inputs = data.data?.inputs || {};
 
-              let displayTitle = null;
-              let iconType = 'default';
+                // 1. 非表示ノードのスキップ
+                const isHiddenNode = HIDDEN_NODE_PREFIXES.some(prefix => title?.startsWith(prefix));
+                if (isHiddenNode) {
+                  // 非表示ノードはスキップ (思考プロセスに表示しない)
+                  continue;
+                }
 
-              if (mapping) {
-                // マッピングテーブルにマッチした場合
-                displayTitle = mapping.title;
-                iconType = mapping.icon;
+                // 2. マッピングテーブルから表示情報を取得
+                const mapping = title ? NODE_DISPLAY_MAP[title] : null;
 
-                // 動的タイトル生成
-                if (mapping.dynamic === 'document') {
-                  // ドキュメント抽出器: ファイル名を動的に取得
+                let displayTitle = null;
+                let iconType = 'default';
+
+                if (mapping) {
+                  // マッピングテーブルにマッチした場合
+                  displayTitle = mapping.title;
+                  iconType = mapping.icon;
+
+                  // 動的タイトル生成
+                  if (mapping.dynamic === 'document') {
+                    // ドキュメント抽出器: ファイル名を動的に取得
+                    let fileNameToDisplay = '添付ファイル';
+                    if (inputs.target_file) {
+                      fileNameToDisplay = inputs.target_file;
+                    } else {
+                      const allActiveFiles = [...sessionFiles, ...displayFiles];
+                      const inputValues = JSON.stringify(inputs);
+                      const matchedFile = allActiveFiles.find(f => inputValues.includes(f.name) || inputValues.includes(f.id));
+                      if (matchedFile) {
+                        fileNameToDisplay = matchedFile.name;
+                      } else if (allActiveFiles.length === 1) {
+                        fileNameToDisplay = allActiveFiles[0].name;
+                      } else if (allActiveFiles.length > 1) {
+                        fileNameToDisplay = `${allActiveFiles.length}件のファイル`;
+                      }
+                    }
+                    displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
+                    detectedTraceMode = 'document';
+                  } else if (mapping.dynamic === 'search') {
+                    // Web検索: クエリを動的に取得
+                    const query = inputs.query || capturedOptimizedQuery || text;
+                    displayTitle = `Web検索: "${query}"`;
+                    detectedTraceMode = 'search';
+                  }
+                } else if (nodeType === 'document-extractor') {
+                  // マッピングにないが document-extractor タイプの場合
                   let fileNameToDisplay = '添付ファイル';
                   if (inputs.target_file) {
                     fileNameToDisplay = inputs.target_file;
@@ -568,271 +624,247 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   }
                   displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
                   detectedTraceMode = 'document';
-                } else if (mapping.dynamic === 'search') {
-                  // Web検索: クエリを動的に取得
+                  iconType = 'document';
+                } else if (nodeType === 'tool' && title?.includes('Perplexity')) {
+                  // Perplexity検索のフォールバック
                   const query = inputs.query || capturedOptimizedQuery || text;
                   displayTitle = `Web検索: "${query}"`;
                   detectedTraceMode = 'search';
+                  iconType = 'search';
+                } else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
+                  // ナレッジ検索
+                  const query = inputs.query || capturedOptimizedQuery;
+                  displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
+                  detectedTraceMode = 'knowledge';
+                  iconType = 'retrieval';
+                } else if (nodeType === 'llm') {
+                  // LLMノード (マッピングにない場合のフォールバック)
+                  displayTitle = '情報を整理して回答を生成中...';
+                  iconType = 'writing';
                 }
-              } else if (nodeType === 'document-extractor') {
-                // マッピングにないが document-extractor タイプの場合
-                let fileNameToDisplay = '添付ファイル';
-                if (inputs.target_file) {
-                  fileNameToDisplay = inputs.target_file;
-                } else {
-                  const allActiveFiles = [...sessionFiles, ...displayFiles];
-                  const inputValues = JSON.stringify(inputs);
-                  const matchedFile = allActiveFiles.find(f => inputValues.includes(f.name) || inputValues.includes(f.id));
-                  if (matchedFile) {
-                    fileNameToDisplay = matchedFile.name;
-                  } else if (allActiveFiles.length === 1) {
-                    fileNameToDisplay = allActiveFiles[0].name;
-                  } else if (allActiveFiles.length > 1) {
-                    fileNameToDisplay = `${allActiveFiles.length}件のファイル`;
+
+                // 3. 表示対象のノードのみ思考プロセスに追加
+                if (displayTitle) {
+                  tracker.markNodeStart(nodeId, displayTitle);
+
+                  // ★変更: streamingMessage stateを直接更新（messages配列を走査しない）
+                  setStreamingMessage(prev => prev ? {
+                    ...prev,
+                    traceMode: detectedTraceMode,
+                    thoughtProcess: [
+                      ...prev.thoughtProcess.map(t => ({ ...t, status: 'done' })),
+                      { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
+                    ]
+                  } : prev);
+                }
+              }
+              else if (data.event === 'node_finished') {
+                const nodeId = data.data?.node_id;
+                const title = data.data?.title;
+                const outputs = data.data?.outputs;
+
+                if (nodeId) tracker.markNodeEnd(nodeId);
+
+                // クエリ書き換え結果のキャプチャ
+                if (title === 'LLM_Query_Rewrite') {
+                  const generatedText = outputs?.text || outputs?.answer;
+                  if (generatedText) {
+                    capturedOptimizedQuery = generatedText.trim();
+                    addLog(`[Workflow] 最適化クエリ: ${capturedOptimizedQuery}`, 'info');
                   }
                 }
-                displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
-                detectedTraceMode = 'document';
-                iconType = 'document';
-              } else if (nodeType === 'tool' && title?.includes('Perplexity')) {
-                // Perplexity検索のフォールバック
-                const query = inputs.query || capturedOptimizedQuery || text;
-                displayTitle = `Web検索: "${query}"`;
-                detectedTraceMode = 'search';
-                iconType = 'search';
-              } else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
-                // ナレッジ検索
-                const query = inputs.query || capturedOptimizedQuery;
-                displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
-                detectedTraceMode = 'knowledge';
-                iconType = 'retrieval';
-              } else if (nodeType === 'llm') {
-                // LLMノード (マッピングにない場合のフォールバック)
-                displayTitle = '情報を整理して回答を生成中...';
-                iconType = 'writing';
-              }
 
-              // 3. 表示対象のノードのみ思考プロセスに追加
-              if (displayTitle) {
-                tracker.markNodeStart(nodeId, displayTitle);
-
-                // ★変更: streamingMessage stateを直接更新（messages配列を走査しない）
-                setStreamingMessage(prev => prev ? {
-                  ...prev,
-                  traceMode: detectedTraceMode,
-                  thoughtProcess: [
-                    ...prev.thoughtProcess.map(t => ({ ...t, status: 'done' })),
-                    { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
-                  ]
-                } : prev);
-              }
-            }
-            else if (data.event === 'node_finished') {
-              const nodeId = data.data?.node_id;
-              const title = data.data?.title;
-              const outputs = data.data?.outputs;
-
-              if (nodeId) tracker.markNodeEnd(nodeId);
-
-              // クエリ書き換え結果のキャプチャ
-              if (title === 'LLM_Query_Rewrite') {
-                const generatedText = outputs?.text || outputs?.answer;
-                if (generatedText) {
-                  capturedOptimizedQuery = generatedText.trim();
-                  addLog(`[Workflow] 最適化クエリ: ${capturedOptimizedQuery}`, 'info');
+                // ★ワークフローログ: 中間結果の記録
+                const outputText = outputs?.text;
+                if (outputText && title) {
+                  // 意図分析結果
+                  if (title === 'LLM_Intent_Analysis') {
+                    addLog(`[Workflow] 意図分析結果: ${outputText}`, 'info');
+                  }
+                  // Perplexity検索結果
+                  else if (title === 'TOOL_Perplexity_Search') {
+                    addLog(`[Workflow] Perplexity結果:\n${outputText}`, 'info');
+                  }
+                  // 回答生成LLMの結果
+                  else if (title.startsWith('LLM_') && (
+                    title.includes('Hybrid') || title.includes('Doc') ||
+                    title.includes('Search') || title.includes('General') ||
+                    title.includes('Chat') || title.includes('Fast')
+                  )) {
+                    addLog(`[Workflow] ${title} 出力:\n${outputText}`, 'info');
+                  }
                 }
-              }
 
-              // ★ワークフローログ: 中間結果の記録
-              const outputText = outputs?.text;
-              if (outputText && title) {
-                // 意図分析結果
-                if (title === 'LLM_Intent_Analysis') {
-                  addLog(`[Workflow] 意図分析結果: ${outputText}`, 'info');
-                }
-                // Perplexity検索結果
-                else if (title === 'TOOL_Perplexity_Search') {
-                  addLog(`[Workflow] Perplexity結果:\n${outputText}`, 'info');
-                }
-                // 回答生成LLMの結果
-                else if (title.startsWith('LLM_') && (
-                  title.includes('Hybrid') || title.includes('Doc') ||
-                  title.includes('Search') || title.includes('General') ||
-                  title.includes('Chat') || title.includes('Fast')
-                )) {
-                  addLog(`[Workflow] ${title} 出力:\n${outputText}`, 'info');
-                }
-              }
-
-              // 意図分析の結果を表示に反映
-              if (title === 'LLM_Intent_Analysis' && outputs?.text) {
-                const decision = outputs.text.trim();
-                let resultText = '';
-                if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
-                else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
-                else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
-                else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
-                else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
-                if (resultText && nodeId) {
+                // 意図分析の結果を表示に反映
+                if (title === 'LLM_Intent_Analysis' && outputs?.text) {
+                  const decision = outputs.text.trim();
+                  let resultText = '';
+                  if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
+                  else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
+                  else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
+                  else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
+                  else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
+                  if (resultText && nodeId) {
+                    // ★変更: streamingMessage stateを直接更新
+                    setStreamingMessage(prev => prev ? {
+                      ...prev,
+                      thoughtProcess: prev.thoughtProcess.map(t =>
+                        t.id === nodeId ? { ...t, title: resultText, status: 'done' } : t
+                      )
+                    } : prev);
+                  }
+                } else if (nodeId) {
+                  // その他のノードは完了ステータスに更新
                   // ★変更: streamingMessage stateを直接更新
                   setStreamingMessage(prev => prev ? {
                     ...prev,
-                    thoughtProcess: prev.thoughtProcess.map(t =>
-                      t.id === nodeId ? { ...t, title: resultText, status: 'done' } : t
-                    )
+                    thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
                   } : prev);
                 }
-              } else if (nodeId) {
-                // その他のノードは完了ステータスに更新
-                // ★変更: streamingMessage stateを直接更新
-                setStreamingMessage(prev => prev ? {
-                  ...prev,
-                  thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
-                } : prev);
               }
-            }
 
-            else if (data.event === 'message') {
-              if (data.answer) {
-                // ★追加: 最初のmessageイベント受信時にタイマー開始
-                if (messageStartTime === null) {
-                  messageStartTime = Date.now();
-                }
-
-                contentBuffer += data.answer;
-                tracker.markFirstToken();
-                tracker.incrementChars(data.answer);
-
-                if (protocolMode === 'PENDING') {
-                  const trimmed = contentBuffer.trimStart();
-                  if (trimmed.length > 0) {
-                    // JSONモード判定: { で始まる OR ```json で始まる
-                    const looksLikeJson = trimmed.startsWith('{') ||
-                      trimmed.startsWith('```json') ||
-                      trimmed.startsWith('```\n{');
-                    protocolMode = looksLikeJson ? 'JSON' : 'RAW';
+              else if (data.event === 'message') {
+                if (data.answer) {
+                  // ★追加: 最初のmessageイベント受信時にタイマー開始
+                  if (messageStartTime === null) {
+                    messageStartTime = Date.now();
                   }
-                }
 
-                let textToDisplay = '';
-                let thinkingToDisplay = '';  // ★追加: thinking用
+                  contentBuffer += data.answer;
+                  tracker.markFirstToken();
+                  tracker.incrementChars(data.answer);
 
-                // ★変更: message受信開始から1秒間は表示を抑制（ちらつき防止）
-                const elapsedMs = Date.now() - messageStartTime;
-                const isDelayPeriod = elapsedMs < DISPLAY_DELAY_MS;
+                  if (protocolMode === 'PENDING') {
+                    const trimmed = contentBuffer.trimStart();
+                    if (trimmed.length > 0) {
+                      // JSONモード判定: { で始まる OR ```json で始まる
+                      const looksLikeJson = trimmed.startsWith('{') ||
+                        trimmed.startsWith('```json') ||
+                        trimmed.startsWith('```\n{');
+                      protocolMode = looksLikeJson ? 'JSON' : 'RAW';
+                    }
+                  }
 
-                if (isDelayPeriod) {
-                  // 1秒未満は表示しない（スケルトンローダーが表示される）
-                  textToDisplay = '';
-                } else if (protocolMode === 'PENDING') {
-                  // 1秒経過後でもPENDINGの場合は表示しない
-                  textToDisplay = '';
-                } else if (protocolMode === 'JSON') {
-                  const parsed = parseLlmResponse(contentBuffer);
-                  // isParsed && answer が空でない場合のみ表示
-                  textToDisplay = (parsed.isParsed && parsed.answer) ? parsed.answer : '';
-                  thinkingToDisplay = parsed.thinking || '';  // ★追加
-                } else {
-                  // RAWモードでも、JSON構造が検出されたらパースを試みる（誤判定対策）
-                  const trimmed = contentBuffer.trim();
-                  if (trimmed.includes('"answer"') && (trimmed.startsWith('{') || trimmed.startsWith('```'))) {
+                  let textToDisplay = '';
+                  let thinkingToDisplay = '';  // ★追加: thinking用
+
+                  // ★変更: message受信開始から1秒間は表示を抑制（ちらつき防止）
+                  const elapsedMs = Date.now() - messageStartTime;
+                  const isDelayPeriod = elapsedMs < DISPLAY_DELAY_MS;
+
+                  if (isDelayPeriod) {
+                    // 1秒未満は表示しない（スケルトンローダーが表示される）
+                    textToDisplay = '';
+                  } else if (protocolMode === 'PENDING') {
+                    // 1秒経過後でもPENDINGの場合は表示しない
+                    textToDisplay = '';
+                  } else if (protocolMode === 'JSON') {
                     const parsed = parseLlmResponse(contentBuffer);
-                    if (parsed.isParsed && parsed.answer) {
-                      textToDisplay = parsed.answer;
-                      thinkingToDisplay = parsed.thinking || '';  // ★追加
-                      // モードを修正（以降のストリーミングでも正しく処理）
-                      protocolMode = 'JSON';
-                    } else {
-                      // パース失敗時も表示しない（ちらつき防止）
-                      textToDisplay = '';
-                    }
+                    // isParsed && answer が空でない場合のみ表示
+                    textToDisplay = (parsed.isParsed && parsed.answer) ? parsed.answer : '';
+                    thinkingToDisplay = parsed.thinking || '';  // ★追加
                   } else {
-                    textToDisplay = contentBuffer;
-                  }
-                }
-
-                // ★変更: streamingMessage stateを直接更新（messages配列を走査しない）
-                setStreamingMessage(prev => prev ? {
-                  ...prev,
-                  text: textToDisplay,
-                  rawContent: contentBuffer,
-                  thinking: thinkingToDisplay  // ★追加
-                } : prev);
-              }
-            }
-            else if (data.event === 'message_end') {
-              const citations = data.metadata?.retriever_resources || [];
-              if (citations.length > 0) {
-                // ★変更: streamingMessage stateを直接更新
-                setStreamingMessage(prev => prev ? {
-                  ...prev,
-                  citations: mapCitationsFromApi(citations),
-                  traceMode: detectedTraceMode
-                } : prev);
-              }
-              if (data.message_id) {
-                fetchSuggestions(data.message_id, aiMessageId);
-              }
-            }
-            else if (data.event === 'workflow_finished') {
-              let finalText = contentBuffer;
-              let finalCitations = [];
-              let smartActions = [];
-              let finalThinking = '';  // ★追加
-
-              // ★改善: protocolModeに関係なく、コンテンツがJSON形式かチェック
-              // ストリーミング中の初期判定が誤っている場合にも対応
-              const trimmedBuffer = contentBuffer.trim();
-              const looksLikeJsonContent =
-                trimmedBuffer.startsWith('{') ||
-                trimmedBuffer.startsWith('```json') ||
-                trimmedBuffer.startsWith('```\n{') ||
-                (trimmedBuffer.includes('"answer"') && trimmedBuffer.includes('"citations"'));
-
-              if (protocolMode === 'JSON' || looksLikeJsonContent) {
-                const parsed = parseLlmResponse(contentBuffer);
-                if (parsed.isParsed) {
-                  finalText = parsed.answer;
-                  finalThinking = parsed.thinking || '';  // ★追加
-                  if (parsed.citations.length > 0) {
-                    finalCitations = mapCitationsFromLLM(parsed.citations);
-                  }
-                  // ★変更: parseLlmResponseから直接smartActionsを取得
-                  if (parsed.smartActions && parsed.smartActions.length > 0) {
-                    smartActions = parsed.smartActions;
-                    addLog(`[Workflow] Smart Actions detected: ${smartActions.length} actions`, 'info');
-                  }
-                }
-              }
-
-              // ★変更: streamingMessageRefから現在値を取得して、setMessagesとsetStreamingMessageを別々に呼び出す
-              // これによりsetState内からsetStateを呼び出す問題を根本的に解決
-              const currentStreamingMsg = streamingMessageRef.current;
-              if (currentStreamingMsg) {
-                const finalMessage = {
-                  ...currentStreamingMsg,
-                  text: finalText,
-                  rawContent: contentBuffer,
-                  citations: currentStreamingMsg.citations.length > 0 ? currentStreamingMsg.citations : finalCitations,
-                  smartActions: smartActions,
-                  thinking: finalThinking || currentStreamingMsg.thinking || '',  // ★追加
-                  isStreaming: false,
-                  traceMode: detectedTraceMode,
-                  thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {
-                    if (t.title === '情報を整理して回答を生成中...') {
-                      return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };
+                    // RAWモードでも、JSON構造が検出されたらパースを試みる（誤判定対策）
+                    const trimmed = contentBuffer.trim();
+                    if (trimmed.includes('"answer"') && (trimmed.startsWith('{') || trimmed.startsWith('```'))) {
+                      const parsed = parseLlmResponse(contentBuffer);
+                      if (parsed.isParsed && parsed.answer) {
+                        textToDisplay = parsed.answer;
+                        thinkingToDisplay = parsed.thinking || '';  // ★追加
+                        // モードを修正（以降のストリーミングでも正しく処理）
+                        protocolMode = 'JSON';
+                      } else {
+                        // パース失敗時も表示しない（ちらつき防止）
+                        textToDisplay = '';
+                      }
+                    } else {
+                      textToDisplay = contentBuffer;
                     }
-                    return { ...t, status: 'done' };
-                  })
-                };
-                // messages配列に確定メッセージを追加
-                setMessages(prevMsgs => [...prevMsgs, finalMessage]);
-                // streamingMessageをクリア
-                setStreamingMessage(null);
+                  }
+
+                  // ★変更: streamingMessage stateを直接更新（messages配列を走査しない）
+                  setStreamingMessage(prev => prev ? {
+                    ...prev,
+                    text: textToDisplay,
+                    rawContent: contentBuffer,
+                    thinking: thinkingToDisplay  // ★追加
+                  } : prev);
+                }
               }
+              else if (data.event === 'message_end') {
+                const citations = data.metadata?.retriever_resources || [];
+                if (citations.length > 0) {
+                  // ★変更: streamingMessage stateを直接更新
+                  setStreamingMessage(prev => prev ? {
+                    ...prev,
+                    citations: mapCitationsFromApi(citations),
+                    traceMode: detectedTraceMode
+                  } : prev);
+                }
+                if (data.message_id) {
+                  fetchSuggestions(data.message_id, aiMessageId);
+                }
+              }
+              else if (data.event === 'workflow_finished') {
+                let finalText = contentBuffer;
+                let finalCitations = [];
+                let smartActions = [];
+                let finalThinking = '';  // ★追加
+
+                // ★改善: protocolModeに関係なく、コンテンツがJSON形式かチェック
+                // ストリーミング中の初期判定が誤っている場合にも対応
+                const trimmedBuffer = contentBuffer.trim();
+                const looksLikeJsonContent =
+                  trimmedBuffer.startsWith('{') ||
+                  trimmedBuffer.startsWith('```json') ||
+                  trimmedBuffer.startsWith('```\n{') ||
+                  (trimmedBuffer.includes('"answer"') && trimmedBuffer.includes('"citations"'));
+
+                if (protocolMode === 'JSON' || looksLikeJsonContent) {
+                  const parsed = parseLlmResponse(contentBuffer);
+                  if (parsed.isParsed) {
+                    finalText = parsed.answer;
+                    finalThinking = parsed.thinking || '';  // ★追加
+                    if (parsed.citations.length > 0) {
+                      finalCitations = mapCitationsFromLLM(parsed.citations);
+                    }
+                    // ★変更: parseLlmResponseから直接smartActionsを取得
+                    if (parsed.smartActions && parsed.smartActions.length > 0) {
+                      smartActions = parsed.smartActions;
+                      addLog(`[Workflow] Smart Actions detected: ${smartActions.length} actions`, 'info');
+                    }
+                  }
+                }
+
+                // ★変更: streamingMessageRefから現在値を取得して、setMessagesとsetStreamingMessageを別々に呼び出す
+                // これによりsetState内からsetStateを呼び出す問題を根本的に解決
+                const currentStreamingMsg = streamingMessageRef.current;
+                if (currentStreamingMsg) {
+                  const finalMessage = {
+                    ...currentStreamingMsg,
+                    text: finalText,
+                    rawContent: contentBuffer,
+                    citations: currentStreamingMsg.citations.length > 0 ? currentStreamingMsg.citations : finalCitations,
+                    smartActions: smartActions,
+                    thinking: finalThinking || currentStreamingMsg.thinking || '',  // ★追加
+                    isStreaming: false,
+                    traceMode: detectedTraceMode,
+                    thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {
+                      if (t.title === '情報を整理して回答を生成中...') {
+                        return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };
+                      }
+                      return { ...t, status: 'done' };
+                    })
+                  };
+                  // messages配列に確定メッセージを追加
+                  setMessages(prevMsgs => [...prevMsgs, finalMessage]);
+                  // streamingMessageをクリア
+                  setStreamingMessage(null);
+                }
+              }
+            } catch (e) {
+              console.error('Stream Parse Error:', e);
             }
-          } catch (e) {
-            console.error('Stream Parse Error:', e);
           }
         }
       }
