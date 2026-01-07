@@ -416,7 +416,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     const isFastMode = true; // 常にリアルタイム表示を使用
 
     setIsGenerating(true);
-    
+
     // ★変更: ストリーミング中はstreamingMessage stateで管理（messages配列を更新しない）
     const initialAiMessage = {
       id: aiMessageId,
@@ -430,6 +430,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       traceMode: 'knowledge',
       thoughtProcess: [],
       processStatus: null,
+      thinking: '',  // ★追加: Chain-of-Thought用
       mode: isFastMode ? 'fast' : 'normal'
     };
     setStreamingMessage(initialAiMessage);
@@ -485,7 +486,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       let isConversationIdSynced = false;
       let capturedOptimizedQuery = null;
       let protocolMode = 'PENDING';
-      
+
       // 表示遅延タイマー（ちらつき防止）
       // messageイベント受信時にタイマーを開始する（思考プロセス完了後）
       let messageStartTime = null;
@@ -697,7 +698,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 if (messageStartTime === null) {
                   messageStartTime = Date.now();
                 }
-                
+
                 contentBuffer += data.answer;
                 tracker.markFirstToken();
                 tracker.incrementChars(data.answer);
@@ -714,11 +715,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 }
 
                 let textToDisplay = '';
-                
+                let thinkingToDisplay = '';  // ★追加: thinking用
+
                 // ★変更: message受信開始から1秒間は表示を抑制（ちらつき防止）
                 const elapsedMs = Date.now() - messageStartTime;
                 const isDelayPeriod = elapsedMs < DISPLAY_DELAY_MS;
-                
+
                 if (isDelayPeriod) {
                   // 1秒未満は表示しない（スケルトンローダーが表示される）
                   textToDisplay = '';
@@ -729,6 +731,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   const parsed = parseLlmResponse(contentBuffer);
                   // isParsed && answer が空でない場合のみ表示
                   textToDisplay = (parsed.isParsed && parsed.answer) ? parsed.answer : '';
+                  thinkingToDisplay = parsed.thinking || '';  // ★追加
                 } else {
                   // RAWモードでも、JSON構造が検出されたらパースを試みる（誤判定対策）
                   const trimmed = contentBuffer.trim();
@@ -736,6 +739,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                     const parsed = parseLlmResponse(contentBuffer);
                     if (parsed.isParsed && parsed.answer) {
                       textToDisplay = parsed.answer;
+                      thinkingToDisplay = parsed.thinking || '';  // ★追加
                       // モードを修正（以降のストリーミングでも正しく処理）
                       protocolMode = 'JSON';
                     } else {
@@ -751,7 +755,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 setStreamingMessage(prev => prev ? {
                   ...prev,
                   text: textToDisplay,
-                  rawContent: contentBuffer
+                  rawContent: contentBuffer,
+                  thinking: thinkingToDisplay  // ★追加
                 } : prev);
               }
             }
@@ -773,6 +778,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
               let finalText = contentBuffer;
               let finalCitations = [];
               let smartActions = [];
+              let finalThinking = '';  // ★追加
 
               // ★改善: protocolModeに関係なく、コンテンツがJSON形式かチェック
               // ストリーミング中の初期判定が誤っている場合にも対応
@@ -787,6 +793,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 const parsed = parseLlmResponse(contentBuffer);
                 if (parsed.isParsed) {
                   finalText = parsed.answer;
+                  finalThinking = parsed.thinking || '';  // ★追加
                   if (parsed.citations.length > 0) {
                     finalCitations = mapCitationsFromLLM(parsed.citations);
                   }
@@ -808,6 +815,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   rawContent: contentBuffer,
                   citations: currentStreamingMsg.citations.length > 0 ? currentStreamingMsg.citations : finalCitations,
                   smartActions: smartActions,
+                  thinking: finalThinking || currentStreamingMsg.thinking || '',  // ★追加
                   isStreaming: false,
                   traceMode: detectedTraceMode,
                   thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {

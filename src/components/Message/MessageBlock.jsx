@@ -71,6 +71,7 @@ const MessageBlock = ({
     smartActions,
     isStreaming,
     thoughtProcess,
+    thinking,  // ★追加: Chain-of-Thought
     files,
     traceMode,
     messageId,
@@ -279,8 +280,12 @@ const MessageBlock = ({
                     </div>
                   )}
 
-                  {isAi && thoughtProcess && thoughtProcess.length > 0 && (
-                    <ThinkingProcess steps={thoughtProcess} isStreaming={isStreaming} />
+                  {isAi && (thoughtProcess?.length > 0 || thinking) && (
+                    <ThinkingProcess
+                      steps={thoughtProcess}
+                      isStreaming={isStreaming}
+                      thinkingContent={thinking}
+                    />
                   )}
 
                   {isAi && isStreaming && isTextEmpty && !showRaw && mode !== 'fast' && (
@@ -375,6 +380,7 @@ const arePropsEqual = (prev, next) => {
     && p.suggestions === n.suggestions
     && p.smartActions === n.smartActions
     && p.thoughtProcess === n.thoughtProcess
+    && p.thinking === n.thinking  // ★追加
     && p.files === n.files;
 };
 

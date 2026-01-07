@@ -1,13 +1,15 @@
 // src/utils/responseParser.js
 
 /**
- * 壊れた（生成途中の）JSON文字列から、answerフィールドの中身を可能な限り抽出する
+ * 汎用的な部分JSON抽出関数
+ * 壊れた（生成途中の）JSON文字列から、指定フィールドの中身を可能な限り抽出する
  * @param {string} text - 解析対象のテキスト
- * @returns {string|null} 抽出できた回答テキスト（見つからない場合はnull）
+ * @param {string} fieldName - 抽出するフィールド名（例: "answer", "thinking"）
+ * @returns {string|null} 抽出できたテキスト（見つからない場合はnull）
  */
-const extractPartialJson = (text) => {
-  // 1. "answer": " の開始位置を探す
-  const startPattern = /"answer"\s*:\s*"/;
+const extractPartialField = (text, fieldName) => {
+  // 1. "fieldName": " の開始位置を探す
+  const startPattern = new RegExp(`"${fieldName}"\\s*:\\s*"`);
   const match = text.match(startPattern);
 
   if (!match) return null;
@@ -45,14 +47,28 @@ const extractPartialJson = (text) => {
 };
 
 /**
+ * 壊れた（生成途中の）JSON文字列から、answerフィールドの中身を可能な限り抽出する
+ * @param {string} text - 解析対象のテキスト
+ * @returns {string|null} 抽出できた回答テキスト（見つからない場合はnull）
+ */
+const extractPartialJson = (text) => extractPartialField(text, 'answer');
+
+/**
+ * 壊れた（生成途中の）JSON文字列から、thinkingフィールドの中身を可能な限り抽出する
+ * @param {string} text - 解析対象のテキスト
+ * @returns {string|null} 抽出できた思考テキスト（見つからない場合はnull）
+ */
+const extractPartialThinking = (text) => extractPartialField(text, 'thinking');
+
+/**
  * LLMのレスポンス（テキスト）を解析し、JSONであれば回答と出典、Smart Actionsを抽出する。
  * ストリーミング中の不完全なJSONにも対応。
  * @param {string} rawText - LLMからの生のテキスト
- * @returns {object} { answer, citations, smartActions, isParsed }
+ * @returns {object} { answer, citations, smartActions, thinking, isParsed }
  */
 export const parseLlmResponse = (rawText) => {
   if (!rawText) {
-    return { answer: '', citations: [], smartActions: [], isParsed: false };
+    return { answer: '', citations: [], smartActions: [], thinking: '', isParsed: false };
   }
 
   let textToParse = rawText.trim();
@@ -80,11 +96,12 @@ export const parseLlmResponse = (rawText) => {
           // 後方互換: { smart_actions: { suggested_actions: [...] } } 形式にも対応
           smartActions = parsed.smart_actions.suggested_actions;
         }
-        
+
         return {
           answer: parsed.answer || '',
           citations: Array.isArray(parsed.citations) ? parsed.citations : [],
           smartActions: smartActions,
+          thinking: parsed.thinking || '',
           isParsed: true
         };
       }
@@ -118,10 +135,14 @@ export const parseLlmResponse = (rawText) => {
       }
     } catch (e) { }
 
+    // thinkingの部分抽出
+    const partialThinking = extractPartialThinking(textToParse);
+
     return {
       answer: partialAnswer,
       citations: extractedCitations,
       smartActions: extractedSmartActions,
+      thinking: partialThinking || '',
       isParsed: true
     };
   }
@@ -132,6 +153,7 @@ export const parseLlmResponse = (rawText) => {
     answer: textToParse, // 生テキストをそのまま返す
     citations: [],
     smartActions: [],
+    thinking: '',
     isParsed: false
   };
 };

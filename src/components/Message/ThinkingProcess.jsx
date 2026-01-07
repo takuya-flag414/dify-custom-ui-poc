@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './ThinkingProcess.css';
 import FluidOrb from '../Shared/FluidOrb';
+import MarkdownRenderer from '../Shared/MarkdownRenderer';
 
 // --- SF Symbols風 SVG Icons ---
 const Icons = {
@@ -49,6 +50,11 @@ const Icons = {
             <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
     ),
+    thinking: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+    ),
     default: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -56,22 +62,28 @@ const Icons = {
     )
 };
 
-const ThinkingProcess = ({ steps, isStreaming }) => {
+const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
     const [isExpanded, setIsExpanded] = useState(isStreaming);
 
+    // stepsまたはthinkingContentがあるかチェック
+    const hasSteps = steps && steps.length > 0;
+    const hasThinking = thinkingContent && thinkingContent.trim().length > 0;
+    const hasContent = hasSteps || hasThinking;
+
     useEffect(() => {
-        if (!isStreaming && steps && steps.every(s => s.status === 'done')) {
+        if (!isStreaming && hasSteps && steps.every(s => s.status === 'done')) {
             const timer = setTimeout(() => {
                 setIsExpanded(false);
             }, 2000);
             return () => clearTimeout(timer);
         }
-    }, [isStreaming, steps]);
+    }, [isStreaming, steps, hasSteps]);
 
-    if (!steps || steps.length === 0) return null;
+    // コンテンツがない場合は何も表示しない
+    if (!hasContent) return null;
 
-    const currentStep = steps.find(s => s.status === 'processing') || steps[steps.length - 1];
-    const isAllDone = steps.every(s => s.status === 'done');
+    const currentStep = hasSteps ? (steps.find(s => s.status === 'processing') || steps[steps.length - 1]) : null;
+    const isAllDone = hasSteps ? steps.every(s => s.status === 'done') : !isStreaming;
 
     return (
         <div className="thinking-process-container">
@@ -102,26 +114,44 @@ const ThinkingProcess = ({ steps, isStreaming }) => {
 
             <div className={`thinking-accordion-grid ${isExpanded ? 'expanded' : ''}`}>
                 <div className="thinking-accordion-overflow">
-                    <div className="thinking-steps-list">
-                        {steps.map((step, index) => {
-                            // アイコンの取得
-                            const StepIcon = Icons[step.iconType] || Icons.default;
+                    {/* ワークフローステップ */}
+                    {hasSteps && (
+                        <div className="thinking-steps-list">
+                            {steps.map((step, index) => {
+                                // アイコンの取得
+                                const StepIcon = Icons[step.iconType] || Icons.default;
 
-                            return (
-                                <div key={step.id || index} className={`thinking-step-item ${step.status}`}>
-                                    <div className="step-icon-column">
-                                        {/* ステータスに応じたアイコン表示 */}
-                                        <div className={`step-icon-circle ${step.status}`}>
-                                            {StepIcon}
+                                return (
+                                    <div key={step.id || index} className={`thinking-step-item ${step.status}`}>
+                                        <div className="step-icon-column">
+                                            {/* ステータスに応じたアイコン表示 */}
+                                            <div className={`step-icon-circle ${step.status}`}>
+                                                {StepIcon}
+                                            </div>
+                                            {/* 線 (最後の要素以外) */}
+                                            {index !== steps.length - 1 && <div className="step-line"></div>}
                                         </div>
-                                        {/* 線 (最後の要素以外) */}
-                                        {index !== steps.length - 1 && <div className="step-line"></div>}
+                                        <span className="step-title">{step.title}</span>
                                     </div>
-                                    <span className="step-title">{step.title}</span>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* AIの思考セクション - ステップの下に表示 */}
+                    {hasThinking && (
+                        <div className="thinking-content-section">
+                            <div className="thinking-content-header">
+                                <div className="thinking-content-icon">
+                                    {Icons.thinking}
                                 </div>
-                            );
-                        })}
-                    </div>
+                                <span>AIの思考</span>
+                            </div>
+                            <div className="thinking-content-body">
+                                <MarkdownRenderer content={thinkingContent} />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
