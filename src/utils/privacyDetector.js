@@ -258,6 +258,61 @@ export function scanText(text) {
 }
 
 /**
+ * テキストをスキャンし、マッチ位置情報を含む検知結果を返す
+ * ハイライト表示用
+ * @param {string} text - スキャン対象のテキスト
+ * @returns {{ hasWarning: boolean, highlights: Array<{start: number, end: number, type: string, priority: string}> }}
+ */
+export function scanTextWithPositions(text) {
+  if (!text || typeof text !== 'string') {
+    return { hasWarning: false, highlights: [] };
+  }
+
+  const highlights = [];
+  // 重複除去用のSet（開始-終了位置を文字列化）
+  const seenPositions = new Set();
+
+  for (const patternDef of DETECTION_PATTERNS) {
+    // execで位置情報を取得するためにRegExpを再作成
+    const regex = new RegExp(patternDef.pattern.source, patternDef.pattern.flags);
+    let match;
+    
+    while ((match = regex.exec(text)) !== null) {
+      const matchedText = match[0];
+      const start = match.index;
+      const end = start + matchedText.length;
+      
+      // バリデーターがある場合はチェック
+      if (patternDef.validator && !patternDef.validator(matchedText)) {
+        continue;
+      }
+      
+      // 重複チェック
+      const posKey = `${start}-${end}`;
+      if (seenPositions.has(posKey)) {
+        continue;
+      }
+      seenPositions.add(posKey);
+      
+      highlights.push({
+        start,
+        end,
+        type: patternDef.id,
+        priority: patternDef.priority,
+      });
+    }
+  }
+
+  // 開始位置でソート
+  highlights.sort((a, b) => a.start - b.start);
+
+  return {
+    hasWarning: highlights.length > 0,
+    highlights,
+  };
+}
+
+/**
  * 検知結果の優先度に基づいてソート
  * @param {Array} detections - 検知結果配列
  * @returns {Array} - ソート済み配列
@@ -269,4 +324,5 @@ export function sortDetectionsByPriority(detections) {
   );
 }
 
-export default { scanText, sortDetectionsByPriority };
+export default { scanText, scanTextWithPositions, sortDetectionsByPriority };
+

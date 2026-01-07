@@ -50,20 +50,18 @@
 }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-    .privacy-warning-banner {
-        background: rgba(255, 159, 10, 0.12);
-        border-color: rgba(255, 159, 10, 0.25);
-        color: rgba(255, 255, 255, 0.75);
-    }
+[data-theme="dark"] .privacy-warning-banner {
+    background: rgba(255, 159, 10, 0.12);
+    border-color: rgba(255, 159, 10, 0.25);
+    color: rgba(255, 255, 255, 0.75);
+}
 
-    .privacy-warning-banner-title {
-        color: var(--sys-color-warning, #FF9F0A);
-    }
+[data-theme="dark"] .privacy-warning-banner-title {
+    color: var(--sys-color-warning, #FF9F0A);
+}
 
-    .privacy-warning-banner-desc {
-        color: rgba(255, 255, 255, 0.55);
-    }
+[data-theme="dark"] .privacy-warning-banner-desc {
+    color: rgba(255, 255, 255, 0.55);
 }
 
 /* === Subject Input === */
@@ -112,33 +110,30 @@
 }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
+[data-theme="dark"] .privacy-subject-label,
+[data-theme="dark"] .privacy-message-label {
+    color: rgba(255, 255, 255, 0.6);
+}
 
-    .privacy-subject-label,
-    .privacy-message-label {
-        color: rgba(255, 255, 255, 0.6);
-    }
+[data-theme="dark"] .privacy-subject-input {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+}
 
-    .privacy-subject-input {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.92);
-    }
+[data-theme="dark"] .privacy-subject-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
 
-    .privacy-subject-input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
+[data-theme="dark"] .privacy-subject-input:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(10, 132, 255, 0.5);
+}
 
-    .privacy-subject-input:focus {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.3),
-            0 0 0 4px rgba(10, 132, 255, 0.5);
-    }
-
-    .privacy-subject-input.has-warning {
-        border-color: rgba(255, 159, 10, 0.5);
-        background: rgba(255, 159, 10, 0.08);
-    }
+[data-theme="dark"] .privacy-subject-input.has-warning {
+    border-color: rgba(255, 159, 10, 0.5);
+    background: rgba(255, 159, 10, 0.08);
 }
 
 /* === Textarea === */
@@ -146,7 +141,10 @@
     position: relative;
 }
 
+
 .privacy-textarea {
+    position: relative;
+    /* オーバーレイより前面に */
     width: 100%;
     min-height: 140px;
     padding: 14px 18px;
@@ -158,9 +156,13 @@
     font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "SF Pro", sans-serif);
     font-size: 15px;
     line-height: 1.5;
+    letter-spacing: normal;
+    word-spacing: normal;
     color: rgba(0, 0, 0, 0.9);
     resize: vertical;
     transition: all 0.2s ease;
+    box-sizing: border-box;
+    /* オーバーレイと一致 */
 }
 
 .privacy-textarea::placeholder {
@@ -188,33 +190,31 @@
 }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-    .privacy-textarea {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.92);
-    }
+[data-theme="dark"] .privacy-textarea {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+}
 
-    .privacy-textarea::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
+[data-theme="dark"] .privacy-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
 
-    .privacy-textarea:focus {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.3),
-            0 0 0 4px rgba(10, 132, 255, 0.5);
-    }
+[data-theme="dark"] .privacy-textarea:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(10, 132, 255, 0.5);
+}
 
-    .privacy-textarea.has-warning {
-        border-color: rgba(255, 159, 10, 0.5);
-        background: rgba(255, 159, 10, 0.08);
-    }
+[data-theme="dark"] .privacy-textarea.has-warning {
+    border-color: rgba(255, 159, 10, 0.5);
+    background: rgba(255, 159, 10, 0.08);
+}
 
-    .privacy-textarea.has-warning:focus {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.3),
-            0 0 0 4px rgba(255, 159, 10, 0.4);
-    }
+[data-theme="dark"] .privacy-textarea.has-warning:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(255, 159, 10, 0.4);
 }
 
 /* === Recipient Group (Input Group Design) === */
@@ -391,101 +391,93 @@
 
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-    .privacy-recipient-group {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.12);
-    }
+[data-theme="dark"] .privacy-recipient-group {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
 
-    .privacy-recipient-group:focus-within {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.3),
-            0 0 0 4px rgba(10, 132, 255, 0.5);
-    }
+[data-theme="dark"] .privacy-recipient-group:focus-within {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(10, 132, 255, 0.5);
+}
 
-    .privacy-recipient-separator {
-        background: rgba(255, 255, 255, 0.15);
-    }
+[data-theme="dark"] .privacy-recipient-separator {
+    background: rgba(255, 255, 255, 0.15);
+}
 
-    .privacy-recipient-input {
-        color: rgba(255, 255, 255, 0.92);
-    }
+[data-theme="dark"] .privacy-recipient-input {
+    color: rgba(255, 255, 255, 0.92);
+}
 
-    .privacy-recipient-input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
+[data-theme="dark"] .privacy-recipient-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
 
-    .honorific-selector-trigger {
-        color: rgba(255, 255, 255, 0.7);
-    }
+[data-theme="dark"] .honorific-selector-trigger {
+    color: rgba(255, 255, 255, 0.7);
+}
 
-    .honorific-selector-trigger:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.95);
-    }
+[data-theme="dark"] .honorific-selector-trigger:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.95);
+}
 
-    /* Popover Dark */
-    .honorific-dropdown {
-        background: rgba(35, 35, 35, 0.65);
-        border-color: rgba(255, 255, 255, 0.1);
-        box-shadow:
-            0 4px 16px rgba(0, 0, 0, 0.3),
-            0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
-    }
+/* Popover Dark */
+[data-theme="dark"] .honorific-dropdown {
+    background: rgba(35, 35, 35, 0.65);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+}
 
-    .honorific-option {
-        color: rgba(255, 255, 255, 0.85);
-    }
+[data-theme="dark"] .honorific-option {
+    color: rgba(255, 255, 255, 0.85);
+}
 
-    .honorific-option:hover {
-        background: rgba(10, 132, 255, 0.2);
-        color: #0A84FF;
-    }
+[data-theme="dark"] .honorific-option:hover {
+    background: rgba(10, 132, 255, 0.2);
+    color: #0A84FF;
+}
 
-    /* Custom Input Dark */
-    .honorific-custom-input-wrapper {
-        background: rgba(10, 132, 255, 0.15);
-    }
+/* Custom Input Dark */
+[data-theme="dark"] .honorific-custom-input-wrapper {
+    background: rgba(10, 132, 255, 0.15);
+}
 
-    .honorific-custom-input {
-        color: #0A84FF;
-    }
+[data-theme="dark"] .honorific-custom-input {
+    color: #0A84FF;
+}
 
-    .honorific-reset-btn {
-        background: rgba(255, 255, 255, 0.15);
-        color: rgba(255, 255, 255, 0.6);
-    }
+[data-theme="dark"] .honorific-reset-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+}
 
-    .honorific-reset-btn:hover {
-        background: rgba(255, 255, 255, 0.25);
-        color: rgba(255, 255, 255, 0.9);
-    }
+[data-theme="dark"] .honorific-reset-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 /* === Detection Alert === */
 .privacy-detection-alert {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     background: rgba(255, 149, 0, 0.1);
     border-radius: 10px;
     font-size: 13px;
     font-weight: 500;
     color: var(--sys-color-warning, #FF9500);
-    animation: fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* 検知アラートヘッダー（アイコン + テキスト横並び） */
+.privacy-detection-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .privacy-detection-alert svg {
@@ -494,26 +486,105 @@
 
 .privacy-detection-list {
     display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin-top: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 6px;
+    /* スクロールバー用の余白 */
+}
+
+/* 検知アイテム（各種類ごと） - 横並びコンパクト */
+.privacy-detection-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    border-left: 3px solid var(--sys-color-warning, #FF9500);
+    flex-shrink: 0;
+    /* 横スクロール時に縮まないように */
+    white-space: nowrap;
+}
+
+.privacy-detection-item.priority-critical {
+    border-left-color: var(--sys-color-danger, #FF3B30);
+}
+
+.privacy-detection-item.priority-high {
+    border-left-color: var(--sys-color-warning, #FF9500);
+}
+
+.privacy-detection-item.priority-medium {
+    border-left-color: #FFD60A;
+}
+
+.detection-label {
+    font-weight: 600;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.detection-matches {
+    display: flex;
     flex-wrap: wrap;
     gap: 6px;
 }
 
-.privacy-detection-tag {
-    padding: 2px 8px;
-    background: rgba(255, 149, 0, 0.15);
-    border-radius: 6px;
+/* マッチしたテキスト（codeタグ） */
+.detection-match {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     font-size: 12px;
-    font-weight: 500;
+    padding: 2px 6px;
+    background: rgba(255, 149, 0, 0.15);
+    border-radius: 4px;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.privacy-detection-item.priority-critical .detection-match {
+    background: rgba(255, 59, 48, 0.15);
+}
+
+.detection-more {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.5);
+    align-self: center;
 }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-    .privacy-detection-alert {
-        background: rgba(255, 159, 10, 0.15);
-        color: var(--sys-color-warning, #FF9F0A);
-    }
+[data-theme="dark"] .privacy-detection-alert {
+    background: rgba(255, 159, 10, 0.15);
+    color: var(--sys-color-warning, #FF9F0A);
+}
 
-    .privacy-detection-tag {
-        background: rgba(255, 159, 10, 0.2);
-    }
+[data-theme="dark"] .privacy-detection-item {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .privacy-detection-item.priority-critical {
+    border-left-color: var(--sys-color-danger, #FF453A);
+}
+
+[data-theme="dark"] .privacy-detection-item.priority-high {
+    border-left-color: var(--sys-color-warning, #FF9F0A);
+}
+
+[data-theme="dark"] .detection-label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .detection-match {
+    background: rgba(255, 159, 10, 0.2);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme="dark"] .privacy-detection-item.priority-critical .detection-match {
+    background: rgba(255, 69, 58, 0.2);
+}
+
+[data-theme="dark"] .detection-more {
+    color: rgba(255, 255, 255, 0.5);
 }

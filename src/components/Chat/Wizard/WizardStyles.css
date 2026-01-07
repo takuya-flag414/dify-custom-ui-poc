@@ -46,15 +46,13 @@
 }
 
 /* Dark Mode */
-@media (prefers-color-scheme: dark) {
-    .wizard-hud-container {
-        background: rgba(38, 38, 40, 0.82);
-        border-color: rgba(255, 255, 255, 0.12);
-        box-shadow:
-            0 24px 60px rgba(0, 0, 0, 0.35),
-            0 8px 24px rgba(0, 0, 0, 0.25),
-            0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
-    }
+[data-theme="dark"] .wizard-hud-container {
+    background: rgba(38, 38, 40, 0.82);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.35),
+        0 8px 24px rgba(0, 0, 0, 0.25),
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
 }
 
 /* === 2. AI Glow Button with Animated Gradient === */
@@ -123,8 +121,9 @@
 
 .ai-glow-button.ai-active {
     background: linear-gradient(135deg, var(--sys-color-primary), #5856D6);
-    color: white;
+    color: white !important;
     box-shadow: 0 4px 16px rgba(0, 122, 255, 0.35);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .ai-glow-button.ai-active::before {
@@ -133,19 +132,18 @@
 }
 
 /* Dark Mode */
-@media (prefers-color-scheme: dark) {
-    .ai-glow-button {
-        background: rgba(255, 255, 255, 0.08);
-        color: var(--sys-color-primary-dark);
-    }
+[data-theme="dark"] .ai-glow-button {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--sys-color-primary-dark);
+}
 
-    .ai-glow-button:not(:disabled):hover {
-        background: rgba(255, 255, 255, 0.12);
-    }
+[data-theme="dark"] .ai-glow-button:not(:disabled):hover {
+    background: rgba(255, 255, 255, 0.12);
+}
 
-    .ai-glow-button.ai-active {
-        background: linear-gradient(135deg, var(--sys-color-primary-dark), #5E5CE6);
-    }
+[data-theme="dark"] .ai-glow-button.ai-active {
+    background: linear-gradient(135deg, var(--sys-color-primary-dark), #5E5CE6);
+    color: white !important;
 }
 
 /* === 3. Header === */
@@ -157,10 +155,8 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-header {
-        border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
+[data-theme="dark"] .wizard-header {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .wizard-title {
@@ -172,10 +168,8 @@
     color: rgba(0, 0, 0, 0.88);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-title {
-        color: rgba(255, 255, 255, 0.92);
-    }
+[data-theme="dark"] .wizard-title {
+    color: rgba(255, 255, 255, 0.92);
 }
 
 .wizard-close-button {
@@ -195,10 +189,8 @@
     background: rgba(0, 0, 0, 0.06);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-close-button:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
+[data-theme="dark"] .wizard-close-button:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .wizard-close-button svg {
@@ -229,10 +221,8 @@
     line-height: 1.4;
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-question {
-        color: rgba(255, 255, 255, 0.9);
-    }
+[data-theme="dark"] .wizard-question {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 /* === 5. Chips (Selection Options) === */
@@ -280,21 +270,24 @@
 }
 
 /* Dark Mode */
-@media (prefers-color-scheme: dark) {
-    .wizard-chip {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.85);
-    }
+[data-theme="dark"] .wizard-chip {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
+}
 
-    .wizard-chip:hover {
-        background: rgba(255, 255, 255, 0.12);
-    }
+[data-theme="dark"] .wizard-chip:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
 
-    .wizard-chip--active {
-        background: var(--sys-color-primary-dark);
-        box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35);
-    }
+[data-theme="dark"] .wizard-chip--active {
+    background: var(--sys-color-primary-dark);
+    box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35);
+}
+
+[data-theme="dark"] .wizard-chip--active:hover {
+    background: var(--sys-color-primary-dark);
+    transform: scale(1.03);
 }
 
 /* === 6. Text Input === */
@@ -326,22 +319,20 @@
 }
 
 /* Dark Mode */
-@media (prefers-color-scheme: dark) {
-    .wizard-input {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.92);
-    }
+[data-theme="dark"] .wizard-input {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+}
 
-    .wizard-input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
+[data-theme="dark"] .wizard-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
 
-    .wizard-input:focus {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.3),
-            0 0 0 4px rgba(10, 132, 255, 0.5);
-    }
+[data-theme="dark"] .wizard-input:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(10, 132, 255, 0.5);
 }
 
 /* === 6.5 Textarea Input (for multi-line text) === */
@@ -376,22 +367,20 @@
 }
 
 /* Dark Mode */
-@media (prefers-color-scheme: dark) {
-    .wizard-textarea {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.92);
-    }
+[data-theme="dark"] .wizard-textarea {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+}
 
-    .wizard-textarea::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
+[data-theme="dark"] .wizard-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
 
-    .wizard-textarea:focus {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.3),
-            0 0 0 4px rgba(10, 132, 255, 0.5);
-    }
+[data-theme="dark"] .wizard-textarea:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(10, 132, 255, 0.5);
 }
 
 /* === 7. Footer === */
@@ -404,11 +393,9 @@
     border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-footer {
-        background: rgba(255, 255, 255, 0.03);
-        border-top-color: rgba(255, 255, 255, 0.06);
-    }
+[data-theme="dark"] .wizard-footer {
+    background: rgba(255, 255, 255, 0.03);
+    border-top-color: rgba(255, 255, 255, 0.06);
 }
 
 /* Back/Cancel Button (Ghost Style) */
@@ -430,15 +417,13 @@
     color: rgba(0, 0, 0, 0.8);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-back-button {
-        color: rgba(255, 255, 255, 0.6);
-    }
+[data-theme="dark"] .wizard-back-button {
+    color: rgba(255, 255, 255, 0.6);
+}
 
-    .wizard-back-button:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: rgba(255, 255, 255, 0.85);
-    }
+[data-theme="dark"] .wizard-back-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
 }
 
 /* Step Indicator */
@@ -461,15 +446,13 @@
     box-shadow: 0 0 8px rgba(0, 122, 255, 0.4);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-step-dot {
-        background: rgba(255, 255, 255, 0.15);
-    }
+[data-theme="dark"] .wizard-step-dot {
+    background: rgba(255, 255, 255, 0.15);
+}
 
-    .wizard-step-dot.active {
-        background: var(--sys-color-primary-dark);
-        box-shadow: 0 0 8px rgba(10, 132, 255, 0.5);
-    }
+[data-theme="dark"] .wizard-step-dot.active {
+    background: var(--sys-color-primary-dark);
+    box-shadow: 0 0 8px rgba(10, 132, 255, 0.5);
 }
 
 /* === 8. Accessibility: Halo Focus Ring === */
@@ -484,17 +467,14 @@
         0 0 0 4px rgba(0, 122, 255, 0.5);
 }
 
-@media (prefers-color-scheme: dark) {
-
-    .wizard-chip:focus-visible,
-    .wizard-input:focus-visible,
-    .ai-glow-button:focus-visible,
-    .wizard-back-button:focus-visible,
-    .wizard-close-button:focus-visible {
-        box-shadow:
-            0 0 0 1px rgba(0, 0, 0, 0.4),
-            0 0 0 4px rgba(10, 132, 255, 0.6);
-    }
+[data-theme="dark"] .wizard-chip:focus-visible,
+[data-theme="dark"] .wizard-input:focus-visible,
+[data-theme="dark"] .ai-glow-button:focus-visible,
+[data-theme="dark"] .wizard-back-button:focus-visible,
+[data-theme="dark"] .wizard-close-button:focus-visible {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.4),
+        0 0 0 4px rgba(10, 132, 255, 0.6);
 }
 
 /* === 9. Reduced Motion === */
@@ -515,14 +495,128 @@
 .wizard-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 998;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    z-index: 9998;
 }
 
-@media (prefers-color-scheme: dark) {
-    .wizard-backdrop {
-        background: rgba(0, 0, 0, 0.45);
-    }
+[data-theme="dark"] .wizard-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* === 11. Modal Layer (Portal Target) === */
+.wizard-modal-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    padding: 1rem;
+}
+
+/* === New UI: Negative Chips (Anti-Patterns) === */
+.wizard-chip--negative.wizard-chip--active {
+    background: rgba(255, 59, 48, 0.15);
+    /* Red tint */
+    border-color: #FF3B30;
+    color: #FF3B30;
+}
+
+/* === New UI: iOS Style Toggle Switch (Thinking Mode) === */
+.wizard-toggle-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.wizard-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wizard-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 32px;
+}
+
+.wizard-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.wizard-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: .4s;
+    border-radius: 34px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.wizard-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.wizard-toggle-switch input:checked+.wizard-toggle-slider {
+    background-color: #34C759;
+    /* Apple Green */
+}
+
+.wizard-toggle-switch input:focus+.wizard-toggle-slider {
+    box-shadow: 0 0 1px #34C759;
+}
+
+.wizard-toggle-switch input:checked+.wizard-toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.wizard-toggle-status {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1D1D1F;
+    min-width: 40px;
+}
+
+.wizard-toggle-description {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    line-height: 1.5;
+    max-width: 300px;
+}
+
+/* Dark Mode Support for Toggle */
+[data-theme="dark"] .wizard-toggle-slider {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .wizard-toggle-status {
+    color: #F5F5F7;
+}
+
+[data-theme="dark"] .wizard-toggle-description {
+    color: rgba(255, 255, 255, 0.5);
 }

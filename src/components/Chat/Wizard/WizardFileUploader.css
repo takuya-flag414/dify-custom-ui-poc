@@ -247,69 +247,67 @@
 }
 
 /* Dark mode adjustments */
-@media (prefers-color-scheme: dark) {
-    .wizard-dropzone {
-        background: rgba(30, 30, 30, 0.6);
-        border-color: rgba(255, 255, 255, 0.15);
-    }
+[data-theme="dark"] .wizard-dropzone {
+    background: rgba(30, 30, 30, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+}
 
-    .wizard-dropzone:hover {
-        border-color: rgba(10, 132, 255, 0.4);
-        background: rgba(10, 132, 255, 0.08);
-    }
+[data-theme="dark"] .wizard-dropzone:hover {
+    border-color: rgba(10, 132, 255, 0.4);
+    background: rgba(10, 132, 255, 0.08);
+}
 
-    .wizard-dropzone-icon {
-        color: rgba(255, 255, 255, 0.35);
-    }
+[data-theme="dark"] .wizard-dropzone-icon {
+    color: rgba(255, 255, 255, 0.35);
+}
 
-    .wizard-dropzone:hover .wizard-dropzone-icon {
-        color: var(--sys-color-primary, #0A84FF);
-    }
+[data-theme="dark"] .wizard-dropzone:hover .wizard-dropzone-icon {
+    color: var(--sys-color-primary, #0A84FF);
+}
 
-    .wizard-dropzone-text {
-        color: rgba(255, 255, 255, 0.5);
-    }
+[data-theme="dark"] .wizard-dropzone-text {
+    color: rgba(255, 255, 255, 0.5);
+}
 
-    .wizard-dropzone-text strong {
-        color: var(--sys-color-primary, #0A84FF);
-    }
+[data-theme="dark"] .wizard-dropzone-text strong {
+    color: var(--sys-color-primary, #0A84FF);
+}
 
-    .wizard-dropzone-hint {
-        color: rgba(255, 255, 255, 0.35);
-    }
+[data-theme="dark"] .wizard-dropzone-hint {
+    color: rgba(255, 255, 255, 0.35);
+}
 
-    .wizard-file-card {
-        background: rgba(40, 40, 40, 0.8);
-        border-color: rgba(255, 255, 255, 0.08);
-    }
+[data-theme="dark"] .wizard-file-card {
+    background: rgba(40, 40, 40, 0.8);
+    border-color: rgba(255, 255, 255, 0.08);
+}
 
-    .wizard-file-card:hover {
-        background: rgba(50, 50, 50, 0.95);
-    }
+[data-theme="dark"] .wizard-file-card:hover {
+    background: rgba(50, 50, 50, 0.95);
+}
 
-    .wizard-file-card.warning {
-        background: rgba(255, 149, 0, 0.08);
-    }
+[data-theme="dark"] .wizard-file-card.warning {
+    background: rgba(255, 149, 0, 0.08);
+}
 
-    .wizard-file-icon {
-        background: rgba(255, 255, 255, 0.06);
-        color: rgba(255, 255, 255, 0.5);
-    }
+[data-theme="dark"] .wizard-file-icon {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.5);
+}
 
-    .wizard-file-name {
-        color: rgba(255, 255, 255, 0.85);
-    }
+[data-theme="dark"] .wizard-file-name {
+    color: rgba(255, 255, 255, 0.85);
+}
 
-    .wizard-file-meta {
-        color: rgba(255, 255, 255, 0.45);
-    }
+[data-theme="dark"] .wizard-file-meta {
+    color: rgba(255, 255, 255, 0.45);
+}
 
-    .wizard-file-remove {
-        color: rgba(255, 255, 255, 0.35);
-    }
+[data-theme="dark"] .wizard-file-remove {
+    color: rgba(255, 255, 255, 0.35);
+}
 
-    .wizard-file-remove:hover {
-        background: rgba(255, 69, 58, 0.15);
-        color: var(--sys-color-danger, #FF453A);
-    }
+[data-theme="dark"] .wizard-file-remove:hover {
+    background: rgba(255, 69, 58, 0.15);
+    color: var(--sys-color-danger, #FF453A);
 }

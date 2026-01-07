@@ -268,14 +268,48 @@ const WizardPrivacyTextarea = ({
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     >
-                        <ShieldAlertIcon />
-                        <span>機密情報を検知:</span>
+                        <div className="privacy-detection-header">
+                            <ShieldAlertIcon />
+                            <span>機密情報を検知:</span>
+                        </div>
                         <div className="privacy-detection-list">
-                            {privacyWarning.detections.map((detection) => (
-                                <span key={detection.id} className="privacy-detection-tag">
-                                    {detection.label} ({detection.count}件)
-                                </span>
-                            ))}
+                            <AnimatePresence mode="popLayout">
+                                {privacyWarning.detections.map((detection, index) => (
+                                    <motion.div
+                                        key={detection.id}
+                                        layout
+                                        initial={{ opacity: 0, x: -20, scale: 0.9 }}
+                                        animate={{
+                                            opacity: 1,
+                                            x: 0,
+                                            scale: 1,
+                                            transition: {
+                                                type: 'spring',
+                                                stiffness: 300,
+                                                damping: 15,
+                                                delay: index * 0.05
+                                            }
+                                        }}
+                                        exit={{
+                                            opacity: 0,
+                                            x: 20,
+                                            scale: 0.9,
+                                            transition: { duration: 0.15 }
+                                        }}
+                                        className={`privacy-detection-item priority-${detection.priority}`}
+                                    >
+                                        <span className="detection-label">{detection.label}</span>
+                                        <div className="detection-matches">
+                                            {detection.matches.slice(0, 3).map((match, idx) => (
+                                                <code key={idx} className="detection-match">{match}</code>
+                                            ))}
+                                            {detection.matches.length > 3 && (
+                                                <span className="detection-more">+{detection.matches.length - 3}件</span>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     </motion.div>
                 )}
@@ -285,4 +319,5 @@ const WizardPrivacyTextarea = ({
 };
 
 export default WizardPrivacyTextarea;
+
 

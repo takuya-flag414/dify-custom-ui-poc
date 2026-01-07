@@ -1,5 +1,6 @@
 // src/components/Chat/Wizard/CapabilityWizard.jsx
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import './WizardStyles.css';
@@ -46,7 +47,6 @@ const CapabilityWizard = ({
     }, [isOpen, onClose]);
 
     // 条件付きステップをフィルタリングして表示可能なステップを取得
-    // NOTE: Reactのフックルールに従い、早期リターンの前に配置
     const visibleSteps = useMemo(() => {
         if (!scenarioData?.steps) return [];
         return scenarioData.steps.filter(step => {
@@ -60,7 +60,13 @@ const CapabilityWizard = ({
     // scenarioDataがない場合は何も表示しない
     if (!scenarioData) return null;
 
+    // 有効なステップがない場合は何も表示しない
+    if (!visibleSteps.length) return null;
+
     const currentStep = visibleSteps[currentStepIndex];
+
+    // 現在のステップが取得できない場合（インデックス範囲外など）は何も表示しない
+    if (!currentStep) return null;
     const totalSteps = visibleSteps.length;
     const isLastStep = currentStepIndex === totalSteps - 1;
 
@@ -159,11 +165,11 @@ const CapabilityWizard = ({
         }
     };
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Backdrop */}
+                    {/* Backdrop - すりガラス効果 */}
                     <motion.div
                         className="wizard-backdrop"
                         variants={backdropVariants}
@@ -173,8 +179,8 @@ const CapabilityWizard = ({
                         onClick={onClose}
                     />
 
-                    {/* Centering Container */}
-                    <div className="fixed inset-0 z-[999] flex items-center justify-center pointer-events-none p-4">
+                    {/* Modal Layer - Portal経由でbody直下 */}
+                    <div className="wizard-modal-layer">
                         {/* HUD Container */}
                         <motion.div
                             className="wizard-hud-container"
@@ -222,6 +228,7 @@ const CapabilityWizard = ({
                                             options={currentStep.options}
                                             getOptions={currentStep.getOptions}
                                             placeholder={currentStep.placeholder}
+                                            description={currentStep.description} // description を追加
                                             value={formData[currentStep.id]}
                                             onChange={(val) => updateFormData(currentStep.id, val)}
                                             formData={formData}
@@ -254,7 +261,9 @@ const CapabilityWizard = ({
                                 <button
                                     className={`ai-glow-button ${isLastStep ? 'ai-active' : ''}`}
                                     onClick={handleNext}
-                                    disabled={!formData[currentStep.id]}
+                                    // toggleやcheckbox-groupの場合、値がfalse/空でも進める場合があるため、必須チェックを調整
+                                    // ここでは簡易的に、toggleは常にOKとする
+                                    disabled={currentStep.type !== 'toggle' && currentStep.type !== 'checkbox-group' && !formData[currentStep.id]}
                                 >
                                     {isLastStep ? '生成する' : '次へ'}
                                 </button>
@@ -263,7 +272,8 @@ const CapabilityWizard = ({
                     </div>
                 </>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 
@@ -276,8 +286,19 @@ const ScenarioIcon = ({ iconName }) => {
     return <Icon className="w-5 h-5" style={{ opacity: 0.7 }} />;
 };
 
-// 入力UIのレンダラー
-const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange, formData, showSubject, showRecipient }) => {
+// 入力UIのレンダラー (showSubject, showRecipient, description を追加)
+const StepRenderer = ({
+    type,
+    options,
+    getOptions,
+    placeholder,
+    description,
+    value,
+    onChange,
+    formData,
+    showSubject,
+    showRecipient
+}) => {
     switch (type) {
         case 'chips':
             return (
@@ -294,7 +315,6 @@ const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange,
                 </div>
             );
         case 'dynamic-chips':
-            // formDataに応じて動的にオプションを取得
             const dynamicOptions = getOptions ? getOptions(formData) : options || [];
             return (
                 <div className="wizard-chips-container">
@@ -309,6 +329,30 @@ const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange,
                     ))}
                 </div>
             );
+        case 'checkbox-group':
+            return (
+                <div className="wizard-chips-container">
+                    {options.map(opt => {
+                        const isSelected = (value || []).includes(opt);
+                        return (
+                            <button
+                                key={opt}
+                                onClick={() => {
+                                    const current = value || [];
+                                    const next = isSelected
+                                        ? current.filter(c => c !== opt)
+                                        : [...current, opt];
+                                    onChange(next);
+                                }}
+                                className={`wizard-chip wizard-chip--negative ${isSelected ? 'wizard-chip--active' : ''}`}
+                            >
+                                {isSelected && <span className="mr-1.5 font-bold">✕</span>}
+                                {opt}
+                            </button>
+                        );
+                    })}
+                </div>
+            );
         case 'text':
             return (
                 <input
@@ -321,12 +365,10 @@ const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange,
                 />
             );
         case 'privacy-textarea':
-            // showSubjectが関数の場合はformDataで評価
             const shouldShowSubject = typeof showSubject === 'function'
                 ? showSubject(formData)
                 : !!showSubject;
 
-            // showRecipientが関数の場合はformDataで評価
             const shouldShowRecipient = typeof showRecipient === 'function'
                 ? showRecipient(formData)
                 : !!showRecipient;
@@ -349,7 +391,6 @@ const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange,
                 />
             );
         case 'dynamic':
-            // formDataのsource選択に応じてUIを切り替え
             if (formData?.source === 'ファイルをアップロード') {
                 return (
                     <WizardFileUploader
@@ -359,7 +400,6 @@ const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange,
                     />
                 );
             }
-            // デフォルトはテキスト入力
             return (
                 <textarea
                     value={value || ''}
@@ -369,6 +409,29 @@ const StepRenderer = ({ type, options, getOptions, placeholder, value, onChange,
                     autoFocus
                     rows={5}
                 />
+            );
+        case 'toggle':
+            return (
+                <div className="wizard-toggle-wrapper">
+                    <div className="wizard-toggle-container">
+                        <label className="wizard-toggle-switch">
+                            <input
+                                type="checkbox"
+                                checked={!!value}
+                                onChange={(e) => onChange(e.target.checked)}
+                            />
+                            <span className="wizard-toggle-slider"></span>
+                        </label>
+                        <span className="wizard-toggle-status">
+                            {value ? 'ON' : 'OFF'}
+                        </span>
+                    </div>
+                    {description && (
+                        <p className="wizard-toggle-description">
+                            {description}
+                        </p>
+                    )}
+                </div>
             );
         default:
             return <div style={{ color: 'rgba(0,0,0,0.4)' }}>Unknown Step Type: {type}</div>;
