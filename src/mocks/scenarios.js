@@ -5,9 +5,16 @@
  * @param {string} answer - 回答テキスト
  * @param {Array} citations - 引用配列
  * @param {Array} smartActions - Smart Actions配列（オプション）
+ * @param {string} thinking - Chain-of-Thought用思考プロセス（オプション）
  */
-const createMockJson = (answer, citations = [], smartActions = []) => {
-  const obj = { answer, citations };
+const createMockJson = (answer, citations = [], smartActions = [], thinking = '') => {
+  // thinking を answer より先に配置（ストリーミング時に thinking が先に表示されるように）
+  const obj = {};
+  if (thinking) {
+    obj.thinking = thinking;
+  }
+  obj.answer = answer;
+  obj.citations = citations;
   if (smartActions.length > 0) {
     obj.smart_actions = smartActions;
   }
@@ -20,13 +27,81 @@ const createMockJson = (answer, citations = [], smartActions = []) => {
  * @param {string} answer - 回答テキスト
  * @param {Array} citations - 引用配列
  * @param {Array} smartActions - Smart Actions配列（オプション）
+ * @param {string} thinking - Chain-of-Thought用思考プロセス（オプション）
  */
-const createMockJsonCodeBlock = (answer, citations = [], smartActions = []) => {
-  const jsonObj = { answer, citations };
+const createMockJsonCodeBlock = (answer, citations = [], smartActions = [], thinking = '') => {
+  // thinking を answer より先に配置（ストリーミング時に thinking が先に表示されるように）
+  const jsonObj = {};
+  if (thinking) {
+    jsonObj.thinking = thinking;
+  }
+  jsonObj.answer = answer;
+  jsonObj.citations = citations;
   if (smartActions.length > 0) {
     jsonObj.smart_actions = smartActions;
   }
   return '```json\n' + JSON.stringify(jsonObj, null, 2) + '\n```';
+};
+
+// =================================================================
+// Chain-of-Thought (thinking) テンプレート定義
+// =================================================================
+
+/**
+ * 各検索モード×AIスタイル用のthinkingテンプレート
+ * ContextSelector.jsx のモード定義に対応
+ */
+const thinkingTemplates = {
+  // オート（ファイルなし）: standard
+  pure: {
+    efficient: "- **分析**: ユーザーの質問を分類\n- **判断**: 雑談として即座に応答",
+    partner: "- **ユーザー認識**: 初回のあいさつ\n- **文脈分析**: カジュアルな会話\n- **発話戦略**: フレンドリーに応答、次のアクションを提案"
+  },
+  // オート（ファイルあり）: standard_file
+  file_only: {
+    efficient: "- **分析**: 添付ファイルの内容確認\n- **判断**: ドキュメント要約タスクとして処理",
+    partner: "- **ファイル確認**: ドキュメントを読み込み中\n- **内容把握**: 構造と要点を整理\n- **発話戦略**: わかりやすく要約して説明"
+  },
+  // スピード（ファイルなし）: fast
+  fast_pure: {
+    efficient: "- **モード**: 高速応答（検索省略）\n- **戦略**: 既存知識で即座に回答",
+    partner: "- **モード**: 高速応答モード\n- **認識**: スピード重視のリクエスト\n- **戦略**: シンプルかつ迅速に回答"
+  },
+  // スピード（ファイルあり）: fast_file
+  fast_file: {
+    efficient: "- **モード**: 高速応答\n- **処理**: ファイル内容の即座の分析",
+    partner: "- **モード**: 高速応答モード\n- **ファイル処理**: 内容を素早く把握\n- **戦略**: 要点を簡潔に抽出して回答"
+  },
+  // フルパワー（ファイルなし）: hybrid
+  hybrid: {
+    efficient: "- **検索戦略**: 社内DB + Web検索を並行実行\n- **情報統合**: 内部・外部情報を照合して回答を構築",
+    partner: "- **検索モード**: フルパワー検索\n- **戦略**: 社内規定とWeb情報を統合\n- **発話戦略**: 信頼性の高い総合回答を構築"
+  },
+  // フルパワー（ファイルあり）: hybrid_file
+  full: {
+    efficient: "- **処理**: ファイル + 社内DB + Web検索\n- **分析**: 3ソースの情報を統合して総合判断",
+    partner: "- **検索モード**: フルパワー検索（ファイル含む）\n- **分析**: ファイル内容を社内・Web情報と照合\n- **戦略**: 包括的な回答を作成"
+  },
+  // 社内データ（ファイルなし）: enterprise
+  rag_only: {
+    efficient: "- **検索対象**: 社内ナレッジベースのみ\n- **分析**: 社内規定・ドキュメントを参照して回答",
+    partner: "- **検索モード**: 社内データ限定\n- **戦略**: 社内規定に基づいた正確な回答\n- **配慮**: コンプライアンスを意識した表現"
+  },
+  // 社内データ（ファイルあり）: enterprise_file
+  file_rag: {
+    efficient: "- **処理**: ファイル + 社内ナレッジ\n- **分析**: 添付資料と社内規定を照合",
+    partner: "- **ファイル処理**: 添付ドキュメントを確認\n- **照合**: 社内規定と比較分析\n- **戦略**: 規定遵守の観点から回答"
+  },
+  // Web検索（ファイルなし）: deep
+  web_only: {
+    efficient: "- **検索対象**: Webのみ（Perplexity API）\n- **分析**: 最新のWeb情報を収集・整理",
+    partner: "- **検索モード**: Web検索モード\n- **情報収集**: 最新のWeb情報を調査\n- **発話戦略**: 出典を明示して回答"
+  },
+  // Web検索（ファイルあり）: deep_file
+  file_web: {
+    efficient: "- **処理**: ファイル + Web検索\n- **分析**: 添付資料とWeb情報を照合",
+    partner: "- **ファイル確認**: 添付ドキュメントを読み込み\n- **Web検索**: 最新情報と照らし合わせ\n- **戦略**: 両者を統合して回答"
+  }
 };
 
 // =================================================================
@@ -128,7 +203,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'General LLM', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJsonCodeBlock(styleTemplates.pure.efficient, [])
+        answer: createMockJsonCodeBlock(styleTemplates.pure.efficient, [], [], thinkingTemplates.pure.efficient)
       },
       { event: 'node_finished', data: { title: 'General LLM', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -141,7 +216,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'General LLM', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJsonCodeBlock(styleTemplates.pure.partner, [])
+        answer: createMockJsonCodeBlock(styleTemplates.pure.partner, [], [], thinkingTemplates.pure.partner)
       },
       { event: 'node_finished', data: { title: 'General LLM', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -167,7 +242,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'web', source: 'React Blog: React Compiler', url: 'https://react.dev/blog' },
             { id: 'cite_2', type: 'web', source: 'TechCrunch: Frontend Trends 2025', url: 'https://techcrunch.com/react' }
-          ]
+          ],
+          [],
+          thinkingTemplates.web_only.efficient
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
@@ -188,7 +265,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'web', source: 'React Blog: React Compiler', url: 'https://react.dev/blog' },
             { id: 'cite_2', type: 'web', source: 'TechCrunch: Frontend Trends 2025', url: 'https://techcrunch.com/react' }
-          ]
+          ],
+          [],
+          thinkingTemplates.web_only.partner
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
@@ -224,7 +303,8 @@ export const scenarios = {
             { type: 'web_search', label: 'Web検索で再確認', icon: 'globe', payload: {} },
             { type: 'deep_dive', label: 'もっと詳しく解説', icon: 'sparkles', payload: {} },
             { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } }
-          ]
+          ],
+          thinkingTemplates.rag_only.efficient
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
@@ -253,7 +333,8 @@ export const scenarios = {
             { type: 'web_search', label: 'Web検索で再確認', icon: 'globe', payload: {} },
             { type: 'deep_dive', label: 'もっと詳しく解説', icon: 'sparkles', payload: {} },
             { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } }
-          ]
+          ],
+          thinkingTemplates.rag_only.partner
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
@@ -282,7 +363,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'web', source: 'NIST AI Risk Management Framework', url: 'https://nist.gov/ai' },
             { id: 'cite_2', type: 'rag', source: 'ITセキュリティガイドライン_v3.pdf', url: null }
-          ]
+          ],
+          [],
+          thinkingTemplates.hybrid.efficient
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
@@ -305,7 +388,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'web', source: 'NIST AI Risk Management Framework', url: 'https://nist.gov/ai' },
             { id: 'cite_2', type: 'rag', source: 'ITセキュリティガイドライン_v3.pdf', url: null }
-          ]
+          ],
+          [],
+          thinkingTemplates.hybrid.partner
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
@@ -329,7 +414,9 @@ export const scenarios = {
         event: 'message',
         answer: createMockJson(
           styleTemplates.file_only.efficient,
-          [{ id: 'cite_1', type: 'document', source: 'ProjectX_Kickoff.pptx', url: null }]
+          [{ id: 'cite_1', type: 'document', source: 'ProjectX_Kickoff.pptx', url: null }],
+          [],
+          thinkingTemplates.file_only.efficient
         )
       },
       { event: 'node_finished', data: { title: 'Document LLM', node_type: 'llm' } },
@@ -347,7 +434,9 @@ export const scenarios = {
         event: 'message',
         answer: createMockJson(
           styleTemplates.file_only.partner,
-          [{ id: 'cite_1', type: 'document', source: 'ProjectX_Kickoff.pptx', url: null }]
+          [{ id: 'cite_1', type: 'document', source: 'ProjectX_Kickoff.pptx', url: null }],
+          [],
+          thinkingTemplates.file_only.partner
         )
       },
       { event: 'node_finished', data: { title: 'Document LLM', node_type: 'llm' } },
@@ -376,7 +465,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'document', source: 'LegacyCode.js', url: null },
             { id: 'cite_2', type: 'web', source: 'React Docs: Effects', url: 'https://react.dev/reference/react/useEffect' }
-          ]
+          ],
+          [],
+          thinkingTemplates.file_web.efficient
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
@@ -399,7 +490,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'document', source: 'LegacyCode.js', url: null },
             { id: 'cite_2', type: 'web', source: 'React Docs: Effects', url: 'https://react.dev/reference/react/useEffect' }
-          ]
+          ],
+          [],
+          thinkingTemplates.file_web.partner
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
@@ -428,7 +521,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'document', source: '請求書_株式会社A.pdf', url: null },
             { id: 'cite_2', type: 'rag', source: '購買管理規定.pdf', url: null }
-          ]
+          ],
+          [],
+          thinkingTemplates.file_rag.efficient
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
@@ -451,7 +546,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'document', source: '請求書_株式会社A.pdf', url: null },
             { id: 'cite_2', type: 'rag', source: '購買管理規定.pdf', url: null }
-          ]
+          ],
+          [],
+          thinkingTemplates.file_rag.partner
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
@@ -483,7 +580,9 @@ export const scenarios = {
             { id: 'cite_1', type: 'document', source: '2025_事業計画案.docx', url: null },
             { id: 'cite_2', type: 'rag', source: 'プロジェクト完了報告書_ChatBot2023.pdf', url: null },
             { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' }
-          ]
+          ],
+          [],
+          thinkingTemplates.full.efficient
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
@@ -509,7 +608,9 @@ export const scenarios = {
             { id: 'cite_1', type: 'document', source: '2025_事業計画案.docx', url: null },
             { id: 'cite_2', type: 'rag', source: 'プロジェクト完了報告書_ChatBot2023.pdf', url: null },
             { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' }
-          ]
+          ],
+          [],
+          thinkingTemplates.full.partner
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
@@ -525,7 +626,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: styleTemplates.fast_pure.efficient
+        answer: createMockJsonCodeBlock(styleTemplates.fast_pure.efficient, [], [], thinkingTemplates.fast_pure.efficient)
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -534,7 +635,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: styleTemplates.fast_pure.partner
+        answer: createMockJsonCodeBlock(styleTemplates.fast_pure.partner, [], [], thinkingTemplates.fast_pure.partner)
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -551,7 +652,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJson(styleTemplates.fast_file.efficient, [])
+        answer: createMockJson(styleTemplates.fast_file.efficient, [], [], thinkingTemplates.fast_file.efficient)
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -562,7 +663,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJson(styleTemplates.fast_file.partner, [])
+        answer: createMockJson(styleTemplates.fast_file.partner, [], [], thinkingTemplates.fast_file.partner)
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
