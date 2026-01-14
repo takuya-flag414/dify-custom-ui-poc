@@ -30,7 +30,7 @@ const itemVariants = {
 
 // 検索モード設定のマッピング（ContextSelectorのMODESに対応）
 const MODE_SETTINGS = {
-    standard: { ragEnabled: false, webMode: 'auto' },
+    standard: { ragEnabled: 'auto', webMode: 'auto' },
     fast: { ragEnabled: false, webMode: 'off' },
     hybrid: { ragEnabled: true, webMode: 'auto' },
     enterprise: { ragEnabled: true, webMode: 'off' },

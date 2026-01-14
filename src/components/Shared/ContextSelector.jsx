@@ -87,9 +87,9 @@ const MODES = [
     {
         id: 'standard',
         label: 'オート',
-        desc: 'AIが状況に応じて判断します',
+        desc: 'AIがRAGとWeb検索の必要性を判断します',
         icon: <SparklesIcon />,
-        settings: { ragEnabled: false, webMode: 'auto' },
+        settings: { ragEnabled: 'auto', webMode: 'auto' },
         colorClass: 'mode-standard',
         isDefault: true
     },
@@ -134,11 +134,16 @@ const ContextSelector = ({ settings, onSettingsChange }) => {
 
     const currentModeId = useMemo(() => {
         const { ragEnabled, webMode } = settings;
-        if (ragEnabled && webMode !== 'off') return 'hybrid';
-        if (ragEnabled && webMode === 'off') return 'enterprise';
-        if (!ragEnabled && webMode === 'force') return 'deep';
-        if (!ragEnabled && webMode === 'auto') return 'standard';
-        return 'fast';
+        // 'auto' モード判定を最優先
+        if (ragEnabled === 'auto' && webMode === 'auto') return 'standard';
+        // 明示的にtrueの場合
+        if (ragEnabled === true && webMode !== 'off') return 'hybrid';
+        if (ragEnabled === true && webMode === 'off') return 'enterprise';
+        // 明示的にfalseの場合
+        if (ragEnabled === false && webMode === 'force') return 'deep';
+        if (ragEnabled === false && webMode === 'off') return 'fast';
+        // フォールバック
+        return 'standard';
     }, [settings]);
 
     const handleModeSelect = (modeId) => {

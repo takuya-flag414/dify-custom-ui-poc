@@ -62,7 +62,7 @@ export const ChatServiceAdapter = {
     if (mockMode === 'FE') {
       const generator = new MockStreamGenerator();
 
-      const useRag = searchSettings?.ragEnabled;
+      const useRag = searchSettings?.ragEnabled === true || searchSettings?.ragEnabled === 'auto';
       const useWeb = searchSettings?.webMode !== 'off';
       const hasFile = files.length > 0;
 
@@ -84,12 +84,12 @@ export const ChatServiceAdapter = {
       // ★AIスタイルに基づいてシナリオを選択
       const aiStyle = promptSettings?.aiStyle || 'partner';
       const scenarioData = scenarios[scenarioKey] || scenarios['pure'];
-      
+
       // 新形式（スタイル別オブジェクト）と旧形式（配列）の両方に対応
       const baseScenario = Array.isArray(scenarioData)
         ? scenarioData  // 旧形式（後方互換）
         : (scenarioData[aiStyle] || scenarioData['partner']); // 新形式
-      
+
       let targetScenario = [];
 
       if (hasFile) {
@@ -146,7 +146,7 @@ export const ChatServiceAdapter = {
     const requestBody = {
       inputs: {
         isDebugMode: mockMode === 'BE',
-        rag_enabled: searchSettings?.ragEnabled ? 'true' : 'false',
+        rag_enabled: searchSettings?.ragEnabled === 'auto' ? 'auto' : (searchSettings?.ragEnabled ? 'true' : 'false'),
         web_search_mode: searchModeValue,
         search_mode: searchModeValue === 'force' ? 'force' : 'auto',
         domain_filter: domainFilterString,

@@ -88,19 +88,26 @@ const getModeInfo = (settings) => {
   const filterCount = domainFilters?.length || 0;
   const suffix = filterCount > 0 ? ` (${filterCount})` : '';
 
-  if (ragEnabled && webMode !== 'off') {
+  // 'auto'モード判定を最優先
+  if (ragEnabled === 'auto' && webMode === 'auto') {
+    return { label: `オート${suffix}`, class: 'mode-standard', icon: <SparklesIcon /> };
+  }
+  // 明示的にtrueの場合
+  if (ragEnabled === true && webMode !== 'off') {
     return { label: `ハイブリッド${suffix}`, class: 'mode-hybrid', icon: <RocketLaunchIcon /> };
   }
-  if (ragEnabled) {
+  if (ragEnabled === true) {
     return { label: '社内データ', class: 'mode-enterprise', icon: <BuildingOfficeIcon /> };
   }
+  // webMode判定
   if (webMode === 'force') {
     return { label: `Web検索${suffix}`, class: 'mode-deep', icon: <GlobeAltIcon /> };
   }
-  if (webMode === 'auto') {
-    return { label: `オート${suffix}`, class: 'mode-standard', icon: <SparklesIcon /> };
+  if (webMode === 'off') {
+    return { label: 'スピード', class: 'mode-fast', icon: <ZapIcon /> };
   }
-  return { label: 'スピード', class: 'mode-fast', icon: <ZapIcon /> };
+  // フォールバック
+  return { label: `オート${suffix}`, class: 'mode-standard', icon: <SparklesIcon /> };
 };
 
 // --- Main Component ---

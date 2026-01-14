@@ -120,18 +120,39 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                             {steps.map((step, index) => {
                                 // アイコンの取得
                                 const StepIcon = Icons[step.iconType] || Icons.default;
+                                const hasDetail = step.thinking || step.resultValue;
 
                                 return (
-                                    <div key={step.id || index} className={`thinking-step-item ${step.status}`}>
-                                        <div className="step-icon-column">
-                                            {/* ステータスに応じたアイコン表示 */}
-                                            <div className={`step-icon-circle ${step.status}`}>
-                                                {StepIcon}
+                                    <div key={step.id || index} className="thinking-step-wrapper">
+                                        <div className={`thinking-step-item ${step.status}`}>
+                                            <div className="step-icon-column">
+                                                {/* ステータスに応じたアイコン表示 */}
+                                                <div className={`step-icon-circle ${step.status}`}>
+                                                    {StepIcon}
+                                                </div>
+                                                {/* 線 (最後の要素以外) */}
+                                                {index !== steps.length - 1 && <div className="step-line"></div>}
                                             </div>
-                                            {/* 線 (最後の要素以外) */}
-                                            {index !== steps.length - 1 && <div className="step-line"></div>}
+                                            <span className="step-title">{step.title}</span>
                                         </div>
-                                        <span className="step-title">{step.title}</span>
+
+                                        {/* ★追加: ステップ詳細（thinking + result）の表示 */}
+                                        {hasDetail && step.status === 'done' && (
+                                            <div className="step-detail-container">
+                                                {step.thinking && (
+                                                    <div className="step-thinking-row">
+                                                        <span className="step-thinking-icon">🧠</span>
+                                                        <span className="step-thinking-text">{step.thinking}</span>
+                                                    </div>
+                                                )}
+                                                {step.resultLabel && step.resultValue && (
+                                                    <div className="step-result-row">
+                                                        <span className="step-result-label">{step.resultLabel}:</span>
+                                                        <span className="step-result-value">{step.resultValue}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}

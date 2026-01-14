@@ -61,7 +61,7 @@ const ChatArea = (props) => {
             'rag_only': { ragEnabled: true, webMode: 'off' },
             'web_only': { ragEnabled: false, webMode: 'force' },
             'hybrid': { ragEnabled: true, webMode: 'auto' },
-            'standard': { ragEnabled: false, webMode: 'auto' },
+            'standard': { ragEnabled: 'auto', webMode: 'auto' },
             'fast': { ragEnabled: false, webMode: 'off' }
           };
           const newSettings = modeSettings[action.payload.mode];

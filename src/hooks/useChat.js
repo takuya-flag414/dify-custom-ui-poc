@@ -6,11 +6,12 @@ import { scenarioSuggestions } from '../mocks/scenarios';
 import { ChatServiceAdapter } from '../services/ChatServiceAdapter';
 import { fetchMessagesApi, fetchSuggestionsApi, stopGenerationApi } from '../api/dify';
 import { parseLlmResponse } from '../utils/responseParser';
+import { extractJsonFromLlmOutput } from '../utils/llmOutputParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../utils/citationMapper';
 import { createConfigError } from '../utils/errorHandler';
 
 const DEFAULT_SEARCH_SETTINGS = {
-  ragEnabled: false,
+  ragEnabled: 'auto',
   webMode: 'auto',
   domainFilters: []
 };
@@ -455,7 +456,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
     // ★ワークフローログ: リクエスト開始
     addLog(`[Workflow] === 新規リクエスト開始 ===`, 'info');
-    addLog(`[Workflow] 検索モード: Web=${currentSettings.webMode}, RAG=${currentSettings.ragEnabled ? 'ON' : 'OFF'}`, 'info');
+    const ragLabel = currentSettings.ragEnabled === 'auto' ? 'AUTO' : (currentSettings.ragEnabled ? 'ON' : 'OFF');
+    addLog(`[Workflow] 検索モード: Web=${currentSettings.webMode}, RAG=${ragLabel}`, 'info');
     addLog(`[Workflow] ユーザー入力: ${text}`, 'info');
     if (displayFiles.length > 0) {
       addLog(`[Workflow] 添付ファイル: ${displayFiles.map(f => f.name).join(', ')}`, 'info');
@@ -683,24 +685,101 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                 if (nodeId) tracker.markNodeEnd(nodeId);
 
-                // クエリ書き換え結果のキャプチャ
+                // ★改善: LLM_Query_Rewrite のJSON出力をパースしてログ記録 + UIに反映
                 if (title === 'LLM_Query_Rewrite') {
-                  const generatedText = outputs?.text || outputs?.answer;
-                  if (generatedText) {
-                    capturedOptimizedQuery = generatedText.trim();
-                    addLog(`[Workflow] 最適化クエリ: ${capturedOptimizedQuery}`, 'info');
+                  const rawText = outputs?.text;
+                  const parsedJson = extractJsonFromLlmOutput(rawText);
+                  if (parsedJson) {
+                    capturedOptimizedQuery = parsedJson.optimized_query || '';
+                    addLog(`[LLM_Query_Rewrite] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
+                    addLog(`[LLM_Query_Rewrite] optimized_query: ${parsedJson.optimized_query || 'N/A'}`, 'info');
+
+                    // ★追加: thoughtProcessにthinkingと結果を追加
+                    setStreamingMessage(prev => prev ? {
+                      ...prev,
+                      thoughtProcess: prev.thoughtProcess.map(t =>
+                        t.id === nodeId ? {
+                          ...t,
+                          status: 'done',
+                          thinking: parsedJson.thinking || '',
+                          resultLabel: '最適化クエリ',
+                          resultValue: parsedJson.optimized_query || ''
+                        } : t
+                      )
+                    } : prev);
+                  } else if (rawText) {
+                    // パース失敗時はRAW出力をログ
+                    capturedOptimizedQuery = rawText.trim();
+                    addLog(`[LLM_Query_Rewrite] RAW出力: ${rawText}`, 'warn');
+                    // ステータスのみ更新
+                    setStreamingMessage(prev => prev ? {
+                      ...prev,
+                      thoughtProcess: prev.thoughtProcess.map(t =>
+                        t.id === nodeId ? { ...t, status: 'done' } : t
+                      )
+                    } : prev);
+                  }
+                }
+
+                // ★改善: LLM_Intent_Analysis のJSON出力をパースしてログ記録 + UIに反映
+                if (title === 'LLM_Intent_Analysis') {
+                  const rawText = outputs?.text;
+                  const parsedJson = extractJsonFromLlmOutput(rawText);
+                  if (parsedJson) {
+                    addLog(`[LLM_Intent_Analysis] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
+                    addLog(`[LLM_Intent_Analysis] category: ${parsedJson.category || 'N/A'}`, 'info');
+                    addLog(`[LLM_Intent_Analysis] confidence: ${parsedJson.confidence || 'N/A'}`, 'info');
+
+                    // ★追加: カテゴリーを日本語に変換
+                    let categoryLabel = parsedJson.category || '';
+                    const categoryMap = {
+                      'SEARCH': 'Web検索モード',
+                      'CHAT': '雑談モード',
+                      'LOGICAL': '論理回答モード',
+                      'ANSWER': '内部知識モード',
+                      'HYBRID': 'ハイブリッド検索モード'
+                    };
+                    const displayCategory = categoryMap[categoryLabel] || categoryLabel;
+                    const confidenceText = parsedJson.confidence ? ` (信頼度: ${parsedJson.confidence})` : '';
+
+                    // ★追加: thoughtProcessにthinkingと結果を追加
+                    setStreamingMessage(prev => prev ? {
+                      ...prev,
+                      thoughtProcess: prev.thoughtProcess.map(t =>
+                        t.id === nodeId ? {
+                          ...t,
+                          title: `判定: ${displayCategory}`,
+                          status: 'done',
+                          thinking: parsedJson.thinking || '',
+                          resultLabel: '分類',
+                          resultValue: `${displayCategory}${confidenceText}`
+                        } : t
+                      )
+                    } : prev);
+                  } else if (rawText) {
+                    addLog(`[LLM_Intent_Analysis] RAW出力: ${rawText}`, 'warn');
+                    // 旧フォーマットのフォールバック
+                    const decision = rawText.trim();
+                    let resultText = '';
+                    if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
+                    else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
+                    else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
+                    else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
+                    else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
+                    setStreamingMessage(prev => prev ? {
+                      ...prev,
+                      thoughtProcess: prev.thoughtProcess.map(t =>
+                        t.id === nodeId ? { ...t, title: resultText || t.title, status: 'done' } : t
+                      )
+                    } : prev);
                   }
                 }
 
                 // ★ワークフローログ: 中間結果の記録
                 const outputText = outputs?.text;
                 if (outputText && title) {
-                  // 意図分析結果
-                  if (title === 'LLM_Intent_Analysis') {
-                    addLog(`[Workflow] 意図分析結果: ${outputText}`, 'info');
-                  }
                   // Perplexity検索結果
-                  else if (title === 'TOOL_Perplexity_Search') {
+                  if (title === 'TOOL_Perplexity_Search') {
                     addLog(`[Workflow] Perplexity結果:\n${outputText}`, 'info');
                   }
                   // 回答生成LLMの結果
@@ -713,27 +792,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   }
                 }
 
-                // 意図分析の結果を表示に反映
-                if (title === 'LLM_Intent_Analysis' && outputs?.text) {
-                  const decision = outputs.text.trim();
-                  let resultText = '';
-                  if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
-                  else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
-                  else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
-                  else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
-                  else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
-                  if (resultText && nodeId) {
-                    // ★変更: streamingMessage stateを直接更新
-                    setStreamingMessage(prev => prev ? {
-                      ...prev,
-                      thoughtProcess: prev.thoughtProcess.map(t =>
-                        t.id === nodeId ? { ...t, title: resultText, status: 'done' } : t
-                      )
-                    } : prev);
-                  }
-                } else if (nodeId) {
-                  // その他のノードは完了ステータスに更新
-                  // ★変更: streamingMessage stateを直接更新
+                // その他のノードは完了ステータスに更新（LLM_Query_Rewrite, LLM_Intent_Analysis以外）
+                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis') {
                   setStreamingMessage(prev => prev ? {
                     ...prev,
                     thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
@@ -760,11 +820,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                       const structuralJson = trimmed.startsWith('{') ||
                         trimmed.startsWith('```json') ||
                         trimmed.startsWith('```\n{');
-                      
+
                       // 2. フィールド検知: thinking/answerフィールドの有無
                       const hasThinkingField = trimmed.includes('"thinking"');
                       const hasAnswerField = trimmed.includes('"answer"');
-                      
+
                       if (structuralJson || hasThinkingField || hasAnswerField) {
                         protocolMode = 'JSON';
                       } else {

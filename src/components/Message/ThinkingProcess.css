@@ -344,3 +344,109 @@
         animation: none;
     }
 }
+
+/* ========================================
+   Step Detail Container (Thinking + Result)
+   Apple Intelligence Style (DESIGN_RULE.md準拠)
+   ======================================== */
+.thinking-step-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.step-detail-container {
+    margin: 4px 0 10px 44px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    
+    /* Apple Intelligence淡いグラデーション */
+    background: linear-gradient(135deg,
+        rgba(0, 255, 255, 0.02) 0%,
+        rgba(255, 0, 255, 0.02) 50%,
+        rgba(0, 122, 255, 0.02) 100%);
+    border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.05));
+    
+    /* Glassmorphism */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    
+    /* Spring animation */
+    animation: step-detail-appear 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes step-detail-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.step-thinking-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.step-thinking-icon {
+    flex-shrink: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.step-thinking-text {
+    font-size: var(--text-caption, 12px);
+    color: var(--color-text-sub, #6B7280);
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.step-result-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    font-size: var(--text-caption, 12px);
+    padding-top: 6px;
+    border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.05));
+}
+
+.step-result-label {
+    color: var(--color-text-muted, #9CA3AF);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.step-result-value {
+    color: var(--color-text-main, #1F2937);
+    font-weight: 600;
+    word-break: break-word;
+}
+
+/* ダークモード対応 */
+[data-theme='dark'] .step-detail-container {
+    background: linear-gradient(135deg,
+        rgba(0, 255, 255, 0.04) 0%,
+        rgba(255, 0, 255, 0.04) 50%,
+        rgba(0, 122, 255, 0.04) 100%);
+    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+[data-theme='dark'] .step-result-row {
+    border-top-color: var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+[data-theme='dark'] .step-result-value {
+    color: var(--color-text-main, #F9FAFB);
+}
+
+/* Reduced Motion対応 */
+@media (prefers-reduced-motion: reduce) {
+    .step-detail-container {
+        animation: none;
+    }
+}
