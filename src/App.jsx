@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
 import './index.css';
@@ -12,6 +12,7 @@ import SettingsArea from './components/Settings/SettingsArea';
 import ApiConfigModal from './components/Shared/ApiConfigModal';
 import InspectorPanel from './components/Inspector/InspectorPanel';
 import ArtifactPanel from './components/Artifacts/ArtifactPanel';
+import SystemBootScreen from './components/Loading/SystemBootScreen';
 
 import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';
@@ -28,6 +29,12 @@ import { useOnboarding } from './hooks/useOnboarding';
 import OnboardingScreen from './components/Onboarding/OnboardingScreen';
 import { FEATURE_FLAGS } from './config/featureFlags';
 
+// Phase A: 認証機能
+import { useAuth } from './context/AuthContext';
+import LoginScreen from './components/Auth/LoginScreen';
+
+// generateUUID は AuthService に移管されたため削除
+// 後方互換のため残存（将来削除予定）
 const generateUUID = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -39,6 +46,9 @@ const generateUUID = () => {
 };
 
 function App() {
+  // ★ Phase A: 認証状態を取得
+  const { user: authUser, isAuthenticated, isLoading: isAuthLoading, logout, isNewUser } = useAuth();
+
   const [mockMode, setMockMode] = useState('OFF');
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState('chat');
@@ -46,43 +56,37 @@ function App() {
   // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // 【修正】初期化時に関数を実行してIDとRoleを即時決定する
+  // ★ Phase A: currentUser を useAuth から取得したユーザー情報で構成
+  // 認証済みの場合は authUser を使用、未認証の場合はフォールバック
   const [currentUser, setCurrentUser] = useState(() => {
-    // 1. User ID Initialization
-    let storedUserId = null;
-    try {
-      storedUserId = localStorage.getItem('app_user_id');
-    } catch (e) {
-      console.error('Failed to read user id', e);
-    }
-
-    if (!storedUserId) {
-      storedUserId = `user-${generateUUID().slice(0, 8)}`;
-      try {
-        localStorage.setItem('app_user_id', storedUserId);
-      } catch (e) {
-        console.error('Failed to save user id', e);
-      }
-      console.log('[App] New User ID generated:', storedUserId);
-    } else {
-      console.log('[App] User ID loaded:', storedUserId);
-    }
-
-    // 2. Role Initialization
+    // Role Initialization（デバッグ用の役割設定は維持）
     let storedRole = 'user';
     try {
       storedRole = localStorage.getItem('app_debug_role') || 'user';
     } catch (e) {
       console.error('Failed to read role', e);
     }
-    console.log('[App] Debug Role loaded:', storedRole);
-
     return {
-      id: storedUserId,
+      id: null,
       role: storedRole,
-      name: 'Loading...', // useSettingsで上書きされるため表示されません
+      name: 'Loading...',
     };
   });
+
+  // authUser が変更されたら currentUser を更新
+  useEffect(() => {
+    if (authUser) {
+      console.log('[App] authUser data:', JSON.stringify(authUser, null, 2));
+      setCurrentUser(prev => ({
+        id: authUser.userId,
+        role: authUser.role || prev.role,
+        name: authUser.displayName || 'User',
+        email: authUser.email,         // ★追加: アカウント情報表示用
+        createdAt: authUser.createdAt, // ★追加: アカウント情報表示用
+      }));
+      console.log('[App] User authenticated:', authUser.email);
+    }
+  }, [authUser]);
 
   // 【削除】useEffect内でのUser ID生成ロジックは削除（上記のuseState初期化に移動済み）
 
@@ -93,10 +97,17 @@ function App() {
     addLog(`[App] Role changed to ${newRole}`, 'info');
   };
 
-  const { settings, updateSettings, isLoaded: isSettingsLoaded } = useSettings(currentUser.id);
+  // ★ Phase A: authUser.preferencesをuseSettingsに渡し、アカウント設定を反映
+  const { settings, updateSettings, isLoaded: isSettingsLoaded } = useSettings(authUser?.userId, authUser?.preferences);
 
   // テーマをDOMに適用
-  useTheme(settings?.general?.theme || 'system');
+  // ★ Loading中は前回のテーマ設定（app_last_theme）を優先使用し、ちらつきを防止
+  const effectiveTheme = useMemo(() => {
+    if (isSettingsLoaded) return settings?.general?.theme || 'system';
+    return localStorage.getItem('app_last_theme') || 'system';
+  }, [isSettingsLoaded, settings?.general?.theme]);
+
+  useTheme(effectiveTheme);
 
   // Inspector Panel 状態管理
   const inspector = useInspector();
@@ -112,7 +123,8 @@ function App() {
   } = useTutorial();
 
   // オンボーディング（初回セットアップウィザード）
-  const onboardingState = useOnboarding();
+  // ★ Phase A: ユーザーIDごとにオンボーディング完了を管理
+  const onboardingState = useOnboarding(authUser?.userId);
 
   // ArtifactPanelを開く（Inspectorから独立）
   const openArtifact = (artifact) => {
@@ -165,7 +177,7 @@ function App() {
     handleDeleteConversation,
     handleRenameConversation,
     handleConversationUpdated,
-  } = useConversations(mockMode, currentUser.id, addLog, apiKey, apiUrl);
+  } = useConversations(mockMode, authUser?.userId, addLog, apiKey, apiUrl);
 
   const {
     messages,
@@ -185,7 +197,7 @@ function App() {
     handleRegenerate
   } = useChat(
     mockMode,
-    currentUser.id,
+    authUser?.userId,
     conversationId,
     addLog,
     handleConversationCreated,
@@ -239,6 +251,15 @@ function App() {
   const appStyle = {
     '--sidebar-width': isSidebarCollapsed ? '68px' : '260px',
   };
+
+  // ★ Phase A: 表示名の決定ロジック
+  // settings.profile.displayName がデフォルト値"User"の場合は authUser の displayName を優先
+  const effectiveDisplayName = useMemo(() => {
+    const savedName = settings?.profile?.displayName;
+    const authName = currentUser?.name;
+    const isCustomSavedName = savedName && savedName !== 'User';
+    return isCustomSavedName ? savedName : (authName || savedName || 'User');
+  }, [settings?.profile?.displayName, currentUser?.name]);
 
   const pageTransitionVariants = {
     initial: {
@@ -304,11 +325,25 @@ function App() {
   // 初期状態の判定（グラデーション背景表示用）
   const isInitialState = messages.length === 0 && !isHistoryLoading && currentView === 'chat';
 
+  // ★ Phase A: 認証ローディング中
+  if (isAuthLoading) {
+    return <SystemBootScreen />;
+  }
+
+  // ★ Phase A: 未認証の場合はログイン画面を表示
+  if (!isAuthenticated) {
+    return (
+      <AnimatePresence mode="wait">
+        <LoginScreen key="login" />
+      </AnimatePresence>
+    );
+  }
+
   return (
     <div className={`app${isInitialState ? ' app-initial' : ''}`} style={appStyle}>
-      {/* オンボーディングウィザード（初回起動時のみ表示） - 全画面没入型 */}
+      {/* オンボーディングウィザード（新規アカウント作成時のみ表示） */}
       <AnimatePresence>
-        {!onboardingState.isCompleted && (
+        {isNewUser && !onboardingState.isCompleted && (
           <OnboardingScreen
             {...onboardingState}
             updateSettings={updateSettings}
@@ -316,8 +351,8 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* アプリ本体（isAppReadyがtrueになってから描画開始） */}
-      {onboardingState.isAppReady && (
+      {/* アプリ本体（isNewUserでなければ即座に表示、isNewUserならisAppReady後に表示） */}
+      {(!isNewUser || onboardingState.isAppReady) && (
         <>
           <TutorialOverlay
             isActive={isTutorialActive}
@@ -410,7 +445,7 @@ function App() {
                             setSearchSettings={setSearchSettings}
                             onOpenConfig={() => setIsConfigModalOpen(true)}
                             onOpenArtifact={openArtifact}
-                            userName={settings?.profile?.displayName || 'User'}
+                            userName={effectiveDisplayName}
                             onStartTutorial={startTutorial}
                             stopGeneration={stopGeneration}
                             handleEdit={handleEdit}
@@ -438,6 +473,10 @@ function App() {
                             setMockMode={handleMockModeChange}
                             onOpenApiConfig={() => setIsConfigModalOpen(true)}
                             onResetOnboarding={handleResetOnboarding}
+                            onLogout={() => {
+                              logout();
+                              setIsSettingsOpen(false);
+                            }}
                           />
                         </motion.div>
                       )}
@@ -489,6 +528,10 @@ function App() {
                 setMockMode={handleMockModeChange}
                 onOpenApiConfig={() => setIsConfigModalOpen(true)}
                 onResetOnboarding={handleResetOnboarding}
+                onLogout={() => {
+                  logout();
+                  setIsSettingsOpen(false);
+                }}
                 isModal={true}
                 onClose={() => setIsSettingsOpen(false)}
               />

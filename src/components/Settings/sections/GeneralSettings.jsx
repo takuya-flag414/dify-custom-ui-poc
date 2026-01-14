@@ -4,7 +4,8 @@ import {
   Moon, Sun, Monitor,
   RotateCcw, Type, Keyboard,
   MousePointer2, Laptop
-} from 'lucide-react';
+}
+  from 'lucide-react';
 import { MacSettingsSection, MacSettingsRow, MacSelect } from './MacSettingsComponents';
 import './SettingsCommon.css';
 import './GeneralSettings.css';
@@ -92,6 +93,8 @@ const GeneralSettings = ({ settings, onUpdateSettings, onResetOnboarding }) => {
           />
         </MacSettingsRow>
       </MacSettingsSection>
+
+
 
       {/* === Section: Input === */}
       <MacSettingsSection title="Input">

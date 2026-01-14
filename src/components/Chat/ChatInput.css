@@ -1,91 +1,123 @@
-/* --- Main Container: Floating Capsule - V2 --- */
-.input-capsule-container {
+/* src/components/Chat/ChatInput.css */
+
+/* --- Container: Intelligent HUD --- */
+.chat-input-container {
     width: 100%;
-    max-width: 800px;
+    max-width: 768px;
     margin: 0 auto;
-    background-color: var(--color-bg-input-capsule);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-lg);
-    border-radius: var(--radius-3xl);
-    /* 24px */
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0 24px;
     position: relative;
     z-index: 20;
 }
 
-.input-capsule-container:focus-within {
-    background-color: var(--color-bg-surface);
-    box-shadow: var(--glow-primary);
-    transform: scale(1.01);
-    border-color: oklch(60% 0.2 250 / 0.3);
+.chat-input-container-centered {
+    width: 100%;
+    max-width: 768px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 20;
 }
 
-/* Drag & Drop Active State */
-.input-capsule-container.dragging {
-    background-color: var(--color-primary-bg);
-    border: 2px dashed var(--color-primary);
-    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
-    transform: scale(1.01);
+/* レスポンシブ: 768px以下ではフル幅 */
+@media (max-width: 768px) {
+
+    .chat-input-container,
+    .chat-input-container-centered {
+        max-width: 100%;
+        padding: 0 16px;
+    }
 }
 
-.input-capsule-container.dragging .input-textarea,
-.input-capsule-container.dragging .right-controls,
-.input-capsule-container.dragging .action-btn-circle {
-    opacity: 0.6;
-    pointer-events: none;
+/* 
+ * The Monolithic HUD Container 
+ * Uses Framer Motion "layout" for smooth resizing
+ */
+.chat-input-hud-container {
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-hud-bg);
+    backdrop-filter: var(--glass-hud-blur);
+    -webkit-backdrop-filter: var(--glass-hud-blur);
+    border: 1px solid var(--glass-hud-border);
+    box-shadow: var(--glass-hud-shadow);
+    border-radius: 26px;
+    /* Slightly larger radius for Sequoia feel */
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    overflow: visible;
+    /* Changed from hidden to allow popover to display outside container */
+    /* Ensure hardware acceleration for smooth blur */
+    transform: translateZ(0);
 }
 
-/* --- File Tray --- */
+.chat-input-hud-container:focus-within {
+    border-color: var(--color-primary);
+    box-shadow:
+        0 0 0 3px rgba(0, 122, 255, 0.15),
+        0 20px 50px rgba(0, 0, 0, 0.12);
+}
+
+/* Drag & Drop State */
+.chat-input-hud-container.dragging {
+    background: rgba(239, 246, 255, 0.9);
+    /* Blue tint */
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+/* Privacy Warning State */
+.chat-input-hud-container.privacy-warning {
+    border-color: var(--color-warning-amber);
+    box-shadow:
+        0 20px 50px rgba(245, 158, 11, 0.2),
+        inset 0 0 0 1px var(--color-warning-amber);
+}
+
+/* --- 1. File Tray Area --- */
+.file-tray-wrapper {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.02);
+    /* Slight darkening for tray area */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 .file-tray {
     display: flex;
     gap: 8px;
-    padding: 12px 16px 4px 16px;
+    padding: 12px 16px;
     overflow-x: auto;
     width: 100%;
-    scrollbar-width: none;
+    /* Rubber banding scroll effect */
+    overscroll-behavior-x: contain;
 }
 
-.file-tray::-webkit-scrollbar {
-    display: none;
-}
-
+/* File Card Styles (inherited/adapted) */
 .file-card {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 10px;
-    background-color: var(--color-bg-sidebar);
-    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
     font-size: 12px;
     color: var(--color-text-main);
     user-select: none;
     max-width: 220px;
-    animation: slideUp 0.2s ease-out;
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    /* overflow: hidden を削除 - ポップオーバーが正しく表示されるように */
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .file-card:hover {
-    background-color: var(--color-border-strong);
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.file-card.pending {
-    background-color: #EFF6FF;
-}
-
-/* File Card Content (Name + Status) */
 .file-card-content {
     display: flex;
     flex-direction: column;
-    flex: 1;
     min-width: 0;
-    gap: 2px;
 }
 
 .file-card-name {
@@ -95,730 +127,183 @@
     font-weight: 500;
 }
 
-/* ========================================
-   File Scan States (The Intelligent Guardian)
-   ======================================== */
-
-/* Scanning State - Border Animation */
-.file-card.scanning {
-    opacity: 0.8;
-    pointer-events: none;
-}
-
-.file-card.scanning::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 10px;
-    background: conic-gradient(from 0deg,
-            transparent 0deg,
-            var(--color-primary) 60deg,
-            transparent 120deg);
-    animation: scan-border-rotate 1s linear infinite;
-    z-index: -1;
-}
-
-.file-card.scanning::after {
-    content: '';
-    position: absolute;
-    inset: 1px;
-    border-radius: 7px;
-    background: var(--color-bg-sidebar);
-    z-index: -1;
-}
-
-@keyframes scan-border-rotate {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 .file-scan-status {
     font-size: 10px;
     color: var(--color-primary);
-    font-weight: 500;
 }
 
-/* Warning State - Amber Glow */
-.file-card.warning {
-    background-color: var(--color-warning-amber-bg);
-    box-shadow:
-        inset 0 0 12px rgba(245, 158, 11, 0.15),
-        0 0 8px rgba(245, 158, 11, 0.25);
-    border: 1px solid var(--color-warning-amber);
-}
-
-.file-card.warning:hover {
-    background-color: rgba(245, 158, 11, 0.15);
-}
-
-.file-warning-status {
-    font-size: 10px;
-    color: var(--color-warning-amber);
-    font-weight: 600;
-}
-
-/* ========================================
-   File Privacy Shield Button (盾ボタン)
-   添付ファイルの機密情報表示用
-   ======================================== */
-
-.file-privacy-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-}
-
-.file-privacy-shield-btn {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    padding: 3px 8px;
-    border-radius: var(--radius-full);
-    background-color: var(--color-warning-amber);
-    color: white;
-    font-size: 10px;
-    font-weight: var(--font-semibold);
-    cursor: pointer;
-    border: none;
-    outline: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    flex-shrink: 0;
-}
-
-.file-privacy-shield-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
-}
-
-.file-privacy-shield-btn:focus-visible {
-    box-shadow: var(--ring-focus);
-}
-
-.file-privacy-shield-btn svg {
-    width: 12px;
-    height: 12px;
-}
-
-.file-privacy-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background-color: white;
-    color: var(--color-warning-amber);
-    font-size: 9px;
-    font-weight: var(--font-bold);
-}
-
-/* File Privacy Popover */
-.file-privacy-popover {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    right: 0;
-    width: 260px;
-    background: var(--color-bg-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-3);
-    z-index: 100;
-    animation: popover-slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: bottom right;
-}
-
-@keyframes popover-slide-up {
-    from {
-        opacity: 0;
-        transform: translateY(4px) scale(0.96);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.file-privacy-filename {
-    font-size: 11px;
-    font-weight: var(--font-medium);
-    color: var(--color-text-sub);
-    margin-bottom: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    background-color: var(--color-bg-sidebar);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Dark Mode - File Privacy */
-[data-theme='dark'] .file-privacy-shield-btn {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme='dark'] .file-privacy-badge {
-    background-color: rgba(255, 255, 255, 0.95);
-}
-
-[data-theme='dark'] .file-privacy-popover {
-    background: var(--color-bg-surface);
-    border-color: var(--color-border-strong);
-}
-
-[data-theme='dark'] .file-privacy-filename {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* ★追加: ファイルアイコンのサイズ指定 (32px = 2rem) */
 .file-tray-icon {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--color-text-sub);
 }
 
 .file-remove-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.06);
-    color: var(--color-text-sub);
     border: none;
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-sub);
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: all 0.2s;
     opacity: 0;
-    pointer-events: none;
-    transform: scale(0.9);
-    margin-left: 2px;
+    /* Hidden by default */
 }
 
 .file-card:hover .file-remove-btn {
     opacity: 1;
-    pointer-events: auto;
-    transform: scale(1);
 }
 
 .file-remove-btn:hover {
-    background-color: var(--color-error);
+    background: var(--color-error);
     color: white;
-    transform: scale(1.1);
 }
 
-/* --- Input Row --- */
-.input-row {
+/* --- 2. Main Input Row --- */
+.input-main-row {
     display: flex;
     align-items: flex-end;
-    padding: 8px 12px;
+    /* Align to bottom as textarea grows */
+    padding: 8px;
+    min-height: 56px;
     gap: 8px;
-    width: 100%;
 }
 
-.action-btn-circle {
-    width: 36px;
-    height: 36px;
+/* Left Actions (Add Button) */
+.input-left-actions {
+    display: flex;
+    align-items: center;
+    padding-bottom: 6px;
+    /* Align with single line text */
+}
+
+.add-file-btn {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--color-text-sub);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    background-color: var(--color-bg-sidebar);
-    color: var(--color-text-main);
     cursor: pointer;
     transition: all 0.2s;
-    flex-shrink: 0;
 }
 
-.action-btn-circle:hover:not(:disabled) {
-    background-color: var(--color-border-strong);
-    transform: scale(1.05);
+.add-file-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
+    transform: rotate(90deg);
+    /* Playful interaction */
 }
 
-.action-btn-circle:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.input-textarea {
+/* Native Textarea (Invisible) */
+.native-textarea {
     flex: 1;
     border: none;
     background: transparent;
-    padding: 9px 4px;
+    padding: 10px 4px;
+    /* Align vertically */
     font-family: var(--font-family-base);
-    font-size: var(--text-body);
-    /* 17px */
+    font-size: 17px;
     line-height: 1.5;
-    letter-spacing: var(--tracking-normal);
     resize: none;
-    max-height: 200px;
     outline: none;
     color: var(--color-text-main);
-    min-height: 36px;
+    max-height: 250px;
 }
 
-.input-textarea::placeholder {
+.native-textarea::placeholder {
     color: var(--color-text-muted);
+    opacity: 0.6;
 }
 
-.right-controls {
+/* Right Controls */
+.input-right-actions {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
 }
 
-/* --- Mode Chip Styles (Updated) --- */
-.mode-chip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+/* Context Pill (Minimalist) */
+.context-pill {
+    width: 32px;
     height: 32px;
-    padding: 0 12px;
-    border-radius: var(--radius-full);
-    /* V2: カプセル型 */
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-    white-space: nowrap;
-}
-
-/* 1. Fast Mode (Amber) */
-.mode-chip.mode-fast {
-    background-color: #FFFBEB;
-    /* amber-50 */
-    color: #D97706;
-    /* amber-600 */
-    border-color: #FEF3C7;
-    /* amber-100 */
-}
-
-.mode-chip.mode-fast:hover {
-    background-color: #FEF3C7;
-    /* V2 マイクロインタラクション */
-    transform: scale(1.02);
-    filter: brightness(1.02);
-}
-
-/* 2. Standard Mode (Gray/Neutral) */
-.mode-chip.mode-standard {
-    background-color: #F3F4F6;
-    /* gray-100 */
-    color: #4B5563;
-    /* gray-600 */
-    border-color: transparent;
-}
-
-.mode-chip.mode-standard:hover {
-    background-color: #E5E7EB;
-    /* V2 マイクロインタラクション */
-    transform: scale(1.02);
-    filter: brightness(1.02);
-}
-
-/* 3. Research (Blue) */
-.mode-chip.mode-deep {
-    background-color: #EFF6FF;
-    /* blue-50 */
-    color: #2563EB;
-    /* blue-600 */
-    border-color: #DBEAFE;
-}
-
-.mode-chip.mode-deep:hover {
-    background-color: #DBEAFE;
-    /* V2 マイクロインタラクション */
-    transform: scale(1.02);
-    filter: brightness(1.02);
-}
-
-/* 4. Enterprise (Green) */
-.mode-chip.mode-enterprise {
-    background-color: #ECFDF5;
-    /* green-50 */
-    color: #059669;
-    /* green-600 */
-    border-color: #D1FAE5;
-}
-
-.mode-chip.mode-enterprise:hover {
-    background-color: #D1FAE5;
-    /* V2 マイクロインタラクション */
-    transform: scale(1.02);
-    filter: brightness(1.02);
-}
-
-/* 5. Hybrid (Purple) */
-.mode-chip.mode-hybrid {
-    background-color: #F5F3FF;
-    /* violet-50 */
-    color: #7C3AED;
-    /* violet-600 */
-    border-color: #EDE9FE;
-}
-
-.mode-chip.mode-hybrid:hover {
-    background-color: #EDE9FE;
-    /* V2 マイクロインタラクション */
-    transform: scale(1.02);
-    filter: brightness(1.02);
-}
-
-
-/* Send Button */
-.send-btn {
-    width: 36px;
-    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
-    background-color: transparent;
-    color: var(--color-text-muted);
+    background: transparent;
     cursor: pointer;
     transition: all 0.2s;
-    flex-shrink: 0;
+    color: var(--color-text-sub);
 }
 
-.send-btn.active {
-    background-color: var(--color-text-main);
-    color: white;
+.context-pill:hover,
+.context-pill.active {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
 }
 
-.send-btn.active:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.context-pill.mode-deep {
+    color: #007AFF;
 }
 
-.send-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.context-pill.mode-enterprise {
+    color: #34C759;
 }
 
+.context-pill.mode-hybrid {
+    color: #AF52DE;
+}
+
+.context-pill.mode-fast {
+    color: #D97706;
+}
+
+.context-pill.mode-standard {
+    color: #4B5563;
+}
+
+/* Disclaimer */
 .input-disclaimer {
     font-size: 11px;
     color: var(--color-text-muted);
     margin-top: 12px;
     text-align: center;
-    opacity: 0.7;
+    opacity: 0.6;
+    font-weight: 400;
 }
 
-/* --- Popover Position --- */
-.input-capsule-container .search-options-popover {
-    left: auto !important;
-    right: 0;
-    bottom: calc(100% + 10px);
-    width: 320px;
-    transform-origin: bottom right;
-    /* 不透明な背景 */
-    background: var(--color-bg-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-lg);
+/* Dark Mode Overrides */
+[data-theme='dark'] .chat-input-hud-container {
+    background: var(--glass-hud-bg);
+    border-color: var(--glass-hud-border);
 }
 
-
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(4px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+[data-theme='dark'] .file-tray-wrapper {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
-/* ========================================
-   Dark Mode Overrides for Mode Chips
-   ======================================== */
-[data-theme='dark'] .mode-chip.mode-fast {
-    background-color: rgba(217, 119, 6, 0.15);
-    border-color: rgba(217, 119, 6, 0.3);
-    color: #FBBF24;
+[data-theme='dark'] .file-card {
+    background-color: rgba(60, 60, 60, 0.5);
+    border-color: rgba(255, 255, 255, 0.05);
 }
 
-[data-theme='dark'] .mode-chip.mode-standard {
-    background-color: rgba(75, 85, 99, 0.2);
-    border-color: rgba(75, 85, 99, 0.4);
-    color: #D1D5DB;
+[data-theme='dark'] .file-card:hover {
+    background-color: rgba(80, 80, 80, 0.8);
 }
 
-[data-theme='dark'] .mode-chip.mode-deep {
-    background-color: rgba(37, 99, 235, 0.15);
-    border-color: rgba(37, 99, 235, 0.3);
-    color: #60A5FA;
-}
-
-[data-theme='dark'] .mode-chip.mode-enterprise {
-    background-color: rgba(5, 150, 105, 0.15);
-    border-color: rgba(5, 150, 105, 0.3);
-    color: #34D399;
-}
-
-[data-theme='dark'] .mode-chip.mode-hybrid {
-    background-color: rgba(124, 58, 237, 0.15);
-    border-color: rgba(124, 58, 237, 0.3);
-    color: #A78BFA;
-}
-
-[data-theme='dark'] .file-card.pending {
-    background-color: rgba(59, 130, 246, 0.15);
-}
-
-[data-theme='dark'] .send-btn.active {
-    background-color: var(--color-primary);
-}
-
-/* ========================================
-   Privacy Warning State (Amber Glow)
-   The Intelligent Guardian 警告表示
-   ======================================== */
-
-/* Warning State on Input Capsule */
-.input-capsule-container.privacy-warning {
-    box-shadow: var(--glow-warning);
-    border-color: var(--color-warning-amber);
-    background-color: var(--color-warning-amber-bg);
-}
-
-.input-capsule-container.privacy-warning:focus-within {
-    box-shadow: var(--glow-warning);
-    border-color: var(--color-warning-amber);
-}
-
-/* Shield Indicator - ボタン化 */
-.privacy-shield-indicator {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: var(--radius-full);
-    background-color: var(--color-warning-amber);
+[data-theme='dark'] .add-file-btn:hover,
+[data-theme='dark'] .context-pill:hover {
+    background-color: rgba(255, 255, 255, 0.1);
     color: white;
-    font-size: var(--text-xs);
-    font-weight: var(--font-semibold);
-    cursor: pointer;
-    border: none;
-    outline: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    flex-shrink: 0;
-}
-
-.privacy-shield-indicator:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.privacy-shield-indicator:focus-visible {
-    box-shadow: var(--ring-focus);
-}
-
-.privacy-shield-indicator svg {
-    width: 14px;
-    height: 14px;
-}
-
-.privacy-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background-color: white;
-    color: var(--color-warning-amber);
-    font-size: 11px;
-    font-weight: var(--font-bold);
-}
-
-/* ========================================
-   Privacy Detail Popover
-   ======================================== */
-
-.privacy-detail-popover {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    right: 0;
-    width: 280px;
-    background: var(--color-bg-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-4);
-    z-index: 60;
-    animation: popover-slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: bottom right;
-}
-
-/* Header */
-.privacy-detail-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: var(--text-sm);
-    font-weight: var(--font-bold);
-    color: var(--color-warning-amber);
-    margin-bottom: var(--space-3);
-    padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.privacy-detail-header svg {
-    width: 18px;
-    height: 18px;
-}
-
-/* List */
-.privacy-detail-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 var(--space-3) 0;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.privacy-detail-list li {
-    padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.privacy-detail-list li:last-child {
-    border-bottom: none;
-}
-
-.privacy-detail-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-}
-
-.privacy-detail-label-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.privacy-detail-label-row::before {
-    content: "•";
-    color: var(--color-warning-amber);
-    font-weight: bold;
-    margin-right: var(--space-2);
-}
-
-.privacy-detail-label {
-    flex: 1;
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--color-text-main);
-}
-
-.privacy-detail-count {
-    color: var(--color-text-muted);
-    font-size: var(--text-xs);
-}
-
-.privacy-detail-matches {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1);
-    padding-left: var(--space-4);
-}
-
-.privacy-detail-value {
-    display: inline-block;
-    padding: 2px 6px;
-    background-color: var(--color-warning-amber-bg);
-    border-radius: var(--radius-sm);
-    font-size: 11px;
-    font-family: 'SF Mono', 'Consolas', monospace;
-    color: var(--color-text-main);
-    border: 1px solid var(--color-warning-amber);
-}
-
-/* Footer */
-.privacy-detail-footer {
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-    text-align: center;
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--color-border);
-}
-
-/* ========================================
-   Dark Mode - Privacy Warning
-   ======================================== */
-[data-theme='dark'] .privacy-shield-indicator {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme='dark'] .privacy-badge {
-    background-color: rgba(255, 255, 255, 0.95);
-}
-
-[data-theme='dark'] .privacy-detail-popover {
-    background: var(--color-bg-surface);
-    border-color: var(--color-border-strong);
-}
-
-[data-theme='dark'] .privacy-detail-value {
-    background-color: var(--color-warning-amber-bg);
-    border-color: var(--color-warning-amber);
-}
-
-/* ========================================
-   Stop Button Styles (生成停止)
-   DESIGN_RULE準拠: AI Glow効果
-   ======================================== */
-
-.send-btn.stop-mode {
-    background: linear-gradient(135deg, #EF4444, #DC2626);
-    color: white;
-    box-shadow:
-        0 0 15px rgba(239, 68, 68, 0.4),
-        0 0 30px rgba(239, 68, 68, 0.2);
-    animation: stop-pulse 2s ease-in-out infinite;
-}
-
-.send-btn.stop-mode:hover {
-    transform: scale(1.08);
-    box-shadow:
-        0 0 20px rgba(239, 68, 68, 0.5),
-        0 0 40px rgba(239, 68, 68, 0.3);
-}
-
-@keyframes stop-pulse {
-
-    0%,
-    100% {
-        box-shadow:
-            0 0 15px rgba(239, 68, 68, 0.4),
-            0 0 30px rgba(239, 68, 68, 0.2);
-    }
-
-    50% {
-        box-shadow:
-            0 0 20px rgba(239, 68, 68, 0.5),
-            0 0 40px rgba(239, 68, 68, 0.3);
-    }
-}
-
-/* Dark mode adjustments */
-[data-theme='dark'] .send-btn.stop-mode {
-    box-shadow:
-        0 0 20px rgba(239, 68, 68, 0.5),
-        0 0 40px rgba(239, 68, 68, 0.25);
 }

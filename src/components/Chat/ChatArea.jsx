@@ -1,5 +1,5 @@
 // src/components/Chat/ChatArea.jsx
-import React, { useCallback } from 'react'; // ★追加: useCallback
+import React, { useCallback } from 'react';
 import '../../App.css';
 import './ChatArea.css';
 
@@ -7,11 +7,12 @@ import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
 import HistorySkeleton from './HistorySkeleton';
 import WelcomeScreen from './WelcomeScreen';
+import ScrollToBottomButton from './ScrollToBottomButton';
+
 
 const ChatArea = (props) => {
   const {
     messages,
-    // ★追加: ストリーミング中メッセージを別途受け取る（パフォーマンス最適化）
     streamingMessage,
     isGenerating,
     isHistoryLoading,
@@ -24,41 +25,44 @@ const ChatArea = (props) => {
     onOpenArtifact,
     userName,
     onStartTutorial,
-    // ★追加: Phase 1.5 - 停止・編集・再送信機能
     stopGeneration,
     handleEdit,
-    handleRegenerate
+    handleRegenerate,
+    autoScroll = true // デフォルトtrue
   } = props;
+
+  // ★追加: 自動スクロール有効状態管理
+  const [autoScrollEnabled, setAutoScrollEnabled] = React.useState(true);
+
+  // 初期化時にpropsの値をセット
+  React.useEffect(() => {
+    setAutoScrollEnabled(autoScroll);
+  }, [autoScroll]);
 
   // 初期状態: メッセージ0件 かつ 履歴ロード中でない
   const isInitialState = messages.length === 0 && !isHistoryLoading;
 
-  // ★追加: 関数をメモ化して、ChatHistoryの再レンダリングを抑制する
   const handleSuggestionClick = useCallback((q) => {
     onSendMessage(q, []);
   }, [onSendMessage]);
 
-  // ★追加: Smart Actions ハンドラー
   const handleSmartActionSelect = useCallback((action) => {
     switch (action.type) {
       case 'suggested_question':
-        // そのままテキストを送信
         if (action.payload?.text) {
           onSendMessage(action.payload.text, []);
         }
         break;
 
       case 'retry_mode':
-        // モードを変更して直前のクエリで再送信
         const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
         if (lastUserMsg && action.payload?.mode) {
-          // モード名に応じた設定マッピング
           const modeSettings = {
-            'rag_only': { ragEnabled: true, webMode: 'off' },      // 社内データのみ
-            'web_only': { ragEnabled: false, webMode: 'force' },   // Web検索のみ
-            'hybrid': { ragEnabled: true, webMode: 'auto' },       // フルパワー
-            'standard': { ragEnabled: false, webMode: 'auto' },    // オート
-            'fast': { ragEnabled: false, webMode: 'off' }          // スピード
+            'rag_only': { ragEnabled: true, webMode: 'off' },
+            'web_only': { ragEnabled: false, webMode: 'force' },
+            'hybrid': { ragEnabled: true, webMode: 'auto' },
+            'standard': { ragEnabled: false, webMode: 'auto' },
+            'fast': { ragEnabled: false, webMode: 'off' }
           };
           const newSettings = modeSettings[action.payload.mode];
           if (newSettings) {
@@ -67,7 +71,6 @@ const ChatArea = (props) => {
               ...newSettings
             }));
           }
-          // 少し待ってから再送信（設定反映のため）
           setTimeout(() => {
             onSendMessage(lastUserMsg.text, []);
           }, 100);
@@ -75,7 +78,6 @@ const ChatArea = (props) => {
         break;
 
       case 'web_search':
-        // Webモードを有効化して再検索
         const lastUserMsgForWeb = [...messages].reverse().find(m => m.role === 'user');
         if (lastUserMsgForWeb) {
           setSearchSettings(prev => ({
@@ -89,7 +91,6 @@ const ChatArea = (props) => {
         break;
 
       case 'deep_dive':
-        // より詳しく解説を求める
         const lastUserMsgForDeep = [...messages].reverse().find(m => m.role === 'user');
         if (lastUserMsgForDeep) {
           onSendMessage(`${lastUserMsgForDeep.text}について、より詳しく解説してください。`, []);
@@ -97,7 +98,6 @@ const ChatArea = (props) => {
         break;
 
       case 'navigate':
-        // 外部URLを別タブで開く
         if (action.payload?.url) {
           window.open(action.payload.url, '_blank', 'noopener,noreferrer');
         }
@@ -107,6 +107,11 @@ const ChatArea = (props) => {
         console.warn('Unknown smart action type:', action.type);
     }
   }, [messages, onSendMessage, setSearchSettings]);
+
+  // ★追加: ボタンクリック時のハンドラ
+  const handleScrollToBottom = () => {
+    setAutoScrollEnabled(true);
+  };
 
   return (
     <div className={`chat-area${isInitialState ? ' chat-area-initial' : ''}`}>
@@ -161,8 +166,15 @@ const ChatArea = (props) => {
             userName={userName}
             onEdit={handleEdit}
             onRegenerate={handleRegenerate}
+            autoScroll={autoScrollEnabled} // ★変更: stateを渡す
+            onAutoScrollChange={setAutoScrollEnabled} // ★追加: state更新関数を渡す
           />
           <div className="bottom-controls-wrapper">
+            {/* ★追加: ScrollToBottomButton */}
+            <ScrollToBottomButton
+              visible={!autoScrollEnabled}
+              onClick={handleScrollToBottom}
+            />
             <ChatInput
               isLoading={isGenerating}
               onSendMessage={onSendMessage}

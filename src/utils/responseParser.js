@@ -111,9 +111,13 @@ export const parseLlmResponse = (rawText) => {
   }
 
   // 3. ストリーミング用: 部分抽出ロジック (New!)
+  // ★改善: thinkingを先に抽出（answerより先に出力される可能性があるため）
+  const partialThinking = extractPartialThinking(textToParse);
   const partialAnswer = extractPartialJson(textToParse);
-  if (partialAnswer !== null) {
-    // answerが見つかった場合
+
+  // ★改善: answerまたはthinkingのどちらかが見つかれば、JSONとして処理
+  if (partialAnswer !== null || partialThinking !== null) {
+    // answerまたはthinkingが見つかった場合
     // citations も同様に部分抽出を試みるのが理想だが、
     // citationsは通常answerの後にあるため、回答中は空でもUX上問題ない
 
@@ -135,11 +139,8 @@ export const parseLlmResponse = (rawText) => {
       }
     } catch (e) { }
 
-    // thinkingの部分抽出
-    const partialThinking = extractPartialThinking(textToParse);
-
     return {
-      answer: partialAnswer,
+      answer: partialAnswer || '',  // ★改善: nullの場合は空文字を返す
       citations: extractedCitations,
       smartActions: extractedSmartActions,
       thinking: partialThinking || '',

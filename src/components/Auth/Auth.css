@@ -1,0 +1,493 @@
+/* src/components/Auth/Auth.css */
+/* 認証画面用スタイル - DESIGN_RULE.md 準拠 */
+
+/* ============================================
+   Login Screen Container
+   ============================================ */
+.login-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* 背景オーバーレイ（FluidOrbBackgroundの上） */
+.login-screen__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--sys-bg-base, #f5f5f7);
+  opacity: 0.4;
+}
+
+/* ============================================
+   Login Panel - mat-hud マテリアル
+   ============================================ */
+.login-panel {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  border-radius: 24px;
+
+  /* mat-hud: 強いブラー + 高い輝度 */
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(50px) saturate(200%);
+  -webkit-backdrop-filter: blur(50px) saturate(200%);
+
+  /* Specular edge reflection */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.15),
+    0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+
+  z-index: 1;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .login-panel,
+.dark .login-panel {
+  background: rgba(40, 40, 40, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.4),
+    0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+}
+
+[data-theme="dark"] .login-screen__backdrop,
+.dark .login-screen__backdrop {
+  background: var(--sys-bg-base, #1e1e1e);
+  opacity: 0.5;
+}
+
+/* ============================================
+   Login Header
+   ============================================ */
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* AI Gradient Icon Container */
+  background: linear-gradient(135deg,
+      var(--ai-gradient-cyan, #00FFFF) 0%,
+      var(--ai-gradient-magenta, #FF00FF) 50%,
+      var(--ai-gradient-blue, #007AFF) 100%);
+  border-radius: 16px;
+  color: white;
+}
+
+.login-header__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.login-header__title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--color-text-primary);
+  margin: 0 0 8px;
+}
+
+.login-header__subtitle {
+  font-size: 15px;
+  color: var(--color-text-sub, #666);
+  margin: 0;
+}
+
+/* ============================================
+   Form Elements
+   ============================================ */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-sub, #666);
+}
+
+.form-input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: all 0.2s ease-out;
+}
+
+.form-input:focus {
+  border-color: var(--sys-color-primary, #007AFF);
+  box-shadow:
+    0 0 0 1px #FFFFFF,
+    0 0 0 4px rgba(0, 122, 255, 0.3);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-sub, #999);
+}
+
+[data-theme="dark"] .form-input,
+.dark .form-input {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .form-input:focus,
+.dark .form-input:focus {
+  box-shadow:
+    0 0 0 1px #000000,
+    0 0 0 4px rgba(10, 132, 255, 0.4);
+}
+
+/* Password toggle button */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--color-text-sub, #666);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.password-toggle:hover {
+  opacity: 1;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.login-button {
+  width: 100%;
+  padding: 14px 24px;
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+
+  /* Primary Button - AI Gradient */
+  background: linear-gradient(135deg,
+      var(--sys-color-primary, #007AFF) 0%,
+      #5856D6 100%);
+  color: white;
+}
+
+.login-button:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-button--loading {
+  position: relative;
+  color: transparent;
+}
+
+.login-button--loading::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   Error Message
+   ============================================ */
+.login-error {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  color: var(--sys-color-danger, #FF3B30);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ============================================
+   Footer Links
+   ============================================ */
+.login-footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.login-footer__text {
+  font-size: 14px;
+  color: var(--color-text-sub, #666);
+}
+
+.login-footer__link {
+  color: var(--sys-color-primary, #007AFF);
+  font-weight: 500;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.login-footer__link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   Signup Modal
+   ============================================ */
+.signup-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.signup-modal {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .signup-modal,
+.dark .signup-modal {
+  background: rgba(35, 35, 35, 0.95);
+}
+
+.signup-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.signup-modal__title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.signup-modal__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-text-sub);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.signup-modal__close:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .signup-modal__close,
+.dark .signup-modal__close {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .signup-modal__close:hover,
+.dark .signup-modal__close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Password requirements */
+.password-requirements {
+  font-size: 12px;
+  color: var(--color-text-sub, #888);
+  margin-top: 4px;
+}
+
+.password-requirements--valid {
+  color: var(--sys-color-success, #34C759);
+}
+
+.password-requirements--invalid {
+  color: var(--sys-color-danger, #FF3B30);
+}
+
+/* ============================================
+   Name Fields Grid Layout
+   ============================================ */
+.form-group-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ============================================
+   Select Input Wrapper (秘密の質問)
+   ============================================ */
+.form-select-wrapper {
+  position: relative;
+}
+
+.form-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--color-text-sub, #666);
+  pointer-events: none;
+}
+
+.form-input--select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.form-input--select:focus {
+  border-color: var(--sys-color-primary, #007AFF);
+}
+
+/* ============================================
+   Date Input (生年月日)
+   ============================================ */
+.form-input--date {
+  cursor: pointer;
+}
+
+.form-input--date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.form-input--date::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+[data-theme="dark"] .form-input--date::-webkit-calendar-picker-indicator,
+.dark .form-input--date::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* ============================================
+   Form Hints
+   ============================================ */
+.form-hint {
+  font-size: 12px;
+  color: var(--color-text-sub, #888);
+  margin-top: 2px;
+}
+
+/* ============================================
+   Required Field Indicator
+   ============================================ */
+.form-required {
+  color: var(--sys-color-danger, #FF3B30);
+}
+
+/* ============================================
+   Expanded Signup Modal (more fields)
+   ============================================ */
+.signup-modal--expanded {
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for expanded modal */
+.signup-modal--expanded::-webkit-scrollbar {
+  width: 8px;
+}
+
+.signup-modal--expanded::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.signup-modal--expanded::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.signup-modal--expanded::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .signup-modal--expanded::-webkit-scrollbar-thumb,
+.dark .signup-modal--expanded::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .signup-modal--expanded::-webkit-scrollbar-thumb:hover,
+.dark .signup-modal--expanded::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

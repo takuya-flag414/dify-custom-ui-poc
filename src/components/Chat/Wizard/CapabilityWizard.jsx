@@ -1,5 +1,5 @@
 // src/components/Chat/Wizard/CapabilityWizard.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -14,6 +14,9 @@ import WizardFileUploader from './WizardFileUploader';
 // Privacy Textarea
 import WizardPrivacyTextarea from './WizardPrivacyTextarea';
 
+// Privacy Confirm Dialog
+import PrivacyConfirmDialog from '../PrivacyConfirmDialog';
+
 /**
  * macOS Sequoia Style Capability HUD
  * Apple Intelligence デザインシステムに準拠
@@ -27,13 +30,28 @@ const CapabilityWizard = ({
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [formData, setFormData] = useState({});
 
+    // 機密情報警告状態
+    const [currentStepWarning, setCurrentStepWarning] = useState({
+        hasWarning: false,
+        detections: [],
+        fileDetections: []
+    });
+    const [showPrivacyConfirm, setShowPrivacyConfirm] = useState(false);
+
     // Reset state when opening
     useEffect(() => {
         if (isOpen) {
             setCurrentStepIndex(0);
             setFormData({});
+            setCurrentStepWarning({ hasWarning: false, detections: [], fileDetections: [] });
+            setShowPrivacyConfirm(false);
         }
     }, [isOpen]);
+
+    // ステップ変更時に警告状態をリセット
+    useEffect(() => {
+        setCurrentStepWarning({ hasWarning: false, detections: [], fileDetections: [] });
+    }, [currentStepIndex]);
 
     // Handle Escape key
     useEffect(() => {
@@ -57,39 +75,63 @@ const CapabilityWizard = ({
         });
     }, [scenarioData?.steps, formData]);
 
+    // 現在のステップ情報を計算（フックの後で使用するため）
+    const currentStep = visibleSteps[currentStepIndex] || null;
+    const totalSteps = visibleSteps.length;
+    const isLastStep = currentStepIndex === totalSteps - 1;
+
+    // --- Handlers (useCallback は早期リターンの前に配置) ---
+    const proceedToNextStep = useCallback(() => {
+        if (isLastStep) {
+            onSubmit(formData);
+        } else {
+            setCurrentStepIndex(prev => prev + 1);
+        }
+    }, [isLastStep, formData, onSubmit]);
+
+    const handleNext = useCallback(() => {
+        // 機密情報検知ステップかつ警告ありの場合、確認ダイアログを表示
+        const isPrivacyStep = currentStep?.type === 'privacy-textarea' ||
+            currentStep?.type === 'file-upload' ||
+            (currentStep?.type === 'dynamic' && formData?.source === 'ファイルをアップロード');
+
+        if (isPrivacyStep && currentStepWarning.hasWarning) {
+            setShowPrivacyConfirm(true);
+            return;
+        }
+
+        proceedToNextStep();
+    }, [currentStep?.type, currentStepWarning.hasWarning, proceedToNextStep, formData?.source]);
+
+    const handlePrivacyConfirm = useCallback(() => {
+        setShowPrivacyConfirm(false);
+        proceedToNextStep();
+    }, [proceedToNextStep]);
+
+    const handlePrivacyCancel = useCallback(() => {
+        setShowPrivacyConfirm(false);
+    }, []);
+
+    const handleBack = useCallback(() => {
+        if (currentStepIndex > 0) {
+            setCurrentStepIndex(prev => prev - 1);
+        } else {
+            onClose();
+        }
+    }, [currentStepIndex, onClose]);
+
+    const updateFormData = useCallback((key, value) => {
+        setFormData(prev => ({ ...prev, [key]: value }));
+    }, []);
+
     // scenarioDataがない場合は何も表示しない
     if (!scenarioData) return null;
 
     // 有効なステップがない場合は何も表示しない
     if (!visibleSteps.length) return null;
 
-    const currentStep = visibleSteps[currentStepIndex];
-
     // 現在のステップが取得できない場合（インデックス範囲外など）は何も表示しない
     if (!currentStep) return null;
-    const totalSteps = visibleSteps.length;
-    const isLastStep = currentStepIndex === totalSteps - 1;
-
-    // --- Handlers ---
-    const handleNext = () => {
-        if (isLastStep) {
-            onSubmit(formData);
-        } else {
-            setCurrentStepIndex(prev => prev + 1);
-        }
-    };
-
-    const handleBack = () => {
-        if (currentStepIndex > 0) {
-            setCurrentStepIndex(prev => prev - 1);
-        } else {
-            onClose();
-        }
-    };
-
-    const updateFormData = (key, value) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
-    };
 
     // --- Animation Variants (Apple Spring Physics) ---
     const hudVariants = {
@@ -234,6 +276,7 @@ const CapabilityWizard = ({
                                             formData={formData}
                                             showSubject={currentStep.showSubject}
                                             showRecipient={currentStep.showRecipient}
+                                            onWarningChange={setCurrentStepWarning}
                                         />
                                     </motion.div>
                                 </AnimatePresence>
@@ -270,6 +313,16 @@ const CapabilityWizard = ({
                             </footer>
                         </motion.div>
                     </div>
+
+                    {/* Privacy Confirm Dialog */}
+                    {showPrivacyConfirm && (
+                        <PrivacyConfirmDialog
+                            detections={currentStepWarning.detections}
+                            fileDetections={currentStepWarning.fileDetections}
+                            onConfirm={handlePrivacyConfirm}
+                            onCancel={handlePrivacyCancel}
+                        />
+                    )}
                 </>
             )}
         </AnimatePresence>,
@@ -286,7 +339,7 @@ const ScenarioIcon = ({ iconName }) => {
     return <Icon className="w-5 h-5" style={{ opacity: 0.7 }} />;
 };
 
-// 入力UIのレンダラー (showSubject, showRecipient, description を追加)
+// 入力UIのレンダラー (showSubject, showRecipient, description, onWarningChange を追加)
 const StepRenderer = ({
     type,
     options,
@@ -297,7 +350,8 @@ const StepRenderer = ({
     onChange,
     formData,
     showSubject,
-    showRecipient
+    showRecipient,
+    onWarningChange
 }) => {
     switch (type) {
         case 'chips':
@@ -380,6 +434,7 @@ const StepRenderer = ({
                     placeholder={placeholder}
                     showSubject={shouldShowSubject}
                     showRecipient={shouldShowRecipient}
+                    onWarningChange={onWarningChange}
                 />
             );
         case 'file-upload':
@@ -388,6 +443,7 @@ const StepRenderer = ({
                     files={value || []}
                     onChange={onChange}
                     multiple={true}
+                    onWarningChange={onWarningChange}
                 />
             );
         case 'dynamic':
@@ -397,6 +453,7 @@ const StepRenderer = ({
                         files={value || []}
                         onChange={onChange}
                         multiple={true}
+                        onWarningChange={onWarningChange}
                     />
                 );
             }

@@ -158,34 +158,11 @@
 }
 
 /* --- Input Area Container --- */
-/* 通常（下部）モード */
-.chat-input-container {
-  width: 100%;
-  padding: 0 var(--space-6);
-  background: transparent;
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  position: relative;
-  /* 免責事項を縦並びにするため */
-  flex-direction: column;
-  align-items: center;
-}
-
-/* 中央配置モード (Initial) */
-.chat-input-container-centered {
-  width: 100%;
-  padding: 0;
-  /* Wrapperのpaddingに任せる */
-  background: transparent;
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  position: relative;
-  /* 免責事項を縦並びにするため */
-  flex-direction: column;
-  align-items: center;
-}
+/* 
+ * NOTE: .chat-input-container と .chat-input-container-centered の
+ * width, max-width, padding は ChatInput.css で定義されています。
+ * ここではレイアウト用のプロパティのみ追加しています。
+ */
 
 /* --- Form Styling --- */
 .chat-input-form {
@@ -618,4 +595,38 @@
 .api-config-button:hover {
   background-color: var(--color-bg-sidebar);
   border-color: var(--color-text-sub);
+}
+
+/* Scroll To Bottom Button */
+.scroll-to-bottom-btn {
+  position: absolute;
+  /* 入力欄の真上中央 */
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  /* Material / Glassmorphism */
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+
+  transition: all 0.2s ease;
+}
+
+.scroll-to-bottom-btn:hover {
+  background: var(--color-bg-sub);
+  transform: translateX(-50%) scale(1.1);
 }

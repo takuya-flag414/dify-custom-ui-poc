@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FileIcon from '../../Shared/FileIcon';
 import { scanFiles, isScannableFile } from '../../../utils/fileScanner';
+import PrivacyWarningBanner from './PrivacyWarningBanner';
 import './WizardFileUploader.css';
 
 // --- Icons ---
@@ -42,6 +43,13 @@ const WarningIcon = () => (
     </svg>
 );
 
+const PlusIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+);
+
 // --- Constants ---
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_EXTENSIONS = '.pdf,.docx,.txt,.md,.csv,.xlsx';
@@ -60,7 +68,7 @@ const formatFileSize = (bytes) => {
  * - 機密情報リアルタイム検知
  * - ドラッグ＆ドロップ
  */
-const WizardFileUploader = ({ files = [], onChange, multiple = true }) => {
+const WizardFileUploader = ({ files = [], onChange, multiple = true, onWarningChange }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [oversizedFiles, setOversizedFiles] = useState([]);
     // ローカルでファイル状態を管理（スキャン結果の更新用）
@@ -73,6 +81,25 @@ const WizardFileUploader = ({ files = [], onChange, multiple = true }) => {
             setLocalFiles(files);
         }
     }, [files]);
+
+    // 親コンポーネントに警告状態を通知
+    useEffect(() => {
+        if (onWarningChange) {
+            const hasWarning = localFiles.some(f => f.hasWarning);
+            const fileDetections = localFiles
+                .filter(f => f.hasWarning && f.detections && f.detections.length > 0)
+                .map(f => ({
+                    fileName: f.file.name,
+                    detections: f.detections
+                }));
+
+            onWarningChange({
+                hasWarning,
+                detections: [],
+                fileDetections
+            });
+        }
+    }, [localFiles, onWarningChange]);
 
     // ファイル追加処理
     const addFiles = useCallback(async (newFiles) => {
@@ -194,28 +221,40 @@ const WizardFileUploader = ({ files = [], onChange, multiple = true }) => {
         }
     };
 
+    // ファイルがある場合はインラインモード
+    const hasFiles = fileCount > 0;
+
     return (
-        <div className="wizard-file-uploader">
-            {/* Drop Zone */}
-            <div
-                className={`wizard-dropzone ${isDragging ? 'dragging' : ''}`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={handleClick}
-                role="button"
-                tabIndex={0}
-                aria-label="ファイルをアップロード"
-            >
-                <UploadCloudIcon />
-                <p className="wizard-dropzone-text">
-                    ファイルを<strong>ドラッグ＆ドロップ</strong><br />
-                    またはクリックして選択
-                </p>
-                <span className="wizard-dropzone-hint">
-                    PDF, Word, テキスト, CSV, Excel（最大10MB）
-                </span>
-            </div>
+        <div
+            className="wizard-file-uploader"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
+            {/* 警告バナー（常時表示） */}
+            <PrivacyWarningBanner
+                description="アップロードされたファイルの内容はAIに送信されます。機密情報を含むファイルのアップロードは避けてください。"
+            />
+
+            {/* ファイルがない場合のみフルドロップゾーンを表示 */}
+            {!hasFiles && (
+                <div
+                    className={`wizard-dropzone ${isDragging ? 'dragging' : ''}`}
+                    onClick={handleClick}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="ファイルをアップロード"
+                >
+                    <UploadCloudIcon />
+                    <p className="wizard-dropzone-text">
+                        ファイルを<strong>ドラッグ＆ドロップ</strong><br />
+                        またはクリックして選択
+                    </p>
+                    <span className="wizard-dropzone-hint">
+                        PDF, Word, テキスト, CSV, Excel（最大10MB）
+                    </span>
+                </div>
+            )}
 
             <input
                 type="file"
@@ -241,8 +280,8 @@ const WizardFileUploader = ({ files = [], onChange, multiple = true }) => {
                 )}
             </AnimatePresence>
 
-            {/* File List */}
-            {fileCount > 0 && (
+            {/* File List with Inline Add Card */}
+            {hasFiles && (
                 <>
                     <div className="wizard-file-list">
                         <AnimatePresence>
@@ -301,6 +340,22 @@ const WizardFileUploader = ({ files = [], onChange, multiple = true }) => {
                                 );
                             })}
                         </AnimatePresence>
+
+                        {/* Inline Add Card */}
+                        <div
+                            className={`wizard-inline-add-card ${isDragging ? 'dragging' : ''}`}
+                            onClick={handleClick}
+                            role="button"
+                            tabIndex={0}
+                        >
+                            <div className="wizard-inline-add-icon">
+                                <PlusIcon />
+                            </div>
+                            <div className="wizard-inline-add-text">
+                                <span className="wizard-inline-add-title">ファイルを追加</span>
+                                <span className="wizard-inline-add-hint">クリックまたはドラッグ＆ドロップ</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="wizard-file-count">

@@ -23,7 +23,48 @@ const DEFAULT_SETTINGS = {
   // 今後 rag, debug 等のカテゴリが増えます
 };
 
-export const useSettings = (userId) => {
+/**
+ * authUser.preferences から useSettings 形式に変換するヘルパー
+ * @param {object} authPrefs - authUser.preferences
+ * @returns {object} DEFAULT_SETTINGS 形式にマッピングされた設定
+ */
+const mapAuthPreferencesToSettings = (authPrefs) => {
+  if (!authPrefs) return null;
+
+  return {
+    profile: {
+      ...DEFAULT_SETTINGS.profile,
+      // displayNameはauthUser本体から取得するため、ここでは設定しない
+    },
+    general: {
+      ...DEFAULT_SETTINGS.general,
+      theme: authPrefs.theme || DEFAULT_SETTINGS.general.theme,
+    },
+    prompt: {
+      ...DEFAULT_SETTINGS.prompt,
+      aiStyle: authPrefs.aiStyle || DEFAULT_SETTINGS.prompt.aiStyle,
+      userProfile: {
+        ...DEFAULT_SETTINGS.prompt.userProfile,
+        role: authPrefs.userProfile?.role || '',
+        department: authPrefs.userProfile?.department || '',
+      },
+      customInstructions: authPrefs.customInstructions || '',
+    },
+  };
+};
+
+/**
+ * ユーザー設定管理Hook
+ * 
+ * ★ Phase A 認証対応:
+ * - authPreferences: authUser.preferences（アカウントのデフォルト設定）
+ * - LocalStorageの設定が存在しない場合、authPreferencesを初期値として使用
+ * - LocalStorageの設定が存在する場合は、ユーザーのカスタマイズを尊重
+ * 
+ * @param {string} userId - ユーザーID
+ * @param {object} authPreferences - authUser.preferences（アカウントのデフォルト設定）
+ */
+export const useSettings = (userId, authPreferences = null) => {
   // 【修正】初期化関数内で同期的にLocalStorageを読み込む
   const [settings, setSettings] = useState(() => {
     // userIdがまだ無い場合（App側で生成中の場合など）はデフォルトを返す
@@ -61,6 +102,13 @@ export const useSettings = (userId) => {
             customInstructions: migratedCustomInstructions, // 旧 systemPrompt からマイグレーション
           },
         };
+      } else if (authPreferences) {
+        // ★ Phase A: LocalStorageにデータがない場合、authPreferencesを初期値として使用
+        console.log('[useSettings] Using authPreferences as initial settings');
+        const mappedSettings = mapAuthPreferencesToSettings(authPreferences);
+        // 初回なのでLocalStorageにも保存
+        localStorage.setItem(key, JSON.stringify(mappedSettings));
+        return mappedSettings;
       }
     } catch (e) {
       console.error('[useSettings] Failed to parse settings during init:', e);
@@ -73,10 +121,6 @@ export const useSettings = (userId) => {
   // Load settings when userId changes (初期ロード後の変更検知用)
   useEffect(() => {
     if (!userId) return;
-
-    // ※注: 初期化ですでに読み込んでいるため、本来ここは「userIdが変わった時」用です。
-    // 重複実行になりますが、Reactの調整機能により大きな問題にはなりません。
-    // 念のため最新の状態を反映させます。
 
     const key = `app_preferences_${userId}`;
     const stored = localStorage.getItem(key);
@@ -109,10 +153,16 @@ export const useSettings = (userId) => {
       } catch (e) {
         console.error('[useSettings] Failed to parse settings:', e);
       }
+    } else if (authPreferences) {
+      // ★ Phase A: LocalStorageにデータがない場合、authPreferencesを使用
+      console.log('[useSettings] Applying authPreferences on userId change');
+      const mappedSettings = mapAuthPreferencesToSettings(authPreferences);
+      setSettings(mappedSettings);
+      localStorage.setItem(key, JSON.stringify(mappedSettings));
     }
 
     setIsLoaded(true);
-  }, [userId]);
+  }, [userId, authPreferences]);
 
   // Save settings helper: カテゴリとキーを指定して更新
   const updateSettings = useCallback((category, key, value) => {
@@ -125,6 +175,11 @@ export const useSettings = (userId) => {
       // Persist to LocalStorage
       localStorage.setItem(`app_preferences_${userId}`, JSON.stringify(newSettings));
 
+      // Global Theme Persistence (for loading screen)
+      if (category === 'general' && key === 'theme') {
+        localStorage.setItem('app_last_theme', value);
+      }
+
       return newSettings;
     });
   }, [userId]);
@@ -133,7 +188,13 @@ export const useSettings = (userId) => {
   const setAllSettings = useCallback((newSettings) => {
     if (!userId) return;
     setSettings(newSettings);
+    setSettings(newSettings);
     localStorage.setItem(`app_preferences_${userId}`, JSON.stringify(newSettings));
+    
+    // Global Theme Persistence
+    if (newSettings.general?.theme) {
+      localStorage.setItem('app_last_theme', newSettings.general.theme);
+    }
   }, [userId]);
 
   return { settings, updateSettings, isLoaded, setAllSettings };

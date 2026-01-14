@@ -1,5 +1,5 @@
 /* src/components/Chat/ChatHistory.jsx */
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import './ChatHistory.css';
 import MessageBlock from '../Message/MessageBlock';
@@ -8,6 +8,9 @@ import SystemErrorBlock from '../Message/SystemErrorBlock';
 
 // パフォーマンス制限: 50件を超えると最新メッセージのみアニメーション
 const ANIMATION_LIMIT = 50;
+
+// ユーザー操作検知後のフラグ持続時間 (ms)
+const USER_SCROLL_FLAG_DURATION = 150;
 
 // ★変更: streamingMessage propsを追加（パフォーマンス最適化）
 // ★追加: onEdit, onRegenerate props (Phase 1.5)
@@ -22,18 +25,93 @@ const ChatHistory = ({
   onOpenArtifact,
   userName,
   onEdit,
-  onRegenerate
+  onRegenerate,
+  autoScroll = false, // ★追加
+  onAutoScrollChange, // ★追加
+  ...rest
 }) => {
   const messagesEndRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // ★追加: ユーザー操作によるスクロールかどうかを判定するフラグ
+  const userInitiatedScrollRef = useRef(false);
+  const userScrollTimeoutRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // ★変更: streamingMessageも依存配列に追加
+  // ★追加: ユーザー操作を検知するハンドラ
+  const handleUserScrollAction = useCallback(() => {
+    userInitiatedScrollRef.current = true;
+
+    // 前回のタイムアウトをクリア
+    if (userScrollTimeoutRef.current) {
+      clearTimeout(userScrollTimeoutRef.current);
+    }
+
+    // 一定時間後にフラグをリセット
+    userScrollTimeoutRef.current = setTimeout(() => {
+      userInitiatedScrollRef.current = false;
+    }, USER_SCROLL_FLAG_DURATION);
+  }, []);
+
+  // ★追加: ユーザー操作イベントリスナーを登録
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, streamingMessage, isLoading]);
+    const container = containerRef.current;
+    if (!container) return;
+
+    // wheel, touchmove, keydown でユーザー操作を検知
+    container.addEventListener('wheel', handleUserScrollAction, { passive: true });
+    container.addEventListener('touchmove', handleUserScrollAction, { passive: true });
+    container.addEventListener('keydown', handleUserScrollAction);
+
+    return () => {
+      container.removeEventListener('wheel', handleUserScrollAction);
+      container.removeEventListener('touchmove', handleUserScrollAction);
+      container.removeEventListener('keydown', handleUserScrollAction);
+
+      // クリーンアップ時にタイムアウトもクリア
+      if (userScrollTimeoutRef.current) {
+        clearTimeout(userScrollTimeoutRef.current);
+      }
+    };
+  }, [handleUserScrollAction]);
+
+  // ★変更: streamingMessageも依存配列に追加
+  // ★変更: autoScrollがtrueの時のみスクロール
+  // ★変更: onAutoScrollChange追加 (状態リフトアップ)
+  // 自動スクロール処理
+  useEffect(() => {
+    // autoScrollが有効で、かつ新しいコンテンツがある場合（loading or messages change）
+    if (autoScroll) {
+      scrollToBottom();
+    }
+  }, [messages, streamingMessage, isLoading, autoScroll]);
+
+  // ★改良: スクロールイベントハンドラ - ユーザー操作時のみ自動スクロールを解除
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    // 誤差許容範囲 (px)
+    const errorMargin = 20;
+
+    // 現在位置が底に近いかどうか
+    const isAtBottom = scrollHeight - scrollTop - clientHeight <= errorMargin;
+
+    if (isAtBottom) {
+      // 底に到達したら自動スクロール再開（ユーザー操作かどうかに関わらず）
+      if (!autoScroll && onAutoScrollChange) {
+        onAutoScrollChange(true);
+      }
+    } else {
+      // ★改良: ユーザー操作によるスクロールの場合のみ自動スクロールを解除
+      // プログラムによるスクロール（scrollIntoView）では解除しない
+      if (userInitiatedScrollRef.current && autoScroll && onAutoScrollChange) {
+        onAutoScrollChange(false);
+      }
+    }
+  };
+
 
   // ★追加: リトライ機能
   // エラーの一つ前の「ユーザーメッセージ」を探して再送する
@@ -59,7 +137,13 @@ const ChatHistory = ({
   const isNewMessage = (index) => index === messages.length - 1;
 
   return (
-    <div className="chat-history">
+    <div
+      ref={containerRef}
+      className="chat-history"
+      onScroll={handleScroll}
+      tabIndex={0} // キーボードイベント検知のためtabIndexを追加
+    >
+
       <AnimatePresence mode="popLayout">
         {/* ★変更: 確定メッセージのみをmessages配列からレンダリング */}
         {messages.map((msg, index) => {

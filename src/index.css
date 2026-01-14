@@ -230,6 +230,15 @@
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(25px) saturate(180%);
 
+  /* --- Material: Intelligent HUD (Light Mode) --- */
+  --glass-hud-blur: blur(50px) saturate(200%);
+  --glass-hud-bg: rgba(255, 255, 255, 0.85);
+  --glass-hud-border: rgba(0, 0, 0, 0.1);
+  /* Visible border for light mode */
+  --glass-hud-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+
   /* UI要素用の背景色 */
   --color-bg-header: rgba(255, 255, 255, 0.85);
   --color-bg-input-capsule: rgba(255, 255, 255, 0.8);
@@ -254,6 +263,24 @@
   /* Sidebar */
   --bg-layer-2: oklch(25% 0 0);
   /* Surface */
+
+  /* --- Apple Intelligence Gradients (v3.0) --- */
+  --ai-gradient-cyan: #00FFFF;
+  --ai-gradient-magenta: #FF00FF;
+  --ai-gradient-yellow: #FFD60A;
+  --ai-gradient-blue: #007AFF;
+
+  /* --- New Material: Intelligent HUD (v3.0) --- */
+  /* 背景をぼかしつつ、彩度を上げて「発光体」のような質感を出す */
+  --glass-hud-blur: blur(50px) saturate(200%);
+  --glass-hud-bg: rgba(255, 255, 255, 0.65);
+  --glass-hud-border: rgba(255, 255, 255, 0.4);
+
+  /* Specular Highlight (ガラスの縁の反射) */
+  --glass-hud-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
+  /* Inner specular */
 
   --color-bg-body: oklch(0% 0 0);
   --color-bg-surface: oklch(15% 0 0);
@@ -316,6 +343,24 @@
 
   /* モーダル背景 */
   --color-bg-modal: rgba(20, 20, 20, 0.98);
+
+  /* --- HUD Material Dark Mode Overrides --- */
+  --glass-hud-bg: rgba(30, 30, 30, 0.6);
+  --glass-hud-border: rgba(255, 255, 255, 0.15);
+  --glass-hud-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+/* AI Spin Animation */
+@keyframes ai-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ========================================

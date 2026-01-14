@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { scanText } from '../../../utils/privacyDetector';
+import PrivacyWarningBanner from './PrivacyWarningBanner';
 import './WizardPrivacyTextarea.css';
 
 // --- Icons ---
@@ -61,11 +62,23 @@ const WizardPrivacyTextarea = ({
     showSubject = false,
     subjectPlaceholder = '例: Re: プロジェクト進捗について',
     showRecipient = false,
-    recipientPlaceholder = '例: 田中 太郎'
+    recipientPlaceholder = '例: 田中 太郎',
+    onWarningChange
 }) => {
     const [privacyWarning, setPrivacyWarning] = useState({ hasWarning: false, detections: [] });
     // 敬称メニューの開閉状態
     const [isHonorificOpen, setIsHonorificOpen] = useState(false);
+
+    // 親コンポーネントに警告状態を通知
+    useEffect(() => {
+        if (onWarningChange) {
+            onWarningChange({
+                hasWarning: privacyWarning.hasWarning,
+                detections: privacyWarning.detections,
+                fileDetections: []
+            });
+        }
+    }, [privacyWarning, onWarningChange]);
 
     // valueを正規化
     const normalizedValue = useMemo(() => {
@@ -129,17 +142,7 @@ const WizardPrivacyTextarea = ({
     return (
         <div className="wizard-privacy-textarea">
             {/* 警告バナー（常時表示） */}
-            <div className="privacy-warning-banner">
-                <AlertTriangleIcon />
-                <div className="privacy-warning-banner-content">
-                    <span className="privacy-warning-banner-title">
-                        機密情報の取り扱いに注意
-                    </span>
-                    <span className="privacy-warning-banner-desc">
-                        個人情報や社外秘情報の入力は避けてください。入力された内容はAIに送信されます。
-                    </span>
-                </div>
-            </div>
+            <PrivacyWarningBanner />
 
             {/* 宛名入力欄（showRecipient=trueの場合のみ） */}
             {showRecipient && (

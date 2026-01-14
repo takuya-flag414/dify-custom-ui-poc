@@ -72,15 +72,15 @@ const thinkingTemplates = {
     efficient: "- **モード**: 高速応答\n- **処理**: ファイル内容の即座の分析",
     partner: "- **モード**: 高速応答モード\n- **ファイル処理**: 内容を素早く把握\n- **戦略**: 要点を簡潔に抽出して回答"
   },
-  // フルパワー（ファイルなし）: hybrid
+  // ハイブリッド（ファイルなし）: hybrid
   hybrid: {
     efficient: "- **検索戦略**: 社内DB + Web検索を並行実行\n- **情報統合**: 内部・外部情報を照合して回答を構築",
-    partner: "- **検索モード**: フルパワー検索\n- **戦略**: 社内規定とWeb情報を統合\n- **発話戦略**: 信頼性の高い総合回答を構築"
+    partner: "- **検索モード**: ハイブリッド検索\n- **戦略**: 社内規定とWeb情報を統合\n- **発話戦略**: 信頼性の高い総合回答を構築"
   },
-  // フルパワー（ファイルあり）: hybrid_file
+  // ハイブリッド（ファイルあり）: hybrid_file
   full: {
     efficient: "- **処理**: ファイル + 社内DB + Web検索\n- **分析**: 3ソースの情報を統合して総合判断",
-    partner: "- **検索モード**: フルパワー検索（ファイル含む）\n- **分析**: ファイル内容を社内・Web情報と照合\n- **戦略**: 包括的な回答を作成"
+    partner: "- **検索モード**: ハイブリッド検索（ファイル含む）\n- **分析**: ファイル内容を社内・Web情報と照合\n- **戦略**: 包括的な回答を作成"
   },
   // 社内データ（ファイルなし）: enterprise
   rag_only: {
@@ -620,13 +620,14 @@ export const scenarios = {
 
   // =================================================================
   // Pattern 9: Fast Mode (Pure)
+  // ※スピードモードはJSON形式ではなく生Markdownを返す
   // =================================================================
   'fast_pure': {
     efficient: [
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJsonCodeBlock(styleTemplates.fast_pure.efficient, [], [], thinkingTemplates.fast_pure.efficient)
+        answer: styleTemplates.fast_pure.efficient  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -635,7 +636,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJsonCodeBlock(styleTemplates.fast_pure.partner, [], [], thinkingTemplates.fast_pure.partner)
+        answer: styleTemplates.fast_pure.partner  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -644,6 +645,7 @@ export const scenarios = {
 
   // =================================================================
   // Pattern 10: Fast Mode (File)
+  // ※スピードモードはJSON形式ではなく生Markdownを返す
   // =================================================================
   'fast_file': {
     efficient: [
@@ -652,7 +654,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJson(styleTemplates.fast_file.efficient, [], [], thinkingTemplates.fast_file.efficient)
+        answer: styleTemplates.fast_file.efficient  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
@@ -663,7 +665,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: createMockJson(styleTemplates.fast_file.partner, [], [], thinkingTemplates.fast_file.partner)
+        answer: styleTemplates.fast_file.partner  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }

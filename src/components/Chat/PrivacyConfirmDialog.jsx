@@ -94,7 +94,7 @@ const PrivacyConfirmDialog = ({ detections = [], fileDetections = [], onConfirm,
 
                 {/* 確認メッセージ */}
                 <p className="privacy-confirm-message">
-                    このまま送信してもよろしいですか？
+                    このまま続行してもよろしいですか？
                 </p>
 
                 {/* アクションボタン */}
@@ -103,7 +103,7 @@ const PrivacyConfirmDialog = ({ detections = [], fileDetections = [], onConfirm,
                         キャンセル
                     </button>
                     <button className="privacy-confirm-btn-send" onClick={onConfirm}>
-                        送信する
+                        続行する
                     </button>
                 </div>
             </div>

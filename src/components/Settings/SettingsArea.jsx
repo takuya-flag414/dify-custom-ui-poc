@@ -27,6 +27,7 @@ const SettingsArea = ({
     setMockMode,
     onOpenApiConfig,
     onResetOnboarding,
+    onLogout,  // ★追加: Phase A ログアウト機能
     // Modal Props
     isModal = false,
     onClose
@@ -65,6 +66,7 @@ const SettingsArea = ({
                 setMockMode={setMockMode}
                 onOpenApiConfig={onOpenApiConfig}
                 onResetOnboarding={onResetOnboarding}
+                onLogout={onLogout}
             />
         </>
     );

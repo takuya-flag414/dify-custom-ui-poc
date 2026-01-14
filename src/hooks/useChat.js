@@ -108,6 +108,24 @@ const createPerfTracker = (addLog) => ({
   }
 });
 
+/**
+ * useChat - チャット機能のカスタムフック
+ * 
+ * ★ Phase A 認証統合:
+ * - userId は App.jsx から渡され、AuthContext の authUser.userId が使用される
+ * - Dify API の 'user' パラメータにこの userId が設定される
+ * - これにより、ログインユーザーごとに会話履歴が分離される
+ * 
+ * @param {string} mockMode - モックモード ('OFF', 'FE', 'BE')
+ * @param {string} userId - 認証済みユーザーID (AuthContext から取得)
+ * @param {string} conversationId - 現在の会話ID
+ * @param {function} addLog - ログ出力関数
+ * @param {function} onConversationCreated - 会話作成時コールバック
+ * @param {function} onConversationUpdated - 会話更新時コールバック
+ * @param {string} apiKey - Dify API キー
+ * @param {string} apiUrl - Dify API URL
+ * @param {object} promptSettings - プロンプト設定 (aiStyle, userProfile, customInstructions)
+ */
 export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl, promptSettings) => {
   const [messages, setMessages] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -490,7 +508,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
       // 表示遅延タイマー（ちらつき防止）
       // messageイベント受信時にタイマーを開始する（思考プロセス完了後）
       let messageStartTime = null;
-      const DISPLAY_DELAY_MS = 150; // 0.15秒間は表示を抑制
+      const DISPLAY_DELAY_MS = 500; // 0.2秒間は表示を抑制
 
       // ★追加: SSEチャンク分割対策用バッファ
       // ネットワーク転送時に行の途中で分割される場合があるため、
@@ -737,11 +755,22 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   if (protocolMode === 'PENDING') {
                     const trimmed = contentBuffer.trimStart();
                     if (trimmed.length > 0) {
-                      // JSONモード判定: { で始まる OR ```json で始まる
-                      const looksLikeJson = trimmed.startsWith('{') ||
+                      // ★改善: JSONモード判定
+                      // 1. 構造的特徴: { で始まる OR ```json で始まる
+                      const structuralJson = trimmed.startsWith('{') ||
                         trimmed.startsWith('```json') ||
                         trimmed.startsWith('```\n{');
-                      protocolMode = looksLikeJson ? 'JSON' : 'RAW';
+                      
+                      // 2. フィールド検知: thinking/answerフィールドの有無
+                      const hasThinkingField = trimmed.includes('"thinking"');
+                      const hasAnswerField = trimmed.includes('"answer"');
+                      
+                      if (structuralJson || hasThinkingField || hasAnswerField) {
+                        protocolMode = 'JSON';
+                      } else {
+                        // JSON構造でもフィールドもない場合はRAWモード
+                        protocolMode = 'RAW';
+                      }
                     }
                   }
 
@@ -753,24 +782,35 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   const isDelayPeriod = elapsedMs < DISPLAY_DELAY_MS;
 
                   if (isDelayPeriod) {
-                    // 1秒未満は表示しない（スケルトンローダーが表示される）
-                    textToDisplay = '';
+                    // ★改善: 待機時間中は表示しない（JSONフィールド検知を待つ）
+                    // ただし、既にthinking/answerが検知されていれば表示開始可能
+                    const parsed = parseLlmResponse(contentBuffer);
+                    if (parsed.isParsed && (parsed.answer || parsed.thinking)) {
+                      // フィールドが検知されたので待機時間を短縮して表示開始
+                      textToDisplay = parsed.answer;
+                      thinkingToDisplay = parsed.thinking || '';
+                      protocolMode = 'JSON';
+                    } else {
+                      textToDisplay = '';
+                    }
                   } else if (protocolMode === 'PENDING') {
-                    // 1秒経過後でもPENDINGの場合は表示しない
-                    textToDisplay = '';
+                    // 待機時間経過後でもPENDINGの場合はRAWモードへ移行
+                    protocolMode = 'RAW';
+                    textToDisplay = contentBuffer;
                   } else if (protocolMode === 'JSON') {
                     const parsed = parseLlmResponse(contentBuffer);
-                    // isParsed && answer が空でない場合のみ表示
-                    textToDisplay = (parsed.isParsed && parsed.answer) ? parsed.answer : '';
-                    thinkingToDisplay = parsed.thinking || '';  // ★追加
+                    // ★改善: isParsedであればanswerが空でもOK（thinkingだけの場合もある）
+                    textToDisplay = parsed.isParsed ? parsed.answer : '';
+                    thinkingToDisplay = parsed.thinking || '';
                   } else {
                     // RAWモードでも、JSON構造が検出されたらパースを試みる（誤判定対策）
                     const trimmed = contentBuffer.trim();
-                    if (trimmed.includes('"answer"') && (trimmed.startsWith('{') || trimmed.startsWith('```'))) {
+                    // ★改善: thinkingフィールドも検知対象に追加
+                    if ((trimmed.includes('"answer"') || trimmed.includes('"thinking"')) && (trimmed.startsWith('{') || trimmed.startsWith('```'))) {
                       const parsed = parseLlmResponse(contentBuffer);
-                      if (parsed.isParsed && parsed.answer) {
+                      if (parsed.isParsed) {
                         textToDisplay = parsed.answer;
-                        thinkingToDisplay = parsed.thinking || '';  // ★追加
+                        thinkingToDisplay = parsed.thinking || '';
                         // モードを修正（以降のストリーミングでも正しく処理）
                         protocolMode = 'JSON';
                       } else {

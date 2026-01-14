@@ -1,0 +1,56 @@
+/* src/components/Chat/Wizard/PrivacyWarningBanner.css */
+
+/**
+ * Privacy Warning Banner Styles
+ * DESIGN_RULE.md準拠 - 機密情報取り扱い警告バナー
+ */
+
+/* === Warning Banner === */
+.privacy-warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(255, 149, 0, 0.08);
+    border: 1px solid rgba(255, 149, 0, 0.2);
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.75);
+}
+
+.privacy-warning-banner svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--sys-color-warning, #FF9500);
+}
+
+.privacy-warning-banner-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.privacy-warning-banner-title {
+    font-weight: 600;
+    color: var(--sys-color-warning, #FF9500);
+}
+
+.privacy-warning-banner-desc {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Dark mode */
+[data-theme="dark"] .privacy-warning-banner {
+    background: rgba(255, 159, 10, 0.12);
+    border-color: rgba(255, 159, 10, 0.25);
+    color: rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="dark"] .privacy-warning-banner-title {
+    color: var(--sys-color-warning, #FF9F0A);
+}
+
+[data-theme="dark"] .privacy-warning-banner-desc {
+    color: rgba(255, 255, 255, 0.55);
+}
