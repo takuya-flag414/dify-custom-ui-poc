@@ -726,21 +726,77 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                   const rawText = outputs?.text;
                   const parsedJson = extractJsonFromLlmOutput(rawText);
                   if (parsedJson) {
+                    // ★ログ出力
                     addLog(`[LLM_Intent_Analysis] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
                     addLog(`[LLM_Intent_Analysis] category: ${parsedJson.category || 'N/A'}`, 'info');
-                    addLog(`[LLM_Intent_Analysis] confidence: ${parsedJson.confidence || 'N/A'}`, 'info');
+                    // 新フォーマット: requires_rag, requires_web
+                    if (parsedJson.requires_rag !== undefined || parsedJson.requires_web !== undefined) {
+                      addLog(`[LLM_Intent_Analysis] requires_rag: ${parsedJson.requires_rag}, requires_web: ${parsedJson.requires_web}`, 'info');
+                    }
+                    // 旧フォーマット互換: confidence
+                    if (parsedJson.confidence !== undefined) {
+                      addLog(`[LLM_Intent_Analysis] confidence: ${parsedJson.confidence}`, 'info');
+                    }
 
-                    // ★追加: カテゴリーを日本語に変換
-                    let categoryLabel = parsedJson.category || '';
-                    const categoryMap = {
-                      'SEARCH': 'Web検索モード',
-                      'CHAT': '雑談モード',
-                      'LOGICAL': '論理回答モード',
-                      'ANSWER': '内部知識モード',
-                      'HYBRID': 'ハイブリッド検索モード'
+                    // ★ユーザーフレンドリーな表現を生成
+                    const getIntentDisplayInfo = (category, requiresRag, requiresWeb) => {
+                      // ベースカテゴリーの表現
+                      const categoryLabels = {
+                        'TASK': { emoji: '🛠️', label: 'タスク実行' },
+                        'CHAT': { emoji: '💬', label: 'おしゃべり' },
+                        'QUESTION': { emoji: '❓', label: '質問回答' },
+                        'ANALYSIS': { emoji: '📊', label: '分析' },
+                        // 旧フォーマット互換
+                        'SEARCH': { emoji: '🔍', label: 'Web検索' },
+                        'LOGICAL': { emoji: '🧠', label: '論理回答' },
+                        'ANSWER': { emoji: '💡', label: '内部知識' },
+                        'HYBRID': { emoji: '🔍', label: 'ハイブリッド検索' },
+                      };
+
+                      // RAG/Webフラグの組み合わせ表現
+                      const searchModeLabels = {
+                        'rag_web': { emoji: '🔍', suffix: '社内＋Webを調査します' },
+                        'rag_only': { emoji: '📁', suffix: '社内データを確認します' },
+                        'web_only': { emoji: '🌐', suffix: 'Webで情報を探します' },
+                        'none': { emoji: '💡', suffix: 'AIが直接お答えします' },
+                      };
+
+                      const base = categoryLabels[category] || { emoji: '🤖', label: '処理' };
+
+                      // 新フォーマットの場合のみRAG/Web判定
+                      if (requiresRag !== undefined || requiresWeb !== undefined) {
+                        const searchKey = requiresRag && requiresWeb ? 'rag_web' :
+                          requiresRag ? 'rag_only' :
+                            requiresWeb ? 'web_only' : 'none';
+                        const search = searchModeLabels[searchKey];
+
+                        return {
+                          title: `${base.emoji} ${base.label}`,
+                          resultValue: `${search.emoji} ${search.suffix}`,
+                        };
+                      }
+
+                      // 旧フォーマットの場合はカテゴリーのみ表示
+                      return {
+                        title: `${base.emoji} ${base.label}`,
+                        resultValue: null,
+                      };
                     };
-                    const displayCategory = categoryMap[categoryLabel] || categoryLabel;
+
+                    const displayInfo = getIntentDisplayInfo(
+                      parsedJson.category,
+                      parsedJson.requires_rag,
+                      parsedJson.requires_web
+                    );
+
+                    // 旧フォーマット互換: confidenceがあれば表示
                     const confidenceText = parsedJson.confidence ? ` (信頼度: ${parsedJson.confidence})` : '';
+                    const finalResultValue = displayInfo.resultValue
+                      ? displayInfo.resultValue
+                      : `${displayInfo.title}${confidenceText}`;
+
+                    // ログに判定結果を出力
+                    addLog(`[LLM_Intent_Analysis] 判定: ${displayInfo.title}${displayInfo.resultValue ? ' → ' + displayInfo.resultValue : ''}`, 'info');
 
                     // ★追加: thoughtProcessにthinkingと結果を追加
                     setStreamingMessage(prev => prev ? {
@@ -748,11 +804,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                       thoughtProcess: prev.thoughtProcess.map(t =>
                         t.id === nodeId ? {
                           ...t,
-                          title: `判定: ${displayCategory}`,
+                          title: `判定: ${displayInfo.title}`,
                           status: 'done',
                           thinking: parsedJson.thinking || '',
-                          resultLabel: '分類',
-                          resultValue: `${displayCategory}${confidenceText}`
+                          resultLabel: '検索方針',
+                          resultValue: finalResultValue
                         } : t
                       )
                     } : prev);
@@ -761,11 +817,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                     // 旧フォーマットのフォールバック
                     const decision = rawText.trim();
                     let resultText = '';
-                    if (decision.includes('SEARCH')) resultText = '判定: Web検索モード';
-                    else if (decision.includes('CHAT')) resultText = '判定: 雑談モード';
-                    else if (decision.includes('LOGICAL')) resultText = '判定: 論理回答モード';
-                    else if (decision.includes('ANSWER')) resultText = '判定: 内部知識モード';
-                    else if (decision.includes('HYBRID')) resultText = '判定: ハイブリッド検索モード';
+                    if (decision.includes('SEARCH')) resultText = '判定: 🔍 Web検索モード';
+                    else if (decision.includes('CHAT')) resultText = '判定: 💬 おしゃべりモード';
+                    else if (decision.includes('LOGICAL')) resultText = '判定: 🧠 論理回答モード';
+                    else if (decision.includes('ANSWER')) resultText = '判定: 💡 内部知識モード';
+                    else if (decision.includes('HYBRID')) resultText = '判定: 🔍 ハイブリッド検索モード';
+                    else if (decision.includes('TASK')) resultText = '判定: 🛠️ タスク実行モード';
                     setStreamingMessage(prev => prev ? {
                       ...prev,
                       thoughtProcess: prev.thoughtProcess.map(t =>
