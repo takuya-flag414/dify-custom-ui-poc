@@ -9,6 +9,35 @@ import { SECURITY_QUESTIONS } from '../../mocks/mockUsers';
 import './Auth.css';
 
 /**
+ * パスワード要件を満たすセキュアなランダムパスワードを生成
+ * 要件: 8文字以上、英字(大小)、数字、記号を含む
+ */
+const generateSecurePassword = () => {
+    const length = 12;
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*';
+
+    const allChars = lowercase + uppercase + numbers + symbols;
+
+    // 各種類から最低1文字ずつ確保
+    let password = '';
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += symbols[Math.floor(Math.random() * symbols.length)];
+
+    // 残りをランダムに埋める
+    for (let i = password.length; i < length; i++) {
+        password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // シャッフル
+    return password.split('').sort(() => Math.random() - 0.5).join('');
+};
+
+/**
  * サインアップ（新規登録）モーダル
  * - バリデーション（メール形式、パスワード強度、表示名必須）
  * - セキュリティ情報（姓・名・生年月日・秘密の質問）
@@ -169,6 +198,29 @@ const SignupModal = ({ onClose }) => {
 
                 {/* フォーム */}
                 <form className="login-form" onSubmit={handleSubmit}>
+                    {/* 開発環境注意バナー */}
+                    <motion.div
+                        className="dev-warning-banner"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+                    >
+                        <div className="dev-warning-banner__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                <line x1="12" y1="9" x2="12" y2="13" />
+                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg>
+                        </div>
+                        <div className="dev-warning-banner__content">
+                            <p className="dev-warning-banner__title">⚠️ 開発環境のため、以下にご注意ください</p>
+                            <ul className="dev-warning-banner__list">
+                                <li>本当のメールアドレスは入力しないでください（捨てメアド推奨）</li>
+                                <li>仕事や日常で使用するパスワードは入力しないでください</li>
+                            </ul>
+                        </div>
+                    </motion.div>
+
                     {/* エラーメッセージ */}
                     {displayError && (
                         <motion.div
@@ -300,6 +352,31 @@ const SignupModal = ({ onClose }) => {
                                 </span>
                             </div>
                         )}
+                        {/* パスワード自動生成ボタン */}
+                        <div className="password-actions">
+                            <motion.button
+                                type="button"
+                                className="password-generate-btn"
+                                onClick={() => {
+                                    const generated = generateSecurePassword();
+                                    setPassword(generated);
+                                    setConfirmPassword(generated);
+                                    setShowPassword(true);
+                                }}
+                                disabled={isSubmitting}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                                    <path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01" />
+                                    <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01" />
+                                    <path d="M6 16h.01M10 16h.01M14 16h.01M18 16h.01" />
+                                </svg>
+                                自動生成
+                            </motion.button>
+                        </div>
                     </div>
 
                     {/* パスワード確認 */}

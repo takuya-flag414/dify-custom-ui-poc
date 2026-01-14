@@ -491,3 +491,141 @@
 .dark .signup-modal--expanded::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* ============================================
+   Development Warning Banner
+   - DESIGN_RULE.md 準拠: sys-color-warning (#FF9500)
+   ============================================ */
+.dev-warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 149, 0, 0.1);
+  border: 1px solid rgba(255, 149, 0, 0.25);
+  margin-bottom: 16px;
+}
+
+.dev-warning-banner__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sys-color-warning, #FF9500);
+}
+
+.dev-warning-banner__content {
+  flex: 1;
+}
+
+.dev-warning-banner__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sys-color-warning, #FF9500);
+  margin: 0 0 6px;
+}
+
+.dev-warning-banner__list {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  margin: 0;
+  padding-left: 18px;
+  list-style-type: disc;
+}
+
+.dev-warning-banner__list li {
+  margin-bottom: 2px;
+}
+
+.dev-warning-banner__list li:last-child {
+  margin-bottom: 0;
+}
+
+[data-theme="dark"] .dev-warning-banner,
+.dark .dev-warning-banner {
+  background: rgba(255, 159, 10, 0.12);
+  border-color: rgba(255, 159, 10, 0.3);
+}
+
+[data-theme="dark"] .dev-warning-banner__title,
+.dark .dev-warning-banner__title {
+  color: var(--sys-color-warning-dark, #FF9F0A);
+}
+
+/* ============================================
+   Password Generate Button
+   - DESIGN_RULE.md 準拠: Ghost/Secondary ボタン
+   - Halo Focus Ring
+   ============================================ */
+.password-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.password-generate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(0, 122, 255, 0.08);
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sys-color-primary, #007AFF);
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+
+.password-generate-btn:hover {
+  background: rgba(0, 122, 255, 0.14);
+  border-color: rgba(0, 122, 255, 0.35);
+}
+
+.password-generate-btn:active {
+  transform: scale(0.98);
+}
+
+/* Halo Focus Ring - DESIGN_RULE.md 9.1 準拠 */
+.password-generate-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 1px #FFFFFF,
+    0 0 0 4px rgba(0, 122, 255, 0.5);
+}
+
+.password-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.password-generate-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+[data-theme="dark"] .password-generate-btn,
+.dark .password-generate-btn {
+  background: rgba(10, 132, 255, 0.12);
+  border-color: rgba(10, 132, 255, 0.3);
+  color: var(--sys-color-primary-dark, #0A84FF);
+}
+
+[data-theme="dark"] .password-generate-btn:hover,
+.dark .password-generate-btn:hover {
+  background: rgba(10, 132, 255, 0.18);
+  border-color: rgba(10, 132, 255, 0.45);
+}
+
+[data-theme="dark"] .password-generate-btn:focus-visible,
+.dark .password-generate-btn:focus-visible {
+  box-shadow:
+    0 0 0 1px #000000,
+    0 0 0 4px rgba(10, 132, 255, 0.5);
+}
