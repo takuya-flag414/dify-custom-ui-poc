@@ -31,6 +31,15 @@ const PanelRightIcon = (props) => (
     </svg>
 );
 
+// ★追加: テストアイコン
+const TestTubeIcon = (props) => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5V2"></path>
+        <path d="M8.5 2h7"></path>
+        <path d="M14.5 16h-5"></path>
+    </svg>
+);
+
 const Header = ({
     mockMode,
     setMockMode,
@@ -41,8 +50,9 @@ const Header = ({
     onStartTutorial,
     currentUser,
     onRoleChange,
-    isInspectorOpen,    // ★追加
-    onToggleInspector   // ★追加
+    isInspectorOpen,
+    onToggleInspector,
+    onOpenTestPanel   // ★追加: テストパネル開閉ハンドラ
 }) => {
     const [isCopied, setIsCopied] = useState(false);
 
@@ -87,6 +97,16 @@ const Header = ({
                 >
                     <HelpIcon width="16" height="16" />
                     ガイド
+                </button>
+
+                {/* ★追加: 自動テストパネルボタン */}
+                <button
+                    className="header-btn"
+                    onClick={onOpenTestPanel}
+                    title="自動テストを実行"
+                >
+                    <TestTubeIcon width="16" height="16" />
+                    テスト
                 </button>
 
                 {/* ★一時無効化: Inspectorトグルボタン（開発中のため非表示）

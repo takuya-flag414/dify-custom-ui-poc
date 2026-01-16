@@ -12,6 +12,7 @@ import SettingsArea from './components/Settings/SettingsArea';
 import ApiConfigModal from './components/Shared/ApiConfigModal';
 import InspectorPanel from './components/Inspector/InspectorPanel';
 import ArtifactPanel from './components/Artifacts/ArtifactPanel';
+import TestPanel from './components/DevTools/TestPanel';
 import SystemBootScreen from './components/Loading/SystemBootScreen';
 
 import { useLogger } from './hooks/useLogger';
@@ -55,6 +56,9 @@ function App() {
 
   // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // ★追加: テストパネル状態
+  const [isTestPanelOpen, setIsTestPanelOpen] = useState(false);
 
   // ★ Phase A: currentUser を useAuth から取得したユーザー情報で構成
   // 認証済みの場合は authUser を使用、未認証の場合はフォールバック
@@ -410,6 +414,7 @@ function App() {
                     onRoleChange={handleRoleChange}
                     isInspectorOpen={inspector.isOpen}
                     onToggleInspector={() => inspector.isOpen ? inspector.closeInspector() : inspector.openInspector()}
+                    onOpenTestPanel={() => setIsTestPanelOpen(true)}
                   />
 
                   {/* Main Content Area */}
@@ -537,6 +542,19 @@ function App() {
               />
             )}
           </AnimatePresence>
+
+          {/* ★追加: テストパネル */}
+          <TestPanel
+            isOpen={isTestPanelOpen}
+            onClose={() => setIsTestPanelOpen(false)}
+            mockMode={mockMode}
+            addLog={addLog}
+            handleSendMessage={handleSendMessage}
+            messages={messages}
+            apiKey={apiKey}
+            apiUrl={apiUrl}
+            userId={authUser?.userId}
+          />
         </>
       )}
     </div>
