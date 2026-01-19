@@ -1771,7 +1771,7 @@ workflow:
             value: high
           search_domain_filter:
             type: mixed
-            value: '{{#1761291739140.domain_filter#}}'
+            value: '{{#1761291739140.domain_filter#}}{{#1768364899851.final_domain_filter#}}'
           search_recency_filter:
             type: constant
             value: month
@@ -1780,7 +1780,7 @@ workflow:
             value: 0.7
           top_k:
             type: constant
-            value: 10
+            value: 18
           top_p:
             type: constant
             value: 1
@@ -1885,17 +1885,21 @@ workflow:
         prompt_template:
         - id: 6d795767-8518-4886-b2c8-f5bce5f42eaf
           role: system
-          text: "# Role\nあなたは、Google検索演算子とPerplexityの仕様を熟知した「検索クエリ最適化エンジニア」です。\nユーザーの質問を分析し、**最もデータヒット率の高い検索クエリ**を生成してJSON形式で出力してください。\n\
+          text: "# Role\nあなたは、Perplexityの仕様を熟知した「検索クエリ最適化エンジニア」です。\nユーザーの質問を分析し、**最もデータヒット率の高い検索クエリ**と、**信頼できる情報源ドメイン**を生成してJSON形式で出力してください。\n\
             \n# Input Data\n- Query: {{#sys.query#}}\n- Current Time: {{#1761291739140.current_time#}}\n\
-            \n# Processing Steps (Search Logic Chain)\n出力を作成する前に、以下の要素を考慮してクエリを作成してください。\n\
-            1. **曖昧性解消**: 指示語（それ、あれ）の具体化、相対日時（今日、来週）の日付変換。\n2. **演算子適用**: `site:`,\
-            \ `filetype:`, `\"\"` (完全一致), `-` (除外) の活用。\n\n# Output Requirements\n\
-            出力するJSONには必ず以下のフィールドを含めてください。\n1. `thinking`: 変換ロジック（指示語の補完内容や演算子の追加理由）を要約した**簡潔な日本語の一文**。\n\
-            2. `optimized_query`: 最適化された検索クエリ文字列のみ。\n\n# Output Format (JSON Only)\n\
-            必ず `{` で開始し `}` で終了してください。\n\n## Output Example\n{\n  \"thinking\": \"\
-            直前の話題から「それ」を「iPhone 16」に置換し、公式情報を優先するためsiteオプションを追加しました。\",\n  \"optimized_query\"\
-            : \"iPhone 16 Pro Max 価格 site:apple.com\"\n}"
-        selected: false
+            \n# Processing Steps (Search Logic Chain)\n出力を作成する前に、以下の要素を考慮して情報を整理してください。\n\
+            1. **曖昧性解消**: 指示語（それ、あれ）の具体化、相対日時（今日、来週）の日付変換。\n2. **ドメイン選定**: 質問の内容に基づき、情報の信頼性が高いドメイン（公式ドキュメント、技術ブログ、ニュースサイト等）を特定する。\n\
+            \   - 技術的な質問 -> 公式ドキュメント (e.g., `docs.python.org`) や `stackoverflow.com`\n\
+            \   - ニュース -> 大手メディア (e.g., `reuters.com`, `nikkei.com`)\n   - 一般知識 ->\
+            \ 指定なし（空配列）\n\n# Output Requirements\n出力するJSONには必ず以下のフィールドを含めてください。\n\
+            1. `thinking`: 変換ロジックとドメイン選定理由を要約した**簡潔な日本語の一文**。\n2. `optimized_query`:\
+            \ **`site:` などの演算子を含まない**、純粋かつ最適な検索キーワード文字列。\n3. `target_domains`: 検索対象とすべきドメインの**配列**（最大3つまで）。不要な場合は空配列\
+            \ `[]`。\n\n# Output Format (JSON Only)\n必ず `{` で開始し `}` で終了してください。\n\n\
+            ## Output Example\n{\n  \"thinking\": \"Reactの最新機能に関する質問のため、指示語を具体化し、公式サイトとGitHubを優先ドメインとして設定しました。\"\
+            ,\n  \"optimized_query\": \"React 19 Server Components features\",\n \
+            \ \"target_domains\": [\"react.dev\", \"github.com\", \"ycombinator.com\"\
+            ]\n}"
+        selected: true
         title: LLM_Query_Rewrite
         type: llm
         vision:
@@ -1908,7 +1912,7 @@ workflow:
       positionAbsolute:
         x: 4284
         y: 702
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1918,8 +1922,8 @@ workflow:
         - input_type: variable
           operation: over-write
           value:
-          - '1764916701592'
-          - text
+          - '1768364899851'
+          - result
           variable_selector:
           - conversation
           - optimized_search_query
@@ -3390,7 +3394,7 @@ workflow:
       positionAbsolute:
         x: 7080
         y: 800
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -3413,8 +3417,8 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
+          name: gpt-5-mini
+          provider: langgenius/openai/openai
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
@@ -3669,17 +3673,31 @@ workflow:
       type: custom
       width: 242
     - data:
-        code: "import json\nimport re\n\ndef main(llm_output: str) -> dict:\n    try:\n\
-          \        # 1. Markdownコードブロック (```json ... ```) がある場合を除去\n        clean_text\
-          \ = re.sub(r'```(?:json)?\\s*|\\s*```', '', llm_output.strip())\n      \
-          \  \n        # 2. JSONパース\n        data = json.loads(clean_text)\n     \
-          \   \n        # 3. optimized_query フィールドの抽出\n        # 万が一キーがない場合は空文字ではなく元のクエリ等を返す安全策をとることも可能\n\
-          \        query = data.get('optimized_query', '')\n        \n        return\
-          \ {\n            \"result\": query\n        }\n    except Exception as e:\n\
-          \        # パース失敗時（ハルシネーション等）は、元のテキストをそのまま返す安全策\n        return {\n     \
-          \       \"result\": llm_output\n        }"
+        code: "import json\nimport re\n\ndef main(llm_output: str, user_domain_filter:\
+          \ str) -> dict:\n    # 1. AI出力のパース\n    try:\n        clean_text = re.sub(r'```(?:json)?\\\
+          s*|\\s*```', '', llm_output.strip())\n        data = json.loads(clean_text)\n\
+          \        \n        ai_query = data.get('optimized_query', '')\n        #\
+          \ AIが提案したドメインリスト (例: [\"react.dev\", \"github.com\"])\n        ai_domains\
+          \ = data.get('target_domains', [])\n        if isinstance(ai_domains, str):\n\
+          \            ai_domains = [d.strip() for d in ai_domains.split(',') if d.strip()]\n\
+          \            \n    except Exception:\n        # パース失敗時は安全策として入力をそのまま返す\n\
+          \        return {\n            \"result\": llm_output,\n            \"final_domain_filter\"\
+          : user_domain_filter or \"\"\n        }\n\n    # 2. ユーザー手動入力のパース (カンマ区切り文字列をリスト化)\n\
+          \    user_domains = []\n    if user_domain_filter:\n        user_domains\
+          \ = [d.strip() for d in user_domain_filter.split(',') if d.strip()]\n\n\
+          \    # 3. ドメインのマージロジック (優先順位: ユーザー > AI)\n    # ユーザー指定がある場合はそれを優先し、枠が余っていればAI提案を採用する\n\
+          \    merged_domains = []\n    \n    # まずユーザー指定を追加\n    merged_domains.extend(user_domains)\n\
+          \    \n    # 重複を避けつつAI提案を追加\n    for domain in ai_domains:\n        if domain\
+          \ not in merged_domains:\n            merged_domains.append(domain)\n  \
+          \          \n    # 4. API制限 (最大3つ) に合わせてカット\n    final_domains = merged_domains[:3]\n\
+          \    \n    # 5. カンマ区切り文字列に戻す\n    final_filter_str = \",\".join(final_domains)\n\
+          \n    return {\n        \"result\": ai_query,\n        \"final_domain_filter\"\
+          : final_filter_str\n    }"
         code_language: python3
         outputs:
+          final_domain_filter:
+            children: null
+            type: string
           result:
             children: null
             type: string
@@ -3692,6 +3710,11 @@ workflow:
           - text
           value_type: string
           variable: llm_output
+        - value_selector:
+          - '1761291739140'
+          - domain_filter
+          value_type: string
+          variable: user_domain_filter
       height: 52
       id: '1768364899851'
       position:
@@ -3773,18 +3796,18 @@ workflow:
       height: 88
       id: '17683770269110'
       position:
-        x: 2494
-        y: 493
+        x: 2523
+        y: 496
       positionAbsolute:
-        x: 2494
-        y: 493
+        x: 2523
+        y: 496
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     viewport:
-      x: -2791.9415899641267
-      y: -380.45796220242096
-      zoom: 0.7578582832551993
+      x: -8248.500659873436
+      y: -1116.7625883833941
+      zoom: 2
   rag_pipeline_variables: []

@@ -151,6 +151,13 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                                                         <span className="step-result-value">{step.resultValue}</span>
                                                     </div>
                                                 )}
+                                                {/* ★追加: 追加結果行のループ表示 */}
+                                                {step.additionalResults && step.additionalResults.map((result, i) => (
+                                                    <div key={i} className="step-result-row">
+                                                        <span className="step-result-label">{result.label}:</span>
+                                                        <span className="step-result-value">{result.value}</span>
+                                                    </div>
+                                                ))}
                                             </div>
                                         )}
                                     </div>

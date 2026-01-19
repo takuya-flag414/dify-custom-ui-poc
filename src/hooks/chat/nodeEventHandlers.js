@@ -38,7 +38,7 @@ const getFileNameToDisplay = (inputs, sessionFiles, displayFiles) => {
  */
 export const processNodeStarted = (data, context) => {
   const { sessionFiles, displayFiles, capturedOptimizedQuery, userText } = context;
-  
+
   const nodeType = data.data?.node_type;
   const title = data.data?.title;
   const inputs = data.data?.inputs || {};
@@ -171,8 +171,16 @@ export const processQueryRewriteFinished = (outputs, nodeId, addLog) => {
 
   if (parsedJson) {
     const optimizedQuery = parsedJson.optimized_query || '';
+    const targetDomains = parsedJson.target_domains || [];
+
     addLog(`[LLM_Query_Rewrite] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
     addLog(`[LLM_Query_Rewrite] optimized_query: ${optimizedQuery || 'N/A'}`, 'info');
+    addLog(`[LLM_Query_Rewrite] target_domains: ${JSON.stringify(targetDomains)}`, 'info');
+
+    // target_domains をカンマ区切りの表示文字列に変換
+    const domainsDisplay = targetDomains.length > 0
+      ? targetDomains.join(', ')
+      : null;
 
     return {
       optimizedQuery,
@@ -181,7 +189,10 @@ export const processQueryRewriteFinished = (outputs, nodeId, addLog) => {
         status: 'done',
         thinking: parsedJson.thinking || '',
         resultLabel: '最適化クエリ',
-        resultValue: optimizedQuery
+        resultValue: optimizedQuery,
+        additionalResults: domainsDisplay ? [
+          { label: '検索対象ドメイン', value: domainsDisplay }
+        ] : []
       } : t
     };
   } else if (rawText) {
