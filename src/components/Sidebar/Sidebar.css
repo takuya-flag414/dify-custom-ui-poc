@@ -135,33 +135,15 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Apple Intelligence Glow Layer */
-.btn-glow-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: conic-gradient(from 180deg at 50% 50%,
-      #00FFFF 0deg,
-      #FF00FF 90deg,
-      #FFD60A 180deg,
-      #007AFF 270deg,
-      #00FFFF 360deg);
-  opacity: 0;
-  filter: blur(12px);
-  z-index: 0;
-  transition: opacity 0.4s ease;
-  transform: scale(1.2);
+/* Simple Hover Glow (no rainbow) */
+.hero-new-chat-btn:hover {
+  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.15);
+  border-color: rgba(0, 122, 255, 0.3);
 }
 
-.hero-new-chat-btn:hover .btn-glow-layer {
-  opacity: 0.15;
-  /* Subtle glow hint */
-}
-
-[data-theme='dark'] .hero-new-chat-btn:hover .btn-glow-layer {
-  opacity: 0.25;
+[data-theme='dark'] .hero-new-chat-btn:hover {
+  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.2);
+  border-color: rgba(10, 132, 255, 0.4);
 }
 
 .hero-new-chat-btn.active {
@@ -466,4 +448,29 @@
 
 .footer-label {
   font-size: 13px;
+}
+
+/* Multiple footer buttons layout */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Intelligence Tools Button - Simple Styling */
+.footer-btn.intelligence-btn:hover {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme='dark'] .footer-btn.intelligence-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Collapsed sidebar adjustments */
+.sidebar.collapsed .sidebar-footer {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }

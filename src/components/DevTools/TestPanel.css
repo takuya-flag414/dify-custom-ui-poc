@@ -381,7 +381,7 @@
     color: var(--sys-color-danger, #FF3B30);
 }
 
-/* AI Glow Animation (テスト実行中) */
+/* Simple Progress Bar (no rainbow) */
 .test-panel-modal.running .test-panel-header::before {
     content: "";
     position: absolute;
@@ -389,23 +389,22 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg,
-            var(--ai-gradient-cyan, #00FFFF),
-            var(--ai-gradient-magenta, #FF00FF),
-            var(--ai-gradient-yellow, #FFD60A),
-            var(--ai-gradient-blue, #007AFF),
-            var(--ai-gradient-cyan, #00FFFF));
+    background: var(--sys-color-primary, #007AFF);
     background-size: 200% 100%;
-    animation: ai-glow-slide 2s linear infinite;
+    animation: progress-slide 1.5s ease-in-out infinite;
 }
 
-@keyframes ai-glow-slide {
+@keyframes progress-slide {
     0% {
-        background-position: 200% 0;
+        transform: translateX(-100%);
+    }
+
+    50% {
+        transform: translateX(0);
     }
 
     100% {
-        background-position: 0 0;
+        transform: translateX(100%);
     }
 }
 

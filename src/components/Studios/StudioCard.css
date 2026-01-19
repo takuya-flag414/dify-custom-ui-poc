@@ -1,0 +1,272 @@
+/**
+ * StudioCard - Styles
+ * 
+ * Liquid Glass マテリアルとテーマカラーGlow
+ */
+
+.studio-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    min-height: 200px;
+    border-radius: 24px;
+    cursor: pointer;
+    outline: none;
+    overflow: visible;
+    will-change: transform;
+}
+
+/* Focus ring */
+.studio-card:focus-visible {
+    box-shadow:
+        0 0 0 2px var(--color-bg-body),
+        0 0 0 4px var(--card-glow-primary, var(--color-primary));
+}
+
+/* Glow Layer */
+.studio-card__glow {
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(ellipse at center,
+            var(--card-glow-alpha, rgba(0, 122, 255, 0.25)) 0%,
+            transparent 70%);
+    filter: blur(30px);
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    will-change: opacity;
+}
+
+/* Glass Surface */
+.studio-card__surface {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 24px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Border Highlight */
+.studio-card__border {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    z-index: 2;
+    transition: border-color 0.3s ease;
+}
+
+.studio-card:hover .studio-card__border {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Inner Shadow for depth */
+.studio-card__surface::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
+
+/* Icon Container */
+.studio-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.studio-card__emoji {
+    font-size: 40px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Content */
+.studio-card__content {
+    text-align: center;
+    padding: 0 8px;
+}
+
+.studio-card__name {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-text-main);
+    margin: 0 0 6px 0;
+}
+
+.studio-card__description {
+    font-size: 13px;
+    color: var(--color-text-sub);
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Theme Color Indicator */
+.studio-card__color-indicator {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg,
+            var(--card-glow-primary, #007AFF),
+            var(--card-glow-secondary, #0055FF));
+    opacity: 0.6;
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+.studio-card:hover .studio-card__color-indicator {
+    opacity: 1;
+    width: 60px;
+}
+
+/* Light Mode */
+[data-theme='light'] .studio-card__surface {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme='light'] .studio-card__border {
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .studio-card:hover .studio-card__border {
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme='light'] .studio-card__icon {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .studio-card,
+    .studio-card__glow,
+    .studio-card__icon {
+        transition: none !important;
+    }
+}
+
+/* ===== Action Buttons ===== */
+.studio-card__actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+}
+
+.studio-card__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+
+    /* mat-popover Material */
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.studio-card__action-btn--edit {
+    color: #007AFF;
+}
+
+.studio-card__action-btn--edit:hover {
+    background: rgba(0, 122, 255, 0.15);
+    box-shadow:
+        0 4px 12px rgba(0, 122, 255, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.studio-card__action-btn--delete {
+    color: #FF3B30;
+}
+
+.studio-card__action-btn--delete:hover {
+    background: rgba(255, 59, 48, 0.15);
+    box-shadow:
+        0 4px 12px rgba(255, 59, 48, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Dark Mode Action Buttons */
+@media (prefers-color-scheme: dark) {
+    .studio-card__action-btn {
+        background: rgba(60, 60, 60, 0.8);
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .studio-card__action-btn--edit {
+        color: #0A84FF;
+    }
+
+    .studio-card__action-btn--edit:hover {
+        background: rgba(10, 132, 255, 0.25);
+        box-shadow:
+            0 4px 12px rgba(10, 132, 255, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .studio-card__action-btn--delete {
+        color: #FF453A;
+    }
+
+    .studio-card__action-btn--delete:hover {
+        background: rgba(255, 69, 58, 0.25);
+        box-shadow:
+            0 4px 12px rgba(255, 69, 58, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Light Theme Action Buttons */
+[data-theme='light'] .studio-card__action-btn {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}

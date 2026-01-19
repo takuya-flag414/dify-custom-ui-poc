@@ -1,0 +1,20 @@
+/**
+ * AmbientGlow - Styles（超軽量版）
+ * blur効果なし、シンプルなグラデーション背景
+ */
+
+.ambient-glow-container {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--ambient-opacity, 0.15);
+    background: linear-gradient(135deg,
+            var(--glow-primary, #007AFF) 0%,
+            transparent 60%);
+    transition: opacity 0.3s ease, background 0.5s ease;
+}
+
+[data-theme='dark'] .ambient-glow-container {
+    opacity: calc(var(--ambient-opacity, 0.15) * 0.5);
+}

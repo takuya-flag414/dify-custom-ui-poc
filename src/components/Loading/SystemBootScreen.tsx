@@ -2,7 +2,7 @@
 import React from 'react';
 // IntelligenceOrbはまだJSXファイルのため型を緩和
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const IntelligenceOrb = require('../Shared/IntelligenceOrb').default as React.FC<any>;
+import IntelligenceOrb from '../Shared/IntelligenceOrb';
 
 /**
  * SystemBootScreen

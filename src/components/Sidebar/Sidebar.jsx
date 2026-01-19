@@ -1,7 +1,7 @@
 // src/components/Sidebar/Sidebar.jsx
 import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon } from 'lucide-react';
 import DeletePopover from './DeletePopover';
 import ContextMenu from './ContextMenu';
 import { groupConversationsByDate } from '../../utils/dateUtils';
@@ -262,9 +262,6 @@ const Sidebar = ({
               whileHover="hover"
               whileTap="tap"
             >
-              {/* Glow Effect Layer */}
-              <div className="btn-glow-layer" />
-
               <motion.span
                 layoutId="new-chat-icon"
                 className="hero-icon"
@@ -367,6 +364,59 @@ const Sidebar = ({
 
         {/* 4. Footer */}
         <div className="sidebar-footer">
+          {/* Studios Button */}
+          <button
+            className={`footer-btn studios-btn ${currentView === 'studios' ? 'active' : ''}`}
+            onClick={() => onViewChange && onViewChange('studios')}
+            title="Studios"
+          >
+            <motion.div layout className="footer-icon-anchor">
+              <LayersIcon size={18} strokeWidth={2} />
+            </motion.div>
+
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10, width: 0 }}
+                  animate={{ opacity: 1, x: 0, width: 'auto' }}
+                  exit={{ opacity: 0, x: -10, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="footer-label"
+                  style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                >
+                  Studios
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+
+          {/* Intelligence Tools Button */}
+          <button
+            className={`footer-btn intelligence-btn ${currentView === 'tools' ? 'active' : ''}`}
+            onClick={() => onViewChange && onViewChange('tools')}
+            title="Intelligence Tools"
+          >
+            <motion.div layout className="footer-icon-anchor">
+              <SparklesIcon size={18} strokeWidth={2} />
+            </motion.div>
+
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10, width: 0 }}
+                  animate={{ opacity: 1, x: 0, width: 'auto' }}
+                  exit={{ opacity: 0, x: -10, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="footer-label"
+                  style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                >
+                  Intelligence
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+
+          {/* Settings Button */}
           <button
             className={`footer-btn ${currentView === 'settings' ? 'active' : ''}`}
             onClick={handleGoToSettings}

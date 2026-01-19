@@ -143,3 +143,9 @@ export const SparklesIcon = (props) => (
         <path d="M12 3l1.912 5.813a2 2 0 0 0 1.272 1.272L21 12l-5.813 1.912a2 2 0 0 0-1.272 1.272L12 21l-1.912-5.813a2 2 0 0 0-1.272-1.272L3 12l5.813-1.912a2 2 0 0 0 1.272-1.272L12 3z"></path>
     </svg>
 );
+
+export const ChevronRightIcon = (props) => (
+    <svg {...defaultProps} {...props}>
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+);

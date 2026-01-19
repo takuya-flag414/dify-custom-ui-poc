@@ -1,4 +1,5 @@
 /* src/components/Chat/WelcomeScreen.css */
+/* Zen Mode - Feature B */
 
 /* --- Design Tokens & Variables --- */
 :root {
@@ -15,43 +16,32 @@
 
     /* Ethereal Background Colors (Light Mode) */
     --bg-mesh-1: rgba(0, 122, 255, 0.08);
-    /* Blue tint */
     --bg-mesh-2: rgba(255, 0, 255, 0.05);
-    /* Magenta tint */
 }
 
 [data-theme='dark'] {
-    /* Ethereal Background Colors (Dark Mode) */
     --bg-mesh-1: rgba(0, 122, 255, 0.15);
     --bg-mesh-2: rgba(100, 50, 255, 0.1);
 }
 
-/* * Main Container 
- * スクロール制御と背景の基準点となる
- */
+/* === Zen Mode Container === */
 .welcome-container {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
     height: 100%;
-    /* 親要素いっぱいに広げる */
     overflow-y: auto;
-    /* スクロールはこのコンテナ内で発生させる */
     position: relative;
-    /* 子要素の基準点 */
-
-    /* フォールバック背景色 */
     background-color: var(--color-bg-base);
 }
 
-/* * Background Layer Note:
- * グラデーション背景は ChatArea.css の .chat-area-initial に移動しました。
- * これにより、ChatInputを含む全体にグラデーションが適用されます。
- */
+.welcome-container--zen {
+    /* 中央揃えで禅のような空白を強調 */
+    padding: 2rem;
+}
 
-/* * Content Wrapper
- * 背景の上に配置されるコンテンツ領域
- */
+/* === Content Wrapper === */
 .welcome-inner {
     max-width: 800px;
     width: 100%;
@@ -59,19 +49,32 @@
     flex-direction: column;
     gap: 3rem;
     padding: 4rem 1.5rem;
-
     position: relative;
     z-index: 1;
-    /* 背景より手前 */
 }
 
-/* --- Header with Intelligent Shimmer --- */
-.welcome-header {
+.welcome-inner--zen {
+    /* Zen Mode: 中央配置、コンパクトなギャップ */
+    align-items: center;
+    text-align: center;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+}
+
+/* === Greeting Display === */
+.welcome-greeting {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 1.25rem;
+    gap: 1rem;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Focus Fade: フォーカス時にフェードアウト */
+.welcome-greeting.faded {
+    opacity: 0.3;
+    transform: translateY(-8px);
 }
 
 .welcome-logo-badge {
@@ -79,13 +82,10 @@
     align-items: center;
     justify-content: center;
     padding: 6px 14px;
-
-    /* Glass Material for Badge */
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(0, 0, 0, 0.05);
-
     color: var(--color-text-sub);
     font-size: 11px;
     font-weight: 600;
@@ -104,61 +104,64 @@
 .welcome-title {
     font-family: var(--font-display);
     font-size: 34px;
-    /* Large Title */
     font-weight: 700;
     letter-spacing: var(--tracking-large-title);
     line-height: 1.1;
     margin: 0;
     color: var(--color-text-main);
-
-    /* Text Shimmer Effect (Subtle) */
-    background: linear-gradient(135deg,
-            var(--color-text-main) 40%,
-            var(--color-primary) 50%,
-            var(--color-text-main) 60%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    /* 常時微細な質感を持たせる */
 }
 
 .welcome-subtitle {
     font-size: 17px;
-    /* Body */
     letter-spacing: var(--tracking-body);
     color: var(--color-text-sub);
-    max-width: 580px;
+    max-width: 480px;
     margin: 0;
     line-height: 1.5;
     font-weight: 400;
 }
 
-/* --- Grid Layout --- */
-.welcome-grid-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+/* === Hero ChatInput (Centered) === */
+.welcome-hero-input {
+    width: 100%;
+    max-width: 640px;
+    margin: 1rem 0;
 }
 
-.welcome-section-label {
-    font-size: 13px;
-    /* Caption 1 */
-    font-weight: 600;
+/* Override ChatInput styles for hero variant */
+.welcome-hero-input .chat-input-container,
+.welcome-hero-input .chat-input-container-centered {
+    max-width: 100%;
+    padding: 0;
+}
+
+.welcome-hero-input .chat-input-hud-container {
+    /* より大きなシャドウで存在感を出す */
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .welcome-hero-input .chat-input-hud-container {
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* === Guide Text === */
+.welcome-guide-text {
+    font-size: 14px;
     color: var(--color-text-muted);
-    margin: 0 0 0 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    opacity: 0.8;
+    line-height: 1.6;
+    margin: 0;
+    transition: opacity 0.2s ease;
 }
 
-.welcome-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    /* 16px spacing per design rule */
+.welcome-guide-text.faded {
+    opacity: 0.2;
 }
 
-/* --- Footer --- */
+/* === Footer === */
 .welcome-footer-links {
     text-align: center;
     font-size: 13px;
@@ -166,8 +169,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: auto;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    transition: opacity 0.2s ease;
+}
+
+.welcome-footer-links.faded {
+    opacity: 0.2;
+}
+
+.footer-divider {
+    opacity: 0.3;
 }
 
 .link-button {
@@ -175,6 +187,7 @@
     border: none;
     padding: 0;
     color: var(--color-primary);
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: opacity 0.2s ease;
@@ -185,17 +198,32 @@
     text-decoration: underline;
 }
 
-/* Responsive */
+/* === Responsive === */
 @media (max-width: 768px) {
-    .welcome-grid {
-        grid-template-columns: 1fr;
-    }
-
     .welcome-title {
         font-size: 28px;
     }
 
-    .welcome-inner {
-        padding: 2rem 1rem;
+    .welcome-inner--zen {
+        padding: 1.5rem 1rem;
+        gap: 1.5rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 15px;
+    }
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+
+    .welcome-greeting,
+    .welcome-guide-text,
+    .welcome-footer-links {
+        transition: none;
+    }
+
+    .welcome-greeting.faded {
+        transform: none;
     }
 }

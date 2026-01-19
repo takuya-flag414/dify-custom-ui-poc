@@ -249,6 +249,23 @@
 
   /* モーダル背景 */
   --color-bg-modal: rgba(255, 255, 255, 0.95);
+
+  /* ========================================
+     Apple Intelligence Colors & Ambient Glow (Studios)
+     ======================================== */
+  /* Base AI Gradient Colors */
+  --ai-gradient-cyan: #00FFFF;
+  --ai-gradient-magenta: #FF00FF;
+  --ai-gradient-yellow: #FFD60A;
+  --ai-gradient-blue: #007AFF;
+
+  /* Ambient Glow - Dynamic Theme Colors (初期値はblue) */
+  --glow-primary: #007AFF;
+  --glow-secondary: #0055FF;
+  --glow-accent: #E0F0FF;
+  --glow-primary-alpha: rgba(0, 122, 255, 0.25);
+  --glow-secondary-alpha: rgba(0, 85, 255, 0.25);
+  --glow-transition-duration: 1500ms;
 }
 
 /* ========================================
@@ -503,21 +520,16 @@ body {
   stroke-width: 2.5;
 }
 
-/* --- Search Options Popover --- */
+/* --- Search Options Popover (Transparent wrapper for ContextSelector) --- */
 .search-options-popover {
   position: absolute;
   bottom: 100%;
   left: 0;
   margin-bottom: var(--space-2);
-  width: 320px;
-  background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-4);
   z-index: 50;
   animation: popover-slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: bottom left;
+  /* No background/border/padding - ContextSelector provides its own Liquid Glass material */
 }
 
 @keyframes popover-slide-up {

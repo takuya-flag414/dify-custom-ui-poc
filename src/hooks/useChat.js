@@ -29,6 +29,20 @@ import {
   prepareRegenerate 
 } from './chat/messageActions';
 
+/**
+ * APIキー/URL未設定エラーメッセージを生成
+ */
+const createConfigError = () => ({
+  id: `msg_${Date.now()}_error`,
+  role: 'system',
+  type: 'error',
+  text: '',
+  rawError: 'API設定が不完全です。設定画面でAPIキーとAPIエンドポイントを設定してください。',
+  isStreaming: false,
+  timestamp: new Date().toISOString(),
+  thoughtProcess: []
+});
+
 
 /**
  * useChat - チャット機能のカスタムフック

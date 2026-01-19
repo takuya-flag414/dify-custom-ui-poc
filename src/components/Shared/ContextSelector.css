@@ -1,50 +1,146 @@
 /* src/components/Shared/ContextSelector.css */
 
-/* --- Container --- */
+/* --- AI Intelligence Gradient Variables --- */
+:root {
+    --ai-gradient-cyan: #00FFFF;
+    --ai-gradient-magenta: #FF00FF;
+    --ai-gradient-yellow: #FFD60A;
+    --ai-gradient-blue: #007AFF;
+}
+
+/* --- Container with Liquid Glass Material --- */
 .context-selector-container {
     display: flex;
     flex-direction: column;
-    padding: 4px 0;
-    min-width: 280px;
+    padding: 8px;
+    min-width: 290px;
     animation: fadeIn 0.2s ease-out;
+
+    /* 🌊 Liquid Glass Material */
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+
+    /* ✨ Specular Edge (ガラスの縁の反射) */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.08),
+        0 8px 20px rgba(0, 0, 0, 0.04),
+        0 0 0 0.5px rgba(255, 255, 255, 0.6) inset;
+
+    /* 📐 Sequoia Corner Radius */
+    border-radius: 18px;
 }
 
 .context-section-label {
-    padding: 4px 8px;
+    padding: 6px 10px;
     font-size: 11px;
-    /* V2: 10px → 11px 視認性UP */
-    font-weight: 700;
+    font-weight: 600;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
     user-select: none;
+    margin-bottom: 6px;
+    opacity: 0.8;
+}
+
+/* --- Mode Groups --- */
+.primary-modes-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin-bottom: 4px;
 }
 
+/* --- Trigger Button (Accordion Toggle) --- */
+.advanced-trigger-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+    user-select: none;
+}
+
+.advanced-trigger-btn:hover {
+    background-color: var(--color-hover-overlay);
+    color: var(--color-text-main);
+}
+
+.trigger-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    /* Snappy rotation */
+    opacity: 0.7;
+}
+
+.advanced-trigger-btn:hover .trigger-icon {
+    opacity: 1;
+}
+
+.trigger-icon.open {
+    transform: rotate(90deg);
+}
+
+.trigger-text {
+    opacity: 0.9;
+}
+
+/* --- Advanced Wrapper --- */
+.advanced-modes-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* overflow: hidden is handled by motion inline styles */
+}
+
+.advanced-divider-label {
+    padding: 6px 8px 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    user-select: none;
+}
+
+/* --- Mode Item (Transparent Base, Visible on Hover/Active) --- */
 .mode-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     width: 100%;
     border: 1px solid transparent;
-    border-radius: var(--radius-xl);
-    /* V2: 12px → 16px */
+    border-radius: 12px;
     background-color: transparent;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     text-align: left;
-    margin-bottom: 2px;
 }
 
 .mode-item:hover {
-    background-color: var(--color-hover-overlay);
-    /* V2 マイクロインタラクション */
-    transform: scale(1.02);
-    filter: brightness(1.02);
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* --- Color Themes (Active State) --- */
+/* ... (Color Themes: Fast, Standard, Deep, Enterprise, Hybrid - Unchanged) ... */
+
 /* 1. Fast (Amber) */
 .mode-item.active.mode-fast {
     background-color: #FFFBEB;
@@ -57,16 +153,17 @@
     color: #D97706;
 }
 
-/* 2. Standard (Gray/Neutral) */
+/* 2. Standard / Auto (Simple Blue Accent) */
 .mode-item.active.mode-standard {
-    background-color: #F3F4F6;
-    border-color: #E5E7EB;
+    background: rgba(0, 122, 255, 0.1);
+    border-color: rgba(0, 122, 255, 0.3);
+    box-shadow: 0 0 12px rgba(0, 122, 255, 0.15);
 }
 
 .mode-item.active.mode-standard .mode-label,
 .mode-item.active.mode-standard .mode-icon-wrapper,
 .mode-item.active.mode-standard .check-icon {
-    color: #4B5563;
+    color: #007AFF;
 }
 
 /* 3. Research (Blue) */
@@ -133,7 +230,6 @@
 
 .mode-desc {
     font-size: 11px;
-    /* V2: 10px → 11px */
     color: var(--color-text-muted);
     white-space: nowrap;
     overflow: hidden;
@@ -143,7 +239,6 @@
 /* --- Advanced Settings Static Wrapper --- */
 .advanced-options-wrapper-static {
     margin-top: 4px;
-    /* 間隔調整 */
 }
 
 /* Divider */
@@ -151,42 +246,33 @@
     height: 1px;
     background-color: var(--color-border);
     margin: 4px 12px 8px 12px;
-    /* インデントを持たせてリスト内の区切り線らしく */
 }
 
-/* Advanced Link (Unified with mode-item style) */
+/* Advanced Link (Transparent Base) */
 .advanced-link {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    /* mode-itemと同じgap */
-    padding: 10px 12px;
-    /* mode-itemと同じpadding */
+    padding: 12px 14px;
     border-radius: 12px;
-    /* radius-xl */
     background: transparent;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     text-align: left;
-    /* 左揃え強制 */
 }
 
-.advanced-link:hover {
-    background-color: var(--color-hover-overlay);
-    /* V2 マイクロインタラクション */
-    transform: scale(1.02);
-    filter: brightness(1.02);
+.advanced-link:hover:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Disabled State */
 .advanced-link.disabled {
     opacity: 0.5;
-    /* 半透明 */
     cursor: default;
-    /* not-allowedよりも控えめに */
     background-color: transparent !important;
 }
 
@@ -216,7 +302,6 @@
 
 .advanced-label {
     font-size: 13px;
-    /* mode-labelと同じ */
     font-weight: 700;
     color: var(--color-text-main);
     line-height: 1.2;
@@ -224,7 +309,6 @@
 
 .advanced-sub {
     font-size: 11px;
-    /* V2: 10px → 11px */
     color: var(--color-text-muted);
     white-space: nowrap;
     overflow: hidden;
@@ -425,16 +509,7 @@
     color: #FBBF24;
 }
 
-[data-theme='dark'] .mode-item.active.mode-standard {
-    background-color: rgba(75, 85, 99, 0.2);
-    border-color: rgba(75, 85, 99, 0.4);
-}
-
-[data-theme='dark'] .mode-item.active.mode-standard .mode-label,
-[data-theme='dark'] .mode-item.active.mode-standard .mode-icon-wrapper,
-[data-theme='dark'] .mode-item.active.mode-standard .check-icon {
-    color: #D1D5DB;
-}
+/* Dark Mode: Standard Mode AI Glow (legacy override - now handled below) */
 
 [data-theme='dark'] .mode-item.active.mode-deep {
     background-color: rgba(37, 99, 235, 0.15);
@@ -467,4 +542,58 @@
 [data-theme='dark'] .mode-item.active.mode-hybrid .mode-icon-wrapper,
 [data-theme='dark'] .mode-item.active.mode-hybrid .check-icon {
     color: #A78BFA;
+}
+
+/* Dark Mode: Liquid Glass Container */
+[data-theme='dark'] .context-selector-container {
+    /* 🌙 Warm-tinted Dark Glass */
+    background: rgba(38, 36, 42, 0.75);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.25),
+        0 8px 20px rgba(0, 0, 0, 0.15),
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* Dark Mode: Mode Items - Transparent Base */
+[data-theme='dark'] .mode-item {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+[data-theme='dark'] .mode-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark Mode: Standard Mode AI Glow */
+[data-theme='dark'] .mode-item.active.mode-standard {
+    background: rgba(0, 122, 255, 0.15);
+    border-color: rgba(0, 122, 255, 0.35);
+}
+
+[data-theme='dark'] .mode-item.active.mode-standard::before {
+    opacity: 0.25;
+}
+
+[data-theme='dark'] .mode-item.active.mode-standard .mode-label,
+[data-theme='dark'] .mode-item.active.mode-standard .mode-icon-wrapper,
+[data-theme='dark'] .mode-item.active.mode-standard .check-icon {
+    color: #0A84FF;
+}
+
+/* Dark Mode: Advanced Link */
+[data-theme='dark'] .advanced-link {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .advanced-link:hover:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark Mode: Divider */
+[data-theme='dark'] .advanced-divider {
+    background-color: rgba(255, 255, 255, 0.08);
 }

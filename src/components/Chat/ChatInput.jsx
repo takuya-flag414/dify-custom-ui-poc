@@ -82,6 +82,14 @@ const GlobeAltIcon = () => (
   </svg>
 );
 
+const CloudArrowUpIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+    <path d="M12 12v9"></path>
+    <path d="m16 16-4-4-4 4"></path>
+  </svg>
+);
+
 // --- Helper: Get Mode Info ---
 const getModeInfo = (settings) => {
   const { ragEnabled, webMode, domainFilters } = settings;
@@ -190,6 +198,7 @@ const ChatInput = ({
   const addFiles = useCallback(async (newFiles) => {
     if (newFiles && newFiles.length > 0) {
       const initialFiles = newFiles.map(file => ({
+        id: `file-${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`, // Unique ID
         file,
         scanStatus: isScannableFile(file.name) ? 'scanning' : 'skipped',
         hasWarning: false,
@@ -204,7 +213,7 @@ const ChatInput = ({
         return prev.map(sf => {
           if (sf.scanStatus === 'scanning') {
             const result = scannedResults.find(r => r.file === sf.file);
-            if (result) return result;
+            if (result) return { ...sf, ...result }; // Merge result, keeping ID
           }
           return sf;
         });
@@ -274,6 +283,44 @@ const ChatInput = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
+          {/* Drop Zone Overlay */}
+          <AnimatePresence>
+            {isDragging && (
+              <motion.div
+                className="drop-zone-overlay"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="drop-zone-content">
+                  <div className="drop-zone-icon-wrapper">
+                    <CloudArrowUpIcon />
+                  </div>
+                  <p className="drop-zone-text">ファイルをドロップして追加</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Drag Expand Spacer - ファイルがない時のみ高さを拡張 */}
+          <AnimatePresence>
+            {isDragging && !hasFiles && (
+              <motion.div
+                className="drag-expand-spacer"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 80, opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 35,
+                  opacity: { duration: 0.15 }
+                }}
+              />
+            )}
+          </AnimatePresence>
+
           {/* 1. File Tray (Collapsible) */}
           <AnimatePresence>
             {hasFiles && (
@@ -285,29 +332,53 @@ const ChatInput = ({
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
                 <div className="file-tray scrollbar-overlay">
-                  {selectedFiles.map((sf, idx) => {
-                    const statusClass = sf.scanStatus === 'scanning' ? 'scanning' :
-                      sf.hasWarning ? 'warning' : '';
-                    return (
-                      <div key={`pend-${idx}`} className={`file-card pending ${statusClass}`}>
-                        <FileIcon filename={sf.file.name} className="file-tray-icon" />
-                        <div className="file-card-content">
-                          <span className="file-card-name">{sf.file.name}</span>
-                          {sf.scanStatus === 'scanning' && <span className="file-scan-status">スキャン中...</span>}
-                        </div>
-                        {sf.hasWarning && (
-                          <PrivacyShieldButton
-                            detections={sf.detections}
-                            fileName={sf.file.name}
-                            size="small"
-                          />
-                        )}
-                        <button className="file-remove-btn" onClick={() => removeSelectedFile(idx)} title="削除">
-                          <CloseIcon />
-                        </button>
-                      </div>
-                    );
-                  })}
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {selectedFiles.map((sf, idx) => {
+                      const statusClass = sf.scanStatus === 'scanning' ? 'scanning' :
+                        sf.hasWarning ? 'warning' : '';
+                      return (
+                        <motion.div
+                          key={sf.id} // Use Unique ID
+                          layout
+                          initial={{ opacity: 0, x: -20, scale: 0.9 }}
+                          animate={{
+                            opacity: 1,
+                            x: 0,
+                            scale: 1,
+                            transition: {
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 25,
+                              delay: idx * 0.05 // Staggered effect
+                            }
+                          }}
+                          exit={{
+                            opacity: 0,
+                            x: 0, // No horizontal movement on exit
+                            scale: 0.5, // Shrink out
+                            transition: { duration: 0.15 }
+                          }}
+                          className={`file-card pending ${statusClass}`}
+                        >
+                          <FileIcon filename={sf.file.name} className="file-tray-icon" />
+                          <div className="file-card-content">
+                            <span className="file-card-name">{sf.file.name}</span>
+                            {sf.scanStatus === 'scanning' && <span className="file-scan-status">スキャン中...</span>}
+                          </div>
+                          {sf.hasWarning && (
+                            <PrivacyShieldButton
+                              detections={sf.detections}
+                              fileName={sf.file.name}
+                              size="small"
+                            />
+                          )}
+                          <button className="file-remove-btn" onClick={() => removeSelectedFile(idx)} title="削除">
+                            <CloseIcon />
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             )}

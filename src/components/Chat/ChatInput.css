@@ -57,12 +57,18 @@
         0 20px 50px rgba(0, 0, 0, 0.12);
 }
 
-/* Drag & Drop State */
+/* Drag & Drop State - スケール演出でリッチなドロップ体験 */
 .chat-input-hud-container.dragging {
-    background: rgba(239, 246, 255, 0.9);
-    /* Blue tint */
+    background: rgba(239, 246, 255, 0.95);
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px var(--color-primary);
+    /* 多層グロー効果でAI感を演出 */
+    box-shadow:
+        0 0 0 4px rgba(0, 122, 255, 0.25),
+        0 0 20px rgba(0, 122, 255, 0.15),
+        0 8px 32px rgba(0, 122, 255, 0.1);
+    /* スケールで「膨らむ」錯覚を演出（高さ変更なし） */
+    transform: scale(1.02);
+    transform-origin: center bottom;
 }
 
 /* Privacy Warning State */
@@ -73,74 +79,163 @@
         inset 0 0 0 1px var(--color-warning-amber);
 }
 
+/* --- Drop Zone Overlay --- */
+.drop-zone-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    pointer-events: none;
+    /* Allow drops to pass through if needed, but usually handled by container */
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: var(--color-primary);
+}
+
+.drop-zone-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(0, 122, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    box-shadow: 0 0 0 1px rgba(0, 122, 255, 0.2);
+    animation: bounce 1s infinite alternate cubic-bezier(0.5, 0, 0.5, 1);
+}
+
+.drop-zone-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-8px);
+    }
+}
+
+/* Hide other elements when dragging */
+/* Hide main input and file tray when dragging */
+.chat-input-hud-container.dragging .input-main-row,
+.chat-input-hud-container.dragging .file-tray-wrapper {
+    opacity: 0.1;
+    pointer-events: none;
+    filter: blur(2px);
+    transition: opacity 0.2s, filter 0.2s;
+}
+
+/* --- Drag Expand Spacer --- */
+.drag-expand-spacer {
+    width: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+
 /* --- 1. File Tray Area --- */
 .file-tray-wrapper {
     width: 100%;
     background-color: rgba(0, 0, 0, 0.02);
-    /* Slight darkening for tray area */
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .file-tray {
     display: flex;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: 12px;
+    /* Increased gap */
+    padding: 16px;
+    /* Increased padding */
     overflow-x: auto;
     width: 100%;
-    /* Rubber banding scroll effect */
     overscroll-behavior-x: contain;
+    align-items: flex-start;
 }
 
-/* File Card Styles (inherited/adapted) */
+/* File Card Styles (Modernized & Larger) */
 .file-card {
     flex-shrink: 0;
     display: flex;
+    flex-direction: row;
+    /* Keep horizontal but bigger */
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background-color: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 10px;
-    font-size: 12px;
+    gap: 12px;
+    padding: 12px 16px;
+    /* Larger padding */
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    /* More rounded */
     color: var(--color-text-main);
     user-select: none;
-    max-width: 220px;
+    min-width: 200px;
+    max-width: 300px;
+    /* Increased max-width */
+    height: auto;
+    /* Let it grow */
     transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    /* For absolute close button positioning if needed */
 }
 
 .file-card:hover {
-    background-color: rgba(255, 255, 255, 0.9);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    background-color: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.12);
 }
 
 .file-card-content {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    flex: 1;
 }
 
 .file-card-name {
+    font-size: 14px;
+    /* Larger text */
+    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-text-main);
 }
 
 .file-scan-status {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--color-primary);
+    margin-top: 2px;
 }
 
+/* Override FileIcon size contextually if possible, or use CSS scale */
 .file-tray-icon {
-    width: 24px;
-    height: 24px;
-    color: var(--color-text-sub);
+    width: 32px;
+    /* Larger Icon */
+    height: 32px;
+    color: var(--color-primary);
+    /* Use primary color for icons */
+    flex-shrink: 0;
 }
 
 .file-remove-btn {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    /* Larger button */
+    height: 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -151,7 +246,7 @@
     cursor: pointer;
     transition: all 0.2s;
     opacity: 0;
-    /* Hidden by default */
+    margin-left: 4px;
 }
 
 .file-card:hover .file-remove-btn {
@@ -163,27 +258,27 @@
     color: white;
 }
 
+
 /* --- 2. Main Input Row --- */
 .input-main-row {
     display: flex;
     align-items: flex-end;
-    /* Align to bottom as textarea grows */
-    padding: 8px;
-    min-height: 56px;
-    gap: 8px;
+    padding: 12px;
+    /* More breathing room */
+    min-height: 60px;
+    gap: 12px;
 }
 
 /* Left Actions (Add Button) */
 .input-left-actions {
     display: flex;
     align-items: center;
-    padding-bottom: 6px;
-    /* Align with single line text */
+    padding-bottom: 8px;
 }
 
 .add-file-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: transparent;
@@ -199,23 +294,22 @@
     background: rgba(0, 0, 0, 0.05);
     color: var(--color-text-main);
     transform: rotate(90deg);
-    /* Playful interaction */
 }
 
-/* Native Textarea (Invisible) */
+/* Native Textarea */
 .native-textarea {
     flex: 1;
     border: none;
     background: transparent;
-    padding: 10px 4px;
-    /* Align vertically */
+    padding: 12px 4px;
     font-family: var(--font-family-base);
-    font-size: 17px;
+    font-size: 16px;
+    /* Standard readable size */
     line-height: 1.5;
     resize: none;
     outline: none;
     color: var(--color-text-main);
-    max-height: 250px;
+    max-height: 300px;
 }
 
 .native-textarea::placeholder {
@@ -227,14 +321,14 @@
 .input-right-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding-bottom: 4px;
+    gap: 10px;
+    padding-bottom: 6px;
 }
 
-/* Context Pill (Minimalist) */
+/* Context Pill */
 .context-pill {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -288,18 +382,50 @@
     border-color: var(--glass-hud-border);
 }
 
+[data-theme='dark'] .chat-input-hud-container.dragging {
+    background: rgba(10, 132, 255, 0.15);
+    border-color: var(--color-primary);
+    /* ダークモード用多層グロー */
+    box-shadow:
+        0 0 0 4px rgba(10, 132, 255, 0.3),
+        0 0 24px rgba(10, 132, 255, 0.2),
+        0 8px 32px rgba(10, 132, 255, 0.15);
+    transform: scale(1.02);
+    transform-origin: center bottom;
+}
+
+[data-theme='dark'] .drop-zone-icon-wrapper {
+    background: rgba(10, 132, 255, 0.2);
+    box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.3);
+    color: #409CFF;
+}
+
+[data-theme='dark'] .drop-zone-text {
+    color: #409CFF;
+}
+
 [data-theme='dark'] .file-tray-wrapper {
     background-color: rgba(255, 255, 255, 0.02);
     border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme='dark'] .file-card {
-    background-color: rgba(60, 60, 60, 0.5);
+    background-color: rgba(40, 40, 40, 0.6);
     border-color: rgba(255, 255, 255, 0.05);
+    color: #e5e5e5;
 }
 
 [data-theme='dark'] .file-card:hover {
-    background-color: rgba(80, 80, 80, 0.8);
+    background-color: rgba(50, 50, 50, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .file-card-name {
+    color: #e5e5e5;
+}
+
+[data-theme='dark'] .file-tray-icon {
+    color: var(--color-primary);
 }
 
 [data-theme='dark'] .add-file-btn:hover,

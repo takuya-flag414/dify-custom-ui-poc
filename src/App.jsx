@@ -8,12 +8,14 @@ import Sidebar from './components/Sidebar/Sidebar';
 import AppLayout from './components/Layout/AppLayout';
 import Header from './components/Layout/Header';
 import ChatArea from './components/Chat/ChatArea';
+import ToolsGallery from './components/Tools/ToolsGallery';
 import SettingsArea from './components/Settings/SettingsArea';
 import ApiConfigModal from './components/Shared/ApiConfigModal';
 import InspectorPanel from './components/Inspector/InspectorPanel';
 import ArtifactPanel from './components/Artifacts/ArtifactPanel';
 import TestPanel from './components/DevTools/TestPanel';
 import SystemBootScreen from './components/Loading/SystemBootScreen';
+import { StudiosContainer } from './components/Studios';
 
 import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';
@@ -59,6 +61,9 @@ function App() {
 
   // ★追加: テストパネル状態
   const [isTestPanelOpen, setIsTestPanelOpen] = useState(false);
+
+  // ★追加: Studiosギャラリー強制表示フラグ
+  const [forceShowStudioGallery, setForceShowStudioGallery] = useState(false);
 
   // ★ Phase A: currentUser を useAuth から取得したユーザー情報で構成
   // 認証済みの場合は authUser を使用、未認証の場合はフォールバック
@@ -246,6 +251,11 @@ function App() {
       return;
     }
 
+    // Studiosに切り替える時はギャラリー強制表示フラグをセット
+    if (view === 'studios') {
+      setForceShowStudioGallery(true);
+    }
+
     setCurrentView(view);
     if (view === 'settings') {
       setIsArtifactOpen(false);
@@ -420,7 +430,74 @@ function App() {
                   {/* Main Content Area */}
                   <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
                     <AnimatePresence mode="wait">
-                      {(currentView === 'chat' || (FEATURE_FLAGS.USE_SETTINGS_MODAL && currentView !== 'settings')) ? (
+                      {currentView === 'studios' ? (
+                        <motion.div
+                          key="studios-view"
+                          variants={pageTransitionVariants}
+                          initial="initial"
+                          animate="enter"
+                          exit="exit"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <StudiosContainer
+                            onStudioEnter={() => {
+                              // スタジオ入室時に会話をリセット（新規チャット/Welcome表示）
+                              setConversationId(null);
+                              setMessages([]);
+                            }}
+                            forceShowGallery={forceShowStudioGallery}
+                            onGalleryShown={() => setForceShowStudioGallery(false)}
+                          >
+                            <ChatArea
+                              messages={messages}
+                              streamingMessage={streamingMessage}
+                              setMessages={setMessages}
+                              isGenerating={isGenerating}
+                              isHistoryLoading={isHistoryLoading}
+                              conversationId={conversationId}
+                              addLog={addLog}
+                              onConversationCreated={handleConversationCreated}
+                              activeContextFiles={activeContextFiles}
+                              setActiveContextFiles={setActiveContextFiles}
+                              onSendMessage={handleSendMessage}
+                              searchSettings={searchSettings}
+                              setSearchSettings={setSearchSettings}
+                              onOpenConfig={() => setIsConfigModalOpen(true)}
+                              onOpenArtifact={openArtifact}
+                              userName={effectiveDisplayName}
+                              onStartTutorial={startTutorial}
+                              stopGeneration={stopGeneration}
+                              handleEdit={handleEdit}
+                              handleRegenerate={handleRegenerate}
+                            />
+                          </StudiosContainer>
+                        </motion.div>
+                      ) : currentView === 'tools' ? (
+                        <motion.div
+                          key="tools-view"
+                          variants={pageTransitionVariants}
+                          initial="initial"
+                          animate="enter"
+                          exit="exit"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <ToolsGallery
+                            onSendMessage={handleSendMessage}
+                            setSearchSettings={setSearchSettings}
+                            onNavigateToChat={() => setCurrentView('chat')}
+                          />
+                        </motion.div>
+                      ) : (currentView === 'chat' || (FEATURE_FLAGS.USE_SETTINGS_MODAL && currentView !== 'settings')) ? (
                         <motion.div
                           key="chat-view"
                           variants={pageTransitionVariants}
@@ -556,8 +633,9 @@ function App() {
             userId={authUser?.userId}
           />
         </>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 

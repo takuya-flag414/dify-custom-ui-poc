@@ -78,11 +78,10 @@
   align-items: center;
   justify-content: center;
 
-  /* AI Gradient Icon Container */
+  /* Simple Blue-Purple Gradient (No rainbow) */
   background: linear-gradient(135deg,
-      var(--ai-gradient-cyan, #00FFFF) 0%,
-      var(--ai-gradient-magenta, #FF00FF) 50%,
-      var(--ai-gradient-blue, #007AFF) 100%);
+      var(--sys-color-primary, #007AFF) 0%,
+      #5856D6 100%);
   border-radius: 16px;
   color: white;
 }

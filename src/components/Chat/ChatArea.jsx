@@ -132,26 +132,17 @@ const ChatArea = (props) => {
           </div>
         </>
       ) : isInitialState ? (
-        <>
-          <WelcomeScreen
-            userName={userName}
-            onSendMessage={onSendMessage}
-            onStartTutorial={onStartTutorial}
-            setSearchSettings={setSearchSettings}
-          />
-          <div className="bottom-controls-wrapper">
-            <ChatInput
-              isLoading={isGenerating}
-              onSendMessage={onSendMessage}
-              isCentered={false}
-              activeContextFiles={activeContextFiles}
-              setActiveContextFiles={setActiveContextFiles}
-              searchSettings={searchSettings}
-              setSearchSettings={setSearchSettings}
-              onOpenConfig={onOpenConfig}
-            />
-          </div>
-        </>
+        <WelcomeScreen
+          userName={userName}
+          onSendMessage={onSendMessage}
+          onStartTutorial={onStartTutorial}
+          isGenerating={isGenerating}
+          activeContextFiles={activeContextFiles}
+          setActiveContextFiles={setActiveContextFiles}
+          searchSettings={searchSettings}
+          setSearchSettings={setSearchSettings}
+          onOpenConfig={onOpenConfig}
+        />
       ) : (
         <>
           <ChatHistory

@@ -1,0 +1,163 @@
+/**
+ * ConfirmDeleteModal - Styles
+ * 
+ * macOS Sequoia HUD マテリアル準拠
+ */
+
+/* ===== Backdrop ===== */
+.confirm-delete-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+}
+
+/* ===== Modal ===== */
+.confirm-delete-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+
+    /* mat-hud Material */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.15),
+        0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 32px;
+    gap: 16px;
+    min-width: 320px;
+    max-width: 400px;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .confirm-delete-modal {
+        background: rgba(40, 40, 40, 0.85);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.4),
+            0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+    }
+}
+
+/* ===== Icon ===== */
+.confirm-delete-modal__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 59, 48, 0.12);
+    color: #FF3B30;
+}
+
+@media (prefers-color-scheme: dark) {
+    .confirm-delete-modal__icon {
+        background: rgba(255, 69, 58, 0.2);
+        color: #FF453A;
+    }
+}
+
+/* ===== Content ===== */
+.confirm-delete-modal__content {
+    text-align: center;
+}
+
+.confirm-delete-modal__title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--color-text-primary, #1d1d1f);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
+}
+
+.confirm-delete-modal__message {
+    font-size: 14px;
+    color: var(--color-text-secondary, #6e6e73);
+    margin: 0;
+    line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+    .confirm-delete-modal__title {
+        color: #f5f5f7;
+    }
+
+    .confirm-delete-modal__message {
+        color: #a1a1a6;
+    }
+}
+
+/* ===== Actions ===== */
+.confirm-delete-modal__actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.confirm-delete-modal__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s ease;
+}
+
+.confirm-delete-modal__btn--cancel {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--color-text-primary, #1d1d1f);
+}
+
+.confirm-delete-modal__btn--cancel:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.confirm-delete-modal__btn--delete {
+    background: #FF3B30;
+    color: white;
+}
+
+.confirm-delete-modal__btn--delete:hover {
+    background: #E6352B;
+}
+
+@media (prefers-color-scheme: dark) {
+    .confirm-delete-modal__btn--cancel {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f5f5f7;
+    }
+
+    .confirm-delete-modal__btn--cancel:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .confirm-delete-modal__btn--delete {
+        background: #FF453A;
+    }
+
+    .confirm-delete-modal__btn--delete:hover {
+        background: #FF5549;
+    }
+}

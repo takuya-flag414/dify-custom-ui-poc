@@ -1,0 +1,28 @@
+/**
+ * StudiosContainer - Styles
+ */
+
+.studios-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.studios-container__gallery {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.studios-container__active {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.studios-container__chat {
+    flex: 1;
+    overflow: hidden;
+}
