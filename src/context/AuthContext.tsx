@@ -1,12 +1,24 @@
 // src/context/AuthContext.tsx
 // 認証状態をアプリ全体で共有するContext Provider
-// Phase A: Mock Emulation
+// Phase A: Mock Emulation - RBAC対応
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
-import { authService, UserProfile, LoginResult } from '../services/AuthService';
+import { authService, UserProfile, LoginResult, PermissionCode, ResolvedUserRole } from '../services/AuthService';
+import { IS_DEV_MODE } from '../config/devMode';
 
 /**
- * AuthContextの値の型定義
+ * セキュリティ情報の型
+ */
+export interface SecurityInfo {
+    lastName?: string;
+    firstName?: string;
+    birthDate?: string;
+    securityQuestion?: string;
+    securityAnswer?: string;
+}
+
+/**
+ * AuthContextの値の型定義（RBAC対応）
  */
 export interface AuthContextValue {
     /** 現在のログインユーザー */
@@ -19,6 +31,8 @@ export interface AuthContextValue {
     error: string | null;
     /** サインアップ直後かどうか */
     isNewUser: boolean;
+    /** 開発者モードが有効かどうか */
+    isDevMode: boolean;
     /** ログイン関数 */
     login: (email: string, password: string) => Promise<LoginResult>;
     /** サインアップ関数 */
@@ -27,17 +41,10 @@ export interface AuthContextValue {
     logout: () => Promise<void>;
     /** エラークリア関数 */
     clearError: () => void;
-}
-
-/**
- * セキュリティ情報の型
- */
-export interface SecurityInfo {
-    lastName?: string;
-    firstName?: string;
-    birthDate?: string;
-    securityQuestion?: string;
-    securityAnswer?: string;
+    /** 権限チェック関数（RBAC） */
+    hasPermission: (permCode: PermissionCode) => boolean;
+    /** ユーザーのロール一覧を取得 */
+    getUserRoles: () => ResolvedUserRole[];
 }
 
 /**
@@ -148,6 +155,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setError(null);
     }, []);
 
+    /**
+     * 権限チェック（RBAC）
+     * ユーザーが指定された権限を持っているかを判定
+     */
+    const hasPermission = useCallback((permCode: PermissionCode): boolean => {
+        if (!user) return false;
+        return user.permissions.includes(permCode);
+    }, [user]);
+
+    /**
+     * ユーザーのロール一覧を取得
+     */
+    const getUserRoles = useCallback((): ResolvedUserRole[] => {
+        if (!user) return [];
+        return user.roles;
+    }, [user]);
+
     // コンテキスト値をメモ化
     const contextValue = useMemo<AuthContextValue>(() => ({
         user,
@@ -155,11 +179,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading,
         error,
         isNewUser,
+        isDevMode: IS_DEV_MODE,
         login,
         signup,
         logout,
         clearError,
-    }), [user, isLoading, error, isNewUser, login, signup, logout, clearError]);
+        hasPermission,
+        getUserRoles,
+    }), [user, isLoading, error, isNewUser, login, signup, logout, clearError, hasPermission, getUserRoles]);
 
     return (
         <AuthContext.Provider value={contextValue}>
@@ -180,3 +207,6 @@ export const useAuth = (): AuthContextValue => {
 };
 
 export default AuthContext;
+
+// 型のre-export
+export type { PermissionCode, ResolvedUserRole };

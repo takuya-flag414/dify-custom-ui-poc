@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import MockModeSelect from '../Chat/MockModeSelect';
 import RoleSelect from '../Chat/RoleSelect';
 import { SettingsIcon, ClipboardIcon, ReviewIcon } from '../Shared/SystemIcons';
+import { IS_DEV_MODE } from '../../config/devMode';
 import './Header.css';
 
 const REVIEW_URL = "https://www.notion.so/2cc8d90598a080e4b024e51b89bc7eaa";
@@ -64,16 +65,24 @@ const Header = ({
         }, 2000);
     };
 
+    // ユーザーの現在ロールを取得（RBAC対応）
+    const currentRole = currentUser?.roles?.[0]?.roleCode || 'general';
+
     return (
         <header className="app-header">
             {/* Left: Context / Environment */}
             <div className="header-left">
                 <MockModeSelect mockMode={mockMode} setMockMode={setMockMode} />
-                <div className="header-divider" />
-                <RoleSelect
-                    currentRole={currentUser?.role || 'developer'}
-                    onRoleChange={onRoleChange}
-                />
+                {/* DevModeでのみRoleSelectを表示 */}
+                {IS_DEV_MODE && (
+                    <>
+                        <div className="header-divider" />
+                        <RoleSelect
+                            currentRole={currentRole}
+                            onRoleChange={onRoleChange}
+                        />
+                    </>
+                )}
             </div>
 
             {/* Right: Utilities */}

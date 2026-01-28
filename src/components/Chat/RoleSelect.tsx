@@ -1,5 +1,7 @@
 // src/components/Chat/RoleSelect.tsx
+// ロール選択コンポーネント（RBAC対応・DevMode専用）
 import React, { useState, useRef, useEffect } from 'react';
+import type { RoleCode } from '../../mocks/mockUsers';
 
 /**
  * SVGアイコンのProps型
@@ -10,7 +12,7 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * ユーザーアイコン
+ * ユーザーアイコン（一般ユーザー）
  */
 const UserIcon: React.FC<IconProps> = (props) => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -20,7 +22,7 @@ const UserIcon: React.FC<IconProps> = (props) => (
 );
 
 /**
- * シールドアイコン
+ * シールドアイコン（管理者）
  */
 const ShieldIcon: React.FC<IconProps> = (props) => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -29,12 +31,12 @@ const ShieldIcon: React.FC<IconProps> = (props) => (
 );
 
 /**
- * コードアイコン
+ * 目アイコン（閲覧専用）
  */
-const CodeIcon: React.FC<IconProps> = (props) => (
+const EyeIcon: React.FC<IconProps> = (props) => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <polyline points="16 18 22 12 16 6"></polyline>
-        <polyline points="8 6 2 12 8 18"></polyline>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
     </svg>
 );
 
@@ -51,42 +53,41 @@ const CheckIcon: React.FC = () => (
 );
 
 /**
- * ロールの型
- */
-export type Role = 'user' | 'admin' | 'developer';
-
-/**
  * ロールオプションの型
  */
 interface RoleOption {
-    value: Role;
+    value: RoleCode;
     label: string;
     icon: React.FC<IconProps>;
     description: string;
 }
 
+/**
+ * 正式仕様のロールオプション
+ */
 const ROLE_OPTIONS: RoleOption[] = [
-    { value: 'user', label: 'User', icon: UserIcon, description: '一般ユーザー' },
     { value: 'admin', label: 'Admin', icon: ShieldIcon, description: '管理者' },
-    { value: 'developer', label: 'Developer', icon: CodeIcon, description: '開発者' },
+    { value: 'general', label: 'General', icon: UserIcon, description: '一般ユーザー' },
+    { value: 'viewer', label: 'Viewer', icon: EyeIcon, description: '閲覧専用' },
 ];
 
 /**
  * RoleSelect のProps型
  */
 interface RoleSelectProps {
-    currentRole: Role;
-    onRoleChange: (role: Role) => void;
+    currentRole: RoleCode;
+    onRoleChange: (role: RoleCode) => void;
 }
 
 /**
  * ロール選択コンポーネント
+ * DevModeでのみ表示され、デバッグ目的でロールを切り替え可能
  */
 const RoleSelect: React.FC<RoleSelectProps> = ({ currentRole, onRoleChange }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const currentOption = ROLE_OPTIONS.find(opt => opt.value === currentRole) || ROLE_OPTIONS[2];
+    const currentOption = ROLE_OPTIONS.find(opt => opt.value === currentRole) || ROLE_OPTIONS[1];
     const CurrentIcon = currentOption.icon;
 
     useEffect(() => {
@@ -99,7 +100,7 @@ const RoleSelect: React.FC<RoleSelectProps> = ({ currentRole, onRoleChange }) =>
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleSelect = (value: Role): void => {
+    const handleSelect = (value: RoleCode): void => {
         onRoleChange(value);
         setIsOpen(false);
     };
@@ -154,3 +155,6 @@ const RoleSelect: React.FC<RoleSelectProps> = ({ currentRole, onRoleChange }) =>
 };
 
 export default RoleSelect;
+
+// 型のエクスポート
+export type { RoleCode };
