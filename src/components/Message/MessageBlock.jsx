@@ -76,7 +76,10 @@ const MessageBlock = ({
     traceMode,
     messageId,
     id,
-    mode // 'fast' | 'normal'
+    mode, // 'fast' | 'normal'
+    // ★追加: ワークフローエラー情報
+    hasWorkflowError,
+    workflowError
   } = message;
 
   const [showRaw, setShowRaw] = useState(false);
@@ -288,6 +291,27 @@ const MessageBlock = ({
                     />
                   )}
 
+                  {/* ★追加: ワークフローエラーバナー */}
+                  {isAi && hasWorkflowError && workflowError && (
+                    <div className="workflow-error-banner">
+                      <div className="workflow-error-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                          <line x1="12" y1="9" x2="12" y2="13"></line>
+                          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                      </div>
+                      <div className="workflow-error-content">
+                        <span className="workflow-error-title">
+                          ワークフローエラー: {workflowError.nodeTitle}
+                        </span>
+                        <span className="workflow-error-message">
+                          {workflowError.message}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {isAi && isStreaming && isTextEmpty && !showRaw && mode !== 'fast' && (
                     <SkeletonLoader />
                   )}
@@ -380,8 +404,10 @@ const arePropsEqual = (prev, next) => {
     && p.suggestions === n.suggestions
     && p.smartActions === n.smartActions
     && p.thoughtProcess === n.thoughtProcess
-    && p.thinking === n.thinking  // ★追加
-    && p.files === n.files;
+    && p.thinking === n.thinking
+    && p.files === n.files
+    && p.hasWorkflowError === n.hasWorkflowError  // ★追加
+    && p.workflowError === n.workflowError;  // ★追加
 };
 
 export default React.memo(MessageBlock, arePropsEqual);

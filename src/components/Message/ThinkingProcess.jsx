@@ -55,6 +55,14 @@ const Icons = {
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
     ),
+    // ★追加: エラーアイコン
+    error: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+    ),
     default: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -70,20 +78,25 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
     const hasThinking = thinkingContent && thinkingContent.trim().length > 0;
     const hasContent = hasSteps || hasThinking;
 
+    // ★追加: エラー状態のチェック
+    const hasError = hasSteps && steps.some(s => s.status === 'error');
+
     useEffect(() => {
-        if (!isStreaming && hasSteps && steps.every(s => s.status === 'done')) {
+        // ★変更: エラーがある場合は自動で閉じない
+        if (!isStreaming && hasSteps && steps.every(s => s.status === 'done') && !hasError) {
             const timer = setTimeout(() => {
                 setIsExpanded(false);
             }, 2000);
             return () => clearTimeout(timer);
         }
-    }, [isStreaming, steps, hasSteps]);
+    }, [isStreaming, steps, hasSteps, hasError]);
 
     // コンテンツがない場合は何も表示しない
     if (!hasContent) return null;
 
     const currentStep = hasSteps ? (steps.find(s => s.status === 'processing') || steps[steps.length - 1]) : null;
-    const isAllDone = hasSteps ? steps.every(s => s.status === 'done') : !isStreaming;
+    // ★変更: エラー状態も「完了」とみなす（表示用）
+    const isAllDone = hasSteps ? steps.every(s => s.status === 'done' || s.status === 'error') : !isStreaming;
 
     return (
         <div className="thinking-process-container">
@@ -92,8 +105,12 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="thinking-icon-wrapper">
-                    {/* 完了時は常にチェックマーク。進行中はFluidOrb */}
-                    {isStreaming && !isAllDone ? (
+                    {/* 完了時は常にチェックマーク。進行中はFluidOrb。エラー時はエラーアイコン */}
+                    {hasError ? (
+                        <div className="thinking-error-icon">
+                            {Icons.error}
+                        </div>
+                    ) : isStreaming && !isAllDone ? (
                         <FluidOrb />
                     ) : (
                         <div className="thinking-done-icon">
@@ -118,9 +135,9 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                     {hasSteps && (
                         <div className="thinking-steps-list">
                             {steps.map((step, index) => {
-                                // アイコンの取得
-                                const StepIcon = Icons[step.iconType] || Icons.default;
-                                const hasDetail = step.thinking || step.resultValue;
+                                // アイコンの取得（エラー時はエラーアイコンを使用）
+                                const StepIcon = step.status === 'error' ? Icons.error : (Icons[step.iconType] || Icons.default);
+                                const hasDetail = step.thinking || step.resultValue || step.errorMessage;
 
                                 return (
                                     <div key={step.id || index} className="thinking-step-wrapper">
@@ -136,23 +153,31 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                                             <span className="step-title">{step.title}</span>
                                         </div>
 
-                                        {/* ★追加: ステップ詳細（thinking + result）の表示 */}
-                                        {hasDetail && step.status === 'done' && (
-                                            <div className="step-detail-container">
-                                                {step.thinking && (
+                                        {/* ★追加: ステップ詳細（thinking + result または error）の表示 */}
+                                        {hasDetail && (step.status === 'done' || step.status === 'error') && (
+                                            <div className={`step-detail-container ${step.status === 'error' ? 'error' : ''}`}>
+                                                {/* エラーメッセージの表示 */}
+                                                {step.status === 'error' && step.errorMessage && (
+                                                    <div className="step-error-row">
+                                                        <span className="step-error-icon">⚠️</span>
+                                                        <span className="step-error-text">{step.errorMessage}</span>
+                                                    </div>
+                                                )}
+                                                {/* thinkingの表示（エラーでない場合のみ） */}
+                                                {step.thinking && step.status !== 'error' && (
                                                     <div className="step-thinking-row">
                                                         <span className="step-thinking-icon">🧠</span>
                                                         <span className="step-thinking-text">{step.thinking}</span>
                                                     </div>
                                                 )}
-                                                {step.resultLabel && step.resultValue && (
+                                                {step.resultLabel && step.resultValue && step.status !== 'error' && (
                                                     <div className="step-result-row">
                                                         <span className="step-result-label">{step.resultLabel}:</span>
                                                         <span className="step-result-value">{step.resultValue}</span>
                                                     </div>
                                                 )}
                                                 {/* ★追加: 追加結果行のループ表示 */}
-                                                {step.additionalResults && step.additionalResults.map((result, i) => (
+                                                {step.additionalResults && step.status !== 'error' && step.additionalResults.map((result, i) => (
                                                     <div key={i} className="step-result-row">
                                                         <span className="step-result-label">{result.label}:</span>
                                                         <span className="step-result-value">{result.value}</span>

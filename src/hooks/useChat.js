@@ -10,23 +10,25 @@ import { mapCitationsFromApi } from '../utils/citationMapper';
 import { DEFAULT_SEARCH_SETTINGS } from './chat/constants';
 import { createPerfTracker } from './chat/perfTracker';
 import { loadChatHistory } from './chat/historyLoader';
-import { 
-  processNodeStarted, 
-  processQueryRewriteFinished, 
-  processIntentAnalysisFinished, 
-  logWorkflowOutput 
+import {
+  processNodeStarted,
+  processQueryRewriteFinished,
+  processIntentAnalysisFinished,
+  logWorkflowOutput,
+  processNodeError,
+  processWorkflowError
 } from './chat/nodeEventHandlers';
-import { 
-  determineProtocolMode, 
-  extractMessageContent, 
-  processMessageEnd, 
-  processWorkflowFinished, 
-  buildFinalMessage 
+import {
+  determineProtocolMode,
+  extractMessageContent,
+  processMessageEnd,
+  processWorkflowFinished,
+  buildFinalMessage
 } from './chat/messageEventHandlers';
-import { 
-  executeStopGeneration, 
-  prepareMessageEdit, 
-  prepareRegenerate 
+import {
+  executeStopGeneration,
+  prepareMessageEdit,
+  prepareRegenerate
 } from './chat/messageActions';
 
 /**
@@ -407,6 +409,18 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                 if (nodeId) tracker.markNodeEnd(nodeId);
 
+                // ★追加: ノードエラー処理（status === 'failed' の場合）
+                const nodeError = processNodeError(data, addLog);
+                if (nodeError) {
+                  setStreamingMessage(prev => prev ? {
+                    ...prev,
+                    thoughtProcess: prev.thoughtProcess.map(nodeError.thoughtProcessUpdate),
+                    hasWorkflowError: true,
+                    workflowError: { nodeTitle: nodeError.nodeTitle, message: nodeError.errorMessage }
+                  } : prev);
+                  // エラーが発生しても処理は継続（部分的な結果を表示するため）
+                }
+
                 // ★リファクタリング: LLM_Query_Rewrite処理
                 if (title === 'LLM_Query_Rewrite') {
                   const result = processQueryRewriteFinished(outputs, nodeId, addLog);
@@ -433,8 +447,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 // ★リファクタリング: ワークフローログ出力
                 logWorkflowOutput(outputs, title, addLog);
 
-                // その他のノードは完了ステータスに更新
-                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis') {
+                // その他のノードは完了ステータスに更新（エラーでない場合のみ）
+                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && !nodeError) {
                   setStreamingMessage(prev => prev ? {
                     ...prev,
                     thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
@@ -490,6 +504,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 }
               }
               else if (data.event === 'workflow_finished') {
+                // ★追加: ワークフローエラー処理
+                const wfError = processWorkflowError(data, addLog);
+
                 // ★リファクタリング: workflow_finished処理
                 const workflowResult = processWorkflowFinished(contentBuffer, protocolMode, addLog);
 
@@ -501,7 +518,37 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                     contentBuffer,
                     detectedTraceMode
                   );
+
+                  // ★追加: ワークフローエラー情報を最終メッセージに含める
+                  if (wfError || currentStreamingMsg.hasWorkflowError) {
+                    finalMessage.hasWorkflowError = true;
+                    finalMessage.workflowError = wfError
+                      ? { nodeTitle: 'ワークフロー', message: wfError.errorMessage }
+                      : currentStreamingMsg.workflowError;
+                  }
+
                   setMessages(prevMsgs => [...prevMsgs, finalMessage]);
+                  setStreamingMessage(null);
+                }
+              }
+              // ★追加: SSE error イベントハンドリング
+              else if (data.event === 'error') {
+                const errorCode = data.code || 'UNKNOWN';
+                const errorMessage = data.message || '不明なエラーが発生しました';
+                addLog(`[SSE Error] ${errorCode}: ${errorMessage}`, 'error');
+
+                const currentStreamingMsg = streamingMessageRef.current;
+                if (currentStreamingMsg) {
+                  const errorFinalMessage = {
+                    ...currentStreamingMsg,
+                    isStreaming: false,
+                    hasWorkflowError: true,
+                    workflowError: { nodeTitle: 'ストリーミング', message: `${errorCode}: ${errorMessage}` },
+                    thoughtProcess: currentStreamingMsg.thoughtProcess.map(t =>
+                      t.status === 'processing' ? { ...t, status: 'error', errorMessage } : t
+                    )
+                  };
+                  setMessages(prevMsgs => [...prevMsgs, errorFinalMessage]);
                   setStreamingMessage(null);
                 }
               }
@@ -591,7 +638,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
   // ★リファクタリング: メッセージ編集関数
   const handleEdit = useCallback(async (messageId, newText) => {
     const result = prepareMessageEdit({ messageId, messages, addLog });
-    
+
     if (!result.shouldSend) {
       return;
     }
@@ -603,7 +650,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
   // ★リファクタリング: 再送信（再生成）関数
   const handleRegenerate = useCallback(async () => {
     const result = prepareRegenerate({ messages, addLog });
-    
+
     if (!result.shouldSend) {
       return;
     }

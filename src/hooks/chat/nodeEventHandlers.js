@@ -293,3 +293,53 @@ export const logWorkflowOutput = (outputs, title, addLog) => {
     addLog(`[Workflow] ${title} 出力:\n${outputText}`, 'info');
   }
 };
+
+/**
+ * node_finished でエラーが発生した場合の処理
+ * @param {Object} data - SSEイベントデータ
+ * @param {Function} addLog - ログ関数
+ * @returns {Object|null} エラー情報 または null
+ */
+export const processNodeError = (data, addLog) => {
+  const status = data.data?.status;
+  const errorMessage = data.data?.error;
+  const title = data.data?.title;
+  const nodeId = data.data?.node_id;
+
+  if (status !== 'failed' || !errorMessage) {
+    return null;
+  }
+
+  addLog(`[Workflow] ❌ ノード「${title}」でエラー: ${errorMessage}`, 'error');
+
+  return {
+    nodeId,
+    nodeTitle: title,
+    errorMessage,
+    thoughtProcessUpdate: (t) => t.id === nodeId
+      ? { ...t, status: 'error', errorMessage }
+      : t
+  };
+};
+
+/**
+ * workflow_finished でエラーが発生した場合の処理
+ * @param {Object} data - SSEイベントデータ
+ * @param {Function} addLog - ログ関数
+ * @returns {Object|null} エラー情報 または null
+ */
+export const processWorkflowError = (data, addLog) => {
+  const status = data.data?.status;
+  const errorMessage = data.data?.error;
+
+  if (status !== 'failed' || !errorMessage) {
+    return null;
+  }
+
+  addLog(`[Workflow] ❌ ワークフロー全体がエラーで終了: ${errorMessage}`, 'error');
+
+  return {
+    status,
+    errorMessage
+  };
+};

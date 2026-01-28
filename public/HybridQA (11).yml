@@ -1745,7 +1745,7 @@ workflow:
         provider_id: langgenius/perplexity/perplexity
         provider_name: langgenius/perplexity/perplexity
         provider_type: builtin
-        selected: false
+        selected: true
         title: TOOL_Perplexity_Search
         tool_configurations:
           frequency_penalty:
@@ -1780,7 +1780,7 @@ workflow:
             value: 0.7
           top_k:
             type: constant
-            value: 18
+            value: 20
           top_p:
             type: constant
             value: 1
@@ -1793,7 +1793,7 @@ workflow:
             type: mixed
             value: '[検索コンテキスト]
 
-              最適化されたキーワード: {{#conversation.optimized_search_query#}}
+              最適化されたキーワード: {{#1768364899851.complex_query#}}
 
               ユーザーの意図・ニュアンス: {{#sys.query#}}
 
@@ -1823,12 +1823,12 @@ workflow:
       height: 374
       id: '1764914255107'
       position:
-        x: 5310
+        x: 5311.0826546903645
         y: 559
       positionAbsolute:
-        x: 5310
+        x: 5311.0826546903645
         y: 559
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1880,26 +1880,59 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
+          name: gpt-4o
+          provider: langgenius/openai/openai
         prompt_template:
         - id: 6d795767-8518-4886-b2c8-f5bce5f42eaf
           role: system
-          text: "# Role\nあなたは、Perplexityの仕様を熟知した「検索クエリ最適化エンジニア」です。\nユーザーの質問を分析し、**最もデータヒット率の高い検索クエリ**と、**信頼できる情報源ドメイン**を生成してJSON形式で出力してください。\n\
-            \n# Input Data\n- Query: {{#sys.query#}}\n- Current Time: {{#1761291739140.current_time#}}\n\
-            \n# Processing Steps (Search Logic Chain)\n出力を作成する前に、以下の要素を考慮して情報を整理してください。\n\
-            1. **曖昧性解消**: 指示語（それ、あれ）の具体化、相対日時（今日、来週）の日付変換。\n2. **ドメイン選定**: 質問の内容に基づき、情報の信頼性が高いドメイン（公式ドキュメント、技術ブログ、ニュースサイト等）を特定する。\n\
-            \   - 技術的な質問 -> 公式ドキュメント (e.g., `docs.python.org`) や `stackoverflow.com`\n\
-            \   - ニュース -> 大手メディア (e.g., `reuters.com`, `nikkei.com`)\n   - 一般知識 ->\
-            \ 指定なし（空配列）\n\n# Output Requirements\n出力するJSONには必ず以下のフィールドを含めてください。\n\
-            1. `thinking`: 変換ロジックとドメイン選定理由を要約した**簡潔な日本語の一文**。\n2. `optimized_query`:\
-            \ **`site:` などの演算子を含まない**、純粋かつ最適な検索キーワード文字列。\n3. `target_domains`: 検索対象とすべきドメインの**配列**（最大3つまで）。不要な場合は空配列\
-            \ `[]`。\n\n# Output Format (JSON Only)\n必ず `{` で開始し `}` で終了してください。\n\n\
-            ## Output Example\n{\n  \"thinking\": \"Reactの最新機能に関する質問のため、指示語を具体化し、公式サイトとGitHubを優先ドメインとして設定しました。\"\
-            ,\n  \"optimized_query\": \"React 19 Server Components features\",\n \
-            \ \"target_domains\": [\"react.dev\", \"github.com\", \"ycombinator.com\"\
-            ]\n}"
-        selected: true
+          text: "# Role\nYou are a **Strict Search Query Optimization Engineer** who\
+            \ prioritizes \"Information Reliability\" and \"Temporal Accuracy\".\n\
+            Your goal is to extract the best search keywords and generate a strict\
+            \ command set for the search engine (Perplexity).\n\n# Input Data\n- User\
+            \ Query: {{#sys.query#}}\n- **Current Time**: {{#1761291739140.current_time#}}\n\
+            \n# Objectives\n1.  **User Experience**: The `display_keyword` must be\
+            \ simple and clean for UI display.\n2.  **Zero-Trust Logic**: The `search_instruction`\
+            \ must contain strict rules and **Absolute Date References**.\n3.  **Temporal\
+            \ Resolution**: You MUST resolve relative time terms (e.g., \"today\"\
+            , \"yesterday\", \"latest\") into **Absolute Dates** (YYYY-MM-DD) based\
+            \ on the Current Time inside the instruction.\n\n# Language Strategy\n\
+            -   **Technical / Global Topics**: Translate `display_keyword` into **English**.\n\
+            -   **Domestic / Local Topics**: Keep `display_keyword` in **Japanese**.\n\
+            \n# Output Format (JSON Only)\nYou must output a single JSON object.\n\
+            \n```json\n{\n  \"thinking\": \"Reasoning for language selection and date\
+            \ resolution (in Japanese).\",\n  \"display_keyword\": \"Simple Search\
+            \ Keywords (e.g., 'React 19 release date' or '東京 天気')\",\n  \"search_instruction\"\
+            : \"The full template string containing strict rules and DATE CONTEXT.\"\
+            ,\n  \"target_domains\": [\"domain1.com\", \"domain2.go.jp\"]\n}\n\n```\n\
+            \n# Instruction Construction\n\nConstruct the `search_instruction` using\
+            \ the following template.\n\n## Instruction Template\n\n\"\"\"\n[INSTRUCTION_TO_SEARCH_ENGINE]:\n\
+            \n1. **TEMPORAL CONTEXT**: Current Date is {{#1761291739140.current_time#}}.\
+            \ Treat \"latest\" or \"current\" as of this date.\n2. **TRUSTED SOURCES\
+            \ ONLY**: Prioritize Official Documentation, Government websites, Academic\
+            \ papers, and Major News Outlets.\n3. **NOISE FILTER**: Exclude Social\
+            \ Media, Personal Blogs, Forums, and rumors.\n4. **CRITICAL RULE**:\n\
+            * Return \"NO_RELIABLE_DATA_FOUND\" **ONLY IF** there is ABSOLUTELY NO\
+            \ relevant information from trusted sources.\n* **EXCEPTION**: If partial\
+            \ information is available, **DO NOT** use the flag. Provide the available\
+            \ info.\n\n\n5. **LANGUAGE**: Search globally but prioritize results in\
+            \ the language of the keywords.\n\"\"\"\n\n# Few-Shot Examples\n\n## Example\
+            \ 1: Temporal Query (Japanese)\n\n**User Input**: \"今日の東京の天気\" (Assuming\
+            \ Current Time is 2026-01-28)\n**Output**:\n{\n\"thinking\": \"ユーザーは『今日』の情報を求めているため、現在時刻(2026-01-28)を命令文に明記し、検索エンジンに特定の日付を探させる。\"\
+            ,\n\"display_keyword\": \"東京都 天気\",\n\"search_instruction\": \"[INSTRUCTION_TO_SEARCH_ENGINE]:\\\
+            n1. **TEMPORAL CONTEXT**: Current Date is **2026-01-28**. Search specifically\
+            \ for the weather forecast for this date.\\n2. **TRUSTED SOURCES ONLY**:\
+            \ JMA (jma.go.jp), NHK.\\n3. **NOISE FILTER**: Exclude SNS.\\n4. **CRITICAL\
+            \ RULE**: Return \"NO_RELIABLE_DATA_FOUND\" only if no info exists.\"\
+            ,\n\"target_domains\": [\"jma.go.jp\", \"tenki.jp\"]\n}\n\n## Example\
+            \ 2: Technical (English)\n\n**User Input**: \"React 19のリリース日は？\"\n**Output**:\n\
+            {\n\"thinking\": \"技術情報のため英語圏の公式情報を優先する。\",\n\"display_keyword\": \"React\
+            \ 19 official release date\",\n\"search_instruction\": \"[INSTRUCTION_TO_SEARCH_ENGINE]:\\\
+            n1. **TEMPORAL CONTEXT**: Current Date is **2026-01-28**.\\n2. **TRUSTED\
+            \ SOURCES ONLY**: Official React Blog (react.dev), GitHub.\\n3. **NOISE\
+            \ FILTER**: Exclude speculation blogs.\\n4. **CRITICAL RULE**: Return\
+            \ \"NO_RELIABLE_DATA_FOUND\" only if no info exists.\",\n\"target_domains\"\
+            : [\"react.dev\", \"github.com\"]\n}"
+        selected: false
         title: LLM_Query_Rewrite
         type: llm
         vision:
@@ -1912,7 +1945,7 @@ workflow:
       positionAbsolute:
         x: 4284
         y: 702
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1923,7 +1956,7 @@ workflow:
           operation: over-write
           value:
           - '1768364899851'
-          - result
+          - simple_keyword
           variable_selector:
           - conversation
           - optimized_search_query
@@ -2406,8 +2439,7 @@ workflow:
             enabled: true
             size: 10
         model:
-          completion_params:
-            temperature: 0.7
+          completion_params: {}
           mode: chat
           name: gemini-2.0-flash
           provider: langgenius/gemini/google
@@ -3417,22 +3449,22 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gpt-5-mini
-          provider: langgenius/openai/openai
+          name: gemini-2.0-flash
+          provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
           text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」であり、ユーザーの頼れる「AIパートナー」です。\n\
             ユーザーの質問に対し、検索結果（RAGおよびWeb）に基づいて正確かつ親切に回答し、**JSON形式の `answer` フィールドに格納して**出力してください。\n\
-            \n# Intelligence Profile (Dynamic Context)\n以下のJSONデータには、ユーザー属性とカスタム指示が含まれています。\n\
-            この設定に基づき、**「誰のために調査しているのか」**を意識して情報を取捨選択してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n## Profile\
-            \ Rules\n1. **user_context (情報のフィルタリング)**:\n   - `department` / `role`:\
-            \ 検索結果（RAG/Web）の中から、ユーザーの業務に**真に関連する情報**を優先的に抽出してください。\n     - ユーザーが「開発部」なら、技術仕様やAPIドキュメントを優先引用。\n\
-            \     - ユーザーが「人事部」なら、法規制や採用市場動向を優先引用。\n\n2. **custom_directives (制約事項)**:\n\
-            \   - `free_text`: 「URLリストだけ欲しい」「要約は不要」などの指示がある場合、それに従ってください。\n\n# Guidelines\n\
-            \n1. **Style (Partner Mode - Comprehensive)**:\n   - **Tone**: 親しみやすく丁寧な「です・ます」調。\n\
-            \   - **Volume (重要)**:\n     - ユーザーは「納得感」と「網羅性」を求めています。**単なる要約で終わらせず、背景・歴史・理由・具体例を交えて、ブログ記事のように充実した文章量で記述してください。**\n\
+            提供されたコンテキスト（検索結果）が英語や日本語以外の言語であっても、**回答は必ず自然で流暢な日本語**で生成してください。\n\n# Intelligence\
+            \ Profile (Dynamic Context)\n以下のJSONデータには、ユーザー属性とカスタム指示が含まれています。\nこの設定に基づき、**「誰のために調査しているのか」**を意識して情報を取捨選択してください。\n\
+            \n<system_prompt_json>\n{{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\
+            \n## Profile Rules\n1. **user_context (情報のフィルタリング)**:\n   - `department`\
+            \ / `role`: 検索結果（RAG/Web）の中から、ユーザーの業務に**真に関連する情報**を優先的に抽出してください。\n   \
+            \  - ユーザーが「開発部」なら、技術仕様やAPIドキュメントを優先引用。\n     - ユーザーが「人事部」なら、法規制や採用市場動向を優先引用。\n\
+            \n2. **custom_directives (制約事項)**:\n   - `free_text`: 「URLリストだけ欲しい」「要約は不要」などの指示がある場合、それに従ってください。\n\
+            \n# Guidelines\n\n1. **Style (Partner Mode - Comprehensive)**:\n   - **Tone**:\
+            \ 親しみやすく丁寧な「です・ます」調。\n   - **Volume (重要)**:\n     - ユーザーは「納得感」と「網羅性」を求めています。**単なる要約で終わらせず、背景・歴史・理由・具体例を交えて、ブログ記事のように充実した文章量で記述してください。**\n\
             \     - 「一言で言うと」のような短縮は避け、情報を削らずに詳しく解説してください。\n   - **Structure (構造化)**:\n\
             \     - 複数の説や理由がある場合は、必ずそれらを並列して紹介してください（例: 「主な説は3つあります」）。\n     - 見出し（###）を多用し、長文でも読みやすい構成にしてください。\n\
             \     - 結論だけでなく、「なぜそうなったのか（起源）」や「現状はどうなのか（最新動向）」まで時間軸を広げて回答してください。\n　-\
@@ -3450,8 +3482,12 @@ workflow:
             \ のように**個別のブラケット**で記述してください。`[1, 2]` は禁止です。\n   - **Renumbering**: 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を\
             \ `[1]` から連番で採番し直してください。\n     1. **Internal Knowledge (RAG)** (`type`:\
             \ \"rag\")\n     2. **Web Search Results** (`type`: \"web\")\n   - **Consistency**:\
-            \ 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\n# Input Data\n\n##\
-            \ 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\
+            \ 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\n4. **Zero-Trust Handling\
+            \ (With Logic Check)**:\n   - 検索結果 (`context_web`) に \"NO_RELIABLE_DATA_FOUND\"\
+            \ が含まれている場合でも、**即座に諦めないでください。**\n   - **Double Check**: 検索結果のテキストを読み、ユーザーの質問に対する「主要な回答」（例：天気予報の概況、株価の終値など）が含まれているか確認してください。\n\
+            \   - **Decision Rule**:\n     - ケースA: 「主要な回答」が含まれている場合 → フラグを無視し、その情報を使って回答を作成してください。（ただし、「詳細は不明ですが...」と補足すること）\n\
+            \     - ケースB: 本当に情報がゼロ、または信頼性が著しく低い場合 → 回答を控え、謝罪フレーズを出力してください。\n\n# Input\
+            \ Data\n\n## 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\
             - Web Search Mode: {{#1761291739140.web_search_mode#}}\n\n## 1. Internal\
             \ Knowledge (RAG)\n{{#conversation.context_rag#}}\n※ここが空の場合、社内規定は参照していません。\n\
             \n## 2. Web Search Results\n{{#conversation.context_web#}}\n※ここが空の場合、Web検索結果は取得できていません。\n\
@@ -3674,31 +3710,46 @@ workflow:
       width: 242
     - data:
         code: "import json\nimport re\n\ndef main(llm_output: str, user_domain_filter:\
-          \ str) -> dict:\n    # 1. AI出力のパース\n    try:\n        clean_text = re.sub(r'```(?:json)?\\\
-          s*|\\s*```', '', llm_output.strip())\n        data = json.loads(clean_text)\n\
-          \        \n        ai_query = data.get('optimized_query', '')\n        #\
-          \ AIが提案したドメインリスト (例: [\"react.dev\", \"github.com\"])\n        ai_domains\
-          \ = data.get('target_domains', [])\n        if isinstance(ai_domains, str):\n\
-          \            ai_domains = [d.strip() for d in ai_domains.split(',') if d.strip()]\n\
-          \            \n    except Exception:\n        # パース失敗時は安全策として入力をそのまま返す\n\
-          \        return {\n            \"result\": llm_output,\n            \"final_domain_filter\"\
-          : user_domain_filter or \"\"\n        }\n\n    # 2. ユーザー手動入力のパース (カンマ区切り文字列をリスト化)\n\
-          \    user_domains = []\n    if user_domain_filter:\n        user_domains\
-          \ = [d.strip() for d in user_domain_filter.split(',') if d.strip()]\n\n\
-          \    # 3. ドメインのマージロジック (優先順位: ユーザー > AI)\n    # ユーザー指定がある場合はそれを優先し、枠が余っていればAI提案を採用する\n\
-          \    merged_domains = []\n    \n    # まずユーザー指定を追加\n    merged_domains.extend(user_domains)\n\
-          \    \n    # 重複を避けつつAI提案を追加\n    for domain in ai_domains:\n        if domain\
-          \ not in merged_domains:\n            merged_domains.append(domain)\n  \
-          \          \n    # 4. API制限 (最大3つ) に合わせてカット\n    final_domains = merged_domains[:3]\n\
-          \    \n    # 5. カンマ区切り文字列に戻す\n    final_filter_str = \",\".join(final_domains)\n\
-          \n    return {\n        \"result\": ai_query,\n        \"final_domain_filter\"\
-          : final_filter_str\n    }"
+          \ str) -> dict:\n    \"\"\"\n    LLMのJSON出力をパースし、Perplexity用のクエリを構築する。\n\
+          \    ユーザー指定のフィルターと、LLMが提案したtarget_domainsを統合して適用する。\n    \"\"\"\n    \n\
+          \    # 1. デフォルト値\n    simple_keyword = \"\"\n    instruction = \"\"\n  \
+          \  llm_domains = []\n    \n    # 2. JSONパース\n    try:\n        match = re.search(r'\\\
+          {.*\\}', llm_output, re.DOTALL)\n        if match:\n            json_str\
+          \ = match.group(0)\n            data = json.loads(json_str)\n          \
+          \  \n            # 各フィールドの抽出\n            simple_keyword = data.get(\"display_keyword\"\
+          , data.get(\"optimized_query\", \"\"))\n            instruction = data.get(\"\
+          search_instruction\", \"\")\n            # リストとして取得 (例: [\"jma.go.jp\",\
+          \ \"tenki.jp\"])\n            llm_domains = data.get(\"target_domains\"\
+          , [])\n        else:\n            simple_keyword = llm_output\n        \
+          \    instruction = \"\"\n    except Exception:\n        simple_keyword =\
+          \ llm_output\n        instruction = \"\"\n\n    # 3. フィルターの統合ロジック (ここを修正)\n\
+          \    filter_parts = []\n\n    # A. ユーザー指定のフィルターがあれば最優先\n    if user_domain_filter\
+          \ and user_domain_filter.strip():\n        filter_parts.append(user_domain_filter.strip())\n\
+          \n    # B. LLM推奨ドメインを \"site:...\" 形式に変換して追加\n    if isinstance(llm_domains,\
+          \ list) and llm_domains:\n        # \"site:jma.go.jp OR site:tenki.jp\"\
+          \ の形を作る\n        site_operators = [f\"site:{d}\" for d in llm_domains if\
+          \ isinstance(d, str) and d.strip()]\n        if site_operators:\n      \
+          \      # 複数のドメインがある場合はORでつなぎ、括弧でくくる\n            combined_sites = \" OR\
+          \ \".join(site_operators)\n            filter_parts.append(f\"({combined_sites})\"\
+          )\n\n    # 最終的なフィルタ文字列 (例: \"site:jma.go.jp OR site:tenki.jp\")\n    final_domain_filter\
+          \ = \" \".join(filter_parts)\n\n    # 4. クエリの組み立て\n    domain_constraint_text\
+          \ = \"\"\n    if final_domain_filter:\n        domain_constraint_text =\
+          \ f\"\\n\\n[DOMAIN_FILTER]:\\nStrictly search within: {final_domain_filter}\"\
+          \n\n    if instruction:\n        complex_query = f\"[TOPIC]: {simple_keyword}\\\
+          n\\n{instruction}{domain_constraint_text}\"\n    else:\n        complex_query\
+          \ = f\"{simple_keyword} {final_domain_filter}\".strip()\n\n    return {\n\
+          \        \"simple_keyword\": simple_keyword,\n        \"complex_query\"\
+          : complex_query,\n        \"final_domain_filter\": final_domain_filter\n\
+          \    }"
         code_language: python3
         outputs:
+          complex_query:
+            children: null
+            type: string
           final_domain_filter:
             children: null
             type: string
-          result:
+          simple_keyword:
             children: null
             type: string
         selected: false
@@ -3796,18 +3847,18 @@ workflow:
       height: 88
       id: '17683770269110'
       position:
-        x: 2523
-        y: 496
+        x: 2494
+        y: 493
       positionAbsolute:
-        x: 2523
-        y: 496
+        x: 2494
+        y: 493
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     viewport:
-      x: -8248.500659873436
-      y: -1116.7625883833941
-      zoom: 2
+      x: -4250.373224385322
+      y: -299.54703100560664
+      zoom: 0.9236555375410278
   rag_pipeline_variables: []

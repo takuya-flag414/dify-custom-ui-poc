@@ -450,3 +450,67 @@
         animation: none;
     }
 }
+
+/* ========================================
+   Error State Styles
+   ワークフローエラー表示用スタイル
+   ======================================== */
+
+/* ヘッダーのエラーアイコン */
+.thinking-error-icon {
+    color: var(--color-danger, #EF4444);
+}
+
+/* エラー状態のステップアイコン */
+.step-icon-circle.error {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--color-danger, #EF4444);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* エラー状態のステップタイトル */
+.thinking-step-item.error .step-title {
+    color: var(--color-danger, #EF4444);
+    font-weight: 500;
+}
+
+/* エラー詳細コンテナ */
+.step-detail-container.error {
+    background: linear-gradient(135deg,
+        rgba(239, 68, 68, 0.05) 0%,
+        rgba(239, 68, 68, 0.02) 100%);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* エラーメッセージ行 */
+.step-error-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.step-error-icon {
+    flex-shrink: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.step-error-text {
+    font-size: var(--text-caption, 12px);
+    color: var(--color-danger, #EF4444);
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+/* ダークモード対応 */
+[data-theme='dark'] .step-icon-circle.error {
+    background-color: rgba(239, 68, 68, 0.2);
+}
+
+[data-theme='dark'] .step-detail-container.error {
+    background: linear-gradient(135deg,
+        rgba(239, 68, 68, 0.08) 0%,
+        rgba(239, 68, 68, 0.04) 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+}
