@@ -50,7 +50,8 @@ const generateUUID = () => {
 
 function App() {
   // ★ Phase A: 認証状態を取得
-  const { user: authUser, isAuthenticated, isLoading: isAuthLoading, logout, isNewUser } = useAuth();
+  // currentUser は useAuth の user を直接参照
+  const { user: authUser, isAuthenticated, isLoading: isAuthLoading, logout, isNewUser, switchRole } = useAuth();
 
   const [mockMode, setMockMode] = useState('OFF');
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -67,43 +68,29 @@ function App() {
 
   // ★ Phase A: currentUser を useAuth から取得したユーザー情報で構成
   // 認証済みの場合は authUser を使用、未認証の場合はフォールバック
-  const [currentUser, setCurrentUser] = useState(() => {
-    // Role Initialization（デバッグ用の役割設定は維持）
-    let storedRole = 'user';
-    try {
-      storedRole = localStorage.getItem('app_debug_role') || 'user';
-    } catch (e) {
-      console.error('Failed to read role', e);
+  const currentUser = useMemo(() => {
+    if (authUser) {
+      return {
+        id: authUser.userId,
+        role: authUser.role || 'user', // レガシー互換
+        roles: authUser.roles,         // RBAC
+        name: authUser.displayName || 'User',
+        email: authUser.email,
+        createdAt: authUser.createdAt,
+      };
     }
+    // 未認証時のフォールバック（画面遷移前の一瞬など）
     return {
       id: null,
-      role: storedRole,
+      role: 'user',
       name: 'Loading...',
     };
-  });
-
-  // authUser が変更されたら currentUser を更新
-  useEffect(() => {
-    if (authUser) {
-      console.log('[App] authUser data:', JSON.stringify(authUser, null, 2));
-      setCurrentUser(prev => ({
-        id: authUser.userId,
-        role: authUser.role || prev.role,
-        name: authUser.displayName || 'User',
-        email: authUser.email,         // ★追加: アカウント情報表示用
-        createdAt: authUser.createdAt, // ★追加: アカウント情報表示用
-      }));
-      console.log('[App] User authenticated:', authUser.email);
-    }
   }, [authUser]);
 
-  // 【削除】useEffect内でのUser ID生成ロジックは削除（上記のuseState初期化に移動済み）
-
-  // Role変更ハンドラー
-  const handleRoleChange = (newRole) => {
-    localStorage.setItem('app_debug_role', newRole);
-    setCurrentUser(prev => ({ ...prev, role: newRole }));
-    addLog(`[App] Role changed to ${newRole}`, 'info');
+  // Role変更ハンドラー（DevMode用）
+  const handleRoleChange = async (newRole) => {
+    await switchRole(newRole);
+    addLog(`[App] Role switched to ${newRole}`, 'info');
   };
 
   // ★ Phase A: authUser.preferencesをuseSettingsに渡し、アカウント設定を反映

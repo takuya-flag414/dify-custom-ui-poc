@@ -5,6 +5,7 @@
 import {
     MOCK_USERS,
     MOCK_USER_ROLES,
+    MOCK_ROLES,
     AUTH_STORAGE_KEYS,
     MockUser,
     UserPreferences,
@@ -592,6 +593,40 @@ class AuthService {
      */
     resolvePermissions(roles: ResolvedUserRole[]): PermissionCode[] {
         return resolvePermissionsByRoles(roles);
+    }
+
+    /**
+     * 【DevMode専用】ロール切り替え（デバッグ用）
+     * - 指定されたロールコードに基づいて、一時的にユーザーのロールと権限を書き換えた UserProfile を返す
+     * - 実際のDB/Storageは更新せず、メモリ上のオブジェクトのみ更新する
+     */
+    async switchRoleDebug(currentUser: UserProfile, newRoleCode: RoleCode): Promise<UserProfile> {
+        // 1. 新しいロール定義を取得
+        const newRoleDef = MOCK_ROLES.find(r => r.role_code === newRoleCode);
+        if (!newRoleDef) {
+            throw new Error(`Role definition not found for code: ${newRoleCode}`);
+        }
+
+        // 2. ResolvedUserRole を構築
+        const newRole: ResolvedUserRole = {
+            roleId: newRoleDef.id,
+            roleCode: newRoleDef.role_code,
+            roleName: newRoleDef.name,
+            assignedAt: new Date().toISOString()
+        };
+
+        // 3. 権限を再計算
+        const newRoles = [newRole];
+        const newPermissions = resolvePermissionsByRoles(newRoles);
+
+        // 4. UserProfile を更新して返却
+        return {
+            ...currentUser,
+            roles: newRoles,
+            permissions: newPermissions,
+            // レガシー互換フィールドも更新
+            role: newRoleCode === 'admin' ? 'admin' : 'user'
+        };
     }
 }
 

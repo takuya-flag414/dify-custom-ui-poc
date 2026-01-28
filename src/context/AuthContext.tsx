@@ -3,7 +3,7 @@
 // Phase A: Mock Emulation - RBAC対応
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
-import { authService, UserProfile, LoginResult, PermissionCode, ResolvedUserRole } from '../services/AuthService';
+import { authService, UserProfile, LoginResult, PermissionCode, ResolvedUserRole, RoleCode } from '../services/AuthService';
 import { IS_DEV_MODE } from '../config/devMode';
 
 /**
@@ -45,6 +45,8 @@ export interface AuthContextValue {
     hasPermission: (permCode: PermissionCode) => boolean;
     /** ユーザーのロール一覧を取得 */
     getUserRoles: () => ResolvedUserRole[];
+    /** 【DevMode専用】ロール切り替え */
+    switchRole: (roleCode: RoleCode) => Promise<void>;
 }
 
 /**
@@ -172,6 +174,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return user.roles;
     }, [user]);
 
+    /**
+     * 【DevMode専用】ロール切り替え
+     */
+    const switchRole = useCallback(async (roleCode: RoleCode): Promise<void> => {
+        if (!IS_DEV_MODE) return;
+        if (!user) return;
+
+        try {
+            const updatedUser = await authService.switchRoleDebug(user, roleCode);
+            setUser(updatedUser);
+            console.log('[AuthContext] Role switched to:', roleCode);
+        } catch (err) {
+            console.error('[AuthContext] Role switch failed:', err);
+        }
+    }, [user]);
+
     // コンテキスト値をメモ化
     const contextValue = useMemo<AuthContextValue>(() => ({
         user,
@@ -186,7 +204,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         clearError,
         hasPermission,
         getUserRoles,
-    }), [user, isLoading, error, isNewUser, login, signup, logout, clearError, hasPermission, getUserRoles]);
+        switchRole,
+    }), [user, isLoading, error, isNewUser, login, signup, logout, clearError, hasPermission, getUserRoles, switchRole]);
 
     return (
         <AuthContext.Provider value={contextValue}>
