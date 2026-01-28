@@ -5,6 +5,7 @@ import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIco
 import DeletePopover from './DeletePopover';
 import ContextMenu from './ContextMenu';
 import { groupConversationsByDate } from '../../utils/dateUtils';
+import { FEATURE_FLAGS } from '../../config/featureFlags';
 import './Sidebar.css';
 
 /**
@@ -365,56 +366,60 @@ const Sidebar = ({
         {/* 4. Footer */}
         <div className="sidebar-footer">
           {/* Studios Button */}
-          <button
-            className={`footer-btn studios-btn ${currentView === 'studios' ? 'active' : ''}`}
-            onClick={() => onViewChange && onViewChange('studios')}
-            title="Studios"
-          >
-            <motion.div layout className="footer-icon-anchor">
-              <LayersIcon size={18} strokeWidth={2} />
-            </motion.div>
+          {FEATURE_FLAGS.SHOW_SIDEBAR_STUDIOS && (
+            <button
+              className={`footer-btn studios-btn ${currentView === 'studios' ? 'active' : ''}`}
+              onClick={() => onViewChange && onViewChange('studios')}
+              title="Studios"
+            >
+              <motion.div layout className="footer-icon-anchor">
+                <LayersIcon size={18} strokeWidth={2} />
+              </motion.div>
 
-            <AnimatePresence>
-              {!isCollapsed && (
-                <motion.span
-                  initial={{ opacity: 0, x: -10, width: 0 }}
-                  animate={{ opacity: 1, x: 0, width: 'auto' }}
-                  exit={{ opacity: 0, x: -10, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="footer-label"
-                  style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
-                >
-                  Studios
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10, width: 0 }}
+                    animate={{ opacity: 1, x: 0, width: 'auto' }}
+                    exit={{ opacity: 0, x: -10, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="footer-label"
+                    style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                  >
+                    Studios
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          )}
 
           {/* Intelligence Tools Button */}
-          <button
-            className={`footer-btn intelligence-btn ${currentView === 'tools' ? 'active' : ''}`}
-            onClick={() => onViewChange && onViewChange('tools')}
-            title="Intelligence Tools"
-          >
-            <motion.div layout className="footer-icon-anchor">
-              <SparklesIcon size={18} strokeWidth={2} />
-            </motion.div>
+          {FEATURE_FLAGS.SHOW_SIDEBAR_INTELLIGENCE && (
+            <button
+              className={`footer-btn intelligence-btn ${currentView === 'tools' ? 'active' : ''}`}
+              onClick={() => onViewChange && onViewChange('tools')}
+              title="Intelligence Tools"
+            >
+              <motion.div layout className="footer-icon-anchor">
+                <SparklesIcon size={18} strokeWidth={2} />
+              </motion.div>
 
-            <AnimatePresence>
-              {!isCollapsed && (
-                <motion.span
-                  initial={{ opacity: 0, x: -10, width: 0 }}
-                  animate={{ opacity: 1, x: 0, width: 'auto' }}
-                  exit={{ opacity: 0, x: -10, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="footer-label"
-                  style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
-                >
-                  Intelligence
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10, width: 0 }}
+                    animate={{ opacity: 1, x: 0, width: 'auto' }}
+                    exit={{ opacity: 0, x: -10, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="footer-label"
+                    style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                  >
+                    Intelligence
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          )}
 
           {/* Settings Button */}
           <button
