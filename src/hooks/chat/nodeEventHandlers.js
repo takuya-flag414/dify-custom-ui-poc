@@ -274,6 +274,73 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
 };
 
 /**
+ * recency値をユーザーフレンドリーなラベルに変換
+ * @param {string|null} recency - recency値
+ * @returns {string} 表示ラベル
+ */
+const getRecencyLabel = (recency) => {
+  const recencyLabels = {
+    'day': '🗓️ 1日以内',
+    'week': '🗓️ 1週間以内',
+    'month': '🗓️ 1ヶ月以内',
+    'year': '🗓️ 1年以内',
+  };
+  return recencyLabels[recency] || '🗓️ 期間指定なし';
+};
+
+/**
+ * node_finished イベントを処理する (LLM_Search_Strategy)
+ * @param {Object} outputs - ノード出力
+ * @param {string} nodeId - ノードID
+ * @param {Function} addLog - ログ関数
+ * @returns {Object|null} thoughtProcessUpdate または null
+ */
+export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
+  const rawText = outputs?.text;
+  const parsedJson = extractJsonFromLlmOutput(rawText);
+
+  if (parsedJson) {
+    // ログ出力
+    addLog(`[LLM_Search_Strategy] reasoning: ${parsedJson.reasoning || 'N/A'}`, 'info');
+    addLog(`[LLM_Search_Strategy] query_main: ${parsedJson.query_main || 'N/A'}`, 'info');
+    addLog(`[LLM_Search_Strategy] query_alt: ${parsedJson.query_alt || 'N/A'}`, 'info');
+    addLog(`[LLM_Search_Strategy] recency: ${parsedJson.recency || 'N/A'}`, 'info');
+    addLog(`[LLM_Search_Strategy] domain_filter: ${JSON.stringify(parsedJson.domain_filter || [])}`, 'info');
+
+    // 追加結果を構築
+    const additionalResults = [];
+
+    if (parsedJson.query_alt) {
+      additionalResults.push({ label: '補助検索', value: parsedJson.query_alt });
+    }
+
+    additionalResults.push({ label: '検索範囲', value: getRecencyLabel(parsedJson.recency) });
+
+    if (parsedJson.domain_filter && parsedJson.domain_filter.length > 0) {
+      additionalResults.push({ label: '対象サイト', value: parsedJson.domain_filter.join(', ') });
+    }
+
+    return {
+      thoughtProcessUpdate: (t) => t.id === nodeId ? {
+        ...t,
+        status: 'done',
+        thinking: parsedJson.reasoning || '',
+        resultLabel: 'メイン検索',
+        resultValue: parsedJson.query_main || '',
+        additionalResults
+      } : t
+    };
+  } else if (rawText) {
+    addLog(`[LLM_Search_Strategy] RAW出力: ${rawText}`, 'warn');
+    return {
+      thoughtProcessUpdate: (t) => t.id === nodeId ? { ...t, status: 'done' } : t
+    };
+  }
+
+  return null;
+};
+
+/**
  * ワークフローログ出力用の処理
  * @param {Object} outputs - ノード出力
  * @param {string} title - ノードタイトル

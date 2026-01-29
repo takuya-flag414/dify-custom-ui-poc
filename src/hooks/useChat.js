@@ -14,6 +14,7 @@ import {
   processNodeStarted,
   processQueryRewriteFinished,
   processIntentAnalysisFinished,
+  processSearchStrategyFinished,
   logWorkflowOutput,
   processNodeError,
   processWorkflowError
@@ -436,6 +437,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 // ★リファクタリング: LLM_Intent_Analysis処理
                 if (title === 'LLM_Intent_Analysis') {
                   const result = processIntentAnalysisFinished(outputs, nodeId, addLog);
+                  if (result) {
+                    setStreamingMessage(prev => prev ? {
+                      ...prev,
+                      thoughtProcess: prev.thoughtProcess.map(result.thoughtProcessUpdate)
+                    } : prev);
+                  }
+                }
+
+                // ★追加: LLM_Search_Strategy処理 (Devルート)
+                if (title === 'LLM_Search_Strategy') {
+                  const result = processSearchStrategyFinished(outputs, nodeId, addLog);
                   if (result) {
                     setStreamingMessage(prev => prev ? {
                       ...prev,

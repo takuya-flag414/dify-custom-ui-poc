@@ -57,9 +57,14 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     // ツールノード (動的タイトル生成)
     'TOOL_Doc_Extractor': { title: 'ドキュメントを解析中...', icon: 'document', dynamic: 'document' },
     'TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
+
+    // Devルート用ノード
+    'LLM_Search_Strategy': { title: '検索戦略を策定中...', icon: 'reasoning' },
+    'HTTP_TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
+    'LLM_Synthesis': { title: '検索結果を統合中...', icon: 'writing' },
 };
 
 /**
  * 表示対象外のノード接頭辞 (ゲート、変数操作、コード、出力など)
  */
-export const HIDDEN_NODE_PREFIXES: string[] = ['GATE_', 'ROUTER_', 'STYLE_Check_', 'SET_', 'CLEAR_', 'CODE_', 'ANSWER_', 'Check '];
+export const HIDDEN_NODE_PREFIXES: string[] = ['GATE_', 'ROUTER_', 'STYLE_Check_', 'SET_', 'CLEAR_', 'CODE_', 'ANSWER_', 'Check ', 'イテレーション', 'Build_'];
