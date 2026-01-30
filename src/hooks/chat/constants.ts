@@ -62,9 +62,13 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     'LLM_Search_Strategy': { title: '検索戦略を策定中...', icon: 'reasoning' },
     'HTTP_TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
     'LLM_Synthesis': { title: '検索結果を統合中...', icon: 'writing' },
+
+    // Devルート用ノード - FASTモード/Partner系
+    'HTTP_TOOL_Perplexity_Search (1)': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
+    'HTTP_Search_Partner': { title: '回答を生成中...', icon: 'writing' },
 };
 
 /**
  * 表示対象外のノード接頭辞 (ゲート、変数操作、コード、出力など)
  */
-export const HIDDEN_NODE_PREFIXES: string[] = ['GATE_', 'ROUTER_', 'STYLE_Check_', 'SET_', 'CLEAR_', 'CODE_', 'ANSWER_', 'Check ', 'イテレーション', 'Build_'];
+export const HIDDEN_NODE_PREFIXES: string[] = ['GATE_', 'ROUTER_', 'STYLE_Check_', 'SET_', 'CLEAR_', 'CODE_', 'ANSWER_', 'Check ', 'イテレーション', 'Build_', 'Parse_', 'Dev ', 'DEV', 'Deep_', 'Fast_', 'Check_Search_Mode'];

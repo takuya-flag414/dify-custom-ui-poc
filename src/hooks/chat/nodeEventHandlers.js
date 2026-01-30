@@ -310,6 +310,14 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
     // 追加結果を構築
     const additionalResults = [];
 
+    // 検索モードの表示
+    if (parsedJson.search_mode) {
+      const modeLabel = parsedJson.search_mode === 'fast'
+        ? '⚡ 高速モード'
+        : '🔍 詳細モード';
+      additionalResults.push({ label: '検索モード', value: modeLabel });
+    }
+
     if (parsedJson.query_alt) {
       additionalResults.push({ label: '補助検索', value: parsedJson.query_alt });
     }
@@ -318,6 +326,11 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
 
     if (parsedJson.domain_filter && parsedJson.domain_filter.length > 0) {
       additionalResults.push({ label: '対象サイト', value: parsedJson.domain_filter.join(', ') });
+    }
+
+    // target_domains も表示（LLM_Search_Strategy から出力される場合）
+    if (parsedJson.target_domains && parsedJson.target_domains.length > 0) {
+      additionalResults.push({ label: '対象ドメイン', value: parsedJson.target_domains.join(', ') });
     }
 
     return {
