@@ -19,9 +19,6 @@ interface ThinkingStep {
 export const THINKING_RENDER_RULES = {
     // 1. Silent Mode: これらに一致する場合は表示しない（最終回答生成など）
     silentPatterns: [
-        /generate_answer/i,
-        /answer_synthesis/i,
-        /回答生成/i,
         /final_response/i,
         /parameter_extraction/i
     ],
@@ -32,7 +29,12 @@ export const THINKING_RENDER_RULES = {
         'knowledge-retrieval',
         'retriever',
         'search',
-        'request'
+        'request',
+        'document-extractor',
+        'llm',
+        'http-request',
+        'iteration',
+        'writing'
     ],
 
     // タイトルに以下のキーワードが含まれる場合もActionとみなす

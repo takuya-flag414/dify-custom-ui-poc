@@ -639,6 +639,38 @@
     margin: 12px 0;
 }
 
+/* -----------------------------------
+   LOADING STATE
+   ----------------------------------- */
+.fluid-loading-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+}
+
+.fluid-loading-text {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    /* 点滅アニメーション */
+    animation: typing-indicator 1.5s infinite ease-in-out;
+}
+
+@keyframes typing-indicator {
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
+}
+
 /* ダークモード対応 */
 [data-theme='dark'] .thought-action-chip {
     background: rgba(40, 40, 40, 0.6);
@@ -667,6 +699,10 @@
 /* Reduced Motion対応 */
 @media (prefers-reduced-motion: reduce) {
     .action-spinner {
+        animation: none;
+    }
+
+    .fluid-loading-text {
         animation: none;
     }
 }

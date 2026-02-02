@@ -11,6 +11,7 @@ import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from '../Shared/FileIcon';
 import CopyButton from '../Shared/CopyButton';
+import { IS_THINKING_PROCESS_MERGED } from '../../config/env';
 
 // Spring Physics (DESIGN_RULE準拠)
 const SPRING_CONFIG = {
@@ -283,7 +284,8 @@ const MessageBlock = ({
                     </div>
                   )}
 
-                  {isAi && (thoughtProcess?.length > 0 || thinking) && (
+                  {/* Mergedモードでストリーミング中はthoughtProcessが空でもローディングUIを表示するためThinkingProcessをレンダリング */}
+                  {isAi && (thoughtProcess?.length > 0 || thinking || (IS_THINKING_PROCESS_MERGED && isStreaming)) && (
                     <ThinkingProcess
                       steps={thoughtProcess}
                       isStreaming={isStreaming}

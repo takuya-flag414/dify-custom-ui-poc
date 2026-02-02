@@ -64,6 +64,32 @@ const Icons = {
             <line x1="9" y1="9" x2="15" y2="15"></line>
         </svg>
     ),
+    'document-extractor': (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <line x1="10" y1="9" x2="8" y2="9"></line>
+        </svg>
+    ),
+    'http-request': (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+    ),
+    'llm': (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+    ),
+    'iteration': (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+    ),
     default: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -93,7 +119,8 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
     }, [isStreaming, steps, hasSteps, hasError]);
 
     // コンテンツがない場合は何も表示しない
-    if (!hasContent) return null;
+    // ただし、Mergedモードでストリーミング中はローディングUIを表示するため早期リターンしない
+    if (!hasContent && !(IS_THINKING_PROCESS_MERGED && isStreaming)) return null;
 
     const currentStep = hasSteps ? (steps.find(s => s.status === 'processing') || steps[steps.length - 1]) : null;
     // ★変更: エラー状態も「完了」とみなす（表示用）
@@ -104,8 +131,27 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
         // アイコン取得ヘルパー
         const getIcon = (iconType) => Icons[iconType] || Icons.default;
 
+        // 表示可能なコンテンツがあるかチェック
+        // - actionモードのステップがある場合は表示可能
+        // - monologueモードでthinking/reasoningがある場合は表示可能
+        const hasVisibleContent = hasSteps && steps.some(step => {
+            const mode = determineRenderMode(step);
+            if (mode === 'silent') return false;
+            if (mode === 'action') return true; // Actionチップは常に表示される
+            // Monologue: thinking/reasoningがある場合のみ表示
+            return !!(step.thinking || step.reasoning);
+        });
+
         return (
             <div className="fluid-thought-stream">
+                {/* 初期ローディング状態: 表示可能なコンテンツがまだなく、ストリーミング中の場合 */}
+                {!hasVisibleContent && isStreaming && (
+                    <div className="fluid-loading-container">
+                        <FluidOrb width="40px" height="40px" />
+                        <span className="fluid-loading-text">Thinking...</span>
+                    </div>
+                )}
+
                 {hasSteps && steps.map((step, index) => {
                     const mode = determineRenderMode(step);
 
@@ -153,12 +199,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                     );
                 })}
 
-                {/* AIの思考（thinkingContent）がある場合 */}
-                {hasThinking && (
-                    <div className="thought-monologue-container final-thought">
-                        <MarkdownRenderer content={thinkingContent} isStreaming={isStreaming} />
-                    </div>
-                )}
+
 
                 {/* 最終回答との視覚的な区切り */}
                 <hr className="thought-divider" />
