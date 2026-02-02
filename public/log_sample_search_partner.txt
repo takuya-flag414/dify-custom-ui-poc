@@ -1,0 +1,192 @@
+--- PoC Debug Logs ---
+
+--- System Logs ---
+[2026-02-02T04:35:24.835Z] [INFO] --- PoC App Initialized (useLogger) ---
+[2026-02-02T04:35:24.836Z] [INFO] [useConversations] Fetching REAL conversations list...
+[2026-02-02T04:35:24.837Z] [INFO] [useConversations] User ID not set yet.
+[2026-02-02T04:35:24.840Z] [INFO] [useConversations] Fetching REAL conversations list...
+[2026-02-02T04:35:24.840Z] [INFO] [useConversations] User ID not set yet.
+[2026-02-02T04:35:25.898Z] [INFO] [useConversations] Fetching REAL conversations list...
+[2026-02-02T04:35:27.203Z] [INFO] [useConversations] Fetched 20 conversations.
+[2026-02-02T04:35:30.973Z] [INFO] [Workflow] === 新規リクエスト開始 ===
+[2026-02-02T04:35:30.973Z] [INFO] [Workflow] 検索モード: Web=auto, RAG=AUTO
+[2026-02-02T04:35:30.973Z] [INFO] [Workflow] ユーザー入力: 今日の東京の天気は？
+[2026-02-02T04:35:30.973Z] [INFO] [Intelligence Profile] ai_style: partner
+[2026-02-02T04:35:30.974Z] [INFO] [Intelligence Profile] system_prompt: {
+  "user_context": {
+    "name": "藤井",
+    "role": "システム管理者",
+    "department": "情報システム部"
+  },
+  "custom_directives": {
+    "free_text": ""
+  },
+  "meta": {
+    "client_version": "3.0.0",
+    "timestamp": "2026-02-02T04:35:30.973Z"
+  }
+}
+[2026-02-02T04:35:32.703Z] [INFO] [useConversations] New conversation created: fccebdd1-debf-4155-8af4-7ea35370c131
+[2026-02-02T04:35:32.713Z] [INFO] [useChat] Skip loading/resetting history for just-created conversation: fccebdd1-debf-4155-8af4-7ea35370c131
+[2026-02-02T04:35:34.943Z] [INFO] [LLM_Intent_Analysis] thinking: 今日の天気はリアルタイム情報のため、Web検索が必要です。RAGは不要です。
+[2026-02-02T04:35:34.943Z] [INFO] [LLM_Intent_Analysis] category: TASK
+[2026-02-02T04:35:34.943Z] [INFO] [LLM_Intent_Analysis] requires_rag: false, requires_web: true
+[2026-02-02T04:35:34.944Z] [INFO] [LLM_Intent_Analysis] 判定: 🛠️ タスク実行 → 🌐 Webで情報を探します
+[2026-02-02T04:35:41.164Z] [INFO] [LLM_Search_Strategy] reasoning: 東京の天気という単純な事実検索であり、迅速な回答が求められるため、search_modeは"fast"を選択。モデルは低コストな"sonar"を選択。気象庁の情報を参照するため、ドメインを指定。
+[2026-02-02T04:35:41.164Z] [INFO] [LLM_Search_Strategy] query_main: 今日の東京の天気
+[2026-02-02T04:35:41.164Z] [INFO] [LLM_Search_Strategy] query_alt: 東京都 天気予報
+[2026-02-02T04:35:41.164Z] [INFO] [LLM_Search_Strategy] recency: day
+[2026-02-02T04:35:41.164Z] [INFO] [LLM_Search_Strategy] domain_filter: []
+[2026-02-02T04:35:41.165Z] [INFO] [Workflow] LLM_Search_Strategy 出力:
+```json
+{
+  "reasoning": "東京の天気という単純な事実検索であり、迅速な回答が求められるため、search_modeは\"fast\"を選択。モデルは低コストな\"sonar\"を選択。気象庁の情報を参照するため、ドメインを指定。",
+  "search_mode": "fast",
+  "selected_model": "sonar",
+  "query_main": "今日の東京の天気",
+  "query_alt": "東京都 天気予報",
+  "recency": "day",
+  "target_domains": ["jma.go.jp", "yahoo.co.jp", "weathernews.jp"]
+}
+```
+[2026-02-02T04:35:58.452Z] [INFO] [Workflow] LLM_Search_Partner 出力:
+```json
+{
+  "thinking": "- **ユーザーの意図**: 今日の東京の天気に関する最新情報を求めている。\n- **情報の分解**: 天気（晴れ/曇り/雨/雪）、気温（最高/最低）、降水確率、風、湿度などの要素を抽出。\n- **構成案**: まず概要を提示し、気象庁とウェザーニュースの詳細な情報を加える。さらに、Yahoo!天気の情報から、システム管理者が関心を持ちそうな指数（乾燥、風邪注意など）を提示する。\n- **戦略**: 各情報源から得られた情報を統合し、ユーザーが包括的な理解を得られるように努める。特に、システム管理者が日々の業務で考慮すべき点（例：乾燥対策、寒さ対策）を強調する。",
+  "answer": "藤井さん、こんにちは！\nWeb情報をあわせて確認しました🔍\n\n今日の東京の天気についてお知らせしますね。概ね晴れ時々曇りで、最高気温は11℃、最低気温は3℃となるでしょう [1][2][3]。\n\n### ☀️ 全体的な天気概況\n\n東京は、2026年2月2日は概ね晴れ時々曇りとなるでしょう [2]。日中の最高気温は11℃まで上がり、夜間の最低気温は3℃まで下がる見込みです [2][3]。\n\n### 🌡️ 気象庁とウェザーニュースの詳細情報\n\n気象庁のデータによると、横浜の観測地点では気圧が1015.8 hPa、現在の気温は9.3℃で、北北西の風が7.5 m/sで吹いています [1]。\n\nウェザーニュースでは、今日の東京は「晴れ時々くもり」で、降水確率は午前が10%、午後が20%と予測しています [2]。\n\n### 💡 その他の注意点（Yahoo!天気より）\n\nYahoo!天気では、以下の指数が公開されています [3]：\n\n*   紫外線指数: 10（弱く、外出も安心）\n*   重ね着指数: 90（厚手のコートでしっかり防寒を）\n*   乾燥指数: 80（乾燥注意！保湿をしっかり）\n*   風邪注意指数: 80（加湿を心がけた方がよさそう）\n*   洗濯指数: 90（絶好の洗濯日和。バスタオルも速乾）\n*   傘指数: 10（傘なしでも心配なし）\n\n特に乾燥と風邪には注意が必要なようです。オフィス内の加湿や、ご自身の保湿対策も忘れずに行いましょう✅\n\n今日の天気は安定していますが、夕方から曇りとなり、雨や雪の降る可能性もあるため、注意が必要です [1][2][3][4]。伊豆諸島では雨や雷雨となる所がある見込みです [4]。",
+  "citations": [
+    {
+      "id": "cite_1",
+      "type": "web",
+      "source": "気象庁｜最新の気象データ",
+      "url": "https://www.data.jma.go.jp/stats/data/mdrr/synopday/data1s.html"
+    },
+    {
+      "id": "cite_2",
+      "type": "web",
+      "source": "東京の天気 - ウェザーニュース",
+      "url": "https://weathernews.jp/onebox/tenki/tokyo/"
+    },
+    {
+      "id": "cite_3",
+      "type": "web",
+      "source": "東京（東京）の天気 - Yahoo!天気・災害",
+      "url": "https://weather.yahoo.co.jp/weather/jp/13/4410.html"
+    },
+    {
+      "id": "cite_4",
+      "type": "web",
+      "source": "東京都の天気 - Yahoo!天気・災害",
+      "url": "https://weather.yahoo.co.jp/weather/jp/13/"
+    }
+  ]
+}
+```
+[2026-02-02T04:35:59.804Z] [INFO] [Perf] Cycle: "今日の東京の天気は？" | Total: 28830ms | TTFB: 1714ms | TTFT: 21671ms | Thinking: 20900ms (4 steps)
+
+--- Conversation Logs (JSON) ---
+[
+  {
+    "id": "msg_1770006930973_user",
+    "role": "user",
+    "text": "今日の東京の天気は？",
+    "timestamp": "2026-02-02T04:35:30.973Z",
+    "files": []
+  },
+  {
+    "id": "msg_1770006930973_ai",
+    "role": "ai",
+    "text": "藤井さん、こんにちは！\nWeb情報をあわせて確認しました🔍\n\n今日の東京の天気についてお知らせしますね。概ね晴れ時々曇りで、最高気温は11℃、最低気温は3℃となるでしょう [1][2][3]。\n\n### ☀️ 全体的な天気概況\n\n東京は、2026年2月2日は概ね晴れ時々曇りとなるでしょう [2]。日中の最高気温は11℃まで上がり、夜間の最低気温は3℃まで下がる見込みです [2][3]。\n\n### 🌡️ 気象庁とウェザーニュースの詳細情報\n\n気象庁のデータによると、横浜の観測地点では気圧が1015.8 hPa、現在の気温は9.3℃で、北北西の風が7.5 m/sで吹いています [1]。\n\nウェザーニュースでは、今日の東京は「晴れ時々くもり」で、降水確率は午前が10%、午後が20%と予測しています [2]。\n\n### 💡 その他の注意点（Yahoo!天気より）\n\nYahoo!天気では、以下の指数が公開されています [3]：\n\n*   紫外線指数: 10（弱く、外出も安心）\n*   重ね着指数: 90（厚手のコートでしっかり防寒を）\n*   乾燥指数: 80（乾燥注意！保湿をしっかり）\n*   風邪注意指数: 80（加湿を心がけた方がよさそう）\n*   洗濯指数: 90（絶好の洗濯日和。バスタオルも速乾）\n*   傘指数: 10（傘なしでも心配なし）\n\n特に乾燥と風邪には注意が必要なようです。オフィス内の加湿や、ご自身の保湿対策も忘れずに行いましょう✅\n\n今日の天気は安定していますが、夕方から曇りとなり、雨や雪の降る可能性もあるため、注意が必要です [1][2][3][4]。伊豆諸島では雨や雷雨となる所がある見込みです [4]。",
+    "rawContent": "```json\n{\n  \"thinking\": \"- **ユーザーの意図**: 今日の東京の天気に関する最新情報を求めている。\\n- **情報の分解**: 天気（晴れ/曇り/雨/雪）、気温（最高/最低）、降水確率、風、湿度などの要素を抽出。\\n- **構成案**: まず概要を提示し、気象庁とウェザーニュースの詳細な情報を加える。さらに、Yahoo!天気の情報から、システム管理者が関心を持ちそうな指数（乾燥、風邪注意など）を提示する。\\n- **戦略**: 各情報源から得られた情報を統合し、ユーザーが包括的な理解を得られるように努める。特に、システム管理者が日々の業務で考慮すべき点（例：乾燥対策、寒さ対策）を強調する。\",\n  \"answer\": \"藤井さん、こんにちは！\\nWeb情報をあわせて確認しました🔍\\n\\n今日の東京の天気についてお知らせしますね。概ね晴れ時々曇りで、最高気温は11℃、最低気温は3℃となるでしょう [1][2][3]。\\n\\n### ☀️ 全体的な天気概況\\n\\n東京は、2026年2月2日は概ね晴れ時々曇りとなるでしょう [2]。日中の最高気温は11℃まで上がり、夜間の最低気温は3℃まで下がる見込みです [2][3]。\\n\\n### 🌡️ 気象庁とウェザーニュースの詳細情報\\n\\n気象庁のデータによると、横浜の観測地点では気圧が1015.8 hPa、現在の気温は9.3℃で、北北西の風が7.5 m/sで吹いています [1]。\\n\\nウェザーニュースでは、今日の東京は「晴れ時々くもり」で、降水確率は午前が10%、午後が20%と予測しています [2]。\\n\\n### 💡 その他の注意点（Yahoo!天気より）\\n\\nYahoo!天気では、以下の指数が公開されています [3]：\\n\\n*   紫外線指数: 10（弱く、外出も安心）\\n*   重ね着指数: 90（厚手のコートでしっかり防寒を）\\n*   乾燥指数: 80（乾燥注意！保湿をしっかり）\\n*   風邪注意指数: 80（加湿を心がけた方がよさそう）\\n*   洗濯指数: 90（絶好の洗濯日和。バスタオルも速乾）\\n*   傘指数: 10（傘なしでも心配なし）\\n\\n特に乾燥と風邪には注意が必要なようです。オフィス内の加湿や、ご自身の保湿対策も忘れずに行いましょう✅\\n\\n今日の天気は安定していますが、夕方から曇りとなり、雨や雪の降る可能性もあるため、注意が必要です [1][2][3][4]。伊豆諸島では雨や雷雨となる所がある見込みです [4]。\",\n  \"citations\": [\n    {\n      \"id\": \"cite_1\",\n      \"type\": \"web\",\n      \"source\": \"気象庁｜最新の気象データ\",\n      \"url\": \"https://www.data.jma.go.jp/stats/data/mdrr/synopday/data1s.html\"\n    },\n    {\n      \"id\": \"cite_2\",\n      \"type\": \"web\",\n      \"source\": \"東京の天気 - ウェザーニュース\",\n      \"url\": \"https://weathernews.jp/onebox/tenki/tokyo/\"\n    },\n    {\n      \"id\": \"cite_3\",\n      \"type\": \"web\",\n      \"source\": \"東京（東京）の天気 - Yahoo!天気・災害\",\n      \"url\": \"https://weather.yahoo.co.jp/weather/jp/13/4410.html\"\n    },\n    {\n      \"id\": \"cite_4\",\n      \"type\": \"web\",\n      \"source\": \"東京都の天気 - Yahoo!天気・災害\",\n      \"url\": \"https://weather.yahoo.co.jp/weather/jp/13/\"\n    }\n  ]\n}\n```",
+    "citations": [
+      {
+        "id": "cite_1",
+        "type": "web",
+        "source": "[1] 気象庁｜最新の気象データ",
+        "url": "https://www.data.jma.go.jp/stats/data/mdrr/synopday/data1s.html"
+      },
+      {
+        "id": "cite_2",
+        "type": "web",
+        "source": "[2] 東京の天気 - ウェザーニュース",
+        "url": "https://weathernews.jp/onebox/tenki/tokyo/"
+      },
+      {
+        "id": "cite_3",
+        "type": "web",
+        "source": "[3] 東京（東京）の天気 - Yahoo!天気・災害",
+        "url": "https://weather.yahoo.co.jp/weather/jp/13/4410.html"
+      },
+      {
+        "id": "cite_4",
+        "type": "web",
+        "source": "[4] 東京都の天気 - Yahoo!天気・災害",
+        "url": "https://weather.yahoo.co.jp/weather/jp/13/"
+      }
+    ],
+    "suggestions": [
+      "明日の天気は？",
+      "最高気温は何度？",
+      "降水確率は？"
+    ],
+    "isStreaming": false,
+    "timestamp": "2026-02-02T04:35:30.973Z",
+    "traceMode": "search",
+    "thoughtProcess": [
+      {
+        "id": "17683770269110",
+        "title": "判定: 🛠️ タスク実行",
+        "status": "done",
+        "iconType": "router",
+        "thinking": "今日の天気はリアルタイム情報のため、Web検索が必要です。RAGは不要です。",
+        "resultLabel": "検索方針",
+        "resultValue": "🌐 Webで情報を探します"
+      },
+      {
+        "id": "1769666720110",
+        "title": "検索戦略を策定中...",
+        "status": "done",
+        "iconType": "reasoning",
+        "thinking": "東京の天気という単純な事実検索であり、迅速な回答が求められるため、search_modeは\"fast\"を選択。モデルは低コストな\"sonar\"を選択。気象庁の情報を参照するため、ドメインを指定。",
+        "resultLabel": "メイン検索",
+        "resultValue": "今日の東京の天気",
+        "additionalResults": [
+          {
+            "label": "検索モード",
+            "value": "⚡ 高速モード"
+          },
+          {
+            "label": "補助検索",
+            "value": "東京都 天気予報"
+          },
+          {
+            "label": "検索範囲",
+            "value": "🗓️ 1日以内"
+          },
+          {
+            "label": "対象ドメイン",
+            "value": "jma.go.jp, yahoo.co.jp, weathernews.jp"
+          }
+        ]
+      },
+      {
+        "id": "17697558915520",
+        "title": "Web検索: \"今日の東京の天気は？\"",
+        "status": "done",
+        "iconType": "search"
+      },
+      {
+        "id": "17665512248470",
+        "title": "検索結果から回答を生成中...",
+        "status": "done",
+        "iconType": "writing"
+      }
+    ],
+    "processStatus": null,
+    "thinking": "- **ユーザーの意図**: 今日の東京の天気に関する最新情報を求めている。\n- **情報の分解**: 天気（晴れ/曇り/雨/雪）、気温（最高/最低）、降水確率、風、湿度などの要素を抽出。\n- **構成案**: まず概要を提示し、気象庁とウェザーニュースの詳細な情報を加える。さらに、Yahoo!天気の情報から、システム管理者が関心を持ちそうな指数（乾燥、風邪注意など）を提示する。\n- **戦略**: 各情報源から得られた情報を統合し、ユーザーが包括的な理解を得られるように努める。特に、システム管理者が日々の業務で考慮すべき点（例：乾燥対策、寒さ対策）を強調する。",
+    "mode": "fast",
+    "smartActions": []
+  }
+]
+
+--- End of Logs ---

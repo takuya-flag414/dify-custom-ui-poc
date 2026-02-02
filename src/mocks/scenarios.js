@@ -101,6 +101,11 @@ const thinkingTemplates = {
   file_web: {
     efficient: "- **処理**: ファイル + Web検索\n- **分析**: 添付資料とWeb情報を照合",
     partner: "- **ファイル確認**: 添付ドキュメントを読み込み\n- **Web検索**: 最新情報と照らし合わせ\n- **戦略**: 両者を統合して回答"
+  },
+  // ========== Auto Demo (Log based) ==========
+  auto_demo: {
+    efficient: "", // Not used in this demo
+    partner: "- **ユーザーの意図**: 今日の東京の天気に関する最新情報を求めている。\n- **情報の分解**: 天気（晴れ/曇り/雨/雪）、気温（最高/最低）、降水確率、風、湿度などの要素を抽出。\n- **構成案**: まず概要を提示し、気象庁とウェザーニュースの詳細な情報を加える。さらに、Yahoo!天気の情報から、システム管理者が関心を持ちそうな指数（乾燥、風邪注意など）を提示する。\n- **戦略**: 各情報源から得られた情報を統合し、ユーザーが包括的な理解を得られるように努める。特に、システム管理者が日々の業務で考慮すべき点（例：乾燥対策、寒さ対策）を強調する。"
   }
 };
 
@@ -174,6 +179,12 @@ const styleTemplates = {
   full: {
     efficient: "### 総合分析レポート\n\n「事業計画書案」について、社内実績と市場動向の両面から分析しました。\n\n#### 計画書の分析\n提案されている「AIカスタマーサポート」機能[1]は、コスト削減効果が高いとされています。\n\n#### 社内実績\n過去の類似プロジェクト「ChatBot 2023」[2]では、導入により問い合わせが30%削減。\n\n#### 市場動向\n競合他社も同様の機能をリリース[3]。早期リリースが重要。\n\n**結論**: 本計画は妥当性が高く、推進を推奨します。",
     partner: "事業計画書について、社内実績と市場動向の両面から分析してみました！📊\n\nまず計画書[1]で提案されている「**AIカスタマーサポート**」機能、コスト削減効果が期待できそうですね。\n\n**社内の実績**を見てみると...過去の「ChatBot 2023」プロジェクト[2]では、導入後に問い合わせが**30%削減**されたそうです！これは心強いデータですね 💪\n\n**市場動向**としては、競合他社も同様の機能をリリースし始めています[3]。競争力を維持するためにも、**早期リリース**が重要になりそうです。\n\n総合的に見て、この計画は**推進を推奨**します！✅\n\n次のステップとして、リスク管理表の作成などお手伝いしましょうか？"
+  },
+
+  // ========== Auto Demo (Log based) ==========
+  auto_demo: {
+    efficient: "", // Not used
+    partner: "藤井さん、こんにちは！\nWeb情報をあわせて確認しました🔍\n\n今日の東京の天気についてお知らせしますね。概ね晴れ時々曇りで、最高気温は11℃、最低気温は3℃となるでしょう [1][2][3]。\n\n### ☀️ 全体的な天気概況\n\n東京は、2026年2月2日は概ね晴れ時々曇りとなるでしょう [2]。日中の最高気温は11℃まで上がり、夜間の最低気温は3℃まで下がる見込みです [2][3]。\n\n### 🌡️ 気象庁とウェザーニュースの詳細情報\n\n気象庁のデータによると、横浜の観測地点では気圧が1015.8 hPa、現在の気温は9.3℃で、北北西の風が7.5 m/sで吹いています [1]。\n\nウェザーニュースでは、今日の東京は「晴れ時々くもり」で、降水確率は午前が10%、午後が20%と予測しています [2]。\n\n### 💡 その他の注意点（Yahoo!天気より）\n\nYahoo!天気では、以下の指数が公開されています [3]：\n\n*   紫外線指数: 10（弱く、外出も安心）\n*   重ね着指数: 90（厚手のコートでしっかり防寒を）\n*   乾燥指数: 80（乾燥注意！保湿をしっかり）\n*   風邪注意指数: 80（加湿を心がけた方がよさそう）\n*   洗濯指数: 90（絶好の洗濯日和。バスタオルも速乾）\n*   傘指数: 10（傘なしでも心配なし）\n\n特に乾燥と風邪には注意が必要なようです。オフィス内の加湿や、ご自身の保湿対策も忘れずに行いましょう✅\n\n今日の天気は安定していますが、夕方から曇りとなり、雨や雪の降る可能性もあるため、注意が必要です [1][2][3][4]。伊豆諸島では雨や雷雨となる所がある見込みです [4]。"
   }
 };
 
@@ -668,6 +679,67 @@ export const scenarios = {
         answer: styleTemplates.fast_file.partner  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { retriever_resources: [] } }
+    ]
+  },
+
+  // =================================================================
+  // Pattern 11: Auto Demo (Log Based Logic)
+  // =================================================================
+  'auto_demo': {
+    efficient: [], // Not used
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      {
+        event: 'node_finished', data: {
+          title: 'LLM_Intent_Analysis',
+          outputs: {
+            text: '```json\n' + JSON.stringify({
+              thinking: "今日の天気はリアルタイム情報のため、Web検索が必要です。RAGは不要です。",
+              category: "TASK",
+              requires_rag: false,
+              requires_web: true,
+              resultLabel: "判定: 🛠️ タスク実行 → 🌐 Webで情報を探します"
+            }, null, 2) + '\n```'
+          }
+        }
+      },
+      { event: 'node_started', data: { title: 'LLM_Search_Strategy', node_type: 'llm' } },
+      {
+        event: 'node_finished', data: {
+          title: 'LLM_Search_Strategy',
+          outputs: {
+            text: '```json\n' + JSON.stringify({
+              reasoning: "東京の天気という単純な事実検索であり、迅速な回答が求められるため、search_modeは\"fast\"を選択。モデルは低コストな\"sonar\"を選択。気象庁の情報を参照するため、ドメインを指定。",
+              search_mode: "fast",
+              selected_model: "sonar",
+              query_main: "今日の東京の天気",
+              query_alt: "東京都 天気予報",
+              recency: "day",
+              target_domains: ["jma.go.jp", "yahoo.co.jp", "weathernews.jp"],
+              domain_filter: ["jma.go.jp", "yahoo.co.jp", "weathernews.jp"] // Add domain_filter for display consistency
+            }, null, 2) + '\n```'
+          }
+        }
+      },
+      { event: 'node_started', data: { title: 'Perplexity Search', node_type: 'tool', inputs: { query: '今日の東京の天気' } } },
+      { event: 'node_finished', data: { title: 'Perplexity Search', outputs: { text: '[Search Results...]' } } },
+      { event: 'node_started', data: { title: 'LLM_Search_Partner', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJsonCodeBlock(
+          styleTemplates.auto_demo.partner,
+          [
+            { id: 'cite_1', type: 'web', source: '気象庁｜最新の気象データ', url: 'https://www.data.jma.go.jp/stats/data/mdrr/synopday/data1s.html' },
+            { id: 'cite_2', type: 'web', source: '東京の天気 - ウェザーニュース', url: 'https://weathernews.jp/onebox/tenki/tokyo/' },
+            { id: 'cite_3', type: 'web', source: '東京（東京）の天気 - Yahoo!天気・災害', url: 'https://weather.yahoo.co.jp/weather/jp/13/4410.html' },
+            { id: 'cite_4', type: 'web', source: '東京都の天気 - Yahoo!天気・災害', url: 'https://weather.yahoo.co.jp/weather/jp/13/' }
+          ],
+          [],
+          thinkingTemplates.auto_demo.partner
+        )
+      },
+      { event: 'node_finished', data: { title: 'LLM_Search_Partner', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [] } }
     ]
   }

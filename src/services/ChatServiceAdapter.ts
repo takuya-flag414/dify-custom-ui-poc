@@ -120,7 +120,12 @@ export const ChatServiceAdapter = {
             const hasFile = files.length > 0;
 
             let scenarioKey = 'pure';
-            if (!useRag && !useWeb) {
+
+            // ★Auto Mode (Special Demo)
+            if (searchSettings?.ragEnabled === 'auto' && searchSettings?.webMode === 'auto' && !hasFile) {
+                scenarioKey = 'auto_demo';
+            }
+            else if (!useRag && !useWeb) {
                 scenarioKey = hasFile ? 'fast_file' : 'fast_pure';
             } else if (hasFile) {
                 if (!useRag && !useWeb) scenarioKey = 'file_only';
