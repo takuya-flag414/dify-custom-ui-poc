@@ -36,6 +36,8 @@ import { FEATURE_FLAGS } from './config/featureFlags';
 import { useAuth } from './context/AuthContext';
 import LoginScreen from './components/Auth/LoginScreen';
 
+import { DEFAULT_MOCK_MODE } from './config/env';
+
 // generateUUID は AuthService に移管されたため削除
 // 後方互換のため残存（将来削除予定）
 const generateUUID = () => {
@@ -53,7 +55,7 @@ function App() {
   // currentUser は useAuth の user を直接参照
   const { user: authUser, isAuthenticated, isLoading: isAuthLoading, logout, isNewUser, switchRole } = useAuth();
 
-  const [mockMode, setMockMode] = useState('OFF');
+  const [mockMode, setMockMode] = useState(DEFAULT_MOCK_MODE);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState('chat');
 

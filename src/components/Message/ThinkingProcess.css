@@ -358,18 +358,18 @@
     margin: 4px 0 10px 44px;
     padding: 10px 12px;
     border-radius: 10px;
-    
+
     /* Apple Intelligence淡いグラデーション */
     background: linear-gradient(135deg,
-        rgba(0, 255, 255, 0.02) 0%,
-        rgba(255, 0, 255, 0.02) 50%,
-        rgba(0, 122, 255, 0.02) 100%);
+            rgba(0, 255, 255, 0.02) 0%,
+            rgba(255, 0, 255, 0.02) 50%,
+            rgba(0, 122, 255, 0.02) 100%);
     border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.05));
-    
+
     /* Glassmorphism */
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    
+
     /* Spring animation */
     animation: step-detail-appear 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -379,6 +379,7 @@
         opacity: 0;
         transform: translateY(-4px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -430,9 +431,9 @@
 /* ダークモード対応 */
 [data-theme='dark'] .step-detail-container {
     background: linear-gradient(135deg,
-        rgba(0, 255, 255, 0.04) 0%,
-        rgba(255, 0, 255, 0.04) 50%,
-        rgba(0, 122, 255, 0.04) 100%);
+            rgba(0, 255, 255, 0.04) 0%,
+            rgba(255, 0, 255, 0.04) 50%,
+            rgba(0, 122, 255, 0.04) 100%);
     border-color: var(--color-border, rgba(255, 255, 255, 0.1));
 }
 
@@ -477,8 +478,8 @@
 /* エラー詳細コンテナ */
 .step-detail-container.error {
     background: linear-gradient(135deg,
-        rgba(239, 68, 68, 0.05) 0%,
-        rgba(239, 68, 68, 0.02) 100%);
+            rgba(239, 68, 68, 0.05) 0%,
+            rgba(239, 68, 68, 0.02) 100%);
     border-color: rgba(239, 68, 68, 0.2);
 }
 
@@ -510,7 +511,162 @@
 
 [data-theme='dark'] .step-detail-container.error {
     background: linear-gradient(135deg,
-        rgba(239, 68, 68, 0.08) 0%,
-        rgba(239, 68, 68, 0.04) 100%);
+            rgba(239, 68, 68, 0.08) 0%,
+            rgba(239, 68, 68, 0.04) 100%);
     border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ========================================
+   Fluid Thought Stream Styles
+   Apple Intelligence風シームレス表示
+   ======================================== */
+
+.fluid-thought-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+/* Monologue: 最終回答と同一スタイル（特別な装飾なし） */
+.thought-monologue-container {
+    /* スタイルなし - MarkdownRendererのデフォルトスタイルをそのまま使用 */
+}
+
+/* Action: チップ型UI (mat-hud準拠) */
+.thought-action-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 4px 0;
+}
+
+.thought-action-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    width: fit-content;
+
+    /* mat-hud like material */
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-main);
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.thought-action-chip.processing {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.thought-action-chip.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: var(--color-danger, #EF4444);
+}
+
+.action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary, #007AFF);
+}
+
+.action-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.thought-action-chip.error .action-icon {
+    color: var(--color-danger, #EF4444);
+}
+
+.action-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+.action-spinner {
+    width: 10px;
+    height: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--color-primary, #007AFF);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.action-error-icon {
+    font-size: 12px;
+}
+
+.action-error-detail {
+    margin-left: 12px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--color-danger, #EF4444);
+    background: rgba(239, 68, 68, 0.05);
+    border-radius: 8px;
+    border-left: 2px solid var(--color-danger, #EF4444);
+}
+
+/* Action内のMonologue表示 */
+.action-monologue {
+    margin-top: 8px;
+    margin-left: 12px;
+}
+
+/* 思考と回答の区切り線 */
+.thought-divider {
+    border: none;
+    border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.08));
+    margin: 12px 0;
+}
+
+/* ダークモード対応 */
+[data-theme='dark'] .thought-action-chip {
+    background: rgba(40, 40, 40, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+[data-theme='dark'] .thought-action-chip.processing {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+[data-theme='dark'] .thought-action-chip.error {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+[data-theme='dark'] .action-error-detail {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+[data-theme='dark'] .thought-divider {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Reduced Motion対応 */
+@media (prefers-reduced-motion: reduce) {
+    .action-spinner {
+        animation: none;
+    }
 }

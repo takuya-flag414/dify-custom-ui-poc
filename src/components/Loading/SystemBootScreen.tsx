@@ -15,6 +15,7 @@ import IntelligenceOrb from '../Shared/IntelligenceOrb';
  */
 const SystemBootScreen: React.FC = () => {
     return (
+        // @ts-ignore - IntelligenceOrb.jsx lacks type definitions
         <IntelligenceOrb
             mode="loading"
             label="システムを起動中..."

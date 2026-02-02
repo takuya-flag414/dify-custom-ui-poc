@@ -1,8 +1,9 @@
-// src/components/Message/ThinkingProcess.jsx
 import React, { useState, useEffect } from 'react';
 import './ThinkingProcess.css';
 import FluidOrb from '../Shared/FluidOrb';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
+import { IS_THINKING_PROCESS_MERGED } from '../../config/env';
+import { determineRenderMode } from '../../config/thinkingRenderRules';
 
 // --- SF Symbols風 SVG Icons ---
 const Icons = {
@@ -97,6 +98,73 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
     const currentStep = hasSteps ? (steps.find(s => s.status === 'processing') || steps[steps.length - 1]) : null;
     // ★変更: エラー状態も「完了」とみなす（表示用）
     const isAllDone = hasSteps ? steps.every(s => s.status === 'done' || s.status === 'error') : !isStreaming;
+
+    // ★ Fluid Thought Stream モード (環境変数 VITE_MERGE_THINKING_PROCESS=true の場合)
+    if (IS_THINKING_PROCESS_MERGED) {
+        // アイコン取得ヘルパー
+        const getIcon = (iconType) => Icons[iconType] || Icons.default;
+
+        return (
+            <div className="fluid-thought-stream">
+                {hasSteps && steps.map((step, index) => {
+                    const mode = determineRenderMode(step);
+
+                    // Silent: 非表示
+                    if (mode === 'silent') return null;
+
+                    // Action: チップ型UI + thinking/reasoningがあれば追加表示
+                    if (mode === 'action') {
+                        const actionMonologueContent = step.thinking || step.reasoning;
+                        return (
+                            <div key={step.id || index} className="thought-action-container">
+                                <div className={`thought-action-chip ${step.status}`}>
+                                    <span className="action-icon">{getIcon(step.iconType)}</span>
+                                    <span className="action-title">{step.title}</span>
+                                    {step.status === 'processing' && <span className="action-spinner" />}
+                                    {step.status === 'error' && <span className="action-error-icon">⚠️</span>}
+                                </div>
+                                {/* エラー詳細 */}
+                                {step.status === 'error' && step.errorMessage && (
+                                    <div className="action-error-detail">{step.errorMessage}</div>
+                                )}
+                                {/* Actionでもthinking/reasoningがあれば表示 */}
+                                {actionMonologueContent && (
+                                    <div className="thought-monologue-container action-monologue">
+                                        <MarkdownRenderer
+                                            content={actionMonologueContent}
+                                            isStreaming={isStreaming && index === steps.length - 1}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
+                    // Monologue: thinking/reasoningフィールドを最終回答と同一スタイルで表示
+                    const monologueContent = step.thinking || step.reasoning;
+                    if (!monologueContent) return null;
+                    return (
+                        <div key={step.id || index} className="thought-monologue-container">
+                            <MarkdownRenderer
+                                content={monologueContent}
+                                isStreaming={isStreaming && index === steps.length - 1}
+                            />
+                        </div>
+                    );
+                })}
+
+                {/* AIの思考（thinkingContent）がある場合 */}
+                {hasThinking && (
+                    <div className="thought-monologue-container final-thought">
+                        <MarkdownRenderer content={thinkingContent} isStreaming={isStreaming} />
+                    </div>
+                )}
+
+                {/* 最終回答との視覚的な区切り */}
+                <hr className="thought-divider" />
+            </div>
+        );
+    }
 
     return (
         <div className="thinking-process-container">
