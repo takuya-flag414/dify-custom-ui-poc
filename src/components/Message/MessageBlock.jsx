@@ -207,9 +207,16 @@ const MessageBlock = ({
     >
       <div className={`message-container ${!isAi ? 'message-container-user' : ''} group`}>
 
-        <div className={isAi ? 'avatar-ai' : 'avatar-user'}>
-          {isAi ? <AssistantIcon /> : (userName?.charAt(0).toUpperCase() || 'U')}
-        </div>
+        {/* AI: Mini Intelligence Orb, User: アバター */}
+        {isAi ? (
+          <div className="ai-orb-indicator">
+            <div className={`mini-intelligence-orb ${isStreaming ? 'active' : 'idle'}`} />
+          </div>
+        ) : (
+          <div className="avatar-user">
+            {userName?.charAt(0).toUpperCase() || 'U'}
+          </div>
+        )}
 
         <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
 

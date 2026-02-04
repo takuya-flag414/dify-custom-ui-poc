@@ -4,6 +4,7 @@ import FluidOrb from '../Shared/FluidOrb';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
 import { IS_THINKING_PROCESS_MERGED } from '../../config/env';
 import { determineRenderMode } from '../../config/thinkingRenderRules';
+import TypewriterEffect from '../Shared/TypewriterEffect';
 
 // --- SF Symbols風 SVG Icons ---
 const Icons = {
@@ -131,20 +132,51 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
         // アイコン取得ヘルパー
         const getIcon = (iconType) => Icons[iconType] || Icons.default;
 
+        // ★追加: 視覚的な現在ステップのインデックス管理
+        const [visualCurrentStepIndex, setVisualCurrentStepIndex] = useState(0);
+
+        // ★追加: ストリーミング終了時または履歴表示時は全てのステップを表示
+        useEffect(() => {
+            if (!isStreaming) {
+                setVisualCurrentStepIndex(steps ? steps.length : 0);
+            }
+        }, [isStreaming, steps?.length]);
+
+        // ★追加: ステップ完了時の自動進行制御 (タイプライターがない場合)
+        useEffect(() => {
+            if (!isStreaming || !hasSteps) return;
+
+            const currentStep = steps[visualCurrentStepIndex];
+            if (!currentStep) return;
+
+            const isDone = currentStep.status === 'done' || currentStep.status === 'error';
+            const hasMonologue = currentStep.thinking || currentStep.reasoning;
+
+            // モノローグがない場合は、完了したら即座に次のステップへ進む
+            // (モノローグがある場合はTypewriterEffectのonCompleteで進める)
+            if (isDone && !hasMonologue) {
+                // 少しだけ余韻を残すためにごく短い遅延を入れることも可能だが、
+                // 「チップUIは完了タイミングを同期」という要望通り即座に進める
+                setVisualCurrentStepIndex(prev => prev + 1);
+            }
+        }, [steps, visualCurrentStepIndex, isStreaming, hasSteps]);
+
         // 表示可能なコンテンツがあるかチェック
-        // - actionモードのステップがある場合は表示可能
-        // - monologueモードでthinking/reasoningがある場合は表示可能
         const hasVisibleContent = hasSteps && steps.some(step => {
             const mode = determineRenderMode(step);
             if (mode === 'silent') return false;
-            if (mode === 'action') return true; // Actionチップは常に表示される
-            // Monologue: thinking/reasoningがある場合のみ表示
+            if (mode === 'action') return true;
             return !!(step.thinking || step.reasoning);
         });
 
+        // ステップ完了ハンドル (TypewriterEffectから呼ばれる)
+        const handleStepComplete = (index) => {
+            setVisualCurrentStepIndex(prev => Math.max(prev, index + 1));
+        };
+
         return (
             <div className="fluid-thought-stream">
-                {/* 初期ローディング状態: 表示可能なコンテンツがまだなく、ストリーミング中の場合 */}
+                {/* 初期ローディング状態 */}
                 {!hasVisibleContent && isStreaming && (
                     <div className="fluid-loading-container">
                         <FluidOrb width="40px" height="40px" />
@@ -153,32 +185,64 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                 )}
 
                 {hasSteps && steps.map((step, index) => {
+                    // ★追加: 未来のステップは表示しない (ストリーミング中のみ)
+                    if (isStreaming && index > visualCurrentStepIndex) return null;
+
                     const mode = determineRenderMode(step);
+                    const isStepDone = step.status === 'done' || step.status === 'error';
 
                     // Silent: 非表示
                     if (mode === 'silent') return null;
 
-                    // Action: チップ型UI + thinking/reasoningがあれば追加表示
+                    // Action: チップ型UI
                     if (mode === 'action') {
                         const actionMonologueContent = step.thinking || step.reasoning;
+                        const hasAdditionalResults = step.additionalResults && step.additionalResults.length > 0;
+
                         return (
                             <div key={step.id || index} className="thought-action-container">
-                                <div className={`thought-action-chip ${step.status}`}>
-                                    <span className="action-icon">{getIcon(step.iconType)}</span>
-                                    <span className="action-title">{step.title}</span>
-                                    {step.status === 'processing' && <span className="action-spinner" />}
-                                    {step.status === 'error' && <span className="action-error-icon">⚠️</span>}
+                                <div className={`thought-action-chip ${step.status} ${hasAdditionalResults || step.resultValue ? 'has-details' : ''}`}>
+                                    <div className="thought-action-header">
+                                        <span className="action-icon">{getIcon(step.iconType)}</span>
+                                        <span className="action-title">{step.title}</span>
+                                        {step.status === 'processing' && <span className="action-spinner" />}
+                                        {step.status === 'error' && <span className="action-error-icon">⚠️</span>}
+                                    </div>
+
+                                    {/* 詳細情報のラッパー（アニメーション用） */}
+                                    {(step.resultValue || hasAdditionalResults) && (
+                                        <div className="action-content-wrapper">
+                                            {/* メイン結果の表示 */}
+                                            {step.resultValue && (
+                                                <div className="thought-action-result">
+                                                    {step.resultValue}
+                                                </div>
+                                            )}
+
+                                            {/* 詳細パラメータの表示 */}
+                                            {hasAdditionalResults && (
+                                                <div className="thought-action-details">
+                                                    {step.additionalResults.map((result, i) => (
+                                                        <div key={i} className="action-detail-item">
+                                                            <span className="detail-label">{result.label}</span>
+                                                            <span className="detail-value">{result.value}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                                {/* エラー詳細 */}
+
                                 {step.status === 'error' && step.errorMessage && (
                                     <div className="action-error-detail">{step.errorMessage}</div>
                                 )}
-                                {/* Actionでもthinking/reasoningがあれば表示 */}
-                                {actionMonologueContent && (
+                                {/* thinking/reasoningがあれば完了後に表示 */}
+                                {actionMonologueContent && isStepDone && (
                                     <div className="thought-monologue-container action-monologue">
-                                        <MarkdownRenderer
+                                        <TypewriterEffect
                                             content={actionMonologueContent}
-                                            isStreaming={isStreaming && index === steps.length - 1}
+                                            onComplete={() => handleStepComplete(index)}
                                         />
                                     </div>
                                 )}
@@ -186,20 +250,27 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                         );
                     }
 
-                    // Monologue: thinking/reasoningフィールドを最終回答と同一スタイルで表示
+                    // Monologue: thinking/reasoningフィールドを表示
                     const monologueContent = step.thinking || step.reasoning;
                     if (!monologueContent) return null;
+
                     return (
                         <div key={step.id || index} className="thought-monologue-container">
-                            <MarkdownRenderer
-                                content={monologueContent}
-                                isStreaming={isStreaming && index === steps.length - 1}
-                            />
+                            {isStepDone ? (
+                                <TypewriterEffect
+                                    content={monologueContent}
+                                    onComplete={() => handleStepComplete(index)}
+                                />
+                            ) : (
+                                // 処理中はプレースホルダーを表示
+                                <div className="fluid-loading-container small">
+                                    <FluidOrb width="24px" height="24px" />
+                                    <span className="fluid-loading-text">Thinking...</span>
+                                </div>
+                            )}
                         </div>
                     );
                 })}
-
-
 
                 {/* 最終回答との視覚的な区切り */}
                 <hr className="thought-divider" />

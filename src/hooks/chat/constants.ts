@@ -36,23 +36,14 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     'LLM_Query_Rewrite': { title: '質問の要点を整理中...', icon: 'reasoning' },
     'LLM_Intent_Analysis': { title: '質問の意図を解析中...', icon: 'router' },
 
-    // LLM処理ノード - 回答生成 (Efficient スタイル)
-    'LLM_Hybrid_Efficient': { title: '情報を統合して回答を生成中...', icon: 'writing' },
-    'LLM_Doc_Efficient': { title: 'ドキュメントを分析して回答を生成中...', icon: 'writing' },
-    'LLM_Search_Efficient': { title: '検索結果から回答を生成中...', icon: 'writing' },
-    'LLM_General_Efficient': { title: '回答を生成中...', icon: 'writing' },
-    'LLM_Chat_Efficient': { title: '応答を準備中...', icon: 'writing' },
-    'LLM_Fast_Doc_Efficient': { title: 'ドキュメントを高速分析中...', icon: 'writing' },
-    'LLM_Fast_General_Efficient': { title: '高速回答を生成中...', icon: 'writing' },
-
     // LLM処理ノード - 回答生成 (Partner スタイル)
-    'LLM_Hybrid_Partner': { title: '情報を統合して回答を生成中...', icon: 'writing' },
-    'LLM_Doc_Partner': { title: 'ドキュメントを分析して回答を生成中...', icon: 'writing' },
-    'LLM_Search_Partner': { title: '検索結果から回答を生成中...', icon: 'writing' },
-    'LLM_General_Partner': { title: '回答を生成中...', icon: 'writing' },
-    'LLM_Chat_Partner': { title: '応答を準備中...', icon: 'writing' },
-    'LLM_Fast_Doc_Partner': { title: 'ドキュメントを高速分析中...', icon: 'writing' },
-    'LLM_Fast_General_Partner': { title: '高速回答を生成中...', icon: 'writing' },
+    'LLM_Hybrid': { title: '情報を統合して回答を生成中...', icon: 'writing' },
+    'LLM_Doc': { title: 'ドキュメントを分析して回答を生成中...', icon: 'writing' },
+    'LLM_Search': { title: '検索結果から回答を生成中...', icon: 'writing' },
+    'LLM_General': { title: '回答を生成中...', icon: 'writing' },
+    'LLM_Chat': { title: '応答を準備中...', icon: 'writing' },
+    'LLM_Fast_Doc': { title: 'ドキュメントを高速分析中...', icon: 'writing' },
+    'LLM_Fast_General': { title: '高速回答を生成中...', icon: 'writing' },
 
     // ツールノード (動的タイトル生成)
     'TOOL_Doc_Extractor': { title: 'ドキュメントを解析中...', icon: 'document', dynamic: 'document' },
@@ -65,7 +56,7 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
 
     // Devルート用ノード - FASTモード/Partner系
     'HTTP_TOOL_Perplexity_Search (1)': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
-    'HTTP_Search_Partner': { title: '回答を生成中...', icon: 'writing' },
+    'HTTP_LLM_Search': { title: '回答を生成中...', icon: 'writing' },
 };
 
 /**

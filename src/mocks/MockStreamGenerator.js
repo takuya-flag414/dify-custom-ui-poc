@@ -45,7 +45,22 @@ export class MockStreamGenerator {
             data: { id: `wf_${Date.now()}`, status: 'running' }
           };
           controller.enqueue(self.createSSEData(startEvent));
-          await sleep(200);
+          // ★変更: 初期待機 (コールドスタート演出)
+          await sleep(1000 + randomDelay(0, 300));
+
+          // ★追加: 遅延ルール定義
+          const DELAY_RULES = {
+            'Query Rewriter': 1500,
+            'Intent Classifier': 2500,
+            'LLM_Intent_Analysis': 2500, // 意図理解の重み
+            'Search Strategy': 3000,
+            'LLM_Search_Strategy': 3000, // 戦略策定の熟考
+            'Perplexity Search': 8000,   // 外部検索の重み
+            'Web Search': 8000,
+            'LLM_Search_Partner': 2000,
+            'default_llm': 1200,         // 標準的なLLM処理
+            'default_tool': 2000         // 標準的なツール処理
+          };
 
           // 2. シナリオの各イベントを処理
           for (const step of scenario) {
@@ -86,8 +101,16 @@ export class MockStreamGenerator {
               
               // 思考時間のシミュレーション
               if (step.event === 'node_started') {
-                const waitTime = step.data.node_type === 'tool' ? 1500 : 600;
-                await sleep(waitTime);
+                // タイトルに基づいて基本遅延時間を決定
+                let baseDelay = DELAY_RULES[nodeTitle];
+                
+                if (!baseDelay) {
+                   baseDelay = step.data.node_type === 'tool' ? DELAY_RULES['default_tool'] : DELAY_RULES['default_llm'];
+                }
+
+                // ゆらぎを追加 (0~500ms)
+                const variance = randomDelay(0, 500);
+                await sleep(baseDelay + variance);
               }
             }
 

@@ -324,14 +324,11 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
 
     additionalResults.push({ label: '検索範囲', value: getRecencyLabel(parsedJson.recency) });
 
-    if (parsedJson.domain_filter && parsedJson.domain_filter.length > 0) {
-      additionalResults.push({ label: '対象サイト', value: parsedJson.domain_filter.join(', ') });
-    }
-
-    // target_domains も表示（LLM_Search_Strategy から出力される場合）
+    // target_domains を表示（domain_filter ではなく target_domains を使用）
     if (parsedJson.target_domains && parsedJson.target_domains.length > 0) {
       additionalResults.push({ label: '対象ドメイン', value: parsedJson.target_domains.join(', ') });
     }
+
 
     return {
       thoughtProcessUpdate: (t) => t.id === nodeId ? {

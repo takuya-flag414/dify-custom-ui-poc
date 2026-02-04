@@ -9,13 +9,17 @@
 
 
 /* コンテナ: アバター + コンテンツ */
+/* 中央寄せレイアウト - 適度な左右余白 */
 .message-container {
   display: flex;
   gap: 16px;
-  max-width: 900px;
+  max-width: 800px;
+  /* 適度な幅でコンテンツを広く */
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
+  /* 左右余白 */
 }
+
 
 .message-container-user {
   flex-direction: row-reverse;
@@ -54,12 +58,15 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 85%;
+  max-width: 100%;
+  /* AIは透過なのでフル幅を使用 */
   width: 100%;
 }
 
 .message-content-user {
   align-items: flex-end;
+  max-width: 85%;
+  /* ユーザーバブルは幅を制限 */
   /* ユーザーコンテンツは右寄せ */
 }
 
@@ -96,18 +103,26 @@
   min-width: 0;
 }
 
-/* AIのバブル - V2 Glassmorphism */
+/* AIのバブル - V3 透過スタイル (Desktop Intelligence Era) */
+/* 吹き出しを廃止し、コンテンツがそのまま表示される */
 .ai-bubble {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  /* 背景・ボーダー・シャドウを完全削除 */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   color: var(--color-text-main);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-2xl);
-  border-top-left-radius: var(--radius-sm);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   flex: 1;
+
+  /* タイポグラフィ強化 (DESIGN_RULE 3.2準拠) */
+  font-size: var(--text-body);
+  /* 17px */
+  line-height: 1.7;
+  /* leading-relaxed - 読みやすさ優先 */
+  letter-spacing: var(--tracking-normal);
 }
 
 /* ユーザーのバブル - V2 グラデーション */
@@ -115,11 +130,78 @@
   background: linear-gradient(135deg,
       oklch(60% 0.2 250) 0%,
       oklch(65% 0.18 220) 100%);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   color: #FFFFFF;
   border-radius: var(--radius-2xl);
   border-top-right-radius: var(--radius-sm);
-  box-shadow: 0 2px 8px oklch(60% 0.2 250 / 0.3);
+  box-shadow:
+    0 4px 16px oklch(60% 0.2 250 / 0.25),
+    0 0 0 0.5px rgba(255, 255, 255, 0.2) inset;
 }
+
+/* ========================================
+   Mini Intelligence Orb (AIインジケーター)
+   DESIGN_RULE 5.1 Siri Orb準拠の小型版
+   ======================================== */
+.ai-orb-indicator {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.mini-intelligence-orb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+      var(--ai-gradient-cyan, #00FFFF),
+      var(--ai-gradient-magenta, #FF00FF),
+      var(--ai-gradient-yellow, #FFD60A),
+      var(--ai-gradient-blue, #007AFF),
+      var(--ai-gradient-cyan, #00FFFF));
+  filter: blur(4px);
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.mini-intelligence-orb.active {
+  animation: mini-orb-spin 3s linear infinite, mini-orb-pulse 1.5s ease-in-out infinite;
+  opacity: 1;
+  filter: blur(3px);
+}
+
+.mini-intelligence-orb.idle {
+  opacity: 0.5;
+  filter: blur(5px);
+}
+
+@keyframes mini-orb-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes mini-orb-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
 
 /* --- Copy Button Styles --- */
 .copy-btn {
