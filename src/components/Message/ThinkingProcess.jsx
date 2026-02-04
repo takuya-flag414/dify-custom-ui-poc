@@ -150,7 +150,8 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
             if (!currentStep) return;
 
             const isDone = currentStep.status === 'done' || currentStep.status === 'error';
-            const hasMonologue = currentStep.thinking || currentStep.reasoning;
+            // ★修正: thinkingContentも含めてモノローグ有無を判定（LLM_Synthesis対応）
+            const hasMonologue = currentStep.thinking || currentStep.reasoning || currentStep.thinkingContent;
 
             // モノローグがない場合は、完了したら即座に次のステップへ進む
             // (モノローグがある場合はTypewriterEffectのonCompleteで進める)

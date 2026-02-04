@@ -82,15 +82,43 @@ const MessageBlock = ({
         // ★追加: ワークフローエラー情報
         hasWorkflowError,
         workflowError,
-        // ★追加: HTTP_LLM_Search通過フラグ
         usedHttpLlmSearch
     } = message;
+
+    // ★移動: isAi/isUserの定義を先頭に（タイプライター制御で参照するため）
+    const isAi = role === 'ai';
+    const isUser = role === 'user';
 
     const [showRaw, setShowRaw] = useState(false);
     // ★追加: 編集モード用State
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState('');
     const editTextareaRef = useRef(null);
+
+    // ★追加: タイプライター演出の制御
+    // - usedHttpLlmSearchがtrue かつ isStreamingがfalse（新規完了メッセージ）の場合のみタイプライター開始
+    // - hasStartedTypewriterRefで初回マウント時のみタイプライター開始を許可
+    const hasStartedTypewriterRef = useRef(false);
+    const shouldPlayTypewriter = usedHttpLlmSearch && isAi && !isStreaming && !hasStartedTypewriterRef.current;
+
+    // 初回マウント時にタイプライター開始フラグを設定
+    useEffect(() => {
+        if (usedHttpLlmSearch && isAi && !isStreaming) {
+            hasStartedTypewriterRef.current = true;
+        }
+    }, [usedHttpLlmSearch, isAi, isStreaming]);
+
+    // ★タイプライター演出完了ステート
+    // - usedHttpLlmSearchがfalseの場合は最初から完了状態
+    // - usedHttpLlmSearchがtrueでも既にマウント済みの場合は完了状態（履歴メッセージ）
+    const [isTypewriterComplete, setIsTypewriterComplete] = useState(() => {
+        // 初期化時にusedHttpLlmSearchでなければ完了状態
+        if (!usedHttpLlmSearch) return true;
+        // usedHttpLlmSearchで、かつストリーミング中（まだ処理中）なら完了状態
+        if (isStreaming) return true;
+        // 新規完了メッセージの場合はタイプライターを開始（未完了状態）
+        return false;
+    });
 
     useEffect(() => {
         if (!isStreaming) {
@@ -107,8 +135,7 @@ const MessageBlock = ({
         }
     }, [isEditing, editValue.length]);
 
-    const isAi = role === 'ai';
-    const isUser = role === 'user';
+    // ★削除: isAi, isUserの定義は上部に移動済み
     const uniqueMessageId = messageId || id || `msg_${Date.now()}`;
     const isTextEmpty = !text || text.length === 0;
     const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
@@ -341,14 +368,16 @@ const MessageBlock = ({
                                         </pre>
                                     ) : (
                                         !isTextEmpty && (
-                                            // ★追加: HTTP_LLM_Search通過時は最終回答をタイプライター演出で表示
-                                            usedHttpLlmSearch && isAi && !isStreaming ? (
+                                            // ★変更: isTypewriterCompleteがfalseの場合のみタイプライター演出
+                                            // （履歴メッセージでは最初からtrue、新規完了メッセージのみfalse）
+                                            usedHttpLlmSearch && isAi && !isStreaming && !isTypewriterComplete ? (
                                                 <TypewriterEffect
                                                     content={text || ''}
                                                     speed={5}
                                                     renderAsMarkdown={true}
                                                     citations={citations}
                                                     messageId={uniqueMessageId}
+                                                    onComplete={() => setIsTypewriterComplete(true)}
                                                 />
                                             ) : (
                                                 <MarkdownRenderer
@@ -375,7 +404,8 @@ const MessageBlock = ({
                         )}
                     </div>
 
-                    {isAi && !isStreaming && (
+                    {/* ★変更: タイプライター演出完了後にのみmessage-footerを表示 */}
+                    {isAi && !isStreaming && isTypewriterComplete && (
                         <div className="message-footer">
                             {showCitations && <CitationList citations={citations} messageId={uniqueMessageId} />}
                             {showKnowledgeBadge && <AiKnowledgeBadge />}
