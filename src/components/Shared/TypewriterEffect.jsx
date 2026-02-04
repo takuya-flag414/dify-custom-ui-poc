@@ -9,12 +9,25 @@ import MarkdownRenderer from './MarkdownRenderer';
  * - Randomized typing speed (fluctuation/yuragi)
  * - Pauses at punctuation
  * - Renders markdown as it types (by slicing the source string)
+ * - renderAsMarkdown: true の場合、MarkdownRendererでレンダリング
  * 
  * @param {string} content - The full text to display
  * @param {boolean} start - Whether to start the effect
  * @param {function} onComplete - Callback when typing receives end of string
+ * @param {number} speed - Base typing speed in ms (default: 6)
+ * @param {boolean} renderAsMarkdown - Whether to render as markdown (default: true)
+ * @param {Array} citations - Citations for MarkdownRenderer (when renderAsMarkdown=true)
+ * @param {string} messageId - Message ID for MarkdownRenderer (when renderAsMarkdown=true)
  */
-const TypewriterEffect = ({ content, start = true, onComplete }) => {
+const TypewriterEffect = ({
+    content,
+    start = true,
+    onComplete,
+    speed = 6,
+    renderAsMarkdown = true,
+    citations,
+    messageId
+}) => {
     const [displayedContent, setDisplayedContent] = useState('');
     const currentIndexRef = useRef(0);
     const timeoutRef = useRef(null);
@@ -49,7 +62,7 @@ const TypewriterEffect = ({ content, start = true, onComplete }) => {
             currentIndexRef.current += 1;
 
             // Calculate delay for next character
-            let delay = 6; // Base speed: 6ms
+            let delay = speed; // Base speed from props
             const variance = (Math.random() * 4) - 2; // +/- 2ms
             delay = delay + variance;
 
@@ -69,9 +82,20 @@ const TypewriterEffect = ({ content, start = true, onComplete }) => {
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
-    }, [content, start]);
+    }, [content, start, speed]);
 
-    return <MarkdownRenderer content={displayedContent} />;
+    // ★追加: renderAsMarkdownがfalseの場合はプレーンテキスト表示
+    if (!renderAsMarkdown) {
+        return <span className="typewriter-text">{displayedContent}</span>;
+    }
+
+    return (
+        <MarkdownRenderer
+            content={displayedContent}
+            citations={citations}
+            messageId={messageId}
+        />
+    );
 };
 
 export default TypewriterEffect;

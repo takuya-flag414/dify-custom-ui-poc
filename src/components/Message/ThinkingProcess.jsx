@@ -246,6 +246,15 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                                         />
                                     </div>
                                 )}
+                                {/* ★追加: LLM_SynthesisなどのthinkingContentフィールドを表示 */}
+                                {step.thinkingContent && isStepDone && (
+                                    <div className="thought-monologue-container action-monologue synthesis-thinking">
+                                        <TypewriterEffect
+                                            content={step.thinkingContent}
+                                            onComplete={() => handleStepComplete(index)}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         );
                     }

@@ -351,6 +351,41 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
 };
 
 /**
+ * node_finished イベントを処理する (LLM_Synthesis)
+ * @param {Object} outputs - ノード出力
+ * @param {string} nodeId - ノードID
+ * @param {Function} addLog - ログ関数
+ * @returns {Object|null} thoughtProcessUpdate または null
+ */
+export const processLlmSynthesisFinished = (outputs, nodeId, addLog) => {
+    const rawText = outputs?.text;
+    const parsedJson = extractJsonFromLlmOutput(rawText);
+
+    if (parsedJson) {
+        const thinking = parsedJson.thinking || '';
+        const internalLog = parsedJson.internal_log || '';
+
+        addLog(`[LLM_Synthesis] thinking: ${thinking || 'N/A'}`, 'info');
+        addLog(`[LLM_Synthesis] internal_log: ${internalLog || 'N/A'}`, 'info');
+
+        return {
+            thoughtProcessUpdate: (t) => t.id === nodeId ? {
+                ...t,
+                status: 'done',
+                thinkingContent: thinking  // ★新規フィールド: チップ後に表示するthinking内容
+            } : t
+        };
+    } else if (rawText) {
+        addLog(`[LLM_Synthesis] RAW出力: ${rawText}`, 'warn');
+        return {
+            thoughtProcessUpdate: (t) => t.id === nodeId ? { ...t, status: 'done' } : t
+        };
+    }
+
+    return null;
+};
+
+/**
  * ワークフローログ出力用の処理
  * @param {Object} outputs - ノード出力
  * @param {string} title - ノードタイトル

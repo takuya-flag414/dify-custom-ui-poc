@@ -11,6 +11,7 @@ import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from '../Shared/FileIcon';
 import CopyButton from '../Shared/CopyButton';
+import TypewriterEffect from '../Shared/TypewriterEffect';
 import { IS_THINKING_PROCESS_MERGED } from '../../config/env';
 
 // Spring Physics (DESIGN_RULE準拠)
@@ -80,7 +81,9 @@ const MessageBlock = ({
         mode, // 'fast' | 'normal'
         // ★追加: ワークフローエラー情報
         hasWorkflowError,
-        workflowError
+        workflowError,
+        // ★追加: HTTP_LLM_Search通過フラグ
+        usedHttpLlmSearch
     } = message;
 
     const [showRaw, setShowRaw] = useState(false);
@@ -338,14 +341,25 @@ const MessageBlock = ({
                                         </pre>
                                     ) : (
                                         !isTextEmpty && (
-                                            <MarkdownRenderer
-                                                content={text || ''}
-                                                isStreaming={isAi && isStreaming}
-                                                renderMode={mode === 'fast' ? 'realtime' : 'normal'}
-                                                citations={citations}
-                                                messageId={uniqueMessageId}
-                                                onOpenArtifact={onOpenArtifact}
-                                            />
+                                            // ★追加: HTTP_LLM_Search通過時は最終回答をタイプライター演出で表示
+                                            usedHttpLlmSearch && isAi && !isStreaming ? (
+                                                <TypewriterEffect
+                                                    content={text || ''}
+                                                    speed={5}
+                                                    renderAsMarkdown={true}
+                                                    citations={citations}
+                                                    messageId={uniqueMessageId}
+                                                />
+                                            ) : (
+                                                <MarkdownRenderer
+                                                    content={text || ''}
+                                                    isStreaming={isAi && isStreaming}
+                                                    renderMode={mode === 'fast' ? 'realtime' : 'normal'}
+                                                    citations={citations}
+                                                    messageId={uniqueMessageId}
+                                                    onOpenArtifact={onOpenArtifact}
+                                                />
+                                            )
                                         )
                                     )}
                                 </motion.div>

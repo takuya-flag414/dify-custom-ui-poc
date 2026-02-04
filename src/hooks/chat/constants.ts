@@ -52,6 +52,8 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     // Devルート用ノード
     'LLM_Search_Strategy': { title: '検索戦略を策定中...', icon: 'reasoning' },
     'HTTP_TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
+    'HTTP_TOOL_Perplexity_Search_Parallel': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
+    'Parallel_Web_Search': { title: '詳細Web検索中（並列処理）...', icon: 'iteration' },
     'LLM_Synthesis': { title: '検索結果を統合中...', icon: 'writing' },
 
     // Devルート用ノード - FASTモード/Partner系

@@ -165,6 +165,8 @@ export const buildFinalMessage = (currentStreamingMsg, workflowResult, contentBu
         thinking: finalThinking || currentStreamingMsg.thinking || '',
         isStreaming: false,
         traceMode: detectedTraceMode,
+        // ★追加: HTTP_LLM_Search通過フラグを最終メッセージに伝播
+        usedHttpLlmSearch: currentStreamingMsg.usedHttpLlmSearch || false,
         thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {
             if (t.title === '情報を整理して回答を生成中...') {
                 return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };

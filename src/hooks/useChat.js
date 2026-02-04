@@ -15,6 +15,7 @@ import {
     processQueryRewriteFinished,
     processIntentAnalysisFinished,
     processSearchStrategyFinished,
+    processLlmSynthesisFinished,
     logWorkflowOutput,
     processNodeError,
     processWorkflowError
@@ -394,9 +395,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                                 tracker.markNodeStart(nodeId, displayTitle);
 
+                                // ★追加: HTTP_LLM_Searchノードかどうかを判定
+                                const nodeTitle = data.data?.title;
+                                const isHttpLlmSearch = nodeTitle === 'HTTP_LLM_Search';
+
                                 setStreamingMessage(prev => prev ? {
                                     ...prev,
                                     traceMode: detectedTraceMode,
+                                    // ★追加: HTTP_LLM_Search通過フラグ
+                                    usedHttpLlmSearch: prev.usedHttpLlmSearch || isHttpLlmSearch,
                                     thoughtProcess: [
                                         ...prev.thoughtProcess.map(t => ({ ...t, status: 'done' })),
                                         { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
@@ -448,6 +455,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 // ★追加: LLM_Search_Strategy処理 (Devルート)
                                 if (title === 'LLM_Search_Strategy') {
                                     const result = processSearchStrategyFinished(outputs, nodeId, addLog);
+                                    if (result) {
+                                        setStreamingMessage(prev => prev ? {
+                                            ...prev,
+                                            thoughtProcess: prev.thoughtProcess.map(result.thoughtProcessUpdate)
+                                        } : prev);
+                                    }
+                                }
+
+                                // ★追加: LLM_Synthesis処理 (Devルート)
+                                if (title === 'LLM_Synthesis') {
+                                    const result = processLlmSynthesisFinished(outputs, nodeId, addLog);
                                     if (result) {
                                         setStreamingMessage(prev => prev ? {
                                             ...prev,
