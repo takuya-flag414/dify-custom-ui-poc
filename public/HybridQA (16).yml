@@ -228,19 +228,6 @@ workflow:
       type: custom
       zIndex: 0
     - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 1765256779030-source-1765345427966-target
-      selected: false
-      source: '1765256779030'
-      sourceHandle: source
-      target: '1765345427966'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
         isInLoop: false
         sourceType: assigner
         targetType: code
@@ -266,54 +253,6 @@ workflow:
       type: custom
       zIndex: 0
     - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 17655151756460-source-1765345440190-target
-      selected: false
-      source: '17655151756460'
-      sourceHandle: source
-      target: '1765345440190'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 17655151779960-source-17655153615920-target
-      selected: false
-      source: '17655151779960'
-      sourceHandle: source
-      target: '17655153615920'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 17655151786270-source-17655153626170-target
-      selected: false
-      source: '17655151786270'
-      sourceHandle: source
-      target: '17655153626170'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 17655151791010-source-17655153635450-target
-      selected: false
-      source: '17655151791010'
-      sourceHandle: source
-      target: '17655153635450'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
         isInIteration: false
         isInLoop: false
         sourceType: if-else
@@ -335,19 +274,6 @@ workflow:
       source: '1765854025663'
       sourceHandle: 'false'
       target: '1764913411735'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 1765854614015-source-1765854668107-target
-      selected: false
-      source: '1765854614015'
-      sourceHandle: source
-      target: '1765854668107'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -400,19 +326,6 @@ workflow:
       type: custom
       zIndex: 0
     - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 17658599307650-source-1765859958399-target
-      selected: false
-      source: '17658599307650'
-      sourceHandle: source
-      target: '1765859958399'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
         isInLoop: false
         sourceType: assigner
         targetType: if-else
@@ -433,18 +346,6 @@ workflow:
       source: '17658598785120'
       sourceHandle: 0703a046-f8f7-4b0e-b07b-3794eaee8f40
       target: '1766549782668'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 1766549782668-true-1765854614015-target
-      selected: false
-      source: '1766549782668'
-      sourceHandle: 'true'
-      target: '1765854614015'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -474,42 +375,6 @@ workflow:
       zIndex: 0
     - data:
         isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 17658598785120-false-17665500741430-target
-      selected: false
-      source: '17658598785120'
-      sourceHandle: 'false'
-      target: '17665500741430'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665500741430-true-17658599307650-target
-      selected: false
-      source: '17665500741430'
-      sourceHandle: 'true'
-      target: '17658599307650'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665500741430-false-17665500976990-target
-      selected: false
-      source: '17665500741430'
-      sourceHandle: 'false'
-      target: '17665500976990'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
         sourceType: llm
         targetType: answer
       id: 17665500976990-source-1765859958399-target
@@ -522,114 +387,6 @@ workflow:
       zIndex: 0
     - data:
         isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 1765515071449-true-17665510905650-target
-      selected: false
-      source: '1765515071449'
-      sourceHandle: 'true'
-      target: '17665510905650'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665510905650-true-17655151756460-target
-      selected: false
-      source: '17665510905650'
-      sourceHandle: 'true'
-      target: '17655151756460'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 1765515071449-908d672e-4c25-44ac-9ee9-4f7fb1b32144-17665511081250-target
-      selected: false
-      source: '1765515071449'
-      sourceHandle: 908d672e-4c25-44ac-9ee9-4f7fb1b32144
-      target: '17665511081250'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665511081250-true-17655151779960-target
-      selected: false
-      source: '17665511081250'
-      sourceHandle: 'true'
-      target: '17655151779960'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 1765515071449-f10e65ad-bb00-4cdf-aabf-78811af1ba70-17665511228850-target
-      selected: false
-      source: '1765515071449'
-      sourceHandle: f10e65ad-bb00-4cdf-aabf-78811af1ba70
-      target: '17665511228850'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665511228850-true-17655151786270-target
-      selected: false
-      source: '17665511228850'
-      sourceHandle: 'true'
-      target: '17655151786270'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 1765515071449-false-17665511238600-target
-      selected: false
-      source: '1765515071449'
-      sourceHandle: 'false'
-      target: '17665511238600'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665511238600-true-17655151791010-target
-      selected: false
-      source: '17665511238600'
-      sourceHandle: 'true'
-      target: '17655151791010'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665510905650-false-17665511958080-target
-      selected: false
-      source: '17665510905650'
-      sourceHandle: 'false'
-      target: '17665511958080'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
         sourceType: llm
         targetType: answer
       id: 17665511958080-source-1765345440190-target
@@ -637,18 +394,6 @@ workflow:
       source: '17665511958080'
       sourceHandle: source
       target: '1765345440190'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665511081250-false-17665512107830-target
-      selected: false
-      source: '17665511081250'
-      sourceHandle: 'false'
-      target: '17665512107830'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -678,18 +423,6 @@ workflow:
       zIndex: 0
     - data:
         isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665511238600-false-17665512406710-target
-      selected: false
-      source: '17665511238600'
-      sourceHandle: 'false'
-      target: '17665512406710'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
         sourceType: llm
         targetType: answer
       id: 17665512406710-source-17655153635450-target
@@ -697,42 +430,6 @@ workflow:
       source: '17665512406710'
       sourceHandle: source
       target: '17655153635450'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 1765343666910-true-17665517221250-target
-      selected: false
-      source: '1765343666910'
-      sourceHandle: 'true'
-      target: '17665517221250'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665517221250-true-1765256779030-target
-      selected: false
-      source: '17665517221250'
-      sourceHandle: 'true'
-      target: '1765256779030'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 17665517221250-false-17665517422840-target
-      selected: false
-      source: '17665517221250'
-      sourceHandle: 'false'
-      target: '17665517422840'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1081,19 +778,6 @@ workflow:
       type: custom
       zIndex: 0
     - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 17665511228850-false-1769757773884-target
-      selected: false
-      source: '17665511228850'
-      sourceHandle: 'false'
-      target: '1769757773884'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
         isInLoop: false
         sourceType: if-else
         targetType: llm
@@ -1214,6 +898,72 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17658598785120-false-17665500976990-target
+      source: '17658598785120'
+      sourceHandle: 'false'
+      target: '17665500976990'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1765343666910-true-17665517422840-target
+      source: '1765343666910'
+      sourceHandle: 'true'
+      target: '17665517422840'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1765515071449-true-17665511958080-target
+      source: '1765515071449'
+      sourceHandle: 'true'
+      target: '17665511958080'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1765515071449-908d672e-4c25-44ac-9ee9-4f7fb1b32144-17665512107830-target
+      source: '1765515071449'
+      sourceHandle: 908d672e-4c25-44ac-9ee9-4f7fb1b32144
+      target: '17665512107830'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1765515071449-f10e65ad-bb00-4cdf-aabf-78811af1ba70-1769757773884-target
+      source: '1765515071449'
+      sourceHandle: f10e65ad-bb00-4cdf-aabf-78811af1ba70
+      target: '1769757773884'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1765515071449-false-17665512406710-target
+      source: '1765515071449'
+      sourceHandle: 'false'
+      target: '17665512406710'
+      targetHandle: target
+      type: custom
+      zIndex: 0
     nodes:
     - data:
         selected: false
@@ -1322,7 +1072,7 @@ workflow:
           - efficient
           - partner
           placeholder: ''
-          required: true
+          required: false
           type: select
           variable: ai_style
         - default: ''
@@ -1338,10 +1088,10 @@ workflow:
       id: '1761291739140'
       position:
         x: 0
-        y: 253
+        y: 283
       positionAbsolute:
         x: 0
-        y: 253
+        y: 283
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1364,10 +1114,10 @@ workflow:
       id: answer
       position:
         x: 1066
-        y: 622
+        y: 652
       positionAbsolute:
         x: 1066
-        y: 622
+        y: 652
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1387,16 +1137,16 @@ workflow:
           id: 'true'
           logical_operator: and
         selected: false
-        title: GATE_Has_File_Context
+        title: GATE_Debug_Mode
         type: if-else
       height: 124
       id: '1762490237953'
       position:
         x: 342
-        y: 337
+        y: 367
       positionAbsolute:
         x: 342
-        y: 337
+        y: 367
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1422,10 +1172,10 @@ workflow:
       id: '1764913411735'
       position:
         x: 1066
-        y: 166
+        y: 196
       positionAbsolute:
         x: 1066
-        y: 166
+        y: 196
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1443,10 +1193,10 @@ workflow:
       id: '1764913700839'
       position:
         x: 1428
-        y: 188
+        y: 218
       positionAbsolute:
         x: 1428
-        y: 188
+        y: 218
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1480,10 +1230,10 @@ workflow:
       id: '1764913830165'
       position:
         x: 2112
-        y: 185
+        y: 215
       positionAbsolute:
         x: 2112
-        y: 185
+        y: 215
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1525,11 +1275,11 @@ workflow:
       height: 198
       id: '1764914026588'
       position:
-        x: 3198
-        y: 251
+        x: 3178
+        y: 0
       positionAbsolute:
-        x: 3198
-        y: 251
+        x: 3178
+        y: 0
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1553,11 +1303,11 @@ workflow:
       height: 84
       id: '1764914113059'
       position:
-        x: 3560
-        y: 336
+        x: 3540
+        y: 77
       positionAbsolute:
-        x: 3560
-        y: 336
+        x: 3540
+        y: 77
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1600,11 +1350,11 @@ workflow:
       height: 198
       id: '1764914157100'
       position:
-        x: 3922
-        y: 338
+        x: 3902
+        y: 79
       positionAbsolute:
-        x: 3922
-        y: 338
+        x: 3902
+        y: 79
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2052,7 +1802,7 @@ workflow:
             value: 4096
           model:
             type: constant
-            value: sonar-pro
+            value: sonar
           presence_penalty:
             type: constant
             value: 0
@@ -2119,11 +1869,11 @@ workflow:
       height: 374
       id: '1764914255107'
       position:
-        x: 6298
-        y: 502
+        x: 6278
+        y: 243
       positionAbsolute:
-        x: 6298
-        y: 502
+        x: 6278
+        y: 243
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2147,11 +1897,11 @@ workflow:
       height: 84
       id: '1764914281874'
       position:
-        x: 6660
-        y: 794
+        x: 6640
+        y: 535
       positionAbsolute:
-        x: 6660
-        y: 794
+        x: 6640
+        y: 535
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2229,11 +1979,11 @@ workflow:
       height: 88
       id: '1764916701592'
       position:
-        x: 4646
-        y: 645
+        x: 4626
+        y: 386
       positionAbsolute:
-        x: 4646
-        y: 645
+        x: 4626
+        y: 386
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2257,11 +2007,11 @@ workflow:
       height: 84
       id: '1764916740679'
       position:
-        x: 5330
-        y: 647
+        x: 5310
+        y: 388
       positionAbsolute:
-        x: 5330
-        y: 647
+        x: 5310
+        y: 388
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2293,75 +2043,10 @@ workflow:
       id: '1764924171081'
       position:
         x: 1770
-        y: 214
+        y: 244
       positionAbsolute:
         x: 1770
-        y: 214
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        memory:
-          query_prompt_template: '{{#sys.query#}}
-
-
-            {{#sys.files#}}'
-          role_prefix:
-            assistant: ''
-            user: ''
-          window:
-            enabled: true
-            size: 10
-        model:
-          completion_params:
-            temperature: 0.7
-          mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: e1156068-8c73-43a4-ba64-f4811246319b
-          role: system
-          text: "# Role\nあなたは、ユーザーの業務をサポートする「有能で機転の利くAIアシスタント」です。\nユーザーからの挨拶や呼びかけに対し、**ビジネスライクかつ最小限の応答**をJSON形式で返してください。\n\
-            \n# Intelligence Profile (Functional Config)\n以下のJSONデータには、ユーザーからの機能的な要求仕様が含まれています。\n\
-            感情的な配慮や挨拶は不要ですが、**出力形式や情報の粒度**に関する指示は厳格に適用してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n## Processing\
-            \ Rules\n1. **custom_directives (Override)**:\n   - `free_text`: ここに記載された指示（例：「英語で出力」「箇条書きのみ」「JSON形式」）は、システム規定のガイドラインよりも**優先**されます。指示に従い、最短経路で回答を生成してください。\n\
-            \n2. **user_context (Optimization)**:\n   - `name`: **使用しません**。挨拶や呼びかけは省略し、即座にタスクを開始してください。\n\
-            \   - `department` / `role`: 専門用語のレベル調整にのみ利用してください。（例: エンジニア→技術用語を多用 /\
-            \ 経営層→ビジネス用語で要約）\n\n# Guidelines\n\n1. **Style (Efficient Mode)**:\n \
-            \  - **Tone**: 簡潔で客観的な「です・ます」調。\n   - **Visual**: 絵文字は一切使用しないでください。\n\n\
-            2. **Greeting & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
-            \   - **Case 1: First Turn (会話の冒頭)**\n     - 「お疲れ様です。」の一言だけ添えて、用件を伺ってください。\n\
-            \   - **Case 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は完全に省略してください。**\n\
-            \     - ユーザーの入力（感謝や肯定）に対して、「承知いたしました。」「他にご用件はありますか？」等、**最も短い表現**で次のタスクを促してください。\n\
-            \n3. **Citation Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n\n# Input\
-            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n\n# User Query\n\
-            {{#sys.query#}}\n\n# Processing Steps (Efficient Chat Chain)\n回答の出力を作成する前に、以下の手順で思考プロセスを整理し、`thinking`\
-            \ フィールドに**Markdownの箇条書き**（日本語）で記述してください。\n\n1. **意図判定**:\n   - ユーザーの入力は「純粋な挨拶/雑談」か、それとも「タスク依頼の婉曲表現」か。\n\
-            2. **安全確認 (Safety Check)**:\n   - もし入力に「〜について知りたい」「検索して」等の意図が含まれていた場合、このノードでは対応できないため、回答内で検索モードへの切り替えを促すよう戦略を立てる。\n\
-            3. **回答構成**:\n   - 最小限のトークン数で完結させる構成を決定する。\n\n# Output Format (JSON Only)\n\
-            Markdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\n## Output Example (Subsequent\
-            \ Turns)\n{\n  \"thinking\": \"- **意図**: 「ありがとう」という感謝のみ。\\n- **安全**: 検索意図なし。\\\
-            n- **構成**: 「承知いたしました」のみでクローズ。\",\n  \"answer\": \"承知いたしました。\\n他にお手伝いすることはありますか？\"\
-            ,\n  \"citations\": []\n}"
-        selected: false
-        title: LLM_Chat_Efficient
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '1765256779030'
-      position:
-        x: 3540
-        y: 0
-      positionAbsolute:
-        x: 3540
-        y: 0
+        y: 244
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2387,48 +2072,48 @@ workflow:
       id: '1765343666910'
       position:
         x: 2816
-        y: 193
+        y: 223
       positionAbsolute:
         x: 2816
-        y: 193
+        y: 223
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        answer: '{{#1765256779030.text#}}{{#17665517422840.text#}}'
+        answer: '{{#17665517422840.text#}}'
         selected: false
         title: ANSWER_Chat
         type: answer
         variables: []
-      height: 120
+      height: 102
       id: '1765345427966'
       position:
-        x: 3902
-        y: 132
+        x: 3520
+        y: 262
       positionAbsolute:
-        x: 3902
-        y: 132
+        x: 3520
+        y: 262
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        answer: '{{#17655151756460.text#}}{{#17665511958080.text#}}'
+        answer: '{{#17665511958080.text#}}'
         selected: false
         title: ANSWER_Hybrid
         type: answer
         variables: []
-      height: 120
+      height: 102
       id: '1765345440190'
       position:
-        x: 8450
-        y: 735
+        x: 8048
+        y: 510
       positionAbsolute:
-        x: 8450
-        y: 735
+        x: 8048
+        y: 510
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2497,11 +2182,11 @@ workflow:
       height: 80
       id: '1765514869301'
       position:
-        x: 7022
-        y: 952
+        x: 7002
+        y: 693
       positionAbsolute:
-        x: 7022
-        y: 952
+        x: 7002
+        y: 693
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2548,366 +2233,68 @@ workflow:
       height: 220
       id: '1765515071449'
       position:
-        x: 7364
-        y: 882
+        x: 7344
+        y: 623
       positionAbsolute:
-        x: 7364
-        y: 882
+        x: 7344
+        y: 623
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        context:
-          enabled: false
-          variable_selector: []
-        memory:
-          query_prompt_template: '{{#sys.query#}}
-
-
-            {{#sys.files#}}'
-          role_prefix:
-            assistant: ''
-            user: ''
-          window:
-            enabled: true
-            size: 10
-        model:
-          completion_params:
-            frequency_penalty: 0.5
-            presence_penalty: 0.5
-            temperature: 0.2
-            top_p: 0.75
-          mode: chat
-          name: gpt-5-mini
-          provider: langgenius/openai/openai
-        prompt_template:
-        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
-          role: system
-          text: "# Role\nあなたは、社内外の情報を統合してJSONデータを生成する「APIエンドポイント」です。\nユーザーがアップロードした資料、社内規定(RAG)、Web情報を比較・照合し、**純粋なJSON文字列のみ**を出力してください。\n\
-            \n# Guidelines\n\n1. **Style (Efficient Mode)**:\n   - **Tone**: 簡潔で客観的な「です・ます」調。\n\
-            \   - **Structure**:\n     - **挨拶や前置き（「確認しました」等）は一切禁止**です。\n     - 必ず\
-            \ **「### 結論」** という見出しから書き出し、その後に「### 詳細比較」「### 根拠」などの見出しで事実を羅列してください。\n\
-            \     - 絵文字は使用しないでください。\n- **Structured Comparison**:\n  - 社内規定(RAG)と外部情報(Web)の間にどのような違いがあるか、結論のみを端的に対比させてください。\n\
-            \  - 曖昧な表現は避け、「社内ではA、世間ではB」という事実関係を、構造化されたリスト形式で簡潔かつ高密度に提示してください。\n\n\
-            2. **Citation Rule (重要: 出典の表記と統合)**:\n   - **Format**: 文中の引用番号は `[1][2]`\
-            \ のように**個別のブラケット**で記述してください。`[1, 2]` は禁止です。\n   - **Renumbering**: 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を\
-            \ `[1]` から連番で採番し直してください。\n     1. **User Uploaded Files** (`type`: \"\
-            document\")\n     2. **Internal Knowledge (RAG)** (`type`: \"rag\")\n\
-            \     3. **Web Search Results** (`type`: \"web\")\n   - **Consistency**:\
-            \ 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\n# Input Data\n\n##\
-            \ 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\n\
-            ## 1. User Uploaded Files\n- File Names: {{#conversation.context_file_name#}}\n\
-            - Content: {{#conversation.context_file#}}\n\n## 2. Internal Knowledge\
-            \ (RAG)\n{{#conversation.context_rag#}}\n\n## 3. Web Search Results\n\
-            {{#conversation.context_web#}}\n\n# User Query\n{{#sys.query#}}\n\n# Processing\
-            \ Steps (Mental Chain)\n1. **情報源の有無判定**:\n   - 各Input Dataが空でないか確認します。**空の情報源は出典リストおよび回答から完全に除外してください。**\n\
-            \n2. **出典リストの構築**:\n   - 存在する情報源だけを `citations` リストに追加し、連番を振ります。\n\n3.\
-            \ **回答の生成**:\n   - 結論を最初に記述します。\n   - 複数の情報源がある場合、それぞれの整合性や差異について客観的に記述します。\n\
-            \n4. **JSON出力**:\n   - JSON形式に変換します。\n\n# Processing Steps (Efficient\
-            \ Chain)\n回答の出力を作成する前に、以下の手順で思考プロセスを整理し、`thinking` フィールドに**Markdownの箇条書き**（日本語）で記述してください。\n\
-            \n1. **思考スタイル**:\n   - あなたは「優秀な実務アシスタント」です。挨拶は省略し、**事実(Fact)**と**論理(Logic)**のみを最短距離で提供してください。\n\
-            \n2. **思考項目 (Thinking Fields)**:\n   - **ユーザーの意図**: 質問に対する「正解」の定義（数値、Yes/No）。\n\
-            \   - **照合**: 社内規定(RAG)、添付資料(Document)、Web情報の整合性チェック。\n   - **優先判断**:\
-            \ 矛盾時は **RAG > Document > Web** の優先順位で正とする。\n   - **構造**: 結論を先頭に配置し、根拠番号[x]を明記する構成。\n\
-            \n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\
-            \n## Output Example\n{\n  \"thinking\": \"- **ユーザーの意図**: 交通費精算の上限額（数値）の特定。\\\
-            n- **照合**: 規定書(RAG)第3条により「上限なし（実費）」と確認。\\n- **優先判断**: Web上の一般論[3]は採用せず、社内規定[1]を正とする。\\\
-            n- **構造**: 結論（上限なし）→ 根拠ソースの順でリスト化。\",\n  \"answer\": \"### 結論: 上限なし（実費全額支給）[1]\\\
-            n\\n**条件:**\\n- 領収書の原本提出が必須[1]\\n- 最短経路での利用に限る\\n\\n**参照ソース:**\\n- 社内規定:\
-            \ 交通費旅費規程 第3条[1]\\n- 申請書ドラフト: 項目「概算交通費」[2]\",\n  \"citations\": [\n  \
-            \  { \"id\": \"cite_1\", \"type\": \"rag\", \"source\": \"交通費旅費規程_2025.pdf\"\
-            , \"url\": null },\n    { \"id\": \"cite_2\", \"type\": \"document\",\
-            \ \"source\": \"交通費精算申請書_ドラフト.xlsx\", \"url\": null },\n    { \"id\":\
-            \ \"cite_3\", \"type\": \"web\", \"source\": \"国税庁 - 旅費交通費の非課税限度額\", \"\
-            url\": \"https://www.nta.go.jp/taxes/...\" }\n  ]\n}\n\n# Final Constraints\n\
-            1. JSON構造を絶対に崩さないでください。\n2. `answer` フィールドに、挨拶や「いかがでしたか？」等の結びの言葉を含めないでください。\n\
-            3. `thinking` 内では、改行を `\\n` にエスケープしてください。"
-        selected: false
-        title: LLM_Hybrid_Efficient
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '17655151756460'
-      position:
-        x: 8088
-        y: 603
-      positionAbsolute:
-        x: 8088
-        y: 603
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        memory:
-          query_prompt_template: '{{#sys.query#}}
-
-
-            {{#sys.files#}}'
-          role_prefix:
-            assistant: ''
-            user: ''
-          window:
-            enabled: true
-            size: 10
-        model:
-          completion_params:
-            temperature: 0.7
-          mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
-          role: system
-          text: "# Role\nあなたは、ドキュメントの内容を正確に読み解く「ドキュメント分析エンジン」です。\n提供されたファイルの内容のみに基づき、事実を抽出してJSON形式で出力してください。\n\
-            \n# Intelligence Profile (Functional Config)\n以下のJSONデータには、ユーザーからの機能的な要求仕様が含まれています。\n\
-            感情的な配慮や挨拶は不要ですが、**出力形式や情報の粒度**に関する指示は厳格に適用してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n## Processing\
-            \ Rules\n1. **custom_directives (Override)**:\n   - `free_text`: ここに記載された指示（例：「英語で出力」「箇条書きのみ」「JSON形式」）は、システム規定のガイドラインよりも**優先**されます。指示に従い、最短経路で回答を生成してください。\n\
-            \n2. **user_context (Optimization)**:\n   - `name`: **使用しません**。挨拶や呼びかけは省略し、即座にタスクを開始してください。\n\
-            \   - `department` / `role`: 専門用語のレベル調整にのみ利用してください。（例: エンジニア→技術用語を多用 /\
-            \ 経営層→ビジネス用語で要約）\n\n\n# Guidelines\n\n1. **Style (Efficient Mode)**:\n\
-            \   - **Tone**: 簡潔で客観的な「です・ます」調。\n   - **Structure**:\n     - 挨拶は不要です。**「###\
-            \ 要約」** などの見出しから開始してください。\n- **Extraction & Precision**:\n  - 「〜について書かれています」というメタな説明は不要です。資料の中に書かれている具体的な「手順」「条件」「禁止事項」そのものを抜き出してください。\n\
-            \  - ユーザーが資料本文を開かなくても業務を進められるよう、核心となる情報を箇条書きで網羅的に抽出してください。\n   - **Fact\
-            \ Only**:\n     - ファイルに書かれていないことは「記載なし」としてください。推測は禁止です。\n\n2. **Citation\
-            \ Rule**:\n   - **Format**: `[1][2]` 形式を使用してください。\n   - **Renumbering**:\
-            \ ファイルリスト順に `[1]` から採番してください。\n\n# Input Data\n\n## 1. File Names\n{{#conversation.context_file_name#}}\n\
-            \n## 2. File Content\n{{#conversation.context_file#}}\n\n# User Query\n\
-            {{#sys.query#}}\n\n# Processing Steps (Doc Efficient Chain)\n回答の出力を作成する前に、以下の手順で提供されたドキュメント(Context)を厳密に査読し、`thinking`\
-            \ フィールドに**Markdownの箇条書き**（日本語）で記述してください。\n\n1. **思考スタイル**:\n   - 推測や解釈を排除してください。ドキュメントに**書かれていることだけ**を事実として扱います。\n\
-            \n2. **思考項目 (Thinking Fields)**:\n   - **ユーザーの意図**: 抽出・確認すべき具体的なデータや条件。\n\
-            \   - **事実**: コンテキスト内から発見されたテキスト（引用元）。\n   - **判定**: ドキュメント内に回答が存在するか、否か。\n\
-            \   - **構造**: 結論を先頭にし、引用箇所[x]を明示する構成。\n\n# Output Format (JSON Only)\n\
-            Markdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\n## Output Example\n\
-            {\n  \"thinking\": \"- **ユーザーの意図**: 育児休暇の申請期限（数値）の特定。\\n- **事実**: 規則HR-002\
-            \ 第15条に「1ヶ月前」と明記。\\n- **判定**: 回答可能。\\n- **構造**: 結論（1ヶ月前）→ 根拠条文[1]の順で提示。\"\
-            ,\n  \"answer\": \"### 申請期限: 開始の1ヶ月前[1]\\n\\n**根拠規定:**\\n> 「育児休業の申出は、休業開始予定日の1ヶ月前までに行わなければならない」\
-            \ (就業規則 第15条)[1]\",\n  \"citations\": [\n    { \"id\": \"cite_1\", \"\
-            type\": \"document\", \"source\": \"就業規則_2025.pdf\", \"url\": null }\n\
-            \  ]\n}\n\n# Final Constraints\n1. JSON構造を絶対に崩さないでください。\n2. 添付ファイルは必ず\
-            \ `citations` 配列に `type: \"document\"` として含めてください。"
-        selected: false
-        title: LLM_Doc_Efficient
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '17655151779960'
-      position:
-        x: 8088
-        y: 939
-      positionAbsolute:
-        x: 8088
-        y: 939
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        memory:
-          query_prompt_template: '{{#sys.query#}}
-
-
-            {{#sys.files#}}'
-          role_prefix:
-            assistant: ''
-            user: ''
-          window:
-            enabled: true
-            size: 10
-        model:
-          completion_params: {}
-          mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
-          role: system
-          text: "# Role\nあなたは、社内ナレッジと最新のWeb情報を活用する「リサーチアシスタント」です。\n提供されたデータ（RAG/Web）に基づき、**事実のみ**を抽出してJSON形式で出力してください。\n\
-            \n# Intelligence Profile (Functional Config)\n以下のJSONデータには、ユーザーからの機能的な要求仕様が含まれています。\n\
-            感情的な配慮や挨拶は不要ですが、**出力形式や情報の粒度**に関する指示は厳格に適用してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n## Processing\
-            \ Rules\n1. **custom_directives (Override)**:\n   - `free_text`: ここに記載された指示（例：「英語で出力」「箇条書きのみ」「JSON形式」）は、システム規定のガイドラインよりも**優先**されます。指示に従い、最短経路で回答を生成してください。\n\
-            \n2. **user_context (Optimization)**:\n   - `name`: **使用しません**。挨拶や呼びかけは省略し、即座にタスクを開始してください。\n\
-            \   - `department` / `role`: 専門用語のレベル調整にのみ利用してください。（例: エンジニア→技術用語を多用 /\
-            \ 経営層→ビジネス用語で要約）\n\n# Guidelines\n\n1. **Style (Efficient Mode)**:\n \
-            \  - **Tone**: 簡潔で客観的な「です・ます」調。\n   - **Structure**:\n     - 挨拶は不要です。**「###\
-            \ 調査結果」** という見出しから開始してください。\n- **Volume & Density (重要)**:\n  - 単なる要約で情報を削ぎ落とさないでください。「詳細はリンク先で」という逃げは禁止です。\n\
-            \  - 検索結果から得られる「数値」「日付」「固有名詞」「結論」などのファクト（事実）を、箇条書き（Bullet Points）を用いて可能な限り多くリストアップしてください。\n\
-            \  - 文章でつなぐよりも、情報の羅列密度を優先してください。\n   - **No Info Handling**:\n     - 情報が見つからない場合も、謝罪（「申し訳ありません」）は不要です。「該当する情報は確認できませんでした。」と事実のみを伝えてください。\n\
-            \n2. **Citation Rule**:\n   - **Format**: `[1][2]` 形式を使用してください。\n   -\
-            \ **Renumbering**: `[1]` から連番で採番してください。\n\n# Input Data\n\n## 0. Context\
-            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n- Web Search\
-            \ Mode: {{#1761291739140.web_search_mode#}}\n\n## 1. Internal Knowledge\
-            \ (RAG)\n{{#conversation.context_rag#}}\n\n## 2. Web Search Results\n\
-            {{#conversation.context_web#}}\n\n# User Query\n{{#sys.query#}}\n\n# Processing\
-            \ Steps (Search Efficient Chain)\n回答の出力を作成する前に、検索結果を評価し、`thinking` フィールドに**Markdownの箇条書き**（日本語）で記述してください。\n\
-            \n1. **思考スタイル**:\n   - 主観や感想は不要です。**「誰が、いつ、何を言ったか」**を正確にレポートしてください。\n\n\
-            2. **思考項目 (Thinking Fields)**:\n   - **ユーザーの意図**: 検索キーワードの妥当性とターゲット情報。\n\
-            \   - **ソース**: 情報源のドメイン確認（個人ブログ等は除外）。\n   - **時系列**: 情報の発表日時・更新日時の特定。\n\
-            \   - **事実**: 複数のソース[x]で裏付けが取れた客観的事実。\n\n# Output Format (JSON Only)\n\
-            Markdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\n## Output Example\n\
-            {\n  \"thinking\": \"- **ユーザーの意図**: 「React 19 リリース日」の特定。\\n- **ソース**:\
-            \ 公式サイト[1]およびGitHub[2]を確認。\\n- **時系列**: 2024年XX月の発表内容に基づく。\\n- **事実**:\
-            \ 正式リリース日は未定だが、RC版が公開済み。\\n- **構造**: 現状のステータスをリスト化。\",\n  \"answer\":\
-            \ \"### React 19 リリース状況 (2025/XX 現在)\\n\\n- **ステータス**: Release Candidate\
-            \ (RC)[1]\\n- **正式版**: 未定（近日中と予測）[2]\\n\\n詳細は公式ブログ[1]を参照してください。\",\n \
-            \ \"citations\": [\n    { \"id\": \"cite_1\", \"type\": \"web\", \"source\"\
-            : \"React Blog\", \"url\": \"https://react.dev/...\" },\n    { \"id\"\
-            : \"cite_2\", \"type\": \"web\", \"source\": \"GitHub - Facebook/React\"\
-            , \"url\": \"https://github.com/...\" }\n  ]\n}\n\n# Final Constraints\n\
-            1. JSON構造を絶対に崩さないでください。\n2. 確証のない情報は記述しないでください。"
-        selected: false
-        title: LLM_Search_Efficient
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '17655151786270'
-      position:
-        x: 8430
-        y: 1201
-      positionAbsolute:
-        x: 8430
-        y: 1201
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        memory:
-          query_prompt_template: '{{#sys.query#}}
-
-
-            {{#sys.files#}}'
-          role_prefix:
-            assistant: ''
-            user: ''
-          window:
-            enabled: true
-            size: 10
-        model:
-          completion_params:
-            temperature: 0.7
-          mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
-          role: system
-          text: "# Role\nあなたは、一般的な知識に基づいてタスクを遂行する「知識処理エンジン」です。\n参照すべき外部資料はありません。あなたの知識に基づき、事実のみをJSON形式で出力してください。\n\
-            \n# Intelligence Profile (Functional Config)\n以下のJSONデータには、ユーザーからの機能的な要求仕様が含まれています。\n\
-            感情的な配慮や挨拶は不要ですが、**出力形式や情報の粒度**に関する指示は厳格に適用してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n## Processing\
-            \ Rules\n1. **custom_directives (Override)**:\n   - `free_text`: ここに記載された指示（例：「英語で出力」「箇条書きのみ」「JSON形式」）は、システム規定のガイドラインよりも**優先**されます。指示に従い、最短経路で回答を生成してください。\n\
-            \n2. **user_context (Optimization)**:\n   - `name`: **使用しません**。挨拶や呼びかけは省略し、即座にタスクを開始してください。\n\
-            \   - `department` / `role`: 専門用語のレベル調整にのみ利用してください。（例: エンジニア→技術用語を多用 /\
-            \ 経営層→ビジネス用語で要約）\n\n# Guidelines\n\n1. **Style (Efficient Mode)**:\n \
-            \  - **Tone**: 簡潔で客観的な「です・ます」調。\n   - **Structure**:\n     - 挨拶は不要です。**「###\
-            \ 回答」** などの見出しから開始してください。\n   - **Fact Only**:\n     - 社内規定や最新情報を聞かれた場合は、「情報なし」と回答し、Web検索モードの利用を推奨してください。\n\
-            - **Directness & Utility (最重要)**:\n  - 挨拶、前置き、結びの言葉（「こんにちは」「〜について解説します」「いかがでしたか」等）は一切出力しないでください。ノイズです。\n\
-            \  - ユーザーの質問に対する「正解」「コード」「翻訳結果」のみを、0秒で本題に入るスピード感で出力してください。\n\n- **Format**:\n\
-            \  - 長い文章での解説は避け、コードブロック、Markdownの表、箇条書きの手順を優先して使用してください。\n  - 概念の説明が必要な場合も、最大3行以内の「定義」に留め、すぐに「具体例」や「使い方のリスト」を提示してください。\n\
-            \n2. **Citation Rule**:\n   - `citations` は必ず空配列 `[]` にしてください。\n\n# Input\
-            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n\n# User Query\n\
-            {{#sys.query#}}\n\n# Processing Steps (Logic Chain)\n回答の出力を作成する前に、以下の手順で論理構成を整理し、`thinking`\
-            \ フィールドに**Markdownの箇条書き**（日本語）で記述してください。\n\n1. **思考スタイル**:\n   - 感情表現、挨拶、前置きは一切不要です。**論理的整合性**と**情報の構造化**のみに集中してください。\n\
-            \n2. **思考項目 (Thinking Fields)**:\n   - **ユーザーの意図**: 要求（計算、コード生成、翻訳など）の分解。\n\
-            \   - **論理**: 回答を導き出すためのロジックやアルゴリズム。\n   - **制約**: 出力形式（Markdown、JSON、言語）の確認。\n\
-            \   - **構成**: 最も効率的に情報を伝達するためのフォーマット決定。\n\n# Output Format (JSON Only)\n\
-            Markdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\n## Output Example\n\
-            {\n  \"thinking\": \"- **ユーザーの意図**: Pythonでフィボナッチ数列を計算する関数が必要。\\n- **論理**:\
-            \ 再帰は遅いため、反復処理またはメモ化を使用する。\\n- **制約**: 型ヒントとDocstringを含める。\\n- **構成**:\
-            \ コードブロックのみを提示し、解説は最小限にする。\",\n  \"answer\": \"以下はメモ化を使用した効率的な実装です。\\\
-            n\\n```python\\ndef fib(n: int, memo={}) -> int:\\n    if n in memo: return\
-            \ memo[n]\\n    if n <= 1: return n\\n    memo[n] = fib(n-1, memo) + fib(n-2,\
-            \ memo)\\n    return memo[n]\\n```\",\n  \"citations\": []\n}"
-        selected: false
-        title: LLM_General_Efficient
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '17655151791010'
-      position:
-        x: 8088
-        y: 1594
-      positionAbsolute:
-        x: 8088
-        y: 1594
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        answer: '{{#17655151779960.text#}}{{#17665512107830.text#}}'
+        answer: '{{#17665512107830.text#}}'
         selected: false
         title: ANSWER_Document
         type: answer
         variables: []
-      height: 120
+      height: 102
       id: '17655153615920'
       position:
-        x: 8450
-        y: 943
+        x: 8048
+        y: 710
       positionAbsolute:
-        x: 8450
-        y: 943
+        x: 8048
+        y: 710
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        answer: '{{#17655151786270.text#}}{{#17665512248470.text#}}{{#1769758012462.result#}}'
+        answer: '{{#17665512248470.text#}}{{#1769758012462.result#}}'
         selected: false
         title: ANSWER_Search
         type: answer
         variables: []
-      height: 138
+      height: 120
       id: '17655153626170'
       position:
-        x: 9496
-        y: 1385
+        x: 9094
+        y: 901
       positionAbsolute:
-        x: 9496
-        y: 1385
+        x: 9094
+        y: 901
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        answer: '{{#17655151791010.text#}}{{#17665512406710.text#}}'
+        answer: '{{#17665512406710.text#}}'
         selected: false
         title: ANSWER_General
         type: answer
         variables: []
-      height: 120
+      height: 102
       id: '17655153635450'
       position:
-        x: 8450
-        y: 1598
+        x: 8048
+        y: 1099
       positionAbsolute:
-        x: 8450
-        y: 1598
+        x: 8048
+        y: 1099
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2940,89 +2327,29 @@ workflow:
       id: '1765854025663'
       position:
         x: 704
-        y: 336
+        y: 366
       positionAbsolute:
         x: 704
-        y: 336
+        y: 366
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        context:
-          enabled: false
-          variable_selector: []
-        memory:
-          query_prompt_template: '{{#sys.query#}}
-
-
-            {{#sys.files#}}'
-          role_prefix:
-            assistant: ''
-            user: ''
-          window:
-            enabled: true
-            size: 10
-        model:
-          completion_params:
-            temperature: 0.7
-          mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
-          role: system
-          text: "# Role\nあなたは、ドキュメントの内容を高速に処理する「ドキュメント分析エンジン」です。\n**提供されたファイルの内容のみ**に基づき、事実を抽出してJSON形式で回答してください。\n\
-            \n\n# Intelligence Profile (Functional Config)\n以下のJSONデータには、ユーザーからの機能的な要求仕様が含まれています。\n\
-            感情的な配慮や挨拶は不要ですが、**出力形式や情報の粒度**に関する指示は厳格に適用してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n## Processing\
-            \ Rules\n1. **custom_directives (Override)**:\n   - `free_text`: ここに記載された指示（例：「英語で出力」「箇条書きのみ」「JSON形式」）は、システム規定のガイドラインよりも**優先**されます。指示に従い、最短経路で回答を生成してください。\n\
-            \n2. **user_context (Optimization)**:\n   - `name`: **使用しません**。挨拶や呼びかけは省略し、即座にタスクを開始してください。\n\
-            \   - `department` / `role`: 専門用語のレベル調整にのみ利用してください。（例: エンジニア→技術用語を多用 /\
-            \ 経営層→ビジネス用語で要約）\n\n\n\n# Guidelines\n1. **Style (Efficient Mode)**:\n\
-            \   - **Tone**: 簡潔で客観的な「です・ます」調。\n   - **Structure**: 挨拶は不要です。即座に「###\
-            \ 要約」などの見出しから開始してください。\n   - **Fact Only**: ファイルに書かれていないことは「記載なし」としてください。\n\
-            \n2. **JSON Output Rule**:\n   - 必ず以下のJSON形式で出力してください。Markdownコードブロックは使用しないでください。\n\
-            \   - `thinking`: 思考プロセスをMarkdownの箇条書きで記述（改行は `\\n`）。\n   - `answer`:\
-            \ 回答本文をMarkdownで記述（改行は `\\n`）。\n   - `citations`: 高速モードのため、必ず空配列 `[]`\
-            \ を出力してください。\n\n# Input Data\n## 1. File Names\n{{#conversation.context_file_name#}}\n\
-            \n## 2. File Content\n{{#conversation.context_file#}}\n\n# User Query\n\
-            {{#sys.query#}}\n\n# Output Example\n{\n  \"thinking\": \"- **事実**: ファイル内に「締切は10月」という記述あり。\\\
-            n- **構成**: 要点を箇条書きで抽出。\",\n  \"answer\": \"### 抽出結果\\n\\n締切は**10月末**と記載されています。\"\
-            ,\n  \"citations\": []\n}"
-        selected: false
-        title: LLM_Fast_Doc_Efficient
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '1765854614015'
-      position:
-        x: 2836
-        y: 397
-      positionAbsolute:
-        x: 2836
-        y: 397
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        answer: '{{#1765854614015.text#}}{{#17665499392760.text#}}'
+        answer: '{{#17665499392760.text#}}'
         selected: false
         title: ANSWER_Fast_Doc
         type: answer
         variables: []
-      height: 120
+      height: 102
       id: '1765854668107'
       position:
-        x: 3198
-        y: 529
+        x: 3158
+        y: 459
       positionAbsolute:
-        x: 3198
-        y: 529
+        x: 3158
+        y: 459
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3059,10 +2386,10 @@ workflow:
       id: '17658598785120'
       position:
         x: 1066
-        y: 370
+        y: 400
       positionAbsolute:
         x: 1066
-        y: 370
+        y: 400
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3080,10 +2407,10 @@ workflow:
       id: '17658598785131'
       position:
         x: 1428
-        y: 416
+        y: 446
       positionAbsolute:
         x: 1428
-        y: 416
+        y: 446
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3117,10 +2444,10 @@ workflow:
       id: '17658598785132'
       position:
         x: 2112
-        y: 413
+        y: 443
       positionAbsolute:
         x: 2112
-        y: 413
+        y: 443
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3152,88 +2479,29 @@ workflow:
       id: '17658598785133'
       position:
         x: 1770
-        y: 442
+        y: 472
       positionAbsolute:
         x: 1770
-        y: 442
+        y: 472
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        context:
-          enabled: false
-          variable_selector: []
-        memory:
-          query_prompt_template: '{{#sys.query#}}
-
-
-            {{#sys.files#}}'
-          role_prefix:
-            assistant: ''
-            user: ''
-          window:
-            enabled: true
-            size: 10
-        model:
-          completion_params:
-            temperature: 0.7
-          mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: 719bbb6f-05b6-40cb-a9ed-ddbf798ce542
-          role: system
-          text: "# Role\nあなたは、内部知識に基づいてタスクを処理する「知識処理エンジン」です。\n現在、外部ネットワークから切断された**高速モード**で動作しています。JSON形式で出力してください。\n\
-            \n\n\n# Intelligence Profile (Functional Config)\n以下のJSONデータには、ユーザーからの機能的な要求仕様が含まれています。\n\
-            感情的な配慮や挨拶は不要ですが、**出力形式や情報の粒度**に関する指示は厳格に適用してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n## Processing\
-            \ Rules\n1. **custom_directives (Override)**:\n   - `free_text`: ここに記載された指示（例：「英語で出力」「箇条書きのみ」「JSON形式」）は、システム規定のガイドラインよりも**優先**されます。指示に従い、最短経路で回答を生成してください。\n\
-            \n2. **user_context (Optimization)**:\n   - `name`: **使用しません**。挨拶や呼びかけは省略し、即座にタスクを開始してください。\n\
-            \   - `department` / `role`: 専門用語のレベル調整にのみ利用してください。（例: エンジニア→技術用語を多用 /\
-            \ 経営層→ビジネス用語で要約）\n\n\n\n\n# Guidelines\n1. **Style (Efficient Mode)**:\n\
-            \   - **Tone**: 簡潔で客観的な「です・ます」調。\n   - **No Info Handling**: 外部情報が必要な場合は「高速モードのため参照できません」と伝えてください。\n\
-            \n2. **JSON Output Rule**:\n   - 必ず以下のJSON形式で出力してください。Markdownコードブロックは使用しないでください。\n\
-            \   - `thinking`: 論理構成や前提条件をMarkdownの箇条書きで記述（改行は `\\n`）。\n   - `answer`:\
-            \ 回答本文をMarkdownで記述（改行は `\\n`）。\n   - `citations`: 必ず空配列 `[]` を出力してください。\n\
-            \n# Input Data\n- Current Time: {{#1761291739140.current_time#}}\n\n#\
-            \ User Query\n{{#sys.query#}}\n\n# Output Example\n{\n  \"thinking\":\
-            \ \"- **論理**: Pythonのリスト内包表記を使用。\\n- **制約**: コードのみ提示。\",\n  \"answer\"\
-            : \"以下がコード例です。\\n\\n```python\\n[x for x in range(10)]\\n```\",\n  \"\
-            citations\": []\n}"
-        selected: false
-        title: LLM_Fast_General_Efficient
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '17658599307650'
-      position:
-        x: 1790
-        y: 654
-      positionAbsolute:
-        x: 1790
-        y: 654
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        answer: '{{#17658599307650.text#}}{{#17665500976990.text#}}'
+        answer: '{{#17665500976990.text#}}'
         selected: false
         title: ANSWER_Fast_General
         type: answer
         variables: []
-      height: 120
+      height: 102
       id: '1765859958399'
       position:
-        x: 2152
-        y: 658
+        x: 1770
+        y: 654
       positionAbsolute:
-        x: 2152
-        y: 658
+        x: 1770
+        y: 654
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3259,10 +2527,10 @@ workflow:
       id: '1766549782668'
       position:
         x: 2474
-        y: 385
+        y: 457
       positionAbsolute:
         x: 2474
-        y: 385
+        y: 457
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3310,47 +2578,18 @@ workflow:
             n- **注目**: マネージャー層のため、合計金額を強調する。\",\n  \"answer\": \"予算についてですね！\\uD83D\\\
             uDCB0\\n\\n資料によると、合計で**500万円**となっています。\",\n  \"citations\": []\n}"
         selected: false
-        title: LLM_Fast_Doc_Partner
+        title: LLM_Fast_Doc_
         type: llm
         vision:
           enabled: false
       height: 88
       id: '17665499392760'
       position:
-        x: 2836
-        y: 565
+        x: 2816
+        y: 475
       positionAbsolute:
-        x: 2836
-        y: 565
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: is
-            id: c54b374b-43c4-4785-a85e-4e101e2065d2
-            value: efficient
-            varType: string
-            variable_selector:
-            - '1761291739140'
-            - ai_style
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: STYLE_Check_Fast_General
-        type: if-else
-      height: 124
-      id: '17665500741430'
-      position:
-        x: 1428
-        y: 624
-      positionAbsolute:
-        x: 1428
-        y: 624
+        x: 2816
+        y: 475
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3398,134 +2637,18 @@ workflow:
             n- **戦略**: 励ましながらブレストを提案する。\",\n  \"answer\": \"こんにちは！\\n\\nアイデア出しですね、喜んでお手伝いします！\\\
             nまずはキーワードをいくつか挙げてみましょうか？\",\n  \"citations\": []\n}"
         selected: false
-        title: LLM_Fast_General_Partner
+        title: LLM_Fast_General
         type: llm
         vision:
           enabled: false
       height: 88
       id: '17665500976990'
       position:
-        x: 1790
-        y: 822
+        x: 1428
+        y: 670
       positionAbsolute:
-        x: 1790
-        y: 822
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: is
-            id: c54b374b-43c4-4785-a85e-4e101e2065d2
-            value: efficient
-            varType: string
-            variable_selector:
-            - '1761291739140'
-            - ai_style
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: STYLE_Check_Hybrid
-        type: if-else
-      height: 124
-      id: '17665510905650'
-      position:
-        x: 7726
-        y: 716
-      positionAbsolute:
-        x: 7726
-        y: 716
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: is
-            id: c54b374b-43c4-4785-a85e-4e101e2065d2
-            value: efficient
-            varType: string
-            variable_selector:
-            - '1761291739140'
-            - ai_style
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: STYLE_Check_Doc
-        type: if-else
-      height: 124
-      id: '17665511081250'
-      position:
-        x: 7726
-        y: 967
-      positionAbsolute:
-        x: 7726
-        y: 967
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: is
-            id: c54b374b-43c4-4785-a85e-4e101e2065d2
-            value: efficient
-            varType: string
-            variable_selector:
-            - '1761291739140'
-            - ai_style
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: STYLE_Check_Search
-        type: if-else
-      height: 124
-      id: '17665511228850'
-      position:
-        x: 7726
-        y: 1171
-      positionAbsolute:
-        x: 7726
-        y: 1171
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: is
-            id: c54b374b-43c4-4785-a85e-4e101e2065d2
-            value: efficient
-            varType: string
-            variable_selector:
-            - '1761291739140'
-            - ai_style
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: STYLE_Check_General
-        type: if-else
-      height: 124
-      id: '17665511238600'
-      position:
-        x: 7726
-        y: 1564
-      positionAbsolute:
-        x: 7726
-        y: 1564
+        x: 1428
+        y: 670
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3575,22 +2698,20 @@ workflow:
             \  - 結論だけでなく、その根拠となる詳細なデータや条件も網羅し、読み応えのある構成にしてください。\n　- **Emoji Balance\
             \ (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A, \U0001F375,\
             \ ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
-            \   - **Visual**: \n     - 重要なキーワードはMarkdownの **太字** で強調してください。\n\n2.\
-            \ **Greeting & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
-            \   - **Case 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた挨拶（「こんにちは」等）を行ってください。\n\
-            \     - **情報源の言及**: 以下の**入力データが存在する（空でない）場合のみ**、導入で言及してください。\n       \
-            \  - `Files` あり → 「頂いた資料」\n         - `RAG` あり → 「社内規定」\n         - `Web`\
-            \ あり → 「Web情報」\n       - (例: 「資料と社内規定を確認しました\U0001F60A」)\n   - **Case\
-            \ 2: Subsequent Turns (会話の継続中)**\n     - **挨拶（「こんにちは」等）は絶対に省略してください。**\n\
-            \     - **「資料を確認しました」「Webで調べました」といった前置きも一切不要です。**\n     - 冗長さを排除するため、**即座に**ユーザーの質問に対する答え（結論・見出し）から書き出してください。\n\
-            \n\n3. **Citation Rule (重要: 出典の表記と統合)**:\n   - **Format**: 文中の引用番号は `[1][2]`\
-            \ のように**個別のブラケット**で記述してください。`[1, 2]` のようなカンマ区切りは**禁止**です。\n   - **Renumbering**:\
-            \ 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を `[1]` から連番で採番し直してください。\n     1.\
-            \ **User Uploaded Files** (`type`: \"document\")\n     2. **Internal Knowledge\
-            \ (RAG)** (`type`: \"rag\")\n     3. **Web Search Results** (`type`: \"\
-            web\")\n   - **Consistency**: 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\
-            \n# Input Data\n\n## 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\
-            \n## 1. User Uploaded Files (Target Document)\n- File Names: {{#conversation.context_file_name#}}\n\
+            \   - **Visual**: \n     - 重要なキーワードはMarkdownの **太字** で強調してください。\n\n###\
+            \ Greeting & Opening Protocol (重要: 挨拶・前置き禁止)\n- **Absolute Prohibition**:\
+            \ 「こんにちは」「お待たせしました」などの挨拶や、「Webと社内資料を確認した結果、以下のことがわかりました」といった**メタな前置きは一切禁止**します。\n\
+            - **Reason**: ユーザーへの挨拶や状況説明は、前段の `Intent Analysis` ノードですでに完了しています。ここでの重複はUXを著しく損ないます。\n\
+            - **Action**: \n  - 冒頭の0秒目から、ユーザーの問いに対する**核心的な回答（結論）**または**見出し（###）**で書き始めてください。\n\
+            \  - 文脈の接続詞（例：「結論から申し上げますと」「その件については」）も極力省略し、情報の提示に徹してください。\n\n\n3. **Citation\
+            \ Rule (重要: 出典の表記と統合)**:\n   - **Format**: 文中の引用番号は `[1][2]` のように**個別のブラケット**で記述してください。`[1,\
+            \ 2]` のようなカンマ区切りは**禁止**です。\n   - **Renumbering**: 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を\
+            \ `[1]` から連番で採番し直してください。\n     1. **User Uploaded Files** (`type`: \"\
+            document\")\n     2. **Internal Knowledge (RAG)** (`type`: \"rag\")\n\
+            \     3. **Web Search Results** (`type`: \"web\")\n   - **Consistency**:\
+            \ 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\n# Input Data\n\n##\
+            \ 0. Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\n\
+            ## 1. User Uploaded Files (Target Document)\n- File Names: {{#conversation.context_file_name#}}\n\
             - Content: {{#conversation.context_file#}}\n※ここが空の場合、ファイルは添付されていません。\n\
             \n## 2. Internal Knowledge (RAG)\n{{#conversation.context_rag#}}\n※ここが空の場合、社内規定は参照していません。\n\
             \n## 3. Web Search Results\n{{#conversation.context_web#}}\n※ここが空の場合、Web検索は行っていません。\n\
@@ -3623,18 +2744,18 @@ workflow:
             \ `\\n` にエスケープしてください。"
         selected: false
         structured_output_enabled: false
-        title: LLM_Hybrid_Partner
+        title: LLM_Hybrid
         type: llm
         vision:
           enabled: false
       height: 88
       id: '17665511958080'
       position:
-        x: 8088
-        y: 771
+        x: 7706
+        y: 526
       positionAbsolute:
-        x: 8088
-        y: 771
+        x: 7706
+        y: 526
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3673,48 +2794,51 @@ workflow:
             \ `free_text`: ユーザー固有の分析指示（例：「リスク検知を優先して」）があれば、それに従ってください。\n\n# Guidelines\n\
             \n1. **Style (Partner Mode)**:\n   - **Tone**: 丁寧な「です・ます」調。\n   - **Structure\
             \ (構造化)**:\n     - **見出し（###）**と**絵文字**を使用して、内容を整理してください（例: `### \U0001F4C4\
-            \ 要約`, `### \U0001F4CA 数値データ`, `### \U0001F4DD 詳細`）。\n  - **Volume (重要)**:\n\
-            \  - 単なる要約で終わらせず、資料に書かれている内容を「なぜそう決まっているのか」「具体的にどうすればいいのか」まで踏み込んで解説してください。\n\
-            \  - ユーザーが資料を読み返さなくても済むよう、必要な数値、条件、手順を網羅的に記述し、十分な文章量で説明してください。\n- **Contextualization**:\n\
-            \  - 資料の記述を引用するだけでなく、「つまり、あなたの場合はこうなります」という具体的な当てはめを行ってください。\n　- **Emoji\
-            \ Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A, \U0001F375\
-            , ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
-            \n2. **Greeting & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
-            \   - **Case 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた挨拶を行ってください。\n\
-            \     - 「資料全体を拝見しました」「ご提示のファイルを確認しました」等、ファイルを見たことを伝えてください。\n   - **Case\
-            \ 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は絶対に省略してください。**\n     - 「資料を見ました」等の前置きも省略し、**質問に対する答え（結論やデータ）から即座に書き出してください。**\n\
-            \n\n3. **Citation Rule**:\n   - **Format**: `[1][2]` 形式を使用してください。\n  \
-            \ - **Renumbering**: ファイルリストにある順序で `[1]` から採番してください。\n   - **Consistency**:\
-            \ 根拠となる記述には必ず番号を付記してください。\n\n# Input Data\n\n## 0. Context Data\n- Current\
-            \ Time: {{#1761291739140.current_time#}}\n\n## 1. File Names\n{{#conversation.context_file_name#}}\n\
-            \n## 2. File Content\n{{#conversation.context_file#}}\n\n# User Query\n\
-            {{#sys.query#}}\n\n# Processing Steps (Doc Partner Chain)\n回答の出力を作成する前に、以下の手順で提供されたドキュメント(Context)を分析し、`thinking`\
+            \ 要約`, `### \U0001F4CA 数値データ`, `### \U0001F4DD 詳細`）。\n   - **Volume (重要)**:\n\
+            \     - 単なる要約で終わらせず、資料に書かれている内容を「なぜそう決まっているのか」「具体的にどうすればいいのか」まで踏み込んで解説してください。\n\
+            \     - ユーザーが資料を読み返さなくても済むよう、必要な数値、条件、手順を網羅的に記述し、十分な文章量で説明してください。\n  \
+            \ - **Contextualization**:\n     - 資料の記述を引用するだけでなく、「つまり、あなたの場合はこうなります」という具体的な当てはめを行ってください。\n\
+            \   - **Emoji Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A\
+            , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
+            \n2. **Greeting & Opening Protocol (重要: 挨拶・前置き禁止)**:\n   - **Absolute\
+            \ Prohibition**: 「こんにちは」「資料を拝見しました」「アップロードされたファイルを確認したところ」といった挨拶やメタな前置きは**一切禁止**します。\n\
+            \   - **Reason**: ユーザーはファイルをアップロードした当事者であり、それを踏まえた回答であることを自明としています。重複はUXを損ないます。\n\
+            \   - **Action**: \n     - 冒頭の0秒目から、ユーザーの問いに対する**核心的な回答（結論、要約、データ）**または**見出し（###）**で書き始めてください。\n\
+            \     - 接続詞（例：「結論から申し上げますと」）も省略し、情報の提示に徹してください。\n\n3. **Citation Rule**:\n\
+            \   - **Format**: 文中の根拠となる箇所には `[1][2]` 形式を使用してください。\n   - **Renumbering**:\
+            \ ファイルリストにある順序で `[1]` から採番してください。\n   - **Strict Citation List**: 回答の生成に使用した**すべてのファイル**を、出力JSONの\
+            \ `citations` 配列に格納してください。取りこぼしは許されません。\n\n# Input Data\n\n## 0. Context\
+            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n\n## 1. File\
+            \ Names\n{{#conversation.context_file_name#}}\n\n## 2. File Content\n\
+            {{#conversation.context_file#}}\n\n# User Query\n{{#sys.query#}}\n\n#\
+            \ Processing Steps (Doc Partner Chain)\n回答の出力を作成する前に、以下の手順で提供されたドキュメント(Context)を分析し、`thinking`\
             \ フィールドに**Markdownの箇条書き**（日本語）で記述してください。\n\n1. **思考スタイル**:\n   - 資料に書かれている事実だけでなく、「なぜそのルールがあるのか」や「ユーザーはどうすべきか」という**アクション**まで踏み込んで思考してください。\n\
-            \n2. **思考項目 (Thinking Fields)**:\n   - **ユーザーの意図**: ユーザーがその資料を探している背景や困りごと。\n\
-            \   - **根拠**: 回答のベースとなるドキュメント内の具体的な記述。\n   - **補足**: ドキュメントに書いていないが、文脈上伝えるべき注意事項。\n\
+            \   - **重要**: 思考プロセス内であっても、挨拶や「承知しました」等のフレーズは含めないでください。\n\n2. **思考項目 (Thinking\
+            \ Fields)**:\n   - **ユーザーの意図**: ユーザーがその資料を探している背景や困りごと。\n   - **根拠**:\
+            \ 回答のベースとなるドキュメント内の具体的な記述。\n   - **補足**: ドキュメントに書いていないが、文脈上伝えるべき注意事項。\n\
             \   - **戦略**: 専門用語を避け、平易な言葉で説明する構成案。\n\n# Output Format (JSON Only)\n\
             Markdownコードブロックは禁止です。必ず `{` で開始し `}` で終了してください。\n\n## Output Example\n\
             {\n  \"thinking\": \"- **ユーザーの意図**: 育児休暇の申請期限を知りたい。\\n- **根拠**: 就業規則(HR-002)\
             \ 第15条「開始の1ヶ月前まで」との記述あり。\\n- **補足**: 期限を過ぎた場合の特例措置は記載がないため、相談を促す。\\n-\
-            \ **戦略**: 期限を伝えつつ、早めのアクションを促す優しいトーンにする。\",\n  \"answer\": \"育児休暇の申請についてですね\U0001F476\
-            \\n\\n就業規則によると、原則として**「開始予定日の1ヶ月前まで」**の申請が必要です[1]。\\n\\nもし期限が迫っている場合は、まずは直属の上司にご相談されることをお勧めします。\"\
+            \ **戦略**: 期限を伝えつつ、早めのアクションを促す優しいトーンにする。\",\n  \"answer\": \"就業規則によると、育児休暇の申請は原則として**「開始予定日の1ヶ月前まで」**に行う必要があります[1]。\\\
+            n\\n### \U0001F476 申請のポイント\\nもし期限が迫っている場合は、まずは直属の上司にご相談されることをお勧めします。期限を過ぎた場合の特例についての明記はありませんが、早めの相談が解決の鍵となります✨\"\
             ,\n  \"citations\": [\n    { \"id\": \"cite_1\", \"type\": \"document\"\
             , \"source\": \"就業規則_2025.pdf\", \"url\": null }\n  ]\n}\n\n# Final Constraints\n\
             1. JSON構造を絶対に崩さないでください。\n2. 添付ファイルは必ず `citations` 配列に `type: \"document\"\
             ` として含めてください。"
         selected: false
-        title: LLM_Doc_Partner
+        title: LLM_Doc
         type: llm
         vision:
           enabled: false
       height: 88
       id: '17665512107830'
       position:
-        x: 8088
-        y: 1107
+        x: 7706
+        y: 726
       positionAbsolute:
-        x: 8088
-        y: 1107
+        x: 7706
+        y: 726
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3753,26 +2877,17 @@ workflow:
             \  - ユーザーが「開発部」なら、技術仕様やAPIドキュメントを優先引用。\n     - ユーザーが「人事部」なら、法規制や採用市場動向を優先引用。\n\
             \n2. **custom_directives (制約事項)**:\n   - `free_text`: 「URLリストだけ欲しい」「要約は不要」などの指示がある場合、それに従ってください。\n\
             \n# Guidelines\n\n1. **Style (Partner Mode - Comprehensive)**:\n   - **Tone**:\
-            \ 親しみやすく丁寧な「です・ます」調。\n   - **Volume (重要)**:\n     - ユーザーは「納得感」と「網羅性」を求めています。**単なる要約で終わらせず、背景・歴史・理由・具体例を交えて、ブログ記事のように充実した文章量で記述してください。**\n\
-            \     - 「一言で言うと」のような短縮は避け、情報を削らずに詳しく解説してください。\n   - **Structure (構造化)**:\n\
-            \     - 複数の説や理由がある場合は、必ずそれらを並列して紹介してください（例: 「主な説は3つあります」）。\n     - 見出し（###）を多用し、長文でも読みやすい構成にしてください。\n\
-            \     - 結論だけでなく、「なぜそうなったのか（起源）」や「現状はどうなのか（最新動向）」まで時間軸を広げて回答してください。\n　-\
-            \ **Emoji Balance (重要)**:\n     - 文の末尾や区切りの良い箇所に、ポジティブな絵文字（✨, \U0001F60A\
-            , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
-            \     - 見出しには必ず**絵文字**を添えてください（例: `### \U0001F50D 調査結果`, `### \U0001F4CA\
-            \ 比較`, `### \U0001F4A1 ポイント`）。\n\n\n2. **Greeting & Context (重要: 重複排除)**:\n\
-            \   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n   - **Case\
-            \ 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた挨拶を行ってください。\n  \
-            \   - **情報源の言及**: 以下の**入力データが存在する（空でない）場合のみ**言及してください。\n         - `RAG`\
-            \ あり → 「社内規定」\n         - `Web` あり → 「Web情報」\n       - (例: 「社内規定とWeb情報をあわせて確認しました\U0001F50D\
-            」)\n   - **Case 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は絶対に省略してください。**\n\
-            \     - **「Web情報を確認しました」「検索結果によると」といった前置きも完全に省略してください。**\n     - ユーザーは文脈を理解しているため、**即座に**回答の結論や見出し（###）から書き出してください。\n\
-            \n\n3. **Citation Rule (重要: 出典の表記と統合)**:\n   - **Format**: 引用番号は `[1][2]`\
-            \ のように**個別のブラケット**で記述してください。`[1, 2]` は禁止です。\n   - **Renumbering**: 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を\
-            \ `[1]` から連番で採番し直してください。\n     1. **Internal Knowledge (RAG)** (`type`:\
-            \ \"rag\")\n     2. **Web Search Results** (`type`: \"web\")\n   - **Consistency**:\
-            \ 回答本文中の引用番号 `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\n4. **Zero-Trust Handling\
-            \ (With Logic Check)**:\n   - 検索結果 (`context_web`) に \"NO_RELIABLE_DATA_FOUND\"\
+            \ 親しみやすく丁寧な「です・ます」調。\n   - **Volume (重要)**:\n     - ユーザーは「納得感」と「網羅性」を求めています。**単なる要約で終わらせず、背景・歴史・理由・具体例を交えて、ブ\n\
+            2. **Greeting & Context (重要: 挨拶禁止)**:\n   - **Absolute Prohibition**:\
+            \ 「こんにちは」「お疲れ様です」などの挨拶や、「検索結果を確認しました」といった前置きは**一切出力しないでください**。\n   - **Reason**:\
+            \ これらの挨拶は、前段のプロセスですでにユーザーに伝えられています。重複はUXを損ないます。\n   - **Action**: ユーザーの質問に対する回答（結論や見出し\
+            \ `###`）から、**0秒で即座に**書き出してください。\n\n\n3. **Citation Rule (重要: 出典の表記と統合)**:\n\
+            \   - **Format**: 引用番号は `[1][2]` のように**個別のブラケット**で記述してください。`[1, 2]` は禁止です。\n\
+            \   - **Renumbering**: 以下の優先順位で、**実際に使用した（中身が存在する）情報源のみ**を `[1]` から連番で採番し直してください。\n\
+            \     1. **Internal Knowledge (RAG)** (`type`: \"rag\")\n     2. **Web\
+            \ Search Results** (`type`: \"web\")\n   - **Consistency**: 回答本文中の引用番号\
+            \ `[n]` は、必ずこの**新しい通し番号**と一致させてください。\n\n4. **Zero-Trust Handling (With\
+            \ Logic Check)**:\n   - 検索結果 (`context_web`) に \"NO_RELIABLE_DATA_FOUND\"\
             \ が含まれている場合でも、**即座に諦めないでください。**\n   - **Double Check**: 検索結果のテキストを読み、ユーザーの質問に対する「主要な回答」（例：天気予報の概況、株価の終値など）が含まれているか確認してください。\n\
             \   - **Decision Rule**:\n     - ケースA: 「主要な回答」が含まれている場合 → フラグを無視し、その情報を使って回答を作成してください。（ただし、「詳細は不明ですが...」と補足すること）\n\
             \     - ケースB: 本当に情報がゼロ、または信頼性が著しく低い場合 → 回答を控え、謝罪フレーズを出力してください。\n\n# Input\
@@ -3803,18 +2918,18 @@ workflow:
             3. **空欄の明記**: どうしても情報が見つからない項目は、無理に創作せず「（記載なし）」と出力してください。\n4. **フォーマット**:\
             \ ユーザーが求めているのは「リスト」です。必ずMarkdownの表形式、または箇条書きで出力してください。"
         selected: false
-        title: LLM_Search_Partner
+        title: LLM_Search
         type: llm
         vision:
           enabled: false
       height: 88
       id: '17665512248470'
       position:
-        x: 9134
-        y: 1295
+        x: 8410
+        y: 740
       positionAbsolute:
-        x: 9134
-        y: 1295
+        x: 8410
+        y: 740
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3865,12 +2980,13 @@ workflow:
             , \U0001F375, ✅, \U0001F680）を適度に添えて、トーンを明るくしてください。\n     - **制約**: 見出し（###）のアイコンを視覚的なランドマーク（主役）とするため、本文中の絵文字は**1段落につき1つ程度**に留め、画面がうるさくならないよう調整してください。\n\
             \   - **Guidance (重要)**:\n     - もし「社内規定」や「最新ニュース」など、あなたの知識（学習データ）にないことを聞かれた場合は、知ったかぶりをせず、「申し訳ありません\U0001F4A6\
             \ 社内規定や最新情報は、**Web検索モード**をONにするか、資料をアップロードしていただければ詳しくお調べできます！」と親切に誘導してください。\n\
-            \n2. **Greeting & Context (重要: 重複排除)**:\n   - **Check History**: 回答前に必ず**会話履歴（Memory）**を確認してください。\n\
-            \   - **Case 1: First Turn (会話の冒頭)**\n     - `Current Time` に合わせた明るい挨拶（「こんにちは！」「お疲れ様です\U0001F375\
-            」等）を行ってください。\n   - **Case 2: Subsequent Turns (会話の継続中)**\n     - **挨拶は絶対に省略してください。**\n\
-            \     - 直前の会話の続きとして、自然に回答を開始してください。\n\n3. **Citation Rule**:\n   - 外部コンテキストがないため、`citations`\
-            \ は必ず空配列 `[]` にしてください。\n\n# Input Data\n- Current Time: {{#1761291739140.current_time#}}\n\
-            \n# User Query\n{{#sys.query#}}\n\n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず\
+            \n### Greeting & Opening Protocol (重要: 挨拶・前置き禁止)\n- **Absolute Prohibition**:\
+            \ \n  - 「ご質問ありがとうございます」「はい、お答えします」などの挨拶。\n  - 「それはいい質問ですね」などのフィラー（埋め草）。\n\
+            \  - 「AIとしての私の見解は」などの自己言及。\n- **Action**: \n  - 思考プロセスの出力はThinkingブロック（もしあれば）に留め、最終回答（Answer）は**いきなり本題**から開始してください。\n\
+            \  - ユーザーと対等なプロフェッショナルとして、無駄を削ぎ落とした高密度なテキストを提供してください。\n\n3. **Citation\
+            \ Rule**:\n   - 外部コンテキストがないため、`citations` は必ず空配列 `[]` にしてください。\n\n# Input\
+            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n\n# User Query\n\
+            {{#sys.query#}}\n\n# Output Format (JSON Only)\nMarkdownコードブロックは禁止です。必ず\
             \ `{` で開始し `}` で終了してください。\n\n## Output Example\n{\n  \"thinking\": \"\
             - **分析**: ユーザーはPoCの設計について悩んでいる様子。\\n- **制約**: ReactとDifyを使うという制約があるため、その範囲内での解決策が必要。\\\
             n- **提案方針**: 既存のAPI仕様を変えずに済む「フロントエンド側での吸収案」を提示する。\",\n  \"answer\": \"\
@@ -3881,47 +2997,18 @@ workflow:
             2. `thinking` 内では、改行を `\\n` にエスケープしてください。"
         selected: false
         structured_output_enabled: true
-        title: LLM_General_Partner
+        title: LLM_General
         type: llm
         vision:
           enabled: false
       height: 88
       id: '17665512406710'
       position:
-        x: 8088
-        y: 1762
+        x: 7706
+        y: 1115
       positionAbsolute:
-        x: 8088
-        y: 1762
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: is
-            id: c54b374b-43c4-4785-a85e-4e101e2065d2
-            value: efficient
-            varType: string
-            variable_selector:
-            - '1761291739140'
-            - ai_style
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: STYLE_Check_Chat
-        type: if-else
-      height: 124
-      id: '17665517221250'
-      position:
-        x: 3178
-        y: 47
-      positionAbsolute:
-        x: 3178
-        y: 47
+        x: 7706
+        y: 1115
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3980,18 +3067,18 @@ workflow:
             ,\n  \"answer\": \"田中さん、お疲れ様です！✨\\n先ほどの件、無事に解決したようで良かったです。\\n\\n少し休憩を挟んで、リフレッシュしてくださいね\\\
             U0001F375\",\n  \"citations\": []\n}"
         selected: false
-        title: LLM_Chat_Partner
+        title: LLM_Chat
         type: llm
         vision:
           enabled: false
       height: 88
       id: '17665517422840'
       position:
-        x: 3540
-        y: 168
+        x: 3178
+        y: 278
       positionAbsolute:
-        x: 3540
-        y: 168
+        x: 3178
+        y: 278
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4056,11 +3143,11 @@ workflow:
       height: 52
       id: '1768364899851'
       position:
-        x: 4988
-        y: 663
+        x: 4968
+        y: 404
       positionAbsolute:
-        x: 4988
-        y: 663
+        x: 4968
+        y: 404
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4082,50 +3169,53 @@ workflow:
             enabled: true
             size: 10
         model:
-          completion_params:
-            temperature: 0.7
+          completion_params: {}
           mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
         prompt_template:
         - id: b695f1a9-a7a1-4314-b497-cf46a845994b
           role: system
-          text: "# Role\nあなたは、ユーザーの入力と文脈を分析し、最適な情報取得ルートを決定する「コンテキスト・ルーター」です。\n以下の論理フローと判定基準に従い、**JSON形式**で出力してください。\n\
+          text: "# Role\nあなたは、ユーザーの入力と文脈を瞬時に読み取り、最適な情報取得ルートを決定する「コンテキスト・ルーター」です。\n\
+            同時に、ユーザーに対して「指示を理解し、すでに作業を開始したこと」を即座に伝えるための「第一声（Thinking Stream）」を生成してください。\n\
             \n# Input Data\n## User Query\n{{#sys.query#}}\n\n## Conversation History\n\
-            ※直前の会話内容を参照し、指示語（それ、あれ、この資料）が指す対象を特定してください。\n\n## Context Status\n- Has\
-            \ Attached Files: {{#conversation.context_file#}} (※空でなければファイルありとみなす)\n\
-            - **ユーザーが添付ファイルや「この資料」と言及している場合は、会話のトーンがどれほど口語的（例：「どう思う？」「これ見て」）であっても、必ず\
-            \ `category: \"TASK\"` を選択してください。** - 添付ファイルがある場合、`category: \"CHAT\"\
-            ` を選択することは禁止します。\n\n# Decision Logic & Criteria\n\n## 1. Chat Detection\
-            \ (Casual Check)\nユーザーの意図が「挨拶」「感謝」「単なる相槌」または「機能を含まない雑談」であるか判定します。\n- **Yes**:\
-            \ `category`: \"CHAT\", `requires_rag`: false, `requires_web`: false\n\
-            - **No**: ステップ2へ進みます。\n\n## 2. RAG Necessity Check (Internal Knowledge)\n\
-            **「社内固有の知識ベース（ベクトルDB）を検索する必要があるか」**を判定します。\n\n- **TRUE (検索する)**:\n  -\
-            \ 「社内規定」「就業規則」「経費精算ルール」など、組織固有のルールを明示的に問う場合。\n  - 「Aプロジェクトの仕様は？」「B社の議事録はある？」など、固有名詞を含む社内情報を探す場合。\n\
-            \  - 添付ファイルの内容と、社内規定を**比較・照合**させる場合（例: 「この見積書は規定違反していない？」）。\n\n- **FALSE\
-            \ (検索しない - 重要)**:\n  - **添付ファイルの処理**: 「このファイルを要約して」「添付の資料を分析して」など、**現在コンテキストにあるファイル**に対する操作の場合。（検索しなくてもLLMが見えているため）\n\
-            \  - **一般ビジネス知識**: 「一般的なNDAのひな形」「退職願の書き方」など、世間一般の知識で回答できる場合。\n  - **言語操作**:\
-            \ 「この文章を英語にして」「敬語に直して」「校正して」などのタスク。\n\n## 3. Web Necessity Check (External\
-            \ Knowledge)\n**「外部インターネット検索を実行する必要があるか」**を判定します。\n\n- **TRUE (検索する)**:\n\
-            \  - **リアルタイム情報**: 今日の天気、株価、最新のニュース。\n  - **最新スペック・動向**: 「iPhone 16の発売日は？」「最新のReactの機能は？」など、LLMの学習データ（2023年以前）より新しい情報が必要な場合。\n\
-            \  - **具体的な製品・店舗**: 特定の製品の価格、店舗の営業時間など、事実確認が必要な場合。\n\n- **FALSE (検索しない\
-            \ - 重要)**:\n  - **不変の知識・学習済み知識**: 「Pythonでリストをソートする方法」「マーケティングの4Pとは」「東京の県庁所在地」など、一般的・歴史的事実。\n\
-            \  - **コーディング・デバッグ**: 特定の最新ライブラリを指定されない限り、コード生成やエラー解説にWeb検索は不要。\n  - **ロールプレイ**:\
-            \ 「あなたはPMです。アドバイスをください」などの設定付与。\n\n# Output Requirements\n出力するJSONには必ず以下のフィールドを含めてください。\n\
-            1. `thinking`:\n   - 「指示語（これ）は添付ファイルを指すためRAG不要」\n   - 「一般知識（Pythonコード）のためWeb不要」\n\
-            \   - 「社内規定との照合が必要なためRAG有効」\n   といった、**判定の根拠（特にFALSEにした理由）**を簡潔な日本語で記述してください。\n\
-            2. `category`: \"CHAT\" または \"TASK\"\n3. `requires_rag`: boolean (true/false)\n\
-            4. `requires_web`: boolean (true/false)\n\n# Output Format (JSON Only)\n\
-            必ず `{` で開始し `}` で終了してください。\n\n## Output Example (Attached File Case)\n\
-            {\n  \"thinking\": \"ユーザーは『この資料を要約して』と指示しており、対象は添付ファイル（コンテキスト内）であるため、RAG検索は不要です。\"\
-            ,\n  \"category\": \"TASK\",\n  \"requires_rag\": false,\n  \"requires_web\"\
-            : false\n}\n\n## Output Example (General Knowledge Case)\n{\n  \"thinking\"\
-            : \"Pythonのコード生成はLLMの内部知識で対応可能です。最新ライブラリの指定もないため、Web検索は不要です。\",\n  \"\
-            category\": \"TASK\",\n  \"requires_rag\": false,\n  \"requires_web\"\
-            : false\n}\n\n## Output Example (Comparison Case)\n{\n  \"thinking\":\
-            \ \"『添付の見積書』と『社内規定』の比較を求めているため、添付ファイル参照に加え、社内規定を確認するためにRAG検索が必要です。\",\n\
-            \  \"category\": \"TASK\",\n  \"requires_rag\": true,\n  \"requires_web\"\
-            : false\n}"
+            ※直前の会話内容を参照し、ユーザーとの関係性や文脈（挨拶済みか、作業中か）を判断してください。\n\n## Context Status\n\
+            - Has Attached Files: {{#conversation.context_file#}}\n- Current Time:\
+            \ {{#1761291739140.current_time#}}\n- User Profile: {{#1761291739140.system_prompt#}}\n\
+            \n# Decision Logic & Criteria\n\n## 1. Chat Detection\nユーザーの意図が「挨拶」「感謝」「単なる相槌」か判定。\n\
+            - Yes: `category`: \"CHAT\", `requires_rag`: false, `requires_web`: false\n\
+            - No: ステップ2へ。\n\n## 2. RAG Necessity Check (Internal Knowledge)\n**「社内固有の知識ベースを検索する必要があるか」**を厳格に判定します。\n\
+            以下の**明確なキーワード**または**文脈**がない限り、原則として `FALSE` を選択してください。\n\n- **TRUE (検索する\
+            \ - 明確な指定がある場合のみ)**:\n  - **キーワード**: 「社内規定」「就業規則」「ガイドライン」「社内ルール」「稟議」「経費精算」「セキュリティ基準」などの社内用語。\n\
+            \  - **照合指示**: 添付ファイルに対して「規定違反はないか？」等の照合指示。\n  - **固有名詞**: 社内固有のプロジェクト名や人物名。\n\
+            \n- **FALSE (検索しない - デフォルト)**:\n  - **ファイル単体の操作**: 「この資料を要約して」「内容を教えて」など、添付ファイルのみへの言及。\n\
+            \  - **一般知識**: 「Pythonの書き方」など。\n  - **曖昧な場合**: 原則Web検索を優先するか、False。\n\n\
+            ## 3. Web Necessity Check (External Knowledge)\n「外部インターネット検索」が必要か判定。\n\
+            - TRUE: 最新ニュース、天気、株価、技術動向。\n- FALSE: コード生成、一般常識。\n\n# Output Requirements\
+            \ (Field Mapping)\n出力するJSONには必ず以下のフィールドを含めてください。\n\n1. `internal_log`\
+            \ (裏側の論理・デバッグ用):\n   - 判定の根拠を簡潔な**技術的な日本語**で記述してください。\n\n2. `thinking`\
+            \ (ユーザーへの表示用・演出):\n   - **【重要】UI表示の重複防止（Zero-Latency Logic）**:\n     -\
+            \ 次のノードが即座に回答する場合、ここで発言するとメッセージが重複して表示されてしまいます。以下の条件に従って出し分けてください。\n \
+            \    \n     - **Case 1: 待機時間が発生する処理（検索/RAG有効）**\n       - **条件**: `requires_web`\
+            \ または `requires_rag` が `true` の場合。\n       - **動作**: 検索等の待ち時間が発生するため、「つなぎ」として挨拶や受容メッセージを出力してください。（例:\
+            \ \"承知いたしました。確認します\U0001F50D\"）\n       - ※挨拶ルール（初回/2回目以降の分岐）は維持してください。\n\
+            \       \n     - **Case 2: 即答可能な処理（CHAT / 内部完結タスク）**\n       - **条件**:\
+            \ `category` == \"CHAT\" または (`requires_web` == `false` かつ `requires_rag`\
+            \ == `false`)。\n       - **動作**: **必ず空文字 `\"\"` を出力してください。**\n       -\
+            \ **理由**: 次のノードで即座に完全な回答が生成されるため、ここで何かを出力すると画面上でテキストが重複します。\n\n3. `category`:\
+            \ \"CHAT\" または \"TASK\"\n4. `requires_rag`: boolean\n5. `requires_web`:\
+            \ boolean\n\n# Output Format (JSON Only)\n必ず `{` で開始し `}` で終了してください。\n\
+            \n## Example 1 (Ambiguous Request - RAG True)\nInput: \"社内情報について教えて\"\n\
+            {\n  \"internal_log\": \"『社内情報』というキーワードがあるためRAG有効。具体的な指定はないが、まずは検索を実行する。\"\
+            ,\n  \"thinking\": \"社内情報についてですね、承知いたしました。関連する規定やドキュメントを検索してまとめます\U0001F50D\
+            \",\n  \"category\": \"TASK\",\n  \"requires_rag\": true,\n  \"requires_web\"\
+            : false\n}\n\n## Example 2 (File Summary - RAG False)\nInput: \"この資料の要約をお願い\"\
+            \n{\n  \"internal_log\": \"添付ファイルの要約タスク。規定照合の指示がないためRAG不要。\",\n  \"thinking\"\
+            : \"お疲れ様です！✨ 添付資料ですね、すぐに内容を読み込んで要点を抽出します\U0001F4C4\",\n  \"category\"\
+            : \"TASK\",\n  \"requires_rag\": false,\n  \"requires_web\": false\n}\n\
+            \n## Example 3 (Chat)\nInput: \"ありがとう\"\n{\n  \"internal_log\": \"感謝の言葉のみ。機能呼び出し不要。\"\
+            ,\n  \"thinking\": \"どういたしまして！またいつでもお声がけくださいね\U0001F60A\",\n  \"category\"\
+            : \"CHAT\",\n  \"requires_rag\": false,\n  \"requires_web\": false\n}"
         selected: false
         title: LLM_Intent_Analysis
         type: llm
@@ -4135,10 +3225,10 @@ workflow:
       id: '17683770269110'
       position:
         x: 2474
-        y: 211
+        y: 241
       positionAbsolute:
         x: 2474
-        y: 211
+        y: 241
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4162,11 +3252,11 @@ workflow:
       height: 84
       id: '17696657120690'
       position:
-        x: 6660
-        y: 958
+        x: 6640
+        y: 699
       positionAbsolute:
-        x: 6660
-        y: 958
+        x: 6640
+        y: 699
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4191,11 +3281,11 @@ workflow:
       height: 124
       id: '17696666661480'
       position:
-        x: 4284
-        y: 615
+        x: 4264
+        y: 356
       positionAbsolute:
-        x: 4284
-        y: 615
+        x: 4264
+        y: 356
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4209,42 +3299,53 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
         prompt_template:
         - id: 4f25aea0-7407-404f-bc0f-f90215ebd5b7
           role: system
-          text: "# Role\nあなたは、エンタープライズAIアシスタントの「主任テクニカルリサーチャー」です。\nユーザーの入力に基づき、Perplexity\
-            \ APIを利用した最も効果的な検索戦略を立案することが任務です。\n\n# Input Data\n- **User Query**: {{#sys.query#}}\n\
-            - **Current Time**: {{#1761291739140.current_time#}}\n\n# 1. Strategy\
-            \ Formulation Guidelines\n\n### A. 意図分析とクエリ最適化\n`User Query` を分析し、2つの最適化された検索クエリを生成してください。\n\
-            **重要: 「グローバルな技術トピック」と「日本固有のローカルトピック」を明確に区別してください。**\n\n1. **`query_main`**\
-            \ (核心的意図):\n   - 核心となる主題を抽出します。会話的なフィラー（「教えて」「〜について」等）は削除します。\n   - **日本ローカルトピックの場合**:\
-            \ **日本語**のままにします（例：日本の法律、国内ニュース、特定の日本企業）。\n   - **グローバル技術トピックの場合**: 可能な限り**英語**に翻訳するか、専門用語を英語表記にします（例：Reactの仕様、AWSのエラー）。\n\
-            \n2. **`query_alt`** (広範な検索):\n   - **グローバル技術トピックの場合**: **必ず英語に翻訳したクエリ**を生成してください。\n\
-            \   - **日本ローカルトピックの場合**: **日本語**の同義語クエリや、特定のドメイン用語を組み合わせたクエリを生成してください。\n\
-            \n### B. 鮮度とドメインフィルタリング\n- **Recency**: \"day\" (ニュース/天気), \"week\", \"\
-            month\", \"year\", または null (一般知識)。\n- **Domains**: 信頼性の高い権威あるドメインを選定してください。\n\
-            - **制約1**: ドメイン指定は**最大3つ**までとします。\n- **制約2 (重要)**: 出力するドメイン名から **\"www.\"\
-            \ は必ず削除** し、ルートドメイン形式（例: \"jma.go.jp\", \"github.com\"）にしてください。\n  - ❌\
-            \ \"www.jma.go.jp\"\n  - ⭕️ \"jma.go.jp\"\n\n# 2. Model Selection Guidelines\
-            \ (Cost Optimization)\nクエリの複雑さに応じて、最も適切なモデル（`sonar` または `sonar-pro`）を選択してください。\n\
-            \n### ✅ \"sonar\" (標準 / 低コスト) を選択すべきケース:\n- **単純な事実検索**: 「東京の天気」「Appleの株価」「フランスの首都」。\n\
-            - **ナビゲーション**: 「Difyの公式サイトURL」「AWSコンソール ログインページ」。\n- **単純な定義**: 「OCRとは」「ROIの意味」。\n\
-            - **スポーツ/エンタメ**: 「昨日の野球の結果」「映画のキャスト」。\n\n### \U0001F680 \"sonar-pro\"\
-            \ (高度 / 高コスト) を選択すべきケース:\n- **複雑な推論**: 「Next.js と Remix のパフォーマンス比較」「インボイス制度がフリーランスに与える影響」。\n\
-            - **技術/コーディング**: 「Reactフックのエラーデバッグ」「スクレイピング用Pythonスクリプト」。\n- **ミッションクリティカル**:\
-            \ 法的調査、医療情報、官公庁の手続き。\n- **詳細な調査**: 特定の出来事の歴史、詳細な伝記、多段階の質問（Multi-hop）。\n\
-            \n# 3. Search Mode Selection (New!)\nクエリの複雑性に基づき、最適な検索モード(`search_mode`)を決定してください。\n\
-            \n- **\"fast\"** (Simple / 1-Step):\n  - 単純な事実確認（「〜の株価」「〜のCEOは誰」）。\n \
-            \ - 明確な単一トピック。\n  - ユーザーがスピードを求めている場合。\n\n- **\"deep\"** (Precision /\
-            \ 2-Step):\n  - 複数の視点が必要な調査（「〜と〜の比較」「メリット・デメリット」）。\n  - 最新の技術仕様や不確実な情報。\n\
-            \  - 推論や統合が必要な複雑なタスク。\n\n# 4. Output Schema (Strict JSON)\n以下の形式の有効なJSONオブジェクト**のみ**を出力してください。\n\
-            \n```json\n{\n  \"reasoning\": \"モードとドメインを選定した理由\",\n  \"search_mode\"\
-            : \"fast\" | \"deep\",\n  \"selected_model\": \"sonar\" | \"sonar-pro\"\
-            ,\n  \"query_main\": \"string\",\n  \"query_alt\": \"string\",\n  \"recency\"\
-            : \"day\" | \"week\" | \"month\" | \"year\" | null,\n  \"target_domains\"\
-            : [\"string\", \"string\", ...]\n}"
+          text: "# Role\nあなたは、ユーザーの質問に対して最適なWeb検索戦略を立案する「シニア・リサーチ・ストラテジスト」です。\n検索クエリの最適化、情報源の選定を行い、ユーザーに対して「どのような方針で調査を行うか」を宣言してください。\n\
+            \n# Input Data\n## User Query\n{{#sys.query#}}\n\n## Current Time\n{{#1761291739140.current_time#}}\n\
+            \n## User Profile (Character & Tone)\n{{#1761291739140.system_prompt#}}\n\
+            \n## Previous AI Output (Context)\n{{#17683770269110.text#}}\n※直前のノードで生成されたJSONです。この中の\
+            \ `thinking` フィールドの発言内容（挨拶や受容）を踏まえ、そこから自然に続くように発言を構成してください。\n\n# Decision\
+            \ Logic & Guidelines (Criteria)\n\n## 1. Search Mode Selection\nクエリの複雑さと情報の性質に基づいてモードを決定します。\n\
+            - **fast**: 天気、株価、単語の意味など、単純な事実確認。回答速度を最優先。\n- **comprehensive**: ニュースのまとめ、製品比較、一般的な調査。情報の網羅性を優先。\n\
+            - **research**: 学術的な調査、技術的な深掘り、多角的な分析が必要な場合。\n\n## 2. Model Selection\n\
+            コスト最適化フェーズのため、クエリの性質に関わらず**常に「sonar」を選択**してください。\n- **sonar**: 全ての検索リクエストにおいて固定で使用します。\n\
+            \n## 3. Query Optimization\n検索エンジン（Perplexity）に投げるクエリを最適化します。\n- **query_main**:\
+            \ 検索意図を明確にしたメインクエリ。\n- **query_alt**: 視点を変えた代替クエリ（英語での検索が有効なら英語を含める）。\n\
+            \n## 4. Domain Filtering (Strict Limit: Max 3)\n情報の信頼性を担保するため、検索対象ドメインを絞り込みます。\n\
+            - **Rule**: 以下のカテゴリから最も関連性が高く、信頼できるドメインを**最大3つまで**厳選してください。数が多すぎると検索精度が分散するため、ベストな3つに絞り込みます。\n\
+            \  - **Official/Trusted**: `go.jp` (政府), `ac.jp` (大学), 公的機関, 上場企業公式サイト。\n\
+            \  - **News**: `reuters.com`, `bloomberg.co.jp`, `nikkei.com`, `nhk.or.jp`.\n\
+            \  - **Tech**: `qiita.com`, `zenn.dev`, `stackoverflow.com`, 公式ドキュメント。\n\
+            \n# Output Requirements (Field Mapping)\n出力するJSONには必ず以下のフィールドを含めてください。\n\
+            \n1. `internal_log` (裏側の論理・デバッグ用):\n   - モード選択やドメイン選定（なぜその3つを選んだか）の根拠を、**技術的な日本語**で記述してください。\n\
+            \n2. `reasoning` (ユーザーへの表示用・演出):\n   - **機能**: ユーザーに対して「具体的な調査対象」と「検索方針」を宣言してください。\n\
+            \   - **一貫性とフローの確保**:\n     - `Previous AI Output` (Intent Analysis) の内容を確認してください。\n\
+            \     - **Case 1: 前の出力が挨拶を含んでいる場合**\n       - 「具体的には〜」「まずは〜」と続け、自己紹介や挨拶を繰り返さずに調査内容に入ってください。\n\
+            \     - **Case 2: 前の出力が挨拶なし（継続中）の場合**\n       - 「では、〜を確認します」「続いて、〜を当たります」のように、**文脈が続いていることを示す接続詞**を用いて、思考の連続性を表現してください。\n\
+            \   - **具体性**: 抽象的な表現は避け、「気象庁のデータを」「公式リファレンスを」と具体的に示唆してください。\n   - **トーン**:\
+            \ 頼もしく、かつユーザー設定に合わせた親しみやすさで。絵文字を1つ含める。\n\n3. `search_mode`: \"fast\",\
+            \ \"comprehensive\", \"research\"\n4. `selected_model`: \"sonar\"\n5.\
+            \ `query_main`: string\n6. `query_alt`: string\n7. `recency`: \"day\"\
+            , \"week\", \"month\", \"year\", or null\n8. `target_domains`: string[]\
+            \ (検索対象ドメインのリスト。**最大3つまで**)\n\n# Output Format (JSON Only)\n必ず `{` で開始し\
+            \ `}` で終了してください。\n\n## Example 1 (Simple Fact - Start of Convo)\nInput:\
+            \ \"今日の東京の天気\"\n(Previous: \"〇〇さん、こんにちは！お天気の件、承知しました✨\")\n{\n  \"internal_log\"\
+            : \"気象情報は速報性が重要。最も信頼できる気象庁と、詳細な解説がある民間2社に絞る。\",\n  \"reasoning\": \"具体的には、気象庁および主要な気象情報サイトから、最新の予報データを取得しますね\U0001F326\
+            ️\",\n  \"search_mode\": \"fast\",\n  \"selected_model\": \"sonar\",\n\
+            \  \"query_main\": \"2026年2月2日 東京 天気予報\",\n  \"query_alt\": \"Tokyo weather\
+            \ forecast JMA\",\n  \"recency\": \"day\",\n  \"target_domains\": [\"\
+            jma.go.jp\", \"tenki.jp\", \"weathernews.jp\"]\n}\n\n## Example 2 (Tech\
+            \ Research - Continuous)\nInput: \"React 19の新機能について\"\n(Previous: \"React\
+            \ 19ですね。該当ドキュメントを解析します\U0001F50D\")\n{\n  \"internal_log\": \"技術調査。一次情報のReact公式サイトと、GitHubでの議論にリソースを集中させるため2ドメインに厳選。\"\
+            ,\n  \"reasoning\": \"では、React公式サイトのリリースノートと、GitHub上の主要なディスカッションに絞って変更点を洗い出します⚛️\"\
+            ,\n  \"search_mode\": \"comprehensive\",\n  \"selected_model\": \"sonar\"\
+            ,\n  \"query_main\": \"React 19 new features changes\",\n  \"query_alt\"\
+            : \"React 19 migration guide\",\n  \"recency\": \"month\",\n  \"target_domains\"\
+            : [\"react.dev\", \"github.com\"]\n}"
         selected: false
         title: LLM_Search_Strategy
         type: llm
@@ -4253,11 +3354,11 @@ workflow:
       height: 88
       id: '1769666720110'
       position:
-        x: 4646
-        y: 944
+        x: 4626
+        y: 685
       positionAbsolute:
-        x: 4646
-        y: 944
+        x: 4626
+        y: 685
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4319,11 +3420,11 @@ workflow:
       height: 52
       id: '1769666802121'
       position:
-        x: 5350
-        y: 974
+        x: 5330
+        y: 715
       positionAbsolute:
-        x: 5350
-        y: 974
+        x: 5330
+        y: 715
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4333,7 +3434,7 @@ workflow:
         error_handle_mode: terminated
         flatten_output: true
         height: 260
-        is_parallel: false
+        is_parallel: true
         iterator_input_type: array[string]
         iterator_selector:
         - '1769666802121'
@@ -4342,20 +3443,20 @@ workflow:
         - '1769668322968'
         - body
         output_type: array[string]
-        parallel_nums: 10
+        parallel_nums: 3
         selected: false
         start_node_id: 1769668260271start
-        title: イテレーション
+        title: Parallel_Web_Search
         type: iteration
         width: 486
       height: 260
       id: '1769668260271'
       position:
-        x: 5712
-        y: 870
+        x: 5692
+        y: 611
       positionAbsolute:
-        x: 5712
-        y: 870
+        x: 5692
+        y: 611
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4376,8 +3477,8 @@ workflow:
         x: 60
         y: 105
       positionAbsolute:
-        x: 5772
-        y: 975
+        x: 5752
+        y: 716
       selectable: false
       sourcePosition: right
       targetPosition: left
@@ -4413,7 +3514,7 @@ workflow:
           max_connect_timeout: 0
           max_read_timeout: 0
           max_write_timeout: 0
-        title: HTTP_TOOL_Perplexity_Search
+        title: HTTP_TOOL_Perplexity_Search_Parallel
         type: http-request
         url: https://api.perplexity.ai/v2/chat/completions
         variables: []
@@ -4424,8 +3525,8 @@ workflow:
         x: 184
         y: 60
       positionAbsolute:
-        x: 5896
-        y: 930
+        x: 5876
+        y: 671
       selected: true
       sourcePosition: right
       targetPosition: left
@@ -4439,42 +3540,53 @@ workflow:
         model:
           completion_params: {}
           mode: chat
-          name: gemini-2.0-flash
-          provider: langgenius/gemini/google
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
         prompt_template:
         - id: cc7f9012-3f93-4e06-b2f2-ba83bbf16f00
           role: system
-          text: "# Role\nあなたは情報を統合し、検証する「チーフエディター」です。\nユーザーの質問に対し、並列実行された複数のPerplexity検索結果（Source\
-            \ A, Source B...）を分析・統合し、最も信頼性の高い回答を作成してください。\n\n# Input Data (Search\
-            \ Results)\n{{#1769668260271.output#}}\n\n# Chain of Thought (CoT) Process\n\
-            回答を作成する前に、以下の手順で論理検証を行い、その内容を `thinking` フィールドに**Markdownの箇条書き**（日本語）で記述してください。\n\
-            \n1. **Source Evaluation (ソース評価)**:\n   - 各情報の「鮮度（日付）」と「信頼性（ドメイン）」を評価する。\n\
-            \   - ニュースリリースや公式サイト (`.go.jp`, `co.jp`) を個人ブログよりも優先する。\n2. **Conflict\
-            \ Resolution (矛盾の解消)**:\n   - ソース間で事実（数値、日付、仕様）に矛盾がある場合、最も信頼できるソースを採用し、その理由を明記する。\n\
-            3. **Structure Design (構成案)**:\n   - ユーザーの意図（結論を知りたいのか、背景を知りたいのか）に合わせて、見出し構成を設計する。\n\
-            \n# Critical Requirement: Citation Preservation\n入力データには `search_results`\
-            \ 配列が含まれており、それぞれに `id`, `title`, `url` が存在します。\n回答を作成する際は、これらの情報を**絶対に破壊せず**、新しい連番（1,\
-            \ 2, 3...）を割り当てて出力JSONの `citations` フィールドに格納してください。\n\n# Output Rules\n\
-            1. **統合（Synthesis）**:\n   - 複数の結果で共通している事実は「確定情報」として扱ってください。\n   - 情報に矛盾がある場合は、情報の鮮度（Recency）やドメインの信頼性（Official\
-            \ vs Blog）を元に判断し、注釈を入れてください。\n\n2. **Citations (引用)**:\n   - 回答テキスト内には、文末に必ず\
-            \ `[1]`, `[2]` 形式の番号を振ってください。\n   - この番号は、出力JSONの `citations` 配列の `index`\
-            \ と厳密に一致させてください。\n   - **重要**: 異なる検索結果ソース（APIコールごと）で `id` が重複している可能性があります。必ず**ユニークな通し番号**（1から開始）に振り直してください。\n\
-            \n3. **Tone & Style**:\n   - macOSライクな、知性的で簡潔な日本語。\n   - 冗長な前置き（「検索結果に基づくと…」）は排除し、結論から述べる。\n\
-            \n# Output Schema (Strict JSON)\nOutput MUST be a valid JSON object with\
-            \ the following structure.\n**Ensure all newlines in strings are escaped\
-            \ (`\\n`).**\n\n```json\n{\n  \"thinking\": \"- **分析**: ソースA（2024年）とソースB（2025年）で情報が異なります。\\\
-            n- **判定**: 最新のソースBを優先します。\\n- **構成**: まず結論を述べ、次に詳細なスペックを表形式で提示します。\",\n\
-            \  \"answer\": \"ここに回答本文を記述。Markdown形式で、重要な箇所は太字にする。文末には必ず参照番号 [1] [2]\
-            \ をつける。\",\n  \"citations\": [\n    {\n      \"index\": 1,\n      \"title\"\
-            : \"元データのtitle\",\n      \"url\": \"元データのurl\",\n      \"source_name\"\
-            : \"元データのsource (例: web)\"\n    },\n    {\n      \"index\": 2,\n     \
-            \ \"title\": \"...\",\n      \"url\": \"...\",\n      \"source_name\"\
-            : \"...\"\n    }\n  ]\n}\n\n\n### \U0001F4A1 期待される効果\nこの変更により、JSON出力は以下のようになります。フロントエンド側で\
-            \ `thinking` フィールドをパースし、**Inspector Panel**（3カラム目）などに表示することで、「AIがどう考えてその結論に至ったか」をユーザーに可視化できるようになります。\n\
-            \n**出力サンプル:**\n```json\n{\n  \"thinking\": \"- **鮮度確認**: 公式サイトの発表は2日前、ニュース記事は昨日のものです。\\\
-            n- **矛盾**: 価格情報にズレがありますが、公式サイトのPDF情報を正として扱います。\\n- **戦略**: 誤解を防ぐため、「公式サイト発表ベース」であることを注釈に入れます。\"\
-            ,\n  \"answer\": \"### 最新価格について\\n\\n公式サイトによると、価格は**¥12,800**と改定されました[1]...\"\
-            ,\n  \"citations\": [...]\n}\n"
+          text: "# Role\nあなたは情報を統合し、検証する「チーフエディター」です。\nユーザーの質問に対し、並列実行された複数のWeb検索結果（Source\
+            \ A, Source B...）を分析・統合し、最も信頼性の高い回答を作成してください。\n\n# Input Data\n- **User\
+            \ Query:** {{#sys.query#}}\n- **Search Results:** {{#1769668260271.output#}}\
+            \ (Array of JSON objects with id, title, url, snippet)\n\n# Step-by-Step\
+            \ Process (Internal Logic)\n回答生成前に、必ず以下のプロセスを内部的に実行してください。\n\n1. **Source\
+            \ Evaluation (ソース評価)**:\n   - 各情報の「鮮度（日付）」と「信頼性（ドメイン）」を評価する。\n   - ニュースリリースや公式サイト\
+            \ (`.go.jp`, `co.jp`) を個人ブログよりも優先する。\n2. **Conflict Resolution (矛盾の解消)**:\n\
+            \   - ソース間で事実（数値、日付、仕様）に矛盾がある場合、最も信頼できるソースを採用する。\n3. **Citation Handling\
+            \ (引用の正規化)**:\n   - 入力された `search_results` から、回答に使用したソースだけを抽出し、**1から始まる新しい連番**（[1],\
+            \ [2]...）を割り当てる。\n   - 元の `id` が重複している場合は統合し、ユニークなリストにする。\n\n# Output\
+            \ Rules\n1. **統合（Synthesis）**:\n   - 複数の結果で共通している事実は「確定情報」として扱う。\n   -\
+            \ 矛盾がある場合は、判定ロジックを `thinking` に明記した上で、最も確からしい情報を回答とする。\n2. **Citations\
+            \ in Text**:\n   - 回答テキスト内の事実には、必ず文末に `[1]`, `[2]` 形式の番号を付与する。\n3. **Tone\
+            \ & Style**:\n   - macOSライクな、知性的で簡潔な日本語。\n   - 冗長な前置き（「検索結果に基づくと…」）は排除し、結論から述べる。\n\
+            \n# Output Schema (Strict JSON)\nOutput MUST be a valid JSON object.\n\
+            **Ensure all newlines in strings are escaped (`\\n`).**\n\n```json\n{\n\
+            \  \"internal_log\": \"【開発者用ログ】\\n- Source Count: 5\\n- Valid Sources:\
+            \ 3 (Removed duplicates)\\n- Priority: Official Docs > Tech Blogs\\n-\
+            \ Conflict: Source A says 2024, Source B says 2025. Chose B (recency).\"\
+            ,\n  \"thinking\": \"【ユーザー表示用思考プロセス (Markdown)】\\n- **ソース分析**: 公式ドキュメント(Source\
+            \ A)と技術ブログ(Source B)を照合中。\\n- **情報の鮮度**: Source Aは2日前更新のため、これを正とします。\\\
+            n- **構成**: まず結論となるスペック表を提示し、その後に詳細な設定手順を解説します。\",\n  \"answer\": \"ここに回答本文を記述。Markdown形式で、重要な箇所は太字にする。文末には必ず参照番号\
+            \ [1] [2] をつける。\\n\\n### 結論\\n...\",\n  \"citations\": [\n    {\n    \
+            \  \"index\": 1,\n      \"title\": \"元データのtitle\",\n      \"url\": \"\
+            元データのurl\",\n      \"source_name\": \"Web\"\n    },\n    {\n      \"index\"\
+            : 2,\n      \"title\": \"...\",\n      \"url\": \"...\",\n      \"source_name\"\
+            : \"Web\"\n    }\n  ]\n}\n\n```\n\n# Example\n\n**User Query:** \"React\
+            \ 19の主要な変更点は？\"\n\n**Model Output:**\n\n```json\n{\n  \"internal_log\"\
+            : \"Search results contained 3 duplicates. Prioritized React Official\
+            \ Blog over Reddit threads. Found conflict in release date rumors, stuck\
+            \ to official canary release notes.\",\n  \"thinking\": \"- **情報源の特定**:\
+            \ React公式サイトおよびGitHubのDiscussionから、確定している変更点を抽出しました。\\n- **バージョンの区別**:\
+            \ 正式版（Stable）とCanary版の機能を明確に区別して整理します。\\n- **構成**: Server ComponentsとActionsの改善を軸に回答を構成します。\"\
+            ,\n  \"answer\": \"### React 19の主要な変更点\\n\\nReact 19では、非同期処理の管理が大幅に簡素化されています。\\\
+            n\\n- **Actions**: `<form>`要素内での非同期遷移を自動処理する機能が追加されました[1]。\\n- **useActionState**:\
+            \ 前回のstateに基づいてアクションの結果を処理する新しいフックです[2]。\\n\\nこれにより、`useState` や `useEffect`\
+            \ による手動管理が不要になります。\",\n  \"citations\": [\n    {\n      \"index\": 1,\n\
+            \      \"title\": \"React 19 Beta Upgrade Guide\",\n      \"url\": \"\
+            [https://react.dev/blog/](https://react.dev/blog/)...\",\n      \"source_name\"\
+            : \"Web\"\n    },\n    {\n      \"index\": 2,\n      \"title\": \"New\
+            \ Hooks in React 19\",\n      \"url\": \"https://...\",\n      \"source_name\"\
+            : \"Web\"\n    }\n  ]\n}\n\n```\n\n```\n"
         selected: false
         title: LLM_Synthesis
         type: llm
@@ -4483,11 +3595,11 @@ workflow:
       height: 88
       id: '1769668477538'
       position:
-        x: 6318
-        y: 956
+        x: 6298
+        y: 697
       positionAbsolute:
-        x: 6318
-        y: 956
+        x: 6298
+        y: 697
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4512,11 +3624,11 @@ workflow:
       height: 124
       id: '1769754087217'
       position:
-        x: 4988
-        y: 926
+        x: 4968
+        y: 667
       positionAbsolute:
-        x: 4988
-        y: 926
+        x: 4968
+        y: 667
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4581,11 +3693,11 @@ workflow:
       height: 52
       id: '17697542686310'
       position:
-        x: 5350
-        y: 1106
+        x: 5330
+        y: 847
       positionAbsolute:
-        x: 5350
-        y: 1106
+        x: 5330
+        y: 847
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4609,11 +3721,11 @@ workflow:
       height: 84
       id: '17697542971160'
       position:
-        x: 6660
-        y: 1237
+        x: 6640
+        y: 978
       positionAbsolute:
-        x: 6660
-        y: 1237
+        x: 6640
+        y: 978
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4648,18 +3760,18 @@ workflow:
           max_connect_timeout: 0
           max_read_timeout: 0
           max_write_timeout: 0
-        title: HTTP_TOOL_Perplexity_Search (1)
+        title: HTTP_TOOL_Perplexity_Search
         type: http-request
         url: https://api.perplexity.ai/v2/chat/completions
         variables: []
       height: 138
       id: '17697558915520'
       position:
-        x: 5712
-        y: 1210
+        x: 5692
+        y: 951
       positionAbsolute:
-        x: 5712
-        y: 1210
+        x: 5692
+        y: 951
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4672,7 +3784,7 @@ workflow:
           conditions:
           - comparison_operator: is
             id: 4807f0d8-5e96-481d-b6d4-f4e5ad7ee2cb
-            value: true
+            value: false
             varType: boolean
             variable_selector:
             - conversation
@@ -4685,11 +3797,11 @@ workflow:
       height: 124
       id: '1769757773884'
       position:
-        x: 8088
-        y: 1390
+        x: 7706
+        y: 894
       positionAbsolute:
-        x: 8088
-        y: 1390
+        x: 7706
+        y: 894
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4719,18 +3831,18 @@ workflow:
           max_connect_timeout: 0
           max_read_timeout: 0
           max_write_timeout: 0
-        title: HTTP_Search_Partner
+        title: HTTP_LLM_Search
         type: http-request
         url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent
         variables: []
       height: 170
       id: '1769757833389'
       position:
-        x: 8792
-        y: 1404
+        x: 8410
+        y: 908
       positionAbsolute:
-        x: 8792
-        y: 1404
+        x: 8410
+        y: 908
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4764,11 +3876,11 @@ workflow:
       height: 52
       id: '1769758012462'
       position:
-        x: 9134
-        y: 1463
+        x: 8752
+        y: 967
       positionAbsolute:
-        x: 9134
-        y: 1463
+        x: 8752
+        y: 967
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4794,10 +3906,10 @@ workflow:
       id: '1769758295556'
       position:
         x: 704
-        y: 969
+        y: 999
       positionAbsolute:
         x: 704
-        y: 969
+        y: 999
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4835,10 +3947,10 @@ workflow:
       id: '17697583181640'
       position:
         x: 1408
-        y: 983
+        y: 1013
       positionAbsolute:
         x: 1408
-        y: 983
+        y: 1013
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4854,10 +3966,10 @@ workflow:
       id: '1769758385426'
       position:
         x: 1750
-        y: 1017
+        y: 1047
       positionAbsolute:
         x: 1750
-        y: 1017
+        y: 1047
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -4914,10 +4026,10 @@ workflow:
       id: '1769759713699'
       position:
         x: 1066
-        y: 1042
+        y: 1072
       positionAbsolute:
         x: 1066
-        y: 1042
+        y: 1072
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5036,18 +4148,18 @@ workflow:
       height: 52
       id: '17697599213860'
       position:
-        x: 8450
-        y: 1463
+        x: 8068
+        y: 967
       positionAbsolute:
-        x: 8450
-        y: 1463
+        x: 8068
+        y: 967
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     viewport:
-      x: -5994.128446771281
-      y: -1035.9273725514402
-      zoom: 1.1486983549970353
+      x: -6137.122087162982
+      y: -414.721496085996
+      zoom: 1.1486983549970384
   rag_pipeline_variables: []
