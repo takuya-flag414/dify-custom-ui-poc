@@ -61,6 +61,9 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     // Devルート用ノード - FASTモード/Partner系
     'HTTP_TOOL_Perplexity_Search (1)': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
     'HTTP_LLM_Search': { title: '回答を生成中...', icon: 'writing' },
+
+    // ファイル検索ストアツール (社内データ検索)
+    'ファイル検索ストアを指定して検索': { title: '📂 社内データを検索中...', icon: 'file-search' },
 };
 
 /**

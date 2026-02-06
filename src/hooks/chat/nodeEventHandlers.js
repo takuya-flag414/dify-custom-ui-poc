@@ -83,12 +83,21 @@ export const processNodeStarted = (data, context) => {
         displayTitle = `Web検索: "${query}"`;
         detectedTraceMode = 'search';
         iconType = 'search';
+    } else if (nodeType === 'tool' && title?.includes('ファイル検索ストア')) {
+        // ファイル検索ストアツールのフォールバック
+        displayTitle = '📂 社内データを検索中...';
+        detectedTraceMode = 'knowledge';
+        iconType = 'file-search';
     } else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
         // ナレッジ検索
         const query = inputs.query || capturedOptimizedQuery;
         displayTitle = query ? `社内知識を検索: "${query}"` : '社内ナレッジベースを検索中...';
         detectedTraceMode = 'knowledge';
         iconType = 'retrieval';
+    } else if (nodeType === 'iteration') {
+        // イテレーションノードのフォールバック（並列検索など）
+        displayTitle = title || '並列処理中...';
+        iconType = 'iteration';
     } else if (nodeType === 'llm') {
         // LLMノード (マッピングにない場合のフォールバック)
         displayTitle = '情報を整理して回答を生成中...';

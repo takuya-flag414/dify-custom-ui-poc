@@ -46,7 +46,9 @@ export const THINKING_RENDER_RULES = {
         'ツール',
         'Retrieving',
         'Fetching',
-        'HTTP'
+        'HTTP',
+        'ファイル検索ストア',
+        '社内データ'
     ]
 };
 

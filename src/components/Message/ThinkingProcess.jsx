@@ -91,6 +91,14 @@ const Icons = {
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
         </svg>
     ),
+    'file-search': (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <circle cx="11.5" cy="14.5" r="2.5"></circle>
+            <line x1="14.5" y1="17.5" x2="18" y2="21"></line>
+        </svg>
+    ),
     default: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -222,12 +230,17 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                         const actionMonologueContent = step.thinking || step.reasoning;
                         const hasAdditionalResults = step.additionalResults && step.additionalResults.length > 0;
 
+                        // ファイル検索ストアツールは「社内データを検索」とわかりやすく表示
+                        const isFileSearchStore = step.title?.includes('ファイル検索ストア');
+                        const displayTitle = isFileSearchStore ? '📂 社内データを検索' : step.title;
+                        const displayIconType = isFileSearchStore ? 'file-search' : step.iconType;
+
                         return (
                             <div key={step.id || index} className="thought-action-container">
                                 <div className={`thought-action-chip ${step.status} ${hasAdditionalResults || step.resultValue ? 'has-details' : ''}`}>
                                     <div className="thought-action-header">
-                                        <span className="action-icon">{getIcon(step.iconType)}</span>
-                                        <span className="action-title">{step.title}</span>
+                                        <span className="action-icon">{getIcon(displayIconType)}</span>
+                                        <span className="action-title">{displayTitle}</span>
                                         {step.status === 'processing' && <span className="action-spinner" />}
                                         {step.status === 'error' && <span className="action-error-icon">⚠️</span>}
                                     </div>
