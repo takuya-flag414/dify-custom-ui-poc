@@ -42,7 +42,11 @@ const WelcomeScreen = ({
     setActiveContextFiles,
     searchSettings,
     setSearchSettings,
-    onOpenConfig
+    onOpenConfig,
+    // Phase B: Backend B連携用
+    mockMode = 'OFF',
+    backendBApiKey = '',
+    backendBApiUrl = '',
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
@@ -111,6 +115,9 @@ const WelcomeScreen = ({
                         searchSettings={searchSettings}
                         setSearchSettings={setSearchSettings}
                         onOpenConfig={onOpenConfig}
+                        mockMode={mockMode}
+                        backendBApiKey={backendBApiKey}
+                        backendBApiUrl={backendBApiUrl}
                     />
                 </motion.div>
 

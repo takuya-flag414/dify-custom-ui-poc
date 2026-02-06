@@ -1,6 +1,5 @@
 // src/components/Shared/ApiConfigModal.jsx
 import React, { useState, useEffect } from 'react';
-import { useApiConfig } from '../../hooks/useApiConfig';
 import './ApiConfigModal.css';
 import {
     ServerIcon,
@@ -15,32 +14,89 @@ import {
 
 const DIFY_CLOUD_URL = 'https://api.dify.ai/v1';
 
-// mockMode は Props として受け取りますが、もはやバリデーション緩和には使いません
-const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave, mockMode }) => {
-    const [apiKey, setApiKey] = useState('');
-    const [apiUrl, setApiUrl] = useState('');
-    const [showKey, setShowKey] = useState(false);
+// タブ定義
+const TABS = {
+    BACKEND_A: 'backend_a',
+    BACKEND_B: 'backend_b',
+};
+
+const TAB_LABELS = {
+    [TABS.BACKEND_A]: 'Backend A (チャット)',
+    [TABS.BACKEND_B]: 'Backend B (ストア管理)',
+};
+
+const TAB_DESCRIPTIONS = {
+    [TABS.BACKEND_A]: 'HybridQA チャットアプリとの接続設定',
+    [TABS.BACKEND_B]: 'Gemini File Search ストア管理用ワークフローとの接続設定',
+};
+
+// TabButton コンポーネント
+const TabButton = ({ tabId, activeTab, onClick, children }) => (
+    <button
+        type="button"
+        className={`tab-button ${activeTab === tabId ? 'active' : ''}`}
+        onClick={() => onClick(tabId)}
+    >
+        {children}
+    </button>
+);
+
+/**
+ * API設定モーダル（タブ切り替え式）
+ * - Backend A: HybridQA (Chatflowアプリ)
+ * - Backend B: Gemini File Search PoC (Workflowアプリ)
+ */
+const ApiConfigModal = ({
+    isOpen,
+    onClose,
+    // Backend A
+    currentApiKey,
+    currentApiUrl,
+    onSave,
+    // Backend B
+    currentBackendBApiKey = '',
+    currentBackendBApiUrl = '',
+    onSaveBackendB,
+    // 共通
+    mockMode
+}) => {
+    const [activeTab, setActiveTab] = useState(TABS.BACKEND_A);
+
+    // Backend A State
+    const [apiKeyA, setApiKeyA] = useState('');
+    const [apiUrlA, setApiUrlA] = useState('');
+    const [showKeyA, setShowKeyA] = useState(false);
+
+    // Backend B State
+    const [apiKeyB, setApiKeyB] = useState('');
+    const [apiUrlB, setApiUrlB] = useState('');
+    const [showKeyB, setShowKeyB] = useState(false);
 
     // Status: idle | testing | success | error
     const [status, setStatus] = useState('idle');
     const [statusMessage, setStatusMessage] = useState('');
 
-    const { checkConnection } = useApiConfig();
-
     // モーダルが開くたびに初期化
     useEffect(() => {
         if (isOpen) {
-            setApiKey(currentApiKey || '');
-            setApiUrl(currentApiUrl || '');
+            // Backend A
+            setApiKeyA(currentApiKey || '');
+            setApiUrlA(currentApiUrl || '');
+            setShowKeyA(false);
+            // Backend B
+            setApiKeyB(currentBackendBApiKey || '');
+            setApiUrlB(currentBackendBApiUrl || '');
+            setShowKeyB(false);
+            // 共通
             setStatus('idle');
             setStatusMessage('');
-            setShowKey(false);
+            setActiveTab(TABS.BACKEND_A);
         }
-    }, [isOpen, currentApiKey, currentApiUrl]);
+    }, [isOpen, currentApiKey, currentApiUrl, currentBackendBApiKey, currentBackendBApiUrl]);
 
     if (!isOpen) return null;
 
-    // バリデーションと整形
+    // URL整形
     const formatUrl = (url) => {
         let formatted = url.trim();
         if (formatted.endsWith('/')) {
@@ -49,11 +105,29 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
         return formatted;
     };
 
-    const handleTestAndSave = async () => {
-        const formattedUrl = formatUrl(apiUrl);
-        
-        // ★変更: モードに関わらず必須チェック
-        if (!apiKey.trim()) {
+    // 接続テスト（/info エンドポイント）
+    const testApiConnection = async (apiKey, apiUrl) => {
+        const response = await fetch(`${apiUrl}/info`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+            },
+        });
+
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                throw new Error('認証に失敗しました。APIキーを確認してください');
+            }
+            throw new Error(`接続に失敗しました (${response.status})`);
+        }
+        return true;
+    };
+
+    // Backend A 保存処理
+    const handleTestAndSaveA = async () => {
+        const formattedUrl = formatUrl(apiUrlA);
+
+        if (!apiKeyA.trim()) {
             setStatus('error');
             setStatusMessage('APIキーを入力してください');
             return;
@@ -63,30 +137,140 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
         setStatusMessage('接続を確認中...');
 
         try {
-            // Adapterは常にリアルな通信を行うようになった
-            await checkConnection(apiKey, formattedUrl, mockMode);
-
+            await testApiConnection(apiKeyA, formattedUrl);
             setStatus('success');
             setStatusMessage('接続に成功しました');
 
             setTimeout(() => {
-                onSave(apiKey, formattedUrl);
-                onClose();
-            }, 1000);
-
+                onSave(apiKeyA, formattedUrl);
+                onClose(); // モーダルを閉じる
+            }, 500);
         } catch (error) {
             setStatus('error');
             setStatusMessage(`接続失敗: ${error.message || '不明なエラー'}`);
         }
     };
 
-    // ★変更: APIKeyとURLがある場合のみ有効
-    const isFormValid = apiUrl && apiKey;
+    // Backend B 保存処理
+    const handleTestAndSaveB = async () => {
+        const formattedUrl = formatUrl(apiUrlB);
+
+        if (!apiKeyB.trim()) {
+            setStatus('error');
+            setStatusMessage('APIキーを入力してください');
+            return;
+        }
+
+        setStatus('testing');
+        setStatusMessage('接続を確認中...');
+
+        try {
+            await testApiConnection(apiKeyB, formattedUrl);
+            setStatus('success');
+            setStatusMessage('接続に成功しました');
+
+            setTimeout(() => {
+                if (onSaveBackendB) {
+                    onSaveBackendB(apiKeyB, formattedUrl);
+                }
+                onClose(); // モーダルを閉じる
+            }, 500);
+        } catch (error) {
+            setStatus('error');
+            setStatusMessage(`接続失敗: ${error.message || '不明なエラー'}`);
+        }
+    };
+
+    // タブ切り替え時にステータスをリセット
+    const handleTabChange = (tabId) => {
+        setActiveTab(tabId);
+        setStatus('idle');
+        setStatusMessage('');
+    };
+
+    // 現在のタブの入力状態バリデーション
+    const isFormValid = activeTab === TABS.BACKEND_A
+        ? apiUrlA && apiKeyA
+        : apiUrlB && apiKeyB;
+
+    const handleSave = activeTab === TABS.BACKEND_A
+        ? handleTestAndSaveA
+        : handleTestAndSaveB;
+
+    // 入力フィールドのレンダリング
+    const renderInputFields = () => {
+        const isBackendA = activeTab === TABS.BACKEND_A;
+        const apiKey = isBackendA ? apiKeyA : apiKeyB;
+        const setApiKey = isBackendA ? setApiKeyA : setApiKeyB;
+        const apiUrl = isBackendA ? apiUrlA : apiUrlB;
+        const setApiUrl = isBackendA ? setApiUrlA : setApiUrlB;
+        const showKey = isBackendA ? showKeyA : showKeyB;
+        const setShowKey = isBackendA ? setShowKeyA : setShowKeyB;
+
+        return (
+            <>
+                {/* API URL Input */}
+                <div className="input-group">
+                    <label>API エンドポイント (Base URL)</label>
+                    <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
+                        <div className="input-icon">
+                            <ServerIcon width="18" height="18" />
+                        </div>
+                        <input
+                            type="text"
+                            value={apiUrl}
+                            onChange={(e) => {
+                                setApiUrl(e.target.value);
+                                setStatus('idle');
+                            }}
+                            placeholder="https://api.dify.ai/v1"
+                            className="styled-input"
+                        />
+                    </div>
+                    <div className="helper-text">
+                        <span className="link-btn" onClick={() => setApiUrl(DIFY_CLOUD_URL)}>
+                            Dify Cloudのデフォルトを使用
+                        </span>
+                    </div>
+                </div>
+
+                {/* API Key Input */}
+                <div className="input-group">
+                    <label>API キー (App Key)</label>
+                    <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
+                        <div className="input-icon">
+                            <KeyIcon width="18" height="18" />
+                        </div>
+                        <input
+                            type={showKey ? "text" : "password"}
+                            value={apiKey}
+                            onChange={(e) => {
+                                setApiKey(e.target.value);
+                                setStatus('idle');
+                            }}
+                            placeholder="app-xxxxxxxxxxxxxxxxxxxx"
+                            className="styled-input"
+                        />
+                        <button
+                            className="toggle-visibility"
+                            onClick={() => setShowKey(!showKey)}
+                            tabIndex="-1"
+                        >
+                            {showKey ?
+                                <EyeOffIcon width="16" height="16" /> :
+                                <EyeIcon width="16" height="16" />
+                            }
+                        </button>
+                    </div>
+                </div>
+            </>
+        );
+    };
 
     return (
         <div className="api-modal-overlay">
             <div className="api-modal-container">
-                
+
                 {/* Header */}
                 <div className="api-modal-header">
                     <div className="icon-wrapper">
@@ -98,65 +282,24 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                     </div>
                 </div>
 
+                {/* Tab Navigation */}
+                <div className="api-modal-tabs">
+                    <TabButton tabId={TABS.BACKEND_A} activeTab={activeTab} onClick={handleTabChange}>
+                        {TAB_LABELS[TABS.BACKEND_A]}
+                    </TabButton>
+                    <TabButton tabId={TABS.BACKEND_B} activeTab={activeTab} onClick={handleTabChange}>
+                        {TAB_LABELS[TABS.BACKEND_B]}
+                    </TabButton>
+                </div>
+
                 {/* Body */}
                 <div className="api-modal-body">
-                    
-                    {/* ★変更: FEモードの警告バッジを削除 */}
-
-                    {/* API URL Input */}
-                    <div className="input-group">
-                        <label>API エンドポイント (Base URL)</label>
-                        <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
-                            <div className="input-icon">
-                                <ServerIcon width="18" height="18" />
-                            </div>
-                            <input
-                                type="text"
-                                value={apiUrl}
-                                onChange={(e) => {
-                                    setApiUrl(e.target.value);
-                                    setStatus('idle');
-                                }}
-                                placeholder="https://api.dify.ai/v1"
-                                className="styled-input"
-                            />
-                        </div>
-                        <div className="helper-text">
-                            <span className="link-btn" onClick={() => setApiUrl(DIFY_CLOUD_URL)}>
-                                Dify Cloudのデフォルトを使用
-                            </span>
-                        </div>
+                    {/* Tab Description */}
+                    <div className="tab-description">
+                        {TAB_DESCRIPTIONS[activeTab]}
                     </div>
 
-                    {/* API Key Input */}
-                    <div className="input-group">
-                        <label>API キー (App Key)</label>
-                        <div className={`input-wrapper ${status === 'error' ? 'error' : ''}`}>
-                            <div className="input-icon">
-                                <KeyIcon width="18" height="18" />
-                            </div>
-                            <input
-                                type={showKey ? "text" : "password"}
-                                value={apiKey}
-                                onChange={(e) => {
-                                    setApiKey(e.target.value);
-                                    setStatus('idle');
-                                }}
-                                placeholder="app-xxxxxxxxxxxxxxxxxxxx"
-                                className="styled-input"
-                            />
-                            <button 
-                                className="toggle-visibility"
-                                onClick={() => setShowKey(!showKey)}
-                                tabIndex="-1"
-                            >
-                                {showKey ? 
-                                    <EyeOffIcon width="16" height="16" /> : 
-                                    <EyeIcon width="16" height="16" />
-                                }
-                            </button>
-                        </div>
-                    </div>
+                    {renderInputFields()}
                 </div>
 
                 {/* Footer */}
@@ -178,8 +321,7 @@ const ApiConfigModal = ({ isOpen, onClose, currentApiKey, currentApiUrl, onSave,
                         </button>
                         <button
                             className="btn-save"
-                            onClick={handleTestAndSave}
-                            // ★変更: 厳格なチェック
+                            onClick={handleSave}
                             disabled={status === 'testing' || !isFormValid}
                         >
                             {status === 'testing' ? '確認中...' : '接続テスト & 保存'}

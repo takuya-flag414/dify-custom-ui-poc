@@ -128,7 +128,11 @@ const ChatInput = ({
   searchSettings,
   setSearchSettings,
   isStreaming = false,
-  onStop
+  onStop,
+  // Phase B: Backend B連携用
+  mockMode = 'OFF',
+  backendBApiKey = '',
+  backendBApiUrl = '',
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -437,6 +441,9 @@ const ChatInput = ({
                     <ContextSelector
                       settings={searchSettings}
                       onSettingsChange={setSearchSettings}
+                      mockMode={mockMode}
+                      backendBApiKey={backendBApiKey}
+                      backendBApiUrl={backendBApiUrl}
                     />
                   </div>
                 )}

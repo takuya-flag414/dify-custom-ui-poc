@@ -1,10 +1,10 @@
 // src/components/Shared/ContextSelector.jsx
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ContextSelector.css';
 
-// Phase A: モックデータ (Phase Bで API経由に置き換え)
-import { MOCK_STORES } from '../../mocks/storeData';
+// Phase B: API経由でストア一覧を取得
+import { useGeminiStores } from '../../hooks/useGeminiStores';
 
 // --- Icons (SVG) ---
 const iconProps = {
@@ -240,7 +240,14 @@ const ViewHeader = ({ title, onBack }) => (
 );
 
 // --- Main Component ---
-const ContextSelector = ({ settings, onSettingsChange }) => {
+const ContextSelector = ({
+    settings,
+    onSettingsChange,
+    // Phase B: Backend B連携用
+    mockMode = 'OFF',
+    backendBApiKey = '',
+    backendBApiUrl = 'https://api.dify.ai/v1',
+}) => {
     // View state: 'primary' | 'advanced' | 'stores' | 'domains'
     const [view, setView] = useState('primary');
     const [slideDirection, setSlideDirection] = useState('right');
@@ -248,6 +255,15 @@ const ContextSelector = ({ settings, onSettingsChange }) => {
     const [urlInput, setUrlInput] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [activeStoreId, setActiveStoreId] = useState(null);
+
+    // Phase B: ストア一覧をAPI経由で取得
+    const {
+        stores,
+        isLoading: isStoresLoading,
+        error: storesError,
+        refetch: refetchStores,
+        isConfigured: isBackendBConfigured
+    } = useGeminiStores(mockMode, backendBApiKey, backendBApiUrl);
 
     const currentModeId = useMemo(() => {
         const { ragEnabled, webMode } = settings;
@@ -259,10 +275,21 @@ const ContextSelector = ({ settings, onSettingsChange }) => {
         return 'standard';
     }, [settings]);
 
-    // Navigation helpers
+    // Navigation helpers - ストア画面遷移時にデータ取得をトリガー
     const navigateTo = (targetView, direction = 'right') => {
+        console.log('[ContextSelector] navigateTo:', targetView, 'direction:', direction);
+        console.log('[ContextSelector] Current props - mockMode:', mockMode);
+        console.log('[ContextSelector] Current props - backendBApiKey:', backendBApiKey ? `設定済み(長さ:${backendBApiKey.length})` : '未設定(空)');
+        console.log('[ContextSelector] Current props - backendBApiUrl:', backendBApiUrl);
+
         setSlideDirection(direction);
         setView(targetView);
+
+        // ★ストア画面に遷移した時にデータ取得
+        if (targetView === 'stores') {
+            console.log('[ContextSelector] Stores view opened - triggering refetch');
+            refetchStores();
+        }
     };
 
     const goBack = (targetView) => {
@@ -406,19 +433,46 @@ const ContextSelector = ({ settings, onSettingsChange }) => {
                 <span className="badge">Internal Only</span>
             </div>
 
-            <div className="store-grid">
-                {MOCK_STORES.map((store) => (
-                    <StoreItem
-                        key={store.id}
-                        store={store}
-                        isSelected={activeStoreId === store.id}
-                        onClick={() => {
-                            setActiveStoreId(store.id);
-                            console.log('[PhaseA Mock] Selected Store ID:', store.id);
-                        }}
-                    />
-                ))}
-            </div>
+            {/* Phase B: ローディング状態 */}
+            {isStoresLoading && (
+                <div className="stores-loading">
+                    <div className="loading-spinner" />
+                    <span>ストア一覧を読み込み中...</span>
+                </div>
+            )}
+
+            {/* Phase B: エラー状態 */}
+            {storesError && !isStoresLoading && (
+                <div className="stores-error">
+                    <div className="error-icon">⚠️</div>
+                    <div className="error-message">{storesError}</div>
+                    <button className="retry-button" onClick={refetchStores}>
+                        再試行
+                    </button>
+                </div>
+            )}
+
+            {/* ストア一覧 */}
+            {!isStoresLoading && !storesError && (
+                <div className="store-grid">
+                    {stores.map((store) => (
+                        <StoreItem
+                            key={store.id}
+                            store={store}
+                            isSelected={activeStoreId === store.id}
+                            onClick={() => {
+                                setActiveStoreId(store.id);
+                                // Phase B: 選択されたstore_idをsettingsに保存
+                                onSettingsChange({
+                                    ...settings,
+                                    selectedStoreId: store.id,
+                                });
+                                console.log('[Phase B] Selected Store ID:', store.id);
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
         </motion.div>
     );
 

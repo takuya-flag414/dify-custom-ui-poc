@@ -11,6 +11,8 @@ export interface SearchSettings {
     webMode?: 'off' | 'on' | 'auto' | 'force';
     domainFilters?: string[];
     reasoningMode?: 'fast' | 'pro';
+    // Phase B: 選択されたGemini File SearchストアID
+    selectedStoreId?: string;
 }
 
 /**
@@ -214,6 +216,8 @@ export const ChatServiceAdapter = {
                 ai_style: promptSettings?.aiStyle || 'partner',
                 system_prompt: buildSystemPromptPayload(promptSettings, displayName),
                 reasoning_mode: searchSettings?.reasoningMode || 'fast',
+                // Phase B: Gemini File Search ストアID
+                gemini_store_id: searchSettings?.selectedStoreId || '',
             },
             query: text,
             user: userId,

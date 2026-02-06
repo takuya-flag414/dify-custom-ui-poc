@@ -28,7 +28,11 @@ const ChatArea = (props) => {
     stopGeneration,
     handleEdit,
     handleRegenerate,
-    autoScroll = true // デフォルトtrue
+    autoScroll = true, // デフォルトtrue
+    // Phase B: Backend B連携用
+    mockMode = 'OFF',
+    backendBApiKey = '',
+    backendBApiUrl = '',
   } = props;
 
   // ★追加: 自動スクロール有効状態管理
@@ -128,6 +132,9 @@ const ChatArea = (props) => {
               setActiveContextFiles={setActiveContextFiles}
               searchSettings={searchSettings}
               setSearchSettings={setSearchSettings}
+              mockMode={mockMode}
+              backendBApiKey={backendBApiKey}
+              backendBApiUrl={backendBApiUrl}
             />
           </div>
         </>
@@ -142,6 +149,9 @@ const ChatArea = (props) => {
           searchSettings={searchSettings}
           setSearchSettings={setSearchSettings}
           onOpenConfig={onOpenConfig}
+          mockMode={mockMode}
+          backendBApiKey={backendBApiKey}
+          backendBApiUrl={backendBApiUrl}
         />
       ) : (
         <>
@@ -176,6 +186,9 @@ const ChatArea = (props) => {
               setSearchSettings={setSearchSettings}
               isStreaming={isGenerating && !!streamingMessage}
               onStop={stopGeneration}
+              mockMode={mockMode}
+              backendBApiKey={backendBApiKey}
+              backendBApiUrl={backendBApiUrl}
             />
           </div>
         </>

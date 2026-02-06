@@ -38,6 +38,9 @@ import LoginScreen from './components/Auth/LoginScreen';
 
 import { DEFAULT_MOCK_MODE } from './config/env';
 
+// Phase B: Backend B設定（ストア管理用）
+import { useBackendBConfig } from './hooks/useBackendBConfig';
+
 // generateUUID は AuthService に移管されたため削除
 // 後方互換のため残存（将来削除予定）
 const generateUUID = () => {
@@ -151,6 +154,13 @@ function App() {
   */
 
   const { apiKey, apiUrl, saveConfig } = useApiConfig();
+
+  // Phase B: Backend B設定
+  const {
+    apiKey: backendBApiKey,
+    apiUrl: backendBApiUrl,
+    saveConfig: saveBackendBConfig,
+  } = useBackendBConfig();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebar_collapsed');
@@ -368,8 +378,10 @@ function App() {
             currentApiKey={apiKey}
             currentApiUrl={apiUrl}
             onSave={saveConfig}
+            currentBackendBApiKey={backendBApiKey}
+            currentBackendBApiUrl={backendBApiUrl}
+            onSaveBackendB={saveBackendBConfig}
             mockMode={mockMode}
-            addLog={addLog}
           />
 
           {/* 3-Pane Grid Layout (DESIGN_RULE.md v3.0) */}
@@ -463,6 +475,9 @@ function App() {
                               stopGeneration={stopGeneration}
                               handleEdit={handleEdit}
                               handleRegenerate={handleRegenerate}
+                              mockMode={mockMode}
+                              backendBApiKey={backendBApiKey}
+                              backendBApiUrl={backendBApiUrl}
                             />
                           </StudiosContainer>
                         </motion.div>
@@ -521,6 +536,9 @@ function App() {
                             stopGeneration={stopGeneration}
                             handleEdit={handleEdit}
                             handleRegenerate={handleRegenerate}
+                            mockMode={mockMode}
+                            backendBApiKey={backendBApiKey}
+                            backendBApiUrl={backendBApiUrl}
                           />
                         </motion.div>
                       ) : (
