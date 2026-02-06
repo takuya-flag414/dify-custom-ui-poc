@@ -45,11 +45,114 @@
 }
 
 /* --- Mode Groups --- */
-.primary-modes-group {
+.primary-modes-group,
+.advanced-modes-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
     margin-bottom: 4px;
+}
+
+/* --- View Content (for slide animations) --- */
+.view-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- View Header with Back Button --- */
+.view-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.view-header .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.view-header .back-btn:hover {
+    background-color: rgba(0, 122, 255, 0.08);
+}
+
+/* --- Mode Item Wrapper (for sub-settings button) --- */
+.mode-item-wrapper {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.mode-item-wrapper .mode-item {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.mode-item-wrapper:has(.mode-sub-settings-btn) .mode-item {
+    padding-right: 8px;
+}
+
+/* Sub-settings chevron button */
+.mode-sub-settings-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: all 0.15s;
+}
+
+.mode-sub-settings-btn:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    color: var(--color-text-main);
+}
+
+/* Active mode wrapper styling */
+.mode-item-wrapper.active.mode-enterprise .mode-sub-settings-btn {
+    border-left-color: rgba(5, 150, 105, 0.2);
+}
+
+.mode-item-wrapper.active.mode-enterprise .mode-sub-settings-btn:hover {
+    background-color: rgba(5, 150, 105, 0.08);
+    color: #059669;
+}
+
+.mode-item-wrapper.active.mode-hybrid .mode-sub-settings-btn {
+    border-left-color: rgba(124, 58, 237, 0.2);
+}
+
+.mode-item-wrapper.active.mode-hybrid .mode-sub-settings-btn:hover {
+    background-color: rgba(124, 58, 237, 0.08);
+    color: #7C3AED;
+}
+
+.mode-item-wrapper.active.mode-deep .mode-sub-settings-btn {
+    border-left-color: rgba(37, 99, 235, 0.2);
+}
+
+.mode-item-wrapper.active.mode-deep .mode-sub-settings-btn:hover {
+    background-color: rgba(37, 99, 235, 0.08);
+    color: #2563EB;
 }
 
 /* --- Trigger Button (Accordion Toggle) --- */
@@ -141,16 +244,16 @@
 
 /* ... (Color Themes: Fast, Standard, Deep, Enterprise, Hybrid - Unchanged) ... */
 
-/* 1. Fast (Amber) */
-.mode-item.active.mode-fast {
-    background-color: #FFFBEB;
-    border-color: #FEF3C7;
+/* 1. Chat (Neutral Gray) */
+.mode-item.active.mode-chat {
+    background-color: #F5F5F7;
+    border-color: #E5E5E5;
 }
 
-.mode-item.active.mode-fast .mode-label,
-.mode-item.active.mode-fast .mode-icon-wrapper,
-.mode-item.active.mode-fast .check-icon {
-    color: #D97706;
+.mode-item.active.mode-chat .mode-label,
+.mode-item.active.mode-chat .mode-icon-wrapper,
+.mode-item.active.mode-chat .check-icon {
+    color: #636366;
 }
 
 /* 2. Standard / Auto (Simple Blue Accent) */
@@ -482,6 +585,132 @@
     background-color: rgba(239, 68, 68, 0.1);
 }
 
+/* ========================================
+   Enterprise Sub-Panel (Gemini Store Selector)
+   ======================================== */
+
+/* Liquid Glass Sub-panel */
+.enterprise-sub-panel {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.sub-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 0 4px;
+}
+
+.sub-panel-header .label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sub-panel-header .badge {
+    font-size: 9px;
+    font-weight: 600;
+    background: rgba(5, 150, 105, 0.12);
+    color: #059669;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.store-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.store-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, transform 0.15s;
+    width: 100%;
+}
+
+.store-item:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.store-item.active {
+    background: rgba(5, 150, 105, 0.08);
+}
+
+.store-icon-container {
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.store-item.active .store-icon-container {
+    color: #059669;
+}
+
+.store-info {
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+
+.store-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-main);
+    line-height: 1.3;
+}
+
+.store-item.active .store-name {
+    color: #059669;
+}
+
+.store-desc {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Glowing Indicator (Enterprise Green) */
+.store-active-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 1.5px #059669;
+    background: rgba(5, 150, 105, 0.05);
+    pointer-events: none;
+    z-index: 1;
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -498,15 +727,15 @@
 /* ========================================
    Dark Mode Overrides
    ======================================== */
-[data-theme='dark'] .mode-item.active.mode-fast {
-    background-color: rgba(217, 119, 6, 0.15);
-    border-color: rgba(217, 119, 6, 0.3);
+[data-theme='dark'] .mode-item.active.mode-chat {
+    background-color: rgba(99, 99, 102, 0.2);
+    border-color: rgba(99, 99, 102, 0.3);
 }
 
-[data-theme='dark'] .mode-item.active.mode-fast .mode-label,
-[data-theme='dark'] .mode-item.active.mode-fast .mode-icon-wrapper,
-[data-theme='dark'] .mode-item.active.mode-fast .check-icon {
-    color: #FBBF24;
+[data-theme='dark'] .mode-item.active.mode-chat .mode-label,
+[data-theme='dark'] .mode-item.active.mode-chat .mode-icon-wrapper,
+[data-theme='dark'] .mode-item.active.mode-chat .check-icon {
+    color: #AEAEB2;
 }
 
 /* Dark Mode: Standard Mode AI Glow (legacy override - now handled below) */
@@ -596,4 +825,109 @@
 /* Dark Mode: Divider */
 [data-theme='dark'] .advanced-divider {
     background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ========================================
+   Dark Mode: Enterprise Sub-Panel
+   ======================================== */
+
+[data-theme='dark'] .enterprise-sub-panel {
+    background: rgba(38, 36, 42, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .sub-panel-header .label {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='dark'] .sub-panel-header .badge {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34D399;
+}
+
+[data-theme='dark'] .store-item:hover {
+    background: rgba(52, 211, 153, 0.08);
+}
+
+[data-theme='dark'] .store-item.active {
+    background: rgba(52, 211, 153, 0.1);
+}
+
+[data-theme='dark'] .store-icon-container {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='dark'] .store-item.active .store-icon-container {
+    color: #34D399;
+}
+
+[data-theme='dark'] .store-name {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='dark'] .store-item.active .store-name {
+    color: #34D399;
+}
+
+[data-theme='dark'] .store-desc {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='dark'] .store-active-glow {
+    box-shadow: inset 0 0 0 1.5px #34D399;
+    background: rgba(52, 211, 153, 0.08);
+}
+
+/* ========================================
+   Dark Mode: Navigation Components
+   ======================================== */
+
+[data-theme='dark'] .view-header {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .view-header .back-btn {
+    color: #0A84FF;
+}
+
+[data-theme='dark'] .view-header .back-btn:hover {
+    background-color: rgba(10, 132, 255, 0.12);
+}
+
+[data-theme='dark'] .mode-sub-settings-btn {
+    border-left-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='dark'] .mode-sub-settings-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='dark'] .mode-item-wrapper.active.mode-enterprise .mode-sub-settings-btn {
+    border-left-color: rgba(52, 211, 153, 0.2);
+}
+
+[data-theme='dark'] .mode-item-wrapper.active.mode-enterprise .mode-sub-settings-btn:hover {
+    background-color: rgba(52, 211, 153, 0.12);
+    color: #34D399;
+}
+
+[data-theme='dark'] .mode-item-wrapper.active.mode-hybrid .mode-sub-settings-btn {
+    border-left-color: rgba(167, 139, 250, 0.2);
+}
+
+[data-theme='dark'] .mode-item-wrapper.active.mode-hybrid .mode-sub-settings-btn:hover {
+    background-color: rgba(167, 139, 250, 0.12);
+    color: #A78BFA;
+}
+
+[data-theme='dark'] .mode-item-wrapper.active.mode-deep .mode-sub-settings-btn {
+    border-left-color: rgba(96, 165, 250, 0.2);
+}
+
+[data-theme='dark'] .mode-item-wrapper.active.mode-deep .mode-sub-settings-btn:hover {
+    background-color: rgba(96, 165, 250, 0.12);
+    color: #60A5FA;
 }

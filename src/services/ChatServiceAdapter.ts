@@ -10,6 +10,7 @@ export interface SearchSettings {
     ragEnabled?: boolean | 'auto';
     webMode?: 'off' | 'on' | 'auto' | 'force';
     domainFilters?: string[];
+    reasoningMode?: 'fast' | 'pro';
 }
 
 /**
@@ -212,6 +213,7 @@ export const ChatServiceAdapter = {
                 current_time: currentTimeStr,
                 ai_style: promptSettings?.aiStyle || 'partner',
                 system_prompt: buildSystemPromptPayload(promptSettings, displayName),
+                reasoning_mode: searchSettings?.reasoningMode || 'fast',
             },
             query: text,
             user: userId,

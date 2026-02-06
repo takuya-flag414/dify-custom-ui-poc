@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ContextSelector from '../Shared/ContextSelector';
+import IntelligenceSelector from '../Shared/IntelligenceSelector';
 import FileIcon from '../Shared/FileIcon';
 import PrivacyConfirmDialog from './PrivacyConfirmDialog';
 import PrivacyShieldButton from './PrivacyShieldButton';
@@ -37,9 +38,9 @@ const CloseIcon = () => (
 );
 
 // --- Mode Icons ---
-const ZapIcon = () => (
+const ChatBubbleIcon = () => (
   <svg {...iconProps}>
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
   </svg>
 );
 
@@ -112,7 +113,7 @@ const getModeInfo = (settings) => {
     return { label: `Web検索${suffix}`, class: 'mode-deep', icon: <GlobeAltIcon /> };
   }
   if (webMode === 'off') {
-    return { label: 'スピード', class: 'mode-fast', icon: <ZapIcon /> };
+    return { label: 'チャットのみ', class: 'mode-chat', icon: <ChatBubbleIcon /> };
   }
   // フォールバック
   return { label: `オート${suffix}`, class: 'mode-standard', icon: <SparklesIcon /> };
@@ -440,6 +441,12 @@ const ChatInput = ({
                   </div>
                 )}
               </div>
+
+              {/* Intelligence Selector (Brain: Fast/Pro) */}
+              <IntelligenceSelector
+                mode={searchSettings?.reasoningMode || 'fast'}
+                onChange={(mode) => setSearchSettings({ ...searchSettings, reasoningMode: mode })}
+              />
 
               {/* Privacy Shield */}
               {privacyWarning.hasWarning && (

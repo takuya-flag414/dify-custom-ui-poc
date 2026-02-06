@@ -6,8 +6,9 @@
  */
 export interface SearchSettings {
     ragEnabled: 'auto' | boolean;
-    webMode: 'auto' | 'on' | 'off';
+    webMode: 'auto' | 'on' | 'off' | 'force';
     domainFilters: string[];
+    reasoningMode: 'fast' | 'pro';
 }
 
 /**
@@ -25,7 +26,8 @@ export interface NodeDisplayInfo {
 export const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
     ragEnabled: 'auto',
     webMode: 'auto',
-    domainFilters: []
+    domainFilters: [],
+    reasoningMode: 'fast'
 };
 
 /**

@@ -1,0 +1,288 @@
+/* src/components/Shared/IntelligenceSelector.css */
+
+/* --- AI Intelligence Gradient Variables (DESIGN_RULE.md準拠) --- */
+:root {
+    --ai-gradient-cyan: #00FFFF;
+    --ai-gradient-magenta: #FF00FF;
+    --ai-gradient-yellow: #FFD60A;
+    --ai-gradient-blue: #007AFF;
+}
+
+/* --- Container --- */
+.intelligence-selector-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* --- Trigger Button --- */
+.intelligence-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.04);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted, #636366);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    overflow: hidden;
+}
+
+.intelligence-trigger:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--color-text-main, #1d1d1f);
+}
+
+.intelligence-trigger.open {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* --- Trigger Label --- */
+.trigger-label {
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.01em;
+}
+
+/* --- Pro Active: Trigger Glow --- */
+.intelligence-trigger.pro-active {
+    background: transparent;
+    color: var(--ai-gradient-blue);
+}
+
+.trigger-glow-background {
+    position: absolute;
+    inset: -1px;
+    border-radius: 9px;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.trigger-glow-background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg,
+            var(--ai-gradient-cyan),
+            var(--ai-gradient-magenta),
+            var(--ai-gradient-yellow),
+            var(--ai-gradient-blue),
+            var(--ai-gradient-cyan));
+    filter: blur(6px);
+    opacity: 0.5;
+    animation: ai-spin 4s linear infinite;
+}
+
+.trigger-glow-background::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    background: var(--color-bg-surface, rgba(255, 255, 255, 0.95));
+    border-radius: 8px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+@keyframes ai-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Popover --- */
+.intelligence-popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    min-width: 160px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+}
+
+/* --- Mode Item --- */
+.intelligence-mode-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+    overflow: hidden;
+}
+
+.intelligence-mode-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.intelligence-mode-item.active {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+/* --- Mode Content --- */
+.mode-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    z-index: 1;
+}
+
+.mode-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-main, #1d1d1f);
+}
+
+.mode-desc {
+    font-size: 11px;
+    color: var(--color-text-muted, #86868b);
+}
+
+/* --- Check Icon --- */
+.intelligence-mode-item .check-icon {
+    color: var(--color-text-main, #1d1d1f);
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+/* --- Pro Mode Active: Glow --- */
+.intelligence-mode-item.pro.active {
+    background: transparent;
+}
+
+.mode-glow-background {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.mode-glow-background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg,
+            var(--ai-gradient-cyan),
+            var(--ai-gradient-magenta),
+            var(--ai-gradient-yellow),
+            var(--ai-gradient-blue),
+            var(--ai-gradient-cyan));
+    filter: blur(10px);
+    opacity: 0.3;
+    animation: ai-spin 4s linear infinite;
+}
+
+.mode-glow-background::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 7px;
+}
+
+.intelligence-mode-item.pro.active .mode-label {
+    color: var(--ai-gradient-blue);
+}
+
+.intelligence-mode-item.pro.active .check-icon {
+    color: var(--ai-gradient-magenta);
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+[data-theme='dark'] .intelligence-trigger {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-muted, #98989d);
+}
+
+[data-theme='dark'] .intelligence-trigger:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-main, #f5f5f7);
+}
+
+[data-theme='dark'] .intelligence-trigger.pro-active {
+    color: var(--ai-gradient-cyan);
+}
+
+[data-theme='dark'] .trigger-glow-background::before {
+    opacity: 0.35;
+}
+
+[data-theme='dark'] .trigger-glow-background::after {
+    background: rgba(30, 30, 30, 0.95);
+}
+
+[data-theme='dark'] .intelligence-popover {
+    background: rgba(40, 40, 40, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .intelligence-mode-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .intelligence-mode-item.active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .mode-label {
+    color: var(--color-text-main, #f5f5f7);
+}
+
+[data-theme='dark'] .mode-desc {
+    color: var(--color-text-muted, #98989d);
+}
+
+[data-theme='dark'] .intelligence-mode-item .check-icon {
+    color: var(--color-text-main, #f5f5f7);
+}
+
+[data-theme='dark'] .mode-glow-background::before {
+    opacity: 0.25;
+}
+
+[data-theme='dark'] .mode-glow-background::after {
+    background: rgba(40, 40, 40, 0.95);
+}
+
+[data-theme='dark'] .intelligence-mode-item.pro.active .mode-label {
+    color: var(--ai-gradient-cyan);
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+
+    .trigger-glow-background::before,
+    .mode-glow-background::before {
+        animation: none;
+    }
+}

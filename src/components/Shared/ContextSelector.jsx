@@ -1,7 +1,10 @@
 // src/components/Shared/ContextSelector.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ContextSelector.css';
+
+// Phase A: モックデータ (Phase Bで API経由に置き換え)
+import { MOCK_STORES } from '../../mocks/storeData';
 
 // --- Icons (SVG) ---
 const iconProps = {
@@ -40,10 +43,10 @@ const SparklesIcon = () => (
     </svg>
 );
 
-// ⚡ Zap (スピード)
-const ZapIcon = () => (
+// 💬 ChatBubble (チャットのみ)
+const ChatBubbleIcon = () => (
     <svg {...iconProps}>
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
     </svg>
 );
 
@@ -83,6 +86,13 @@ const GlobeAltIcon = () => (
     </svg>
 );
 
+// 📁 Folder (ストア用)
+const FolderIcon = () => (
+    <svg {...iconProps}>
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+    </svg>
+);
+
 // --- Mode Definitions ---
 const MODES = [
     {
@@ -95,12 +105,12 @@ const MODES = [
         isDefault: true
     },
     {
-        id: 'fast',
-        label: 'スピード',
-        desc: '最速で応答。AIの知識だけで回答',
-        icon: <ZapIcon />,
+        id: 'chat',
+        label: 'チャットのみ',
+        desc: '外部情報を参照せず、AIの知識のみで回答',
+        icon: <ChatBubbleIcon />,
         settings: { ragEnabled: false, webMode: 'off' },
-        colorClass: 'mode-fast'
+        colorClass: 'mode-chat'
     },
     {
         id: 'hybrid',
@@ -108,7 +118,9 @@ const MODES = [
         desc: '社内とWebを統合して徹底調査',
         icon: <RocketLaunchIcon />,
         settings: { ragEnabled: true, webMode: 'auto' },
-        colorClass: 'mode-hybrid'
+        colorClass: 'mode-hybrid',
+        hasSubSettings: true,
+        subSettingsView: 'domains'
     },
     {
         id: 'enterprise',
@@ -116,7 +128,9 @@ const MODES = [
         desc: '社内情報のみ。Web検索なし',
         icon: <BuildingOfficeIcon />,
         settings: { ragEnabled: true, webMode: 'off' },
-        colorClass: 'mode-enterprise'
+        colorClass: 'mode-enterprise',
+        hasSubSettings: true,
+        subSettingsView: 'stores'
     },
     {
         id: 'deep',
@@ -124,62 +138,138 @@ const MODES = [
         desc: '最新のWeb情報を検索',
         icon: <GlobeAltIcon />,
         settings: { ragEnabled: false, webMode: 'force' },
-        colorClass: 'mode-deep'
+        colorClass: 'mode-deep',
+        hasSubSettings: true,
+        subSettingsView: 'domains'
     }
 ];
 
-// Sub Component for Mode Button
-const ModeButton = ({ mode, isActive, onClick }) => {
+const PRIMARY_MODES = MODES.filter(m => ['standard', 'chat'].includes(m.id));
+const ADVANCED_MODES = MODES.filter(m => !['standard', 'chat'].includes(m.id));
+
+// --- Animation Variants ---
+const slideVariants = {
+    enterFromRight: { x: 50, opacity: 0 },
+    enterFromLeft: { x: -50, opacity: 0 },
+    center: { x: 0, opacity: 1 },
+    exitToLeft: { x: -50, opacity: 0 },
+    exitToRight: { x: 50, opacity: 0 }
+};
+
+const springTransition = { type: "spring", stiffness: 300, damping: 30 };
+
+// --- Sub Components ---
+
+// Mode Button with optional sub-settings chevron
+const ModeButton = ({ mode, isActive, onClick, onSubSettingsClick }) => {
     const activeClass = isActive ? `active ${mode.colorClass}` : '';
+
     return (
-        <button
-            onClick={onClick}
-            className={`mode-item ${activeClass}`}
-        >
-            <div className="mode-icon-wrapper">
-                {mode.icon}
-            </div>
-            <div className="mode-info">
-                <div className="mode-label">
-                    {mode.label}
+        <div className={`mode-item-wrapper ${activeClass}`}>
+            <button
+                onClick={onClick}
+                className={`mode-item ${activeClass}`}
+            >
+                <div className="mode-icon-wrapper">
+                    {mode.icon}
                 </div>
-                <div className="mode-desc">
-                    {mode.desc}
+                <div className="mode-info">
+                    <div className="mode-label">
+                        {mode.label}
+                    </div>
+                    <div className="mode-desc">
+                        {mode.desc}
+                    </div>
                 </div>
-            </div>
-            {isActive && <CheckIcon className="check-icon" />}
-        </button>
+                {isActive && <CheckIcon className="check-icon" />}
+            </button>
+
+            {/* Sub-settings navigation button */}
+            {mode.hasSubSettings && isActive && (
+                <button
+                    className="mode-sub-settings-btn"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onSubSettingsClick(mode.subSettingsView);
+                    }}
+                    title={mode.subSettingsView === 'stores' ? 'ストア選択' : 'ドメイン設定'}
+                >
+                    <ChevronRightIcon />
+                </button>
+            )}
+        </div>
     );
 };
 
+// Store Item component
+const StoreItem = ({ store, isSelected, onClick }) => {
+    return (
+        <motion.button
+            layout
+            onClick={onClick}
+            className={`store-item ${isSelected ? 'active' : ''}`}
+            whileHover={{ scale: 1.02, backgroundColor: "rgba(5, 150, 105, 0.08)" }}
+            whileTap={{ scale: 0.98 }}
+        >
+            <div className="store-icon-container">
+                <FolderIcon />
+            </div>
+            <div className="store-info">
+                <span className="store-name">{store.display_name}</span>
+                <span className="store-desc">{store.description}</span>
+            </div>
+            {isSelected && (
+                <motion.div
+                    className="store-active-glow"
+                    layoutId="storeGlow"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+            )}
+        </motion.button>
+    );
+};
+
+// View Header with back button
+const ViewHeader = ({ title, onBack }) => (
+    <div className="view-header">
+        <button className="back-btn" onClick={onBack}>
+            <ChevronLeftIcon />
+            <span>{title}</span>
+        </button>
+    </div>
+);
+
+// --- Main Component ---
 const ContextSelector = ({ settings, onSettingsChange }) => {
-    const [view, setView] = useState('main'); // 'main' | 'domains'
+    // View state: 'primary' | 'advanced' | 'stores' | 'domains'
+    const [view, setView] = useState('primary');
+    const [slideDirection, setSlideDirection] = useState('right');
+
     const [urlInput, setUrlInput] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
-    const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+    const [activeStoreId, setActiveStoreId] = useState(null);
 
     const currentModeId = useMemo(() => {
         const { ragEnabled, webMode } = settings;
-        // 'auto' モード判定を最優先
         if (ragEnabled === 'auto' && webMode === 'auto') return 'standard';
-        // 明示的にtrueの場合
         if (ragEnabled === true && webMode !== 'off') return 'hybrid';
         if (ragEnabled === true && webMode === 'off') return 'enterprise';
-        // 明示的にfalseの場合
         if (ragEnabled === false && webMode === 'force') return 'deep';
-        if (ragEnabled === false && webMode === 'off') return 'fast';
-        // フォールバック
+        if (ragEnabled === false && webMode === 'off') return 'chat';
         return 'standard';
     }, [settings]);
 
-    // モード定義を分割
-    const PRIMARY_MODES = MODES.filter(m => ['standard', 'fast'].includes(m.id));
-    const ADVANCED_MODES = MODES.filter(m => !['standard', 'fast'].includes(m.id));
+    // Navigation helpers
+    const navigateTo = (targetView, direction = 'right') => {
+        setSlideDirection(direction);
+        setView(targetView);
+    };
 
-    // マニュアルモード（Advanced内のモード）が選択されている場合は自動的に展開
-    const isManualSelected = ADVANCED_MODES.some(m => m.id === currentModeId);
-    const showAdvanced = isAdvancedOpen || isManualSelected;
+    const goBack = (targetView) => {
+        navigateTo(targetView, 'left');
+    };
 
+    // Mode selection handler
     const handleModeSelect = (modeId) => {
         const targetMode = MODES.find(m => m.id === modeId);
         if (targetMode) {
@@ -187,35 +277,13 @@ const ContextSelector = ({ settings, onSettingsChange }) => {
                 ...settings,
                 ...targetMode.settings
             });
-            // プライマリモードを選択した場合は詳細を閉じる（ユーザー体験としてスッキリさせる）
-            if (['standard', 'fast'].includes(modeId)) {
-                setIsAdvancedOpen(false);
+            if (modeId !== 'enterprise') {
+                setActiveStoreId(null);
             }
         }
     };
 
-    // --- Animation Variants (Design Rule: Spring Physics - Optimized) ---
-    const accordionVariants = {
-        hidden: {
-            opacity: 0,
-            height: 0,
-            overflow: 'hidden',
-            marginBottom: 0
-        },
-        visible: {
-            opacity: 1,
-            height: 'auto',
-            marginBottom: 8,
-            transition: {
-                type: "spring",
-                stiffness: 300,  // より鋭い動き出し
-                damping: 30,     // より素早い収束
-                mass: 0.8        // より軽い質感
-            }
-        }
-    };
-
-    // --- Domain Management (Logic remains unchanged) ---
+    // Domain management
     const filters = settings.domainFilters || [];
 
     const addFilter = () => {
@@ -244,79 +312,27 @@ const ContextSelector = ({ settings, onSettingsChange }) => {
         onSettingsChange({ ...settings, domainFilters: newFilters });
     };
 
-    // --- Render: Domain Settings View ---
-    if (view === 'domains') {
-        return (
-            <div className="context-selector-container">
-                <div className="domain-header">
-                    <button
-                        onClick={() => setView('main')}
-                        className="back-btn"
-                        title="戻る"
-                    >
-                        <ChevronLeftIcon />
-                    </button>
-                    <span className="domain-title">検索対象サイトの設定</span>
-                </div>
-                {/* ... (Domain view content remains same) ... */}
-                <div className="domain-input-row">
-                    <input
-                        className="domain-input-field"
-                        placeholder="example.com"
-                        value={urlInput}
-                        onChange={(e) => setUrlInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && addFilter()}
-                        autoFocus
-                    />
-                    <button
-                        onClick={addFilter}
-                        disabled={!urlInput}
-                        className="domain-add-btn"
-                    >
-                        追加
-                    </button>
-                </div>
-                {errorMsg && <p className="error-msg">{errorMsg}</p>}
-                <p className="domain-help">
-                    特定のドメインを追加すると、そのサイト内のみを検索します。
-                </p>
-                <div className="domain-list">
-                    {filters.length === 0 ? (
-                        <div className="domain-empty">
-                            指定なし (Web全体を検索)
-                        </div>
-                    ) : (
-                        filters.map((filter, idx) => (
-                            <div key={idx} className="domain-item">
-                                <div className="domain-info">
-                                    <GlobeAltIcon />
-                                    <span>{filter}</span>
-                                </div>
-                                <button
-                                    onClick={() => removeFilter(idx)}
-                                    className="domain-delete-btn"
-                                    title="削除"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-        );
-    }
+    // Get animation initial/exit states based on direction
+    const getAnimationState = () => ({
+        initial: slideDirection === 'right' ? 'enterFromRight' : 'enterFromLeft',
+        exit: slideDirection === 'right' ? 'exitToLeft' : 'exitToRight'
+    });
 
-    // --- Render: Main Mode Selection View ---
-    const isWebActive = settings.webMode !== 'off';
+    // --- Render Views ---
 
-    return (
-        <div className="context-selector-container">
-            <div className="context-section-label">
-                検索モード
-            </div>
+    // Primary view (Auto, Chat only, + link to Advanced)
+    const renderPrimaryView = () => (
+        <motion.div
+            key="primary"
+            variants={slideVariants}
+            initial={getAnimationState().initial}
+            animate="center"
+            exit={getAnimationState().exit}
+            transition={springTransition}
+            className="view-content"
+        >
+            <div className="context-section-label">検索モード</div>
 
-            {/* Primary Modes (Auto / Fast) */}
             <div className="primary-modes-group">
                 {PRIMARY_MODES.map((mode) => (
                     <ModeButton
@@ -324,83 +340,155 @@ const ContextSelector = ({ settings, onSettingsChange }) => {
                         mode={mode}
                         isActive={currentModeId === mode.id}
                         onClick={() => handleModeSelect(mode.id)}
+                        onSubSettingsClick={() => { }}
                     />
                 ))}
             </div>
 
-            {/* Manual Override Trigger */}
-            {!isManualSelected && (
+            <button
+                onClick={() => navigateTo('advanced', 'right')}
+                className="advanced-trigger-btn"
+            >
+                <span className="trigger-icon">
+                    <ChevronRightIcon />
+                </span>
+                <span className="trigger-text">
+                    情報源を手動で指定...
+                </span>
+            </button>
+        </motion.div>
+    );
+
+    // Advanced view (Hybrid, Enterprise, Web)
+    const renderAdvancedView = () => (
+        <motion.div
+            key="advanced"
+            variants={slideVariants}
+            initial={getAnimationState().initial}
+            animate="center"
+            exit={getAnimationState().exit}
+            transition={springTransition}
+            className="view-content"
+        >
+            <ViewHeader title="戻る" onBack={() => goBack('primary')} />
+
+            <div className="advanced-divider-label">Manual Override</div>
+
+            <div className="advanced-modes-group">
+                {ADVANCED_MODES.map((mode) => (
+                    <ModeButton
+                        key={mode.id}
+                        mode={mode}
+                        isActive={currentModeId === mode.id}
+                        onClick={() => handleModeSelect(mode.id)}
+                        onSubSettingsClick={(targetView) => navigateTo(targetView, 'right')}
+                    />
+                ))}
+            </div>
+        </motion.div>
+    );
+
+    // Stores view (Enterprise sub-settings)
+    const renderStoresView = () => (
+        <motion.div
+            key="stores"
+            variants={slideVariants}
+            initial={getAnimationState().initial}
+            animate="center"
+            exit={getAnimationState().exit}
+            transition={springTransition}
+            className="view-content"
+        >
+            <ViewHeader title="社内データ" onBack={() => goBack('advanced')} />
+
+            <div className="sub-panel-header">
+                <span className="label">Knowledge Base Channel</span>
+                <span className="badge">Internal Only</span>
+            </div>
+
+            <div className="store-grid">
+                {MOCK_STORES.map((store) => (
+                    <StoreItem
+                        key={store.id}
+                        store={store}
+                        isSelected={activeStoreId === store.id}
+                        onClick={() => {
+                            setActiveStoreId(store.id);
+                            console.log('[PhaseA Mock] Selected Store ID:', store.id);
+                        }}
+                    />
+                ))}
+            </div>
+        </motion.div>
+    );
+
+    // Domains view (Hybrid/Web sub-settings)
+    const renderDomainsView = () => (
+        <motion.div
+            key="domains"
+            variants={slideVariants}
+            initial={getAnimationState().initial}
+            animate="center"
+            exit={getAnimationState().exit}
+            transition={springTransition}
+            className="view-content"
+        >
+            <ViewHeader title="戻る" onBack={() => goBack('advanced')} />
+
+            <div className="domain-input-row">
+                <input
+                    className="domain-input-field"
+                    placeholder="example.com"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addFilter()}
+                    autoFocus
+                />
                 <button
-                    onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                    className="advanced-trigger-btn"
-                    aria-expanded={showAdvanced}
-                    title={showAdvanced ? "詳細設定を閉じる" : "詳細設定を開く"}
+                    onClick={addFilter}
+                    disabled={!urlInput}
+                    className="domain-add-btn"
                 >
-                    <span className={`trigger-icon ${showAdvanced ? 'open' : ''}`}>
-                        <ChevronRightIcon />
-                    </span>
-                    <span className="trigger-text">
-                        {showAdvanced ? '詳細設定を閉じる' : '情報源を手動で指定...'}
-                    </span>
+                    追加
                 </button>
-            )}
-
-            {/* Advanced Modes (Accordion) */}
-            <AnimatePresence initial={false}>
-                {showAdvanced && (
-                    <motion.div
-                        key="advanced-content"
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        variants={accordionVariants}
-                        className="advanced-modes-wrapper"
-                    >
-                        {/* Divider Label */}
-                        <div className="advanced-divider-label">
-                            Manual Override
-                        </div>
-
-                        {ADVANCED_MODES.map((mode) => (
-                            <ModeButton
-                                key={mode.id}
-                                mode={mode}
-                                isActive={currentModeId === mode.id}
-                                onClick={() => handleModeSelect(mode.id)}
-                            />
-                        ))}
-
-                        {/* Advanced Settings Link (Moved inside the accordion) */}
-                        <div className="advanced-options-wrapper-static">
-                            <div className="advanced-divider" />
+            </div>
+            {errorMsg && <p className="error-msg">{errorMsg}</p>}
+            <p className="domain-help">
+                特定のドメインを追加すると、そのサイト内のみを検索します。
+            </p>
+            <div className="domain-list">
+                {filters.length === 0 ? (
+                    <div className="domain-empty">
+                        指定なし (Web全体を検索)
+                    </div>
+                ) : (
+                    filters.map((filter, idx) => (
+                        <div key={idx} className="domain-item">
+                            <div className="domain-info">
+                                <GlobeAltIcon />
+                                <span>{filter}</span>
+                            </div>
                             <button
-                                onClick={() => isWebActive && setView('domains')}
-                                className={`advanced-link ${!isWebActive ? 'disabled' : ''}`}
-                                disabled={!isWebActive}
-                                title={!isWebActive ? "Web検索モードでのみ設定可能です" : ""}
+                                onClick={() => removeFilter(idx)}
+                                className="domain-delete-btn"
+                                title="削除"
                             >
-                                <div className="advanced-icon-wrapper">
-                                    <GlobeAltIcon />
-                                </div>
-
-                                <div className="advanced-info">
-                                    <div className="advanced-label">検索対象サイト</div>
-                                    <div className="advanced-sub">
-                                        {isWebActive
-                                            ? (filters.length > 0 ? `${filters.length}件の指定あり` : 'Web全体')
-                                            : 'Web検索を必要とするモードのみ'}
-                                    </div>
-                                </div>
-
-                                {isWebActive && (
-                                    <span className="chevron-icon">
-                                        <ChevronRightIcon />
-                                    </span>
-                                )}
+                                ×
                             </button>
                         </div>
-                    </motion.div>
+                    ))
                 )}
+            </div>
+        </motion.div>
+    );
+
+    return (
+        <div className="context-selector-container">
+            <AnimatePresence mode="wait" initial={false}>
+                {view === 'primary' && renderPrimaryView()}
+                {view === 'advanced' && renderAdvancedView()}
+                {view === 'stores' && renderStoresView()}
+                {view === 'domains' && renderDomainsView()}
             </AnimatePresence>
         </div>
     );
