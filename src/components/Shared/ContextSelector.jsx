@@ -93,6 +93,15 @@ const FolderIcon = () => (
     </svg>
 );
 
+// 🔄 Refresh (更新)
+const RefreshIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M23 4v6h-6"></path>
+        <path d="M1 20v-6h6"></path>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+    </svg>
+);
+
 // --- Mode Definitions ---
 const MODES = [
     {
@@ -229,13 +238,18 @@ const StoreItem = ({ store, isSelected, onClick }) => {
     );
 };
 
-// View Header with back button
-const ViewHeader = ({ title, onBack }) => (
+// View Header with back button and optional right element
+const ViewHeader = ({ title, onBack, rightElement }) => (
     <div className="view-header">
         <button className="back-btn" onClick={onBack}>
             <ChevronLeftIcon />
             <span>{title}</span>
         </button>
+        {rightElement && (
+            <div className="header-right-element">
+                {rightElement}
+            </div>
+        )}
     </div>
 );
 
@@ -426,7 +440,20 @@ const ContextSelector = ({
             transition={springTransition}
             className="view-content"
         >
-            <ViewHeader title="社内データ" onBack={() => goBack('advanced')} />
+            <ViewHeader
+                title="社内データ"
+                onBack={() => goBack('advanced')}
+                rightElement={
+                    <button
+                        className="refresh-btn"
+                        onClick={() => refetchStores({ force: true })}
+                        title="ストア一覧を更新"
+                        disabled={isStoresLoading}
+                    >
+                        <RefreshIcon />
+                    </button>
+                }
+            />
 
             <div className="sub-panel-header">
                 <span className="label">Knowledge Base Channel</span>
@@ -446,7 +473,7 @@ const ContextSelector = ({
                 <div className="stores-error">
                     <div className="error-icon">⚠️</div>
                     <div className="error-message">{storesError}</div>
-                    <button className="retry-button" onClick={refetchStores}>
+                    <button className="retry-button" onClick={() => refetchStores({ force: true })}>
                         再試行
                     </button>
                 </div>

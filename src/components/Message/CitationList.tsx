@@ -123,9 +123,10 @@ const CitationList: React.FC<CitationListProps> = ({ citations, messageId }) => 
                                     <div className="citation-group-label">{group.label}</div>
                                     <div className="citation-list">
                                         {group.items.map((cite) => {
-                                            const Wrapper = cite.url ? 'a' : 'div';
-                                            const props = cite.url
-                                                ? { href: cite.url, target: '_blank', rel: 'noopener noreferrer' }
+                                            const validUrl = (cite.url && cite.url !== 'null') ? cite.url : undefined;
+                                            const Wrapper = validUrl ? 'a' : 'div';
+                                            const props = validUrl
+                                                ? { href: validUrl, target: '_blank', rel: 'noopener noreferrer' }
                                                 : {};
 
                                             return (
@@ -142,7 +143,7 @@ const CitationList: React.FC<CitationListProps> = ({ citations, messageId }) => 
                                                         <SourceIcon
                                                             type={cite.type === 'dataset' ? 'rag' : cite.type}
                                                             source={cite.source}
-                                                            url={cite.url}
+                                                            url={validUrl}
                                                             className="citation-icon-img"
                                                         />
                                                     </div>
@@ -150,7 +151,7 @@ const CitationList: React.FC<CitationListProps> = ({ citations, messageId }) => 
                                                         <div className="citation-source" title={cite.source}>
                                                             {cite.source.replace(/^\[\d+\]\s*/, '')}
                                                         </div>
-                                                        {cite.url && <div className="citation-url">{cite.url}</div>}
+                                                        {validUrl && <div className="citation-url">{validUrl}</div>}
                                                     </div>
                                                 </Wrapper>
                                             );
