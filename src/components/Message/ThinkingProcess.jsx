@@ -195,6 +195,28 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                     // Silent: 非表示
                     if (mode === 'silent') return null;
 
+                    // ★Mergedモード専用: ルーターノード（判定結果）はチップUI非表示、thinkingのみ表示
+                    if (step.iconType === 'router') {
+                        const monologueContent = step.thinking || step.reasoning;
+                        if (!monologueContent) return null; // thinkingもなければ完全に非表示
+
+                        return (
+                            <div key={step.id || index} className="thought-monologue-container">
+                                {isStepDone ? (
+                                    <TypewriterEffect
+                                        content={monologueContent}
+                                        onComplete={() => handleStepComplete(index)}
+                                    />
+                                ) : (
+                                    <div className="fluid-loading-container small">
+                                        <FluidOrb width="24px" height="24px" />
+                                        <span className="fluid-loading-text">Thinking...</span>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
                     // Action: チップ型UI
                     if (mode === 'action') {
                         const actionMonologueContent = step.thinking || step.reasoning;
