@@ -576,9 +576,12 @@ function App() {
               inspector={(() => {
                 // 最新のAIメッセージから情報を取得
                 const lastAiMessage = messages.slice().reverse().find(m => m.role === 'ai');
-                const thinkingSteps = lastAiMessage?.thoughtProcess || [];
-                const citations = lastAiMessage?.citations || [];
-                const messageId = lastAiMessage?.messageId || lastAiMessage?.id;
+                // ★修正: ストリーミング中はstreamingMessageを優先して表示
+                const targetMessage = (isGenerating && streamingMessage) ? streamingMessage : lastAiMessage;
+
+                const thinkingSteps = targetMessage?.thoughtProcess || [];
+                const citations = targetMessage?.citations || [];
+                const messageId = targetMessage?.messageId || targetMessage?.id;
 
                 return (
                   <InspectorPanel

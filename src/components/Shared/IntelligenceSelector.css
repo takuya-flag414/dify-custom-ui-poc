@@ -49,8 +49,8 @@
     letter-spacing: -0.01em;
 }
 
-/* --- Pro Active: Trigger Glow --- */
-.intelligence-trigger.pro-active {
+/* --- Deep Think Active: Trigger Glow --- */
+.intelligence-trigger.deep-active {
     background: transparent;
     color: var(--ai-gradient-blue);
 }
@@ -106,8 +106,9 @@
     min-width: 160px;
     padding: 6px;
     background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    /* Liquid Glass Effect: Increased blur to 40px */
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
     box-shadow:
@@ -168,8 +169,8 @@
     z-index: 1;
 }
 
-/* --- Pro Mode Active: Glow --- */
-.intelligence-mode-item.pro.active {
+/* --- Deep Think Mode Active: Glow --- */
+.intelligence-mode-item.deep.active {
     background: transparent;
 }
 
@@ -203,11 +204,11 @@
     border-radius: 7px;
 }
 
-.intelligence-mode-item.pro.active .mode-label {
+.intelligence-mode-item.deep.active .mode-label {
     color: var(--ai-gradient-blue);
 }
 
-.intelligence-mode-item.pro.active .check-icon {
+.intelligence-mode-item.deep.active .check-icon {
     color: var(--ai-gradient-magenta);
 }
 
@@ -224,7 +225,7 @@
     color: var(--color-text-main, #f5f5f7);
 }
 
-[data-theme='dark'] .intelligence-trigger.pro-active {
+[data-theme='dark'] .intelligence-trigger.deep-active {
     color: var(--ai-gradient-cyan);
 }
 
@@ -272,7 +273,7 @@
     background: rgba(40, 40, 40, 0.95);
 }
 
-[data-theme='dark'] .intelligence-mode-item.pro.active .mode-label {
+[data-theme='dark'] .intelligence-mode-item.deep.active .mode-label {
     color: var(--ai-gradient-cyan);
 }
 

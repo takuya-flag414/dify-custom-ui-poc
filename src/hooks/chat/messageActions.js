@@ -79,7 +79,8 @@ export const prepareMessageEdit = ({
 
   // 履歴の切り詰め（対象メッセージより前のメッセージのみ残す）
   const previousMessages = messages.slice(0, messageIndex);
-  return { previousMessages, shouldSend: true, error: null };
+  const targetMessage = messages[messageIndex]; // ★追加: 編集対象のメッセージを取得
+  return { previousMessages, targetMessage, shouldSend: true, error: null };
 };
 
 /**

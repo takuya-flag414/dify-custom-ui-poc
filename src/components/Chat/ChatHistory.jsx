@@ -146,44 +146,54 @@ const ChatHistory = ({
 
       <AnimatePresence mode="popLayout">
         {/* ★変更: 確定メッセージのみをmessages配列からレンダリング */}
-        {messages.map((msg, index) => {
-          // ★追加: システムエラーの場合の表示
-          if (msg.role === 'system' && msg.type === 'error') {
+        {(() => {
+          let lastUserMessage = null;
+          return messages.map((msg, index) => {
+            // ★追加: システムエラーの場合の表示
+            if (msg.role === 'system' && msg.type === 'error') {
+              return (
+                <SystemErrorBlock
+                  key={msg.id}
+                  message={msg}
+                  onOpenConfig={onOpenConfig}
+                  onRetry={() => handleRetry(index)}
+                />
+              );
+            }
+
+            // 50件以下 OR 最新メッセージのみアニメーション有効
+            const enableAnimation = enableFullAnimation || isNewMessage(index);
+
+            // ★追加: 最後のAIメッセージかどうかを判定（再送信ボタン表示用）
+            const isLastAi = (
+              msg.role === 'ai' &&
+              !streamingMessage &&
+              index === messages.length - 1
+            );
+
+            // ★追加: 前回のユーザーメッセージを取得（ContextChipsの差分表示用）
+            const previousUserMsg = lastUserMessage;
+            if (msg.role === 'user') {
+              lastUserMessage = msg;
+            }
+
             return (
-              <SystemErrorBlock
+              <MessageBlock
                 key={msg.id}
                 message={msg}
-                onOpenConfig={onOpenConfig}
-                onRetry={() => handleRetry(index)}
+                previousMessage={previousUserMsg} // Pass previous user message
+                onSuggestionClick={onSuggestionClick}
+                onSmartActionSelect={onSmartActionSelect}
+                onOpenArtifact={onOpenArtifact}
+                enableAnimation={enableAnimation}
+                userName={userName}
+                onEdit={onEdit}
+                onRegenerate={onRegenerate}
+                isLastAiMessage={isLastAi}
               />
             );
-          }
-
-          // 50件以下 OR 最新メッセージのみアニメーション有効
-          const enableAnimation = enableFullAnimation || isNewMessage(index);
-
-          // ★追加: 最後のAIメッセージかどうかを判定（再送信ボタン表示用）
-          const isLastAi = (
-            msg.role === 'ai' &&
-            !streamingMessage &&
-            index === messages.length - 1
-          );
-
-          return (
-            <MessageBlock
-              key={msg.id}
-              message={msg}
-              onSuggestionClick={onSuggestionClick}
-              onSmartActionSelect={onSmartActionSelect}
-              onOpenArtifact={onOpenArtifact}
-              enableAnimation={enableAnimation}
-              userName={userName}
-              onEdit={onEdit}
-              onRegenerate={onRegenerate}
-              isLastAiMessage={isLastAi}
-            />
-          );
-        })}
+          });
+        })()}
 
         {/* ★追加: ストリーミング中のメッセージを別途表示（パフォーマンス最適化）*/}
         {streamingMessage && (

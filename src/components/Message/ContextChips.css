@@ -1,0 +1,222 @@
+/* src/components/Message/ContextChips.css */
+
+/* Container - 右寄せで吹き出しの上に配置 */
+.context-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding-right: 4px;
+}
+
+/* Base Chip Style - Glassmorphism (DESIGN_RULE準拠) */
+.context-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    /* Default (Light Mode) */
+    color: var(--color-text-main);
+    background: rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    /* Darker border for light mode */
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.05),
+        0 0 0 0.5px rgba(255, 255, 255, 0.4) inset;
+
+    cursor: default;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease,
+        color 0.2s ease;
+}
+
+.context-chip:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+/* Dark Mode Override for Base Chip */
+[data-theme='dark'] .context-chip {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.15),
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+}
+
+[data-theme='dark'] .context-chip:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Icon */
+.context-chip-icon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    stroke-width: 2.5;
+}
+
+/* Label */
+.context-chip-label {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ========================================
+   Chip Type Variants
+   ======================================== */
+
+/* Store (Knowledge Base) - Green accent */
+/* Light Mode: Dark Green Text, Light Green bg */
+.context-chip-store {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: #047857;
+    /* emerald-700 */
+}
+
+.context-chip-store:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.context-chip-store .context-chip-icon {
+    color: #059669;
+    /* emerald-600 */
+}
+
+/* Dark Mode Override for Store */
+[data-theme='dark'] .context-chip-store {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(52, 211, 153, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='dark'] .context-chip-store:hover {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(52, 211, 153, 0.4);
+}
+
+[data-theme='dark'] .context-chip-store .context-chip-icon {
+    color: #34d399;
+}
+
+
+/* Domain Filter - Blue accent */
+/* Light Mode: Dark Blue Text, Light Blue bg */
+.context-chip-domain {
+    background: rgba(14, 165, 233, 0.1);
+    border-color: rgba(14, 165, 233, 0.2);
+    color: #0369a1;
+    /* sky-700 */
+}
+
+.context-chip-domain:hover {
+    background: rgba(14, 165, 233, 0.15);
+    border-color: rgba(14, 165, 233, 0.3);
+}
+
+.context-chip-domain .context-chip-icon {
+    color: #0284c7;
+    /* sky-600 */
+}
+
+/* Dark Mode Override for Domain */
+[data-theme='dark'] .context-chip-domain {
+    background: rgba(14, 165, 233, 0.15);
+    border-color: rgba(56, 189, 248, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='dark'] .context-chip-domain:hover {
+    background: rgba(14, 165, 233, 0.25);
+    border-color: rgba(56, 189, 248, 0.4);
+}
+
+[data-theme='dark'] .context-chip-domain .context-chip-icon {
+    color: #38bdf8;
+}
+
+
+/* Web Search - Purple accent */
+/* Light Mode */
+.context-chip-web-search {
+    background: rgba(147, 51, 234, 0.1);
+    border-color: rgba(147, 51, 234, 0.2);
+    color: #7e22ce;
+    /* purple-700 */
+}
+
+.context-chip-web-search:hover {
+    background: rgba(147, 51, 234, 0.15);
+    border-color: rgba(147, 51, 234, 0.3);
+}
+
+.context-chip-web-search .context-chip-icon {
+    color: #9333ea;
+    /* purple-600 */
+}
+
+/* Dark Mode Override for Web Search */
+[data-theme='dark'] .context-chip-web-search {
+    background: rgba(147, 51, 234, 0.15);
+    border-color: rgba(167, 139, 250, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='dark'] .context-chip-web-search:hover {
+    background: rgba(147, 51, 234, 0.25);
+    border-color: rgba(167, 139, 250, 0.4);
+}
+
+[data-theme='dark'] .context-chip-web-search .context-chip-icon {
+    color: #a78bfa;
+}
+
+
+/* File Attachment - Neutral */
+/* Light Mode */
+.context-chip-file {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--color-text-main);
+}
+
+.context-chip-file:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.context-chip-file .context-chip-icon {
+    color: var(--color-text-sub);
+}
+
+/* Dark Mode Override for File */
+[data-theme='dark'] .context-chip-file {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='dark'] .context-chip-file:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme='dark'] .context-chip-file .context-chip-icon {
+    color: rgba(255, 255, 255, 0.8);
+}

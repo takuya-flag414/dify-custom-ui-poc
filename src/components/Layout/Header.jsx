@@ -118,7 +118,6 @@ const Header = ({
                     テスト
                 </button>
 
-                {/* ★一時無効化: Inspectorトグルボタン（開発中のため非表示）
                 <button
                     className={`header-btn ${isInspectorOpen ? 'active' : ''}`}
                     onClick={onToggleInspector}
@@ -127,7 +126,6 @@ const Header = ({
                     <PanelRightIcon width="16" height="16" />
                     詳細
                 </button>
-                */}
 
                 <div className="header-divider" />
 

@@ -1,123 +1,21 @@
 // src/components/Chat/ChatInput.jsx
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ContextSelector from '../Shared/ContextSelector';
-import IntelligenceSelector from '../Shared/IntelligenceSelector';
-import FileIcon from '../Shared/FileIcon';
+
+// New Architecture Components
+import CommandCenterContainer from './Input/CommandCenterContainer';
+import ReferenceRail from './Input/ReferenceRail';
+import InputCanvas from './Input/InputCanvas';
+import ControlDeck from './Input/ControlDeck';
+// UniversalAddMenu is now handled inside ControlDeck
+// import UniversalAddMenu from './Input/UniversalAddMenu'; 
 import PrivacyConfirmDialog from './PrivacyConfirmDialog';
-import PrivacyShieldButton from './PrivacyShieldButton';
-import IntelligenceSendButton from './IntelligenceSendButton';
+
 import { scanText } from '../../utils/privacyDetector';
 import { scanFiles, hasFileWarnings, getFileDetections, isScannableFile } from '../../utils/fileScanner';
+// import { fetchKnowledgeStores } from '../../services/DifyClient'; // Removed in favor of hook
+import { useGeminiStores } from '../../hooks/useGeminiStores';
 import './ChatInput.css';
-
-// --- Icons (SVG Definitions) ---
-const iconProps = {
-  width: "14",
-  height: "14",
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: "2",
-  strokeLinecap: "round",
-  strokeLinejoin: "round"
-};
-
-const PlusIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
-
-// --- Mode Icons ---
-const ChatBubbleIcon = () => (
-  <svg {...iconProps}>
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-  </svg>
-);
-
-const SparklesIcon = () => (
-  <svg {...iconProps}>
-    <path d="M12 2L14.4 7.2L20 9.6L14.4 12L12 17.2L9.6 12L4 9.6L9.6 7.2L12 2Z" />
-  </svg>
-);
-
-const RocketLaunchIcon = () => (
-  <svg {...iconProps}>
-    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.01-.09-2.79a1.993 1.993 0 0 0-2.91.09z"></path>
-    <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
-    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
-    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
-  </svg>
-);
-
-const BuildingOfficeIcon = () => (
-  <svg {...iconProps}>
-    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-    <path d="M9 22v-4h6v4"></path>
-    <path d="M8 6h.01"></path>
-    <path d="M16 6h.01"></path>
-    <path d="M12 6h.01"></path>
-    <path d="M12 10h.01"></path>
-    <path d="M12 14h.01"></path>
-    <path d="M16 10h.01"></path>
-    <path d="M16 14h.01"></path>
-    <path d="M8 10h.01"></path>
-    <path d="M8 14h.01"></path>
-  </svg>
-);
-
-const GlobeAltIcon = () => (
-  <svg {...iconProps}>
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M2 12h20"></path>
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-  </svg>
-);
-
-const CloudArrowUpIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-    <path d="M12 12v9"></path>
-    <path d="m16 16-4-4-4 4"></path>
-  </svg>
-);
-
-// --- Helper: Get Mode Info ---
-const getModeInfo = (settings) => {
-  const { ragEnabled, webMode, domainFilters } = settings;
-  const filterCount = domainFilters?.length || 0;
-  const suffix = filterCount > 0 ? ` (${filterCount})` : '';
-
-  // 'auto'モード判定を最優先
-  if (ragEnabled === 'auto' && webMode === 'auto') {
-    return { label: `オート${suffix}`, class: 'mode-standard', icon: <SparklesIcon /> };
-  }
-  // 明示的にtrueの場合
-  if (ragEnabled === true && webMode !== 'off') {
-    return { label: `ハイブリッド${suffix}`, class: 'mode-hybrid', icon: <RocketLaunchIcon /> };
-  }
-  if (ragEnabled === true) {
-    return { label: '社内データ', class: 'mode-enterprise', icon: <BuildingOfficeIcon /> };
-  }
-  // webMode判定
-  if (webMode === 'force') {
-    return { label: `Web検索${suffix}`, class: 'mode-deep', icon: <GlobeAltIcon /> };
-  }
-  if (webMode === 'off') {
-    return { label: 'チャットのみ', class: 'mode-chat', icon: <ChatBubbleIcon /> };
-  }
-  // フォールバック
-  return { label: `オート${suffix}`, class: 'mode-standard', icon: <SparklesIcon /> };
-};
 
 // --- Main Component ---
 const ChatInput = ({
@@ -136,33 +34,37 @@ const ChatInput = ({
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [showContextSelector, setShowContextSelector] = useState(false);
+
+  // showAddMenu state is now managed inside ControlDeck (or triggered via props)
+  // We only need to trigger store loading when menu opens.
+
   const [isDragging, setIsDragging] = useState(false);
   const [privacyWarning, setPrivacyWarning] = useState({ hasWarning: false, detections: [] });
   const [showPrivacyConfirm, setShowPrivacyConfirm] = useState(false);
 
-  const textareaRef = useRef(null);
+  // Store & Domain State (Managed here to lift up to ReferenceRail)
+  const [activeStore, setActiveStore] = useState(null); // { id, display_name, ... }
+  // activeDomains is derived from searchSettings.domainFilters
+
+  // Validation State
+  const [showStoreError, setShowStoreError] = useState(false);
+
+  // Stores Data State (for UniversalAddMenu) managed by hook
+  const {
+    stores,
+    isLoading: isStoreLoading,
+    error: storeError,
+    refetch: refetchStores
+  } = useGeminiStores(mockMode, backendBApiKey, backendBApiUrl);
+
   const fileInputRef = useRef(null);
-  const contextSelectorRef = useRef(null); // Ref for the popover container
 
-  // Click outside to close ContextSelector
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (contextSelectorRef.current && !contextSelectorRef.current.contains(event.target)) {
-        setShowContextSelector(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Remove direct addMenuRef/handling as it's moved
 
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
-    }
-  }, [text]);
+  // Fetch Stores Check - utilizing hook's refetch
+  const handleLoadStores = useCallback(() => {
+    refetchStores();
+  }, [refetchStores]);
 
   // Privacy detection
   useEffect(() => {
@@ -173,18 +75,45 @@ const ChatInput = ({
     return () => clearTimeout(timer);
   }, [text]);
 
+  // ★追加: ストアデータのロード完了後、searchSettings.selectedStoreId に基づいて activeStore を復元
+  useEffect(() => {
+    if (searchSettings.selectedStoreId && stores.length > 0) {
+      const savedStore = stores.find(s => s.id === searchSettings.selectedStoreId);
+      if (savedStore) {
+        setActiveStore(savedStore);
+      }
+    } else if (!searchSettings.selectedStoreId) {
+      setActiveStore(null);
+    }
+  }, [searchSettings.selectedStoreId, stores]);
+
   const executeSend = useCallback(() => {
     const filesToSend = selectedFiles.map(sf => sf.file);
+    // Include store info in the message or context? 
+    // Usually ContextSelector manages the logic, but here we visualize it.
+    // If activeStore is set, ensure searchSettings reflects it if needed.
+
     onSendMessage(text, filesToSend);
     setText('');
     setSelectedFiles([]);
     setPrivacyWarning({ hasWarning: false, detections: [] });
     setShowPrivacyConfirm(false);
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
   }, [text, selectedFiles, onSendMessage]);
 
   const handleSend = () => {
     if ((!text.trim() && selectedFiles.length === 0) || isLoading) return;
+
+    // ★バリデーション: RAG有効(Enterprise/Hybrid)かつストア未選択の場合
+    const isRagEnabled = searchSettings.ragEnabled === true; // autoは除外 (標準モードはストア不要)
+    const isStoreMissing = !searchSettings.selectedStoreId;
+
+    if (isRagEnabled && isStoreMissing) {
+      setShowStoreError(true);
+      // 3秒後にエラー表示を消す
+      setTimeout(() => setShowStoreError(false), 3000);
+      return;
+    }
+
     if (combinedWarning) {
       setShowPrivacyConfirm(true);
       return;
@@ -203,7 +132,7 @@ const ChatInput = ({
   const addFiles = useCallback(async (newFiles) => {
     if (newFiles && newFiles.length > 0) {
       const initialFiles = newFiles.map(file => ({
-        id: `file-${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`, // Unique ID
+        id: `file-${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`,
         file,
         scanStatus: isScannableFile(file.name) ? 'scanning' : 'skipped',
         hasWarning: false,
@@ -218,7 +147,7 @@ const ChatInput = ({
         return prev.map(sf => {
           if (sf.scanStatus === 'scanning') {
             const result = scannedResults.find(r => r.file === sf.file);
-            if (result) return { ...sf, ...result }; // Merge result, keeping ID
+            if (result) return { ...sf, ...result };
           }
           return sf;
         });
@@ -271,209 +200,132 @@ const ChatInput = ({
     }
   }, [isLoading, addFiles]);
 
-  const modeInfo = useMemo(() => getModeInfo(searchSettings || { webMode: 'auto', ragEnabled: false }), [searchSettings]);
+  const placeholder = isHistoryLoading ? "履歴を読み込んでいます..." : isLoading ? "思考中..." : "AIに相談...";
   const hasFiles = selectedFiles.length > 0;
   const canSend = (text.trim().length > 0 || hasFiles) && !isLoading;
-  const placeholder = isHistoryLoading ? "履歴を読み込んでいます..." : isLoading ? "思考中..." : "AIに相談...";
+
+  // --- Handlers for Universal Add Menu ---
+  const handleAddMenuOpen = () => {
+    // Trigger store loading when menu opens (managed by hook's refetch)
+    handleLoadStores();
+  };
+
+  const handleSelectStore = (storeId) => {
+    const store = stores.find(s => s.id === storeId);
+    if (store) {
+      setActiveStore(store);
+      // ★修正: ストア選択時にsearchSettingsも更新して、useChatが参照できるようにする
+      setSearchSettings({
+        ...searchSettings,
+        selectedStoreId: storeId
+      });
+    }
+  };
+
+  // v3.0: ContextSelector からストアオブジェクトを直接受け取る
+  const handleStoreSelected = (store) => {
+    if (store) {
+      setActiveStore(store);
+    }
+  };
+
+  const handleAddDomain = (domain) => {
+    const current = searchSettings.domainFilters || [];
+    if (!current.includes(domain)) {
+      setSearchSettings({
+        ...searchSettings,
+        domainFilters: [...current, domain]
+      });
+    }
+  };
+
+  const handleRemoveDomain = (index) => {
+    const current = searchSettings.domainFilters || [];
+    const next = [...current];
+    next.splice(index, 1);
+    setSearchSettings({
+      ...searchSettings,
+      domainFilters: next
+    });
+  };
 
   return (
     <>
       <div className={isCentered ? "chat-input-container-centered" : "chat-input-container"}>
-        {/* HUD Container with Motion Layout */}
-        <motion.div
-          className={`chat-input-hud-container ${isDragging ? 'dragging' : ''} ${privacyWarning.hasWarning ? 'privacy-warning' : ''}`}
-          layout
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+
+        {/* Hidden File Input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+          accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
+          multiple
+        />
+
+        {/* Liquid Command Center */}
+        <CommandCenterContainer
+          isDragging={isDragging}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          hasWarning={combinedWarning}
         >
-          {/* Drop Zone Overlay */}
-          <AnimatePresence>
-            {isDragging && (
-              <motion.div
-                className="drop-zone-overlay"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="drop-zone-content">
-                  <div className="drop-zone-icon-wrapper">
-                    <CloudArrowUpIcon />
-                  </div>
-                  <p className="drop-zone-text">ファイルをドロップして追加</p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Tier 1: Reference Rail */}
+          <ReferenceRail
+            files={selectedFiles}
+            activeStore={activeStore}
+            activeDomains={searchSettings.domainFilters || []}
+            onRemoveFile={removeSelectedFile}
+            onRemoveStore={() => {
+              setActiveStore(null);
+              setSearchSettings({
+                ...searchSettings,
+                selectedStoreId: null,
+                ragEnabled: 'auto',
+                webMode: 'auto',
+              });
+            }}
+            onRemoveDomain={handleRemoveDomain}
+          />
 
-          {/* Drag Expand Spacer - ファイルがない時のみ高さを拡張 */}
-          <AnimatePresence>
-            {isDragging && !hasFiles && (
-              <motion.div
-                className="drag-expand-spacer"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 80, opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 35,
-                  opacity: { duration: 0.15 }
-                }}
-              />
-            )}
-          </AnimatePresence>
+          {/* Tier 2: Input Canvas */}
+          <InputCanvas
+            text={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+            placeholder={placeholder}
+            isHistoryLoading={isHistoryLoading}
+          />
 
-          {/* 1. File Tray (Collapsible) */}
-          <AnimatePresence>
-            {hasFiles && (
-              <motion.div
-                className="file-tray-wrapper"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
-                <div className="file-tray scrollbar-overlay">
-                  <AnimatePresence mode="popLayout" initial={false}>
-                    {selectedFiles.map((sf, idx) => {
-                      const statusClass = sf.scanStatus === 'scanning' ? 'scanning' :
-                        sf.hasWarning ? 'warning' : '';
-                      return (
-                        <motion.div
-                          key={sf.id} // Use Unique ID
-                          layout
-                          initial={{ opacity: 0, x: -20, scale: 0.9 }}
-                          animate={{
-                            opacity: 1,
-                            x: 0,
-                            scale: 1,
-                            transition: {
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 25,
-                              delay: idx * 0.05 // Staggered effect
-                            }
-                          }}
-                          exit={{
-                            opacity: 0,
-                            x: 0, // No horizontal movement on exit
-                            scale: 0.5, // Shrink out
-                            transition: { duration: 0.15 }
-                          }}
-                          className={`file-card pending ${statusClass}`}
-                        >
-                          <FileIcon filename={sf.file.name} className="file-tray-icon" />
-                          <div className="file-card-content">
-                            <span className="file-card-name">{sf.file.name}</span>
-                            {sf.scanStatus === 'scanning' && <span className="file-scan-status">スキャン中...</span>}
-                          </div>
-                          {sf.hasWarning && (
-                            <PrivacyShieldButton
-                              detections={sf.detections}
-                              fileName={sf.file.name}
-                              size="small"
-                            />
-                          )}
-                          <button className="file-remove-btn" onClick={() => removeSelectedFile(idx)} title="削除">
-                            <CloseIcon />
-                          </button>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Tier 3: Control Deck */}
+          <ControlDeck
+            // Add props for Universal Add Menu
+            onAddMenuOpen={handleAddMenuOpen}
+            onFileUpload={() => fileInputRef.current?.click()}
+            domainFilters={searchSettings.domainFilters || []}
+            onAddDomain={handleAddDomain}
+            onRemoveDomain={handleRemoveDomain}
 
-          {/* 2. Main Input Area (Unified) */}
-          <div className="input-main-row">
-            {/* Left: Add Button */}
-            <div className="input-left-actions">
-              <button
-                className="add-file-btn"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isLoading}
-                title="ファイルを追加"
-              >
-                <PlusIcon />
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-                accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
-                multiple
-              />
-            </div>
+            // v3.0: ContextSelector props
+            onStoreSelected={handleStoreSelected}
+            showStoreError={showStoreError} // ★ Validation Error Prop
 
-            {/* Center: Textarea */}
-            <textarea
-              ref={textareaRef}
-              className="native-textarea"
-              placeholder={placeholder}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isLoading}
-              rows={1}
-              autoFocus={!isHistoryLoading}
-            />
-
-            {/* Right: Controls & Send */}
-            <div className="input-right-actions">
-              {/* Context Selector Pill (Transparent) */}
-              <div className="relative" ref={contextSelectorRef}>
-                <button
-                  className={`context-pill ${modeInfo.class} ${showContextSelector ? 'active' : ''}`}
-                  onClick={() => setShowContextSelector(!showContextSelector)}
-                  disabled={isLoading}
-                  title="検索モード"
-                >
-                  <span className="context-icon">{modeInfo.icon}</span>
-                </button>
-                {showContextSelector && (
-                  <div className="search-options-popover">
-                    <ContextSelector
-                      settings={searchSettings}
-                      onSettingsChange={setSearchSettings}
-                      mockMode={mockMode}
-                      backendBApiKey={backendBApiKey}
-                      backendBApiUrl={backendBApiUrl}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Intelligence Selector (Brain: Fast/Pro) */}
-              <IntelligenceSelector
-                mode={searchSettings?.reasoningMode || 'fast'}
-                onChange={(mode) => setSearchSettings({ ...searchSettings, reasoningMode: mode })}
-              />
-
-              {/* Privacy Shield */}
-              {privacyWarning.hasWarning && (
-                <div className="mr-1">
-                  <PrivacyShieldButton detections={privacyWarning.detections} />
-                </div>
-              )}
-
-              {/* Intelligence Button */}
-              <IntelligenceSendButton
-                isTyping={text.length > 0}
-                isStreaming={isStreaming}
-                canSend={canSend}
-                onSend={handleSend}
-                onStop={onStop}
-                disabled={!canSend}
-              />
-            </div>
-          </div>
-        </motion.div>
+            searchSettings={searchSettings}
+            setSearchSettings={setSearchSettings}
+            mockMode={mockMode}
+            backendBApiKey={backendBApiKey}
+            backendBApiUrl={backendBApiUrl}
+            privacyWarning={privacyWarning}
+            isTyping={text.length > 0}
+            isStreaming={isStreaming}
+            canSend={canSend}
+            onSend={handleSend}
+            onStop={onStop}
+            isLoading={isLoading}
+          />
+        </CommandCenterContainer>
 
         <p className="input-disclaimer">
           AIは不正確な情報を表示することがあるため、生成された回答を再確認するようにしてください。

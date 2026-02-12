@@ -314,7 +314,7 @@
 
 .native-textarea::placeholder {
     color: var(--color-text-muted);
-    opacity: 0.6;
+    opacity: 0.8;
 }
 
 /* Right Controls */
@@ -372,7 +372,7 @@
     color: var(--color-text-muted);
     margin-top: 12px;
     text-align: center;
-    opacity: 0.6;
+    opacity: 0.8;
     font-weight: 400;
 }
 

@@ -10,7 +10,7 @@ export interface SearchSettings {
     ragEnabled?: boolean | 'auto';
     webMode?: 'off' | 'on' | 'auto' | 'force';
     domainFilters?: string[];
-    reasoningMode?: 'fast' | 'pro';
+    reasoningMode?: 'fast' | 'deep';
     // Phase B: 選択されたGemini File SearchストアID
     selectedStoreId?: string;
 }
@@ -136,7 +136,10 @@ export const ChatServiceAdapter = {
                 else if (useRag && !useWeb) scenarioKey = 'file_rag';
                 else scenarioKey = 'full';
             } else {
-                if (useRag && !useWeb) scenarioKey = 'rag_only';
+                if (useRag && !useWeb) {
+                    // ★社内データモードは常に「ピークマネージャー料金規約」のデモを表示
+                    scenarioKey = 'rag_only_pricing';
+                }
                 else if (!useRag && useWeb) scenarioKey = 'web_only';
                 else if (useRag && useWeb) scenarioKey = 'hybrid';
                 else scenarioKey = 'pure';

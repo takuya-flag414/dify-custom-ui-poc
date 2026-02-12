@@ -8,7 +8,7 @@ export interface SearchSettings {
     ragEnabled: 'auto' | boolean;
     webMode: 'auto' | 'on' | 'off' | 'force';
     domainFilters: string[];
-    reasoningMode: 'fast' | 'pro';
+    reasoningMode: 'fast' | 'deep';
 }
 
 /**

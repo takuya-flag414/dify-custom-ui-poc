@@ -1,0 +1,14 @@
+/* src/components/Message/StructuredUserMessage.css */
+
+.structured-user-message {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.structured-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

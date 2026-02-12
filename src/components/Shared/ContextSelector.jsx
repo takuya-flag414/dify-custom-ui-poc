@@ -1,10 +1,14 @@
 // src/components/Shared/ContextSelector.jsx
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ContextSelector.css';
 
 // Phase B: API経由でストア一覧を取得
 import { useGeminiStores } from '../../hooks/useGeminiStores';
+
+// Sub-components
+import ViewHeader from './ViewHeader';
+import StoreSelector from './StoreSelector';
 
 // --- Icons (SVG) ---
 const iconProps = {
@@ -30,12 +34,6 @@ const ChevronRightIcon = () => (
     </svg>
 );
 
-const ChevronLeftIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-);
-
 // ✨ Sparkles (オート)
 const SparklesIcon = () => (
     <svg {...iconProps}>
@@ -47,16 +45,6 @@ const SparklesIcon = () => (
 const ChatBubbleIcon = () => (
     <svg {...iconProps}>
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    </svg>
-);
-
-// 🚀 RocketLaunch (ハイブリッド)
-const RocketLaunchIcon = () => (
-    <svg {...iconProps}>
-        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.01-.09-2.79a1.993 1.993 0 0 0-2.91.09z"></path>
-        <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
-        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
-        <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
     </svg>
 );
 
@@ -86,24 +74,8 @@ const GlobeAltIcon = () => (
     </svg>
 );
 
-// 📁 Folder (ストア用)
-const FolderIcon = () => (
-    <svg {...iconProps}>
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-    </svg>
-);
-
-// 🔄 Refresh (更新)
-const RefreshIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M23 4v6h-6"></path>
-        <path d="M1 20v-6h6"></path>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-    </svg>
-);
-
-// --- Mode Definitions ---
-const MODES = [
+// --- Mode Definitions (v3.0: Flat structure) ---
+const MAIN_MODES = [
     {
         id: 'standard',
         label: 'オート',
@@ -111,35 +83,14 @@ const MODES = [
         icon: <SparklesIcon />,
         settings: { ragEnabled: 'auto', webMode: 'auto' },
         colorClass: 'mode-standard',
-        isDefault: true
     },
     {
         id: 'chat',
         label: 'チャットのみ',
-        desc: '外部情報を参照せず、AIの知識のみで回答',
+        desc: '外部情報を参照せず回答',
         icon: <ChatBubbleIcon />,
         settings: { ragEnabled: false, webMode: 'off' },
-        colorClass: 'mode-chat'
-    },
-    {
-        id: 'hybrid',
-        label: 'ハイブリッド',
-        desc: '社内とWebを統合して徹底調査',
-        icon: <RocketLaunchIcon />,
-        settings: { ragEnabled: true, webMode: 'auto' },
-        colorClass: 'mode-hybrid',
-        hasSubSettings: true,
-        subSettingsView: 'domains'
-    },
-    {
-        id: 'enterprise',
-        label: '社内データ',
-        desc: '社内情報のみ。Web検索なし',
-        icon: <BuildingOfficeIcon />,
-        settings: { ragEnabled: true, webMode: 'off' },
-        colorClass: 'mode-enterprise',
-        hasSubSettings: true,
-        subSettingsView: 'stores'
+        colorClass: 'mode-chat',
     },
     {
         id: 'deep',
@@ -148,13 +99,8 @@ const MODES = [
         icon: <GlobeAltIcon />,
         settings: { ragEnabled: false, webMode: 'force' },
         colorClass: 'mode-deep',
-        hasSubSettings: true,
-        subSettingsView: 'domains'
-    }
+    },
 ];
-
-const PRIMARY_MODES = MODES.filter(m => ['standard', 'chat'].includes(m.id));
-const ADVANCED_MODES = MODES.filter(m => !['standard', 'chat'].includes(m.id));
 
 // --- Animation Variants ---
 const slideVariants = {
@@ -169,8 +115,8 @@ const springTransition = { type: "spring", stiffness: 300, damping: 30 };
 
 // --- Sub Components ---
 
-// Mode Button with optional sub-settings chevron
-const ModeButton = ({ mode, isActive, onClick, onSubSettingsClick }) => {
+// Mode Button (simple, no sub-settings chevron needed in v3.0)
+const ModeButton = ({ mode, isActive, onClick }) => {
     const activeClass = isActive ? `active ${mode.colorClass}` : '';
 
     return (
@@ -192,66 +138,9 @@ const ModeButton = ({ mode, isActive, onClick, onSubSettingsClick }) => {
                 </div>
                 {isActive && <CheckIcon className="check-icon" />}
             </button>
-
-            {/* Sub-settings navigation button */}
-            {mode.hasSubSettings && isActive && (
-                <button
-                    className="mode-sub-settings-btn"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onSubSettingsClick(mode.subSettingsView);
-                    }}
-                    title={mode.subSettingsView === 'stores' ? 'ストア選択' : 'ドメイン設定'}
-                >
-                    <ChevronRightIcon />
-                </button>
-            )}
         </div>
     );
 };
-
-// Store Item component
-const StoreItem = ({ store, isSelected, onClick }) => {
-    return (
-        <motion.button
-            layout
-            onClick={onClick}
-            className={`store-item ${isSelected ? 'active' : ''}`}
-            whileHover={{ scale: 1.02, backgroundColor: "rgba(5, 150, 105, 0.08)" }}
-            whileTap={{ scale: 0.98 }}
-        >
-            <div className="store-icon-container">
-                <FolderIcon />
-            </div>
-            <div className="store-info">
-                <span className="store-name">{store.display_name}</span>
-                <span className="store-desc">{store.description}</span>
-            </div>
-            {isSelected && (
-                <motion.div
-                    className="store-active-glow"
-                    layoutId="storeGlow"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-            )}
-        </motion.button>
-    );
-};
-
-// View Header with back button and optional right element
-const ViewHeader = ({ title, onBack, rightElement }) => (
-    <div className="view-header">
-        <button className="back-btn" onClick={onBack}>
-            <ChevronLeftIcon />
-            <span>{title}</span>
-        </button>
-        {rightElement && (
-            <div className="header-right-element">
-                {rightElement}
-            </div>
-        )}
-    </div>
-);
 
 // --- Main Component ---
 const ContextSelector = ({
@@ -261,14 +150,12 @@ const ContextSelector = ({
     mockMode = 'OFF',
     backendBApiKey = '',
     backendBApiUrl = 'https://api.dify.ai/v1',
+    // v3.0: ストア選択時にストアオブジェクトを親に通知
+    onStoreSelected,
 }) => {
-    // View state: 'primary' | 'advanced' | 'stores' | 'domains'
-    const [view, setView] = useState('primary');
+    // View state: 'main' | 'stores'
+    const [view, setView] = useState('main');
     const [slideDirection, setSlideDirection] = useState('right');
-
-    const [urlInput, setUrlInput] = useState('');
-    const [errorMsg, setErrorMsg] = useState('');
-    const [activeStoreId, setActiveStoreId] = useState(null);
 
     // Phase B: ストア一覧をAPI経由で取得
     const {
@@ -276,7 +163,6 @@ const ContextSelector = ({
         isLoading: isStoresLoading,
         error: storesError,
         refetch: refetchStores,
-        isConfigured: isBackendBConfigured
     } = useGeminiStores(mockMode, backendBApiKey, backendBApiUrl);
 
     const currentModeId = useMemo(() => {
@@ -289,19 +175,11 @@ const ContextSelector = ({
         return 'standard';
     }, [settings]);
 
-    // Navigation helpers - ストア画面遷移時にデータ取得をトリガー
+    // Navigation helpers
     const navigateTo = (targetView, direction = 'right') => {
-        console.log('[ContextSelector] navigateTo:', targetView, 'direction:', direction);
-        console.log('[ContextSelector] Current props - mockMode:', mockMode);
-        console.log('[ContextSelector] Current props - backendBApiKey:', backendBApiKey ? `設定済み(長さ:${backendBApiKey.length})` : '未設定(空)');
-        console.log('[ContextSelector] Current props - backendBApiUrl:', backendBApiUrl);
-
         setSlideDirection(direction);
         setView(targetView);
-
-        // ★ストア画面に遷移した時にデータ取得
         if (targetView === 'stores') {
-            console.log('[ContextSelector] Stores view opened - triggering refetch');
             refetchStores();
         }
     };
@@ -312,45 +190,48 @@ const ContextSelector = ({
 
     // Mode selection handler
     const handleModeSelect = (modeId) => {
-        const targetMode = MODES.find(m => m.id === modeId);
+        const targetMode = MAIN_MODES.find(m => m.id === modeId);
         if (targetMode) {
             onSettingsChange({
                 ...settings,
-                ...targetMode.settings
+                ...targetMode.settings,
+                // 非ストアモード選択時はストア選択をクリア
+                selectedStoreId: null,
             });
-            if (modeId !== 'enterprise') {
-                setActiveStoreId(null);
-            }
         }
     };
 
-    // Domain management
-    const filters = settings.domainFilters || [];
+    // Store Selection Handler (Enterprise mode)
+    const handleStoreSelect = (storeId) => {
+        const store = stores.find(s => s.id === storeId);
 
-    const addFilter = () => {
-        if (!urlInput.trim()) return;
-        try {
-            const rawUrl = urlInput.trim();
-            const safeUrl = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
-            const urlObj = new URL(safeUrl);
-            let hostname = urlObj.hostname.replace(/^www\./, '');
+        // v3.2: ロケットアイコンはデフォルトOFFにする。
+        // ただし、既に「ハイブリッドモード(rag=true & web=auto)」が有効な場合のみ維持する。
+        // Standardモード(rag=auto)から来た場合は OFF にする。
+        const isHybridActive = settings.ragEnabled === true && settings.webMode === 'auto';
+        const nextWebMode = isHybridActive ? 'auto' : 'off';
+        const nextRagEnabled = true;
 
-            if (!filters.includes(hostname)) {
-                onSettingsChange({
-                    ...settings,
-                    domainFilters: [...filters, hostname]
-                });
-            }
-            setUrlInput('');
-            setErrorMsg('');
-        } catch (e) {
-            setErrorMsg('有効なURLを入力してください');
+        onSettingsChange({
+            ...settings,
+            ragEnabled: nextRagEnabled,
+            webMode: nextWebMode,
+            selectedStoreId: storeId,
+        });
+        // ★ストアオブジェクトを親に直接渡す（activeStore 即時反映用）
+        if (store && onStoreSelected) {
+            onStoreSelected(store);
         }
     };
 
-    const removeFilter = (index) => {
-        const newFilters = filters.filter((_, i) => i !== index);
-        onSettingsChange({ ...settings, domainFilters: newFilters });
+    // Hybrid Mode Toggle Handler (Persistent)
+    const handleToggleHybridMode = () => {
+        const nextWebMode = settings.webMode === 'auto' ? 'off' : 'auto';
+        onSettingsChange({
+            ...settings,
+            ragEnabled: true, // Always enable RAG when toggling hybrid in store view
+            webMode: nextWebMode,
+        });
     };
 
     // Get animation initial/exit states based on direction
@@ -361,10 +242,10 @@ const ContextSelector = ({
 
     // --- Render Views ---
 
-    // Primary view (Auto, Chat only, + link to Advanced)
-    const renderPrimaryView = () => (
+    // Main view (v3.0: All basic modes + Enterprise entry)
+    const renderMainView = () => (
         <motion.div
-            key="primary"
+            key="main"
             variants={slideVariants}
             initial={getAnimationState().initial}
             animate="center"
@@ -375,190 +256,41 @@ const ContextSelector = ({
             <div className="context-section-label">検索モード</div>
 
             <div className="primary-modes-group">
-                {PRIMARY_MODES.map((mode) => (
+                {MAIN_MODES.map((mode) => (
                     <ModeButton
                         key={mode.id}
                         mode={mode}
                         isActive={currentModeId === mode.id}
                         onClick={() => handleModeSelect(mode.id)}
-                        onSubSettingsClick={() => { }}
                     />
                 ))}
-            </div>
 
-            <button
-                onClick={() => navigateTo('advanced', 'right')}
-                className="advanced-trigger-btn"
-            >
-                <span className="trigger-icon">
-                    <ChevronRightIcon />
-                </span>
-                <span className="trigger-text">
-                    情報源を手動で指定...
-                </span>
-            </button>
-        </motion.div>
-    );
-
-    // Advanced view (Hybrid, Enterprise, Web)
-    const renderAdvancedView = () => (
-        <motion.div
-            key="advanced"
-            variants={slideVariants}
-            initial={getAnimationState().initial}
-            animate="center"
-            exit={getAnimationState().exit}
-            transition={springTransition}
-            className="view-content"
-        >
-            <ViewHeader title="戻る" onBack={() => goBack('primary')} />
-
-            <div className="advanced-divider-label">Manual Override</div>
-
-            <div className="advanced-modes-group">
-                {ADVANCED_MODES.map((mode) => (
-                    <ModeButton
-                        key={mode.id}
-                        mode={mode}
-                        isActive={currentModeId === mode.id}
-                        onClick={() => handleModeSelect(mode.id)}
-                        onSubSettingsClick={(targetView) => navigateTo(targetView, 'right')}
-                    />
-                ))}
-            </div>
-        </motion.div>
-    );
-
-    // Stores view (Enterprise sub-settings)
-    const renderStoresView = () => (
-        <motion.div
-            key="stores"
-            variants={slideVariants}
-            initial={getAnimationState().initial}
-            animate="center"
-            exit={getAnimationState().exit}
-            transition={springTransition}
-            className="view-content"
-        >
-            <ViewHeader
-                title="社内データ"
-                onBack={() => goBack('advanced')}
-                rightElement={
+                {/* 社内データ > (Enterprise entry point) */}
+                <div className={`mode-item-wrapper ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}>
                     <button
-                        className="refresh-btn"
-                        onClick={() => refetchStores({ force: true })}
-                        title="ストア一覧を更新"
-                        disabled={isStoresLoading}
+                        onClick={() => navigateTo('stores', 'right')}
+                        className={`mode-item ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}
                     >
-                        <RefreshIcon />
-                    </button>
-                }
-            />
-
-            <div className="sub-panel-header">
-                <span className="label">Knowledge Base Channel</span>
-                <span className="badge">Internal Only</span>
-            </div>
-
-            {/* Phase B: ローディング状態 */}
-            {isStoresLoading && (
-                <div className="stores-loading">
-                    <div className="loading-spinner" />
-                    <span>ストア一覧を読み込み中...</span>
-                </div>
-            )}
-
-            {/* Phase B: エラー状態 */}
-            {storesError && !isStoresLoading && (
-                <div className="stores-error">
-                    <div className="error-icon">⚠️</div>
-                    <div className="error-message">{storesError}</div>
-                    <button className="retry-button" onClick={() => refetchStores({ force: true })}>
-                        再試行
-                    </button>
-                </div>
-            )}
-
-            {/* ストア一覧 */}
-            {!isStoresLoading && !storesError && (
-                <div className="store-grid">
-                    {stores.map((store) => (
-                        <StoreItem
-                            key={store.id}
-                            store={store}
-                            isSelected={activeStoreId === store.id}
-                            onClick={() => {
-                                setActiveStoreId(store.id);
-                                // Phase B: 選択されたstore_idをsettingsに保存
-                                onSettingsChange({
-                                    ...settings,
-                                    selectedStoreId: store.id,
-                                });
-                                console.log('[Phase B] Selected Store ID:', store.id);
-                            }}
-                        />
-                    ))}
-                </div>
-            )}
-        </motion.div>
-    );
-
-    // Domains view (Hybrid/Web sub-settings)
-    const renderDomainsView = () => (
-        <motion.div
-            key="domains"
-            variants={slideVariants}
-            initial={getAnimationState().initial}
-            animate="center"
-            exit={getAnimationState().exit}
-            transition={springTransition}
-            className="view-content"
-        >
-            <ViewHeader title="戻る" onBack={() => goBack('advanced')} />
-
-            <div className="domain-input-row">
-                <input
-                    className="domain-input-field"
-                    placeholder="example.com"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addFilter()}
-                    autoFocus
-                />
-                <button
-                    onClick={addFilter}
-                    disabled={!urlInput}
-                    className="domain-add-btn"
-                >
-                    追加
-                </button>
-            </div>
-            {errorMsg && <p className="error-msg">{errorMsg}</p>}
-            <p className="domain-help">
-                特定のドメインを追加すると、そのサイト内のみを検索します。
-            </p>
-            <div className="domain-list">
-                {filters.length === 0 ? (
-                    <div className="domain-empty">
-                        指定なし (Web全体を検索)
-                    </div>
-                ) : (
-                    filters.map((filter, idx) => (
-                        <div key={idx} className="domain-item">
-                            <div className="domain-info">
-                                <GlobeAltIcon />
-                                <span>{filter}</span>
-                            </div>
-                            <button
-                                onClick={() => removeFilter(idx)}
-                                className="domain-delete-btn"
-                                title="削除"
-                            >
-                                ×
-                            </button>
+                        <div className="mode-icon-wrapper">
+                            <BuildingOfficeIcon />
                         </div>
-                    ))
-                )}
+                        <div className="mode-info">
+                            <div className="mode-label">社内データ</div>
+                            <div className="mode-desc">社内ナレッジを検索</div>
+                        </div>
+                        {['enterprise', 'hybrid'].includes(currentModeId) && <CheckIcon className="check-icon" />}
+                    </button>
+                    <button
+                        className="mode-sub-settings-btn"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigateTo('stores', 'right');
+                        }}
+                        title="ストア選択"
+                    >
+                        <ChevronRightIcon />
+                    </button>
+                </div>
             </div>
         </motion.div>
     );
@@ -566,10 +298,25 @@ const ContextSelector = ({
     return (
         <div className="context-selector-container">
             <AnimatePresence mode="wait" initial={false}>
-                {view === 'primary' && renderPrimaryView()}
-                {view === 'advanced' && renderAdvancedView()}
-                {view === 'stores' && renderStoresView()}
-                {view === 'domains' && renderDomainsView()}
+                {view === 'main' && renderMainView()}
+                {view === 'stores' && (
+                    <StoreSelector
+                        onBack={() => goBack('main')}
+                        stores={stores}
+                        isLoading={isStoresLoading}
+                        error={storesError}
+                        onRefresh={refetchStores}
+                        activeStoreId={settings.selectedStoreId || null}
+                        onSelect={handleStoreSelect}
+                        isHybridMode={settings.ragEnabled === true && settings.webMode === 'auto'}
+                        onToggleHybridMode={handleToggleHybridMode}
+                        variants={slideVariants}
+                        initial={getAnimationState().initial}
+                        animate="center"
+                        exit={getAnimationState().exit}
+                        transition={springTransition}
+                    />
+                )}
             </AnimatePresence>
         </div>
     );

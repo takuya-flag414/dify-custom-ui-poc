@@ -12,12 +12,12 @@
 .context-selector-container {
     display: flex;
     flex-direction: column;
-    padding: 8px;
-    min-width: 290px;
+    padding: 6px;
+    width: 280px;
     animation: fadeIn 0.2s ease-out;
 
     /* 🌊 Liquid Glass Material */
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
 
@@ -33,8 +33,8 @@
 }
 
 .context-section-label {
-    padding: 6px 10px;
-    font-size: 11px;
+    padding: 4px 8px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--color-text-muted);
     text-transform: uppercase;
@@ -63,8 +63,8 @@
 .view-header {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -118,6 +118,20 @@
     opacity: 0.3;
 }
 
+/* Hybrid Mode Active (Purple Glow) */
+.refresh-btn.active-hybrid {
+    color: #7C3AED;
+    background-color: rgba(124, 58, 237, 0.1);
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+    opacity: 1;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.refresh-btn.active-hybrid:hover {
+    background-color: rgba(124, 58, 237, 0.15);
+    box-shadow: 0 0 16px rgba(124, 58, 237, 0.5);
+}
+
 /* --- Mode Item Wrapper (for sub-settings button) --- */
 .mode-item-wrapper {
     position: relative;
@@ -138,11 +152,11 @@
 }
 
 /* Sub-settings chevron button */
-.mode-sub-settings-btn {
+.mode-result-settings-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    width: 28px;
     background: transparent;
     border: none;
     border-left: 1px solid rgba(0, 0, 0, 0.06);
@@ -257,8 +271,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+    gap: 8px;
+    padding: 8px 10px;
     width: 100%;
     border: 1px solid transparent;
     border-radius: 12px;
@@ -269,8 +283,8 @@
 }
 
 .mode-item:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--color-hover-overlay);
+    border-color: rgba(0, 0, 0, 0.05);
 }
 
 /* ... (Color Themes: Fast, Standard, Deep, Enterprise, Hybrid - Unchanged) ... */
@@ -357,7 +371,7 @@
 
 .mode-label {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--color-text-main);
     line-height: 1.2;
 }
@@ -387,9 +401,10 @@
     width: 100%;
     display: flex;
     align-items: center;
+    align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 12px 14px;
+    gap: 8px;
+    padding: 8px 10px;
     border-radius: 12px;
     background: transparent;
     border: 1px solid transparent;
@@ -399,8 +414,8 @@
 }
 
 .advanced-link:hover:not(.disabled) {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--color-hover-overlay);
+    border-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Disabled State */
@@ -436,7 +451,7 @@
 
 .advanced-label {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--color-text-main);
     line-height: 1.2;
 }
@@ -500,7 +515,7 @@
 
 .domain-input-field {
     flex: 1;
-    padding: 8px 12px;
+    padding: 6px 8px;
     font-size: 14px;
     border: 1px solid var(--color-border);
     border-radius: 8px;
@@ -575,7 +590,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 6px 10px;
     background-color: var(--color-bg-surface);
     border: 1px solid var(--color-border);
     border-radius: 8px;
@@ -746,8 +761,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    gap: 8px;
+    padding: 8px 10px;
     border-radius: 10px;
     border: none;
     background: transparent;
@@ -789,7 +804,7 @@
 
 .store-name {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--color-text-main);
     line-height: 1.3;
 }
@@ -816,6 +831,53 @@
     background: rgba(5, 150, 105, 0.05);
     pointer-events: none;
     z-index: 1;
+}
+
+/* v3.0: Store Item Row (item + hybrid button side-by-side) */
+.store-item-row {
+    display: flex;
+    align-items: stretch;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.store-item-row .store-item {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Hybrid (Rocket) Button */
+.store-hybrid-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: all 0.15s;
+}
+
+.store-hybrid-btn:hover {
+    background-color: rgba(124, 58, 237, 0.08);
+    color: #7C3AED;
+}
+
+/* Dark mode: store hybrid button */
+[data-theme='dark'] .store-hybrid-btn {
+    border-left-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='dark'] .store-hybrid-btn:hover {
+    background-color: rgba(167, 139, 250, 0.15);
+    color: #A78BFA;
 }
 
 /* Animations */
@@ -883,7 +945,7 @@
 /* Dark Mode: Liquid Glass Container */
 [data-theme='dark'] .context-selector-container {
     /* 🌙 Warm-tinted Dark Glass */
-    background: rgba(38, 36, 42, 0.75);
+    background: rgba(38, 36, 42, 0.95);
     border-color: rgba(255, 255, 255, 0.08);
     box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.25),

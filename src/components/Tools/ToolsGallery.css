@@ -172,33 +172,7 @@
     transform: translateY(-50%) translateX(4px);
 }
 
-/* === Dark Mode === */
-@media (prefers-color-scheme: dark) {
-    .tools-gallery-title {
-        color: var(--text-primary-dark, #f5f5f7);
-    }
-
-    .tool-card {
-        background: rgba(40, 40, 40, 0.75);
-        box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.3),
-            0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
-    }
-
-    .tool-card:hover {
-        box-shadow:
-            0 16px 48px rgba(0, 0, 0, 0.4),
-            0 0 0 0.5px rgba(255, 255, 255, 0.15) inset;
-    }
-
-    .tool-card-title {
-        color: var(--text-primary-dark, #f5f5f7);
-    }
-
-    .tool-card-description {
-        color: var(--text-secondary-dark, #a1a1a6);
-    }
-}
+/* === Dark Mode (via data-theme selector below) === */
 
 /* Data Theme Selector (App-level theme control) */
 [data-theme="dark"] .tools-gallery-title {

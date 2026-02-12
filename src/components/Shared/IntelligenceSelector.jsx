@@ -11,22 +11,22 @@ const BRAIN_MODES = [
         desc: '高速・軽量'
     },
     {
-        id: 'pro',
-        label: 'Pro',
-        desc: '深い推論'
+        id: 'deep',
+        label: 'Deep Think',
+        desc: '高度な推論と分析'
     }
 ];
 
 /**
  * IntelligenceSelector - Brain（思考深度）選択コンポーネント（プルダウン形式）
  * 
- * @param {string} mode - 現在のモード ('fast' | 'pro')
+ * @param {string} mode - 現在のモード ('fast' | 'deep')
  * @param {function} onChange - モード変更コールバック
  */
 const IntelligenceSelector = ({ mode = 'fast', onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
-    const isPro = mode === 'pro';
+    const isDeep = mode === 'deep';
     const currentMode = BRAIN_MODES.find(m => m.id === mode) || BRAIN_MODES[0];
 
     // Click outside to close
@@ -49,12 +49,12 @@ const IntelligenceSelector = ({ mode = 'fast', onChange }) => {
         <div className="intelligence-selector-container" ref={containerRef}>
             {/* Trigger Button */}
             <button
-                className={`intelligence-trigger ${isPro ? 'pro-active' : ''} ${isOpen ? 'open' : ''}`}
+                className={`intelligence-trigger ${isDeep ? 'deep-active' : ''} ${isOpen ? 'open' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
                 title={currentMode.desc}
             >
-                {/* Pro モード時の発光エフェクト背景 */}
-                {isPro && (
+                {/* Deep Think モード時の発光エフェクト背景 */}
+                {isDeep && (
                     <motion.div
                         className="trigger-glow-background"
                         initial={{ opacity: 0 }}
@@ -82,15 +82,15 @@ const IntelligenceSelector = ({ mode = 'fast', onChange }) => {
                     >
                         {BRAIN_MODES.map((brainMode) => {
                             const isActive = mode === brainMode.id;
-                            const isProMode = brainMode.id === 'pro';
+                            const isDeepMode = brainMode.id === 'deep';
                             return (
                                 <button
                                     key={brainMode.id}
-                                    className={`intelligence-mode-item ${isActive ? 'active' : ''} ${isProMode ? 'pro' : ''}`}
+                                    className={`intelligence-mode-item ${isActive ? 'active' : ''} ${isDeepMode ? 'deep' : ''}`}
                                     onClick={() => handleSelect(brainMode.id)}
                                 >
-                                    {/* Pro モード時の発光エフェクト */}
-                                    {isProMode && isActive && (
+                                    {/* Deep Think モード時の発光エフェクト */}
+                                    {isDeepMode && isActive && (
                                         <div className="mode-glow-background" />
                                     )}
                                     <div className="mode-content">

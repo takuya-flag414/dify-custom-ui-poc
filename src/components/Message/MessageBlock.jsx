@@ -10,8 +10,11 @@ import ThinkingProcess from './ThinkingProcess';
 import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
 import FileIcon from '../Shared/FileIcon';
+import ContextChips from './ContextChips';
 import CopyButton from '../Shared/CopyButton';
 import TypewriterEffect from '../Shared/TypewriterEffect';
+import StructuredUserMessage from './StructuredUserMessage';
+import { parseStructuredMessage } from '../../utils/messageSerializer';
 import { IS_THINKING_PROCESS_MERGED } from '../../config/env';
 
 // Spring Physics (DESIGN_RULE準拠)
@@ -54,6 +57,7 @@ const RefreshIcon = () => (
 
 const MessageBlock = ({
     message,
+    previousMessage, // Receive previousMessage
     onSuggestionClick,
     onSmartActionSelect,
     onOpenArtifact,
@@ -92,7 +96,25 @@ const MessageBlock = ({
     const [showRaw, setShowRaw] = useState(false);
     // ★追加: 編集モード用State
     const [isEditing, setIsEditing] = useState(false);
-    const [editValue, setEditValue] = useState('');
+    const [editValue, setEditValue] = useState(() => {
+        if (!isAi) {
+            const parsed = parseStructuredMessage(text);
+            return parsed.content.text;
+        }
+        return text;
+    });
+
+    // contentプロップが変更された場合にeditValueを更新（通常は起きないが念のため）
+    useEffect(() => {
+        if (!isEditing) {
+            if (!isAi) {
+                const parsed = parseStructuredMessage(text);
+                setEditValue(parsed.content.text);
+            } else {
+                setEditValue(text);
+            }
+        }
+    }, [text, isAi, isEditing]);
     const editTextareaRef = useRef(null);
 
     // ★追加: タイプライター演出の制御
@@ -250,6 +272,11 @@ const MessageBlock = ({
 
                 <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
 
+                    {/* ★新規: コンテキストチップをユーザー吹き出しの上に表示 */}
+                    {isUser && !isEditing && (
+                        <ContextChips message={message} previousMessage={previousMessage} />
+                    )}
+
                     <div className="message-bubble-row">
                         {/* ★変更: ユーザーメッセージ用のアクションボタン群 */}
                         {isUser && !isEditing && (
@@ -310,16 +337,7 @@ const MessageBlock = ({
                                         </button>
                                     )}
 
-                                    {!isAi && files && files.length > 0 && (
-                                        <div className="file-attachments-wrapper">
-                                            {files.map((file, index) => (
-                                                <div key={index} className="file-attachment-chip">
-                                                    <FileIcon filename={file.name} />
-                                                    <span className="file-attachment-name">{file.name}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                    {/* ★削除: 添付ファイルUIはContextChipsに移行 */}
 
                                     {/* Mergedモードでストリーミング中はthoughtProcessが空でもローディングUIを表示するためThinkingProcessをレンダリング */}
                                     {isAi && (thoughtProcess?.length > 0 || thinking || (IS_THINKING_PROCESS_MERGED && isStreaming)) && (
@@ -367,19 +385,37 @@ const MessageBlock = ({
                                             )}
                                         </pre>
                                     ) : (
-                                        !isTextEmpty && (
-                                            // ★変更: isTypewriterCompleteがfalseの場合のみタイプライター演出
-                                            // （履歴メッセージでは最初からtrue、新規完了メッセージのみfalse）
-                                            usedHttpLlmSearch && isAi && !isStreaming && !isTypewriterComplete ? (
-                                                <TypewriterEffect
-                                                    content={text || ''}
-                                                    speed={5}
-                                                    renderAsMarkdown={true}
-                                                    citations={citations}
-                                                    messageId={uniqueMessageId}
-                                                    onComplete={() => setIsTypewriterComplete(true)}
-                                                />
-                                            ) : (
+                                        !isTextEmpty && (() => {
+                                            // 1. Typewriter Effect (AI Only, Special Mode)
+                                            if (usedHttpLlmSearch && isAi && !isStreaming && !isTypewriterComplete) {
+                                                return (
+                                                    <TypewriterEffect
+                                                        content={text || ''}
+                                                        speed={5}
+                                                        renderAsMarkdown={true}
+                                                        citations={citations}
+                                                        messageId={uniqueMessageId}
+                                                        onComplete={() => setIsTypewriterComplete(true)}
+                                                    />
+                                                );
+                                            }
+
+                                            // 2. Structured User Message (User Only)
+                                            if (!isAi) {
+                                                const parsed = parseStructuredMessage(text || '');
+                                                // v !== "0.0" means it's a valid structured message (not legacy)
+                                                if (parsed.v && parsed.v !== "0.0") {
+                                                    return (
+                                                        <StructuredUserMessage
+                                                            parsedMessage={parsed}
+                                                            onOpenArtifact={onOpenArtifact}
+                                                        />
+                                                    );
+                                                }
+                                            }
+
+                                            // 3. Standard Markdown (AI Normal / User Plain)
+                                            return (
                                                 <MarkdownRenderer
                                                     content={text || ''}
                                                     isStreaming={isAi && isStreaming}
@@ -388,8 +424,8 @@ const MessageBlock = ({
                                                     messageId={uniqueMessageId}
                                                     onOpenArtifact={onOpenArtifact}
                                                 />
-                                            )
-                                        )
+                                            );
+                                        })()
                                     )}
                                 </motion.div>
                             )}

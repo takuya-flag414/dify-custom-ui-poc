@@ -43,14 +43,12 @@
 }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-    .confirm-delete-modal {
-        background: rgba(40, 40, 40, 0.85);
-        border-color: rgba(255, 255, 255, 0.15);
-        box-shadow:
-            0 20px 50px rgba(0, 0, 0, 0.4),
-            0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
-    }
+[data-theme='dark'] .confirm-delete-modal {
+    background: rgba(40, 40, 40, 0.85);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.4),
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
 }
 
 /* ===== Icon ===== */
@@ -65,11 +63,9 @@
     color: #FF3B30;
 }
 
-@media (prefers-color-scheme: dark) {
-    .confirm-delete-modal__icon {
-        background: rgba(255, 69, 58, 0.2);
-        color: #FF453A;
-    }
+[data-theme='dark'] .confirm-delete-modal__icon {
+    background: rgba(255, 69, 58, 0.2);
+    color: #FF453A;
 }
 
 /* ===== Content ===== */
@@ -92,14 +88,12 @@
     line-height: 1.5;
 }
 
-@media (prefers-color-scheme: dark) {
-    .confirm-delete-modal__title {
-        color: #f5f5f7;
-    }
+[data-theme='dark'] .confirm-delete-modal__title {
+    color: #f5f5f7;
+}
 
-    .confirm-delete-modal__message {
-        color: #a1a1a6;
-    }
+[data-theme='dark'] .confirm-delete-modal__message {
+    color: #a1a1a6;
 }
 
 /* ===== Actions ===== */
@@ -143,21 +137,19 @@
     background: #E6352B;
 }
 
-@media (prefers-color-scheme: dark) {
-    .confirm-delete-modal__btn--cancel {
-        background: rgba(255, 255, 255, 0.1);
-        color: #f5f5f7;
-    }
+[data-theme='dark'] .confirm-delete-modal__btn--cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f5f5f7;
+}
 
-    .confirm-delete-modal__btn--cancel:hover {
-        background: rgba(255, 255, 255, 0.15);
-    }
+[data-theme='dark'] .confirm-delete-modal__btn--cancel:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
 
-    .confirm-delete-modal__btn--delete {
-        background: #FF453A;
-    }
+[data-theme='dark'] .confirm-delete-modal__btn--delete {
+    background: #FF453A;
+}
 
-    .confirm-delete-modal__btn--delete:hover {
-        background: #FF5549;
-    }
+[data-theme='dark'] .confirm-delete-modal__btn--delete:hover {
+    background: #FF5549;
 }

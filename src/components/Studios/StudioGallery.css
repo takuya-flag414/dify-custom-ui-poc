@@ -133,22 +133,7 @@
     color: var(--glow-primary, var(--color-primary));
 }
 
-/* Light mode adjustments */
-@media (prefers-color-scheme: light) {
-    .studio-gallery__add-card {
-        background: rgba(0, 0, 0, 0.02);
-        border-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .studio-gallery__add-card:hover {
-        background: rgba(0, 0, 0, 0.04);
-    }
-
-    .studio-gallery__add-icon {
-        background: rgba(0, 0, 0, 0.05);
-        color: var(--color-text-sub);
-    }
-}
+/* Light mode (via data-theme selector below) */
 
 /* data-theme light mode */
 [data-theme='light'] .studio-gallery__add-card {

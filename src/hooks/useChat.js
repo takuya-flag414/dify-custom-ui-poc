@@ -1,5 +1,5 @@
-// src/hooks/useChat.js
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { buildStructuredMessage, parseStructuredMessage, restoreMessageState } from '../utils/messageSerializer';
 import { scenarioSuggestions } from '../mocks/scenarios';
 // ★変更: Adapterをインポート
 import { ChatServiceAdapter } from '../services/ChatServiceAdapter';
@@ -195,19 +195,30 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         let uploadedFileIds = [];
         let displayFiles = [];
         let uploadedFiles = [];
+        let restoredFiles = []; // ★追加: 復元されたファイル（アップロード不要）
 
         if (attachments.length > 0) {
             setIsGenerating(true);
             try {
-                const uploadPromises = attachments.map(file =>
-                    ChatServiceAdapter.uploadFile(file, { mockMode, userId, apiUrl, apiKey })
-                );
+                // ★変更: Fileオブジェクト（新規）とAttachmentMeta（復元）を分別
+                const filesToUpload = attachments.filter(a => a instanceof File);
+                // Fileインスタンスでないものを既存ファイルとみなす（簡易判定）
+                restoredFiles = attachments.filter(a => !(a instanceof File));
 
-                uploadedFiles = await Promise.all(uploadPromises);
-                uploadedFileIds = uploadedFiles.map(f => f.id);
-                displayFiles = uploadedFiles.map(f => ({ name: f.name }));
+                if (filesToUpload.length > 0) {
+                    const uploadPromises = filesToUpload.map(file =>
+                        ChatServiceAdapter.uploadFile(file, { mockMode, userId, apiUrl, apiKey })
+                    );
+                    uploadedFiles = await Promise.all(uploadPromises);
+                }
 
-                setSessionFiles(prev => [...prev, ...uploadedFiles]);
+                // 表示用ファイルリスト構築
+                displayFiles = [
+                    ...restoredFiles.map(f => ({ name: f.name })),
+                    ...uploadedFiles.map(f => ({ name: f.name }))
+                ];
+
+                setSessionFiles(prev => [...prev, ...uploadedFiles]); // 新規のみ追加
 
             } catch (e) {
                 addLog(`[Upload Error] ${e.message}`, 'error');
@@ -216,16 +227,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             }
         }
 
-        // 3. Update UI (User Message)
-        const userMessageId = `msg_${Date.now()}_user`;
-        const userMessage = {
-            id: userMessageId,
-            role: 'user',
-            text: text,
-            timestamp: new Date().toISOString(),
-            files: displayFiles
-        };
-        setMessages(prev => [...prev, userMessage]);
+        // ★変更: ユーザーメッセージの作成はstructuredQuery構築後（try内）に移動
+        // 以前はここでプレーンテキストをセットしていたが、
+        // ContextChips用に構造化JSONを保存する必要があるため移動
 
         // 4. Update UI (AI Placeholder)
         const aiMessageId = `msg_${Date.now()}_ai`;
@@ -285,12 +289,65 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         // 5. Send Request via Adapter
         let reader;
         try {
-            // sessionFilesと新規アップロードファイルを合わせた配列を作成
-            const allFilesToSend = [...sessionFiles, ...uploadedFiles];
+            // sessionFilesと新規アップロードファイル、さらに復元ファイルを合わせた配列を作成
+            const allFilesToSend = [...sessionFiles, ...uploadedFiles, ...restoredFiles];
+
+            // ★構造化メッセージの構築 (Protocol v1.0)
+            const intelligenceMode = currentSettings.reasoningMode === 'deep' ? 'deep' : 'speed';
+            const intelligence = {
+                mode: intelligenceMode,
+                model: promptSettings?.aiStyle === 'efficient' ? 'gpt-4o-mini' : 'gpt-4o' // 簡易的な推定
+            };
+            
+            const knowledgeContext = {
+                selected_store_ids: currentSettings.selectedStoreId ? [currentSettings.selectedStoreId] : [],
+                web_search_enabled: currentSettings.webMode !== 'off',
+                domain_context: currentSettings.ragEnabled === 'auto' ? 'auto' : (currentSettings.ragEnabled ? 'knowledge' : 'general'),
+                domain_filter: currentSettings.domainFilters || [] // ★追加: ドメインフィルタ
+            };
+
+            // 添付ファイルをメタデータ形式に変換
+            const attachmentMeta = allFilesToSend.map(f => ({
+                id: f.id,
+                name: f.name,
+                type: f.type,
+                // サイズ等は取得できれば設定
+            }));
+
+            const structuredQuery = buildStructuredMessage(
+                text,
+                attachmentMeta,
+                intelligence,
+                knowledgeContext
+            );
+
+            // ★変更: ユーザーメッセージに構造化JSONを保存（ContextChips用）
+            // 元のコードでは230-238行目でプレーンテキストをセットしていたが、
+            // ContextChipsがコンテキスト情報を表示できるようstructuredQueryをセットする
+            const userMessageId = `msg_${Date.now()}_user`;
+            const userMessage = {
+                id: userMessageId,
+                role: 'user',
+                text: structuredQuery, // ★変更: プレーンテキストではなく構造化JSONを保存
+                timestamp: new Date().toISOString(),
+                files: displayFiles
+            };
+            setMessages(prev => [...prev, userMessage]);
+
+            // ★デバッグ用: 送信ペイロードの確認
+            console.group('🔷 Structured Message Payload');
+            console.log('Original Text:', text);
+            console.log('Structured JSON:', structuredQuery);
+            console.log('Parsed Object:', JSON.parse(structuredQuery));
+            console.groupEnd();
+            
+            // ★ログ保存: クリップボードコピー用
+            addLog(`[StructuredPayload] ${structuredQuery}`, 'info');
+
 
             reader = await ChatServiceAdapter.sendMessage(
                 {
-                    text,
+                    text: structuredQuery, // APIにはJSON文字列を送信
                     conversationId,
                     files: allFilesToSend.map(f => ({ id: f.id, name: f.name })),
                     searchSettings: currentSettings,
@@ -674,7 +731,22 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         }
 
         setMessages(result.previousMessages);
-        await handleSendMessage(newText, []);
+
+        // ★修正: 元のメッセージから状態を復元 (attachments等)
+        const targetMessage = result.targetMessage;
+        let attachments = [];
+        if (targetMessage) {
+             const restored = restoreMessageState(targetMessage.text);
+             attachments = restored.attachments || [];
+             // ここでcontextやintelligenceを復元するか？
+             // 仕様としては「現在の設定」で再送信するのが自然かもしれないが、
+             // Dify APIに送る際はattachmentsが必要。
+             // context (stores) は現在のUI状態 (searchSettings) が優先されるべきか？
+             // attachmentsだけは確実に引き継ぐ必要がある。
+        }
+
+        // handleSendMessageはFile|AttachmentMeta[]を受け付けるように修正済み
+        await handleSendMessage(newText, attachments);
     }, [messages, handleSendMessage, addLog]);
 
     // ★リファクタリング: 再送信（再生成）関数
@@ -686,7 +758,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         }
 
         setMessages(result.truncatedMessages);
-        await handleSendMessage(result.targetUserMessage.text, result.targetUserMessage.files || []);
+        
+        // ★修正: テキストが既に構造化JSONの場合はパースしてプレーンテキストを取り出す
+        // これにより、再送信時にJSONが二重にラップされるのを防ぐ
+        const rawText = result.targetUserMessage.text || '';
+        const parsed = parseStructuredMessage(rawText);
+        const textToSend = parsed.content.text;
+
+        await handleSendMessage(textToSend, result.targetUserMessage.files || []);
     }, [messages, handleSendMessage, addLog]);
 
     return {
