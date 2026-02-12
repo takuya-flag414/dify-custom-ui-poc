@@ -9,6 +9,7 @@ export interface SearchSettings {
     webMode: 'auto' | 'on' | 'off' | 'force';
     domainFilters: string[];
     reasoningMode: 'fast' | 'deep';
+    selectedStoreName?: string;
 }
 
 /**

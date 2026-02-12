@@ -34,6 +34,7 @@ export interface IntelligenceContext {
  */
 export interface KnowledgeContext {
     selected_store_ids: string[]; // IDs of Dify Knowledge sets
+    selected_store_names?: string[]; // Display names of selected stores
     domain_context?: string;      // 'auto', 'general', 'coding', etc.
     web_search_enabled?: boolean;
     domain_filter?: string[];     // List of specific domains to restrict search to
@@ -55,6 +56,7 @@ export interface StructuredUserMessage {
     attachments: AttachmentMeta[];
     intelligence: IntelligenceContext;
     context: KnowledgeContext;
+    dify_inputs?: Record<string, string | boolean>; // Dify API inputs snapshot for traceability
 
     // Optional metadata for restoration
     timestamp: number;

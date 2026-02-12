@@ -298,9 +298,10 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 mode: intelligenceMode,
                 model: promptSettings?.aiStyle === 'efficient' ? 'gpt-4o-mini' : 'gpt-4o' // 簡易的な推定
             };
-            
+
             const knowledgeContext = {
                 selected_store_ids: currentSettings.selectedStoreId ? [currentSettings.selectedStoreId] : [],
+                selected_store_names: currentSettings.selectedStoreName ? [currentSettings.selectedStoreName] : [],
                 web_search_enabled: currentSettings.webMode !== 'off',
                 domain_context: currentSettings.ragEnabled === 'auto' ? 'auto' : (currentSettings.ragEnabled ? 'knowledge' : 'general'),
                 domain_filter: currentSettings.domainFilters || [] // ★追加: ドメインフィルタ
@@ -314,12 +315,37 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 // サイズ等は取得できれば設定
             }));
 
+            // ★追加: Dify送信変数のスナップショットを構築（トレーサビリティ用）
+            const searchModeValue = currentSettings.webMode || 'auto';
+            const domainFilterString = (currentSettings.domainFilters || []).join(', ');
+            const now = new Date();
+            const currentTimeStr = now.toLocaleString('ja-JP', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                weekday: 'long', hour: '2-digit', minute: '2-digit'
+            });
+            const difyInputs = {
+                rag_enabled: currentSettings.ragEnabled === 'auto' ? 'auto' : (currentSettings.ragEnabled ? 'true' : 'false'),
+                web_search_mode: searchModeValue,
+                search_mode: searchModeValue === 'force' ? 'force' : 'auto',
+                domain_filter: domainFilterString,
+                current_time: currentTimeStr,
+                ai_style: promptSettings?.aiStyle || 'partner',
+                system_prompt: JSON.stringify(systemPromptPayload),
+                reasoning_mode: currentSettings.reasoningMode || 'fast',
+                gemini_store_id: currentSettings.selectedStoreId || '',
+            };
+
             const structuredQuery = buildStructuredMessage(
                 text,
                 attachmentMeta,
                 intelligence,
                 knowledgeContext
             );
+
+            // ★追加: dify_inputs をペイロードにマージ
+            const parsedPayload = JSON.parse(structuredQuery);
+            parsedPayload.dify_inputs = difyInputs;
+            const finalStructuredQuery = JSON.stringify(parsedPayload);
 
             // ★変更: ユーザーメッセージに構造化JSONを保存（ContextChips用）
             // 元のコードでは230-238行目でプレーンテキストをセットしていたが、
@@ -328,7 +354,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             const userMessage = {
                 id: userMessageId,
                 role: 'user',
-                text: structuredQuery, // ★変更: プレーンテキストではなく構造化JSONを保存
+                text: finalStructuredQuery, // ★変更: プレーンテキストではなく構造化JSONを保存
                 timestamp: new Date().toISOString(),
                 files: displayFiles
             };
@@ -337,17 +363,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             // ★デバッグ用: 送信ペイロードの確認
             console.group('🔷 Structured Message Payload');
             console.log('Original Text:', text);
-            console.log('Structured JSON:', structuredQuery);
-            console.log('Parsed Object:', JSON.parse(structuredQuery));
+            console.log('Structured JSON:', finalStructuredQuery);
+            console.log('Parsed Object:', JSON.parse(finalStructuredQuery));
             console.groupEnd();
-            
+
             // ★ログ保存: クリップボードコピー用
-            addLog(`[StructuredPayload] ${structuredQuery}`, 'info');
+            addLog(`[StructuredPayload] ${finalStructuredQuery}`, 'info');
 
 
             reader = await ChatServiceAdapter.sendMessage(
                 {
-                    text: structuredQuery, // APIにはJSON文字列を送信
+                    text: finalStructuredQuery, // APIにはJSON文字列を送信
                     conversationId,
                     files: allFilesToSend.map(f => ({ id: f.id, name: f.name })),
                     searchSettings: currentSettings,
@@ -736,13 +762,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         const targetMessage = result.targetMessage;
         let attachments = [];
         if (targetMessage) {
-             const restored = restoreMessageState(targetMessage.text);
-             attachments = restored.attachments || [];
-             // ここでcontextやintelligenceを復元するか？
-             // 仕様としては「現在の設定」で再送信するのが自然かもしれないが、
-             // Dify APIに送る際はattachmentsが必要。
-             // context (stores) は現在のUI状態 (searchSettings) が優先されるべきか？
-             // attachmentsだけは確実に引き継ぐ必要がある。
+            const restored = restoreMessageState(targetMessage.text);
+            attachments = restored.attachments || [];
+            // ここでcontextやintelligenceを復元するか？
+            // 仕様としては「現在の設定」で再送信するのが自然かもしれないが、
+            // Dify APIに送る際はattachmentsが必要。
+            // context (stores) は現在のUI状態 (searchSettings) が優先されるべきか？
+            // attachmentsだけは確実に引き継ぐ必要がある。
         }
 
         // handleSendMessageはFile|AttachmentMeta[]を受け付けるように修正済み
@@ -758,7 +784,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         }
 
         setMessages(result.truncatedMessages);
-        
+
         // ★修正: テキストが既に構造化JSONの場合はパースしてプレーンテキストを取り出す
         // これにより、再送信時にJSONが二重にラップされるのを防ぐ
         const rawText = result.targetUserMessage.text || '';

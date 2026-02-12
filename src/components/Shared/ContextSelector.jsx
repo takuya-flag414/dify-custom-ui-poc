@@ -197,6 +197,7 @@ const ContextSelector = ({
                 ...targetMode.settings,
                 // 非ストアモード選択時はストア選択をクリア
                 selectedStoreId: null,
+                selectedStoreName: null,
             });
         }
     };
@@ -217,6 +218,7 @@ const ContextSelector = ({
             ragEnabled: nextRagEnabled,
             webMode: nextWebMode,
             selectedStoreId: storeId,
+            selectedStoreName: store?.display_name || '',
         });
         // ★ストアオブジェクトを親に直接渡す（activeStore 即時反映用）
         if (store && onStoreSelected) {

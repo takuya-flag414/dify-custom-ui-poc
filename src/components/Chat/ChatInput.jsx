@@ -217,7 +217,8 @@ const ChatInput = ({
       // ★修正: ストア選択時にsearchSettingsも更新して、useChatが参照できるようにする
       setSearchSettings({
         ...searchSettings,
-        selectedStoreId: storeId
+        selectedStoreId: storeId,
+        selectedStoreName: store?.display_name || '',
       });
     }
   };
@@ -282,6 +283,7 @@ const ChatInput = ({
               setSearchSettings({
                 ...searchSettings,
                 selectedStoreId: null,
+                selectedStoreName: null,
                 ragEnabled: 'auto',
                 webMode: 'auto',
               });
