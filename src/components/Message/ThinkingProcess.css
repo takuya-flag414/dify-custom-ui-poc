@@ -798,10 +798,26 @@
     font-size: 13px;
     color: var(--color-text-muted);
     font-weight: 500;
-    /* 点滅アニメーション */
-    animation: typing-indicator 1.5s infinite ease-in-out;
+    /* Soft Fade In Animation */
+    animation: text-appear 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+@keyframes text-appear {
+    0% {
+        opacity: 0;
+        transform: translateY(2px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 点滅アニメーション - 必要であれば残すが、今回はtext-appearを使用するため不要なら削除。
+   ただし、他の箇所で使われているかもしれないので定義(@keyframes typing-indicator)は残す。
+   ここでは .fluid-loading-text の閉じた後のゴミを削除する。
+*/
 @keyframes typing-indicator {
     0% {
         opacity: 0.6;

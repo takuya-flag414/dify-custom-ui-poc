@@ -55,11 +55,15 @@ export const processNodeStarted = (data, context) => {
     let displayTitle = null;
     let iconType = 'default';
     let detectedTraceMode = null;
+    let renderMode = null;
+    let thinkingText = null; // ★追加: Thinkingプレースホルダーのテキスト
 
     if (mapping) {
         // マッピングテーブルにマッチした場合
         displayTitle = mapping.title;
         iconType = mapping.icon;
+        renderMode = mapping.renderMode;
+        thinkingText = mapping.thinkingText; // ★追加: マッピングから取得
 
         // 動的タイトル生成
         if (mapping.dynamic === 'document') {
@@ -102,6 +106,8 @@ export const processNodeStarted = (data, context) => {
         // LLMノード (マッピングにない場合のフォールバック)
         displayTitle = '情報を整理して回答を生成中...';
         iconType = 'writing';
+        renderMode = 'silent';
+        thinkingText = '回答を生成中...'; // ★追加: フォールバック
     }
 
     if (!displayTitle) {
@@ -112,7 +118,9 @@ export const processNodeStarted = (data, context) => {
         nodeId: data.data?.node_id || `node_${Date.now()}`,
         displayTitle,
         iconType,
-        detectedTraceMode
+        detectedTraceMode,
+        renderMode,
+        thinkingText // ★追加
     };
 };
 

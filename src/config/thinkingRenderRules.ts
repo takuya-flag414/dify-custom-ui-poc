@@ -14,6 +14,7 @@ interface ThinkingStep {
     thinking?: string;
     resultValue?: string;
     errorMessage?: string;
+    renderMode?: 'silent' | 'action' | 'monologue';
 }
 
 export const THINKING_RENDER_RULES = {
@@ -56,6 +57,11 @@ export const THINKING_RENDER_RULES = {
  * ノード情報からレンダリングモードを決定するヘルパー関数
  */
 export const determineRenderMode = (step: ThinkingStep): RenderMode => {
+    // 0. 明示的なモード指定のチェック (最優先)
+    if (step.renderMode) {
+        return step.renderMode;
+    }
+
     // エラーがある場合は必ず表示（Actionとして扱い、エラーアイコンを出すのが適切）
     if (step.status === 'error') return 'action';
 

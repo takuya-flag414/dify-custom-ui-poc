@@ -185,8 +185,8 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
 
         return (
             <div className="fluid-thought-stream">
-                {/* 初期ローディング状態 */}
-                {!hasVisibleContent && isStreaming && (
+                {/* 初期ローディング状態: ステップがまだ1つもない場合のみ表示 */}
+                {!hasSteps && isStreaming && (
                     <div className="fluid-loading-container">
                         <FluidOrb width="40px" height="40px" />
                         <span className="fluid-loading-text">Thinking...</span>
@@ -199,14 +199,37 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
 
                     const mode = determineRenderMode(step);
                     const isStepDone = step.status === 'done' || step.status === 'error';
+                    const thinkingText = step.thinkingText || 'Thinking...'; // ★追加: カスタムテキスト
 
-                    // Silent: 非表示
-                    if (mode === 'silent') return null;
+                    // ★共通プレースホルダー: 現在進行中のステップで、かつ表示するものがない場合に表示
+                    const ThinkingPlaceholder = (
+                        <div key={step.id || index} className="thought-monologue-container">
+                            <div className="fluid-loading-container small">
+                                <FluidOrb width="24px" height="24px" />
+                                <span className="fluid-loading-text">{thinkingText}</span>
+                            </div>
+                        </div>
+                    );
+
+                    // Silent: 基本非表示だが、現在進行中のステップならThinkingを表示
+                    if (mode === 'silent') {
+                        if (isStreaming && index === visualCurrentStepIndex) {
+                            return ThinkingPlaceholder;
+                        }
+                        return null;
+                    }
 
                     // ★Mergedモード専用: ルーターノード（判定結果）はチップUI非表示、thinkingのみ表示
                     if (step.iconType === 'router') {
                         const monologueContent = step.thinking || step.reasoning;
-                        if (!monologueContent) return null; // thinkingもなければ完全に非表示
+
+                        if (!monologueContent) {
+                            // thinkingもなければ基本非表示だが、現在進行中ならThinkingを表示
+                            if (isStreaming && index === visualCurrentStepIndex) {
+                                return ThinkingPlaceholder;
+                            }
+                            return null;
+                        }
 
                         return (
                             <div key={step.id || index} className="thought-monologue-container">

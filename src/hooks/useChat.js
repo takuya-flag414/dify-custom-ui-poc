@@ -471,7 +471,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     continue;
                                 }
 
-                                const { nodeId, displayTitle, iconType, detectedTraceMode: newTraceMode } = result;
+                                const { nodeId, displayTitle, iconType, detectedTraceMode: newTraceMode, renderMode, thinkingText } = result;
                                 if (newTraceMode) {
                                     detectedTraceMode = newTraceMode;
                                 }
@@ -489,7 +489,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     usedHttpLlmSearch: prev.usedHttpLlmSearch || isHttpLlmSearch,
                                     thoughtProcess: [
                                         ...prev.thoughtProcess.map(t => ({ ...t, status: 'done' })),
-                                        { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType }
+                                        { id: nodeId, title: displayTitle, status: 'processing', iconType: iconType, renderMode: renderMode, thinkingText: thinkingText } // ★thinkingTextを追加
                                     ]
                                 } : prev);
                             }
