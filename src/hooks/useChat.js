@@ -92,6 +92,10 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     // ★追加: 最後のユーザーメッセージを追跡（再送信用）
     const lastUserMessageRef = useRef(null);
 
+    // ★追加: IntelligenceErrorHandler連携用
+    // エラー発生時にエラー情報をstateに保持し、App.jsxのuseErrorIntelligenceが検知する
+    const [lastError, setLastError] = useState(null);
+
     useEffect(() => {
         searchSettingsRef.current = searchSettings;
     }, [searchSettings]);
@@ -644,26 +648,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     setStreamingMessage(null);
                                 }
                             }
-                            // ★追加: SSE error イベントハンドリング
+                            // ★変更: SSE error イベント → IntelligenceErrorHandler に委譲
                             else if (data.event === 'error') {
                                 const errorCode = data.code || 'UNKNOWN';
                                 const errorMessage = data.message || '不明なエラーが発生しました';
-                                addLog(`[SSE Error] ${errorCode}: ${errorMessage}`, 'error');
+                                const fullErrorMsg = `${errorCode}: ${errorMessage}`;
+                                addLog(`[SSE Error] ${fullErrorMsg}`, 'error');
 
-                                const currentStreamingMsg = streamingMessageRef.current;
-                                if (currentStreamingMsg) {
-                                    const errorFinalMessage = {
-                                        ...currentStreamingMsg,
-                                        isStreaming: false,
-                                        hasWorkflowError: true,
-                                        workflowError: { nodeTitle: 'ストリーミング', message: `${errorCode}: ${errorMessage}` },
-                                        thoughtProcess: currentStreamingMsg.thoughtProcess.map(t =>
-                                            t.status === 'processing' ? { ...t, status: 'error', errorMessage } : t
-                                        )
-                                    };
-                                    setMessages(prevMsgs => [...prevMsgs, errorFinalMessage]);
-                                    setStreamingMessage(null);
-                                }
+                                // ストリーミング中のメッセージをクリーンアップ
+                                setStreamingMessage(null);
+                                // IntelligenceErrorHandler にエラーを報告
+                                setLastError({ raw: fullErrorMsg, timestamp: Date.now() });
                             }
                         } catch (e) {
                             console.error('Stream Parse Error:', e);
@@ -677,21 +672,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
         } catch (error) {
             addLog(`[Stream Error] ${error.message}`, 'error');
-            // ★変更: エラー時もstreamingMessageRefから現在値を取得して処理
-            const currentStreamingMsg = streamingMessageRef.current;
-            if (currentStreamingMsg) {
-                const errorMessage = {
-                    ...currentStreamingMsg,
-                    role: 'system',
-                    type: 'error',
-                    text: '',
-                    rawError: error.message,
-                    isStreaming: false,
-                    thoughtProcess: []
-                };
-                setMessages(prevMsgs => [...prevMsgs, errorMessage]);
-                setStreamingMessage(null);
-            }
+            // ★変更: IntelligenceErrorHandler にエラーを委譲
+            setStreamingMessage(null);
+            setLastError({ raw: error.message, timestamp: Date.now() });
             setIsGenerating(false);
         }
     };
@@ -815,5 +798,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         stopGeneration,
         handleEdit,
         handleRegenerate,
+        // ★追加: IntelligenceErrorHandler連携
+        lastError,
+        setLastError,
     };
 };

@@ -10,7 +10,7 @@ import { parseStructuredMessage } from '../../utils/messageSerializer';
 
 // Spring Physics (DESIGN_RULE準拠)
 const SPRING_CONFIG = {
-    type: "spring",
+    type: "spring" as const,
     stiffness: 300,
     damping: 25,
     mass: 1
@@ -197,6 +197,7 @@ const ContextChips: React.FC<ContextChipsProps> = ({ message, previousMessage })
             list.push({
                 type: 'file',
                 label: file.name,
+                // @ts-expect-error FileIcon is a .jsx component without proper TS types
                 icon: <FileIcon filename={file.name} />,
                 title: file.name
             });
@@ -215,6 +216,7 @@ const ContextChips: React.FC<ContextChipsProps> = ({ message, previousMessage })
                 list.push({
                     type: 'file',
                     label: file.name,
+                    // @ts-expect-error FileIcon is a .jsx component without proper TS types
                     icon: <FileIcon filename={file.name} />,
                     title: file.name
                 });

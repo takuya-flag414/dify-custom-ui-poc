@@ -1,0 +1,243 @@
+/* src/components/IntelligenceHUD/ErrorGlassCard.css */
+/* IntelligenceErrorHandler - Liquid Glass Error Card */
+
+/* ========================================
+   Container (HUD Overlay)
+   ======================================== */
+.error-hud-overlay {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 520px;
+    padding: 0 16px;
+}
+
+/* ========================================
+   Glass Card
+   ======================================== */
+.error-glass-card {
+    pointer-events: auto;
+    width: 100%;
+    background: var(--glass-hud-bg);
+    backdrop-filter: var(--glass-hud-blur);
+    -webkit-backdrop-filter: var(--glass-hud-blur);
+    border: 1px solid var(--glass-hud-border);
+    box-shadow: var(--glass-hud-shadow);
+    border-radius: var(--radius-2xl);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ========================================
+   Severity Variants
+   ======================================== */
+
+/* Warning (Amber Glow) */
+.error-glass-card[data-severity="warning"] {
+    border-color: oklch(70% 0.14 85 / 0.5);
+    box-shadow:
+        var(--glass-hud-shadow),
+        var(--glow-warning);
+}
+
+.error-glass-card[data-severity="warning"] .error-glass-icon {
+    color: var(--color-warning-amber);
+}
+
+/* Critical (Red) */
+.error-glass-card[data-severity="critical"] {
+    border-color: oklch(60% 0.18 25 / 0.5);
+    box-shadow:
+        var(--glass-hud-shadow),
+        inset 0 0 20px oklch(55% 0.22 25 / 0.1),
+        0 0 15px oklch(55% 0.22 25 / 0.15);
+}
+
+.error-glass-card[data-severity="critical"] .error-glass-icon {
+    color: var(--color-error);
+}
+
+/* ========================================
+   Icon
+   ======================================== */
+.error-glass-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+}
+
+.error-glass-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* ========================================
+   Body
+   ======================================== */
+.error-glass-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.error-glass-title {
+    font-size: var(--text-body);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-main);
+    line-height: 1.3;
+    margin: 0;
+    letter-spacing: var(--tracking-normal);
+}
+
+.error-glass-desc {
+    font-size: var(--text-caption);
+    color: var(--color-text-sub);
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+/* ========================================
+   Actions
+   ======================================== */
+.error-glass-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.error-glass-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-caption);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-bg-surface);
+    color: var(--color-text-main);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.error-glass-btn:hover {
+    transform: scale(1.03);
+    box-shadow: var(--shadow-md);
+}
+
+.error-glass-btn:active {
+    transform: scale(0.96);
+}
+
+.error-glass-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Primary action variant */
+.error-glass-btn-primary {
+    background: var(--color-primary);
+    color: var(--color-text-white);
+    border-color: transparent;
+}
+
+.error-glass-btn-primary:hover {
+    background: var(--color-primary-hover);
+}
+
+/* ========================================
+   Countdown / Retry Status
+   ======================================== */
+.error-glass-retry-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: var(--text-caption);
+    color: var(--color-text-sub);
+}
+
+.error-glass-countdown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: var(--color-warning-amber-bg);
+    color: var(--color-warning-amber);
+    font-weight: var(--font-bold);
+    font-size: var(--text-caption);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Spinner for retrying */
+.error-glass-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-warning-amber);
+    border-radius: 50%;
+    animation: error-spin 0.8s linear infinite;
+}
+
+@keyframes error-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   Dismiss Button
+   ======================================== */
+.error-glass-dismiss {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.error-glass-dismiss:hover {
+    background: var(--color-hover-overlay);
+    color: var(--color-text-main);
+}
+
+.error-glass-dismiss svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ========================================
+   Reduced Motion
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    .error-glass-spinner {
+        animation: none;
+        border-top-color: var(--color-warning-amber);
+        opacity: 0.6;
+    }
+}

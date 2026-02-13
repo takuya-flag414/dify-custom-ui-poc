@@ -24,6 +24,9 @@ import { useApiConfig } from './hooks/useApiConfig';
 import { useSettings } from './hooks/useSettings';
 import { useTheme } from './hooks/useTheme';
 import { useInspector } from './hooks/useInspector';
+import { useErrorIntelligence } from './hooks/useErrorIntelligence';
+
+import ErrorGlassCard from './components/IntelligenceHUD/ErrorGlassCard';
 
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
@@ -202,7 +205,10 @@ function App() {
     // ★追加: Phase 1.5 - 停止・編集・再送信機能
     stopGeneration,
     handleEdit,
-    handleRegenerate
+    handleRegenerate,
+    // ★追加: IntelligenceErrorHandler連携
+    lastError,
+    setLastError,
   } = useChat(
     mockMode,
     authUser?.userId,
@@ -216,6 +222,23 @@ function App() {
       ? { ...settings.prompt, displayName: settings?.profile?.displayName || '' }
       : undefined
   );
+
+  // ★追加: IntelligenceErrorHandler
+  const errorIntelligence = useErrorIntelligence();
+
+  // ★追加: useChat の lastError を useErrorIntelligence にブリッジ
+  useEffect(() => {
+    if (lastError) {
+      errorIntelligence.reportError(lastError.raw, () => {
+        // リトライコールバック: 最後のユーザーメッセージを再送信
+        const lastUserMsg = messages.slice().reverse().find(m => m.role === 'user');
+        if (lastUserMsg) {
+          handleSendMessage(lastUserMsg.text, []);
+        }
+      });
+      setLastError(null); // クリア
+    }
+  }, [lastError]);
 
   const handleMockModeChange = (newMode) => {
     setMockMode(newMode);
@@ -641,6 +664,18 @@ function App() {
             apiKey={apiKey}
             apiUrl={apiUrl}
             userId={authUser?.userId}
+          />
+
+          {/* ★追加: IntelligenceErrorHandler HUD Overlay */}
+          <ErrorGlassCard
+            error={errorIntelligence.activeError}
+            retryCountdown={errorIntelligence.retryCountdown}
+            isRetrying={errorIntelligence.isRetrying}
+            retryCount={errorIntelligence.retryCount}
+            shakeKey={errorIntelligence.shakeKey}
+            onDismiss={errorIntelligence.dismiss}
+            onManualRetry={errorIntelligence.triggerManualRetry}
+            onOpenConfig={() => setIsConfigModalOpen(true)}
           />
         </>
       )
