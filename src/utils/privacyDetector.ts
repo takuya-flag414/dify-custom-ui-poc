@@ -302,9 +302,9 @@ export function scanTextWithPositions(text: string | null | undefined): ScanResu
         return { hasWarning: false, highlights: [] };
     }
 
-    const highlights: Highlight[] = [];
-    // 重複除去用のSet（開始-終了位置を文字列化）
-    const seenPositions = new Set<string>();
+    const priorityOrder: Record<DetectionPriority, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
+    const rawHighlights: Highlight[] = [];
 
     for (const patternDef of DETECTION_PATTERNS) {
         // execで位置情報を取得するためにRegExpを再作成
@@ -321,14 +321,7 @@ export function scanTextWithPositions(text: string | null | undefined): ScanResu
                 continue;
             }
 
-            // 重複チェック
-            const posKey = `${start}-${end}`;
-            if (seenPositions.has(posKey)) {
-                continue;
-            }
-            seenPositions.add(posKey);
-
-            highlights.push({
+            rawHighlights.push({
                 start,
                 end,
                 type: patternDef.id,
@@ -337,12 +330,40 @@ export function scanTextWithPositions(text: string | null | undefined): ScanResu
         }
     }
 
+    // --- 範囲重複時の優先度排除 ---
+    // 2つのハイライトの範囲が重なっている場合、優先度の低い方を除外する
+    // 例: 「4111-1111-1111-1111」がクレジットカード(critical)と郵便番号(medium)の
+    //     両方にマッチした場合、郵便番号の検出を除外する
+    const filteredHighlights = rawHighlights.filter((highlight, idx) => {
+        for (let i = 0; i < rawHighlights.length; i++) {
+            if (i === idx) continue;
+            const other = rawHighlights[i];
+
+            // 範囲が重なっているかチェック（部分重複・完全包含いずれも対象）
+            const overlaps = highlight.start < other.end && highlight.end > other.start;
+            if (!overlaps) continue;
+
+            // 重なっている相手の方が優先度が高い場合、自分を除外
+            const myPriority = priorityOrder[highlight.priority] ?? 99;
+            const otherPriority = priorityOrder[other.priority] ?? 99;
+            if (otherPriority < myPriority) {
+                return false; // より優先度の高い検出が重なっているので除外
+            }
+
+            // 同じ優先度の場合、先に定義されたパターン（先にrawHighlightsに入ったもの）を優先
+            if (otherPriority === myPriority && i < idx) {
+                return false;
+            }
+        }
+        return true;
+    });
+
     // 開始位置でソート
-    highlights.sort((a, b) => a.start - b.start);
+    filteredHighlights.sort((a, b) => a.start - b.start);
 
     return {
-        hasWarning: highlights.length > 0,
-        highlights,
+        hasWarning: filteredHighlights.length > 0,
+        highlights: filteredHighlights,
     };
 }
 

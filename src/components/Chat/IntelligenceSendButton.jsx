@@ -60,13 +60,13 @@ const IntelligenceSendButton = ({
                     </motion.button>
                 )}
 
-                {/* --- 2. Typing/Active State (Intelligence Glow) --- */}
+                {/* --- 2. Typing/Active State (Simple Blue Button) --- */}
                 {(mode === 'typing' || mode === 'active') && !isStreaming && (
                     <motion.button
                         key="typing"
                         onClick={onSend}
                         disabled={disabled}
-                        className="relative w-9 h-9 rounded-full flex items-center justify-center focus:outline-none"
+                        className="w-9 h-9 rounded-full bg-[#007AFF] text-white flex items-center justify-center shadow-sm hover:bg-[#0062CC] focus:outline-none"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.8, opacity: 0 }}
@@ -75,23 +75,7 @@ const IntelligenceSendButton = ({
                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         title="送信"
                     >
-                        {/* Background Gradient (Spinning) */}
-                        <motion.div
-                            className="absolute inset-0 rounded-full"
-                            style={{
-                                background: `conic-gradient(from 0deg, var(--ai-gradient-cyan), var(--ai-gradient-magenta), var(--ai-gradient-yellow), var(--ai-gradient-blue), var(--ai-gradient-cyan))`,
-                                filter: 'blur(3px)',
-                            }}
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        />
-                        {/* Inner Surface for Icon Contrast */}
-                        <div className="absolute inset-[2px] bg-black rounded-full z-10 opacity-20" />
-
-                        {/* Icon */}
-                        <div className="relative z-20 text-white drop-shadow-sm">
-                            <ArrowUpIcon />
-                        </div>
+                        <ArrowUpIcon />
                     </motion.button>
                 )}
 

@@ -1340,9 +1340,33 @@
   color: var(--color-text-sub, #9CA3AF);
 }
 
+/* ========================================
+   AI Answer Fade-In Animation
+   AI最終回答テキストのスムーズな出現演出
+   ======================================== */
+.ai-answer-fade-in {
+  animation: ai-answer-appear 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes ai-answer-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Reduced Motion対応 */
 @media (prefers-reduced-motion: reduce) {
   .workflow-error-banner {
+    animation: none;
+  }
+
+  .ai-answer-fade-in {
     animation: none;
   }
 }

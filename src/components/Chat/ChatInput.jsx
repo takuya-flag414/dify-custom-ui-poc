@@ -87,13 +87,11 @@ const ChatInput = ({
     }
   }, [searchSettings.selectedStoreId, stores]);
 
-  const executeSend = useCallback(() => {
+  const executeSend = useCallback((excludedTypes = []) => {
     const filesToSend = selectedFiles.map(sf => sf.file);
-    // Include store info in the message or context? 
-    // Usually ContextSelector manages the logic, but here we visualize it.
-    // If activeStore is set, ensure searchSettings reflects it if needed.
 
-    onSendMessage(text, filesToSend);
+    // 第3引数でサニタイズ除外タイプを渡す
+    onSendMessage(text, filesToSend, { sanitizeExcludeTypes: excludedTypes });
     setText('');
     setSelectedFiles([]);
     setPrivacyWarning({ hasWarning: false, detections: [] });
@@ -339,7 +337,7 @@ const ChatInput = ({
         <PrivacyConfirmDialog
           detections={privacyWarning.detections}
           fileDetections={fileWarnings.detections}
-          onConfirm={executeSend}
+          onConfirm={(excludedTypes) => executeSend(excludedTypes)}
           onCancel={() => setShowPrivacyConfirm(false)}
         />
       )}

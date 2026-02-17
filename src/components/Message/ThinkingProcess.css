@@ -1,520 +1,4 @@
-/* src/components/styles/ThinkingProcess.css - V2 */
-
-.thinking-process-container {
-    margin-bottom: 16px;
-    background-color: var(--color-bg-sidebar);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    font-size: var(--text-caption);
-    /* 13px */
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.thinking-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    padding: 10px 14px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    color: var(--color-text-sub);
-    transition: background-color 0.2s;
-    /* フォーカス時のアウトライン調整 */
-    outline: none;
-}
-
-.thinking-header:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--color-primary);
-}
-
-.thinking-header:hover {
-    background-color: var(--color-hover-overlay);
-}
-
-.thinking-icon-wrapper {
-    margin-right: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-}
-
-
-/* thinking-spinner は FluidOrb コンポーネントに置き換え済み */
-
-
-.thinking-check-icon {
-    color: var(--color-success, #10B981);
-}
-
-.thinking-summary-text {
-    flex: 1;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.thinking-chevron {
-    opacity: 0.5;
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.thinking-chevron.rotate {
-    transform: rotate(180deg);
-}
-
-/* --- Accordion Animation (CSS Grid Method) --- */
-.thinking-accordion-grid {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.thinking-accordion-grid.expanded {
-    grid-template-rows: 1fr;
-}
-
-.thinking-accordion-overflow {
-    overflow: hidden;
-}
-
-/* Steps List */
-.thinking-steps-list {
-    padding: 0 14px;
-    /* padding-bottom, padding-top は状態によって変化させる */
-    opacity: 0;
-    border-top: 1px solid transparent;
-    transition:
-        opacity 0.3s ease,
-        padding 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-        border-top-color 0.3s ease;
-}
-
-.thinking-accordion-grid.expanded .thinking-steps-list {
-    padding: 4px 14px 14px 14px;
-    opacity: 1;
-    border-top-color: var(--color-border-light, #F3F4F6);
-}
-
-/* Step Item Styles */
-.thinking-step-item {
-    display: flex;
-    gap: 12px;
-    min-height: 24px;
-}
-
-.step-icon-column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 24px;
-    /* アイコンが入る幅を確保 */
-    margin-right: 8px;
-}
-
-.step-icon-circle {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--color-bg-sidebar);
-    color: var(--color-text-muted);
-    transition: all 0.3s ease;
-    z-index: 1;
-}
-
-/* SVGのサイズ調整 */
-.step-icon-circle svg {
-    width: 12px;
-    height: 12px;
-}
-
-/* アクティブ（処理中）状態 - V2 Glow */
-.step-icon-circle.processing {
-    background-color: var(--color-primary-bg);
-    color: var(--color-primary);
-    box-shadow: var(--glow-primary);
-    animation: pulse-icon 1.5s infinite;
-}
-
-/* 完了状態 */
-.step-icon-circle.done {
-    background-color: var(--color-bg-sidebar);
-    color: var(--color-text-muted);
-}
-
-/* 線の位置調整 */
-.step-line {
-    flex: 1;
-    width: 1px;
-    background-color: var(--color-border);
-    margin-top: 4px;
-    margin-bottom: 4px;
-}
-
-/* ヘッダーの完了アイコン */
-.thinking-done-icon {
-    color: var(--color-text-muted);
-}
-
-@keyframes pulse-icon {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-.step-dot.processing {
-    background-color: var(--color-primary, #3B82F6);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    animation: pulse-dot 1.5s infinite;
-}
-
-.step-dot.done {
-    background-color: var(--color-success, #10B981);
-}
-
-.step-line {
-    flex: 1;
-    width: 1px;
-    background-color: var(--color-border);
-    margin-top: -2px;
-    margin-bottom: -4px;
-    min-height: 12px;
-}
-
-.step-title {
-    padding-top: 1px;
-    color: var(--color-text-muted);
-    line-height: 1.4;
-}
-
-.thinking-step-item.processing .step-title {
-    color: var(--color-text-main);
-    font-weight: 500;
-}
-
-@keyframes pulse-dot {
-    0% {
-        transform: scale(0.95);
-        opacity: 0.8;
-    }
-
-    50% {
-        transform: scale(1.1);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(0.95);
-        opacity: 0.8;
-    }
-}
-
-/* ========================================
-   Dark Mode Overrides
-   ======================================== */
-[data-theme='dark'] .step-icon-circle.processing {
-    background-color: rgba(59, 130, 246, 0.2);
-}
-
-[data-theme='dark'] .thinking-accordion-grid.expanded .thinking-steps-list {
-    border-top-color: var(--color-border);
-}
-
-/* ========================================
-   AI Thinking Content Section
-   Apple Intelligence Style (DESIGN_RULE.md準拠)
-   ======================================== */
-.thinking-content-section {
-    margin: 12px 14px 14px 14px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    /* Apple Intelligenceグラデーション背景 (淡い版) */
-    background: linear-gradient(135deg,
-            rgba(0, 255, 255, 0.03) 0%,
-            rgba(255, 0, 255, 0.03) 35%,
-            rgba(255, 214, 10, 0.03) 65%,
-            rgba(0, 122, 255, 0.03) 100%);
-    border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.05));
-    /* Glassmorphism */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    /* Spring animation for appear */
-    animation: thinking-content-appear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes thinking-content-appear {
-    from {
-        opacity: 0;
-        transform: translateY(4px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.thinking-content-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    font-size: var(--text-caption, 12px);
-    font-weight: 600;
-    color: var(--color-text-sub, #6B7280);
-    letter-spacing: 0.02em;
-}
-
-.thinking-content-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary, #007AFF);
-    opacity: 0.8;
-}
-
-.thinking-content-icon svg {
-    width: 14px;
-    height: 14px;
-}
-
-.thinking-content-body {
-    font-size: var(--text-caption, 12px);
-    line-height: 1.6;
-    color: var(--color-text-sub, #6B7280);
-}
-
-/* Markdown内のスタイル調整 */
-.thinking-content-body p {
-    margin: 0 0 6px 0;
-}
-
-.thinking-content-body p:last-child {
-    margin-bottom: 0;
-}
-
-.thinking-content-body ul,
-.thinking-content-body ol {
-    margin: 0;
-    padding-left: 16px;
-}
-
-.thinking-content-body li {
-    margin-bottom: 2px;
-}
-
-.thinking-content-body strong {
-    color: var(--color-text-main, #1F2937);
-    font-weight: 600;
-}
-
-/* ダークモード対応 */
-[data-theme='dark'] .thinking-content-section {
-    background: linear-gradient(135deg,
-            rgba(0, 255, 255, 0.05) 0%,
-            rgba(255, 0, 255, 0.05) 35%,
-            rgba(255, 214, 10, 0.05) 65%,
-            rgba(0, 122, 255, 0.05) 100%);
-    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
-}
-
-[data-theme='dark'] .thinking-content-body strong {
-    color: var(--color-text-main, #F9FAFB);
-}
-
-/* Reduced Motion対応 */
-@media (prefers-reduced-motion: reduce) {
-    .thinking-content-section {
-        animation: none;
-    }
-}
-
-/* ========================================
-   Step Detail Container (Thinking + Result)
-   Apple Intelligence Style (DESIGN_RULE.md準拠)
-   ======================================== */
-.thinking-step-wrapper {
-    display: flex;
-    flex-direction: column;
-}
-
-.step-detail-container {
-    margin: 4px 0 10px 44px;
-    padding: 10px 12px;
-    border-radius: 10px;
-
-    /* Apple Intelligence淡いグラデーション */
-    background: linear-gradient(135deg,
-            rgba(0, 255, 255, 0.02) 0%,
-            rgba(255, 0, 255, 0.02) 50%,
-            rgba(0, 122, 255, 0.02) 100%);
-    border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.05));
-
-    /* Glassmorphism */
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-
-    /* Spring animation */
-    animation: step-detail-appear 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes step-detail-appear {
-    from {
-        opacity: 0;
-        transform: translateY(-4px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.step-thinking-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.step-thinking-icon {
-    flex-shrink: 0;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.step-thinking-text {
-    font-size: var(--text-caption, 12px);
-    color: var(--color-text-sub, #6B7280);
-    line-height: 1.6;
-    word-break: break-word;
-    white-space: pre-wrap;
-}
-
-.step-result-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 6px;
-    font-size: var(--text-caption, 12px);
-    padding-top: 6px;
-    border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.05));
-}
-
-.step-result-label {
-    color: var(--color-text-muted, #9CA3AF);
-    font-weight: 500;
-    flex-shrink: 0;
-}
-
-.step-result-value {
-    color: var(--color-text-main, #1F2937);
-    font-weight: 600;
-    word-break: break-word;
-}
-
-/* ダークモード対応 */
-[data-theme='dark'] .step-detail-container {
-    background: linear-gradient(135deg,
-            rgba(0, 255, 255, 0.04) 0%,
-            rgba(255, 0, 255, 0.04) 50%,
-            rgba(0, 122, 255, 0.04) 100%);
-    border-color: var(--color-border, rgba(255, 255, 255, 0.1));
-}
-
-[data-theme='dark'] .step-result-row {
-    border-top-color: var(--color-border, rgba(255, 255, 255, 0.1));
-}
-
-[data-theme='dark'] .step-result-value {
-    color: var(--color-text-main, #F9FAFB);
-}
-
-/* Reduced Motion対応 */
-@media (prefers-reduced-motion: reduce) {
-    .step-detail-container {
-        animation: none;
-    }
-}
-
-/* ========================================
-   Error State Styles
-   ワークフローエラー表示用スタイル
-   ======================================== */
-
-/* ヘッダーのエラーアイコン */
-.thinking-error-icon {
-    color: var(--color-danger, #EF4444);
-}
-
-/* エラー状態のステップアイコン */
-.step-icon-circle.error {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: var(--color-danger, #EF4444);
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-/* エラー状態のステップタイトル */
-.thinking-step-item.error .step-title {
-    color: var(--color-danger, #EF4444);
-    font-weight: 500;
-}
-
-/* エラー詳細コンテナ */
-.step-detail-container.error {
-    background: linear-gradient(135deg,
-            rgba(239, 68, 68, 0.05) 0%,
-            rgba(239, 68, 68, 0.02) 100%);
-    border-color: rgba(239, 68, 68, 0.2);
-}
-
-/* エラーメッセージ行 */
-.step-error-row {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-}
-
-.step-error-icon {
-    flex-shrink: 0;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.step-error-text {
-    font-size: var(--text-caption, 12px);
-    color: var(--color-danger, #EF4444);
-    line-height: 1.5;
-    word-break: break-word;
-    white-space: pre-wrap;
-}
-
-/* ダークモード対応 */
-[data-theme='dark'] .step-icon-circle.error {
-    background-color: rgba(239, 68, 68, 0.2);
-}
-
-[data-theme='dark'] .step-detail-container.error {
-    background: linear-gradient(135deg,
-            rgba(239, 68, 68, 0.08) 0%,
-            rgba(239, 68, 68, 0.04) 100%);
-    border-color: rgba(239, 68, 68, 0.3);
-}
+/* src/components/styles/ThinkingProcess.css - Fluid Thought Stream Only */
 
 /* ========================================
    Fluid Thought Stream Styles
@@ -528,11 +12,23 @@
     margin-bottom: 0;
 }
 
-/* Monologue: 最終回答と同一スタイル */
+/* Monologue: 最終回答と同一スタイル + フェードインアニメーション */
 .thought-monologue-container {
-    /* スタイルなし - MarkdownRendererのデフォルトスタイルをそのまま使用 */
     min-height: 0;
-    /* 空のルールセット回避 & レイアウト安定化 */
+    /* フェードインアニメーション */
+    animation: monologue-fade-in 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes monologue-fade-in {
+    0% {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Action: チップ型UI (mat-hud準拠) */
@@ -621,7 +117,7 @@
     /* transition for border-radius is handled by .thought-action-chip transition */
 }
 
-/* ... headers/results/details styles (unchanged logic, just re-ensuring context) ... */
+/* ... headers/results/details styles ... */
 .thought-action-header {
     display: flex;
     align-items: center;
@@ -772,6 +268,28 @@
 }
 
 /* Action内のMonologue表示 */
+.action-done-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-success, #34C759);
+    /* index.cssの変数を使用 */
+    animation: done-check-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    flex-shrink: 0;
+}
+
+@keyframes done-check-pop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 .action-monologue {
     margin-top: 8px;
     margin-left: 12px;
@@ -782,6 +300,18 @@
     border: none;
     border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.08));
     margin: 12px 0;
+    /* フェードインアニメーション */
+    animation: divider-fade-in 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes divider-fade-in {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 /* -----------------------------------
@@ -811,24 +341,6 @@
     100% {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-/* 点滅アニメーション - 必要であれば残すが、今回はtext-appearを使用するため不要なら削除。
-   ただし、他の箇所で使われているかもしれないので定義(@keyframes typing-indicator)は残す。
-   ここでは .fluid-loading-text の閉じた後のゴミを削除する。
-*/
-@keyframes typing-indicator {
-    0% {
-        opacity: 0.6;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0.6;
     }
 }
 
@@ -864,6 +376,14 @@
     }
 
     .fluid-loading-text {
+        animation: none;
+    }
+
+    .thought-monologue-container {
+        animation: none;
+    }
+
+    .thought-divider {
         animation: none;
     }
 }

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ThinkingProcess.css';
 import FluidOrb from '../Shared/FluidOrb';
-import MarkdownRenderer from '../Shared/MarkdownRenderer';
-import { IS_THINKING_PROCESS_MERGED } from '../../config/env';
 import { determineRenderMode } from '../../config/thinkingRenderRules';
 import TypewriterEffect from '../Shared/TypewriterEffect';
 
@@ -57,7 +55,6 @@ const Icons = {
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
     ),
-    // ★追加: エラーアイコン
     error: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -99,6 +96,11 @@ const Icons = {
             <line x1="14.5" y1="17.5" x2="18" y2="21"></line>
         </svg>
     ),
+    checkCircle: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-2 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+        </svg>
+    ),
     default: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -106,221 +108,127 @@ const Icons = {
     )
 };
 
-const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
-    const [isExpanded, setIsExpanded] = useState(isStreaming);
+// アニメーションする3点リーダー
+const ThinkingDots = () => {
+    const [dots, setDots] = useState('.');
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDots(prev => prev.length >= 3 ? '.' : prev + '.');
+        }, 500);
+        return () => clearInterval(interval);
+    }, []);
+
+    return <span>{dots}</span>;
+};
+
+const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => {
     // stepsまたはthinkingContentがあるかチェック
     const hasSteps = steps && steps.length > 0;
     const hasThinking = thinkingContent && thinkingContent.trim().length > 0;
     const hasContent = hasSteps || hasThinking;
 
-    // ★追加: エラー状態のチェック
-    const hasError = hasSteps && steps.some(s => s.status === 'error');
+    // コンテンツがない場合、ストリーミング中でなければ何も表示しない
+    if (!hasContent && !isStreaming) return null;
 
+    // アイコン取得ヘルパー
+    const getIcon = (iconType) => Icons[iconType] || Icons.default;
+
+    // 視覚的な現在ステップのインデックス管理
+    const [visualCurrentStepIndex, setVisualCurrentStepIndex] = useState(0);
+
+    // ストリーミング終了時または履歴表示時は全てのステップを表示
     useEffect(() => {
-        // ★変更: エラーがある場合は自動で閉じない
-        if (!isStreaming && hasSteps && steps.every(s => s.status === 'done') && !hasError) {
-            const timer = setTimeout(() => {
-                setIsExpanded(false);
-            }, 2000);
-            return () => clearTimeout(timer);
+        if (!isStreaming) {
+            setVisualCurrentStepIndex(steps ? steps.length : 0);
         }
-    }, [isStreaming, steps, hasSteps, hasError]);
+    }, [isStreaming, steps?.length]);
 
-    // コンテンツがない場合は何も表示しない
-    // ただし、Mergedモードでストリーミング中はローディングUIを表示するため早期リターンしない
-    if (!hasContent && !(IS_THINKING_PROCESS_MERGED && isStreaming)) return null;
+    // ステップ完了時の自動進行制御 (タイプライターがない場合)
+    useEffect(() => {
+        if (!isStreaming || !hasSteps) return;
 
-    const currentStep = hasSteps ? (steps.find(s => s.status === 'processing') || steps[steps.length - 1]) : null;
-    // ★変更: エラー状態も「完了」とみなす（表示用）
-    const isAllDone = hasSteps ? steps.every(s => s.status === 'done' || s.status === 'error') : !isStreaming;
+        const currentStep = steps[visualCurrentStepIndex];
+        if (!currentStep) return;
 
-    // ★ Fluid Thought Stream モード (環境変数 VITE_MERGE_THINKING_PROCESS=true の場合)
-    if (IS_THINKING_PROCESS_MERGED) {
-        // アイコン取得ヘルパー
-        const getIcon = (iconType) => Icons[iconType] || Icons.default;
+        const isDone = currentStep.status === 'done' || currentStep.status === 'error';
+        // thinkingContentも含めてモノローグ有無を判定（LLM_Synthesis対応）
+        const hasMonologue = currentStep.thinking || currentStep.reasoning || currentStep.thinkingContent;
 
-        // ★追加: 視覚的な現在ステップのインデックス管理
-        const [visualCurrentStepIndex, setVisualCurrentStepIndex] = useState(0);
+        // モノローグがない場合は、完了したら即座に次のステップへ進む
+        // (モノローグがある場合はTypewriterEffectのonCompleteで進める)
+        if (isDone && !hasMonologue) {
+            setVisualCurrentStepIndex(prev => prev + 1);
+        }
+    }, [steps, visualCurrentStepIndex, isStreaming, hasSteps]);
 
-        // ★追加: ストリーミング終了時または履歴表示時は全てのステップを表示
-        useEffect(() => {
-            if (!isStreaming) {
-                setVisualCurrentStepIndex(steps ? steps.length : 0);
-            }
-        }, [isStreaming, steps?.length]);
+    // 表示可能なコンテンツがあるかチェック
+    const hasVisibleContent = hasSteps && steps.some(step => {
+        const mode = determineRenderMode(step);
+        if (mode === 'silent') return false;
+        if (mode === 'action') return true;
+        return !!(step.thinking || step.reasoning);
+    });
 
-        // ★追加: ステップ完了時の自動進行制御 (タイプライターがない場合)
-        useEffect(() => {
-            if (!isStreaming || !hasSteps) return;
+    // ステップ完了ハンドル (TypewriterEffectから呼ばれる)
+    const handleStepComplete = (index) => {
+        setVisualCurrentStepIndex(prev => Math.max(prev, index + 1));
+    };
 
-            const currentStep = steps[visualCurrentStepIndex];
-            if (!currentStep) return;
+    return (
+        <div className="fluid-thought-stream">
+            {/* 初期ローディング状態: ステップがまだ1つもない場合のみ表示 */}
+            {!hasSteps && isStreaming && (
+                <div className="fluid-loading-container">
+                    <FluidOrb width="40px" height="40px" />
+                    <span className="fluid-loading-text">Thinking<ThinkingDots /></span>
+                </div>
+            )}
 
-            const isDone = currentStep.status === 'done' || currentStep.status === 'error';
-            // ★修正: thinkingContentも含めてモノローグ有無を判定（LLM_Synthesis対応）
-            const hasMonologue = currentStep.thinking || currentStep.reasoning || currentStep.thinkingContent;
+            {hasSteps && steps.map((step, index) => {
+                // 未来のステップは表示しない (ストリーミング中のみ)
+                if (isStreaming && index > visualCurrentStepIndex) return null;
 
-            // モノローグがない場合は、完了したら即座に次のステップへ進む
-            // (モノローグがある場合はTypewriterEffectのonCompleteで進める)
-            if (isDone && !hasMonologue) {
-                // 少しだけ余韻を残すためにごく短い遅延を入れることも可能だが、
-                // 「チップUIは完了タイミングを同期」という要望通り即座に進める
-                setVisualCurrentStepIndex(prev => prev + 1);
-            }
-        }, [steps, visualCurrentStepIndex, isStreaming, hasSteps]);
+                const mode = determineRenderMode(step);
+                const isStepDone = step.status === 'done' || step.status === 'error';
+                // 末尾の「.」や「。」を削除してベーステキストを作成 (全角・半角ドット対応)
+                const baseThinkingText = (step.thinkingText || 'Thinking').replace(/[.．。]+$/, '');
+                const thinkingText = (
+                    <>
+                        {baseThinkingText}
+                        <ThinkingDots />
+                    </>
+                );
 
-        // 表示可能なコンテンツがあるかチェック
-        const hasVisibleContent = hasSteps && steps.some(step => {
-            const mode = determineRenderMode(step);
-            if (mode === 'silent') return false;
-            if (mode === 'action') return true;
-            return !!(step.thinking || step.reasoning);
-        });
-
-        // ステップ完了ハンドル (TypewriterEffectから呼ばれる)
-        const handleStepComplete = (index) => {
-            setVisualCurrentStepIndex(prev => Math.max(prev, index + 1));
-        };
-
-        return (
-            <div className="fluid-thought-stream">
-                {/* 初期ローディング状態: ステップがまだ1つもない場合のみ表示 */}
-                {!hasSteps && isStreaming && (
-                    <div className="fluid-loading-container">
-                        <FluidOrb width="40px" height="40px" />
-                        <span className="fluid-loading-text">Thinking...</span>
-                    </div>
-                )}
-
-                {hasSteps && steps.map((step, index) => {
-                    // ★追加: 未来のステップは表示しない (ストリーミング中のみ)
-                    if (isStreaming && index > visualCurrentStepIndex) return null;
-
-                    const mode = determineRenderMode(step);
-                    const isStepDone = step.status === 'done' || step.status === 'error';
-                    const thinkingText = step.thinkingText || 'Thinking...'; // ★追加: カスタムテキスト
-
-                    // ★共通プレースホルダー: 現在進行中のステップで、かつ表示するものがない場合に表示
-                    const ThinkingPlaceholder = (
-                        <div key={step.id || index} className="thought-monologue-container">
-                            <div className="fluid-loading-container small">
-                                <FluidOrb width="24px" height="24px" />
-                                <span className="fluid-loading-text">{thinkingText}</span>
-                            </div>
+                // 共通プレースホルダー: 現在進行中のステップで、かつ表示するものがない場合に表示
+                const ThinkingPlaceholder = (
+                    <div key={step.id || index} className="thought-monologue-container">
+                        <div className="fluid-loading-container small">
+                            <FluidOrb width="24px" height="24px" />
+                            <span className="fluid-loading-text">{thinkingText}</span>
                         </div>
-                    );
+                    </div>
+                );
 
-                    // Silent: 基本非表示だが、現在進行中のステップならThinkingを表示
-                    if (mode === 'silent') {
+                // Silent: 基本非表示だが、現在進行中のステップで本文がまだ表示されていない場合のみThinkingを表示
+                if (mode === 'silent') {
+                    if (isStreaming && index === visualCurrentStepIndex && !hasAnswer) {
+                        return ThinkingPlaceholder;
+                    }
+                    return null;
+                }
+
+                // ルーターノード（判定結果）はチップUI非表示、thinkingのみ表示
+                if (step.iconType === 'router') {
+                    const monologueContent = step.thinking || step.reasoning;
+
+                    if (!monologueContent) {
+                        // thinkingもなければ基本非表示だが、現在進行中ならThinkingを表示
                         if (isStreaming && index === visualCurrentStepIndex) {
                             return ThinkingPlaceholder;
                         }
                         return null;
                     }
-
-                    // ★Mergedモード専用: ルーターノード（判定結果）はチップUI非表示、thinkingのみ表示
-                    if (step.iconType === 'router') {
-                        const monologueContent = step.thinking || step.reasoning;
-
-                        if (!monologueContent) {
-                            // thinkingもなければ基本非表示だが、現在進行中ならThinkingを表示
-                            if (isStreaming && index === visualCurrentStepIndex) {
-                                return ThinkingPlaceholder;
-                            }
-                            return null;
-                        }
-
-                        return (
-                            <div key={step.id || index} className="thought-monologue-container">
-                                {isStepDone ? (
-                                    <TypewriterEffect
-                                        content={monologueContent}
-                                        onComplete={() => handleStepComplete(index)}
-                                    />
-                                ) : (
-                                    <div className="fluid-loading-container small">
-                                        <FluidOrb width="24px" height="24px" />
-                                        <span className="fluid-loading-text">Thinking...</span>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    }
-
-                    // Action: チップ型UI
-                    if (mode === 'action') {
-                        const actionMonologueContent = step.thinking || step.reasoning;
-                        const hasAdditionalResults = step.additionalResults && step.additionalResults.length > 0;
-
-                        // ファイル検索ストアツールは「社内データを検索」とわかりやすく表示
-                        const isFileSearchStore = step.title?.includes('ファイル検索ストア');
-                        const displayTitle = isFileSearchStore ? '📂 社内データを検索' : step.title;
-                        const displayIconType = isFileSearchStore ? 'file-search' : step.iconType;
-
-                        return (
-                            <div key={step.id || index} className="thought-action-container">
-                                <div className={`thought-action-chip ${step.status} ${hasAdditionalResults || step.resultValue ? 'has-details' : ''}`}>
-                                    <div className="thought-action-header">
-                                        <span className="action-icon">{getIcon(displayIconType)}</span>
-                                        <span className="action-title">{displayTitle}</span>
-                                        {step.status === 'processing' && <span className="action-spinner" />}
-                                        {step.status === 'error' && <span className="action-error-icon">⚠️</span>}
-                                    </div>
-
-                                    {/* 詳細情報のラッパー（アニメーション用） */}
-                                    {(step.resultValue || hasAdditionalResults) && (
-                                        <div className="action-content-wrapper">
-                                            {/* メイン結果の表示 */}
-                                            {step.resultValue && (
-                                                <div className="thought-action-result">
-                                                    {step.resultValue}
-                                                </div>
-                                            )}
-
-                                            {/* 詳細パラメータの表示 */}
-                                            {hasAdditionalResults && (
-                                                <div className="thought-action-details">
-                                                    {step.additionalResults.map((result, i) => (
-                                                        <div key={i} className="action-detail-item">
-                                                            <span className="detail-label">{result.label}</span>
-                                                            <span className="detail-value">{result.value}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {step.status === 'error' && step.errorMessage && (
-                                    <div className="action-error-detail">{step.errorMessage}</div>
-                                )}
-                                {/* thinking/reasoningがあれば完了後に表示 */}
-                                {actionMonologueContent && isStepDone && (
-                                    <div className="thought-monologue-container action-monologue">
-                                        <TypewriterEffect
-                                            content={actionMonologueContent}
-                                            onComplete={() => handleStepComplete(index)}
-                                        />
-                                    </div>
-                                )}
-                                {/* ★追加: LLM_SynthesisなどのthinkingContentフィールドを表示 */}
-                                {step.thinkingContent && isStepDone && (
-                                    <div className="thought-monologue-container action-monologue synthesis-thinking">
-                                        <TypewriterEffect
-                                            content={step.thinkingContent}
-                                            onComplete={() => handleStepComplete(index)}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    }
-
-                    // Monologue: thinking/reasoningフィールドを表示
-                    const monologueContent = step.thinking || step.reasoning;
-                    if (!monologueContent) return null;
 
                     return (
                         <div key={step.id || index} className="thought-monologue-container">
@@ -330,131 +238,114 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent }) => {
                                     onComplete={() => handleStepComplete(index)}
                                 />
                             ) : (
-                                // 処理中はプレースホルダーを表示
                                 <div className="fluid-loading-container small">
                                     <FluidOrb width="24px" height="24px" />
-                                    <span className="fluid-loading-text">Thinking...</span>
+                                    <span className="fluid-loading-text">Thinking<ThinkingDots /></span>
                                 </div>
                             )}
                         </div>
                     );
-                })}
+                }
 
-                {/* 最終回答との視覚的な区切り */}
-                <hr className="thought-divider" />
-            </div>
-        );
-    }
+                // Action: チップ型UI
+                if (mode === 'action') {
+                    const actionMonologueContent = step.thinking || step.reasoning;
+                    const hasAdditionalResults = step.additionalResults && step.additionalResults.length > 0;
 
-    return (
-        <div className="thinking-process-container">
-            <button
-                className={`thinking-header ${isExpanded ? 'expanded' : ''}`}
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
-                <div className="thinking-icon-wrapper">
-                    {/* 完了時は常にチェックマーク。進行中はFluidOrb。エラー時はエラーアイコン */}
-                    {hasError ? (
-                        <div className="thinking-error-icon">
-                            {Icons.error}
-                        </div>
-                    ) : isStreaming && !isAllDone ? (
-                        <FluidOrb />
-                    ) : (
-                        <div className="thinking-done-icon">
-                            {Icons.check}
-                        </div>
-                    )}
-                </div>
-                <span className="thinking-summary-text">
-                    {isExpanded || isAllDone ? '思考プロセス' : (currentStep?.title || '処理中...')}
-                </span>
-                <svg
-                    className={`thinking-chevron ${isExpanded ? 'rotate' : ''}`}
-                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
+                    // ファイル検索ストアツールは「社内データを検索」とわかりやすく表示
+                    const isFileSearchStore = step.title?.includes('ファイル検索ストア');
+                    const displayTitle = isFileSearchStore ? '📂 社内データを検索' : step.title;
+                    const displayIconType = isFileSearchStore ? 'file-search' : step.iconType;
 
-            <div className={`thinking-accordion-grid ${isExpanded ? 'expanded' : ''}`}>
-                <div className="thinking-accordion-overflow">
-                    {/* ワークフローステップ */}
-                    {hasSteps && (
-                        <div className="thinking-steps-list">
-                            {steps.map((step, index) => {
-                                // アイコンの取得（エラー時はエラーアイコンを使用）
-                                const StepIcon = step.status === 'error' ? Icons.error : (Icons[step.iconType] || Icons.default);
-                                const hasDetail = step.thinking || step.resultValue || step.errorMessage;
+                    return (
+                        <div key={step.id || index} className="thought-action-container">
+                            <div className={`thought-action-chip ${step.status} ${hasAdditionalResults || step.resultValue ? 'has-details' : ''}`}>
+                                <div className="thought-action-header">
+                                    <span className="action-icon">{getIcon(displayIconType)}</span>
+                                    <span className="action-title">{displayTitle}</span>
+                                    {step.status === 'processing' && <span className="action-spinner" />}
+                                    {step.status === 'error' && <span className="action-error-icon">⚠️</span>}
+                                    {step.status === 'done' && (
+                                        <span className="action-done-icon text-success">
+                                            {Icons.checkCircle}
+                                        </span>
+                                    )}
+                                </div>
 
-                                return (
-                                    <div key={step.id || index} className="thinking-step-wrapper">
-                                        <div className={`thinking-step-item ${step.status}`}>
-                                            <div className="step-icon-column">
-                                                {/* ステータスに応じたアイコン表示 */}
-                                                <div className={`step-icon-circle ${step.status}`}>
-                                                    {StepIcon}
-                                                </div>
-                                                {/* 線 (最後の要素以外) */}
-                                                {index !== steps.length - 1 && <div className="step-line"></div>}
+                                {/* 詳細情報のラッパー（アニメーション用） */}
+                                {(step.resultValue || hasAdditionalResults) && (
+                                    <div className="action-content-wrapper">
+                                        {/* メイン結果の表示 */}
+                                        {step.resultValue && (
+                                            <div className="thought-action-result">
+                                                {step.resultValue}
                                             </div>
-                                            <span className="step-title">{step.title}</span>
-                                        </div>
+                                        )}
 
-                                        {/* ★追加: ステップ詳細（thinking + result または error）の表示 */}
-                                        {hasDetail && (step.status === 'done' || step.status === 'error') && (
-                                            <div className={`step-detail-container ${step.status === 'error' ? 'error' : ''}`}>
-                                                {/* エラーメッセージの表示 */}
-                                                {step.status === 'error' && step.errorMessage && (
-                                                    <div className="step-error-row">
-                                                        <span className="step-error-icon">⚠️</span>
-                                                        <span className="step-error-text">{step.errorMessage}</span>
-                                                    </div>
-                                                )}
-                                                {/* thinkingの表示（エラーでない場合のみ） */}
-                                                {step.thinking && step.status !== 'error' && (
-                                                    <div className="step-thinking-row">
-                                                        <span className="step-thinking-icon">🧠</span>
-                                                        <span className="step-thinking-text">{step.thinking}</span>
-                                                    </div>
-                                                )}
-                                                {step.resultLabel && step.resultValue && step.status !== 'error' && (
-                                                    <div className="step-result-row">
-                                                        <span className="step-result-label">{step.resultLabel}:</span>
-                                                        <span className="step-result-value">{step.resultValue}</span>
-                                                    </div>
-                                                )}
-                                                {/* ★追加: 追加結果行のループ表示 */}
-                                                {step.additionalResults && step.status !== 'error' && step.additionalResults.map((result, i) => (
-                                                    <div key={i} className="step-result-row">
-                                                        <span className="step-result-label">{result.label}:</span>
-                                                        <span className="step-result-value">{result.value}</span>
+                                        {/* 詳細パラメータの表示 */}
+                                        {hasAdditionalResults && (
+                                            <div className="thought-action-details">
+                                                {step.additionalResults.map((result, i) => (
+                                                    <div key={i} className="action-detail-item">
+                                                        <span className="detail-label">{result.label}</span>
+                                                        <span className="detail-value">{result.value}</span>
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
-                                );
-                            })}
-                        </div>
-                    )}
+                                )}
+                            </div>
 
-                    {/* AIの思考セクション - ステップの下に表示 */}
-                    {hasThinking && (
-                        <div className="thinking-content-section">
-                            <div className="thinking-content-header">
-                                <div className="thinking-content-icon">
-                                    {Icons.thinking}
+                            {step.status === 'error' && step.errorMessage && (
+                                <div className="action-error-detail">{step.errorMessage}</div>
+                            )}
+                            {/* thinking/reasoningがあれば完了後に表示 */}
+                            {actionMonologueContent && isStepDone && (
+                                <div className="thought-monologue-container action-monologue">
+                                    <TypewriterEffect
+                                        content={actionMonologueContent}
+                                        onComplete={() => handleStepComplete(index)}
+                                    />
                                 </div>
-                                <span>AIの思考</span>
-                            </div>
-                            <div className="thinking-content-body">
-                                <MarkdownRenderer content={thinkingContent} />
-                            </div>
+                            )}
+                            {/* LLM_SynthesisなどのthinkingContentフィールドを表示 */}
+                            {step.thinkingContent && isStepDone && (
+                                <div className="thought-monologue-container action-monologue synthesis-thinking">
+                                    <TypewriterEffect
+                                        content={step.thinkingContent}
+                                        onComplete={() => handleStepComplete(index)}
+                                    />
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            </div>
+                    );
+                }
+
+                // Monologue: thinking/reasoningフィールドを表示
+                const monologueContent = step.thinking || step.reasoning;
+                if (!monologueContent) return null;
+
+                return (
+                    <div key={step.id || index} className="thought-monologue-container">
+                        {isStepDone ? (
+                            <TypewriterEffect
+                                content={monologueContent}
+                                onComplete={() => handleStepComplete(index)}
+                            />
+                        ) : (
+                            // 処理中はプレースホルダーを表示
+                            <div className="fluid-loading-container small">
+                                <FluidOrb width="24px" height="24px" />
+                                <span className="fluid-loading-text">Thinking<ThinkingDots /></span>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+
+            {/* 最終回答との視覚的な区切り - 本文が表示されてから表示 */}
+            {hasAnswer && <hr className="thought-divider" />}
         </div>
     );
 };

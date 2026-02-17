@@ -6,6 +6,8 @@ import { SourceIcon } from './FileIcons';
 import ArtifactCard from '../Artifacts/ArtifactCard';
 import '../Message/MessageBlock.css';
 import { useLogger } from '../../hooks/useLogger';
+import SecureVaultService, { TOKEN_PATTERN } from '../../services/SecureVaultService';
+import RestoredToken from '../Message/RestoredToken';
 
 // --- Helper: Inline Citation Renderer ---
 // (renderWithInlineCitations, LoggedElement, CodeBlock は変更なしのため省略。元のコードを維持してください)
@@ -115,6 +117,54 @@ const renderWithInlineCitations = (children, citations, messageId) => {
       newChildren.push(child);
     }
   });
+  return newChildren;
+};
+
+// --- Helper: Restored Token Renderer ---
+// SecureVault のトークン ({{CATEGORY_INDEX}}) を RestoredToken コンポーネントに置換
+const renderWithRestoredTokens = (children) => {
+  if (!children) return null;
+  const childrenArray = Array.isArray(children) ? children : [children];
+  const newChildren = [];
+
+  childrenArray.forEach((child, i) => {
+    if (typeof child === 'string') {
+      const tokenRegex = /\{\{([A-Z_]+_[A-Z0-9]+)\}\}/g;
+      let lastIdx = 0;
+      let match;
+
+      while ((match = tokenRegex.exec(child)) !== null) {
+        // トークン前のテキスト
+        if (match.index > lastIdx) {
+          newChildren.push(child.slice(lastIdx, match.index));
+        }
+
+        const token = match[0];
+        const entry = SecureVaultService.getEntry(token);
+
+        newChildren.push(
+          <RestoredToken
+            key={`token-${i}-${match.index}`}
+            token={token}
+            restoredValue={entry ? entry.originalValue : null}
+          />
+        );
+
+        lastIdx = tokenRegex.lastIndex;
+      }
+
+      // 残りのテキスト
+      if (lastIdx < child.length) {
+        newChildren.push(child.slice(lastIdx));
+      } else if (lastIdx === 0) {
+        // トークンなし: そのまま
+        newChildren.push(child);
+      }
+    } else {
+      newChildren.push(child);
+    }
+  });
+
   return newChildren;
 };
 
@@ -451,12 +501,14 @@ const MarkdownRenderer = ({
                   }, [children]);
 
                   const cleaned = cleanChildren(children);
-                  const processed = renderWithInlineCitations(cleaned, citations, messageId);
+                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                  const processed = renderWithRestoredTokens(withCitations);
                   return <p {...props}>{processed}</p>;
                 },
                 li: ({ node, children, ...props }) => {
                   const cleaned = cleanChildren(children);
-                  const processed = renderWithInlineCitations(cleaned, citations, messageId);
+                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                  const processed = renderWithRestoredTokens(withCitations);
                   return (
                     <LoggedElement as="li" logTag="li" content={String(children)} logFunction={logMarkdownRender} {...props}>
                       {processed}

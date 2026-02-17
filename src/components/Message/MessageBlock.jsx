@@ -15,7 +15,6 @@ import CopyButton from '../Shared/CopyButton';
 import TypewriterEffect from '../Shared/TypewriterEffect';
 import StructuredUserMessage from './StructuredUserMessage';
 import { parseStructuredMessage } from '../../utils/messageSerializer';
-import { IS_THINKING_PROCESS_MERGED } from '../../config/env';
 
 // Spring Physics (DESIGN_RULE準拠)
 const SPRING_CONFIG = {
@@ -339,12 +338,13 @@ const MessageBlock = ({
 
                                     {/* ★削除: 添付ファイルUIはContextChipsに移行 */}
 
-                                    {/* Mergedモードでストリーミング中はthoughtProcessが空でもローディングUIを表示するためThinkingProcessをレンダリング */}
-                                    {isAi && (thoughtProcess?.length > 0 || thinking || (IS_THINKING_PROCESS_MERGED && isStreaming)) && (
+                                    {/* ストリーミング中はthoughtProcessが空でもローディングUIを表示するためThinkingProcessをレンダリング */}
+                                    {isAi && (thoughtProcess?.length > 0 || thinking || isStreaming) && (
                                         <ThinkingProcess
                                             steps={thoughtProcess}
                                             isStreaming={isStreaming}
                                             thinkingContent={thinking}
+                                            hasAnswer={!isTextEmpty}
                                         />
                                     )}
 
@@ -415,7 +415,10 @@ const MessageBlock = ({
                                             }
 
                                             // 3. Standard Markdown (AI Normal / User Plain)
-                                            return (
+                                            // AIメッセージはフェードインアニメーション付きで表示
+                                            // CSS animation forwards はDOMマウント時に一度だけ再生されるため、
+                                            // ストリーミング中のテキスト更新でちらつくことはない
+                                            const markdownElement = (
                                                 <MarkdownRenderer
                                                     content={text || ''}
                                                     isStreaming={isAi && isStreaming}
@@ -425,6 +428,10 @@ const MessageBlock = ({
                                                     onOpenArtifact={onOpenArtifact}
                                                 />
                                             );
+                                            if (isAi) {
+                                                return <div className="ai-answer-fade-in">{markdownElement}</div>;
+                                            }
+                                            return markdownElement;
                                         })()
                                     )}
                                 </motion.div>

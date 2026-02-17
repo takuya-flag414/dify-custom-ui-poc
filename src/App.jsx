@@ -27,6 +27,7 @@ import { useInspector } from './hooks/useInspector';
 import { useErrorIntelligence } from './hooks/useErrorIntelligence';
 
 import ErrorGlassCard from './components/IntelligenceHUD/ErrorGlassCard';
+import SanitizeToast from './components/Chat/SanitizeToast';
 
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
@@ -209,6 +210,9 @@ function App() {
     // ★追加: IntelligenceErrorHandler連携
     lastError,
     setLastError,
+    // ★Phase 2: サニタイズ通知
+    sanitizeNotification,
+    setSanitizeNotification,
   } = useChat(
     mockMode,
     authUser?.userId,
@@ -664,6 +668,13 @@ function App() {
             apiKey={apiKey}
             apiUrl={apiUrl}
             userId={authUser?.userId}
+          />
+
+          {/* ★Phase 2: サニタイズ完了トースト */}
+          <SanitizeToast
+            count={sanitizeNotification.count}
+            visible={sanitizeNotification.visible}
+            onDismissed={() => setSanitizeNotification({ visible: false, count: 0 })}
           />
 
           {/* ★追加: IntelligenceErrorHandler HUD Overlay */}

@@ -28,10 +28,4 @@ const getDefaultMockMode = (): MockMode => {
     return 'OFF';
 };
 
-/**
- * 思考プロセスをメッセージバブル内に統合して表示するかどうかを判定します。
- * VITE_MERGE_THINKING_PROCESS='true' の場合のみ true を返します。
- */
-export const IS_THINKING_PROCESS_MERGED = import.meta.env.VITE_MERGE_THINKING_PROCESS === 'true';
-
 export const DEFAULT_MOCK_MODE = getDefaultMockMode();

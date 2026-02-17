@@ -5,6 +5,8 @@ import { scenarioSuggestions } from '../mocks/scenarios';
 import { ChatServiceAdapter } from '../services/ChatServiceAdapter';
 import { fetchSuggestionsApi } from '../api/dify';
 import { mapCitationsFromApi } from '../utils/citationMapper';
+// ★Phase 2: SecureVaultServiceをインポート
+import SecureVaultService from '../services/SecureVaultService';
 
 // ★リファクタリング: 分離したモジュールからインポート
 import { DEFAULT_SEARCH_SETTINGS } from './chat/constants';
@@ -96,6 +98,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     // エラー発生時にエラー情報をstateに保持し、App.jsxのuseErrorIntelligenceが検知する
     const [lastError, setLastError] = useState(null);
 
+    // ★Phase 2: サニタイズ通知用state
+    const [sanitizeNotification, setSanitizeNotification] = useState({ visible: false, count: 0 });
+
     useEffect(() => {
         searchSettingsRef.current = searchSettings;
     }, [searchSettings]);
@@ -170,7 +175,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     }, [conversationId, mockMode, addLog, apiKey, apiUrl, userId]);
 
     // --- メッセージ送信処理 (Adapter利用) ---
-    const handleSendMessage = async (text, attachments = []) => {
+    const handleSendMessage = async (text, attachments = [], options = {}) => {
         const tracker = createPerfTracker(addLog);
         tracker.markStart();
 
@@ -349,35 +354,53 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             // ★追加: dify_inputs をペイロードにマージ
             const parsedPayload = JSON.parse(structuredQuery);
             parsedPayload.dify_inputs = difyInputs;
+
+            // ★Phase 2: サニタイズ処理 (全モード共通)
+            // setMessages の前に実行し、UI・ログ・ペイロードすべてから平文を排除する
+            const sanitizeResult = SecureVaultService.sanitize(text, {
+                excludeTypes: options.sanitizeExcludeTypes || [],
+            });
+            if (sanitizeResult.appliedTokens.length > 0) {
+                // 構造化JSONのtextフィールドをサニタイズ済みテキストに置換
+                parsedPayload.content.text = sanitizeResult.sanitizedText;
+
+                addLog(`[Privacy Tunnel] ${sanitizeResult.appliedTokens.length}件の機密情報をトークン化`, 'info');
+                sanitizeResult.appliedTokens.forEach(t => {
+                    addLog(`[Privacy Tunnel]   ${t.label}: ${t.token}`, 'info');
+                });
+
+                // トースト通知
+                setSanitizeNotification({ visible: true, count: sanitizeResult.appliedTokens.length });
+            }
+
             const finalStructuredQuery = JSON.stringify(parsedPayload);
 
-            // ★変更: ユーザーメッセージに構造化JSONを保存（ContextChips用）
-            // 元のコードでは230-238行目でプレーンテキストをセットしていたが、
-            // ContextChipsがコンテキスト情報を表示できるようstructuredQueryをセットする
+            // ★変更: ユーザーメッセージにサニタイズ済み構造化JSONを保存
+            // Vault が生きている間は MarkdownRenderer の renderWithRestoredTokens が復元表示し、
+            // リロード後は伏字チップ（RestoredToken）で表示される
             const userMessageId = `msg_${Date.now()}_user`;
             const userMessage = {
                 id: userMessageId,
                 role: 'user',
-                text: finalStructuredQuery, // ★変更: プレーンテキストではなく構造化JSONを保存
+                text: finalStructuredQuery, // サニタイズ済みJSON（平文を含まない）
                 timestamp: new Date().toISOString(),
                 files: displayFiles
             };
             setMessages(prev => [...prev, userMessage]);
 
-            // ★デバッグ用: 送信ペイロードの確認
+            // ★デバッグ用: 送信ペイロードの確認（サニタイズ済みのみ出力）
             console.group('🔷 Structured Message Payload');
-            console.log('Original Text:', text);
             console.log('Structured JSON:', finalStructuredQuery);
             console.log('Parsed Object:', JSON.parse(finalStructuredQuery));
             console.groupEnd();
 
-            // ★ログ保存: クリップボードコピー用
+            // ★ログ保存: クリップボードコピー用（サニタイズ済み）
             addLog(`[StructuredPayload] ${finalStructuredQuery}`, 'info');
 
 
             reader = await ChatServiceAdapter.sendMessage(
                 {
-                    text: finalStructuredQuery, // APIにはJSON文字列を送信
+                    text: finalStructuredQuery, // サニタイズ済みJSON
                     conversationId,
                     files: allFilesToSend.map(f => ({ id: f.id, name: f.name })),
                     searchSettings: currentSettings,
@@ -798,6 +821,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         stopGeneration,
         handleEdit,
         handleRegenerate,
+        // ★Phase 2: サニタイズ通知
+        sanitizeNotification,
+        setSanitizeNotification,
         // ★追加: IntelligenceErrorHandler連携
         lastError,
         setLastError,

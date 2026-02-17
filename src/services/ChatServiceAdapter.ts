@@ -2,6 +2,7 @@
 import { uploadFile as apiUploadFile, sendChatMessageApi, fetchConversationsApi, ChatMessagePayload } from '../api/dify';
 import { MockStreamGenerator, ScenarioStep } from '../mocks/MockStreamGenerator';
 import { scenarios } from '../mocks/scenarios';
+import SecureVaultService from './SecureVaultService';
 
 /**
  * 検索設定の型
@@ -221,6 +222,8 @@ export const ChatServiceAdapter = {
                 reasoning_mode: searchSettings?.reasoningMode || 'fast',
                 // Phase B: Gemini File Search ストアID
                 gemini_store_id: searchSettings?.selectedStoreId || '',
+                // ★Phase 2: Privacy Tunnel コンテキスト注入
+                privacy_context: SecureVaultService.getSystemPromptInjection(),
             },
             query: text,
             user: userId,
