@@ -87,7 +87,7 @@ const UniversalAddMenu = ({
                         />
                         <MenuItem
                             icon={<GlobeAltIcon />}
-                            label="Webサイトを追加"
+                            label="Webサイトを指定"
                             onClick={() => setView('DOMAIN')}
                             showArrow
                         />
