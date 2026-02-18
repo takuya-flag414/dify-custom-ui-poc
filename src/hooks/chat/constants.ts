@@ -67,6 +67,9 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
 
     // ファイル検索ストアツール (社内データ検索)
     'ファイル検索ストアを指定して検索': { title: '📂 社内データを検索中...', icon: 'file-search' },
+
+    // 指定されたストアの要約 (社内データ接続)
+    '指定されたストアの要約': { title: '📂 社内データに接続中...', icon: 'file-search', renderMode: 'silent', thinkingText: '社内データに接続中...' },
 };
 
 /**

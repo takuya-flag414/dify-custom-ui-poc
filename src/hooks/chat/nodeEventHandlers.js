@@ -92,6 +92,7 @@ export const processNodeStarted = (data, context) => {
         displayTitle = '📂 社内データを検索中...';
         detectedTraceMode = 'knowledge';
         iconType = 'file-search';
+        thinkingText = '社内データに接続中...';
     } else if (nodeType === 'knowledge-retrieval' || (title && title.includes('ナレッジ'))) {
         // ナレッジ検索
         const query = inputs.query || capturedOptimizedQuery;
