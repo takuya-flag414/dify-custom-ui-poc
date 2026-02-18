@@ -273,18 +273,50 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
     } else if (rawText) {
         addLog(`[LLM_Intent_Analysis] RAW出力: ${rawText}`, 'warn');
 
-        // 旧フォーマットのフォールバック
+        // extractJsonFromLlmOutput が失敗した場合のフォールバック
+        // RAW出力からJSONを手動で再抽出を試みる
+        let fallbackThinking = '';
+        let fallbackCategory = null;
+        let fallbackRequiresRag = undefined;
+        let fallbackRequiresWeb = undefined;
+
+        try {
+            // { ... } を直接抽出
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const manualParsed = JSON.parse(jsonMatch[0]);
+                fallbackThinking = manualParsed.thinking || '';
+                fallbackCategory = manualParsed.category || null;
+                fallbackRequiresRag = manualParsed.requires_rag;
+                fallbackRequiresWeb = manualParsed.requires_web;
+                addLog(`[LLM_Intent_Analysis] フォールバックJSON抽出成功: category=${fallbackCategory}`, 'info');
+            }
+        } catch (e) {
+            addLog(`[LLM_Intent_Analysis] フォールバックJSON抽出も失敗: ${e.message}`, 'warn');
+        }
+
+        // カテゴリー判定（パース成功時はそちらを優先、失敗時はテキストマッチ）
         const decision = rawText.trim();
         let resultText = '';
-        if (decision.includes('SEARCH')) resultText = '判定: 🔍 Web検索モード';
-        else if (decision.includes('CHAT')) resultText = '判定: 💬 おしゃべりモード';
-        else if (decision.includes('LOGICAL')) resultText = '判定: 🧠 論理回答モード';
-        else if (decision.includes('ANSWER')) resultText = '判定: 💡 内部知識モード';
-        else if (decision.includes('HYBRID')) resultText = '判定: 🔍 ハイブリッド検索モード';
-        else if (decision.includes('TASK')) resultText = '判定: 🛠️ タスク実行モード';
+        if (fallbackCategory) {
+            const displayInfo = getIntentDisplayInfo(fallbackCategory, fallbackRequiresRag, fallbackRequiresWeb);
+            resultText = `判定: ${displayInfo.title}`;
+        } else {
+            if (decision.includes('SEARCH')) resultText = '判定: 🔍 Web検索モード';
+            else if (decision.includes('CHAT')) resultText = '判定: 💬 おしゃべりモード';
+            else if (decision.includes('LOGICAL')) resultText = '判定: 🧠 論理回答モード';
+            else if (decision.includes('ANSWER')) resultText = '判定: 💡 内部知識モード';
+            else if (decision.includes('HYBRID')) resultText = '判定: 🔍 ハイブリッド検索モード';
+            else if (decision.includes('TASK')) resultText = '判定: 🛠️ タスク実行モード';
+        }
 
         return {
-            thoughtProcessUpdate: (t) => t.id === nodeId ? { ...t, title: resultText || t.title, status: 'done' } : t
+            thoughtProcessUpdate: (t) => t.id === nodeId ? {
+                ...t,
+                title: resultText || t.title,
+                status: 'done',
+                ...(fallbackThinking ? { thinking: fallbackThinking } : {})
+            } : t
         };
     }
 
