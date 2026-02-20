@@ -237,14 +237,14 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
 
     if (parsedJson) {
         // ログ出力
-        addLog(`[LLM_Intent_Analysis] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
-        addLog(`[LLM_Intent_Analysis] category: ${parsedJson.category || 'N/A'}`, 'info');
+        addLog(`[Intent_Analysis] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
+        addLog(`[Intent_Analysis] category: ${parsedJson.category || 'N/A'}`, 'info');
 
         if (parsedJson.requires_rag !== undefined || parsedJson.requires_web !== undefined) {
-            addLog(`[LLM_Intent_Analysis] requires_rag: ${parsedJson.requires_rag}, requires_web: ${parsedJson.requires_web}`, 'info');
+            addLog(`[Intent_Analysis] requires_rag: ${parsedJson.requires_rag}, requires_web: ${parsedJson.requires_web}`, 'info');
         }
         if (parsedJson.confidence !== undefined) {
-            addLog(`[LLM_Intent_Analysis] confidence: ${parsedJson.confidence}`, 'info');
+            addLog(`[Intent_Analysis] confidence: ${parsedJson.confidence}`, 'info');
         }
 
         const displayInfo = getIntentDisplayInfo(
@@ -258,7 +258,7 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
             ? displayInfo.resultValue
             : `${displayInfo.title}${confidenceText}`;
 
-        addLog(`[LLM_Intent_Analysis] 判定: ${displayInfo.title}${displayInfo.resultValue ? ' → ' + displayInfo.resultValue : ''}`, 'info');
+        addLog(`[Intent_Analysis] 判定: ${displayInfo.title}${displayInfo.resultValue ? ' → ' + displayInfo.resultValue : ''}`, 'info');
 
         return {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
@@ -271,7 +271,7 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
             } : t
         };
     } else if (rawText) {
-        addLog(`[LLM_Intent_Analysis] RAW出力: ${rawText}`, 'warn');
+        addLog(`[Intent_Analysis] RAW出力: ${rawText}`, 'warn');
 
         // extractJsonFromLlmOutput が失敗した場合のフォールバック
         // RAW出力からJSONを手動で再抽出を試みる
@@ -289,10 +289,10 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
                 fallbackCategory = manualParsed.category || null;
                 fallbackRequiresRag = manualParsed.requires_rag;
                 fallbackRequiresWeb = manualParsed.requires_web;
-                addLog(`[LLM_Intent_Analysis] フォールバックJSON抽出成功: category=${fallbackCategory}`, 'info');
+                addLog(`[Intent_Analysis] フォールバックJSON抽出成功: category=${fallbackCategory}`, 'info');
             }
         } catch (e) {
-            addLog(`[LLM_Intent_Analysis] フォールバックJSON抽出も失敗: ${e.message}`, 'warn');
+            addLog(`[Intent_Analysis] フォールバックJSON抽出も失敗: ${e.message}`, 'warn');
         }
 
         // カテゴリー判定（パース成功時はそちらを優先、失敗時はテキストマッチ）
@@ -427,6 +427,39 @@ export const processLlmSynthesisFinished = (outputs, nodeId, addLog) => {
         };
     } else if (rawText) {
         addLog(`[LLM_Synthesis] RAW出力: ${rawText}`, 'warn');
+        return {
+            thoughtProcessUpdate: (t) => t.id === nodeId ? { ...t, status: 'done' } : t
+        };
+    }
+
+    return null;
+};
+
+/**
+ * node_finished イベントを処理する (LLM_RAG_Strategy)
+ * @param {Object} outputs - ノード出力
+ * @param {string} nodeId - ノードID
+ * @param {Function} addLog - ログ関数
+ * @returns {Object|null} thoughtProcessUpdate または null
+ */
+export const processRagStrategyFinished = (outputs, nodeId, addLog) => {
+    const rawText = outputs?.text;
+    const parsedJson = extractJsonFromLlmOutput(rawText);
+
+    if (parsedJson) {
+        const thinking = parsedJson.thinking || '';
+
+        addLog(`[LLM_RAG_Strategy] thinking: ${thinking || 'N/A'}`, 'info');
+
+        return {
+            thoughtProcessUpdate: (t) => t.id === nodeId ? {
+                ...t,
+                status: 'done',
+                thinking: thinking,  // モノローグとして ThinkingProcess.jsx に表示される
+            } : t
+        };
+    } else if (rawText) {
+        addLog(`[LLM_RAG_Strategy] RAW出力: ${rawText}`, 'warn');
         return {
             thoughtProcessUpdate: (t) => t.id === nodeId ? { ...t, status: 'done' } : t
         };

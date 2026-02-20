@@ -282,8 +282,8 @@ const ChatInput = ({
                 ...searchSettings,
                 selectedStoreId: null,
                 selectedStoreName: null,
-                ragEnabled: 'auto',
-                webMode: 'auto',
+                ragEnabled: false,
+                webEnabled: false,
               });
             }}
             onRemoveDomain={handleRemoveDomain}

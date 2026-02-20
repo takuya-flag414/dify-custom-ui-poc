@@ -324,7 +324,15 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
 
                 // Monologue: thinking/reasoningフィールドを表示
                 const monologueContent = step.thinking || step.reasoning;
-                if (!monologueContent) return null;
+
+                // コンテンツがまだない場合（processing中）
+                if (!monologueContent) {
+                    // 現在進行中のステップならThinkingプレースホルダーを表示（thinkingTextを使用）
+                    if (isStreaming && index === visualCurrentStepIndex && !isStepDone) {
+                        return ThinkingPlaceholder;
+                    }
+                    return null;
+                }
 
                 return (
                     <div key={step.id || index} className="thought-monologue-container">

@@ -14,7 +14,7 @@ import ContextChips from './ContextChips';
 import CopyButton from '../Shared/CopyButton';
 import TypewriterEffect from '../Shared/TypewriterEffect';
 import StructuredUserMessage from './StructuredUserMessage';
-import { parseStructuredMessage } from '../../utils/messageSerializer';
+import { parseStructuredMessage, extractPlainText } from '../../utils/messageSerializer';
 
 // Spring Physics (DESIGN_RULE準拠)
 const SPRING_CONFIG = {
@@ -162,7 +162,8 @@ const MessageBlock = ({
     const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
     const showKnowledgeBadge = isAi && !isStreaming && traceMode === 'knowledge';
 
-    const textToCopy = text || '';
+    // ★修正: ユーザーメッセージの場合はJSONプロトコルからプレーンテキストを抽出してコピー
+    const textToCopy = isUser ? extractPlainText(text || '') : (text || '');
 
     // ★追加: 編集開始
     const handleStartEdit = useCallback(() => {

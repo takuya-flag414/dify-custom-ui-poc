@@ -72,26 +72,20 @@ const GlobeAltIcon = () => (
 
 // --- Mode Logic ---
 const getModeInfo = (settings) => {
-    const { ragEnabled, webMode, domainFilters } = settings || { ragEnabled: 'auto', webMode: 'auto' };
+    const { ragEnabled, webEnabled, domainFilters } = settings || { ragEnabled: false, webEnabled: false };
     const filterCount = domainFilters?.length || 0;
     const suffix = filterCount > 0 ? ` (${filterCount})` : '';
 
-    if (ragEnabled === 'auto' && webMode === 'auto') {
-        return { label: `オート${suffix}`, class: 'text-gray-600 dark:text-gray-300', icon: <SparklesIcon /> };
-    }
-    if (ragEnabled === true && webMode !== 'off') {
+    if (ragEnabled && webEnabled) {
         return { label: '社内データ + Web', class: 'text-purple-600 dark:text-purple-400', icon: <RocketLaunchIcon /> };
     }
-    if (ragEnabled === true) {
+    if (ragEnabled) {
         return { label: '社内データ', class: 'text-green-600 dark:text-green-400', icon: <BuildingOfficeIcon /> };
     }
-    if (webMode === 'force') {
+    if (webEnabled) {
         return { label: `Web検索${suffix}`, class: 'text-blue-600 dark:text-blue-400', icon: <GlobeAltIcon /> };
     }
-    if (webMode === 'off') {
-        return { label: 'チャットのみ', class: 'text-gray-500 dark:text-gray-400', icon: <ChatBubbleIcon /> };
-    }
-    return { label: `オート${suffix}`, class: 'text-gray-600 dark:text-gray-300', icon: <SparklesIcon /> };
+    return { label: `チャット${suffix}`, class: 'text-gray-500 dark:text-gray-400', icon: <ChatBubbleIcon /> };
 };
 
 const ControlDeck = ({

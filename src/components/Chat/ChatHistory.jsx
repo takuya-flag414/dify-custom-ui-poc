@@ -5,6 +5,8 @@ import './ChatHistory.css';
 import MessageBlock from '../Message/MessageBlock';
 // ★追加
 import SystemErrorBlock from '../Message/SystemErrorBlock';
+// ★追加: メッセージ再送信時のテキスト抽出ユーティリティ
+import { extractPlainText } from '../../utils/messageSerializer';
 
 // パフォーマンス制限: 50件を超えると最新メッセージのみアニメーション
 const ANIMATION_LIMIT = 50;
@@ -120,8 +122,9 @@ const ChatHistory = ({
     for (let i = errorMsgIndex - 1; i >= 0; i--) {
       const msg = messages[i];
       if (msg.role === 'user') {
-        // 見つかったテキストで再送 (ファイルは簡易的に空とする)
-        onSendMessage(msg.text, []);
+        // ★修正: extractPlainText で構造化JSONからプレーンテキストを抽出し、二重ラップを防止
+        const plainText = extractPlainText(msg.text);
+        onSendMessage(plainText, []);
         return;
       }
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { buildStructuredMessage, parseStructuredMessage, restoreMessageState } from '../utils/messageSerializer';
+import { buildStructuredMessage, parseStructuredMessage, restoreMessageState, extractPlainText } from '../utils/messageSerializer';
 import { scenarioSuggestions } from '../mocks/scenarios';
 // ★変更: Adapterをインポート
 import { ChatServiceAdapter } from '../services/ChatServiceAdapter';
@@ -17,6 +17,7 @@ import {
     processQueryRewriteFinished,
     processIntentAnalysisFinished,
     processSearchStrategyFinished,
+    processRagStrategyFinished,
     processLlmSynthesisFinished,
     logWorkflowOutput,
     processNodeError,
@@ -269,8 +270,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
         // ★ワークフローログ: リクエスト開始
         addLog(`[Workflow] === 新規リクエスト開始 ===`, 'info');
-        const ragLabel = currentSettings.ragEnabled === 'auto' ? 'AUTO' : (currentSettings.ragEnabled ? 'ON' : 'OFF');
-        addLog(`[Workflow] 検索モード: Web=${currentSettings.webMode}, RAG=${ragLabel}`, 'info');
+        const ragLabel = currentSettings.ragEnabled ? 'ON' : 'OFF';
+        addLog(`[Workflow] 検索モード: Web=${currentSettings.webEnabled ? 'ON' : 'OFF'}, RAG=${ragLabel}`, 'info');
         addLog(`[Workflow] ユーザー入力: ${text}`, 'info');
         if (displayFiles.length > 0) {
             addLog(`[Workflow] 添付ファイル: ${displayFiles.map(f => f.name).join(', ')}`, 'info');
@@ -311,8 +312,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             const knowledgeContext = {
                 selected_store_ids: currentSettings.selectedStoreId ? [currentSettings.selectedStoreId] : [],
                 selected_store_names: currentSettings.selectedStoreName ? [currentSettings.selectedStoreName] : [],
-                web_search_enabled: currentSettings.webMode !== 'off',
-                domain_context: currentSettings.ragEnabled === 'auto' ? 'auto' : (currentSettings.ragEnabled ? 'knowledge' : 'general'),
+                web_search_enabled: currentSettings.webEnabled,
+                domain_context: currentSettings.ragEnabled ? 'knowledge' : 'general',
                 domain_filter: currentSettings.domainFilters || [] // ★追加: ドメインフィルタ
             };
 
@@ -325,7 +326,6 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             }));
 
             // ★追加: Dify送信変数のスナップショットを構築（トレーサビリティ用）
-            const searchModeValue = currentSettings.webMode || 'auto';
             const domainFilterString = (currentSettings.domainFilters || []).join(', ');
             const now = new Date();
             const currentTimeStr = now.toLocaleString('ja-JP', {
@@ -333,9 +333,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 weekday: 'long', hour: '2-digit', minute: '2-digit'
             });
             const difyInputs = {
-                rag_enabled: currentSettings.ragEnabled === 'auto' ? 'auto' : (currentSettings.ragEnabled ? 'true' : 'false'),
-                web_search_mode: searchModeValue,
-                search_mode: searchModeValue === 'force' ? 'force' : 'auto',
+                rag_enabled: currentSettings.ragEnabled ? 'true' : 'false',
+                web_enabled: currentSettings.webEnabled ? 'true' : 'false',
                 domain_filter: domainFilterString,
                 current_time: currentTimeStr,
                 ai_style: promptSettings?.aiStyle || 'partner',
@@ -552,7 +551,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 }
 
                                 // ★リファクタリング: LLM_Intent_Analysis処理
-                                if (title === 'LLM_Intent_Analysis') {
+                                if (title === 'LLM_Intent_Analysis' || title === 'LLM_Intent_Analysis_RAG' || title === 'LLM_Intent_Analysis_Web') {
                                     const result = processIntentAnalysisFinished(outputs, nodeId, addLog);
                                     if (result) {
                                         setStreamingMessage(prev => prev ? {
@@ -565,6 +564,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 // ★追加: LLM_Search_Strategy処理 (Devルート)
                                 if (title === 'LLM_Search_Strategy') {
                                     const result = processSearchStrategyFinished(outputs, nodeId, addLog);
+                                    if (result) {
+                                        setStreamingMessage(prev => prev ? {
+                                            ...prev,
+                                            thoughtProcess: prev.thoughtProcess.map(result.thoughtProcessUpdate)
+                                        } : prev);
+                                    }
+                                }
+
+                                // ★追加: LLM_RAG_Strategy处理
+                                if (title === 'LLM_RAG_Strategy') {
+                                    const result = processRagStrategyFinished(outputs, nodeId, addLog);
                                     if (result) {
                                         setStreamingMessage(prev => prev ? {
                                             ...prev,
@@ -588,7 +598,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 logWorkflowOutput(outputs, title, addLog);
 
                                 // その他のノードは完了ステータスに更新（エラーでない場合のみ）
-                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && !nodeError) {
+                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_RAG_Strategy' && !nodeError) {
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
@@ -791,11 +801,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
         setMessages(result.truncatedMessages);
 
-        // ★修正: テキストが既に構造化JSONの場合はパースしてプレーンテキストを取り出す
-        // これにより、再送信時にJSONが二重にラップされるのを防ぐ
-        const rawText = result.targetUserMessage.text || '';
-        const parsed = parseStructuredMessage(rawText);
-        const textToSend = parsed.content.text;
+        // ★修正: extractPlainText で構造化JSONからプレーンテキストを抽出し、二重ラップを防止
+        const textToSend = extractPlainText(result.targetUserMessage.text || '');
 
         await handleSendMessage(textToSend, result.targetUserMessage.files || []);
     }, [messages, handleSendMessage, addLog]);
@@ -815,8 +822,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         setSearchSettings: updateSearchSettings,
         domainFilters: searchSettings.domainFilters,
         setDomainFilters: (filters) => updateSearchSettings({ ...searchSettings, domainFilters: filters }),
-        forceSearch: searchSettings.webMode === 'force',
-        setForceSearch: (force) => updateSearchSettings({ ...searchSettings, webMode: force ? 'force' : 'auto' }),
+        forceSearch: searchSettings.webEnabled,
+        setForceSearch: (force) => updateSearchSettings({ ...searchSettings, webEnabled: !!force }),
         // ★新規: 停止・編集・再送信機能
         stopGeneration,
         handleEdit,

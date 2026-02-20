@@ -48,8 +48,8 @@ export interface UploadedFile {
 export interface UserSettings {
     displayName: string;
     aiStyle: string;
-    ragEnabled: boolean | 'auto';
-    webMode: 'off' | 'on' | 'smart';
+    ragEnabled: boolean;
+    webEnabled: boolean;
 }
 
 /**

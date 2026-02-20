@@ -62,11 +62,11 @@ const ChatArea = (props) => {
         const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
         if (lastUserMsg && action.payload?.mode) {
           const modeSettings = {
-            'rag_only': { ragEnabled: true, webMode: 'off' },
-            'web_only': { ragEnabled: false, webMode: 'force' },
-            'hybrid': { ragEnabled: true, webMode: 'auto' },
-            'standard': { ragEnabled: 'auto', webMode: 'auto' },
-            'fast': { ragEnabled: false, webMode: 'off' }
+            'rag_only': { ragEnabled: true, webEnabled: false },
+            'web_only': { ragEnabled: false, webEnabled: true },
+            'hybrid': { ragEnabled: true, webEnabled: true },
+            'standard': { ragEnabled: false, webEnabled: false },
+            'fast': { ragEnabled: false, webEnabled: false }
           };
           const newSettings = modeSettings[action.payload.mode];
           if (newSettings) {
@@ -86,7 +86,7 @@ const ChatArea = (props) => {
         if (lastUserMsgForWeb) {
           setSearchSettings(prev => ({
             ...prev,
-            webMode: 'force'
+            webEnabled: true
           }));
           setTimeout(() => {
             onSendMessage(lastUserMsgForWeb.text, []);

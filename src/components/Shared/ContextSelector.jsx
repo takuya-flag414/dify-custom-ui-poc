@@ -77,19 +77,11 @@ const GlobeAltIcon = () => (
 // --- Mode Definitions (v3.0: Flat structure) ---
 const MAIN_MODES = [
     {
-        id: 'standard',
-        label: 'オート',
-        desc: 'AIが情報源を自動判断',
-        icon: <SparklesIcon />,
-        settings: { ragEnabled: 'auto', webMode: 'auto' },
-        colorClass: 'mode-standard',
-    },
-    {
         id: 'chat',
-        label: 'チャットのみ',
+        label: 'チャット',
         desc: '外部情報を参照せず回答',
         icon: <ChatBubbleIcon />,
-        settings: { ragEnabled: false, webMode: 'off' },
+        settings: { ragEnabled: false, webEnabled: false },
         colorClass: 'mode-chat',
     },
     {
@@ -97,7 +89,7 @@ const MAIN_MODES = [
         label: 'Web検索',
         desc: '最新のWeb情報を検索',
         icon: <GlobeAltIcon />,
-        settings: { ragEnabled: false, webMode: 'force' },
+        settings: { ragEnabled: false, webEnabled: true },
         colorClass: 'mode-deep',
     },
 ];
@@ -166,13 +158,11 @@ const ContextSelector = ({
     } = useGeminiStores(mockMode, backendBApiKey, backendBApiUrl);
 
     const currentModeId = useMemo(() => {
-        const { ragEnabled, webMode } = settings;
-        if (ragEnabled === 'auto' && webMode === 'auto') return 'standard';
-        if (ragEnabled === true && webMode !== 'off') return 'hybrid';
-        if (ragEnabled === true && webMode === 'off') return 'enterprise';
-        if (ragEnabled === false && webMode === 'force') return 'deep';
-        if (ragEnabled === false && webMode === 'off') return 'chat';
-        return 'standard';
+        const { ragEnabled, webEnabled } = settings;
+        if (ragEnabled && webEnabled) return 'hybrid';
+        if (ragEnabled && !webEnabled) return 'enterprise';
+        if (!ragEnabled && webEnabled) return 'deep';
+        return 'chat'; // デフォルト
     }, [settings]);
 
     // Navigation helpers
@@ -206,17 +196,14 @@ const ContextSelector = ({
     const handleStoreSelect = (storeId) => {
         const store = stores.find(s => s.id === storeId);
 
-        // v3.2: ロケットアイコンはデフォルトOFFにする。
-        // ただし、既に「ハイブリッドモード(rag=true & web=auto)」が有効な場合のみ維持する。
-        // Standardモード(rag=auto)から来た場合は OFF にする。
-        const isHybridActive = settings.ragEnabled === true && settings.webMode === 'auto';
-        const nextWebMode = isHybridActive ? 'auto' : 'off';
+        // v4.0: webEnabled の状態を維持する
+        const nextWebEnabled = settings.webEnabled || false;
         const nextRagEnabled = true;
 
         onSettingsChange({
             ...settings,
             ragEnabled: nextRagEnabled,
-            webMode: nextWebMode,
+            webEnabled: nextWebEnabled,
             selectedStoreId: storeId,
             selectedStoreName: store?.display_name || '',
         });
@@ -228,11 +215,11 @@ const ContextSelector = ({
 
     // Hybrid Mode Toggle Handler (Persistent)
     const handleToggleHybridMode = () => {
-        const nextWebMode = settings.webMode === 'auto' ? 'off' : 'auto';
+        const nextWebEnabled = !settings.webEnabled;
         onSettingsChange({
             ...settings,
             ragEnabled: true, // Always enable RAG when toggling hybrid in store view
-            webMode: nextWebMode,
+            webEnabled: nextWebEnabled,
         });
     };
 
@@ -310,7 +297,7 @@ const ContextSelector = ({
                         onRefresh={refetchStores}
                         activeStoreId={settings.selectedStoreId || null}
                         onSelect={handleStoreSelect}
-                        isHybridMode={settings.ragEnabled === true && settings.webMode === 'auto'}
+                        isHybridMode={settings.ragEnabled === true && settings.webEnabled === true}
                         onToggleHybridMode={handleToggleHybridMode}
                         variants={slideVariants}
                         initial={getAnimationState().initial}

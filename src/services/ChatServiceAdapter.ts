@@ -8,8 +8,8 @@ import SecureVaultService from './SecureVaultService';
  * 検索設定の型
  */
 export interface SearchSettings {
-    ragEnabled?: boolean | 'auto';
-    webMode?: 'off' | 'on' | 'auto' | 'force';
+    ragEnabled?: boolean;
+    webEnabled?: boolean;
     domainFilters?: string[];
     reasoningMode?: 'fast' | 'deep';
     // Phase B: 選択されたGemini File SearchストアID
@@ -119,18 +119,15 @@ export const ChatServiceAdapter = {
         if (mockMode === 'FE') {
             const generator = new MockStreamGenerator();
 
-            const useRag = searchSettings?.ragEnabled === true || searchSettings?.ragEnabled === 'auto';
-            const useWeb = searchSettings?.webMode !== 'off';
+            const useRag = searchSettings?.ragEnabled === true;
+            const useWeb = searchSettings?.webEnabled === true;
             const hasFile = files.length > 0;
 
             let scenarioKey = 'pure';
 
-            // ★Auto Mode (Special Demo)
-            if (searchSettings?.ragEnabled === 'auto' && searchSettings?.webMode === 'auto' && !hasFile) {
-                scenarioKey = 'auto_demo';
-            }
-            else if (!useRag && !useWeb) {
-                scenarioKey = hasFile ? 'fast_file' : 'fast_pure';
+            // Chat mode (no RAG, no Web)
+            if (!useRag && !useWeb && !hasFile) {
+                scenarioKey = 'fast_pure';
             } else if (hasFile) {
                 if (!useRag && !useWeb) scenarioKey = 'file_only';
                 else if (!useRag && useWeb) scenarioKey = 'file_web';
@@ -202,7 +199,6 @@ export const ChatServiceAdapter = {
 
         // --- 2. Real API / BE Mock Mode ---
         const domainFilterString = searchSettings?.domainFilters?.join(', ') || '';
-        const searchModeValue = searchSettings?.webMode || 'auto';
         const now = new Date();
         const currentTimeStr = now.toLocaleString('ja-JP', {
             year: 'numeric', month: 'long', day: 'numeric',
@@ -212,9 +208,8 @@ export const ChatServiceAdapter = {
         const requestBody: ChatMessagePayload = {
             inputs: {
                 isDebugMode: mockMode === 'BE',
-                rag_enabled: searchSettings?.ragEnabled === 'auto' ? 'auto' : (searchSettings?.ragEnabled ? 'true' : 'false'),
-                web_search_mode: searchModeValue,
-                search_mode: searchModeValue === 'force' ? 'force' : 'auto',
+                rag_enabled: searchSettings?.ragEnabled ? 'true' : 'false',
+                web_enabled: searchSettings?.webEnabled ? 'true' : 'false',
                 domain_filter: domainFilterString,
                 current_time: currentTimeStr,
                 ai_style: promptSettings?.aiStyle || 'partner',

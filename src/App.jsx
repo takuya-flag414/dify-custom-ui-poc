@@ -42,6 +42,9 @@ import LoginScreen from './components/Auth/LoginScreen';
 
 import { DEFAULT_MOCK_MODE } from './config/env';
 
+// ★追加: メッセージ再送信時のテキスト抽出ユーティリティ
+import { extractPlainText } from './utils/messageSerializer';
+
 // Phase B: Backend B設定（ストア管理用）
 import { useBackendBConfig } from './hooks/useBackendBConfig';
 
@@ -235,9 +238,11 @@ function App() {
     if (lastError) {
       errorIntelligence.reportError(lastError.raw, () => {
         // リトライコールバック: 最後のユーザーメッセージを再送信
+        // ★修正: extractPlainText で構造化JSONからプレーンテキストを抽出し、二重ラップを防止
         const lastUserMsg = messages.slice().reverse().find(m => m.role === 'user');
         if (lastUserMsg) {
-          handleSendMessage(lastUserMsg.text, []);
+          const plainText = extractPlainText(lastUserMsg.text);
+          handleSendMessage(plainText, []);
         }
       });
       setLastError(null); // クリア

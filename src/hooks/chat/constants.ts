@@ -5,8 +5,8 @@
  * 検索設定の型定義
  */
 export interface SearchSettings {
-    ragEnabled: 'auto' | boolean;
-    webMode: 'auto' | 'on' | 'off' | 'force';
+    ragEnabled: boolean;
+    webEnabled: boolean;
     domainFilters: string[];
     reasoningMode: 'fast' | 'deep';
     selectedStoreName?: string;
@@ -27,8 +27,8 @@ export interface NodeDisplayInfo {
  * 検索設定のデフォルト値
  */
 export const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-    ragEnabled: 'auto',
-    webMode: 'auto',
+    ragEnabled: false,
+    webEnabled: false,
     domainFilters: [],
     reasoningMode: 'fast'
 };
@@ -39,7 +39,9 @@ export const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
 export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     // LLM処理ノード - クエリ処理
     'LLM_Query_Rewrite': { title: '質問の要点を整理中...', icon: 'reasoning' },
-    'LLM_Intent_Analysis': { title: '質問の意図を解析中...', icon: 'router' },
+    'LLM_Intent_Analysis': { title: '質問の意図を解析中...', icon: 'router', renderMode: 'monologue', thinkingText: '質問の意図を解析しています...' },
+    'LLM_Intent_Analysis_RAG': { title: '質問の意図を解析中...', icon: 'router', renderMode: 'monologue', thinkingText: '質問の意図を解析しています...' },
+    'LLM_Intent_Analysis_Web': { title: '質問の意図を解析中...', icon: 'router', renderMode: 'monologue', thinkingText: '質問の意図を解析しています...' },
 
     // LLM処理ノード - 最終回答生成
     'LLM_Hybrid': { title: '情報を統合して回答を生成中...', icon: 'writing', renderMode: 'silent', thinkingText: '回答を生成中...' },
@@ -56,6 +58,7 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
 
     // Devルート用ノード
     'LLM_Search_Strategy': { title: '検索戦略を策定中...', icon: 'reasoning' },
+    'LLM_RAG_Strategy': { title: '検索戦略を策定中...', icon: 'reasoning', renderMode: 'monologue', thinkingText: '検索戦略を策定中...' },
     'HTTP_TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
     'HTTP_TOOL_Perplexity_Search_Parallel': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
     'Parallel_Web_Search': { title: '詳細Web検索中（並列処理）...', icon: 'iteration' },
@@ -68,8 +71,8 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     // ファイル検索ストアツール (社内データ検索)
     'ファイル検索ストアを指定して検索': { title: '📂 社内データを検索中...', icon: 'file-search' },
 
-    // 指定されたストアの要約 (社内データ接続)
-    '指定されたストアの要約': { title: '📂 社内データに接続中...', icon: 'file-search', renderMode: 'silent', thinkingText: '社内データに接続中...' },
+    // 指定されたストアの要約 (社内データ接続) → Actionチップで表示
+    '指定されたストアの要約': { title: '社内データに接続中', icon: 'file-search', renderMode: 'action' },
 };
 
 /**

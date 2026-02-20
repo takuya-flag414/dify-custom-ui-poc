@@ -89,6 +89,29 @@ export const isStructuredMessage = (obj: any): obj is StructuredUserMessage => {
 };
 
 /**
+ * Extracts the plain text from a raw message string.
+ * If the string is a valid Structured Message Protocol JSON, returns `content.text`.
+ * If it's already plain text, returns it as-is.
+ * 
+ * This is the canonical utility for preventing JSON double-wrapping on resend/retry.
+ * 
+ * @param rawText The raw text (may be structured JSON or plain text)
+ * @returns The plain user input text
+ */
+export const extractPlainText = (rawText: string): string => {
+    if (!rawText) return '';
+    try {
+        const parsed = JSON.parse(rawText);
+        if (parsed && typeof parsed === 'object' && parsed.v && parsed.content?.text) {
+            return parsed.content.text;
+        }
+    } catch (e) {
+        // Not JSON — treat as plain text
+    }
+    return rawText;
+};
+
+/**
  * Restores the full state from a structured message string.
  * Used for Editing or Retrying messages.
  * 

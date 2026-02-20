@@ -16,8 +16,8 @@ import { WIZARD_SCENARIOS } from '../Chat/Wizard/WizardConfig';
 // === Type Definitions ===
 
 interface SearchSettings {
-    ragEnabled: boolean | 'auto';
-    webMode: 'auto' | 'off' | 'force';
+    ragEnabled: boolean;
+    webEnabled: boolean;
 }
 
 interface ToolDefinition {
@@ -60,11 +60,11 @@ const itemVariants = {
 // === Mode Settings Map (for auto-switching) ===
 
 const MODE_SETTINGS: Record<string, Partial<SearchSettings>> = {
-    standard: { ragEnabled: 'auto', webMode: 'auto' },
-    fast: { ragEnabled: false, webMode: 'off' },
-    hybrid: { ragEnabled: true, webMode: 'auto' },
-    enterprise: { ragEnabled: true, webMode: 'off' },
-    deep: { ragEnabled: false, webMode: 'force' }
+    standard: { ragEnabled: false, webEnabled: false },
+    fast: { ragEnabled: false, webEnabled: false },
+    hybrid: { ragEnabled: true, webEnabled: true },
+    enterprise: { ragEnabled: true, webEnabled: false },
+    deep: { ragEnabled: false, webEnabled: true }
 };
 
 // === Tool Definitions ===
