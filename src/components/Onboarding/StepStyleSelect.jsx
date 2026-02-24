@@ -37,58 +37,60 @@ const StepStyleSelect = ({ selectedStyle, onStyleChange, onNext, onPrev }) => {
     };
 
     return (
-        <div className="onboarding-step">
-            <h1 className="onboarding-title">
-                どのようなサポートを<br />希望しますか？
-            </h1>
+        <div className="onboarding-step split-layout">
+            <div className="onboarding-step-left">
+                <h1 className="onboarding-title">
+                    どのようなサポートを<br />希望しますか？
+                </h1>
+                <p className="onboarding-subtitle">
+                    あなたに合ったコミュニケーションスタイルを選んでください。
+                </p>
+                <div className="title-decoration-line" />
+            </div>
 
-            <p className="onboarding-subtitle">
-                あなたに合ったコミュニケーションスタイルを選んでください。
-            </p>
+            <div className="onboarding-step-right">
+                <div className="grid-cards">
+                    {STYLES.map((style) => {
+                        const IconComponent = style.icon;
+                        const isSelected = selectedStyle === style.id;
 
-            <div className="onboarding-cards">
-                {STYLES.map((style) => {
-                    const IconComponent = style.icon;
-                    const isSelected = selectedStyle === style.id;
-
-                    return (
-                        <div
-                            key={style.id}
-                            className={`onboarding-card ${isSelected ? 'selected' : ''}`}
-                            onClick={() => handleCardClick(style.id)}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    handleCardClick(style.id);
-                                }
-                            }}
-                        >
-                            <div className="onboarding-card-icon">
-                                <IconComponent />
-                            </div>
-                            <div className="onboarding-card-content">
+                        return (
+                            <div
+                                key={style.id}
+                                className={`onboarding-card ${isSelected ? 'selected' : ''}`}
+                                onClick={() => handleCardClick(style.id)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        handleCardClick(style.id);
+                                    }
+                                }}
+                            >
+                                <div className="onboarding-card-icon">
+                                    <IconComponent />
+                                </div>
                                 <h3 className="onboarding-card-title">{style.title}</h3>
                                 <p className="onboarding-card-desc">{style.description}</p>
                             </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
 
-            <div className="onboarding-actions">
-                <button
-                    className="onboarding-btn onboarding-btn-primary"
-                    onClick={onNext}
-                >
-                    次へ
-                </button>
-                <button
-                    className="onboarding-btn onboarding-btn-secondary"
-                    onClick={onPrev}
-                >
-                    戻る
-                </button>
+                <div className="onboarding-actions row-actions">
+                    <button
+                        className="onboarding-btn onboarding-btn-secondary"
+                        onClick={onPrev}
+                    >
+                        戻る
+                    </button>
+                    <button
+                        className="onboarding-btn onboarding-btn-primary"
+                        onClick={onNext}
+                    >
+                        次へ
+                    </button>
+                </div>
             </div>
         </div>
     );

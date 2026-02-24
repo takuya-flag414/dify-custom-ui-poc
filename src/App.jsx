@@ -386,9 +386,9 @@ function App() {
 
   return (
     <div className={`app${isInitialState ? ' app-initial' : ''}`} style={appStyle}>
-      {/* オンボーディングウィザード（新規アカウント作成時のみ表示） */}
+      {/* オンボーディングウィザード（未完了 or リセット後に表示） */}
       <AnimatePresence>
-        {isNewUser && !onboardingState.isCompleted && (
+        {!onboardingState.isCompleted && (
           <OnboardingScreen
             {...onboardingState}
             updateSettings={updateSettings}
@@ -396,8 +396,8 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* アプリ本体（isNewUserでなければ即座に表示、isNewUserならisAppReady後に表示） */}
-      {(!isNewUser || onboardingState.isAppReady) && (
+      {/* アプリ本体（オンボーディング完了後、またはスキップ後に表示） */}
+      {(onboardingState.isCompleted || onboardingState.isAppReady) && (
         <>
           <TutorialOverlay
             isActive={isTutorialActive}

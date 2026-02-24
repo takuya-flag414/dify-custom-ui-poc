@@ -15,7 +15,7 @@ const STYLE_LABELS = {
 
 const StepReady = ({ name, style, onComplete }) => {
     return (
-        <div className="onboarding-step">
+        <div className="onboarding-step centered-layout">
             <div className="onboarding-ready-icon">
                 <CheckIcon />
             </div>
@@ -28,12 +28,12 @@ const StepReady = ({ name, style, onComplete }) => {
                 さっそく始めましょう。
             </p>
 
-            <div className="onboarding-summary">
-                <div className="onboarding-summary-item">
+            <div className="horizontal-summary">
+                <div className="onboarding-summary-card">
                     <span className="onboarding-summary-label">お名前</span>
                     <span className="onboarding-summary-value">{name}</span>
                 </div>
-                <div className="onboarding-summary-item">
+                <div className="onboarding-summary-card">
                     <span className="onboarding-summary-label">スタイル</span>
                     <span className="onboarding-summary-value">{STYLE_LABELS[style] || style}</span>
                 </div>
@@ -41,7 +41,7 @@ const StepReady = ({ name, style, onComplete }) => {
 
             <div className="onboarding-actions">
                 <button
-                    className="onboarding-btn onboarding-btn-primary"
+                    className="onboarding-btn onboarding-btn-primary large-btn"
                     onClick={onComplete}
                 >
                     チャットを開始

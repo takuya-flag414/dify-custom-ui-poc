@@ -41,6 +41,20 @@
     padding: 2rem;
 }
 
+/* Seasonal Event Backgrounds */
+.welcome-container--zen.bg-spring {
+    background-image: url('/svg/spring-background.svg');
+    background-size: cover;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    transition: background-image 0.4s ease-in-out;
+}
+
+[data-theme='dark'] .welcome-container--zen.bg-spring {
+    background-image: url('/svg/spring-background-dark.svg');
+}
+
 /* === Content Wrapper === */
 .welcome-inner {
     max-width: 800px;

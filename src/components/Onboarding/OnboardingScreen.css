@@ -13,12 +13,90 @@
 /* === コンテンツエリア === */
 .onboarding-screen-content {
     position: relative;
-    z-index: 1;
+    z-index: 10;
     width: 100%;
-    max-width: 900px;
-    padding: var(--space-6);
+    max-width: 1200px;
+    padding: var(--space-8) var(--space-6);
     display: flex;
     flex-direction: column;
+    height: 100vh;
+}
+
+/* Background Shapes for Slide Design */
+.onboarding-bg-shape {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* 大きな青い円 */
+.bg-shape-1 {
+    width: 1200px;
+    height: 1200px;
+    background: var(--color-primary);
+    top: -600px;
+    left: -400px;
+    opacity: 0.05;
+}
+
+/* 同心円の破線 */
+.bg-shape-2 {
+    width: 800px;
+    height: 800px;
+    border: 2px dashed var(--color-border-strong);
+    background: transparent;
+    top: -400px;
+    left: -200px;
+    opacity: 0.2;
+}
+
+.bg-shape-3 {
+    width: 900px;
+    height: 900px;
+    border: 1px dashed var(--color-border-item);
+    background: transparent;
+    top: -450px;
+    left: -250px;
+    opacity: 0.3;
+}
+
+/* 右下の青い半円 */
+.bg-shape-4 {
+    width: 600px;
+    height: 600px;
+    background: var(--color-primary);
+    bottom: -300px;
+    right: -200px;
+    opacity: 0.08;
+    filter: blur(40px);
+}
+
+/* ランダムな小さな円（アクセント） */
+.bg-shape-5 {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary);
+    top: 20%;
+    right: 15%;
+    opacity: 0.6;
+}
+
+.bg-shape-6 {
+    width: 120px;
+    height: 120px;
+    background: rgba(156, 163, 175, 0.15);
+    top: 60%;
+    left: 45%;
+}
+
+[data-theme='dark'] .bg-shape-2,
+[data-theme='dark'] .bg-shape-3 {
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .bg-shape-6 {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* === ステップラッパー === */
@@ -28,22 +106,52 @@
     flex: 1;
 }
 
-/* === 共通ステップスタイル - V2 Glassmorphism === */
+/* === 共通ステップスタイル - スライド風 === */
 .onboarding-step-new {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: var(--space-6);
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: var(--radius-3xl);
-    border: 1px solid var(--glass-border);
-    box-shadow:
-        0 25px 50px -12px rgba(0, 0, 0, 0.15),
-        0 0 0 1px rgba(0, 0, 0, 0.03);
+    padding: var(--space-8);
+    background: transparent;
+    border: none;
+    box-shadow: none;
     min-height: 440px;
+    flex: 1;
+    width: 100%;
+    justify-content: center;
+}
+
+/* スライド風2カラムレイアウト用 */
+.split-layout {
+    flex-direction: row;
+    text-align: left;
+    gap: 8vw;
+}
+
+.onboarding-step-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 500px;
+}
+
+.onboarding-step-right {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.title-decoration-line {
+    width: 80px;
+    height: 6px;
+    background: var(--color-primary);
+    border-radius: 3px;
+    margin: var(--space-2) 0 var(--space-8) 0;
 }
 
 /* === アイコンエリア === */
@@ -132,8 +240,8 @@
 
 /* === スタイル選択レイアウト === */
 .onboarding-style-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
+    display: flex;
+    flex-direction: column;
     gap: var(--space-6);
     width: 100%;
     text-align: left;
@@ -401,11 +509,11 @@
 /* ========================================
    Dark Mode
    ======================================== */
+/* Remove solid background and shadow for slide layout */
 [data-theme='dark'] .onboarding-step-new {
-    background: rgba(28, 28, 30, 0.9);
-    box-shadow:
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(255, 255, 255, 0.05);
+    background: transparent;
+    box-shadow: none;
+    border: none;
 }
 
 [data-theme='dark'] .onboarding-input-new {
@@ -654,4 +762,183 @@
     .welcome-btn-pulse svg {
         transition: none;
     }
+}
+
+/* ========================================
+   Ghost Button（スキップ用）
+   ======================================== */
+.onboarding-btn-ghost-new {
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    height: 40px;
+}
+
+.onboarding-btn-ghost-new:hover {
+    color: var(--color-text-sub);
+    background: var(--color-hover-overlay);
+    transform: scale(1.01);
+}
+
+/* ========================================
+   Context Tutorial
+   ======================================== */
+.tutorial-step {
+    gap: var(--space-4);
+}
+
+.tutorial-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    background: var(--color-primary-bg);
+    border: 1px solid oklch(60% 0.2 250 / 0.25);
+    border-radius: var(--radius-full);
+    font-size: var(--text-caption);
+    font-weight: var(--font-semibold);
+    color: var(--color-primary);
+    letter-spacing: 0.03em;
+    margin-bottom: var(--space-2);
+}
+
+.tutorial-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-2xl);
+    margin-bottom: var(--space-4);
+}
+
+.tutorial-icon-wrapper svg {
+    width: 44px;
+    height: 44px;
+}
+
+/* Knowledge: ブルー */
+.tutorial-icon-knowledge {
+    background: linear-gradient(135deg, oklch(60% 0.2 250) 0%, oklch(55% 0.22 250) 100%);
+    color: white;
+    box-shadow: 0 8px 24px oklch(60% 0.2 250 / 0.35), 0 0 0 4px oklch(60% 0.2 250 / 0.1);
+}
+
+/* Web: パープル */
+.tutorial-icon-web {
+    background: linear-gradient(135deg, oklch(60% 0.2 305) 0%, oklch(55% 0.22 305) 100%);
+    color: white;
+    box-shadow: 0 8px 24px oklch(60% 0.2 305 / 0.35), 0 0 0 4px oklch(60% 0.2 305 / 0.1);
+}
+
+/* Hybrid: エメラルド */
+.tutorial-icon-hybrid {
+    background: linear-gradient(135deg, oklch(60% 0.2 160) 0%, oklch(55% 0.22 160) 100%);
+    color: white;
+    box-shadow: 0 8px 24px oklch(60% 0.2 160 / 0.35), 0 0 0 4px oklch(60% 0.2 160 / 0.1);
+}
+
+/* ========================================
+   Instructions Step - Textarea
+   ======================================== */
+.onboarding-textarea {
+    width: 100%;
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--text-body);
+    font-family: inherit;
+    color: var(--color-text-main);
+    background: var(--color-bg-surface);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-xl);
+    outline: none;
+    resize: vertical;
+    line-height: 1.6;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    box-sizing: border-box;
+}
+
+.onboarding-textarea::placeholder {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+}
+
+.onboarding-textarea:focus,
+.onboarding-textarea.focused {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px oklch(60% 0.2 250 / 0.15), 0 4px 12px oklch(60% 0.2 250 / 0.1);
+}
+
+[data-theme='dark'] .onboarding-textarea {
+    background: rgba(51, 65, 85, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+[data-theme='dark'] .onboarding-textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2), 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* ========================================
+   Ready Screen - Updated
+   ======================================== */
+/* ready-icon-glow: ロケットアイコン（グリーン） */
+.ready-icon-glow {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    box-shadow:
+        0 8px 24px rgba(16, 185, 129, 0.35),
+        0 0 0 4px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* サマリーカード */
+.ready-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border-light);
+    width: 100%;
+    max-width: 320px;
+    margin: var(--space-2) 0 var(--space-4);
+    text-align: left;
+}
+
+[data-theme='dark'] .ready-summary-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.ready-summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--text-sm);
+}
+
+.ready-summary-label {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    width: 90px;
+    font-size: var(--text-caption);
+}
+
+.ready-summary-value {
+    color: var(--color-text-sub);
+    font-weight: var(--font-medium);
+    flex: 1;
+    text-align: right;
+    font-size: var(--text-caption);
+}
+
+.ready-summary-value.positive {
+    color: var(--color-text-main);
+    font-weight: var(--font-semibold);
+}
+
+.ready-summary-value.neutral {
+    color: var(--color-text-muted);
+    font-weight: var(--font-normal);
 }

@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="100%" height="100%">
+    <defs>
+        <!-- 背景の青空グラデーション -->
+        <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#87CEEB"/>
+            <stop offset="60%" stop-color="#CBE9F6"/>
+            <stop offset="100%" stop-color="#E0F6FF"/>
+        </linearGradient>
+
+        <!-- 桜の花びら単体のパス（先端の切れ込みを表現） -->
+        <g id="single-petal">
+            <path d="M 0 12 C -8 4 -12 -4 -4 -10 C -2 -12 0 -7 0 -7 C 0 -7 2 -12 4 -10 C 12 -4 8 4 0 12 Z" fill="#FFB7C5" opacity="0.9"/>
+        </g>
+
+        <!-- 桜の木を構成する花束のクラスター（3種類用意してランダム感を出す） -->
+        <g id="cluster1">
+            <circle cx="0" cy="0" r="45" fill="#FFB7C5" opacity="0.9"/>
+            <circle cx="-25" cy="-20" r="35" fill="#FF9EB5" opacity="0.85"/>
+            <circle cx="25" cy="15" r="40" fill="#FFC0CB" opacity="0.95"/>
+            <circle cx="15" cy="-30" r="30" fill="#FFA6C9" opacity="0.8"/>
+            <circle cx="-15" cy="30" r="35" fill="#FFD1DC" opacity="0.9"/>
+            <use href="#single-petal" x="-35" y="-45" transform="rotate(15)" />
+            <use href="#single-petal" x="35" y="-35" transform="rotate(75)" />
+            <use href="#single-petal" x="-25" y="45" transform="rotate(120)" />
+        </g>
+
+        <g id="cluster2">
+            <circle cx="0" cy="0" r="40" fill="#FFC0CB" opacity="0.95"/>
+            <circle cx="-20" cy="25" r="35" fill="#FFB7C5" opacity="0.9"/>
+            <circle cx="30" cy="-15" r="35" fill="#FFD1DC" opacity="0.85"/>
+            <circle cx="-30" cy="-15" r="30" fill="#FF9EB5" opacity="0.8"/>
+            <use href="#single-petal" x="-40" y="20" transform="rotate(45)" />
+            <use href="#single-petal" x="20" y="40" transform="rotate(160)" />
+            <use href="#single-petal" x="40" y="-20" transform="rotate(-30)" />
+        </g>
+
+        <g id="cluster3">
+            <circle cx="0" cy="0" r="50" fill="#FFB7C5" opacity="0.85"/>
+            <circle cx="20" cy="20" r="40" fill="#FF9EB5" opacity="0.9"/>
+            <circle cx="-25" cy="10" r="30" fill="#FFA6C9" opacity="0.85"/>
+            <circle cx="10" cy="-25" r="40" fill="#FFD1DC" opacity="0.95"/>
+            <use href="#single-petal" x="-30" y="-30" transform="rotate(-45)" />
+            <use href="#single-petal" x="40" y="30" transform="rotate(90)" />
+        </g>
+
+        <style>
+            /* 花びらが舞い散るアニメーションのキーフレーム（4パターンの軌道を用意） */
+            @keyframes fall1 {
+                0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+                5%   { opacity: 1; }
+                30%  { transform: translate(-150px, 200px) rotate(120deg); }
+                70%  { transform: translate(-400px, 500px) rotate(240deg); }
+                90%  { opacity: 1; }
+                100% { transform: translate(-600px, 800px) rotate(360deg); opacity: 0; }
+            }
+
+            @keyframes fall2 {
+                0%   { transform: translate(0, 0) rotate(45deg); opacity: 0; }
+                10%  { opacity: 0.8; }
+                50%  { transform: translate(-300px, 400px) rotate(180deg); }
+                85%  { opacity: 0.8; }
+                100% { transform: translate(-550px, 850px) rotate(360deg); opacity: 0; }
+            }
+
+            @keyframes fall3 {
+                0%   { transform: translate(0, 0) rotate(-45deg); opacity: 0; }
+                8%   { opacity: 0.9; }
+                40%  { transform: translate(-250px, 300px) rotate(-120deg); }
+                80%  { transform: translate(-550px, 650px) rotate(-240deg); opacity: 0.9; }
+                100% { transform: translate(-750px, 850px) rotate(-360deg); opacity: 0; }
+            }
+
+            @keyframes fall4 {
+                0%   { transform: translate(0, 0) rotate(90deg); opacity: 0; }
+                5%   { opacity: 1; }
+                60%  { transform: translate(-400px, 550px) rotate(270deg); }
+                90%  { opacity: 1; }
+                100% { transform: translate(-650px, 900px) rotate(450deg); opacity: 0; }
+            }
+
+            /* 各パターンの基本クラス設定 */
+            .p-type1 { animation: fall1 linear infinite; }
+            .p-type2 { animation: fall2 ease-in-out infinite; }
+            .p-type3 { animation: fall3 ease-in infinite; }
+            .p-type4 { animation: fall4 ease-out infinite; }
+        </style>
+    </defs>
+
+    <!-- 背景 -->
+    <rect width="1000" height="700" fill="url(#skyGradient)" />
+
+    <!-- 太陽（爽やかさを強調するためのアクセント） -->
+    <circle cx="150" cy="180" r="60" fill="#FFFFFF" opacity="0.7"/>
+    <circle cx="150" cy="180" r="40" fill="#FFFFFF" opacity="0.9"/>
+
+    <!-- 富士山 -->
+    <g id="fuji">
+        <!-- 山肌 -->
+        <path d="M -100 700 C 150 700 230 350 270 250 L 330 250 C 370 350 450 700 700 700 Z" fill="#4A648C" />
+        <!-- 山頂の雪冠 -->
+        <path d="M 238 350 
+                 L 255 370 L 270 340 L 285 365 L 300 330 
+                 L 315 360 L 330 340 L 345 370 L 362 350 
+                 C 350 300 340 250 330 250 
+                 L 270 250 
+                 C 260 250 250 300 238 350 Z" fill="#FFFFFF" />
+    </g>
+
+    <!-- 桜の木（右前景） -->
+    <g id="cherry-tree">
+        <!-- 幹と枝 -->
+        <g stroke="#3D2817" stroke-linecap="round" fill="none">
+            <path d="M 820 700 Q 880 600 880 400 L 920 400 Q 920 600 980 700 Z" fill="#3D2817" stroke="none"/>
+            <path d="M 880 450 Q 800 400 680 350" stroke-width="20"/>
+            <path d="M 890 400 Q 850 250 760 150" stroke-width="15"/>
+            <path d="M 900 400 Q 950 250 900 80" stroke-width="18"/>
+            <path d="M 920 420 Q 980 350 1080 300" stroke-width="16"/>
+            <!-- 細い枝 -->
+            <path d="M 750 380 Q 700 300 630 280" stroke-width="8"/>
+            <path d="M 820 230 Q 780 180 720 180" stroke-width="10"/>
+            <path d="M 920 200 Q 980 150 1020 120" stroke-width="12"/>
+            <path d="M 950 380 Q 1000 420 1050 450" stroke-width="8"/>
+        </g>
+
+        <!-- 花（クラスターを重ねて満開のディテールを表現） -->
+        <use href="#cluster1" x="680" y="350" transform="scale(1.2)" />
+        <use href="#cluster2" x="780" y="150" transform="scale(1.4)" />
+        <use href="#cluster3" x="900" y="100" transform="scale(1.5)" />
+        <use href="#cluster1" x="1050" y="300" transform="scale(1.3)" />
+        <use href="#cluster2" x="850" y="280" transform="scale(1.6)" />
+        <use href="#cluster3" x="750" y="250" transform="scale(1.1)" />
+        <use href="#cluster1" x="950" y="200" transform="scale(1.4)" />
+        <use href="#cluster2" x="800" y="400" transform="scale(1.1)" />
+        <use href="#cluster3" x="950" y="400" transform="scale(1.2)" />
+        <use href="#cluster1" x="880" y="50" transform="scale(1.1)" />
+        <use href="#cluster2" x="630" y="280" transform="scale(1.0)" />
+        <use href="#cluster3" x="720" y="180" transform="scale(1.2)" />
+        <use href="#cluster1" x="1020" y="120" transform="scale(1.3)" />
+        <use href="#cluster2" x="1050" y="450" transform="scale(1.0)" />
+        <!-- エッジのふわっとした広がりを追加 -->
+        <use href="#cluster3" x="600" y="380" transform="scale(0.8)" />
+        <use href="#cluster1" x="850" y="150" transform="scale(1.3)" />
+    </g>
+
+    <!-- 舞い散る桜の花びら（アニメーション） -->
+    <!-- 多数の花びらを異なる初期位置、スケール、アニメーションタイミングで配置してランダム性を演出 -->
+    <g id="falling-petals">
+        <g transform="translate(680, 250) scale(1.1)"><use href="#single-petal" class="p-type1" style="animation-duration: 9s; animation-delay: 0s;" /></g>
+        <g transform="translate(850, 150) scale(0.8)"><use href="#single-petal" class="p-type2" style="animation-duration: 12s; animation-delay: 1.5s;" /></g>
+        <g transform="translate(750, 300) scale(1.0)"><use href="#single-petal" class="p-type3" style="animation-duration: 10s; animation-delay: 3s;" /></g>
+        <g transform="translate(900, 100) scale(1.2)"><use href="#single-petal" class="p-type4" style="animation-duration: 14s; animation-delay: 0.5s;" /></g>
+        
+        <g transform="translate(650, 350) scale(0.9)"><use href="#single-petal" class="p-type2" style="animation-duration: 11s; animation-delay: 4s;" /></g>
+        <g transform="translate(950, 200) scale(1.3)"><use href="#single-petal" class="p-type1" style="animation-duration: 13s; animation-delay: 2.5s;" /></g>
+        <g transform="translate(800, 180) scale(0.7)"><use href="#single-petal" class="p-type3" style="animation-duration: 9.5s; animation-delay: 5s;" /></g>
+        <g transform="translate(720, 280) scale(1.1)"><use href="#single-petal" class="p-type4" style="animation-duration: 10.5s; animation-delay: 1s;" /></g>
+
+        <g transform="translate(1000, 300) scale(1.0)"><use href="#single-petal" class="p-type1" style="animation-duration: 15s; animation-delay: 3.5s;" /></g>
+        <g transform="translate(880, 50) scale(0.9)"><use href="#single-petal" class="p-type2" style="animation-duration: 11.5s; animation-delay: 6s;" /></g>
+        <g transform="translate(780, 400) scale(1.2)"><use href="#single-petal" class="p-type3" style="animation-duration: 12.5s; animation-delay: 2s;" /></g>
+        <g transform="translate(850, 250) scale(0.8)"><use href="#single-petal" class="p-type4" style="animation-duration: 8.5s; animation-delay: 4.5s;" /></g>
+
+        <g transform="translate(620, 380) scale(1.1)"><use href="#single-petal" class="p-type1" style="animation-duration: 10s; animation-delay: 7s;" /></g>
+        <g transform="translate(920, 150) scale(1.4)"><use href="#single-petal" class="p-type2" style="animation-duration: 13s; animation-delay: 8.5s;" /></g>
+        <g transform="translate(740, 220) scale(0.9)"><use href="#single-petal" class="p-type3" style="animation-duration: 11s; animation-delay: 6.5s;" /></g>
+        <g transform="translate(820, 320) scale(1.0)"><use href="#single-petal" class="p-type4" style="animation-duration: 14.5s; animation-delay: 9s;" /></g>
+
+        <g transform="translate(980, 100) scale(0.8)"><use href="#single-petal" class="p-type1" style="animation-duration: 12s; animation-delay: 10s;" /></g>
+        <g transform="translate(870, 380) scale(1.1)"><use href="#single-petal" class="p-type2" style="animation-duration: 9.5s; animation-delay: 11s;" /></g>
+        <g transform="translate(710, 150) scale(1.3)"><use href="#single-petal" class="p-type3" style="animation-duration: 13.5s; animation-delay: 7.5s;" /></g>
+        <g transform="translate(800, 280) scale(0.9)"><use href="#single-petal" class="p-type4" style="animation-duration: 10s; animation-delay: 12.5s;" /></g>
+
+        <g transform="translate(1050, 250) scale(1.2)"><use href="#single-petal" class="p-type1" style="animation-duration: 14s; animation-delay: 5.5s;" /></g>
+        <g transform="translate(760, 100) scale(0.7)"><use href="#single-petal" class="p-type2" style="animation-duration: 10.5s; animation-delay: 13s;" /></g>
+        <g transform="translate(940, 350) scale(1.0)"><use href="#single-petal" class="p-type3" style="animation-duration: 11.5s; animation-delay: 8s;" /></g>
+        <g transform="translate(840, 200) scale(1.1)"><use href="#single-petal" class="p-type4" style="animation-duration: 12.5s; animation-delay: 14s;" /></g>
+        
+        <!-- 奥の方から降る小さな花びら（遠近感の追加） -->
+        <g transform="translate(700, 180) scale(0.5)"><use href="#single-petal" class="p-type1" style="animation-duration: 16s; animation-delay: 1s;" /></g>
+        <g transform="translate(850, 100) scale(0.6)"><use href="#single-petal" class="p-type3" style="animation-duration: 15s; animation-delay: 4s;" /></g>
+        <g transform="translate(950, 250) scale(0.5)"><use href="#single-petal" class="p-type2" style="animation-duration: 17s; animation-delay: 7s;" /></g>
+        <g transform="translate(780, 250) scale(0.6)"><use href="#single-petal" class="p-type4" style="animation-duration: 14s; animation-delay: 10s;" /></g>
+    </g>
+</svg>

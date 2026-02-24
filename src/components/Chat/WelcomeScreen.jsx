@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import './WelcomeScreen.css';
 import { getTimeBasedGreeting } from '../../utils/timeUtils';
 import ChatInput from './ChatInput';
+import { useSeasonalBackground } from '../../hooks/useSeasonalBackground';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,6 +52,9 @@ const WelcomeScreen = ({
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
 
+    // Get the seasonal background CSS class if we are in a special period
+    const seasonalClass = useSeasonalBackground();
+
     // フォーカスイベント監視
     useEffect(() => {
         const handleFocusIn = (e) => {
@@ -80,7 +84,7 @@ const WelcomeScreen = ({
     }, []);
 
     return (
-        <div className="welcome-container welcome-container--zen">
+        <div className={`welcome-container welcome-container--zen ${seasonalClass || ''}`}>
             <motion.div
                 className="welcome-inner welcome-inner--zen"
                 variants={containerVariants}

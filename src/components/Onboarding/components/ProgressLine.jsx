@@ -37,8 +37,53 @@ const ReadyIcon = () => (
     </svg>
 );
 
-const STEP_ICONS = [WelcomeIcon, NameIcon, StyleIcon, ReadyIcon];
-const STEP_LABELS = ['開始', '名前', 'スタイル', '完了'];
+// Tutorial/Instructions/Ready 用アイコン追加
+const BookIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+);
+
+const GlobeIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="2" y1="12" x2="22" y2="12" />
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+);
+
+const MergeIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="18" cy="18" r="3" />
+        <circle cx="6" cy="6" r="3" />
+        <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+        <line x1="6" y1="9" x2="6" y2="21" />
+    </svg>
+);
+
+const RulesIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6" />
+        <line x1="8" y1="12" x2="21" y2="12" />
+        <line x1="8" y1="18" x2="21" y2="18" />
+        <line x1="3" y1="6" x2="3.01" y2="6" />
+        <line x1="3" y1="12" x2="3.01" y2="12" />
+        <line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+);
+
+// step 0〜6 のアイコンとラベル（7ステップ対応）
+const STEP_ICONS = [
+    WelcomeIcon,  // 0: welcome
+    BookIcon,     // 1: tutorial-knowledge
+    GlobeIcon,    // 2: tutorial-web
+    MergeIcon,    // 3: tutorial-hybrid
+    NameIcon,     // 4: name
+    RulesIcon,    // 5: instructions
+    ReadyIcon,    // 6: ready
+];
+const STEP_LABELS = ['開始', '知識', 'Web', '混合', '名前', '指示', '完了'];
 
 /**
  * 強化型プログレスインジケーター
@@ -64,7 +109,7 @@ const ProgressLine = ({ currentStep, totalSteps }) => {
                             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                         >
                             <div className="progress-step-icon">
-                                {isCompleted ? <CheckIcon /> : <IconComponent />}
+                                {isCompleted ? <CheckIcon /> : (IconComponent ? <IconComponent /> : null)}
                             </div>
 
                             {/* ラベル */}

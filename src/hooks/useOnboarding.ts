@@ -14,7 +14,7 @@ export interface OnboardingStep {
  */
 export interface TempProfile {
     name: string;
-    style: 'efficient' | 'partner';
+    customInstructions: string;
 }
 
 /**
@@ -36,8 +36,9 @@ export interface UseOnboardingReturn {
     isLastStep: boolean;
     nextStep: () => void;
     prevStep: () => void;
+    skipTutorial: () => void;
     setTempName: (name: string) => void;
-    setTempStyle: (style: 'efficient' | 'partner') => void;
+    setTempInstructions: (instructions: string) => void;
     completeOnboarding: (updateSettingsFn?: UpdateSettingsFunction) => void;
     resetOnboarding: () => void;
 }
@@ -89,13 +90,19 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
 
     const [tempProfile, setTempProfile] = useState<TempProfile>({
         name: '',
-        style: 'partner'
+        customInstructions: ''
     });
 
+    // Step IDs:
+    // 0: welcome, 1: tutorial-knowledge, 2: tutorial-web, 3: tutorial-hybrid
+    // 4: name, 5: instructions, 6: ready
     const steps: OnboardingStep[] = useMemo(() => [
         { id: 'welcome', title: 'ようこそ' },
+        { id: 'tutorial-knowledge', title: 'ナレッジ' },
+        { id: 'tutorial-web', title: 'Web検索' },
+        { id: 'tutorial-hybrid', title: 'ハイブリッド' },
         { id: 'name', title: 'お名前' },
-        { id: 'style', title: 'スタイル' },
+        { id: 'instructions', title: 'カスタム指示' },
         { id: 'ready', title: '準備完了' }
     ], []);
 
@@ -132,17 +139,32 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
         setTempProfile(prev => ({ ...prev, name }));
     }, []);
 
-    const setTempStyle = useCallback((style: 'efficient' | 'partner'): void => {
-        setTempProfile(prev => ({ ...prev, style }));
+    const setTempInstructions = useCallback((customInstructions: string): void => {
+        setTempProfile(prev => ({ ...prev, customInstructions }));
+    }, []);
+
+    // チュートリアルをスキップ → 名前入力ステップ(Step 4)へジャンプ
+    const skipTutorial = useCallback((): void => {
+        if (transitionLockRef.current) return;
+        transitionLockRef.current = true;
+        setCurrentStep(4);
+        setTimeout(() => {
+            transitionLockRef.current = false;
+        }, 400);
     }, []);
 
     const completeOnboarding = useCallback((updateSettingsFn?: UpdateSettingsFunction): void => {
         if (!storageKey) return;
 
         try {
-            if (updateSettingsFn && tempProfile.name) {
-                updateSettingsFn('profile', 'displayName', tempProfile.name);
-                updateSettingsFn('prompt', 'aiStyle', tempProfile.style);
+            if (updateSettingsFn) {
+                if (tempProfile.name) {
+                    updateSettingsFn('profile', 'displayName', tempProfile.name);
+                }
+                if (tempProfile.customInstructions) {
+                    updateSettingsFn('prompt', 'customInstructions', tempProfile.customInstructions);
+                }
+                // ai_style は廃止。バックエンドには常に 'partner' をデフォルト送信。
             }
 
             localStorage.setItem(storageKey, 'true');
@@ -166,7 +188,7 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
             setIsCompleted(false);
             setIsAppReady(false);
             setCurrentStep(0);
-            setTempProfile({ name: '', style: 'partner' });
+            setTempProfile({ name: '', customInstructions: '' });
             console.log('[useOnboarding] Onboarding reset for user:', userId);
         } catch (e) {
             console.error('[useOnboarding] Failed to reset onboarding:', e);
@@ -184,8 +206,9 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
         isLastStep,
         nextStep,
         prevStep,
+        skipTutorial,
         setTempName,
-        setTempStyle,
+        setTempInstructions,
         completeOnboarding,
         resetOnboarding
     };

@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-// App Icon with animation
+// App Icon
 const AppIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -21,80 +21,95 @@ const ArrowRightIcon = () => (
 );
 
 /**
- * ステップ1: ウェルカム画面
- * アプリへの最初の印象を決める重要な画面
- * - アイコンにグロー + パルス効果
- * - タイトルに段階的表示
- * - ボタンにバウンスアニメーション
+ * ステップ0: ウェルカム画面
+ * チュートリアル開始 または スキップ の選択
  */
-const StepWelcome = ({ onNext }) => {
+const StepWelcome = ({ onNext, onSkip }) => {
     return (
-        <div className="onboarding-step-new">
-            {/* アイコン + グローリング */}
-            <div className="welcome-icon-wrapper">
-                <motion.div
-                    className="onboarding-icon-new welcome-icon-glow"
-                    initial={{ scale: 0, rotate: -10 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 15,
-                        delay: 0.1
-                    }}
+        <div className="onboarding-step-new split-layout">
+            <div className="onboarding-step-left">
+                {/* アイコン + グローリング */}
+                <div className="welcome-icon-wrapper">
+                    <motion.div
+                        className="onboarding-icon-new welcome-icon-glow"
+                        initial={{ scale: 0, rotate: -10 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 15,
+                            delay: 0.1
+                        }}
+                    >
+                        <AppIcon />
+                    </motion.div>
+                </div>
+
+                {/* タイトル */}
+                <motion.h1
+                    className="onboarding-title-new"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    style={{ fontSize: '4rem', fontWeight: 800, marginBottom: '24px' }}
                 >
-                    <AppIcon />
-                </motion.div>
+                    ようこそ
+                </motion.h1>
+                <div className="title-decoration-line" />
             </div>
 
-            {/* タイトル */}
-            <motion.h1
-                className="onboarding-title-new"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-            >
-                ようこそ
-            </motion.h1>
-
-            {/* サブタイトル */}
-            <motion.p
-                className="onboarding-subtitle-new"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-            >
-                あなたの新しい思考のパートナーへ。
-            </motion.p>
-
-            {/* 説明 */}
-            <motion.p
-                className="onboarding-description-new"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-            >
-                数ステップの簡単な設定で、<br />
-                あなたに最適化されたAIアシスタントが始まります。
-            </motion.p>
-
-            {/* ボタン */}
-            <motion.div
-                className="onboarding-actions-new"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-            >
-                <motion.button
-                    className="onboarding-btn-new onboarding-btn-primary-new"
-                    onClick={onNext}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+            <div className="onboarding-step-right">
+                {/* サブタイトル */}
+                <motion.p
+                    className="onboarding-subtitle-new"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    style={{ fontSize: '1.75rem', color: 'var(--color-primary)' }}
                 >
-                    始める
-                    <ArrowRightIcon />
-                </motion.button>
-            </motion.div>
+                    あなたの新しい思考のパートナーへ。
+                </motion.p>
+
+                {/* 説明 */}
+                <motion.p
+                    className="onboarding-description-new"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    style={{ fontSize: '1.25rem', lineHeight: 1.8, marginBottom: '32px' }}
+                >
+                    まず、このアシスタントでできることを<br />
+                    簡単にご紹介します。
+                </motion.p>
+
+                {/* ボタン */}
+                <motion.div
+                    className="onboarding-actions-new"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    style={{ flexDirection: 'row', maxWidth: 'none', justifyContent: 'flex-start', paddingTop: 0, alignItems: 'center' }}
+                >
+                    <motion.button
+                        className="onboarding-btn-new onboarding-btn-primary-new"
+                        onClick={onNext}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        style={{ minWidth: '240px' }}
+                    >
+                        チュートリアルを開始
+                        <ArrowRightIcon />
+                    </motion.button>
+                    <button
+                        type="button"
+                        className="onboarding-btn-new onboarding-btn-ghost-new"
+                        onClick={onSkip}
+                        style={{ minWidth: '120px', marginLeft: '12px' }}
+                    >
+                        スキップ
+                    </button>
+                </motion.div>
+            </div>
         </div>
     );
 };

@@ -13,31 +13,28 @@ const AppIcon = () => (
 
 const StepWelcome = ({ onNext }) => {
     return (
-        <div className="onboarding-step">
-            <div className="onboarding-icon">
-                <AppIcon />
+        <div className="onboarding-step split-layout">
+            <div className="onboarding-step-left">
+                <div className="onboarding-icon">
+                    <AppIcon />
+                </div>
+                <h1 className="onboarding-title">ようこそ</h1>
+                <p className="onboarding-subtitle">あなたの新しい思考のパートナーへ。</p>
+                <div className="title-decoration-line" />
             </div>
-
-            <h1 className="onboarding-title">
-                ようこそ
-            </h1>
-
-            <p className="onboarding-subtitle">
-                あなたの新しい思考のパートナーへ。
-            </p>
-
-            <p className="onboarding-description">
-                数ステップの簡単な設定で、<br />
-                あなたに最適化されたAIアシスタントが始まります。
-            </p>
-
-            <div className="onboarding-actions">
-                <button
-                    className="onboarding-btn onboarding-btn-primary"
-                    onClick={onNext}
-                >
-                    始める
-                </button>
+            <div className="onboarding-step-right">
+                <p className="onboarding-description large-text">
+                    数ステップの簡単な設定で、<br />
+                    あなたに最適化されたAIアシスタントが始まります。
+                </p>
+                <div className="onboarding-actions">
+                    <button
+                        className="onboarding-btn onboarding-btn-primary"
+                        onClick={onNext}
+                    >
+                        始める
+                    </button>
+                </div>
             </div>
         </div>
     );

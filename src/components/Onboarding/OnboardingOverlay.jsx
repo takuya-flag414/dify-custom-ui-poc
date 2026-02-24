@@ -79,31 +79,37 @@ const OnboardingOverlay = ({
         }
     };
 
-    // アニメーション設定
+    // アニメーション設定 (フルスクリーン用スライド風)
     const stepVariants = {
-        enter: (direction) => ({
-            x: direction > 0 ? 30 : -30,
-            opacity: 0
-        }),
-        center: {
-            x: 0,
-            opacity: 1
-        },
-        exit: (direction) => ({
-            x: direction < 0 ? 30 : -30,
-            opacity: 0
-        })
+        enter: { x: 50, opacity: 0 },
+        center: { x: 0, opacity: 1 },
+        exit: { x: -50, opacity: 0 }
     };
 
     return createPortal(
         <div className="onboarding-overlay">
             <motion.div
                 className="onboarding-container"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
             >
-                <div className="onboarding-content">
+                {/* スライド風背景装飾 */}
+                <div className="onboarding-bg-shape bg-shape-1" />
+                <div className="onboarding-bg-shape bg-shape-2" />
+                <div className="onboarding-bg-shape bg-shape-3" />
+                <div className="onboarding-bg-shape bg-shape-4" />
+                <div className="onboarding-bg-shape bg-shape-5" />
+                <div className="onboarding-bg-shape bg-shape-6" />
+
+                {/* ヘッダーエリア */}
+                <div className="onboarding-header">
+                    <div className="onboarding-logo">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        AI Partner
+                    </div>
                     {/* 進捗ドット */}
                     <div className="onboarding-progress">
                         {Array.from({ length: totalSteps }).map((_, index) => (
@@ -114,8 +120,10 @@ const OnboardingOverlay = ({
                             />
                         ))}
                     </div>
+                </div>
 
-                    {/* ステップコンテンツ */}
+                {/* ステップコンテンツ */}
+                <div className="onboarding-content-wrapper">
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={currentStep}
@@ -123,8 +131,8 @@ const OnboardingOverlay = ({
                             initial="enter"
                             animate="center"
                             exit="exit"
-                            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-                            style={{ display: 'flex', flexDirection: 'column', flex: 1 }}
+                            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                            className="onboarding-step-container"
                         >
                             {renderStep()}
                         </motion.div>
