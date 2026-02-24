@@ -422,7 +422,7 @@ export const processLlmSynthesisFinished = (outputs, nodeId, addLog) => {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',
-                thinkingContent: thinking  // ★新規フィールド: チップ後に表示するthinking内容
+                thinking: thinking  // モノローグとして ThinkingProcess.jsx に表示される
             } : t
         };
     } else if (rawText) {

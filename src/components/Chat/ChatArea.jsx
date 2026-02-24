@@ -2,6 +2,7 @@
 import React, { useCallback } from 'react';
 import '../../App.css';
 import './ChatArea.css';
+import { extractPlainText } from '../../utils/messageSerializer';
 
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
@@ -76,7 +77,9 @@ const ChatArea = (props) => {
             }));
           }
           setTimeout(() => {
-            onSendMessage(lastUserMsg.text, []);
+            // payload.textがあればLLM生成文を優先、なければ直前入力をフォールバック
+            const textToSend = action.payload.text || extractPlainText(lastUserMsg.text);
+            onSendMessage(textToSend, []);
           }, 100);
         }
         break;
@@ -89,15 +92,17 @@ const ChatArea = (props) => {
             webEnabled: true
           }));
           setTimeout(() => {
-            onSendMessage(lastUserMsgForWeb.text, []);
+            // payload.textがあればLLM生成文を優先、なければ直前入力をフォールバック
+            const textToSend = action.payload?.text || extractPlainText(lastUserMsgForWeb.text);
+            onSendMessage(textToSend, []);
           }, 100);
         }
         break;
 
       case 'deep_dive':
-        const lastUserMsgForDeep = [...messages].reverse().find(m => m.role === 'user');
-        if (lastUserMsgForDeep) {
-          onSendMessage(`${lastUserMsgForDeep.text}について、より詳しく解説してください。`, []);
+        if (action.payload?.text) {
+          // LLMが生成したpayload.textを直接送信（自然な質問文）
+          onSendMessage(action.payload.text, []);
         }
         break;
 

@@ -551,7 +551,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 }
 
                                 // ★リファクタリング: LLM_Intent_Analysis処理
-                                if (title === 'LLM_Intent_Analysis' || title === 'LLM_Intent_Analysis_RAG' || title === 'LLM_Intent_Analysis_Web') {
+                                if (title === 'LLM_Intent_Analysis' || title === 'LLM_Intent_Analysis_RAG' || title === 'LLM_Intent_Analysis_Web' || title === 'LLM_Intent_Analysis_Hybrid') {
                                     const result = processIntentAnalysisFinished(outputs, nodeId, addLog);
                                     if (result) {
                                         setStreamingMessage(prev => prev ? {
@@ -598,7 +598,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 logWorkflowOutput(outputs, title, addLog);
 
                                 // その他のノードは完了ステータスに更新（エラーでない場合のみ）
-                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_RAG_Strategy' && !nodeError) {
+                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_Intent_Analysis_Hybrid' && title !== 'LLM_RAG_Strategy' && title !== 'LLM_Synthesis' && !nodeError) {
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)

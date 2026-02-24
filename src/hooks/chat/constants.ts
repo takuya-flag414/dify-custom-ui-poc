@@ -42,6 +42,7 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     'LLM_Intent_Analysis': { title: '質問の意図を解析中...', icon: 'router', renderMode: 'monologue', thinkingText: '質問の意図を解析しています...' },
     'LLM_Intent_Analysis_RAG': { title: '質問の意図を解析中...', icon: 'router', renderMode: 'monologue', thinkingText: '質問の意図を解析しています...' },
     'LLM_Intent_Analysis_Web': { title: '質問の意図を解析中...', icon: 'router', renderMode: 'monologue', thinkingText: '質問の意図を解析しています...' },
+    'LLM_Intent_Analysis_Hybrid': { title: '質問の意図を解析中...', icon: 'router', renderMode: 'monologue', thinkingText: '質問の意図を解析しています...' },
 
     // LLM処理ノード - 最終回答生成
     'LLM_Hybrid': { title: '情報を統合して回答を生成中...', icon: 'writing', renderMode: 'silent', thinkingText: '回答を生成中...' },
@@ -62,7 +63,7 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     'HTTP_TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
     'HTTP_TOOL_Perplexity_Search_Parallel': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },
     'Parallel_Web_Search': { title: '詳細Web検索中（並列処理）...', icon: 'iteration' },
-    'LLM_Synthesis': { title: '検索結果を統合中...', icon: 'writing', renderMode: 'silent' },
+    'LLM_Synthesis': { title: '検索結果を統合中...', icon: 'writing', renderMode: 'monologue', thinkingText: '検索結果を統合中...' },
 
     // Devルート用ノード - FASTモード/Partner系
     'HTTP_TOOL_Perplexity_Search (1)': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },

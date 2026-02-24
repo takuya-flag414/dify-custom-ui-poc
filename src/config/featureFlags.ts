@@ -10,6 +10,11 @@ export interface FeatureFlags {
     SHOW_SIDEBAR_STUDIOS: boolean;
     /** true: サイドバーにIntelligenceボタンを表示, false: 非表示 */
     SHOW_SIDEBAR_INTELLIGENCE: boolean;
+    /**
+     * true:  SmartActions（AIからの提案）を表示し、「関連する質問」を非表示
+     * false: SmartActionsを非表示にし、「関連する質問」を表示
+     */
+    ENABLE_SMART_ACTIONS: boolean;
 }
 
 const getEnvBoolean = (key: string, defaultValue: boolean): boolean => {
@@ -27,4 +32,8 @@ export const FEATURE_FLAGS: FeatureFlags = {
     // サイドバー項目の表示制御
     SHOW_SIDEBAR_STUDIOS: getEnvBoolean('VITE_FEATURE_SHOW_SIDEBAR_STUDIOS', false),
     SHOW_SIDEBAR_INTELLIGENCE: getEnvBoolean('VITE_FEATURE_SHOW_SIDEBAR_INTELLIGENCE', false),
+    // SmartActions と「関連する質問」の排他制御
+    // true  → SmartActions表示 / 「関連する質問」非表示
+    // false → SmartActions非表示 / 「関連する質問」表示
+    ENABLE_SMART_ACTIONS: getEnvBoolean('VITE_FEATURE_ENABLE_SMART_ACTIONS', true),
 };

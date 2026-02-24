@@ -15,6 +15,7 @@ import CopyButton from '../Shared/CopyButton';
 import TypewriterEffect from '../Shared/TypewriterEffect';
 import StructuredUserMessage from './StructuredUserMessage';
 import { parseStructuredMessage, extractPlainText } from '../../utils/messageSerializer';
+import { FEATURE_FLAGS } from '../../config/featureFlags';
 
 // Spring Physics (DESIGN_RULE準拠)
 const SPRING_CONFIG = {
@@ -453,10 +454,16 @@ const MessageBlock = ({
                         <div className="message-footer">
                             {showCitations && <CitationList citations={citations} messageId={uniqueMessageId} />}
                             {showKnowledgeBadge && <AiKnowledgeBadge />}
-                            {smartActions && smartActions.length > 0 && (
-                                <SmartActionGroup actions={smartActions} onActionSelect={onSmartActionSelect} />
+                            {/* ★変更: ENABLE_SMART_ACTIONSフラグで排他制御 */}
+                            {FEATURE_FLAGS.ENABLE_SMART_ACTIONS ? (
+                                /* SmartActionsが有効 → AIからの提案のみ表示、「関連する質問」は非表示 */
+                                smartActions && smartActions.length > 0 && (
+                                    <SmartActionGroup actions={smartActions} onActionSelect={onSmartActionSelect} />
+                                )
+                            ) : (
+                                /* SmartActionsが無効 → 「関連する質問」のみ表示 */
+                                <SuggestionButtons suggestions={suggestions} onSuggestionClick={onSuggestionClick} />
                             )}
-                            <SuggestionButtons suggestions={suggestions} onSuggestionClick={onSuggestionClick} />
                         </div>
                     )}
                 </div>
