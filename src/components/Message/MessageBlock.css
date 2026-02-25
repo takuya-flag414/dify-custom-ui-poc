@@ -614,9 +614,23 @@
   margin-bottom: 1em;
   font-size: 0.9em;
   border-radius: var(--radius-lg, 12px);
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
   box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+/* テーブル角丸: overflow:visible でも四隅の角丸を維持する */
+.markdown-renderer thead tr:first-child th:first-child {
+  border-top-left-radius: var(--radius-lg, 12px);
+}
+.markdown-renderer thead tr:first-child th:last-child {
+  border-top-right-radius: var(--radius-lg, 12px);
+}
+.markdown-renderer tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--radius-lg, 12px);
+}
+.markdown-renderer tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--radius-lg, 12px);
 }
 
 .markdown-renderer th,
