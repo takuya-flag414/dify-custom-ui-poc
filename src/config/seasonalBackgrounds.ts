@@ -10,7 +10,7 @@ export interface SeasonalBackground {
 export const seasonalBackgrounds: SeasonalBackground[] = [
     {
         id: 'spring-sakura',
-        start: '02-15', // 3月15日〜
+        start: '03-20', // 3月20日〜
         end: '04-10',   // 4月10日まで
         cssClass: 'bg-spring',
     },

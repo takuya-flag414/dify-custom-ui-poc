@@ -1,5 +1,6 @@
 // src/hooks/useOnboarding.ts
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import type { DiagnosisAnswers } from '../components/Onboarding/utils/promptGenerator';
 
 /**
  * オンボーディングステップの型
@@ -15,7 +16,14 @@ export interface OnboardingStep {
 export interface TempProfile {
     name: string;
     customInstructions: string;
+    diagnosisAnswers?: Partial<DiagnosisAnswers>;
+    personaName?: string;
 }
+
+/**
+ * 診断モードの型
+ */
+export type DiagnosisMode = 'none' | 'diagnosis' | 'manual' | 'skip';
 
 /**
  * 設定更新関数の型
@@ -41,6 +49,14 @@ export interface UseOnboardingReturn {
     setTempInstructions: (instructions: string) => void;
     completeOnboarding: (updateSettingsFn?: UpdateSettingsFunction) => void;
     resetOnboarding: () => void;
+    // 診断機能
+    diagnosisMode: DiagnosisMode;
+    diagnosisSubStep: number;
+    setDiagnosisMode: (mode: DiagnosisMode) => void;
+    setDiagnosisAnswer: (axisKey: keyof DiagnosisAnswers, answer: 'A' | 'B') => void;
+    nextDiagnosisSubStep: () => void;
+    prevDiagnosisSubStep: () => void;
+    resetDiagnosis: () => void;
 }
 
 /**
@@ -93,16 +109,20 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
         customInstructions: ''
     });
 
+    // ─── 診断機能 state ───
+    const [diagnosisMode, setDiagnosisModeState] = useState<DiagnosisMode>('none');
+    const [diagnosisSubStep, setDiagnosisSubStep] = useState<number>(0); // 0=intro, 1~4=Q1~Q4, 5=result
+
     // Step IDs:
     // 0: welcome, 1: tutorial-knowledge, 2: tutorial-web, 3: tutorial-hybrid
-    // 4: name, 5: instructions, 6: ready
+    // 4: name, 5: diagnosis (旧: instructions), 6: ready
     const steps: OnboardingStep[] = useMemo(() => [
         { id: 'welcome', title: 'ようこそ' },
         { id: 'tutorial-knowledge', title: 'ナレッジ' },
         { id: 'tutorial-web', title: 'Web検索' },
         { id: 'tutorial-hybrid', title: 'ハイブリッド' },
         { id: 'name', title: 'お名前' },
-        { id: 'instructions', title: 'カスタム指示' },
+        { id: 'diagnosis', title: '診断' },
         { id: 'ready', title: '準備完了' }
     ], []);
 
@@ -153,6 +173,54 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
         }, 400);
     }, []);
 
+    // ─── 診断機能 actions ───
+
+    const setDiagnosisMode = useCallback((mode: DiagnosisMode): void => {
+        setDiagnosisModeState(mode);
+        if (mode === 'diagnosis') {
+            setDiagnosisSubStep(1); // Q1から開始
+        } else if (mode === 'manual') {
+            setDiagnosisSubStep(-1); // 手動入力を示す特別な値
+        } else if (mode === 'skip') {
+            // スキップ: customInstructionsは空のままnextStepへ
+        }
+    }, []);
+
+    const setDiagnosisAnswer = useCallback((axisKey: keyof DiagnosisAnswers, answer: 'A' | 'B'): void => {
+        setTempProfile(prev => ({
+            ...prev,
+            diagnosisAnswers: {
+                ...prev.diagnosisAnswers,
+                [axisKey]: answer,
+            },
+        }));
+    }, []);
+
+    const nextDiagnosisSubStep = useCallback((): void => {
+        setDiagnosisSubStep(prev => prev + 1);
+    }, []);
+
+    const prevDiagnosisSubStep = useCallback((): void => {
+        setDiagnosisSubStep(prev => {
+            if (prev <= 1) {
+                // Q1から戻る → intro画面へ
+                setDiagnosisModeState('none');
+                return 0;
+            }
+            return prev - 1;
+        });
+    }, []);
+
+    const resetDiagnosis = useCallback((): void => {
+        setDiagnosisModeState('none');
+        setDiagnosisSubStep(0);
+        setTempProfile(prev => ({
+            ...prev,
+            diagnosisAnswers: undefined,
+            personaName: undefined,
+        }));
+    }, []);
+
     const completeOnboarding = useCallback((updateSettingsFn?: UpdateSettingsFunction): void => {
         if (!storageKey) return;
 
@@ -189,6 +257,8 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
             setIsAppReady(false);
             setCurrentStep(0);
             setTempProfile({ name: '', customInstructions: '' });
+            setDiagnosisModeState('none');
+            setDiagnosisSubStep(0);
             console.log('[useOnboarding] Onboarding reset for user:', userId);
         } catch (e) {
             console.error('[useOnboarding] Failed to reset onboarding:', e);
@@ -210,6 +280,14 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
         setTempName,
         setTempInstructions,
         completeOnboarding,
-        resetOnboarding
+        resetOnboarding,
+        // 診断機能
+        diagnosisMode,
+        diagnosisSubStep,
+        setDiagnosisMode,
+        setDiagnosisAnswer,
+        nextDiagnosisSubStep,
+        prevDiagnosisSubStep,
+        resetDiagnosis,
     };
 };

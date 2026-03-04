@@ -6,6 +6,10 @@ import StepContextTutorial from './steps/StepContextTutorial';
 import StepNameInput from './steps/StepNameInput';
 import StepInstructions from './steps/StepInstructions';
 import StepReady from './steps/StepReady';
+import StepDiagnosisIntro from './steps/StepDiagnosisIntro';
+import StepDiagnosisQuestion from './steps/StepDiagnosisQuestion';
+import StepDiagnosisResult from './steps/StepDiagnosisResult';
+import { DIAGNOSIS_QUESTIONS } from './utils/diagnosisConstants';
 import AnimatedBackground from './components/AnimatedBackground';
 import ProgressLine from './components/ProgressLine';
 import './OnboardingScreen.css';
@@ -18,7 +22,7 @@ import './OnboardingScreen.css';
  *   2: tutorial-web
  *   3: tutorial-hybrid
  *   4: name
- *   5: instructions
+ *   5: diagnosis (旧: instructions) - 内部でサブステップ管理
  *   6: ready
  */
 const OnboardingScreen = ({
@@ -33,6 +37,14 @@ const OnboardingScreen = ({
     setTempInstructions,
     completeOnboarding,
     updateSettings,
+    // 診断機能
+    diagnosisMode,
+    diagnosisSubStep,
+    setDiagnosisMode,
+    setDiagnosisAnswer,
+    nextDiagnosisSubStep,
+    prevDiagnosisSubStep,
+    resetDiagnosis,
 }) => {
     // 完了ハンドラ
     const handleComplete = useCallback(() => {
@@ -108,15 +120,7 @@ const OnboardingScreen = ({
                     />
                 );
             case 5:
-                return (
-                    <StepInstructions
-                        key="instructions"
-                        instructions={tempProfile.customInstructions}
-                        onInstructionsChange={setTempInstructions}
-                        onNext={nextStep}
-                        onPrev={prevStep}
-                    />
-                );
+                return renderDiagnosisSubStep();
             case 6:
                 return (
                     <StepReady
@@ -130,6 +134,83 @@ const OnboardingScreen = ({
             default:
                 return null;
         }
+    };
+
+    // ─── ステップ5内部: 診断サブステップのルーティング ───
+    const renderDiagnosisSubStep = () => {
+        // 手動入力モード
+        if (diagnosisMode === 'manual') {
+            return (
+                <StepInstructions
+                    key="instructions-manual"
+                    instructions={tempProfile.customInstructions}
+                    onInstructionsChange={setTempInstructions}
+                    onNext={nextStep}
+                    onPrev={() => {
+                        resetDiagnosis();
+                    }}
+                />
+            );
+        }
+
+        // 診断モード: Q1〜Q4
+        if (diagnosisMode === 'diagnosis' && diagnosisSubStep >= 1 && diagnosisSubStep <= 4) {
+            const qIndex = diagnosisSubStep - 1;
+            const questionData = DIAGNOSIS_QUESTIONS[qIndex];
+            const currentAnswer = tempProfile.diagnosisAnswers?.[questionData.axisKey] || null;
+
+            return (
+                <StepDiagnosisQuestion
+                    key={`diagnosis-q${qIndex}`}
+                    questionIndex={qIndex}
+                    totalQuestions={DIAGNOSIS_QUESTIONS.length}
+                    questionData={questionData}
+                    selectedAnswer={currentAnswer}
+                    onSelect={(answer) => {
+                        setDiagnosisAnswer(questionData.axisKey, answer);
+                        // 0.3秒後に自動で次の設問へ
+                        setTimeout(() => {
+                            nextDiagnosisSubStep();
+                        }, 300);
+                    }}
+                    onPrev={prevDiagnosisSubStep}
+                />
+            );
+        }
+
+        // 診断モード: 結果表示
+        if (diagnosisMode === 'diagnosis' && diagnosisSubStep === 5) {
+            const answers = tempProfile.diagnosisAnswers;
+            // 全軸回答済みかチェック
+            if (answers?.axis1 && answers?.axis2 && answers?.axis3 && answers?.axis4) {
+                return (
+                    <StepDiagnosisResult
+                        key="diagnosis-result"
+                        answers={answers}
+                        onConfirm={(prompt, personaName) => {
+                            setTempInstructions(prompt);
+                            nextStep();
+                        }}
+                        onRetry={resetDiagnosis}
+                        onPrev={prevDiagnosisSubStep}
+                    />
+                );
+            }
+        }
+
+        // デフォルト: Intro画面
+        return (
+            <StepDiagnosisIntro
+                key="diagnosis-intro"
+                onSelectDiagnosis={() => setDiagnosisMode('diagnosis')}
+                onSelectManual={() => setDiagnosisMode('manual')}
+                onSelectSkip={() => {
+                    setDiagnosisMode('skip');
+                    nextStep();
+                }}
+                onPrev={prevStep}
+            />
+        );
     };
 
     return (
@@ -155,7 +236,7 @@ const OnboardingScreen = ({
 
                 <AnimatePresence mode="wait">
                     <motion.div
-                        key={currentStep}
+                        key={currentStep === 5 ? `${currentStep}-${diagnosisMode}-${diagnosisSubStep}` : currentStep}
                         variants={variants}
                         initial="enter"
                         animate="center"

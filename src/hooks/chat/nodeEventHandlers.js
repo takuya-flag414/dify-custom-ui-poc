@@ -239,6 +239,9 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
         // ログ出力
         addLog(`[Intent_Analysis] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
         addLog(`[Intent_Analysis] category: ${parsedJson.category || 'N/A'}`, 'info');
+        if (parsedJson.session_title) {
+            addLog(`[Intent_Analysis] session_title: ${parsedJson.session_title}`, 'info');
+        }
 
         if (parsedJson.requires_rag !== undefined || parsedJson.requires_web !== undefined) {
             addLog(`[Intent_Analysis] requires_rag: ${parsedJson.requires_rag}, requires_web: ${parsedJson.requires_web}`, 'info');
@@ -261,6 +264,7 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
         addLog(`[Intent_Analysis] 判定: ${displayInfo.title}${displayInfo.resultValue ? ' → ' + displayInfo.resultValue : ''}`, 'info');
 
         return {
+            sessionTitle: parsedJson.session_title || null,
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 title: `判定: ${displayInfo.title}`,
@@ -295,6 +299,18 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
             addLog(`[Intent_Analysis] フォールバックJSON抽出も失敗: ${e.message}`, 'warn');
         }
 
+        // フォールバックからも session_title を抽出
+        let fallbackSessionTitle = null;
+        try {
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const manualParsed = JSON.parse(jsonMatch[0]);
+                fallbackSessionTitle = manualParsed.session_title || null;
+            }
+        } catch (e) {
+            // session_title 抽出失敗は無視
+        }
+
         // カテゴリー判定（パース成功時はそちらを優先、失敗時はテキストマッチ）
         const decision = rawText.trim();
         let resultText = '';
@@ -311,6 +327,7 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
         }
 
         return {
+            sessionTitle: fallbackSessionTitle,
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 title: resultText || t.title,

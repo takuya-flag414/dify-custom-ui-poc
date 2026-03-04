@@ -192,6 +192,7 @@ function App() {
     handleDeleteConversation,
     handleRenameConversation,
     handleConversationUpdated,
+    handleTitleExtracted,
   } = useConversations(mockMode, authUser?.userId, addLog, apiKey, apiUrl);
 
   const {
@@ -223,6 +224,7 @@ function App() {
     addLog,
     handleConversationCreated,
     handleConversationUpdated,
+    handleTitleExtracted,
     apiKey,
     apiUrl,
     settings?.prompt // ★追加: AI回答スタイルとシステムプロンプトを渡す

@@ -62,14 +62,11 @@ const MergeIcon = () => (
     </svg>
 );
 
-const RulesIcon = () => (
+const BrainIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="8" y1="6" x2="21" y2="6" />
-        <line x1="8" y1="12" x2="21" y2="12" />
-        <line x1="8" y1="18" x2="21" y2="18" />
-        <line x1="3" y1="6" x2="3.01" y2="6" />
-        <line x1="3" y1="12" x2="3.01" y2="12" />
-        <line x1="3" y1="18" x2="3.01" y2="18" />
+        <path d="M9.5 2a3.5 3.5 0 0 0-3.2 2.1A3.5 3.5 0 0 0 4 7.5a3.5 3.5 0 0 0 .8 2.3A3.5 3.5 0 0 0 4 12.5a3.5 3.5 0 0 0 2.3 3.3A3.5 3.5 0 0 0 9.5 19" />
+        <path d="M14.5 2a3.5 3.5 0 0 1 3.2 2.1A3.5 3.5 0 0 1 20 7.5a3.5 3.5 0 0 1-.8 2.3 3.5 3.5 0 0 1 .8 2.7 3.5 3.5 0 0 1-2.3 3.3A3.5 3.5 0 0 1 14.5 19" />
+        <path d="M12 2v20" />
     </svg>
 );
 
@@ -80,10 +77,10 @@ const STEP_ICONS = [
     GlobeIcon,    // 2: tutorial-web
     MergeIcon,    // 3: tutorial-hybrid
     NameIcon,     // 4: name
-    RulesIcon,    // 5: instructions
+    BrainIcon,    // 5: diagnosis
     ReadyIcon,    // 6: ready
 ];
-const STEP_LABELS = ['開始', '知識', 'Web', '混合', '名前', '指示', '完了'];
+const STEP_LABELS = ['開始', '知識', 'Web', '混合', '名前', '診断', '完了'];
 
 /**
  * 強化型プログレスインジケーター

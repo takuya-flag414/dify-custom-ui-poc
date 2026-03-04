@@ -10,6 +10,7 @@ import { LogLevel } from './useLogger';
 export interface ConversationWithTimestamp extends Conversation {
     created_at: number;
     updated_at?: number;
+    isTitleGenerated?: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export interface UseConversationsReturn {
     handleDeleteConversation: (targetId: string) => Promise<void>;
     handleRenameConversation: (targetId: string, newName: string) => Promise<void>;
     handleConversationUpdated: (targetId: string) => void;
+    handleTitleExtracted: (targetId: string, sessionTitle: string) => void;
 }
 
 export const useConversations = (
@@ -97,8 +99,9 @@ export const useConversations = (
         addLog(`[useConversations] New conversation created: ${newId}`, 'info');
         const newConv: ConversationWithTimestamp = {
             id: newId,
-            name: newTitle,
-            created_at: Math.floor(Date.now() / 1000)
+            name: '✨ 思考中...',
+            created_at: Math.floor(Date.now() / 1000),
+            isTitleGenerated: false,
         };
 
         setConversations((prev) => {
@@ -107,22 +110,84 @@ export const useConversations = (
         });
         setConversationId(newId);
 
+        // Level 1 Fallback: Dify Auto-titleポーリング（session_titleが未取得の場合のみ）
         if (mockMode !== 'FE' && apiKey && apiUrl && userId) {
             setTimeout(async () => {
                 try {
+                    // isTitleGenerated チェック: session_titleで既に更新済みならスキップ
+                    let alreadyGenerated = false;
+                    setConversations(prev => {
+                        const target = prev.find(c => c.id === newId);
+                        if (target?.isTitleGenerated) {
+                            alreadyGenerated = true;
+                        }
+                        return prev;
+                    });
+                    if (alreadyGenerated) {
+                        addLog(`[useConversations] Title already set by session_title. Skipping Dify poll.`, 'info');
+                        return;
+                    }
+
                     const data = await fetchConversationsApi(userId, apiUrl, apiKey, 1);
                     const updatedConv = data.data?.find(c => c.id === newId);
-                    if (updatedConv && updatedConv.name && updatedConv.name !== newTitle) {
-                        setConversations(prev => prev.map(c =>
-                            c.id === newId ? { ...c, name: updatedConv.name } : c
-                        ));
-                        addLog(`[useConversations] Title updated: "${updatedConv.name}"`, 'info');
+                    if (updatedConv && updatedConv.name) {
+                        setConversations(prev => prev.map(c => {
+                            if (c.id === newId && !c.isTitleGenerated) {
+                                addLog(`[useConversations] Level 1 Fallback: Dify auto-title = "${updatedConv.name}"`, 'info');
+                                return { ...c, name: updatedConv.name, isTitleGenerated: true };
+                            }
+                            return c;
+                        }));
+                    } else {
+                        // Level 2 Fallback: ユーザー入力の先頭20文字
+                        setConversations(prev => prev.map(c => {
+                            if (c.id === newId && !c.isTitleGenerated) {
+                                const fallbackTitle = newTitle.length > 20
+                                    ? newTitle.substring(0, 20) + '...'
+                                    : newTitle;
+                                addLog(`[useConversations] Level 2 Fallback: user input = "${fallbackTitle}"`, 'info');
+                                return { ...c, name: fallbackTitle, isTitleGenerated: true };
+                            }
+                            return c;
+                        }));
                     }
                 } catch (e) {
                     const errorMessage = e instanceof Error ? e.message : String(e);
-                    addLog(`[useConversations] Failed to refresh title: ${errorMessage}`, 'warn');
+                    addLog(`[useConversations] Dify poll failed: ${errorMessage}`, 'warn');
+                    // Level 2 Fallback: ユーザー入力の先頭20文字
+                    setConversations(prev => prev.map(c => {
+                        if (c.id === newId && !c.isTitleGenerated) {
+                            const fallbackTitle = newTitle.length > 20
+                                ? newTitle.substring(0, 20) + '...'
+                                : newTitle;
+                            addLog(`[useConversations] Level 2 Fallback (error): user input = "${fallbackTitle}"`, 'info');
+                            return { ...c, name: fallbackTitle, isTitleGenerated: true };
+                        }
+                        return c;
+                    }));
                 }
-            }, 3000);
+            }, 5000); // session_titleが先に到着する時間的余裕を確保（3s→5s）
+        }
+    }, [addLog, mockMode, apiKey, apiUrl, userId]);
+
+    /**
+     * session_titleが抽出された時にタイトルを更新する（最優先）
+     * session_title は最も正確なソースであるため、isTitleGenerated に関係なく常に上書きする
+     */
+    const handleTitleExtracted = useCallback((targetId: string, sessionTitle: string): void => {
+        addLog(`[useConversations] session_title extracted: "${sessionTitle}" for ${targetId}`, 'info');
+        setConversations(prev => prev.map(c => {
+            if (c.id === targetId) {
+                return { ...c, name: sessionTitle, isTitleGenerated: true };
+            }
+            return c;
+        }));
+
+        // Dify側の会話名も上書き（fire-and-forget）
+        if (mockMode !== 'FE' && apiKey && apiUrl && userId) {
+            renameConversationApi(targetId, sessionTitle, userId, apiUrl, apiKey)
+                .then(() => addLog(`[useConversations] Dify rename success: "${sessionTitle}"`, 'info'))
+                .catch((e: Error) => addLog(`[useConversations] Dify rename failed: ${e.message}`, 'warn'));
         }
     }, [addLog, mockMode, apiKey, apiUrl, userId]);
 
@@ -209,5 +274,6 @@ export const useConversations = (
         handleDeleteConversation,
         handleRenameConversation,
         handleConversationUpdated,
+        handleTitleExtracted,
     };
 };

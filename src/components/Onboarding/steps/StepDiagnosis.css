@@ -1,0 +1,414 @@
+/* src/components/Onboarding/steps/StepDiagnosis.css */
+
+/* ─── Diagnosis Intro ─── */
+
+.diagnosis-intro-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.diagnosis-choice-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: var(--radius-2xl, 16px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  text-align: left;
+  width: 100%;
+  color: var(--color-text-main);
+  position: relative;
+  overflow: hidden;
+}
+
+.diagnosis-choice-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--glass-border-hover, rgba(255, 255, 255, 0.25));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.diagnosis-choice-card.recommended {
+  border-color: var(--sys-color-primary, #0A84FF);
+}
+
+.diagnosis-choice-card.recommended:hover {
+  border-color: var(--sys-color-primary, #0A84FF);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(0, 122, 255, 0.12);
+}
+
+.diagnosis-choice-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-xl, 12px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.diagnosis-choice-text {
+  flex: 1;
+}
+
+.diagnosis-choice-text h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-main);
+}
+
+.diagnosis-choice-text p {
+  font-size: 0.9rem;
+  color: var(--color-text-sub);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.diagnosis-recommended-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--sys-color-primary, #0A84FF);
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.diagnosis-choice-chevron {
+  flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+  color: var(--color-text-muted);
+}
+
+.diagnosis-choice-card:hover .diagnosis-choice-chevron {
+  opacity: 0.8;
+}
+
+/* ─── Diagnosis Question ─── */
+
+.diagnosis-question-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.diagnosis-question-counter {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sys-color-primary, #0A84FF);
+  letter-spacing: 0.05em;
+}
+
+.diagnosis-question-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: var(--color-text-main);
+}
+
+.diagnosis-question-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-sub);
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+.diagnosis-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.diagnosis-option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--radius-2xl, 16px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+  border: 2px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  cursor: pointer;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  text-align: left;
+  width: 100%;
+  color: var(--color-text-main);
+  position: relative;
+}
+
+.diagnosis-option-card:hover {
+  border-color: var(--glass-border-hover, rgba(255, 255, 255, 0.3));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.diagnosis-option-card.selected {
+  border-color: var(--sys-color-primary, #0A84FF);
+  background: rgba(10, 132, 255, 0.08);
+  box-shadow: 0 0 16px rgba(10, 132, 255, 0.1);
+}
+
+.diagnosis-option-emoji {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.diagnosis-option-content {
+  flex: 1;
+}
+
+.diagnosis-option-content h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: var(--color-text-main);
+}
+
+.diagnosis-option-content p {
+  font-size: 0.95rem;
+  color: var(--color-text-sub);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.diagnosis-option-card.selected .diagnosis-option-content p {
+  color: var(--color-text-main);
+}
+
+.diagnosis-option-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--sys-color-primary, #0A84FF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+/* ─── Diagnosis Result ─── */
+
+.diagnosis-result-container {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  padding-bottom: 16px;
+}
+
+.diagnosis-result-persona {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, var(--ai-gradient-cyan, #00BFFF), var(--ai-gradient-blue, #007AFF));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.diagnosis-result-description {
+  font-size: 1.1rem;
+  color: var(--color-text-sub);
+  text-align: center;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+.diagnosis-result-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.diagnosis-summary-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-xl, 12px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  font-size: 0.9rem;
+  color: var(--color-text-main);
+}
+
+.diagnosis-summary-chip-emoji {
+  font-size: 1.2rem;
+}
+
+.diagnosis-result-prompt-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  text-align: left;
+  width: 100%;
+  letter-spacing: 0.03em;
+}
+
+.diagnosis-result-textarea {
+  width: 100%;
+  min-height: 120px;
+  max-height: 200px;
+  padding: 16px;
+  border-radius: var(--radius-2xl, 16px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  color: var(--color-text-main);
+  font-size: 0.95rem;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, sans-serif);
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.diagnosis-result-textarea:focus {
+  border-color: var(--sys-color-primary, #0A84FF);
+  box-shadow:
+    0 0 0 3px rgba(0, 122, 255, 0.3);
+}
+
+.diagnosis-result-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.diagnosis-result-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding-top: 20px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.diagnosis-result-retry {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.diagnosis-result-retry:hover {
+  color: var(--color-text-main);
+}
+
+/* ─── Thinking Glow (結果計算時) ─── */
+
+@keyframes diagnosis-glow-sweep {
+  0% {
+    background-position: 200% center;
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    background-position: -200% center;
+    opacity: 0;
+  }
+}
+
+.diagnosis-thinking-glow {
+  position: relative;
+}
+
+.diagnosis-thinking-glow::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--ai-gradient-cyan, #00BFFF) 25%,
+      var(--ai-gradient-magenta, #FF00FF) 50%,
+      var(--ai-gradient-blue, #007AFF) 75%,
+      transparent 100%);
+  background-size: 400% 100%;
+  z-index: -1;
+  animation: diagnosis-glow-sweep 1.5s ease-out forwards;
+  filter: blur(6px);
+  opacity: 0;
+}
+
+/* ─── Primary button glow on hover ─── */
+
+.diagnosis-btn-glow:hover {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 0 12px rgba(0, 122, 255, 0.15);
+}
+
+/* ─── Light mode overrides ─── */
+
+:root[data-theme="light"] .diagnosis-choice-card,
+:root[data-theme="light"] .diagnosis-option-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="light"] .diagnosis-choice-card:hover,
+:root[data-theme="light"] .diagnosis-option-card:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="light"] .diagnosis-choice-card.recommended {
+  border-color: var(--sys-color-primary, #007AFF);
+}
+
+:root[data-theme="light"] .diagnosis-choice-icon {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:root[data-theme="light"] .diagnosis-summary-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="light"] .diagnosis-result-textarea {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] .diagnosis-result-textarea:focus {
+  border-color: var(--sys-color-primary, #007AFF);
+}

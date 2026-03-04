@@ -69,7 +69,7 @@ const createConfigError = () => ({
  * @param {string} apiUrl - Dify API URL
  * @param {object} promptSettings - プロンプト設定 (aiStyle, userProfile, customInstructions)
  */
-export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, apiKey, apiUrl, promptSettings) => {
+export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, apiKey, apiUrl, promptSettings) => {
     const [messages, setMessages] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -411,6 +411,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
             // --- Stream Handling (Common Logic) ---
             let contentBuffer = '';
+            let capturedSessionTitle = null;
             let detectedTraceMode = 'knowledge';
             let isConversationIdSynced = false;
             let capturedOptimizedQuery = null;
@@ -554,6 +555,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 if (title === 'LLM_Intent_Analysis' || title === 'LLM_Intent_Analysis_RAG' || title === 'LLM_Intent_Analysis_Web' || title === 'LLM_Intent_Analysis_Hybrid') {
                                     const result = processIntentAnalysisFinished(outputs, nodeId, addLog);
                                     if (result) {
+                                        // ★変更: session_titleをキャプチャ（workflow_finished後に遅延適用）
+                                        if (result.sessionTitle && result.sessionTitle.trim() !== '') {
+                                            capturedSessionTitle = result.sessionTitle;
+                                            addLog(`[useChat] session_title captured: "${capturedSessionTitle}" (deferred)`, 'info');
+                                        }
                                         setStreamingMessage(prev => prev ? {
                                             ...prev,
                                             thoughtProcess: prev.thoughtProcess.map(result.thoughtProcessUpdate)
@@ -596,6 +602,27 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                                 // ★リファクタリング: ワークフローログ出力
                                 logWorkflowOutput(outputs, title, addLog);
+
+                                // ★追加: LLM_Fast_General / LLM_Fast_Doc からも session_title を抽出
+                                if ((title === 'LLM_Fast_General' || title === 'LLM_Fast_Doc') && !capturedSessionTitle) {
+                                    try {
+                                        const rawText = outputs?.text;
+                                        if (rawText) {
+                                            // JSON出力からsession_titleを直接抽出
+                                            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                                            if (jsonMatch) {
+                                                const parsed = JSON.parse(jsonMatch[0]);
+                                                if (parsed.session_title && parsed.session_title.trim() !== '') {
+                                                    capturedSessionTitle = parsed.session_title;
+                                                    addLog(`[useChat] session_title captured from ${title}: "${capturedSessionTitle}" (deferred)`, 'info');
+                                                }
+                                            }
+                                        }
+                                    } catch (e) {
+                                        // session_title抽出失敗は無視（フォールバックに任せる）
+                                        addLog(`[useChat] session_title extraction from ${title} failed: ${e.message}`, 'warn');
+                                    }
+                                }
 
                                 // その他のノードは完了ステータスに更新（エラーでない場合のみ）
                                 if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_Intent_Analysis_Hybrid' && title !== 'LLM_RAG_Strategy' && title !== 'LLM_Synthesis' && !nodeError) {
@@ -679,6 +706,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                                     setMessages(prevMsgs => [...prevMsgs, finalMessage]);
                                     setStreamingMessage(null);
+
+                                    // ★追加: session_titleによるタイトル更新（全メッセージ受信完了後）
+                                    if (capturedSessionTitle) {
+                                        const targetConvId = data.conversation_id || conversationId;
+                                        if (targetConvId && onTitleExtracted) {
+                                            onTitleExtracted(targetConvId, capturedSessionTitle);
+                                            addLog(`[useChat] session_title applied after workflow_finished: "${capturedSessionTitle}"`, 'info');
+                                        }
+                                    }
                                 }
                             }
                             // ★変更: SSE error イベント → IntelligenceErrorHandler に委譲
