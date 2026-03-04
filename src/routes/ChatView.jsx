@@ -93,8 +93,10 @@ const ChatView = ({
             prevConvIdRef.current === null &&
             conversationId !== urlConversationId
         ) {
-            // URL を静かに書き換え（replace）— ユーザーは遷移を感じない
-            navigate(`/chat/${conversationId}`, { replace: true });
+            // ★ サイレントURL更新: React Routerを経由せず、ブラウザのHistory APIを直接使用
+            // これによりRoutes再マウント・AnimatePresence再発火を完全に回避し、
+            // 新規チャット開始時のスムーズさを維持する
+            window.history.replaceState(null, '', `/chat/${conversationId}`);
         }
         prevConvIdRef.current = conversationId;
     }, [conversationId]); // eslint-disable-line react-hooks/exhaustive-deps

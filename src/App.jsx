@@ -71,10 +71,15 @@ function App() {
   const [mockMode, setMockMode] = useState(DEFAULT_MOCK_MODE);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
-  // ★ URLルーティング: currentView と isSettingsOpen をURLから導出
+  // ★ URLルーティング: backgroundLocation パターン
+  // 設定画面をオーバーレイ表示する際、背景のチャット画面を維持するために
+  // 「元の位置」を location.state.backgroundLocation として保持する
   const location = useLocation();
   const navigate = useNavigate();
-  const currentView = location.pathname.startsWith('/settings') ? 'settings' : 'chat';
+  const backgroundLocation = location.state?.backgroundLocation;
+  // RoutesはbackgroundLocationがあればそれを使用（設定画面の裏でチャットを維持）
+  const displayLocation = backgroundLocation || location;
+  const currentView = displayLocation.pathname.startsWith('/settings') ? 'settings' : 'chat';
   const isSettingsOpen = location.pathname.startsWith('/settings');
 
   // ★追加: テストパネル状態
@@ -287,7 +292,8 @@ function App() {
   // ★ URLルーティング: ビュー切替をナビゲーションに変換
   const handleViewChange = (view) => {
     if (view === 'settings') {
-      navigate('/settings/profile');
+      // ★ backgroundLocation: 現在のチャット位置を保存して設定画面へ
+      navigate('/settings/profile', { state: { backgroundLocation: location } });
       return;
     }
 
@@ -471,7 +477,7 @@ function App() {
                   {/* Main Content Area — URLルーティング */}
                   <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
                     <AnimatePresence mode="wait">
-                      <Routes location={location} key={location.pathname}>
+                      <Routes location={displayLocation} key={currentView}>
                         <Route path="/" element={<Navigate to="/chat" replace />} />
                         <Route path="/chat" element={
                           <ChatView
@@ -502,35 +508,6 @@ function App() {
                           />
                         } />
                         <Route path="/chat/:conversationId" element={
-                          <ChatView
-                            messages={messages}
-                            streamingMessage={streamingMessage}
-                            setMessages={setMessages}
-                            isGenerating={isGenerating}
-                            isHistoryLoading={isHistoryLoading}
-                            conversationId={conversationId}
-                            setConversationId={setConversationId}
-                            addLog={addLog}
-                            handleConversationCreated={handleConversationCreated}
-                            activeContextFiles={activeContextFiles}
-                            setActiveContextFiles={setActiveContextFiles}
-                            handleSendMessage={handleSendMessage}
-                            searchSettings={searchSettings}
-                            setSearchSettings={setSearchSettings}
-                            onOpenConfig={() => setIsConfigModalOpen(true)}
-                            openArtifact={openArtifact}
-                            effectiveDisplayName={effectiveDisplayName}
-                            startTutorial={startTutorial}
-                            stopGeneration={stopGeneration}
-                            handleEdit={handleEdit}
-                            handleRegenerate={handleRegenerate}
-                            mockMode={mockMode}
-                            backendBApiKey={backendBApiKey}
-                            backendBApiUrl={backendBApiUrl}
-                          />
-                        } />
-                        {/* /settings/* のメインコンテンツは chat を維持（設定はオーバーレイ） */}
-                        <Route path="/settings/*" element={
                           <ChatView
                             messages={messages}
                             streamingMessage={streamingMessage}

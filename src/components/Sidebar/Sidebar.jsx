@@ -197,7 +197,10 @@ const Sidebar = ({
   const handleNewChat = () => { navigate('/chat'); };
   const handleSelectConversation = (id) => { navigate(`/chat/${id}`); };
   const handleGoToChat = () => { navigate('/chat'); };
-  const handleGoToSettings = () => { navigate('/settings/profile'); };
+  const handleGoToSettings = () => {
+    // ★ backgroundLocation: 現在のチャット位置を保存して設定画面へ
+    navigate('/settings/profile', { state: { backgroundLocation: location } });
+  };
 
   const handleMenuOpen = (e, conv) => {
     e.stopPropagation();

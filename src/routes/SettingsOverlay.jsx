@@ -2,7 +2,7 @@
 // 設定画面をオーバーレイモーダルとして表示するルートコンポーネント
 // 現在のチャット画面の上にポータルとして浮かぶ
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import SettingsArea from '../components/Settings/SettingsArea';
 
 const SettingsOverlay = ({
@@ -17,10 +17,16 @@ const SettingsOverlay = ({
 }) => {
     const { section } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleClose = () => {
-        // 設定画面を閉じた時にチャットに戻る
-        navigate('/chat', { replace: true });
+        // ★ backgroundLocation があればそこに戻る（チャット画面の位置を復元）
+        const backgroundLocation = location.state?.backgroundLocation;
+        if (backgroundLocation) {
+            navigate(backgroundLocation.pathname, { replace: true });
+        } else {
+            navigate('/chat', { replace: true });
+        }
     };
 
     return (
