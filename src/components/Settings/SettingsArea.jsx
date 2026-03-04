@@ -30,9 +30,11 @@ const SettingsArea = ({
     onLogout,  // ★追加: Phase A ログアウト機能
     // Modal Props
     isModal = false,
-    onClose
+    onClose,
+    // ★追加: URLルーティング対応 - 初期セクション
+    initialSection
 }) => {
-    const [activeTab, setActiveTab] = useState('profile');
+    const [activeTab, setActiveTab] = useState(initialSection || 'profile');
 
     // Role変更時のタブリセット処理
     useEffect(() => {

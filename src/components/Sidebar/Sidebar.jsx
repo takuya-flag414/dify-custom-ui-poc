@@ -1,5 +1,6 @@
 // src/components/Sidebar/Sidebar.jsx
 import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon } from 'lucide-react';
 import DeletePopover from './DeletePopover';
@@ -175,9 +176,14 @@ const Sidebar = ({
   onRenameConversation,
   isCollapsed,
   toggleSidebar,
-  currentView,
+  currentView: currentViewProp, // 後方互換のため残すが、URLから導出する
   onViewChange
 }) => {
+  // ★ URLルーティング: navigate/location を使用
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentView = location.pathname.startsWith('/settings') ? 'settings' : 'chat';
+
   const [menuConfig, setMenuConfig] = useState({ isOpen: false, targetConv: null, anchorRect: null });
   const [deletePopoverConfig, setDeletePopoverConfig] = useState({ isOpen: false, targetConv: null, anchorRect: null });
   const [renamingId, setRenamingId] = useState(null);
@@ -187,10 +193,11 @@ const Sidebar = ({
     return groupConversationsByDate(conversations);
   }, [conversations, isCollapsed]);
 
-  const handleNewChat = () => { if (onViewChange) onViewChange('chat'); setConversationId(null); };
-  const handleSelectConversation = (id) => { if (onViewChange) onViewChange('chat'); setConversationId(id); };
-  const handleGoToChat = () => { if (onViewChange) onViewChange('chat'); };
-  const handleGoToSettings = () => { if (onViewChange) onViewChange('settings'); };
+  // ★ URLルーティング: ナビゲーションをURLベースに変更
+  const handleNewChat = () => { navigate('/chat'); };
+  const handleSelectConversation = (id) => { navigate(`/chat/${id}`); };
+  const handleGoToChat = () => { navigate('/chat'); };
+  const handleGoToSettings = () => { navigate('/settings/profile'); };
 
   const handleMenuOpen = (e, conv) => {
     e.stopPropagation();

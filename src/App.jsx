@@ -1,5 +1,7 @@
 // src/App.jsx
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
 import './index.css';
@@ -7,9 +9,10 @@ import './index.css';
 import Sidebar from './components/Sidebar/Sidebar';
 import AppLayout from './components/Layout/AppLayout';
 import Header from './components/Layout/Header';
-import ChatArea from './components/Chat/ChatArea';
 import ToolsGallery from './components/Tools/ToolsGallery';
 import SettingsArea from './components/Settings/SettingsArea';
+import ChatView from './routes/ChatView';
+import SettingsOverlay from './routes/SettingsOverlay';
 import ApiConfigModal from './components/Shared/ApiConfigModal';
 import InspectorPanel from './components/Inspector/InspectorPanel';
 import ArtifactPanel from './components/Artifacts/ArtifactPanel';
@@ -67,10 +70,12 @@ function App() {
 
   const [mockMode, setMockMode] = useState(DEFAULT_MOCK_MODE);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('chat');
 
-  // Settings Modal State
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  // ★ URLルーティング: currentView と isSettingsOpen をURLから導出
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentView = location.pathname.startsWith('/settings') ? 'settings' : 'chat';
+  const isSettingsOpen = location.pathname.startsWith('/settings');
 
   // ★追加: テストパネル状態
   const [isTestPanelOpen, setIsTestPanelOpen] = useState(false);
@@ -272,17 +277,17 @@ function App() {
     setConversationId(null);
     setMessages([]);
 
-    // 3. チャット画面に戻る
-    setCurrentView('chat');
-    setIsSettingsOpen(false); // Close modal if open
+    // 3. チャット画面に戻る（URLルーティング対応）
+    navigate('/chat');
     setIsArtifactOpen(false);
 
     addLog('[App] Onboarding reset. Conversation view cleared.', 'info');
   };
 
+  // ★ URLルーティング: ビュー切替をナビゲーションに変換
   const handleViewChange = (view) => {
-    if (view === 'settings' && FEATURE_FLAGS.USE_SETTINGS_MODAL) {
-      setIsSettingsOpen(true);
+    if (view === 'settings') {
+      navigate('/settings/profile');
       return;
     }
 
@@ -291,9 +296,8 @@ function App() {
       setForceShowStudioGallery(true);
     }
 
-    setCurrentView(view);
-    if (view === 'settings') {
-      setIsArtifactOpen(false);
+    if (view === 'chat') {
+      navigate('/chat');
     }
   };
 
@@ -464,111 +468,31 @@ function App() {
                     onOpenTestPanel={() => setIsTestPanelOpen(true)}
                   />
 
-                  {/* Main Content Area */}
+                  {/* Main Content Area — URLルーティング */}
                   <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
                     <AnimatePresence mode="wait">
-                      {currentView === 'studios' ? (
-                        <motion.div
-                          key="studios-view"
-                          variants={pageTransitionVariants}
-                          initial="initial"
-                          animate="enter"
-                          exit="exit"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}
-                        >
-                          <StudiosContainer
-                            onStudioEnter={() => {
-                              // スタジオ入室時に会話をリセット（新規チャット/Welcome表示）
-                              setConversationId(null);
-                              setMessages([]);
-                            }}
-                            forceShowGallery={forceShowStudioGallery}
-                            onGalleryShown={() => setForceShowStudioGallery(false)}
-                          >
-                            <ChatArea
-                              messages={messages}
-                              streamingMessage={streamingMessage}
-                              setMessages={setMessages}
-                              isGenerating={isGenerating}
-                              isHistoryLoading={isHistoryLoading}
-                              conversationId={conversationId}
-                              addLog={addLog}
-                              onConversationCreated={handleConversationCreated}
-                              activeContextFiles={activeContextFiles}
-                              setActiveContextFiles={setActiveContextFiles}
-                              onSendMessage={handleSendMessage}
-                              searchSettings={searchSettings}
-                              setSearchSettings={setSearchSettings}
-                              onOpenConfig={() => setIsConfigModalOpen(true)}
-                              onOpenArtifact={openArtifact}
-                              userName={effectiveDisplayName}
-                              onStartTutorial={startTutorial}
-                              stopGeneration={stopGeneration}
-                              handleEdit={handleEdit}
-                              handleRegenerate={handleRegenerate}
-                              mockMode={mockMode}
-                              backendBApiKey={backendBApiKey}
-                              backendBApiUrl={backendBApiUrl}
-                            />
-                          </StudiosContainer>
-                        </motion.div>
-                      ) : currentView === 'tools' ? (
-                        <motion.div
-                          key="tools-view"
-                          variants={pageTransitionVariants}
-                          initial="initial"
-                          animate="enter"
-                          exit="exit"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}
-                        >
-                          <ToolsGallery
-                            onSendMessage={handleSendMessage}
-                            setSearchSettings={setSearchSettings}
-                            onNavigateToChat={() => setCurrentView('chat')}
-                          />
-                        </motion.div>
-                      ) : (currentView === 'chat' || (FEATURE_FLAGS.USE_SETTINGS_MODAL && currentView !== 'settings')) ? (
-                        <motion.div
-                          key="chat-view"
-                          variants={pageTransitionVariants}
-                          initial="initial"
-                          animate="enter"
-                          exit="exit"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}
-                        >
-                          <ChatArea
+                      <Routes location={location} key={location.pathname}>
+                        <Route path="/" element={<Navigate to="/chat" replace />} />
+                        <Route path="/chat" element={
+                          <ChatView
                             messages={messages}
                             streamingMessage={streamingMessage}
                             setMessages={setMessages}
                             isGenerating={isGenerating}
                             isHistoryLoading={isHistoryLoading}
                             conversationId={conversationId}
+                            setConversationId={setConversationId}
                             addLog={addLog}
-                            onConversationCreated={handleConversationCreated}
+                            handleConversationCreated={handleConversationCreated}
                             activeContextFiles={activeContextFiles}
                             setActiveContextFiles={setActiveContextFiles}
-                            onSendMessage={handleSendMessage}
+                            handleSendMessage={handleSendMessage}
                             searchSettings={searchSettings}
                             setSearchSettings={setSearchSettings}
                             onOpenConfig={() => setIsConfigModalOpen(true)}
-                            onOpenArtifact={openArtifact}
-                            userName={effectiveDisplayName}
-                            onStartTutorial={startTutorial}
+                            openArtifact={openArtifact}
+                            effectiveDisplayName={effectiveDisplayName}
+                            startTutorial={startTutorial}
                             stopGeneration={stopGeneration}
                             handleEdit={handleEdit}
                             handleRegenerate={handleRegenerate}
@@ -576,35 +500,66 @@ function App() {
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
                           />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="settings-view"
-                          variants={pageTransitionVariants}
-                          initial="initial"
-                          animate="enter"
-                          exit="exit"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            overflow: 'hidden'
-                          }}
-                        >
-                          <SettingsArea
-                            currentUser={currentUser}
-                            settings={settings}
-                            onUpdateSettings={updateSettings}
+                        } />
+                        <Route path="/chat/:conversationId" element={
+                          <ChatView
+                            messages={messages}
+                            streamingMessage={streamingMessage}
+                            setMessages={setMessages}
+                            isGenerating={isGenerating}
+                            isHistoryLoading={isHistoryLoading}
+                            conversationId={conversationId}
+                            setConversationId={setConversationId}
+                            addLog={addLog}
+                            handleConversationCreated={handleConversationCreated}
+                            activeContextFiles={activeContextFiles}
+                            setActiveContextFiles={setActiveContextFiles}
+                            handleSendMessage={handleSendMessage}
+                            searchSettings={searchSettings}
+                            setSearchSettings={setSearchSettings}
+                            onOpenConfig={() => setIsConfigModalOpen(true)}
+                            openArtifact={openArtifact}
+                            effectiveDisplayName={effectiveDisplayName}
+                            startTutorial={startTutorial}
+                            stopGeneration={stopGeneration}
+                            handleEdit={handleEdit}
+                            handleRegenerate={handleRegenerate}
                             mockMode={mockMode}
-                            setMockMode={handleMockModeChange}
-                            onOpenApiConfig={() => setIsConfigModalOpen(true)}
-                            onResetOnboarding={handleResetOnboarding}
-                            onLogout={() => {
-                              logout();
-                              setIsSettingsOpen(false);
-                            }}
+                            backendBApiKey={backendBApiKey}
+                            backendBApiUrl={backendBApiUrl}
                           />
-                        </motion.div>
-                      )}
+                        } />
+                        {/* /settings/* のメインコンテンツは chat を維持（設定はオーバーレイ） */}
+                        <Route path="/settings/*" element={
+                          <ChatView
+                            messages={messages}
+                            streamingMessage={streamingMessage}
+                            setMessages={setMessages}
+                            isGenerating={isGenerating}
+                            isHistoryLoading={isHistoryLoading}
+                            conversationId={conversationId}
+                            setConversationId={setConversationId}
+                            addLog={addLog}
+                            handleConversationCreated={handleConversationCreated}
+                            activeContextFiles={activeContextFiles}
+                            setActiveContextFiles={setActiveContextFiles}
+                            handleSendMessage={handleSendMessage}
+                            searchSettings={searchSettings}
+                            setSearchSettings={setSearchSettings}
+                            onOpenConfig={() => setIsConfigModalOpen(true)}
+                            openArtifact={openArtifact}
+                            effectiveDisplayName={effectiveDisplayName}
+                            startTutorial={startTutorial}
+                            stopGeneration={stopGeneration}
+                            handleEdit={handleEdit}
+                            handleRegenerate={handleRegenerate}
+                            mockMode={mockMode}
+                            backendBApiKey={backendBApiKey}
+                            backendBApiUrl={backendBApiUrl}
+                          />
+                        } />
+                        <Route path="*" element={<Navigate to="/chat" replace />} />
+                      </Routes>
                     </AnimatePresence>
                   </div>
                 </motion.div>
@@ -645,23 +600,18 @@ function App() {
             />
           </motion.div>
 
-          {/* Settings Modal Overlay - GLOBAL LEVEL */}
+          {/* Settings Modal Overlay - URLルーティングベース */}
           <AnimatePresence>
-            {FEATURE_FLAGS.USE_SETTINGS_MODAL && isSettingsOpen && (
-              <SettingsArea
+            {isSettingsOpen && (
+              <SettingsOverlay
                 currentUser={currentUser}
                 settings={settings}
                 onUpdateSettings={updateSettings}
                 mockMode={mockMode}
-                setMockMode={handleMockModeChange}
+                handleMockModeChange={handleMockModeChange}
                 onOpenApiConfig={() => setIsConfigModalOpen(true)}
-                onResetOnboarding={handleResetOnboarding}
-                onLogout={() => {
-                  logout();
-                  setIsSettingsOpen(false);
-                }}
-                isModal={true}
-                onClose={() => setIsSettingsOpen(false)}
+                handleResetOnboarding={handleResetOnboarding}
+                logout={logout}
               />
             )}
           </AnimatePresence>
