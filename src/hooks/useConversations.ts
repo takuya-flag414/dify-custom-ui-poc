@@ -30,6 +30,7 @@ export interface UseConversationsReturn {
     handleRenameConversation: (targetId: string, newName: string) => Promise<void>;
     handleConversationUpdated: (targetId: string) => void;
     handleTitleExtracted: (targetId: string, sessionTitle: string) => void;
+    handleTitleFallback: (targetId: string, userText: string) => void;
 }
 
 export const useConversations = (
@@ -109,66 +110,8 @@ export const useConversations = (
             return [newConv, ...prev];
         });
         setConversationId(newId);
-
-        // Level 1 Fallback: Dify Auto-titleポーリング（session_titleが未取得の場合のみ）
-        if (mockMode !== 'FE' && apiKey && apiUrl && userId) {
-            setTimeout(async () => {
-                try {
-                    // isTitleGenerated チェック: session_titleで既に更新済みならスキップ
-                    let alreadyGenerated = false;
-                    setConversations(prev => {
-                        const target = prev.find(c => c.id === newId);
-                        if (target?.isTitleGenerated) {
-                            alreadyGenerated = true;
-                        }
-                        return prev;
-                    });
-                    if (alreadyGenerated) {
-                        addLog(`[useConversations] Title already set by session_title. Skipping Dify poll.`, 'info');
-                        return;
-                    }
-
-                    const data = await fetchConversationsApi(userId, apiUrl, apiKey, 1);
-                    const updatedConv = data.data?.find(c => c.id === newId);
-                    if (updatedConv && updatedConv.name) {
-                        setConversations(prev => prev.map(c => {
-                            if (c.id === newId && !c.isTitleGenerated) {
-                                addLog(`[useConversations] Level 1 Fallback: Dify auto-title = "${updatedConv.name}"`, 'info');
-                                return { ...c, name: updatedConv.name, isTitleGenerated: true };
-                            }
-                            return c;
-                        }));
-                    } else {
-                        // Level 2 Fallback: ユーザー入力の先頭20文字
-                        setConversations(prev => prev.map(c => {
-                            if (c.id === newId && !c.isTitleGenerated) {
-                                const fallbackTitle = newTitle.length > 20
-                                    ? newTitle.substring(0, 20) + '...'
-                                    : newTitle;
-                                addLog(`[useConversations] Level 2 Fallback: user input = "${fallbackTitle}"`, 'info');
-                                return { ...c, name: fallbackTitle, isTitleGenerated: true };
-                            }
-                            return c;
-                        }));
-                    }
-                } catch (e) {
-                    const errorMessage = e instanceof Error ? e.message : String(e);
-                    addLog(`[useConversations] Dify poll failed: ${errorMessage}`, 'warn');
-                    // Level 2 Fallback: ユーザー入力の先頭20文字
-                    setConversations(prev => prev.map(c => {
-                        if (c.id === newId && !c.isTitleGenerated) {
-                            const fallbackTitle = newTitle.length > 20
-                                ? newTitle.substring(0, 20) + '...'
-                                : newTitle;
-                            addLog(`[useConversations] Level 2 Fallback (error): user input = "${fallbackTitle}"`, 'info');
-                            return { ...c, name: fallbackTitle, isTitleGenerated: true };
-                        }
-                        return c;
-                    }));
-                }
-            }, 5000); // session_titleが先に到着する時間的余裕を確保（3s→5s）
-        }
-    }, [addLog, mockMode, apiKey, apiUrl, userId]);
+        // ★変更: フォールバックは workflow_finished 後に handleTitleFallback で実行するため、setTimeout は削除
+    }, [addLog]);
 
     /**
      * session_titleが抽出された時にタイトルを更新する（最優先）
@@ -188,6 +131,60 @@ export const useConversations = (
             renameConversationApi(targetId, sessionTitle, userId, apiUrl, apiKey)
                 .then(() => addLog(`[useConversations] Dify rename success: "${sessionTitle}"`, 'info'))
                 .catch((e: Error) => addLog(`[useConversations] Dify rename failed: ${e.message}`, 'warn'));
+        }
+    }, [addLog, mockMode, apiKey, apiUrl, userId]);
+
+    /**
+     * session_titleが取得できなかった場合のフォールバック（workflow_finished 後に呼ばれる）
+     * Level 1: Dify Auto-title ポーリング → Level 2: ユーザー入力先頭20文字
+     */
+    const handleTitleFallback = useCallback((targetId: string, userText: string): void => {
+        addLog(`[useConversations] Fallback triggered for ${targetId}`, 'info');
+
+        if (mockMode !== 'FE' && apiKey && apiUrl && userId) {
+            // Level 1: Dify Auto-title ポーリング（3秒後、Dify側の自動タイトル生成を待つ）
+            setTimeout(async () => {
+                try {
+                    const data = await fetchConversationsApi(userId, apiUrl, apiKey, 1);
+                    const updatedConv = data.data?.find((c: Conversation) => c.id === targetId);
+                    if (updatedConv && updatedConv.name) {
+                        setConversations(prev => prev.map(c => {
+                            if (c.id === targetId && !c.isTitleGenerated) {
+                                addLog(`[useConversations] Level 1 Fallback: Dify auto-title = "${updatedConv.name}"`, 'info');
+                                return { ...c, name: updatedConv.name, isTitleGenerated: true };
+                            }
+                            return c;
+                        }));
+                        return;
+                    }
+                } catch (e) {
+                    const errorMessage = e instanceof Error ? e.message : String(e);
+                    addLog(`[useConversations] Dify poll failed: ${errorMessage}`, 'warn');
+                }
+
+                // Level 2 Fallback: ユーザー入力の先頭20文字
+                setConversations(prev => prev.map(c => {
+                    if (c.id === targetId && !c.isTitleGenerated) {
+                        const fallbackTitle = userText.length > 20
+                            ? userText.substring(0, 20) + '...'
+                            : userText;
+                        addLog(`[useConversations] Level 2 Fallback: user input = "${fallbackTitle}"`, 'info');
+                        return { ...c, name: fallbackTitle, isTitleGenerated: true };
+                    }
+                    return c;
+                }));
+            }, 3000);
+        } else {
+            // Mockモード: ユーザー入力をそのまま使用
+            const fallbackTitle = userText.length > 20
+                ? userText.substring(0, 20) + '...'
+                : userText;
+            setConversations(prev => prev.map(c => {
+                if (c.id === targetId && !c.isTitleGenerated) {
+                    return { ...c, name: fallbackTitle, isTitleGenerated: true };
+                }
+                return c;
+            }));
         }
     }, [addLog, mockMode, apiKey, apiUrl, userId]);
 
@@ -275,5 +272,6 @@ export const useConversations = (
         handleRenameConversation,
         handleConversationUpdated,
         handleTitleExtracted,
+        handleTitleFallback,
     };
 };

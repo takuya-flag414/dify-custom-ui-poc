@@ -69,7 +69,7 @@ const createConfigError = () => ({
  * @param {string} apiUrl - Dify API URL
  * @param {object} promptSettings - プロンプト設定 (aiStyle, userProfile, customInstructions)
  */
-export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, apiKey, apiUrl, promptSettings) => {
+export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, onTitleFallback, apiKey, apiUrl, promptSettings) => {
     const [messages, setMessages] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -713,6 +713,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                         if (targetConvId && onTitleExtracted) {
                                             onTitleExtracted(targetConvId, capturedSessionTitle);
                                             addLog(`[useChat] session_title applied after workflow_finished: "${capturedSessionTitle}"`, 'info');
+                                        }
+                                    } else {
+                                        // ★追加: session_title 未取得時のフォールバック
+                                        const targetConvId = data.conversation_id || conversationId;
+                                        if (targetConvId && onTitleFallback) {
+                                            onTitleFallback(targetConvId, text);
+                                            addLog(`[useChat] No session_title captured. Triggering fallback for ${targetConvId}`, 'info');
                                         }
                                     }
                                 }
