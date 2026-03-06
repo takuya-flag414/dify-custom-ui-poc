@@ -9,6 +9,7 @@ import SmartActionGroup from './SmartActionGroup';
 import ThinkingProcess from './ThinkingProcess';
 import SkeletonLoader from './SkeletonLoader';
 import AiKnowledgeBadge from './AiKnowledgeBadge';
+import TokenUsageIndicator from './TokenUsageIndicator';
 import FileIcon from '../Shared/FileIcon';
 import ContextChips from './ContextChips';
 import CopyButton from '../Shared/CopyButton';
@@ -456,6 +457,8 @@ const MessageBlock = ({
                         <div className="message-footer">
                             {showCitations && <CitationList citations={citations} messageId={uniqueMessageId} />}
                             {showKnowledgeBadge && <AiKnowledgeBadge />}
+                            {/* ★追加: トークン消費表示 */}
+                            {message.usage && <TokenUsageIndicator usage={message.usage} />}
                             {/* ★変更: ENABLE_SMART_ACTIONSフラグで排他制御 */}
                             {FEATURE_FLAGS.ENABLE_SMART_ACTIONS ? (
                                 /* SmartActionsが有効 → AIからの提案のみ表示、「関連する質問」は非表示 */
@@ -514,7 +517,8 @@ const arePropsEqual = (prev, next) => {
         && p.thinking === n.thinking
         && p.files === n.files
         && p.hasWorkflowError === n.hasWorkflowError  // ★追加
-        && p.workflowError === n.workflowError;  // ★追加
+        && p.workflowError === n.workflowError
+        && p.usage === n.usage;  // ★追加
 };
 
 export default React.memo(MessageBlock, arePropsEqual);

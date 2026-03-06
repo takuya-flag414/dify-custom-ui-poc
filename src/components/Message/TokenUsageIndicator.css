@@ -1,0 +1,119 @@
+/* src/components/Message/TokenUsageIndicator.css */
+
+.token-usage-indicator {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background-color: var(--sys-bg-alt);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    color: var(--sys-color-secondary, #666);
+    font-family: var(--font-rounded, -apple-system, BlinkMacSystemFont, "SF Pro Rounded", sans-serif);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    cursor: default;
+    transition: all 0.2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+    .token-usage-indicator {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.6);
+    }
+}
+
+.token-usage-indicator:hover {
+    background-color: var(--sys-bg-hover, rgba(0, 0, 0, 0.05));
+    color: var(--sys-color-primary, #007AFF);
+}
+
+@media (prefers-color-scheme: dark) {
+    .token-usage-indicator:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.token-usage-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+}
+
+.token-usage-indicator:hover .token-usage-icon {
+    opacity: 1;
+}
+
+/* Tooltip (Hover Card) */
+.token-usage-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(5px) scale(0.95);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 8px 12px;
+    min-width: 140px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 100;
+    color: var(--sys-color-text, #1d1d1f);
+}
+
+@media (prefers-color-scheme: dark) {
+    .token-usage-tooltip {
+        background: rgba(40, 40, 40, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+        color: #f5f5f7;
+    }
+}
+
+.token-usage-indicator.group:hover .token-usage-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Tooltip inner rows */
+.tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 11px;
+}
+
+.tooltip-label {
+    opacity: 0.7;
+}
+
+.tooltip-value {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.tooltip-divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+    margin: 4px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .tooltip-divider {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.tooltip-row.total {
+    font-weight: 700;
+}

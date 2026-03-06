@@ -91,33 +91,34 @@ export const extractMessageContent = (contentBuffer, protocolMode, messageStartT
  * message_end イベントを処理する
  * @param {Object} data - SSEイベントデータ
  * @param {string} detectedTraceMode - 検出されたトレースモード
- * @returns {Object|null} { citations, traceMode } または null
+ * @returns {Object} { citations, traceMode, usage } 
  */
 export const processMessageEnd = (data, detectedTraceMode) => {
     const citations = data.metadata?.retriever_resources || [];
+    const usage = data.metadata?.usage || null;
 
-    if (citations.length > 0) {
-        return {
-            citations: mapCitationsFromApi(citations),
-            traceMode: detectedTraceMode
-        };
-    }
-
-    return null;
+    return {
+        citations: citations.length > 0 ? mapCitationsFromApi(citations) : [],
+        traceMode: detectedTraceMode,
+        usage: usage
+    };
 };
 
-/**
- * workflow_finished イベントを処理する
- * @param {string} contentBuffer - コンテンツバッファ
- * @param {string} protocolMode - 現在のプロトコルモード
- * @param {Function} addLog - ログ関数
- * @returns {Object} { finalText, finalCitations, smartActions, finalThinking }
- */
-export const processWorkflowFinished = (contentBuffer, protocolMode, addLog) => {
+export const processWorkflowFinished = (contentBuffer, protocolMode, addLog, rawData) => {
     let finalText = contentBuffer;
     let finalCitations = [];
     let smartActions = [];
     let finalThinking = '';
+    let finalUsage = null;
+
+    // rawDataからtotal_tokensを取得 (Chatflowモード等でmessage_endが得られない場合のフォールバック)
+    if (rawData?.data?.total_tokens) {
+        finalUsage = {
+            total_tokens: rawData.data.total_tokens,
+            prompt_tokens: null,
+            completion_tokens: null
+        };
+    }
 
     // protocolModeに関係なく、コンテンツがJSON形式かチェック
     const trimmedBuffer = contentBuffer.trim();
@@ -142,7 +143,7 @@ export const processWorkflowFinished = (contentBuffer, protocolMode, addLog) => 
         }
     }
 
-    return { finalText, finalCitations, smartActions, finalThinking };
+    return { finalText, finalCitations, smartActions, finalThinking, finalUsage };
 };
 
 /**
@@ -154,7 +155,7 @@ export const processWorkflowFinished = (contentBuffer, protocolMode, addLog) => 
  * @returns {Object} 最終メッセージオブジェクト
  */
 export const buildFinalMessage = (currentStreamingMsg, workflowResult, contentBuffer, detectedTraceMode) => {
-    const { finalText, finalCitations, smartActions, finalThinking } = workflowResult;
+    const { finalText, finalCitations, smartActions, finalThinking, finalUsage } = workflowResult;
 
     return {
         ...currentStreamingMsg,
@@ -167,6 +168,7 @@ export const buildFinalMessage = (currentStreamingMsg, workflowResult, contentBu
         traceMode: detectedTraceMode,
         // ★追加: HTTP_LLM_Search通過フラグを最終メッセージに伝播
         usedHttpLlmSearch: currentStreamingMsg.usedHttpLlmSearch || false,
+        usage: finalUsage || currentStreamingMsg.usage || null,
         thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {
             if (t.title === '情報を整理して回答を生成中...') {
                 return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };

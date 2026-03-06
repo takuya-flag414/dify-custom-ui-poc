@@ -672,8 +672,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 if (messageEndResult) {
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
-                                        citations: messageEndResult.citations,
-                                        traceMode: messageEndResult.traceMode
+                                        citations: messageEndResult.citations.length > 0 ? messageEndResult.citations : prev.citations,
+                                        traceMode: messageEndResult.traceMode,
+                                        usage: messageEndResult.usage || prev.usage
                                     } : prev);
                                 }
                                 if (data.message_id) {
@@ -685,7 +686,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 const wfError = processWorkflowError(data, addLog);
 
                                 // ★リファクタリング: workflow_finished処理
-                                const workflowResult = processWorkflowFinished(contentBuffer, protocolMode, addLog);
+                                const workflowResult = processWorkflowFinished(contentBuffer, protocolMode, addLog, data);
 
                                 const currentStreamingMsg = streamingMessageRef.current;
                                 if (currentStreamingMsg) {
