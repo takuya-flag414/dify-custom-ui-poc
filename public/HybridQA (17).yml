@@ -21,6 +21,46 @@ version: 0.6.0
 workflow:
   conversation_variables:
   - description: ''
+    id: ba1e1bcc-9a00-4104-907c-e604a3ca5b70
+    name: is_web_search_executed
+    selector:
+    - conversation
+    - is_web_search_executed
+    value: 'false'
+    value_type: string
+  - description: ''
+    id: 98b761dd-24cf-415e-8133-72f6a511c4c3
+    name: is_rag_search_executed
+    selector:
+    - conversation
+    - is_rag_search_executed
+    value: 'false'
+    value_type: string
+  - description: ''
+    id: 84f52089-9026-4dd5-87fd-7c338871bbfa
+    name: is_store_summary_executed
+    selector:
+    - conversation
+    - is_store_summary_executed
+    value: 'false'
+    value_type: string
+  - description: ''
+    id: 9dcf67df-5556-4cae-be25-09f48c662b60
+    name: search_strategy_reasoning
+    selector:
+    - conversation
+    - search_strategy_reasoning
+    value: ''
+    value_type: string
+  - description: ''
+    id: 2daf6031-3ee8-41f1-9c39-78369c667bf1
+    name: rag_strategy_thinking
+    selector:
+    - conversation
+    - rag_strategy_thinking
+    value: ''
+    value_type: string
+  - description: ''
     id: d44927d2-cb89-4859-b1b8-2ae4d7dc2ad4
     name: requires_web
     selector:
@@ -234,19 +274,6 @@ workflow:
       source: '1764924171081'
       sourceHandle: source
       target: '1764913830165'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: code
-        targetType: if-else
-      id: 1765514869301-source-1765515071449-target
-      selected: false
-      source: '1765514869301'
-      sourceHandle: source
-      target: '1765515071449'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -680,19 +707,6 @@ workflow:
     - data:
         isInIteration: false
         isInLoop: false
-        sourceType: start
-        targetType: code
-      id: 1761291739140-source-1770869430347-target
-      selected: false
-      source: '1761291739140'
-      sourceHandle: source
-      target: '1770869430347'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
         sourceType: code
         targetType: if-else
       id: 1770869430347-source-1762490237953-target
@@ -748,18 +762,6 @@ workflow:
       source: '17715726019570'
       sourceHandle: source
       target: '1770356105216'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: tool
-        targetType: llm
-      id: 1771391749204-source-17715726019570-target
-      selected: false
-      source: '1771391749204'
-      sourceHandle: source
-      target: '17715726019570'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1017,6 +1019,65 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1765514869301-source-1765515071449-target
+      source: '1765514869301'
+      sourceHandle: source
+      target: '1765515071449'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: assigner
+      id: 1761291739140-source-1772782910983-target
+      source: '1761291739140'
+      sourceHandle: source
+      target: '1772782910983'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: code
+      id: 1772782910983-source-1770869430347-target
+      source: '1772782910983'
+      sourceHandle: source
+      target: '1770869430347'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: tool
+        targetType: assigner
+      id: 1771391749204-source-1772783154630-target
+      source: '1771391749204'
+      sourceHandle: source
+      target: '1772783154630'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: llm
+      id: 1772783154630-source-17715726019570-target
+      source: '1772783154630'
+      sourceHandle: source
+      target: '17715726019570'
+      targetHandle: target
+      type: custom
+      zIndex: 0
     nodes:
     - data:
         selected: false
@@ -1160,10 +1221,10 @@ workflow:
       id: '1761291739140'
       position:
         x: 0
-        y: 60.85130164500299
+        y: 62
       positionAbsolute:
         x: 0
-        y: 60.85130164500299
+        y: 62
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1185,10 +1246,10 @@ workflow:
       height: 340
       id: answer
       position:
-        x: 1046
+        x: 1388
         y: 401
       positionAbsolute:
-        x: 1046
+        x: 1388
         y: 401
       selected: false
       sourcePosition: right
@@ -1214,10 +1275,10 @@ workflow:
       height: 124
       id: '1762490237953'
       position:
-        x: 684
+        x: 1026
         y: 172
       positionAbsolute:
-        x: 684
+        x: 1026
         y: 172
       selected: false
       sourcePosition: right
@@ -1243,10 +1304,10 @@ workflow:
       height: 124
       id: '1764913411735'
       position:
-        x: 1408
+        x: 1750
         y: 199
       positionAbsolute:
-        x: 1408
+        x: 1750
         y: 199
       selected: false
       sourcePosition: right
@@ -1264,10 +1325,10 @@ workflow:
       height: 104
       id: '1764913700839'
       position:
-        x: 1770
+        x: 2112
         y: 221
       positionAbsolute:
-        x: 1770
+        x: 2112
         y: 221
       selected: false
       sourcePosition: right
@@ -1301,10 +1362,10 @@ workflow:
       height: 110
       id: '1764913830165'
       position:
-        x: 2454
+        x: 2796
         y: 218
       positionAbsolute:
-        x: 2454
+        x: 2796
         y: 218
       selected: false
       sourcePosition: right
@@ -1344,10 +1405,10 @@ workflow:
       height: 176
       id: '1764914026588'
       position:
-        x: 4586
+        x: 4928
         y: 435
       positionAbsolute:
-        x: 4586
+        x: 4928
         y: 435
       selected: false
       sourcePosition: right
@@ -1380,10 +1441,10 @@ workflow:
       height: 150
       id: '1764914157100'
       position:
-        x: 6678
+        x: 7362
         y: 526
       positionAbsolute:
-        x: 6678
+        x: 7362
         y: 526
       selected: false
       sourcePosition: right
@@ -1415,10 +1476,10 @@ workflow:
       height: 52
       id: '1764924171081'
       position:
-        x: 2112
+        x: 2454
         y: 247
       positionAbsolute:
-        x: 2112
+        x: 2454
         y: 247
       selected: false
       sourcePosition: right
@@ -1444,10 +1505,10 @@ workflow:
       height: 124
       id: '1765343666910'
       position:
-        x: 4224
+        x: 4566
         y: 222
       positionAbsolute:
-        x: 4224
+        x: 4566
         y: 222
       selected: false
       sourcePosition: right
@@ -1463,10 +1524,10 @@ workflow:
       height: 102
       id: '1765345427966'
       position:
-        x: 4928
+        x: 5270
         y: 245
       positionAbsolute:
-        x: 4928
+        x: 5270
         y: 245
       selected: false
       sourcePosition: right
@@ -1482,10 +1543,10 @@ workflow:
       height: 102
       id: '1765345440190'
       position:
-        x: 10784
+        x: 11468
         y: 593
       positionAbsolute:
-        x: 10784
+        x: 11468
         y: 593
       selected: false
       sourcePosition: right
@@ -1552,10 +1613,10 @@ workflow:
       height: 80
       id: '1765514869301'
       position:
-        x: 9738
+        x: 10422
         y: 765
       positionAbsolute:
-        x: 9738
+        x: 10422
         y: 765
       selected: false
       sourcePosition: right
@@ -1603,10 +1664,10 @@ workflow:
       height: 220
       id: '1765515071449'
       position:
-        x: 10080
+        x: 10764
         y: 695
       positionAbsolute:
-        x: 10080
+        x: 10764
         y: 695
       selected: false
       sourcePosition: right
@@ -1622,10 +1683,10 @@ workflow:
       height: 102
       id: '17655153615920'
       position:
-        x: 10784
+        x: 11468
         y: 791
       positionAbsolute:
-        x: 10784
+        x: 11468
         y: 791
       selected: false
       sourcePosition: right
@@ -1641,10 +1702,10 @@ workflow:
       height: 102
       id: '17655153626170'
       position:
-        x: 10784
+        x: 11468
         y: 1187
       positionAbsolute:
-        x: 10784
+        x: 11468
         y: 1187
       selected: false
       sourcePosition: right
@@ -1660,10 +1721,10 @@ workflow:
       height: 102
       id: '17655153635450'
       position:
-        x: 10784
+        x: 11468
         y: 989
       positionAbsolute:
-        x: 10784
+        x: 11468
         y: 989
       selected: false
       sourcePosition: right
@@ -1696,10 +1757,10 @@ workflow:
       height: 150
       id: '1765854025663'
       position:
-        x: 1046
+        x: 1388
         y: 171
       positionAbsolute:
-        x: 1046
+        x: 1388
         y: 171
       selected: false
       sourcePosition: right
@@ -1715,10 +1776,10 @@ workflow:
       height: 102
       id: '1765854668107'
       position:
-        x: 3178
+        x: 3520
         y: 652
       positionAbsolute:
-        x: 3178
+        x: 3520
         y: 652
       selected: false
       sourcePosition: right
@@ -1755,10 +1816,10 @@ workflow:
       height: 172
       id: '17658598785120'
       position:
-        x: 1408
+        x: 1750
         y: 403
       positionAbsolute:
-        x: 1408
+        x: 1750
         y: 403
       selected: false
       sourcePosition: right
@@ -1776,10 +1837,10 @@ workflow:
       height: 104
       id: '17658598785131'
       position:
-        x: 1770
+        x: 2112
         y: 449
       positionAbsolute:
-        x: 1770
+        x: 2112
         y: 449
       selected: false
       sourcePosition: right
@@ -1813,10 +1874,10 @@ workflow:
       height: 110
       id: '17658598785132'
       position:
-        x: 2454
+        x: 2796
         y: 446
       positionAbsolute:
-        x: 2454
+        x: 2796
         y: 446
       selected: false
       sourcePosition: right
@@ -1848,10 +1909,10 @@ workflow:
       height: 52
       id: '17658598785133'
       position:
-        x: 2112
+        x: 2454
         y: 475
       positionAbsolute:
-        x: 2112
+        x: 2454
         y: 475
       selected: false
       sourcePosition: right
@@ -1867,10 +1928,10 @@ workflow:
       height: 102
       id: '1765859958399'
       position:
-        x: 2112
+        x: 2454
         y: 641
       positionAbsolute:
-        x: 2112
+        x: 2454
         y: 641
       selected: false
       sourcePosition: right
@@ -1930,7 +1991,11 @@ workflow:
             - **label**: UIに表示されるボタンのテキスト（短く簡潔に）。\n\n  ⚠️【重要: 抽象化禁止】\n  「関連規定を聞く」のように一般化せず、具体的な規定名やキーワードを含めてください。\n\
             \  （例: ⭕️「はい、『〇〇申請の手順』を詳しく教えて」 ⭕️「社内資料にないので、Webで一般的な『〇〇』について調べて」）\n⚠️【重要】ボタンのラベル(label)には「〇〇.pdfの手法」といったファイル名を含めず、必ず具体的な手法名やテーマ名を含めてください。\n\
             - **icon**: Lucide Reactのアイコン名。（例: `zap`, `file-search`, `globe`, `search`）\n\
-            - **payload**: `{\"text\": \"具体的な質問や指示文\"}`\n"
+            - **payload**: `{\"text\": \"具体的な質問や指示文\"}`\n\n## 5. session_title (スレッド名)\n\
+            会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n- **【初回会話（Conversation Historyが空）の場合】**:\
+            \ ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n  - ⭕️ 良い例：「ドキュメントの要約」「React\
+            \ 19の仕様確認」\n  - ❌ 悪い例：「〜について教えてください」などの冗長な表現。\n- **【2回目以降（継続した会話）の場合】**:\
+            \ 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。\n"
         - id: 828543d6-8a8e-4790-8d4e-9223e50b27f9
           role: user
           text: '# Input Data
@@ -1993,6 +2058,9 @@ workflow:
                   - url
                   type: object
                 type: array
+              session_title:
+                description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+                type: string
               smart_actions:
                 description: 資料の内容を踏まえ、ユーザーが次に深掘りしたくなるような質問やドキュメントに関するアクションの提案（1〜3つ）
                 items:
@@ -2033,6 +2101,10 @@ workflow:
             - answer
             - citations
             - smart_actions
+            - session_title
+            session_title:
+              description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+              type: string
             type: object
         structured_output_enabled: true
         title: LLM_Fast_Doc
@@ -2042,10 +2114,10 @@ workflow:
       height: 118
       id: '17665499392760'
       position:
-        x: 2816
+        x: 3158
         y: 462
       positionAbsolute:
-        x: 2816
+        x: 3158
         y: 462
       selected: false
       sourcePosition: right
@@ -2101,7 +2173,11 @@ workflow:
             \ UIに表示されるボタンのテキスト（短く簡潔に）。\n  ⚠️【重要: 抽象化禁止】\n  「詳細を聞く」のように一般化せず、ユーザーが「何について答えるボタンなのか」を一目で分かるようにしてください。\n\
             \  （例: ⭕️「はい、〇〇について詳しく教えて」 ⭕️「はい、Webで『今日の東京の天気』を調べて」）\n- **icon**: Lucide\
             \ Reactのアイコン名。（例: `zap`, `sparkles`, `globe`, `search`）\n- **payload**:\
-            \ `{\"text\": \"具体的な質問や指示文\"}` （※web_searchの場合は、検索エンジンにそのまま投げられる具体的なクエリテキストをセットしてください）"
+            \ `{\"text\": \"具体的な質問や指示文\"}` （※web_searchの場合は、検索エンジンにそのまま投げられる具体的なクエリテキストをセットしてください）\n\
+            \n## 5. session_title (スレッド名)\n会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n\
+            - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
+            \  - ⭕️ 良い例：「ドキュメントの要約」「React 19の仕様確認」\n  - ❌ 悪い例：「〜について教えてください」などの冗長な表現。\n\
+            - **【2回目以降（継続した会話）の場合】**: 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。"
         - id: 213a941e-d1b3-4eb3-8610-9009414820c3
           role: user
           text: '# Input Data
@@ -2145,6 +2221,9 @@ workflow:
                       type: string
                   type: object
                 type: array
+              session_title:
+                description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+                type: string
               smart_actions:
                 description: 現在の文脈を踏まえ、ユーザーが次に取るべきアクションや関連質問の提案（1〜3つ）
                 items:
@@ -2185,6 +2264,7 @@ workflow:
             - answer
             - citations
             - smart_actions
+            - session_title
             type: object
         structured_output_enabled: true
         title: LLM_Fast_General
@@ -2194,10 +2274,10 @@ workflow:
       height: 118
       id: '17665500976990'
       position:
-        x: 1770
+        x: 2112
         y: 633
       positionAbsolute:
-        x: 1770
+        x: 2112
         y: 633
       selected: false
       sourcePosition: right
@@ -2242,7 +2322,9 @@ workflow:
             \ ...）\n※提供されていない情報源がある場合は、その旨を認識した上で戦略を立ててください。\n\n## 2. answer (回答本文)\n\
             ユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n- **結論ファースト**: 冒頭（`###\
             \ 結論 \U0001F680` など）で核心を突いてください。\n- ⚠️**【重要: 高密度情報のテーブル化】**: 情報量が多い場合（比較表や一覧など）は、**必ずMarkdownの表（Table）形式で整理して出力**してください。特に「社内基準」と「一般基準（Web）」の比較などは表形式を強く推奨します。\n\
-            - **Citation Rule**: 引用した情報の文末には必ず `[1]` のようなInline Markersを付与してください（末尾の出典リスト作成は禁止）。\n\
+            \n- ⚠️**【テーブル化の注意点】**: \n -情報を表（テーブル）形式で出力する際は、厳密にMarkdownのテーブル記法に従うこと。\n\
+            \ -必ずヘッダーの直下に区切り行（例：|---|---|---|）を含めること。\n -データ行を箇条書き（- や ・）で出力してはならない。必ず | で区切った行として出力すること。\n\
+            \n- **Citation Rule**: 引用した情報の文末には必ず `[1]` のようなInline Markersを付与してください（末尾の出典リスト作成は禁止）。\n\
             - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、社内と社外の情報を踏まえた「次の打ち手」や「比較の深掘り」を促す「短い問いかけ」を1〜2文で添えてください。\n\
             \  - （例：「社内基準はクリアしていますが、他社の最新事例（Web）とも比較してみますか？」「この最新技術を、社内の〇〇プロジェクトにどう適用するか議論しましょうか？」など）\n\
             - ⚠️**【重要: 主語の明示化】**: 情報の説明や比較表のヘッダーには、単なるファイル名（例：`資料1.pdf`）を使用しないでください。必ず抽出された「資料のタイトル」「システム名」または「提案手法のテーマ」を主語として記述し、ユーザーが直感的に内容を区別できるようにしてください。\n\
@@ -2383,10 +2465,10 @@ workflow:
       height: 118
       id: '17665511958080'
       position:
-        x: 10442
+        x: 11126
         y: 585
       positionAbsolute:
-        x: 10442
+        x: 11126
         y: 585
       selected: false
       sourcePosition: right
@@ -2429,13 +2511,15 @@ workflow:
             \ **検索対象**: 第4章 セキュリティ要件, - **分析**: 該当箇所に記載あり、要約して提示する）\n\n## 2. answer\
             \ (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n- **結論ファースト**:\
             \ 冒頭（`### 結論 \U0001F680` など）で核心を突いてください。\n- ⚠️**【重要: 高密度情報のテーブル化】**: ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
-            - **Citation Rule**: 引用した情報の文末には必ず `[1]` のようなInline Markersを付与してください（末尾の出典リスト作成は禁止）。\n\
+            \n- ⚠️**【テーブル化の注意点】**: \n -情報を表（テーブル）形式で出力する際は、厳密にMarkdownのテーブル記法に従うこと。\n\
+            \ -必ずヘッダーの直下に区切り行（例：|---|---|---|）を含めること。\n -データ行を箇条書き（- や ・）で出力してはならない。必ず | で区切った行として出力すること。\n\
+            \n- **Citation Rule**: 引用した情報の文末には必ず `[1]` のようなInline Markersを付与してください（末尾の出典リスト作成は禁止）。\n\
             - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、業務の次のステップや関連規定の確認を促す「短い問いかけ」を1〜2文で添えてください。\n\
             \  - （例：「〇〇の申請手続きについても確認しておきますか？」「関連する『〇〇ガイドライン』の詳細も深掘りしましょうか？」など）\n-\
             \ ⚠️**【重要: 主語の明示化】**: 情報の説明や比較表のヘッダーには、単なるファイル名（例：`資料1.pdf`）を使用しないでください。必ず抽出された「資料のタイトル」「システム名」または「提案手法のテーマ」を主語として記述し、ユーザーが直感的に内容を区別できるようにしてください。\n\
             \n\n## 3. citations (出典情報) 【極めて重要】\n回答の根拠としたドキュメント情報を**必ず**リストに含めてください。空配列\
-            \ `[]` で返すことは重大な規約違反です。\n- `type` は必ず `\"document\"` または `\"rag\"` としてください。\n\
-            - `source` にはファイル名を記載してください。\n- `source`: 必ず「元のファイル名（拡張子含む）」のみを記述してください。資料のタイトルやテーマなどの余計な文字列（例：「資料1.pdf:\
+            \ `[]` で返すことは重大な規約違反です。\n- `type` は必ず `\"document\"`  としてください。\n- `source`\
+            \ にはファイル名を記載してください。\n- `source`: 必ず「元のファイル名（拡張子含む）」のみを記述してください。資料のタイトルやテーマなどの余計な文字列（例：「資料1.pdf:\
             \ 〇〇システム」）は絶対に含めないでください。\n\n## 4. smart_actions (プロアクティブ提案)\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
             ⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
             \n- **type**: `suggested_question` または `deep_dive`\n- **label**: UIに表示されるボタンのテキスト（短く簡潔に）。\n\
@@ -2498,7 +2582,7 @@ workflow:
                       description: 参照したファイル名
                       type: string
                     type:
-                      description: 出典タイプ（必ず 'document' または 'rag' とする）
+                      description: 出典タイプ（必ず 'document' とする）
                       type: string
                     url:
                       description: ファイルのパス、または参照可能なURL/ページ番号
@@ -2558,10 +2642,10 @@ workflow:
       height: 118
       id: '17665512107830'
       position:
-        x: 10442
+        x: 11126
         y: 783
       positionAbsolute:
-        x: 10442
+        x: 11126
         y: 783
       selected: false
       sourcePosition: right
@@ -2605,7 +2689,9 @@ workflow:
             \ どのような構成で回答し、どのアクションを提案すべきか。\n\n## 2. answer (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n\
             - **結論ファースト**: 冒頭（`### 結論 \U0001F680` など）で核心を突いてください。\n- **構成**: だらだらとした長文は避け、見出し（`###`）と箇条書きを多用し、重要な箇所は**太字**にしてスキャンしやすい構成にしてください。\n\
             - ⚠️**【重要: 高密度情報のテーブル化】**: \n  ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を絶対に避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
-            \  （例: `| カテゴリ | 略語 | 意味 |` のようなカラム構成にし、視認性を最大化すること）\n- **Citation Rule\
+            \  （例: `| カテゴリ | 略語 | 意味 |` のようなカラム構成にし、視認性を最大化すること）\n\n- ⚠️**【テーブル化の注意点】**:\
+            \ \n -情報を表（テーブル）形式で出力する際は、厳密にMarkdownのテーブル記法に従うこと。\n -必ずヘッダーの直下に区切り行（例：|---|---|---|）を含めること。\n\
+            \ -データ行を箇条書き（- や ・）で出力してはならない。必ず | で区切った行として出力すること。\n\n- **Citation Rule\
             \ (重要)**:\n  - 情報を引用した場合は、該当箇所の文末に必ず `[1]` のような番号（Inline Markers）のみを付与してください。\n\
             \  - **テキストの末尾に「参照元」「出典」といったリストを作成することは絶対に禁止です。** 出典リストはUI側で自動生成されます。\n\
             - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、ユーザーの次の思考やアクションを促す「短い問いかけ（質問や提案）」を1〜2文で添えてください。\n\
@@ -2628,45 +2714,24 @@ workflow:
             }`）"
         - id: 47bed9c7-8524-46e6-a1ad-f527e121dc97
           role: user
-          text: '# Input Data
-
-
-            ## User Query
-
-            {{#1770869430347.text#}}
-
-
-            ## Context Data
-
-            - Current Time: {{#1761291739140.current_time#}}
-
-            - Web Search Mode: {{#1761291739140.web_enabled#}}
-
-
-            ## User Profile (Dynamic Context)
-
-            {{#1761291739140.system_prompt#}}
-
-            ※このプロファイルの `department`（部署）や `role`（役割）に基づき、情報の粒度や専門性を調整してください。また `custom_directives`（指示）がある場合は最優先で従ってください。
-
-
-            ## 1. Internal Knowledge (RAG)
-
-            {{#conversation.context_rag#}}
-
-            ※ここが空の場合、社内規定は参照していません。
-
-
-            ## 2. Web Search Results
-
-            {{#conversation.context_web#}}
-
-            ※ここが空の場合、Web検索結果は取得できていません。
-
-
-            # Instruction
-
-            上記のリソースを使用して、ユーザーの質問に対する「インサイト」を含む回答をJSON形式で生成してください。'
+          text: "# Input Data\n\n## User Query\n{{#1770869430347.text#}}\n\n## Context\
+            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n- Web Search\
+            \ Mode: {{#1761291739140.web_enabled#}}\n\n## User Profile (Dynamic Context)\n\
+            {{#1761291739140.system_prompt#}}\n※このプロファイルの `department`（部署）や `role`（役割）に基づき、情報の粒度や専門性を調整してください。また\
+            \ `custom_directives`（指示）がある場合は最優先で従ってください。\n\n## 1. Internal Knowledge\
+            \ (RAG)\n{{#conversation.context_rag#}}\n※ここが空の場合、社内規定は参照していません。\n\n##\
+            \ 2. Web Search Results\n{{#conversation.context_web#}}\n※ここが空の場合、Web検索結果は取得できていません。\n\
+            \n## Search Execution Status\n- RAG Used: {{#conversation.requires_rag#}}\n\
+            - Web Used: {{#conversation.requires_web#}}\n\n## Tool Execution Status\n\
+            - Store Summary Executed: \n{{#conversation.is_store_summary_executed#}}\n\
+            - RAG Search Executed: {{#conversation.is_rag_search_executed#}}\n- Web\
+            \ Search Executed: {{#conversation.is_web_search_executed#}}\n\n## Previous\
+            \ Processes (Reasoning Logs by Node)\n【Intent Analysis Node】\n- Thinking:\
+            \ {{#conversation.intent_analysis_thinking#}}\n\n【RAG Strategy Node】\n\
+            - Thinking: {{#conversation.rag_strategy_thinking#}}\n\n【Web Search Strategy\
+            \ Node】\n- Reasoning: {{#conversation.search_strategy_reasoning#}}\n\n\
+            ※【重要: 出力フォーマットの厳守】\n上記「Tool Execution Status」の値を文字列からbooleanに変換し、指定されたJSONスキーマの各フラグに正確に反映してください。また、Reasoning\
+            \ Logsの内容はマークダウン等に結合せず、各オブジェクト内にそのままマッピングしてください。\n\n# Instruction\n上記のリソースを使用して、ユーザーの質問に対する「インサイト」を含む回答をJSON形式で生成してください。"
         retry_config:
           max_retries: 3
           retry_enabled: true
@@ -2689,7 +2754,7 @@ workflow:
                       description: ページタイトルやドキュメントファイル名
                       type: string
                     type:
-                      description: '出典タイプ（例: web, document）'
+                      description: '出典タイプ（例: web, rag）'
                       type: string
                     url:
                       description: 参照URLまたはパス
@@ -2701,6 +2766,37 @@ workflow:
                   - url
                   type: object
                 type: array
+              process_logs:
+                description: 各ノードの推論プロセスおよびツールの実行ステータスを格納するオブジェクト
+                properties:
+                  intent_analysis:
+                    description: インテント分析ノードの推論結果
+                    properties:
+                      thinking:
+                        type: string
+                    type: object
+                  is_rag_search_executed:
+                    description: 「ファイル検索ストアを指定して検索」ツールが実行されたかどうか
+                    type: boolean
+                  is_store_summary_executed:
+                    description: 「指定されたストアの要約」ツールが実行されたかどうか
+                    type: boolean
+                  is_web_search_executed:
+                    description: 「HTTP_TOOL_Perplexity_Search」ツールが実行されたかどうか
+                    type: boolean
+                  rag_strategy:
+                    description: 社内ドキュメント検索戦略ノードの推論結果
+                    properties:
+                      thinking:
+                        type: string
+                    type: object
+                  web_search_strategy:
+                    description: Web検索戦略ノードの推論結果
+                    properties:
+                      reasoning:
+                        type: string
+                    type: object
+                type: object
               smart_actions:
                 description: ユーザーが次に取るべきアクションのプロアクティブな提案（1〜3つ）
                 items:
@@ -2737,11 +2833,20 @@ workflow:
               thinking:
                 description: 回答を生成するための真意の汲み取り、分析、戦略などの内部思考プロセス
                 type: string
+              used_rag:
+                description: プロンプトの『Search Execution Status』を基に、RAG（社内ドキュメント検索）が実行されたかを示す真偽値
+                type: boolean
+              used_web:
+                description: プロンプトの『Search Execution Status』を基に、外部Web検索が実行されたかを示す真偽値
+                type: boolean
             required:
             - thinking
             - answer
             - citations
             - smart_actions
+            - used_rag
+            - used_web
+            - process_logs
             type: object
         structured_output_enabled: true
         title: LLM_Search
@@ -2751,12 +2856,12 @@ workflow:
       height: 118
       id: '17665512248470'
       position:
-        x: 10442
+        x: 11126
         y: 1179
       positionAbsolute:
-        x: 10442
+        x: 11126
         y: 1179
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -2797,7 +2902,9 @@ workflow:
             \n## 2. answer (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n\
             - **結論ファースト**: 冒頭（`### 結論 \U0001F680` など）で核心を突いてください。\n- ⚠️**【重要: 高密度情報のテーブル化】**:\
             \ ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を絶対に避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
-            - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、ユーザーの次の思考や作業を促す「短い問いかけ（質問や提案）」を1〜2文で添えてください。\n\
+            \n- ⚠️**【テーブル化の注意点】**: \n -情報を表（テーブル）形式で出力する際は、厳密にMarkdownのテーブル記法に従うこと。\n\
+            \ -必ずヘッダーの直下に区切り行（例：|---|---|---|）を含めること。\n -データ行を箇条書き（- や ・）で出力してはならない。必ず | で区切った行として出力すること。\n\
+            \n- ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、ユーザーの次の思考や作業を促す「短い問いかけ（質問や提案）」を1〜2文で添えてください。\n\
             \  - （例：「この方針で進めてもよろしいですか？」「別の切り口からさらにアイデアを出しましょうか？」「コードの解説も必要ですか？」など）\n\
             - ⚠️**【重要: 主語の明示化】**: 情報の説明や比較表のヘッダーには、単なるファイル名（例：`資料1.pdf`）を使用しないでください。必ず抽出された「資料のタイトル」「システム名」または「提案手法のテーマ」を主語として記述し、ユーザーが直感的に内容を区別できるようにしてください。\n\
             \n\n## 3. citations (出典情報)\n外部コンテキストがないため、必ず空配列 `[]` を出力してください。\n\n\n\
@@ -2899,11 +3006,11 @@ workflow:
       height: 118
       id: '17665512406710'
       position:
-        x: 10442
-        y: 980.2421417167448
+        x: 11126
+        y: 981
       positionAbsolute:
-        x: 10442
-        y: 980.2421417167448
+        x: 11126
+        y: 981
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2973,10 +3080,10 @@ workflow:
       height: 118
       id: '17665517422840'
       position:
-        x: 4586
+        x: 4928
         y: 237
       positionAbsolute:
-        x: 4586
+        x: 4928
         y: 237
       selected: false
       sourcePosition: right
@@ -3017,21 +3124,26 @@ workflow:
             \ false)】**:\n  - 直前の会話履歴の中に、ユーザーの質問に対する「明確な答え」が既に含まれている場合（深掘り質問や再確認）。\n\
             \  - AIの学習済み知識（一般常識、プログラミングの基本概念、歴史的事実など）で即答可能であり、最新情報を引く必要がない場合。\n\n\
             # Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n \
-            \  - 推論の根拠を技術的な**「日本語」**で記述してください。\n   - 記載例: \"ユーザーはReact 19の機能について質問している。最新情報が必要なトピックであるため、カテゴリをTASKとし、requires_webをtrueに設定。\"\
-            \n   - 記載例: \"ユーザーは直前の会話に対する追加質問を行っている。履歴内で完結するためカテゴリはTASKだが、新たなWeb検索は不要としてrequires_webはfalseに設定。\"\
-            \n   - 記載例: \"ユーザーの入力は「ありがとう」のみ。業務外の挨拶であるためカテゴリをCHATに設定。\"\n\n2. **category**:\n\
-            \   - 上記ルールに基づき `\"TASK\"` または `\"CHAT\"` を選択してください。\n\n3. **thinking**:\n\
-            \   - **requires_web: true の場合**:\n     - ユーザーに対して「状況に合わせた挨拶」と「具体的なアクション」を動的に宣言してください。\n\
-            \     - **時間帯の考慮**:\n       - 05:00-10:59:「おはようございます」\n       - 11:00-16:59:「こんにちは」\n\
-            \       - 17:00-:「本日もお疲れ様です」または「こんばんは」\n     - **アクション**: 「[トピック]についてWeb検索します」「最新の[技術名]を調査します」と記述してください。\n\
-            \     - ※初回会話時のみ挨拶を含め、2回目以降はアクションのみにしてください。\n   - **requires_web: false\
-            \ の場合**:\n     - **必ず空文字 `\"\"` を出力してください。**\n\n4. **requires_web / requires_rag**:\n\
-            \   - `requires_web`: 上記ルールに基づき要否を `true` または `false` で設定。\n   - `requires_rag`:\
-            \ **常に `false` を設定してください。**\n\n5. **search_query**:\n   - `requires_web:\
-            \ true` の場合、検索エンジンに投げる最適なクエリを生成してください。\n   - それ以外（`requires_web: false`\
-            \ または CHAT）の場合は空文字 `\"\"` にしてください。\n\n6. **session_title**:\n   - **【初回会話（Conversation\
-            \ Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n  \
-            \   - ⭕️ 良い例：「出張旅費の規定確認」「SaaS導入フローの調査」\n     - ❌ 悪い例：「出張旅費について教えてください」「〜に関する質問」などの冗長な表現。\n\
+            \  - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
+            \   - 記載例:\n     - **category**: React 19の新機能に関する質問のため、業務・調査要求（TASK）と判断。\n\
+            \     - **requires_web**: 履歴に情報がなく、最新の技術動向であるためWeb検索が必要（true）。\n     -\
+            \ **search_query**: 最適な検索用キーワードとして『React 19 新機能 変更点』を生成。\n     - **thinking**:\
+            \ 初回会話のため挨拶込みのアクションを宣言。カスタム指示の口調を適用。\n     - **session_title**: 質問の核心から「React\
+            \ 19の新機能調査」というスレッド名を設定。\n\n2. **category**:\n   - 上記ルールに基づき `\"TASK\"\
+            ` または `\"CHAT\"` を選択してください。\n\n3. **thinking**:\n   - ユーザーに提示する「Web検索のアクション宣言」です。メタな発言は避け、洗練された簡潔な表現にしてください。\n\
+            \   - ⚠️**【最重要: キャラクター・口調の完全反映】**: `User Profile (Context)`（system_prompt）内に独自の口調（例：「〜だね」「〜ですわ」）やキャラクター設定、トーン＆マナーの指示がある場合、デフォルトの「です・ます」調よりもそのカスタム指示を最優先し、完全に憑依した文体で出力してください。\n\
+            \   - **【初回会話（Conversation Historyが空）の場合】**:\n     - `User Profile` からユーザーの名前（または役職）を抽出し、積極的に呼びかけてください。\n\
+            \     - 時間帯に合わせた挨拶（カスタム口調に合わせる）を添え、その後にアクションを宣言してください。\n   - **【2回目以降（継続した会話）の場合】**:\n\
+            \     - 挨拶や名前の呼びかけは一切省略し、0秒でアクションのみを宣言してください。\n   - **アクション宣言の例（Web特化）**:\n\
+            \     - 「最新の[トピック]について外部リソースを調査します\U0001F310」\n     - 「Web全体から[トピック]の最新動向を検索しますね\U0001F50D\
+            」\n     - ※これらもカスタム指示があれば、指定された口調に変換すること。\n   - **検索不要・CHATの場合**: \n \
+            \    - 検索不要（requires_web: false）またはCHATの場合は、アクション宣言は不要なため、必ず空文字 `\"\"\
+            ` を出力してください。\n\n4. **requires_web / requires_rag**:\n   - `requires_web`:\
+            \ 上記ルールに基づき要否を `true` または `false` で設定。\n   - `requires_rag`: **常に `false`\
+            \ を設定してください。**\n\n5. **search_query**:\n   - `requires_web: true` の場合、検索エンジンに投げる最適なクエリを生成してください。\n\
+            \   - それ以外（`requires_web: false` または CHAT）の場合は空文字 `\"\"` にしてください。\n\n\
+            6. **session_title**:\n   - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
+            \     - ⭕️ 良い例：「出張旅費の規定確認」「SaaS導入フローの調査」\n     - ❌ 悪い例：「出張旅費について教えてください」「〜に関する質問」などの冗長な表現。\n\
             \   - **【2回目以降（継続した会話）の場合】**: 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。"
         - id: ef524c95-4ecd-45de-9717-8e3d776e0ccc
           role: user
@@ -3051,7 +3163,8 @@ workflow:
 
             {{#1761291739140.system_prompt#}}
 
-            ※ここにユーザーの名前(name)や属性が含まれています。`thinking` フィールドの生成時に参照してください。
+            ※ここにユーザーの名前(name)や属性、文章スタイル指示等が含まれています。`thinking` フィールドの生成時に参照してください。
+
 
 
 
@@ -3107,10 +3220,10 @@ workflow:
       height: 118
       id: '17683770269110'
       position:
-        x: 3178
+        x: 3520
         y: 225
       positionAbsolute:
-        x: 3178
+        x: 3520
         y: 225
       selected: false
       sourcePosition: right
@@ -3135,10 +3248,10 @@ workflow:
       height: 84
       id: '17696657120690'
       position:
-        x: 9376
+        x: 10060
         y: 755
       positionAbsolute:
-        x: 9376
+        x: 10060
         y: 755
       selected: false
       sourcePosition: right
@@ -3217,10 +3330,10 @@ workflow:
       height: 118
       id: '1769666720110'
       position:
-        x: 7402
+        x: 8086
         y: 726
       positionAbsolute:
-        x: 7402
+        x: 8086
         y: 726
       selected: false
       sourcePosition: right
@@ -3283,10 +3396,10 @@ workflow:
       height: 52
       id: '1769666802121'
       position:
-        x: 8106
+        x: 8790
         y: 771
       positionAbsolute:
-        x: 8106
+        x: 8790
         y: 771
       selected: false
       sourcePosition: right
@@ -3315,10 +3428,10 @@ workflow:
       height: 260
       id: '1769668260271'
       position:
-        x: 8448
+        x: 9132
         y: 667
       positionAbsolute:
-        x: 8448
+        x: 9132
         y: 667
       selected: false
       sourcePosition: right
@@ -3340,7 +3453,7 @@ workflow:
         x: 60
         y: 105
       positionAbsolute:
-        x: 8508
+        x: 9192
         y: 772
       selectable: false
       sourcePosition: right
@@ -3388,7 +3501,7 @@ workflow:
         x: 184
         y: 60
       positionAbsolute:
-        x: 8632
+        x: 9316
         y: 727
       selected: false
       sourcePosition: right
@@ -3489,10 +3602,10 @@ workflow:
       height: 118
       id: '1769668477538'
       position:
-        x: 9034
+        x: 9718
         y: 738
       positionAbsolute:
-        x: 9034
+        x: 9718
         y: 738
       selected: false
       sourcePosition: right
@@ -3518,10 +3631,10 @@ workflow:
       height: 124
       id: '1769754087217'
       position:
-        x: 7744
+        x: 8428
         y: 723
       positionAbsolute:
-        x: 7744
+        x: 8428
         y: 723
       selected: false
       sourcePosition: right
@@ -3587,10 +3700,10 @@ workflow:
       height: 52
       id: '17697542686310'
       position:
-        x: 8310
+        x: 8994
         y: 994
       positionAbsolute:
-        x: 8310
+        x: 8994
         y: 994
       selected: false
       sourcePosition: right
@@ -3615,10 +3728,10 @@ workflow:
       height: 84
       id: '17697542971160'
       position:
-        x: 9034
+        x: 9718
         y: 936
       positionAbsolute:
-        x: 9034
+        x: 9718
         y: 936
       selected: false
       sourcePosition: right
@@ -3661,10 +3774,10 @@ workflow:
       height: 138
       id: '17697558915520'
       position:
-        x: 8672
+        x: 9356
         y: 1007
       positionAbsolute:
-        x: 8672
+        x: 9356
         y: 1007
       selected: false
       sourcePosition: right
@@ -3865,10 +3978,10 @@ workflow:
       height: 82
       id: '1770356105216'
       position:
-        x: 5974
+        x: 6658
         y: 535
       positionAbsolute:
-        x: 5974
+        x: 6658
         y: 535
       selected: false
       sourcePosition: right
@@ -3886,19 +3999,36 @@ workflow:
           - conversation
           - context_rag
           write_mode: over-write
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17715726019570'
+          - structured_output
+          - thinking
+          variable_selector:
+          - conversation
+          - rag_strategy_thinking
+          write_mode: over-write
+        - input_type: constant
+          operation: set
+          value: 'true'
+          variable_selector:
+          - conversation
+          - is_rag_search_executed
+          write_mode: over-write
         selected: false
         title: SET_RAG
         type: assigner
         version: '2'
-      height: 84
+      height: 136
       id: '1770356226003'
       position:
-        x: 6316
-        y: 534
+        x: 7000
+        y: 508
       positionAbsolute:
-        x: 6316
-        y: 534
-      selected: false
+        x: 7000
+        y: 508
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -3964,10 +4094,10 @@ workflow:
       height: 52
       id: '1770869430347'
       position:
-        x: 342
+        x: 684
         y: 208
       positionAbsolute:
-        x: 342
+        x: 684
         y: 208
       selected: false
       sourcePosition: right
@@ -4018,10 +4148,10 @@ workflow:
       height: 224
       id: '1770871562386'
       position:
-        x: 2816
+        x: 3158
         y: 124
       positionAbsolute:
-        x: 2816
+        x: 3158
         y: 124
       selected: false
       sourcePosition: right
@@ -4062,19 +4192,23 @@ workflow:
             \ - ユーザーが明示的に「資料から探して」「規定を確認して」と求めた場合。\n- **【RAG検索が不要な場合 (requires_rag:\
             \ false)】**:\n  - 直前の会話履歴や既存のコンテキストの中に、ユーザーの質問に対する「明確な答え」が既に含まれている場合（深掘り質問や再確認など、検索し直さなくても回答できる場合）。\n\
             \n# Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n\
-            \   - 推論の根拠を技術的な**「日本語」**で記述してください。\n   - 記載例: \"ユーザーは出張旅費について質問している。過去のコンテキストに情報がないためカテゴリをTASKとし、requires_ragをtrueに設定。\"\
-            \n   - 記載例: \"直前のドキュメントに関する追加質問。履歴内のコンテキストで完結するためカテゴリはTASKだが、新たな検索は不要としてrequires_ragはfalseに設定。\"\
-            \n\n2. **category**:\n   - 上記ルールに基づき `\"TASK\"` または `\"CHAT\"` を選択してください。\n\
-            \n3. **thinking**:\n   - **requires_rag: true の場合**:\n     - ユーザーの状況と文脈に合わせたアクション宣言を行ってください。\n\
-            \     - **【初回会話（Conversation Historyが空）の場合】**:\n       - `User Profile\
-            \ (Context)` からユーザーの名前（または役職）を抽出し、積極的に呼びかけてください。\n       - 時間帯（05:00-10:59「おはようございます」、11:00-16:59「こんにちは」、17:00-「お疲れ様です」）に合わせた挨拶を添え、その後にアクションを宣言してください。\n\
-            \       - （出力例：「田中さん、お疲れ様です✨ 該当の社内規定を確認しますね。」）\n     - **【2回目以降（継続した会話）の場合】**:\n\
-            \       - **挨拶や名前の呼びかけは一切省略**し、0秒でアクションのみを宣言してください。くどさを排除し、スピーディーな体験を提供します。\n\
-            \       - （出力例：「関連するプロジェクト資料をお調べしますね\U0001F50D」）\n   - **requires_rag:\
-            \ false の場合**:\n     - **必ず空文字 `\"\"` を出力してください。**\n\n4. **requires_web\
-            \ / requires_rag**:\n   - `requires_web`: このモードでは常に `false` を設定してください。\n\
-            \   - `requires_rag`: 上記ルールに基づき要否を設定してください。\n\n5. **session_title**:\n\
-            \   - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
+            \   - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
+            \   - 記載例:\n     - **category**: ユーザーは出張旅費について質問しているため、業務要求（TASK）と判断。\n\
+            \     - **requires_rag**: 過去のコンテキストに情報がないため、新規の社内ドキュメント検索が必要（true）。\n\
+            \     - **thinking**: 初回会話のため、プロファイルから名前を抽出し、挨拶込みのアクション宣言を生成。カスタム指示の口調を適用。\n\
+            \     - **session_title**: 質問の核心から「出張旅費の規定確認」というスレッド名を抽出。\n\n2. **category**:\n\
+            \   - 上記ルールに基づき `\"TASK\"` または `\"CHAT\"` を選択してください。\n\n3. **thinking**:\n\
+            \   - ユーザーに提示する「社内情報検索のアクション宣言」です。メタな発言は避け、洗練された簡潔な表現にしてください。\n   - ⚠️**【最重要:\
+            \ キャラクター・口調の完全反映】**: `User Profile (Context)`（system_prompt）内に独自の口調（例：「〜だね」「〜ですわ」）やキャラクター設定、トーン＆マナーの指示がある場合、デフォルトの「です・ます」調よりもそのカスタム指示を最優先し、完全に憑依した文体で出力してください。\n\
+            \   - **【初回会話（Conversation Historyが空）の場合】**:\n     - `User Profile` からユーザーの名前（または役職）を抽出し、積極的に呼びかけてください。\n\
+            \     - 時間帯に合わせた挨拶（カスタム口調に合わせる）を添え、その後にアクションを宣言してください。\n   - **【2回目以降（継続した会話）の場合】**:\n\
+            \     - 挨拶や名前の呼びかけは一切省略し、0秒でアクションのみを宣言してください。\n   - **アクション宣言の例（RAG特化）**:\n\
+            \     - 「該当の社内規定・ドキュメントを確認しますね✨」\n     - 「関連するプロジェクト資料をお調べします\U0001F50D\
+            」\n     - ※これらもカスタム指示があれば、指定された口調に変換すること。\n   - **検索不要・CHATの場合**: \n \
+            \    - 検索不要（requires_rag: false）またはCHATの場合は、アクション宣言は不要なため、必ず空文字 `\"\"\
+            ` を出力してください。\n\n4. **requires_web / requires_rag**:\n   - `requires_web`:\
+            \ このモードでは常に `false` を設定してください。\n   - `requires_rag`: 上記ルールに基づき要否を設定してください。\n\
+            \n5. **session_title**:\n   - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
             \     - ⭕️ 良い例：「出張旅費の規定確認」「SaaS導入フローの調査」\n     - ❌ 悪い例：「出張旅費について教えてください」「〜に関する質問」などの冗長な表現。\n\
             \   - **【2回目以降（継続した会話）の場合】**: 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。"
         - id: ef524c95-4ecd-45de-9717-8e3d776e0ccc
@@ -4096,7 +4230,7 @@ workflow:
 
             {{#1761291739140.system_prompt#}}
 
-            ※ここにユーザーの名前(name)や属性が含まれています。`thinking` フィールドの生成時に参照してください。
+            ※ここにユーザーの名前(name)や属性、文章スタイル指示等が含まれています。`thinking` フィールドの生成時に参照してください。
 
 
             ## 現在保持している社内ナレッジ (context_rag)
@@ -4155,10 +4289,10 @@ workflow:
       height: 118
       id: '17708716964770'
       position:
-        x: 3178
+        x: 3520
         y: 9
       positionAbsolute:
-        x: 3178
+        x: 3520
         y: 9
       selected: false
       sourcePosition: right
@@ -4193,10 +4327,10 @@ workflow:
       height: 160
       id: '1770871743875'
       position:
-        x: 3882
+        x: 4224
         y: 204
       positionAbsolute:
-        x: 3882
+        x: 4224
         y: 204
       selected: false
       sourcePosition: right
@@ -4385,10 +4519,10 @@ workflow:
       height: 82
       id: '1771391749204'
       position:
-        x: 5290
+        x: 5632
         y: 535
       positionAbsolute:
-        x: 5290
+        x: 5632
         y: 535
       selected: false
       sourcePosition: right
@@ -4465,6 +4599,14 @@ workflow:
             ※直前のインテント分析ノードで生成されたAIの発言です。ここから自然に続くように `thinking` を構成してください。ただし、重複したトピック・表現・言い回しは厳禁です。
 
 
+            ### User Profile (Context)
+
+            {{#1761291739140.system_prompt#}}
+
+            ※ここにユーザーの名前(name)や属性、文章スタイル指示等が含まれています。`thinking` フィールドの生成時に参照してください。
+
+
+
             ## 4. Conversation History (Context)
 
             ※システムによって自動付与される直近の会話履歴（Memory）を必ず確認し、ユーザーが「何について」追加質問しているのか文脈を補完した上で、最適な
@@ -4513,10 +4655,10 @@ workflow:
       height: 118
       id: '17715726019570'
       position:
-        x: 5632
+        x: 6316
         y: 517
       positionAbsolute:
-        x: 5632
+        x: 6316
         y: 517
       selected: false
       sourcePosition: right
@@ -4633,10 +4775,10 @@ workflow:
       height: 82
       id: '1771573783623'
       position:
-        x: 4948
+        x: 5290
         y: 535
       positionAbsolute:
-        x: 4948
+        x: 5290
         y: 535
       selected: false
       sourcePosition: right
@@ -4681,17 +4823,24 @@ workflow:
             \n## 4. Hybrid Activation (両方 True)\n以下のような「内と外の情報が交差する問い」に対しては、迷わず両方のフラグを\
             \ `true` に設定してください。\n- 「社内の規定（RAG）と、一般的な法律・Webの最新基準（Web）を比較したい」\n- 「社内のこのプロジェクト（RAG）に、最新の外部技術（Web）をどう適用すべきか」\n\
             \n# Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n\
-            \   - 推論の根拠を技術的な「日本語」で論理的に記述してください。\n   - 記載例: \"ユーザーは社内インフラへの最新AIツールの導入について質問している。社内セキュリティ基準（RAG）と最新のAIツール動向（Web）の両方の照合が必要なため、requires_ragとrequires_webを共にtrueに設定。\"\
-            \n\n2. **category**:\n   - 上記ルールに基づき `\"TASK\"` または `\"CHAT\"` を選択。\n\n\
-            3. **thinking (macOS Sequoia 'Writing Tools' Style)**:\n   - ユーザーに提示するアクション宣言です。メタな発言は避け、洗練された簡潔な表現にしてください。\n\
+            \   - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
+            \   - 記載例:\n     - **category**: 社内インフラへのAI導入に関する要件確認のため（TASK）と判断。\n \
+            \    - **requires_rag**: 社内セキュリティ基準の確認が必要なため（true）。\n     - **requires_web**:\
+            \ 最新のエンタープライズAIツール動向の照合も必要なため（true）。\n     - **search_query**: Web検索用に『最新\
+            \ エンタープライズ AIツール セキュリティ』を生成。\n     - **thinking**: 初回会話としてハイブリッド調査のアクションを宣言。カスタム指示の口調を適用。\n\
+            \     - **session_title**: 質問の核心から「AIツールの導入要件調査」というスレッド名を設定。\n\n2. **category**:\n\
+            \   - 上記ルールに基づき `\"TASK\"` または `\"CHAT\"` を選択。\n\n3. **thinking**:\n \
+            \  - ユーザーに提示する「ハイブリッド検索のアクション宣言」です。メタな発言は避け、洗練された簡潔な表現にしてください。\n   - ⚠️**【最重要:\
+            \ キャラクター・口調の完全反映】**: `User Profile (Context)`（system_prompt）内に独自の口調（例：「〜だね」「〜ですわ」）やキャラクター設定、トーン＆マナーの指示がある場合、デフォルトの「です・ます」調よりもそのカスタム指示を最優先し、完全に憑依した文体で出力してください。\n\
             \   - **【初回会話（Conversation Historyが空）の場合】**:\n     - `User Profile` からユーザーの名前（または役職）を抽出し、積極的に呼びかけてください。\n\
-            \     - 時間帯（05:00-10:59「おはようございます」、11:00-16:59「こんにちは」、17:00-「お疲れ様です」）に合わせた挨拶を添え、その後にアクションを宣言してください。\n\
-            \   - **【2回目以降（継続した会話）の場合】**:\n     - **挨拶や名前の呼びかけは一切省略**し、0秒でアクションのみを宣言してください。くどさを排除します。\n\
-            \   - **アクション宣言の例**:\n     - Hybrid: 「社内ナレッジと最新の外部情報を統合して分析を開始しますね✨」\n\
-            \     - RAGのみ: 「社内の最新ドキュメントから該当箇所を確認しています...」\n     - Webのみ: 「最新の〇〇について外部リソースを調査します\U0001F50D\
-            」\n     - TASKだが検索不要 (False, False): 必ず空文字 `\"\"` を出力してください。\n     - CHAT:\
-            \ 必ず空文字 `\"\"` を出力してください。\n\n4. **search_query**:\n   - `requires_web:\
-            \ true` の場合、Web検索エンジン（Perplexity等）に投げるための純粋な最適化キーワード（自然言語ではなく、検索ヒット率の高い単語の羅列）を生成してください。\n\
+            \     - 時間帯に合わせた挨拶（カスタム口調に合わせる）を添え、その後にアクションを宣言してください。\n   - **【2回目以降（継続した会話）の場合】**:\n\
+            \     - 挨拶や名前の呼びかけは一切省略し、0秒でアクションのみを宣言してください。\n   - **アクション宣言の例（状況に応じて変化）**:\n\
+            \     - Hybrid (両方True): 「社内ナレッジと最新の外部情報を統合して分析を開始しますね✨」\n     - RAGのみ\
+            \ (True, False): 「社内の最新ドキュメントから該当箇所を確認しています...」\n     - Webのみ (False,\
+            \ True): 「最新の〇〇について外部リソースを調査します\U0001F50D」\n     - ※これらもカスタム指示があれば、指定された口調に変換すること。\n\
+            \   - **検索不要・CHATの場合**: \n     - 検索不要（両方とも false）またはCHATの場合は、アクション宣言は不要なため、必ず空文字\
+            \ `\"\"` を出力してください。\n\n4. **search_query**:\n   - `requires_web: true`\
+            \ の場合、Web検索エンジン（Perplexity等）に投げるための純粋な最適化キーワード（自然言語ではなく、検索ヒット率の高い単語の羅列）を生成してください。\n\
             \   - それ以外（RAGのみ、検索不要、CHAT）の場合は、必ず空文字 `\"\"` を出力してください。\n\n5. **session_title**:\n\
             \   - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
             \     - ⭕️ 良い例：「出張旅費の規定確認」「SaaS導入フローの調査」\n     - ❌ 悪い例：「出張旅費について教えてください」「〜に関する質問」などの冗長な表現。\n\
@@ -4717,6 +4866,14 @@ workflow:
             ### [Current User Query]
 
             {{#sys.query#}}
+
+
+            ## User Profile (Context)
+
+            {{#1761291739140.system_prompt#}}
+
+            ※ここにユーザーの名前(name)や属性、文章スタイル指示等が含まれています。`thinking` フィールドの生成時に参照してください。
+
 
 
             ---
@@ -4771,10 +4928,10 @@ workflow:
       height: 118
       id: '1771914142140'
       position:
-        x: 3178
+        x: 3520
         y: 454
       positionAbsolute:
-        x: 3178
+        x: 3520
         y: 454
       selected: false
       sourcePosition: right
@@ -4820,10 +4977,10 @@ workflow:
       height: 136
       id: '1771915112684'
       position:
-        x: 3520
+        x: 3862
         y: 0
       positionAbsolute:
-        x: 3520
+        x: 3862
         y: 0
       selected: false
       sourcePosition: right
@@ -4869,10 +5026,10 @@ workflow:
       height: 136
       id: '1771915148504'
       position:
-        x: 3520
+        x: 3862
         y: 216
       positionAbsolute:
-        x: 3520
+        x: 3862
         y: 216
       selected: false
       sourcePosition: right
@@ -4928,10 +5085,10 @@ workflow:
       height: 162
       id: '1771915161869'
       position:
-        x: 3520
+        x: 3862
         y: 432
       positionAbsolute:
-        x: 3520
+        x: 3862
         y: 432
       selected: false
       sourcePosition: right
@@ -4957,10 +5114,10 @@ workflow:
       height: 124
       id: '1771998847270'
       position:
-        x: 7040
+        x: 7724
         y: 711
       positionAbsolute:
-        x: 7040
+        x: 7724
         y: 711
       selected: false
       sourcePosition: right
@@ -5013,9 +5170,11 @@ workflow:
             {{#1761291739140.current_time#}}
 
 
-            ## User Profile (Character & Tone)
+            ## User Profile (Context)
 
             {{#1761291739140.system_prompt#}}
+
+            ※ここにユーザーの名前(name)や属性、文章スタイル指示等が含まれています。`reasoning` フィールドの生成時に参照してください。
 
 
             ## Previous AI Output (Context)
@@ -5086,10 +5245,10 @@ workflow:
       height: 118
       id: '17719989311170'
       position:
-        x: 7402
+        x: 8086
         y: 924
       positionAbsolute:
-        x: 7402
+        x: 8086
         y: 924
       selected: false
       sourcePosition: right
@@ -5194,10 +5353,10 @@ workflow:
       height: 52
       id: '17719994416790'
       position:
-        x: 7744
+        x: 8428
         y: 957
       positionAbsolute:
-        x: 7744
+        x: 8428
         y: 957
       selected: false
       sourcePosition: right
@@ -5240,11 +5399,11 @@ workflow:
       height: 138
       id: '17719995520230'
       position:
-        x: 8107
-        y: 1126.9999999999998
+        x: 8790
+        y: 1126
       positionAbsolute:
-        x: 8107
-        y: 1126.9999999999998
+        x: 8790
+        y: 1126
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5262,25 +5421,107 @@ workflow:
           - conversation
           - context_web
           write_mode: over-write
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17719989311170'
+          - structured_output
+          - reasoning
+          variable_selector:
+          - conversation
+          - search_strategy_reasoning
+          write_mode: over-write
+        - input_type: constant
+          operation: set
+          value: 'true'
+          variable_selector:
+          - conversation
+          - is_web_search_executed
+          write_mode: over-write
         selected: false
         title: SET_Web_Context (3)
         type: assigner
         version: '2'
-      height: 84
+      height: 136
       id: '17719995621490'
       position:
-        x: 9376
-        y: 1153
+        x: 10060
+        y: 1127
       positionAbsolute:
-        x: 9376
-        y: 1153
+        x: 10060
+        y: 1127
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: constant
+          operation: set
+          value: 'false'
+          variable_selector:
+          - conversation
+          - is_store_summary_executed
+          write_mode: over-write
+        - input_type: constant
+          operation: set
+          value: 'false'
+          variable_selector:
+          - conversation
+          - is_rag_search_executed
+          write_mode: over-write
+        - input_type: constant
+          operation: set
+          value: 'false'
+          variable_selector:
+          - conversation
+          - is_web_search_executed
+          write_mode: over-write
+        selected: false
+        title: RESET_Execution_Flags
+        type: assigner
+        version: '2'
+      height: 136
+      id: '1772782910983'
+      position:
+        x: 342
+        y: 166
+      positionAbsolute:
+        x: 342
+        y: 166
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: constant
+          operation: set
+          value: 'true'
+          variable_selector:
+          - conversation
+          - is_store_summary_executed
+          write_mode: over-write
+        selected: false
+        title: 変数代入 11
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1772783154630'
+      position:
+        x: 5974
+        y: 534
+      positionAbsolute:
+        x: 5974
+        y: 534
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     viewport:
-      x: -1683.1417863962347
-      y: 118.33042671269563
-      zoom: 1.056516907075022
+      x: -12426.303775353488
+      y: -843.3889686026239
+      zoom: 1.218770788614574
   rag_pipeline_variables: []

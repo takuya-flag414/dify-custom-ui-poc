@@ -3,6 +3,7 @@ import './ThinkingProcess.css';
 import FluidOrb from '../Shared/FluidOrb';
 import { determineRenderMode } from '../../config/thinkingRenderRules';
 import TypewriterEffect from '../Shared/TypewriterEffect';
+import MarkdownRenderer from '../Shared/MarkdownRenderer';
 
 // --- SF Symbols風 SVG Icons ---
 const Icons = {
@@ -233,10 +234,14 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                     return (
                         <div key={step.id || index} className="thought-monologue-container">
                             {isStepDone ? (
-                                <TypewriterEffect
-                                    content={monologueContent}
-                                    onComplete={() => handleStepComplete(index)}
-                                />
+                                isStreaming ? (
+                                    <TypewriterEffect
+                                        content={monologueContent}
+                                        onComplete={() => handleStepComplete(index)}
+                                    />
+                                ) : (
+                                    <MarkdownRenderer content={monologueContent} />
+                                )
                             ) : (
                                 <div className="fluid-loading-container small">
                                     <FluidOrb width="24px" height="24px" />
@@ -300,22 +305,28 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                             {step.status === 'error' && step.errorMessage && (
                                 <div className="action-error-detail">{step.errorMessage}</div>
                             )}
-                            {/* thinking/reasoningがあれば完了後に表示 */}
                             {actionMonologueContent && isStepDone && (
                                 <div className="thought-monologue-container action-monologue">
-                                    <TypewriterEffect
-                                        content={actionMonologueContent}
-                                        onComplete={() => handleStepComplete(index)}
-                                    />
+                                    {isStreaming ? (
+                                        <TypewriterEffect
+                                            content={actionMonologueContent}
+                                            onComplete={() => handleStepComplete(index)}
+                                        />
+                                    ) : (
+                                        <MarkdownRenderer content={actionMonologueContent} />
+                                    )}
                                 </div>
                             )}
-                            {/* LLM_SynthesisなどのthinkingContentフィールドを表示 */}
                             {step.thinkingContent && isStepDone && (
                                 <div className="thought-monologue-container action-monologue synthesis-thinking">
-                                    <TypewriterEffect
-                                        content={step.thinkingContent}
-                                        onComplete={() => handleStepComplete(index)}
-                                    />
+                                    {isStreaming ? (
+                                        <TypewriterEffect
+                                            content={step.thinkingContent}
+                                            onComplete={() => handleStepComplete(index)}
+                                        />
+                                    ) : (
+                                        <MarkdownRenderer content={step.thinkingContent} />
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -337,10 +348,14 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                 return (
                     <div key={step.id || index} className="thought-monologue-container">
                         {isStepDone ? (
-                            <TypewriterEffect
-                                content={monologueContent}
-                                onComplete={() => handleStepComplete(index)}
-                            />
+                            isStreaming ? (
+                                <TypewriterEffect
+                                    content={monologueContent}
+                                    onComplete={() => handleStepComplete(index)}
+                                />
+                            ) : (
+                                <MarkdownRenderer content={monologueContent} />
+                            )
                         ) : (
                             // 処理中はプレースホルダーを表示
                             <div className="fluid-loading-container small">

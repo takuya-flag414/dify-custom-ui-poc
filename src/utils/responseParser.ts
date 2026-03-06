@@ -10,6 +10,18 @@ export interface SmartAction {
 }
 
 /**
+ * process_logs の型定義（最終回答LLMが出力する推論プロセスログ）
+ */
+export interface ProcessLogs {
+    intent_analysis?: { thinking?: string };
+    rag_strategy?: { thinking?: string };
+    web_search_strategy?: { reasoning?: string };
+    is_store_summary_executed?: boolean | string;
+    is_rag_search_executed?: boolean | string;
+    is_web_search_executed?: boolean | string;
+}
+
+/**
  * LLM応答のパース結果の型定義
  */
 export interface ParsedLlmResponse {
@@ -18,6 +30,9 @@ export interface ParsedLlmResponse {
     smartActions: SmartAction[];
     thinking: string;
     isParsed: boolean;
+    processLogs: ProcessLogs | null;
+    usedRag: boolean;
+    usedWeb: boolean;
 }
 
 /**
@@ -98,7 +113,7 @@ const extractPartialThinking = (text: string): string | null => extractPartialFi
  */
 export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmResponse => {
     if (!rawText) {
-        return { answer: '', citations: [], smartActions: [], thinking: '', isParsed: false };
+        return { answer: '', citations: [], smartActions: [], thinking: '', isParsed: false, processLogs: null, usedRag: false, usedWeb: false };
     }
 
     let textToParse = rawText.trim();
@@ -127,12 +142,22 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                     smartActions = parsed.smart_actions.suggested_actions;
                 }
 
+                // process_logs / used_rag / used_web を抽出
+                const processLogs: ProcessLogs | null = parsed.process_logs && typeof parsed.process_logs === 'object'
+                    ? parsed.process_logs as ProcessLogs
+                    : null;
+                const usedRag = parsed.used_rag === true || parsed.used_rag === 'true';
+                const usedWeb = parsed.used_web === true || parsed.used_web === 'true';
+
                 return {
                     answer: parsed.answer || '',
                     citations: Array.isArray(parsed.citations) ? parsed.citations : [],
                     smartActions: smartActions,
                     thinking: parsed.thinking || '',
-                    isParsed: true
+                    isParsed: true,
+                    processLogs,
+                    usedRag,
+                    usedWeb,
                 };
             }
         }
@@ -174,7 +199,10 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
             citations: extractedCitations,
             smartActions: extractedSmartActions,
             thinking: partialThinking || '',
-            isParsed: true
+            isParsed: true,
+            processLogs: null, // ストリーミング中はprocess_logsは不完全なため抽出しない
+            usedRag: false,
+            usedWeb: false,
         };
     }
 
@@ -185,6 +213,9 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
         citations: [],
         smartActions: [],
         thinking: '',
-        isParsed: false
+        isParsed: false,
+        processLogs: null,
+        usedRag: false,
+        usedWeb: false,
     };
 };

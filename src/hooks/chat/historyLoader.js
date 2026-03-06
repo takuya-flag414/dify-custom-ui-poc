@@ -6,6 +6,7 @@ import { fetchMessagesApi } from '../../api/dify';
 import { parseLlmResponse } from '../../utils/responseParser';
 import { mapCitationsFromApi, mapCitationsFromLLM } from '../../utils/citationMapper';
 import { createConfigError } from '../../utils/errorHandler';
+import { rebuildThoughtProcess } from '../../utils/thoughtProcessRestorer';
 import { DEFAULT_SEARCH_SETTINGS } from './constants';
 
 /**
@@ -108,11 +109,14 @@ const buildMessagesFromApi = (chronologicalMessages) => {
       let aiText = item.answer;
       let aiCitations = mapCitationsFromApi(item.retriever_resources || []);
       let traceMode = aiCitations.length > 0 ? 'search' : 'knowledge';
+      let restoredThoughtProcess = [];
+      let restoredThinking = '';
 
       const parsed = parseLlmResponse(aiText);
 
       if (parsed.isParsed) {
         aiText = parsed.answer;
+        restoredThinking = parsed.thinking || '';
         if (aiCitations.length === 0 && parsed.citations.length > 0) {
           aiCitations = mapCitationsFromLLM(parsed.citations);
           if (aiCitations.some(c => c.type === 'web')) traceMode = 'search';
@@ -120,6 +124,15 @@ const buildMessagesFromApi = (chronologicalMessages) => {
           else traceMode = 'document';
         } else if (parsed.citations.length > 0) {
           traceMode = 'search';
+        }
+
+        // ★追加: process_logs が存在する場合、thoughtProcess を再構築
+        if (parsed.processLogs) {
+          restoredThoughtProcess = rebuildThoughtProcess(
+            parsed.processLogs,
+            parsed.usedRag,
+            parsed.usedWeb
+          );
         }
       }
 
@@ -130,11 +143,13 @@ const buildMessagesFromApi = (chronologicalMessages) => {
         rawContent: item.answer,
         citations: aiCitations,
         suggestions: [],
+        smartActions: parsed.isParsed ? (parsed.smartActions || []) : [],
         isStreaming: false,
         timestamp: timestamp,
         traceMode: traceMode,
-        thoughtProcess: [],
-        processStatus: null
+        thoughtProcess: restoredThoughtProcess,
+        processStatus: null,
+        thinking: restoredThinking,
       });
     }
   }

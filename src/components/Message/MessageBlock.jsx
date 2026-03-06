@@ -459,7 +459,7 @@ const MessageBlock = ({
                             {/* ★変更: ENABLE_SMART_ACTIONSフラグで排他制御 */}
                             {FEATURE_FLAGS.ENABLE_SMART_ACTIONS ? (
                                 /* SmartActionsが有効 → AIからの提案のみ表示、「関連する質問」は非表示 */
-                                smartActions && smartActions.length > 0 && (
+                                isLastAiMessage && smartActions && smartActions.length > 0 && (
                                     <SmartActionGroup actions={smartActions} onActionSelect={onSmartActionSelect} />
                                 )
                             ) : (
