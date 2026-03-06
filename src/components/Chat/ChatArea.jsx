@@ -1,5 +1,5 @@
 // src/components/Chat/ChatArea.jsx
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import '../../App.css';
 import './ChatArea.css';
 import { extractPlainText } from '../../utils/messageSerializer';
@@ -9,6 +9,7 @@ import ChatInput from './ChatInput';
 import HistorySkeleton from './HistorySkeleton';
 import WelcomeScreen from './WelcomeScreen';
 import ScrollToBottomButton from './ScrollToBottomButton';
+import TableModal from '../Shared/TableModal';
 
 
 const ChatArea = (props) => {
@@ -38,6 +39,15 @@ const ChatArea = (props) => {
 
   // ★追加: 自動スクロール有効状態管理
   const [autoScrollEnabled, setAutoScrollEnabled] = React.useState(true);
+
+  // ★追加: Table Modalの状態管理をChatAreaに持ち上げ
+  const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+  const [tableContent, setTableContent] = useState(null);
+
+  const handleOpenTableModal = useCallback((content) => {
+    setTableContent(content);
+    setIsTableModalOpen(true);
+  }, []);
 
   // 初期化時にpropsの値をセット
   React.useEffect(() => {
@@ -174,6 +184,7 @@ const ChatArea = (props) => {
             onRegenerate={handleRegenerate}
             autoScroll={autoScrollEnabled} // ★変更: stateを渡す
             onAutoScrollChange={setAutoScrollEnabled} // ★追加: state更新関数を渡す
+            onOpenTableModal={handleOpenTableModal} // ★追加: Table Modalを開くハンドラ
           />
           <div className="bottom-controls-wrapper">
             {/* ★追加: ScrollToBottomButton */}
@@ -198,6 +209,13 @@ const ChatArea = (props) => {
           </div>
         </>
       )}
+
+      {/* ★追加: Table Fullscreen ModalをChatAreaのルートレベルでレンダリング */}
+      <TableModal
+        isOpen={isTableModalOpen}
+        onClose={() => setIsTableModalOpen(false)}
+        tableContent={tableContent}
+      />
     </div>
   );
 };

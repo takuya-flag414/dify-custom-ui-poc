@@ -607,28 +607,97 @@
 }
 
 /* Table (DESIGN_RULE: Glass Effect + Caption 1 Header) */
-.markdown-renderer table {
+.markdown-table-wrapper {
   width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1em;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
+  box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.05));
+  position: relative;
+  /* For absolutely positioning the expand button */
+}
+
+/* --- Table Expand Button (DESIGN_RULE: iOS/macOS Hover Feedback) --- */
+.table-expand-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.8));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.1));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--color-text-main, #333);
+  z-index: 10;
+}
+
+[data-theme='dark'] .table-expand-btn {
+  background: rgba(40, 40, 40, 0.8);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #E5E7EB;
+}
+
+/* Show button on table hover */
+.markdown-table-wrapper:hover .table-expand-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.table-expand-btn:hover {
+  background: var(--color-bg-sub, rgba(240, 240, 240, 0.9));
+  transform: scale(1.05);
+}
+
+[data-theme='dark'] .table-expand-btn:hover {
+  background: rgba(60, 60, 60, 0.9);
+}
+
+[data-theme='dark'] .markdown-table-wrapper {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.markdown-renderer table {
+  width: max-content;
+  /* Allow the table to grow beyond its container */
+  min-width: 100%;
+  /* Ensure it at least fills the container */
   border-collapse: separate;
   border-spacing: 0;
-  margin-bottom: 1em;
+  margin-bottom: 0;
+  /* Margin moved to wrapper */
   font-size: 0.9em;
   border-radius: var(--radius-lg, 12px);
   overflow: visible;
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
-  box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.05));
+  border: none;
+  /* Border moved to wrapper */
+  box-shadow: none;
+  /* Box shadow moved to wrapper */
 }
 
 /* テーブル角丸: overflow:visible でも四隅の角丸を維持する */
 .markdown-renderer thead tr:first-child th:first-child {
   border-top-left-radius: var(--radius-lg, 12px);
 }
+
 .markdown-renderer thead tr:first-child th:last-child {
   border-top-right-radius: var(--radius-lg, 12px);
 }
+
 .markdown-renderer tbody tr:last-child td:first-child {
   border-bottom-left-radius: var(--radius-lg, 12px);
 }
+
 .markdown-renderer tbody tr:last-child td:last-child {
   border-bottom-right-radius: var(--radius-lg, 12px);
 }
@@ -641,6 +710,17 @@
   text-align: left;
 }
 
+.markdown-renderer td {
+  min-width: 120px;
+  /* Prevent cells from squeezing too thin */
+  max-width: 450px;
+  /* Prevent cells from stretching infinitely horizontally */
+  word-break: break-word;
+  /* Allow long text to wrap inside the max-width boundary */
+  white-space: normal;
+  /* Ensure text can wrap */
+}
+
 .markdown-renderer th {
   background: rgba(0, 0, 0, 0.04);
   font-size: 12px;
@@ -649,6 +729,8 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--color-text-sub);
+  white-space: nowrap;
+  /* Prevent headers from wrapping */
 }
 
 .markdown-renderer tr:last-child td {
@@ -660,7 +742,7 @@
 }
 
 [data-theme='dark'] .markdown-renderer table {
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: transparent;
 }
 
 [data-theme='dark'] .markdown-renderer th {
@@ -795,6 +877,184 @@
   border-style: solid;
   border-color: #e5e7eb transparent transparent transparent;
   z-index: -1;
+}
+
+/* ========================================
+   Table Fullscreen Modal (macOS Sequoia UI)
+   ======================================== */
+.table-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  /* Ensure it covers everything */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  /* Space around the modal */
+  pointer-events: auto;
+}
+
+.table-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  /* Reduced from 20px for performance */
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  /* Click outside to close */
+}
+
+[data-theme='dark'] .table-modal-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.table-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  /* Maximum width for the expanded table */
+  max-height: 90vh;
+  /* Maximum height */
+  display: flex;
+  flex-direction: column;
+  /* Use solid colors to ensure smooth scrolling (Removed heavy Liquid Glass blur) */
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  /* Corner Radius Shift (DESIGN_RULE 4.1 fallback) */
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  /* Simplified shadow for performance */
+  overflow: hidden;
+  /* Contains the scrollable area */
+  z-index: 1;
+  /* Above backdrop */
+  /* hardware acceleration hint */
+  transform: translateZ(0);
+}
+
+[data-theme='dark'] .table-modal-content {
+  background: #252526;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Header Area (Unified Toolbar style without heavy blur) */
+.table-modal-header {
+  flex-shrink: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: #f9f9f9;
+  /* Solid header background */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  /* Very thin separator */
+  position: relative;
+  /* For centering the title */
+}
+
+[data-theme='dark'] .table-modal-header {
+  background: #1e1e1e;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Traffic Lights (Window Controls) */
+.table-modal-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Spacing */
+  width: 60px;
+  /* Reserve space */
+}
+
+.table-modal-close-btn {
+  width: 14px;
+  /* macOS style button size */
+  height: 14px;
+  border-radius: 50%;
+  background-color: #FF5F57;
+  /* Close Red */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: transparent;
+  /* Icon hidden by default */
+  transition: all 0.2s;
+}
+
+.table-modal-header:hover .table-modal-close-btn {
+  color: rgba(0, 0, 0, 0.5);
+  /* Show "x" icon on toolbar hover */
+}
+
+.table-modal-close-btn:hover {
+  background-color: #FF3B30;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme='dark'] .table-modal-close-btn {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.table-modal-title {
+  /* Center the title */
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 13px;
+  /* Footnote / UI Control size */
+  font-weight: 500;
+  /* Medium */
+  color: var(--color-text-main, #333);
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  /* Let clicks pass through if needed */
+}
+
+[data-theme='dark'] .table-modal-title {
+  color: #E5E7EB;
+}
+
+/* Scrollable Content Body */
+.table-modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  background: transparent;
+  /* Inherit from container */
+}
+
+/* Override inner table styles specifically for the modal wrapper to maximize space */
+.table-modal-body .markdown-table-wrapper {
+  margin-bottom: 0;
+  border: none;
+  /* The modal container handles the border */
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.table-modal-body .markdown-table-wrapper:hover .table-expand-btn {
+  display: none;
+  /* Hide the expand button while already in the modal */
+}
+
+/* Expand cell max-widths for larger screen real-estate */
+.table-modal-body .markdown-renderer td {
+  max-width: 800px;
+  /* Allow much more text before wrapping */
+  font-size: 14px;
+  /* slightly larger for readability */
+}
+
+.table-modal-body .markdown-renderer th {
+  font-size: 13px;
 }
 
 /* Streaming Cursor (Normal Mode) */

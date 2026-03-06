@@ -19,96 +19,114 @@ const renderWithInlineCitations = (children, citations, messageId) => {
 
   childrenArray.forEach((child, i) => {
     if (typeof child === 'string') {
-      const parts = child.split(/(\[\d+\])/g);
+      // 変更点: [1, 2] のようにカンマ区切りで複数の数字が含まれるケースに対応
+      const parts = child.split(/(\[\s*\d+(?:\s*,\s*\d+)*\s*\])/g);
       parts.forEach((part, j) => {
-        if (/^\[\d+\]$/.test(part)) {
-          const numberStr = part.replace(/[\[\]]/g, '');
-          const number = parseInt(numberStr, 10);
+        if (/^\[\s*\d+(?:\s*,\s*\d+)*\s*\]$/.test(part)) {
+          const numbersStr = part.replace(/[\[\]]/g, '');
+          const numberItems = numbersStr.split(',');
 
-          if (number > 0 && number <= citationCount) {
-            const citation = citations[number - 1];
-            newChildren.push(
-              <span key={`${i}-${j}`} className="citation-badge-wrapper">
-                <a
-                  href={`#citation-${messageId}-${number}`}
-                  className="citation-badge"
-                  onClick={(e) => {
-                    e.preventDefault();
+          const groupNodes = [];
 
-                    // ★Phase 3: InspectorPanel連携用イベントを発火
-                    const inspectorEvent = new CustomEvent('openInspectorCitation', {
-                      detail: { citationIndex: number, messageId }
-                    });
-                    window.dispatchEvent(inspectorEvent);
+          numberItems.forEach((nStr, k) => {
+            const number = parseInt(nStr.trim(), 10);
 
-                    // 従来の出典リスト展開も維持（フォールバック）
-                    const expandEvent = new CustomEvent('expandCitationList', {
-                      detail: { messageId }
-                    });
-                    window.dispatchEvent(expandEvent);
-
-                    // アコーディオン展開アニメーション後にスクロール（従来のチャット内CitationList用）
-                    setTimeout(() => {
-                      const el = document.getElementById(`citation-${messageId}-${number}`);
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        el.classList.add('highlight-citation');
-                        setTimeout(() => el.classList.remove('highlight-citation'), 2000);
-                      }
-                    }, 350);
-                  }}
-                >
-                  {number}
-                </a>
-                {citation.url ? (
+            if (number > 0 && number <= citationCount) {
+              const citation = citations[number - 1];
+              groupNodes.push(
+                <span key={`${i}-${j}-${k}`} className="citation-badge-wrapper">
                   <a
-                    href={citation.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="citation-tooltip citation-tooltip-link"
-                    onClick={(e) => e.stopPropagation()}
+                    href={`#citation-${messageId}-${number}`}
+                    className="citation-badge"
+                    onClick={(e) => {
+                      e.preventDefault();
+
+                      // ★Phase 3: InspectorPanel連携用イベントを発火
+                      const inspectorEvent = new CustomEvent('openInspectorCitation', {
+                        detail: { citationIndex: number, messageId }
+                      });
+                      window.dispatchEvent(inspectorEvent);
+
+                      // 従来の出典リスト展開も維持（フォールバック）
+                      const expandEvent = new CustomEvent('expandCitationList', {
+                        detail: { messageId }
+                      });
+                      window.dispatchEvent(expandEvent);
+
+                      // アコーディオン展開アニメーション後にスクロール（従来のチャット内CitationList用）
+                      setTimeout(() => {
+                        const el = document.getElementById(`citation-${messageId}-${number}`);
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          el.classList.add('highlight-citation');
+                          setTimeout(() => el.classList.remove('highlight-citation'), 2000);
+                        }
+                      }, 350);
+                    }}
                   >
-                    <span className="citation-tooltip-content">
-                      <span className="citation-tooltip-icon">
-                        <SourceIcon
-                          type={citation.type === 'dataset' ? 'rag' : citation.type}
-                          source={citation.source}
-                          url={citation.url}
-                          className="w-4 h-4"
-                        />
-                      </span>
-                      <span className="citation-tooltip-text">
-                        <span className="citation-tooltip-title" style={{ display: 'block' }}>
-                          {citation.source.replace(/^\[\d+\]\s*/, '')}
-                        </span>
-                        <span className="citation-tooltip-url" style={{ display: 'block' }}>{citation.url}</span>
-                      </span>
-                    </span>
+                    {number}
                   </a>
-                ) : (
-                  <span className="citation-tooltip">
-                    <span className="citation-tooltip-content">
-                      <span className="citation-tooltip-icon">
-                        <SourceIcon
-                          type={citation.type === 'dataset' ? 'rag' : citation.type}
-                          source={citation.source}
-                          url={citation.url}
-                          className="w-4 h-4"
-                        />
+                  {citation.url ? (
+                    <a
+                      href={citation.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="citation-tooltip citation-tooltip-link"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="citation-tooltip-content">
+                        <span className="citation-tooltip-icon">
+                          <SourceIcon
+                            type={citation.type === 'dataset' ? 'rag' : citation.type}
+                            source={citation.source}
+                            url={citation.url}
+                            className="w-4 h-4"
+                          />
+                        </span>
+                        <span className="citation-tooltip-text">
+                          <span className="citation-tooltip-title" style={{ display: 'block' }}>
+                            {citation.source.replace(/^\[\d+\]\s*/, '')}
+                          </span>
+                          <span className="citation-tooltip-url" style={{ display: 'block' }}>{citation.url}</span>
+                        </span>
                       </span>
-                      <span className="citation-tooltip-text">
-                        <span className="citation-tooltip-title" style={{ display: 'block' }}>
-                          {citation.source.replace(/^\[\d+\]\s*/, '')}
+                    </a>
+                  ) : (
+                    <span className="citation-tooltip">
+                      <span className="citation-tooltip-content">
+                        <span className="citation-tooltip-icon">
+                          <SourceIcon
+                            type={citation.type === 'dataset' ? 'rag' : citation.type}
+                            source={citation.source}
+                            url={citation.url}
+                            className="w-4 h-4"
+                          />
+                        </span>
+                        <span className="citation-tooltip-text">
+                          <span className="citation-tooltip-title" style={{ display: 'block' }}>
+                            {citation.source.replace(/^\[\d+\]\s*/, '')}
+                          </span>
                         </span>
                       </span>
                     </span>
-                  </span>
-                )}
-              </span>
-            );
-          } else {
-            newChildren.push(part);
-          }
+                  )}
+                </span>
+              );
+            } else {
+              groupNodes.push(<span key={`${i}-${j}-${k}-invalid`}>{nStr}</span>);
+            }
+
+            // 複数のバッジの間の隙間を少し空ける
+            if (k < numberItems.length - 1) {
+              groupNodes.push(<span key={`${i}-${j}-${k}-space`} className="citation-comma"> </span>);
+            }
+          });
+
+          newChildren.push(
+            <span key={`${i}-${j}-group`} className="inline-citation-group">
+              {groupNodes}
+            </span>
+          );
         } else if (part) {
           newChildren.push(part);
         }
@@ -198,6 +216,15 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
     );
   }
 
+  // ★追加: textタイプのコードブロックはインラインのプレーンテキストとしてレンダリングする
+  if (lang === 'text') {
+    return (
+      <span className="markdown-plain-text" {...props}>
+        {children}
+      </span>
+    );
+  }
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(codeText);
@@ -249,8 +276,10 @@ const MarkdownRenderer = ({
   renderMode = 'normal',
   citations = [],
   messageId,
-  onOpenArtifact
+  onOpenArtifact,
+  onOpenTableModal // ★追加: 親(ChatArea等)から渡されるモーダル開閉ハンドラ
 }) => {
+  const logger = useLogger();
   // 初期状態の設定: realtimeなら即 'done' (表示状態) にする
   const [displayMode, setDisplayMode] = useState(() => {
     if (renderMode === 'realtime') return 'done';
@@ -258,8 +287,7 @@ const MarkdownRenderer = ({
   });
 
   const [typedContent, setTypedContent] = useState('');
-  const { addLog } = useLogger();
-
+  // const { addLog } = useLogger(); // Replaced by logger.addLog
   const prevStreamingRef = useRef(isStreaming);
   const loggedElementsRef = useRef(new Set());
 
@@ -367,8 +395,8 @@ const MarkdownRenderer = ({
 
     loggedElementsRef.current.add(logKey);
     const message = `Rendered [${tag}]: ${contentSnippet?.substring(0, 50)}${contentSnippet?.length > 50 ? '...' : ''}`;
-    addLog(message, 'info');
-  }, [displayMode, addLog, isStreaming, renderMode]);
+    logger.addLog(message, 'info');
+  }, [displayMode, logger, isStreaming, renderMode]);
 
   const checkUnrenderedMarkdown = useCallback((text) => {
     if (displayMode !== 'done' || typeof text !== 'string') return;
@@ -387,10 +415,10 @@ const MarkdownRenderer = ({
         if (loggedElementsRef.current.has(logKey)) return;
         loggedElementsRef.current.add(logKey);
         const message = `Potential unrendered Markdown (${name}) detected: "${match}"`;
-        addLog(message, 'warn');
+        logger.addLog(message, 'warn');
       }
     });
-  }, [displayMode, addLog]);
+  }, [displayMode, logger]);
 
   const cleanChildren = useCallback((children) => {
     return React.Children.map(children, child => {
@@ -538,6 +566,30 @@ const MarkdownRenderer = ({
                   const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
                   const processed = renderWithRestoredTokens(withCitations);
                   return <blockquote {...props}>{processed}</blockquote>;
+                },
+                table: ({ node, children, ...props }) => {
+                  return (
+                    <div className="markdown-table-wrapper group">
+                      <button
+                        className="table-expand-btn"
+                        onClick={() => {
+                          if (onOpenTableModal) {
+                            onOpenTableModal(<table {...props}>{children}</table>);
+                          }
+                        }}
+                        aria-label="Expand table"
+                        title="View Fullscreen"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="15 3 21 3 21 9"></polyline>
+                          <polyline points="9 21 3 21 3 15"></polyline>
+                          <line x1="21" y1="3" x2="14" y2="10"></line>
+                          <line x1="3" y1="21" x2="10" y2="14"></line>
+                        </svg>
+                      </button>
+                      <table {...props}>{children}</table>
+                    </div>
+                  );
                 }
               }}
             >

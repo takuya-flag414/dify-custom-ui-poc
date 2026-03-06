@@ -30,6 +30,7 @@ const ChatHistory = ({
   onRegenerate,
   autoScroll = false, // ★追加
   onAutoScrollChange, // ★追加
+  onOpenTableModal, // ★追加: Table Modalを開くハンドラ
   ...rest
 }) => {
   const messagesEndRef = useRef(null);
@@ -193,6 +194,7 @@ const ChatHistory = ({
                 onEdit={onEdit}
                 onRegenerate={onRegenerate}
                 isLastAiMessage={isLastAi}
+                onOpenTableModal={onOpenTableModal}
               />
             );
           });
@@ -208,6 +210,7 @@ const ChatHistory = ({
             onOpenArtifact={onOpenArtifact}
             enableAnimation={true}
             userName={userName}
+            onOpenTableModal={onOpenTableModal}
           />
         )}
       </AnimatePresence>

@@ -66,7 +66,8 @@ const MessageBlock = ({
     // ★追加: 編集・再送信用Props
     onEdit,
     onRegenerate,
-    isLastAiMessage = false  // 再送信ボタンを表示するかどうかの制御
+    isLastAiMessage = false,  // 再送信ボタンを表示するかどうかの制御
+    onOpenTableModal // ★追加: Table Modalを開くハンドラ
 }) => {
     const {
         role,
@@ -428,6 +429,7 @@ const MessageBlock = ({
                                                     citations={citations}
                                                     messageId={uniqueMessageId}
                                                     onOpenArtifact={onOpenArtifact}
+                                                    onOpenTableModal={onOpenTableModal} // ★追加: Propsの受け渡し
                                                 />
                                             );
                                             if (isAi) {
@@ -484,7 +486,8 @@ const arePropsEqual = (prev, next) => {
             && prev.enableAnimation === next.enableAnimation
             && prev.onEdit === next.onEdit
             && prev.onRegenerate === next.onRegenerate
-            && prev.isLastAiMessage === next.isLastAiMessage;
+            && prev.isLastAiMessage === next.isLastAiMessage
+            && prev.onOpenTableModal === next.onOpenTableModal;
     }
 
     // 2. 参照が違う場合（ストリーミング中の更新など）、必要なフィールドだけ浅く比較
