@@ -16,13 +16,15 @@ const PROTOCOL_VERSION = "1.0";
  * @param attachments List of attached files
  * @param intelligence Settings for the AI model/mode
  * @param context context settings like Knowledge Base selection
+ * @param quote Optional text quoted from a previous AI message
  * @returns Serialized JSON string ready for the API
  */
 export const buildStructuredMessage = (
     text: string,
     attachments: AttachmentMeta[] = [],
     intelligence: IntelligenceContext = { mode: 'speed' },
-    context: KnowledgeContext = { selected_store_ids: [] }
+    context: KnowledgeContext = { selected_store_ids: [] },
+    quote?: string
 ): string => {
     const message: StructuredUserMessage = {
         v: PROTOCOL_VERSION,
@@ -32,6 +34,7 @@ export const buildStructuredMessage = (
         attachments: attachments,
         intelligence: intelligence,
         context: context,
+        quote: quote,
         timestamp: Date.now()
     };
 
@@ -125,6 +128,7 @@ export const restoreMessageState = (query: string) => {
         attachments: parsed.attachments || [],
         intelligence: parsed.intelligence,
         context: parsed.context,
+        quote: parsed.quote,
         timestamp: parsed.timestamp
     };
 };

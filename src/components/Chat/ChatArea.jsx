@@ -40,6 +40,9 @@ const ChatArea = (props) => {
   // ★追加: 自動スクロール有効状態管理
   const [autoScrollEnabled, setAutoScrollEnabled] = React.useState(true);
 
+  // ★追加: Contextual Quote (文脈引用) の状態管理
+  const [quoteContext, setQuoteContext] = useState(null);
+
   // ★追加: Table Modalの状態管理をChatAreaに持ち上げ
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
   const [tableContent, setTableContent] = useState(null);
@@ -185,6 +188,7 @@ const ChatArea = (props) => {
             autoScroll={autoScrollEnabled} // ★変更: stateを渡す
             onAutoScrollChange={setAutoScrollEnabled} // ★追加: state更新関数を渡す
             onOpenTableModal={handleOpenTableModal} // ★追加: Table Modalを開くハンドラ
+            onQuote={(text) => setQuoteContext(text)} // ★追加: 引用用ハンドラ
           />
           <div className="bottom-controls-wrapper">
             {/* ★追加: ScrollToBottomButton */}
@@ -205,6 +209,8 @@ const ChatArea = (props) => {
               mockMode={mockMode}
               backendBApiKey={backendBApiKey}
               backendBApiUrl={backendBApiUrl}
+              quote={quoteContext} // ★追加: 引用テキスト
+              onRemoveQuote={() => setQuoteContext(null)} // ★追加: 引用クリアハンドラ
             />
           </div>
         </>

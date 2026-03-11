@@ -257,7 +257,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: '検索結果から回答を生成中...', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 2480, completion_tokens: 1856, total_tokens: 4336 } } }
     ]
   },
 
@@ -276,7 +276,7 @@ export const scenarios = {
         answer: createMockJsonCodeBlock(styleTemplates.pure.efficient, [], [], thinkingTemplates.pure.efficient)
       },
       { event: 'node_finished', data: { title: 'General LLM', node_type: 'llm', status: 'succeeded' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 845, completion_tokens: 128, total_tokens: 973 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
@@ -289,7 +289,7 @@ export const scenarios = {
         answer: createMockJsonCodeBlock(styleTemplates.pure.partner, [], [], thinkingTemplates.pure.partner)
       },
       { event: 'node_finished', data: { title: 'General LLM', node_type: 'llm', status: 'succeeded' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 912, completion_tokens: 195, total_tokens: 1107 } } }
     ]
   },
 
@@ -318,7 +318,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
@@ -341,7 +341,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -378,7 +378,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
@@ -408,7 +408,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 1580, completion_tokens: 342, total_tokens: 1922 } } }
     ]
   },
 
@@ -439,7 +439,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'Query Rewriter', node_type: 'llm' } },
@@ -464,7 +464,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'SEARCH LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -490,7 +490,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Document LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } } },
@@ -510,7 +510,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Document LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -541,7 +541,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
@@ -566,7 +566,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -597,7 +597,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
@@ -622,7 +622,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -656,7 +656,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor' } },
@@ -684,7 +684,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'Hybrid LLM', node_type: 'llm' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -700,7 +700,7 @@ export const scenarios = {
         answer: styleTemplates.fast_pure.efficient  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
@@ -709,7 +709,7 @@ export const scenarios = {
         answer: styleTemplates.fast_pure.partner  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -727,7 +727,7 @@ export const scenarios = {
         answer: styleTemplates.fast_file.efficient  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ],
     partner: [
       { event: 'node_started', data: { title: 'ドキュメント抽出', node_type: 'document-extractor', inputs: { file: 'upload_file_id' } } },
@@ -738,7 +738,7 @@ export const scenarios = {
         answer: styleTemplates.fast_file.partner  // 生Markdown（JSON形式ではない）
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   },
 
@@ -799,7 +799,7 @@ export const scenarios = {
         )
       },
       { event: 'node_finished', data: { title: 'LLM_Search_Partner', node_type: 'llm', status: 'succeeded' } },
-      { event: 'message_end', metadata: { retriever_resources: [] } }
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
   }
 };

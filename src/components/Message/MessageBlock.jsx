@@ -18,6 +18,13 @@ import StructuredUserMessage from './StructuredUserMessage';
 import { parseStructuredMessage, extractPlainText } from '../../utils/messageSerializer';
 import { FEATURE_FLAGS } from '../../config/featureFlags';
 
+// ★追加: 引用(返信)アイコン
+const ReplyIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 11l8-8v4.5A11.5 11.5 0 0 1 22 18.5c-2.5-3-6-4.5-11-4.5V19l-8-8z" />
+    </svg>
+);
+
 // Spring Physics (DESIGN_RULE準拠)
 const SPRING_CONFIG = {
     type: "spring",
@@ -68,7 +75,8 @@ const MessageBlock = ({
     onEdit,
     onRegenerate,
     isLastAiMessage = false,  // 再送信ボタンを表示するかどうかの制御
-    onOpenTableModal // ★追加: Table Modalを開くハンドラ
+    onOpenTableModal, // ★追加: Table Modalを開くハンドラ
+    onQuote // ★追加: 引用ハンドラ
 }) => {
     const {
         role,
@@ -159,7 +167,85 @@ const MessageBlock = ({
         }
     }, [isEditing, editValue.length]);
 
-    // ★削除: isAi, isUserの定義は上部に移動済み
+    // ★追加: テキスト選択とポップオーバーの状態管理
+    const [selectionState, setSelectionState] = useState({
+        text: '',
+        visible: false,
+        x: 0,
+        y: 0
+    });
+    const messageContentRef = useRef(null);
+    const isSelectingRef = useRef(false);
+
+    // ★追加: 選択範囲の検知と位置計算
+    const handleSelectionChange = useCallback(() => {
+        // AIメッセージのみ、かつストリーミングが完了している場合のみ許可
+        if (!isAi || isStreaming) return;
+        
+        // ドラッグ中（選択操作中）はポップオーバーを更新しない
+        if (isSelectingRef.current) return;
+
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+
+        if (selectedText && messageContentRef.current && messageContentRef.current.contains(selection.anchorNode)) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            const containerRect = messageContentRef.current.getBoundingClientRect();
+
+            // 画面外の場合は表示しない
+            if (rect.width === 0 || rect.height === 0) return;
+
+            setSelectionState({
+                text: selectedText,
+                visible: true,
+                x: rect.left - containerRect.left + rect.width / 2, // Container基準のX座標
+                y: rect.top - containerRect.top - 8 // Container基準のY座標 (テキストの少し上。FramerMotion側で translate(-50%, -100%) されているので、これで上に乗る形になります)
+            });
+        } else {
+            setSelectionState(prev => prev.visible ? { ...prev, visible: false } : prev);
+        }
+    }, [isAi, isStreaming]);
+
+    useEffect(() => {
+        const handleMouseDown = () => {
+            isSelectingRef.current = true;
+            // 新たに選択を開始する場合は、現在のポップオーバーを隠す
+            setSelectionState(prev => prev.visible ? { ...prev, visible: false } : prev);
+        };
+
+        const handleMouseUp = () => {
+            isSelectingRef.current = false;
+            // 選択確定後に少しだけ遅延を入れてから（JSのコールスタックの最後で）選択状態を評価する
+            setTimeout(handleSelectionChange, 10);
+        };
+
+        document.addEventListener('selectionchange', handleSelectionChange);
+        document.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mouseup', handleMouseUp);
+        // スクロールやリサイズで選択範囲がずれるため非表示にする
+        window.addEventListener('scroll', handleSelectionChange, true);
+        window.addEventListener('resize', handleSelectionChange);
+
+        return () => {
+            document.removeEventListener('selectionchange', handleSelectionChange);
+            document.removeEventListener('mousedown', handleMouseDown);
+            document.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('scroll', handleSelectionChange, true);
+            window.removeEventListener('resize', handleSelectionChange);
+        };
+    }, [handleSelectionChange]);
+
+    const handleReplyClick = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (onQuote && selectionState.text) {
+            onQuote(selectionState.text);
+            // 選択解除
+            window.getSelection().removeAllRanges();
+            setSelectionState(prev => ({ ...prev, visible: false }));
+        }
+    }, [onQuote, selectionState.text]);
     const uniqueMessageId = messageId || id || `msg_${Date.now()}`;
     const isTextEmpty = !text || text.length === 0;
     const showCitations = (traceMode === 'search' || traceMode === 'document') || (citations && citations.length > 0);
@@ -168,11 +254,26 @@ const MessageBlock = ({
     // ★修正: ユーザーメッセージの場合はJSONプロトコルからプレーンテキストを抽出してコピー
     const textToCopy = isUser ? extractPlainText(text || '') : (text || '');
 
+    // ★追加: パース済みの構造化メッセージから引用文を抽出
+    let extractedQuote = null;
+    if (isUser && text) {
+        try {
+            const parsed = parseStructuredMessage(text);
+            if (parsed && parsed.v && parsed.v !== "0.0" && parsed.quote) {
+                extractedQuote = parsed.quote;
+            }
+        } catch(e) {}
+    }
+
     // ★追加: 編集開始
     const handleStartEdit = useCallback(() => {
-        setEditValue(text || '');
+        if (!isAi) {
+            setEditValue(extractPlainText(text || ''));
+        } else {
+            setEditValue(text || '');
+        }
         setIsEditing(true);
-    }, [text]);
+    }, [text, isAi]);
 
     // ★追加: 編集確定
     const handleConfirmEdit = useCallback(() => {
@@ -273,11 +374,19 @@ const MessageBlock = ({
                     </div>
                 )}
 
-                <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`}>
+                <div className={`message-content ${isAi ? 'message-content-ai' : 'message-content-user'}`} ref={messageContentRef}>
 
                     {/* ★新規: コンテキストチップをユーザー吹き出しの上に表示 */}
                     {isUser && !isEditing && (
                         <ContextChips message={message} previousMessage={previousMessage} />
+                    )}
+
+                    {/* ★追加: 引用の表示（吹き出しから分離して配置） */}
+                    {isUser && !isEditing && extractedQuote && (
+                        <div className="user-quote-reference">
+                            <ReplyIcon />
+                            <span>"{extractedQuote}"</span>
+                        </div>
                     )}
 
                     <div className="message-bubble-row">
@@ -443,6 +552,50 @@ const MessageBlock = ({
                             )}
                         </AnimatePresence>
 
+                        {/* ★追加: Selection Popover (Liquid Glass Style) */}
+                        <AnimatePresence>
+                            {selectionState.visible && (
+                                <div
+                                    className="selection-popover-wrapper"
+                                    style={{
+                                        position: 'absolute',
+                                        left: `${selectionState.x}px`,
+                                        top: `${selectionState.y}px`,
+                                        transform: 'translate(-50%, -100%)',
+                                        zIndex: 1000,
+                                        pointerEvents: 'none' // ラッパーはクリックを妨害しない
+                                    }}
+                                >
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.9, y: 5 }}
+                                        transition={{ type: "spring", stiffness: 250, damping: 25 }}
+                                        className="selection-popover"
+                                        style={{
+                                            // DESIGN_RULE: Liquid Glass
+                                            backdropFilter: 'blur(20px) saturate(180%)',
+                                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                                            pointerEvents: 'auto' // 要素自体はクリック可能
+                                        }}
+                                        onMouseDown={(e) => {
+                                            // ポップオーバー内クリックで選択が解除されないようにする
+                                            e.preventDefault();
+                                        }}
+                                    >
+                                        <button
+                                            onClick={handleReplyClick}
+                                            className="selection-reply-btn flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
+                                            style={{ fontFamily: '"SF Pro Text", -apple-system, sans-serif' }}
+                                        >
+                                            <ReplyIcon />
+                                            <span>返信</span>
+                                        </button>
+                                    </motion.div>
+                                </div>
+                            )}
+                        </AnimatePresence>
+
                         {/* ★変更: AIメッセージ用のアクションボタン群（コピー + 再生成） */}
                         {isAi && (
                             <div className="ai-action-group">
@@ -490,7 +643,8 @@ const arePropsEqual = (prev, next) => {
             && prev.onEdit === next.onEdit
             && prev.onRegenerate === next.onRegenerate
             && prev.isLastAiMessage === next.isLastAiMessage
-            && prev.onOpenTableModal === next.onOpenTableModal;
+            && prev.onOpenTableModal === next.onOpenTableModal
+            && prev.onQuote === next.onQuote;
     }
 
     // 2. 参照が違う場合（ストリーミング中の更新など）、必要なフィールドだけ浅く比較

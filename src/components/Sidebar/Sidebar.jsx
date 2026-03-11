@@ -194,7 +194,10 @@ const Sidebar = ({
   }, [conversations, isCollapsed]);
 
   // ★ URLルーティング: ナビゲーションをURLベースに変更
-  const handleNewChat = () => { navigate('/chat'); };
+  const handleNewChat = () => {
+    setConversationId(null);
+    navigate('/chat');
+  };
   const handleSelectConversation = (id) => { navigate(`/chat/${id}`); };
   const handleGoToChat = () => { navigate('/chat'); };
   const handleGoToSettings = () => {

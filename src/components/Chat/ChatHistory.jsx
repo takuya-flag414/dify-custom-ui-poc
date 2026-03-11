@@ -31,6 +31,7 @@ const ChatHistory = ({
   autoScroll = false, // ★追加
   onAutoScrollChange, // ★追加
   onOpenTableModal, // ★追加: Table Modalを開くハンドラ
+  onQuote, // ★追加: 引用用ハンドラ
   ...rest
 }) => {
   const messagesEndRef = useRef(null);
@@ -195,6 +196,7 @@ const ChatHistory = ({
                 onRegenerate={onRegenerate}
                 isLastAiMessage={isLastAi}
                 onOpenTableModal={onOpenTableModal}
+                onQuote={onQuote} // ★追加: 引用用ハンドラ
               />
             );
           });
@@ -211,6 +213,7 @@ const ChatHistory = ({
             enableAnimation={true}
             userName={userName}
             onOpenTableModal={onOpenTableModal}
+            onQuote={onQuote} // ★追加: 引用用ハンドラ
           />
         )}
       </AnimatePresence>

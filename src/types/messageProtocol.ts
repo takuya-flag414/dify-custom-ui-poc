@@ -56,6 +56,7 @@ export interface StructuredUserMessage {
     attachments: AttachmentMeta[];
     intelligence: IntelligenceContext;
     context: KnowledgeContext;
+    quote?: string; // Optioanl quoted text from previous AI message
     dify_inputs?: Record<string, string | boolean>; // Dify API inputs snapshot for traceability
 
     // Optional metadata for restoration

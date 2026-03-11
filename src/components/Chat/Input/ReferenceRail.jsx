@@ -37,11 +37,13 @@ const ReferenceRail = ({
     files = [],
     activeStore = null,
     activeDomains = [],
+    quote = null, // ★追加: 引用テキスト
     onRemoveFile,
     onRemoveStore,
-    onRemoveDomain
+    onRemoveDomain,
+    onRemoveQuote // ★追加: 引用削除ハンドラ
 }) => {
-    const hasItems = files.length > 0 || activeStore || activeDomains.length > 0;
+    const hasItems = files.length > 0 || activeStore || activeDomains.length > 0 || quote;
 
     return (
         <AnimatePresence>
@@ -55,6 +57,15 @@ const ReferenceRail = ({
                 >
                     <div className="px-4 py-2 flex flex-wrap gap-2 items-center">
 
+
+                        {/* ★追加: Quote Badge */}
+                        {quote && (
+                            <GlassChip onRemove={onRemoveQuote} className="text-gray-800 dark:text-gray-200 bg-black/5 dark:bg-white/10 border-l-[3px] border-l-[#0A84FF] pl-2 pr-3">
+                                <span className="line-clamp-2 overflow-hidden text-ellipsis max-w-[300px]" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                    "{quote}"
+                                </span>
+                            </GlassChip>
+                        )}
 
                         {/* Selected Store */}
                         {activeStore && (

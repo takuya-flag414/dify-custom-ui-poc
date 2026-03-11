@@ -31,6 +31,8 @@ const ChatInput = ({
   mockMode = 'OFF',
   backendBApiKey = '',
   backendBApiUrl = '',
+  quote = null, // ★追加: 引用テキスト
+  onRemoveQuote // ★追加: 引用削除ハンドラ
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -90,13 +92,19 @@ const ChatInput = ({
   const executeSend = useCallback((excludedTypes = []) => {
     const filesToSend = selectedFiles.map(sf => sf.file);
 
-    // 第3引数でサニタイズ除外タイプを渡す
-    onSendMessage(text, filesToSend, { sanitizeExcludeTypes: excludedTypes });
+    // ★変更: 第4引数（オプション等）で quote を渡す
+    onSendMessage(text, filesToSend, { sanitizeExcludeTypes: excludedTypes, quote });
+    
     setText('');
     setSelectedFiles([]);
     setPrivacyWarning({ hasWarning: false, detections: [] });
     setShowPrivacyConfirm(false);
-  }, [text, selectedFiles, onSendMessage]);
+
+    // ★追加: 送信完了時に引用を解除する
+    if (onRemoveQuote) {
+      onRemoveQuote();
+    }
+  }, [text, selectedFiles, onSendMessage, quote, onRemoveQuote]);
 
   const handleSend = () => {
     if ((!text.trim() && selectedFiles.length === 0) || isLoading) return;
@@ -275,6 +283,8 @@ const ChatInput = ({
             files={selectedFiles}
             activeStore={activeStore}
             activeDomains={searchSettings.domainFilters || []}
+            quote={quote} // ★追加
+            onRemoveQuote={onRemoveQuote} // ★追加
             onRemoveFile={removeSelectedFile}
             onRemoveStore={() => {
               setActiveStore(null);
@@ -297,6 +307,7 @@ const ChatInput = ({
             disabled={isLoading}
             placeholder={placeholder}
             isHistoryLoading={isHistoryLoading}
+            focusTrigger={quote} // ★追加: quoteが変更されたらフォーカスするトリガーとして渡す
           />
 
           {/* Tier 3: Control Deck */}

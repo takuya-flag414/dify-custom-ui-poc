@@ -94,8 +94,10 @@ const ChatView = ({
             conversationId !== urlConversationId
         ) {
             // ★ サイレントURL更新: React Routerを経由せず、ブラウザのHistory APIを直接使用
-            // これによりRoutes再マウント・AnimatePresence再発火を完全に回避し、
+            // Routes再マウント・AnimatePresence再発火を完全に回避し、
             // 新規チャット開始時のスムーズさを維持する
+            // ※「新しいチャット」ボタン押下時はSidebar側でsetConversationId(null)を
+            //   明示的に呼ぶことでWelcomeScreen遷移を保証する
             window.history.replaceState(null, '', `/chat/${conversationId}`);
         }
         prevConvIdRef.current = conversationId;

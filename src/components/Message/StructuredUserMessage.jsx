@@ -34,7 +34,7 @@ const StructuredUserMessage = ({ parsedMessage, onOpenArtifact }) => {
             initial="hidden"
             animate="show"
         >
-            {/* Text Content Only */}
+            {/* Text Content */}
             <div className="structured-content">
                 <MarkdownRenderer
                     content={content.text}

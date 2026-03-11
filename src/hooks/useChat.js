@@ -347,7 +347,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 text,
                 attachmentMeta,
                 intelligence,
-                knowledgeContext
+                knowledgeContext,
+                options.quote // ★追加: 引用テキストを渡す
             );
 
             // ★追加: dify_inputs をペイロードにマージ
@@ -415,6 +416,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             let detectedTraceMode = 'knowledge';
             let isConversationIdSynced = false;
             let capturedOptimizedQuery = null;
+            let capturedUsage = null;
             let protocolMode = 'PENDING';
 
             // 表示遅延タイマー（ちらつき防止）
@@ -670,6 +672,10 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 // ★リファクタリング: message_end処理
                                 const messageEndResult = processMessageEnd(data, detectedTraceMode);
                                 if (messageEndResult) {
+                                    // ★修正: usageをローカル変数にもキャプチャ（React state更新は非同期のため）
+                                    if (messageEndResult.usage) {
+                                        capturedUsage = messageEndResult.usage;
+                                    }
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         citations: messageEndResult.citations.length > 0 ? messageEndResult.citations : prev.citations,
@@ -703,6 +709,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                         finalMessage.workflowError = wfError
                                             ? { nodeTitle: 'ワークフロー', message: wfError.errorMessage }
                                             : currentStreamingMsg.workflowError;
+                                    }
+
+                                    // ★修正: capturedUsageでフォールバック（streamingMessageRef更新遅延対策）
+                                    if (!finalMessage.usage && capturedUsage) {
+                                        finalMessage.usage = capturedUsage;
                                     }
 
                                     setMessages(prevMsgs => [...prevMsgs, finalMessage]);
