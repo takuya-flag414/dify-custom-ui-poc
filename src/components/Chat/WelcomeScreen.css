@@ -55,6 +55,19 @@
     background-image: url('/svg/spring-background-dark.svg');
 }
 
+.welcome-container--zen.bg-early-summer {
+    background-image: url('/svg/early-summer-background.svg');
+    background-size: cover;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    transition: background-image 0.4s ease-in-out;
+}
+
+/* [data-theme='dark'] .welcome-container--zen.bg-early-summer {
+    background-image: url('/svg/early-summer-background-dark.svg');
+} */
+
 /* === Content Wrapper === */
 .welcome-inner {
     max-width: 800px;

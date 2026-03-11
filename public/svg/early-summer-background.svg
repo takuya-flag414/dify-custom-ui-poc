@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E88E5" />
+      <stop offset="100%" stop-color="#E3F2FD" />
+    </linearGradient>
+    
+    <!-- Carp Gradients -->
+    <linearGradient id="blackCarpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#263238"/>
+      <stop offset="100%" stop-color="#455A64"/>
+    </linearGradient>
+    
+    <linearGradient id="redCarpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D32F2F"/>
+      <stop offset="100%" stop-color="#E53935"/>
+    </linearGradient>
+    
+    <linearGradient id="blueCarpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0288D1"/>
+      <stop offset="100%" stop-color="#039BE5"/>
+    </linearGradient>
+
+    <!-- Scale Pattern -->
+    <g id="scales">
+      <path d="M 100,35 A 20,20 0 0,1 100,65" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 100,60 A 20,20 0 0,1 100,90" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      
+      <path d="M 130,40 A 20,20 0 0,1 130,70" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 130,65 A 20,20 0 0,1 130,95" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      
+      <path d="M 160,45 A 20,20 0 0,1 160,75" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 160,70 A 20,20 0 0,1 160,100" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      
+      <path d="M 190,50 A 20,20 0 0,1 190,80" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 190,75 A 20,20 0 0,1 190,105" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      
+      <path d="M 220,55 A 20,20 0 0,1 220,85" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+      
+      <path d="M 250,55 A 20,20 0 0,1 250,85" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <g id="carp-template">
+      <!-- Body -->
+      <path d="M 0,40 Q 150,-20 350,10 L 420,-20 Q 380,60 420,140 L 350,110 Q 150,140 0,80 A 8,20 0 0,0 0,40 Z" />
+      
+      <!-- Dorsal fin (back) -->
+      <path d="M 100,2 Q 200,-35 300,5 Q 250,0 100,2 Z" fill="rgba(255,255,255,0.2)" />
+      
+      <!-- Pectoral fin (belly) -->
+      <path d="M 80,100 Q 120,165 160,120 Q 120,120 80,100 Z" fill="rgba(255,255,255,0.2)" />
+      
+      <!-- Eye -->
+      <circle cx="45" cy="55" r="14" fill="#ffffff" />
+      <circle cx="48" cy="55" r="6" fill="#212121" />
+      <!-- Golden rim -->
+      <circle cx="45" cy="55" r="14" fill="none" stroke="#FFD54F" stroke-width="2" />
+      <circle cx="45" cy="55" r="18" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
+      
+      <!-- Scales -->
+      <use href="#scales" />
+    </g>
+
+    <!-- Cloud Path -->
+    <path id="cloud" d="M 40,60 Q 40,20 80,20 Q 100,0 140,0 Q 180,0 200,20 Q 240,20 240,60 Z" />
+  </defs>
+
+  <style>
+    .sky { fill: url(#skyGrad); }
+    
+    .cloud { opacity: 0; fill: rgba(255, 255, 255, 0.6); }
+    .cloud1 { animation: drift1 100s linear infinite; }
+    .cloud2 { animation: drift2 140s linear infinite; }
+    .cloud3 { animation: drift3 80s linear infinite; }
+
+    .pole-group {
+      transform-origin: 50px 1080px; /* Adjusted to bottom */
+      animation: sway 5s ease-in-out infinite alternate;
+    }
+
+    .yaguruma {
+      transform-origin: 0 0;
+      animation: spin 6s linear infinite;
+    }
+
+    /* Carps rotate from their mouth (0,0 anchor point) */
+    .carp-black { animation: waveBlack 3.5s ease-in-out infinite alternate; transform-origin: 0 0; }
+    .carp-red   { animation: waveRed 3s ease-in-out infinite alternate -1s; transform-origin: 0 0; }
+    .carp-blue  { animation: waveBlue 2.5s ease-in-out infinite alternate -2s; transform-origin: 0 0; }
+
+    @keyframes drift1 { 
+        0%   { transform: translate(1950px, 150px) scale(1.5); opacity: 0; }
+        5%   { opacity: 0.6; }
+        95%  { opacity: 0.6; }
+        100% { transform: translate(-400px, 150px) scale(1.5); opacity: 0; } 
+    }
+    @keyframes drift2 { 
+        0%   { transform: translate(1950px, 350px) scale(2); opacity: 0; }
+        5%   { opacity: 0.4; }
+        95%  { opacity: 0.4; }
+        100% { transform: translate(-500px, 350px) scale(2); opacity: 0; } 
+    }
+    @keyframes drift3 { 
+        0%   { transform: translate(1950px, 600px) scale(1.2); opacity: 0; }
+        5%   { opacity: 0.7; }
+        95%  { opacity: 0.7; }
+        100% { transform: translate(-300px, 600px) scale(1.2); opacity: 0; } 
+    }
+
+    @keyframes sway {
+        0%   { transform: rotate(-0.5deg); }
+        100% { transform: rotate(1deg); }
+    }
+
+    @keyframes spin {
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes waveBlack { 
+        0%   { transform: rotate(-3deg) scaleY(0.98); } 
+        100% { transform: rotate(3deg) scaleY(1.02); } 
+    }
+    @keyframes waveRed { 
+        0%   { transform: rotate(-4deg) scaleY(0.97); } 
+        100% { transform: rotate(4deg) scaleY(1.03); } 
+    }
+    @keyframes waveBlue { 
+        0%   { transform: rotate(-5deg) scaleY(0.96); } 
+        100% { transform: rotate(5deg) scaleY(1.04); } 
+    }
+  </style>
+
+  <!-- Background Layer -->
+  <rect class="sky" width="100%" height="100%" />
+
+  <!-- Cloud Layer -->
+  <use href="#cloud" class="cloud cloud1" style="animation-delay: -30s" />
+  <use href="#cloud" class="cloud cloud2" style="animation-delay: -70s" />
+  <use href="#cloud" class="cloud cloud3" style="animation-delay: -15s" />
+
+  <!-- Foreground: Pole and Carps Layer -->
+  <!-- Move pole origin to the left safety zone -->
+  <g transform="translate(100, 0)">
+    <g class="pole-group">
+      <!-- Main Pole Line (adjusted to fit 1080 height) -->
+      <line x1="50" y1="1080" x2="250" y2="150" stroke="#78909C" stroke-width="16" stroke-linecap="round" />
+      
+      <!-- Yaguruma (Arrow wheel) at top of pole -->
+      <g transform="translate(250, 150)">
+        <g class="yaguruma">
+          <circle cx="0" cy="0" r="45" fill="none" stroke="#FFD54F" stroke-width="5" />
+          <path d="M-45,0 L45,0 M0,-45 L0,45 M-32,-32 L32,32 M-32,32 L32,-32" stroke="#FFCA28" stroke-width="5" />
+          <!-- Arrows on edges -->
+          <circle cx="-45" cy="0" r="5" fill="#FFC107" />
+          <circle cx="45" cy="0" r="5" fill="#FFC107" />
+          <circle cx="0" cy="-45" r="5" fill="#FFC107" />
+          <circle cx="0" cy="45" r="5" fill="#FFC107" />
+          <!-- Center connection -->
+          <circle cx="0" cy="0" r="10" fill="#FFA000" />
+        </g>
+      </g>
+
+      <!-- Carp Scales are increased since viewport is wider, they need more presence -->
+      
+      <!-- Black Carp (真鯉) -->
+      <line x1="225" y1="280" x2="285" y2="280" stroke="#CFD8DC" stroke-width="3" />
+      <g transform="translate(285, 280)"> 
+        <g class="carp-black"> 
+          <!-- Scale down visually so it doesn't overlap center UI -->
+          <g transform="scale(0.65) translate(0, -60)">
+            <use href="#carp-template" fill="url(#blackCarpGrad)" />
+          </g>
+        </g>
+      </g>
+
+      <!-- Red Carp (緋鯉) -->
+      <line x1="195" y1="420" x2="265" y2="420" stroke="#CFD8DC" stroke-width="3" />
+      <g transform="translate(265, 420)"> 
+        <g class="carp-red">
+          <g transform="scale(0.55) translate(0, -60)">
+            <use href="#carp-template" fill="url(#redCarpGrad)" />
+          </g>
+        </g>
+      </g>
+
+      <!-- Blue Carp (青鯉) -->
+      <line x1="165" y1="560" x2="245" y2="560" stroke="#CFD8DC" stroke-width="3" />
+      <g transform="translate(245, 560)"> 
+        <g class="carp-blue">
+          <g transform="scale(0.45) translate(0, -60)">
+            <use href="#carp-template" fill="url(#blueCarpGrad)" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Foreground: Building Roof (Static) Layer (adjusted to bottom left) -->
+  <path d="M-50,1100 L-50,850 L 400,1100 Z" fill="#37474F" />
+  <path d="M-50,850 L 400,1100 L 370,1100 L-50,880 Z" fill="#263238" />
+  <!-- Overlap fixing line to ground it safely at bottom left -->
+  <polygon points="-50,1100 -50,850 400,1100 0,1150" fill="#37474F" />
+
+</svg>

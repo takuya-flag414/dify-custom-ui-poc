@@ -14,5 +14,11 @@ export const seasonalBackgrounds: SeasonalBackground[] = [
         end: '04-10',   // 4月10日まで
         cssClass: 'bg-spring',
     },
+    {
+        id: 'early-summer-carp',
+        start: '04-15', // 4月15日〜
+        end: '05-10',   // 5月10日まで
+        cssClass: 'bg-early-summer',
+    },
     // 今後、夏や冬のイベントなどを追加していく
 ];
