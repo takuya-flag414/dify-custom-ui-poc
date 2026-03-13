@@ -65,14 +65,17 @@ const ChatArea = (props) => {
   }, [onSendMessage]);
 
   const handleSmartActionSelect = useCallback((action) => {
-    switch (action.type) {
-      case 'suggested_question':
+    // LLMによってアンダースコアが省かれるケースがあるため正規化する
+    const normalizedType = action.type ? action.type.replace(/_/g, '').toLowerCase() : '';
+
+    switch (normalizedType) {
+      case 'suggestedquestion':
         if (action.payload?.text) {
           onSendMessage(action.payload.text, []);
         }
         break;
 
-      case 'retry_mode':
+      case 'retrymode':
         const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
         if (lastUserMsg && action.payload?.mode) {
           const modeSettings = {
@@ -80,9 +83,12 @@ const ChatArea = (props) => {
             'web_only': { ragEnabled: false, webEnabled: true },
             'hybrid': { ragEnabled: true, webEnabled: true },
             'standard': { ragEnabled: false, webEnabled: false },
-            'fast': { ragEnabled: false, webEnabled: false }
+            'fast': { ragEnabled: false, webEnabled: false },
+            // アンダースコアなしのペイロードも考慮
+            'ragonly': { ragEnabled: true, webEnabled: false },
+            'webonly': { ragEnabled: false, webEnabled: true }
           };
-          const newSettings = modeSettings[action.payload.mode];
+          const newSettings = modeSettings[action.payload.mode] || modeSettings[action.payload.mode.replace(/_/g, '')];
           if (newSettings) {
             setSearchSettings(prev => ({
               ...prev,
@@ -97,7 +103,7 @@ const ChatArea = (props) => {
         }
         break;
 
-      case 'web_search':
+      case 'websearch':
         const lastUserMsgForWeb = [...messages].reverse().find(m => m.role === 'user');
         if (lastUserMsgForWeb) {
           setSearchSettings(prev => ({
@@ -112,7 +118,7 @@ const ChatArea = (props) => {
         }
         break;
 
-      case 'deep_dive':
+      case 'deepdive':
         if (action.payload?.text) {
           // LLMが生成したpayload.textを直接送信（自然な質問文）
           onSendMessage(action.payload.text, []);
@@ -122,6 +128,12 @@ const ChatArea = (props) => {
       case 'navigate':
         if (action.payload?.url) {
           window.open(action.payload.url, '_blank', 'noopener,noreferrer');
+        }
+        break;
+
+      case 'selection':
+        if (action.payload?.text) {
+          onSendMessage(action.payload.text, []);
         }
         break;
 

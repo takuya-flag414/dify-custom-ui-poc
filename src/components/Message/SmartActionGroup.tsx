@@ -10,18 +10,21 @@ import {
     Sparkles,
     ExternalLink,
     RefreshCw,
+    ListChecks,
+    GitBranch,
+    CheckSquare,
     LucideIcon
 } from 'lucide-react';
 import './SmartActionGroup.css';
 
-/**
- * Smart Action の型
- */
 export interface SmartAction {
-    type: 'retry_mode' | 'suggested_question' | 'web_search' | 'deep_dive' | 'navigate' | string;
+    type: 'retry_mode' | 'suggested_question' | 'web_search' | 'deep_dive' | 'navigate' | 'selection' | string;
     label: string;
     icon?: string;
-    payload?: unknown;
+    payload?: {
+        text?: string;
+        [key: string]: any;
+    };
 }
 
 /**
@@ -63,16 +66,16 @@ const containerVariants: Variants = {
     }
 };
 
-// 各アイテムのアニメーション
+// 各アイテムのアニメーション (下から上へ)
 const itemVariants: Variants = {
     hidden: {
         opacity: 0,
-        y: 10,
-        scale: 0.9
+        y: 10,  // 下に少し下げる
+        scale: 0.98 // スケール変化を控えめに
     },
     visible: {
         opacity: 1,
-        y: 0,
+        y: 0,   // 元の位置へ
         scale: 1,
         transition: SPRING_CONFIG
     }
@@ -87,16 +90,22 @@ const ICON_MAP: Record<string, LucideIcon> = {
     'search': Search,
     'sparkles': Sparkles,
     'external-link': ExternalLink,
-    'refresh-cw': RefreshCw
+    'refresh-cw': RefreshCw,
+    'list-checks': ListChecks,
+    'git-branch': GitBranch,
+    'check-square': CheckSquare
 };
 
 // デフォルトアイコン（typeに基づく）
+const normalizeType = (type?: string) => type ? type.replace(/_/g, '').toLowerCase() : '';
+
 const TYPE_DEFAULT_ICONS: Record<string, LucideIcon> = {
-    'retry_mode': Database,
-    'suggested_question': MessageCircleQuestion,
-    'web_search': Globe,
-    'deep_dive': Sparkles,
-    'navigate': ExternalLink
+    'retrymode': Database,
+    'suggestedquestion': MessageCircleQuestion,
+    'websearch': Globe,
+    'deepdive': Sparkles,
+    'navigate': ExternalLink,
+    'selection': ListChecks
 };
 
 /**
@@ -106,7 +115,7 @@ const getIconComponent = (iconName: string | undefined, type: string): LucideIco
     if (iconName && ICON_MAP[iconName]) {
         return ICON_MAP[iconName];
     }
-    return TYPE_DEFAULT_ICONS[type] || MessageCircleQuestion;
+    return TYPE_DEFAULT_ICONS[normalizeType(type)] || MessageCircleQuestion;
 };
 
 /**
@@ -117,10 +126,51 @@ const SmartActionGroup: React.FC<SmartActionGroupProps> = ({ actions, onActionSe
         return null;
     }
 
+    const isSelectionMode = actions.some(action => normalizeType(action.type) === 'selection');
+
     const handleClick = (action: SmartAction): void => {
         if (disabled) return;
         onActionSelect?.(action);
     };
+
+    if (isSelectionMode) {
+        return (
+            <motion.div
+                className="selection-island-container"
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+            >
+                <div className="selection-island-header">
+                    <GitBranch size={16} className="selection-island-header-icon" />
+                    <span className="selection-island-header-label">どの方針で進めますか？</span>
+                </div>
+                <motion.div 
+                    className="selection-island-list"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {actions.map((action, index) => {
+                        const IconComponent = getIconComponent(action.icon, action.type);
+                        return (
+                            <motion.button
+                                key={`${action.type}-${index}`}
+                                className={`selection-island-item ${disabled ? 'disabled' : ''}`}
+                                variants={itemVariants}
+                                onClick={() => handleClick(action)}
+                                disabled={disabled}
+                                title={action.label}
+                            >
+                                <IconComponent size={15} className="selection-island-icon" />
+                                <span className="selection-island-label">{action.label}</span>
+                            </motion.button>
+                        );
+                    })}
+                </motion.div>
+            </motion.div>
+        );
+    }
 
     return (
         <div className="smart-actions-container">

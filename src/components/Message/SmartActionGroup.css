@@ -64,42 +64,44 @@
    ======================================== */
 .smart-action-group {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column; /* 縦積みに変更 */
     gap: 8px;
     padding: 0;
 }
 
 .smart-action-btn {
     display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
+    align-items: flex-start; /* 複数行時にアイコンを上揃え */
+    justify-content: flex-start; /* 左寄せ */
+    width: 100%; /* 横幅いっぱい */
+    gap: 8px; /* アイコンとテキストの隙間を少し広げる */
+    padding: 10px 14px;
+    height: auto;
 
-    /* Ghost Style */
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: 9999px;
-    /* rounded-full */
+    /* Liquid Glass Style */
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px; /* カプセル型(9999px)から少し丸みを帯びた角丸長方形に変更 */
 
     /* Typography */
     font-size: 13px;
     font-weight: 500;
     color: var(--color-primary);
-    line-height: 1;
+    line-height: 1.4;
 
     /* Interaction */
     cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 
     /* タッチターゲット確保 */
     min-height: 36px;
 }
 
 .smart-action-btn:hover:not(.disabled) {
-    background: var(--bg-layer-1);
-    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.6); /* ホバー時の明るさを調整 */
+    border-color: rgba(59, 130, 246, 0.3);
     /* Hover時のGlow効果 */
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .smart-action-btn:focus-visible {
@@ -115,13 +117,15 @@
 .smart-action-icon {
     flex-shrink: 0;
     color: inherit;
+    margin-top: 1px; /* テキスト1行目と揃える */
 }
 
 .smart-action-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
+    white-space: normal; /* 折り返しを許可 */
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
+    text-align: left;
 }
 
 /* ========================================
@@ -132,14 +136,132 @@
 }
 
 [data-theme="dark"] .smart-action-btn {
-    border-color: var(--color-border);
+    background: rgba(255, 255, 255, 0.05); /* Liquid Glassダークモードのベース色 */
+    border-color: rgba(255, 255, 255, 0.1);
     color: var(--color-primary);
 }
 
 [data-theme="dark"] .smart-action-btn:hover:not(.disabled) {
-    background: var(--bg-layer-2);
-    border-color: var(--color-primary);
-    box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(96, 165, 250, 0.4);
+    box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2);
+}
+
+[data-theme="dark"] .selection-island-container {
+    background: rgba(40, 40, 40, 0.75);
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+[data-theme="dark"] .selection-island-item {
+    color: var(--color-text-main);
+}
+
+[data-theme="dark"] .selection-island-item:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.08); /* ダークモード用 Inset Highlight */
+}
+
+[data-theme="dark"] .selection-island-item:active:not(.disabled) {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* ========================================
+   Selection Island (Floating Design)
+   ======================================== */
+.selection-island-container {
+    margin-top: 18px;
+    padding: 16px;
+    
+    /* HUD Material (DESIGN_RULE準拠) */
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    
+    /* Floating Edge & Shadow */
+    border-radius: 20px;
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+
+    /* アニメーション用の基準 */
+    transform-origin: top center;
+}
+
+.selection-island-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 0 4px; /* リストとのアライメント */
+}
+
+.selection-island-header-icon {
+    flex-shrink: 0;
+    color: var(--color-primary);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+    animation: glow-pulse 2.5s ease-in-out infinite; /* Iconに静かな明滅を追加 */
+}
+
+.selection-island-header-label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--color-text-main); /* 通常の色に戻す */
+}
+
+.selection-island-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.selection-island-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    
+    /* 枠線なし/透明スタート */
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-text-main);
+    text-align: left;
+    cursor: pointer;
+
+    /* Inset Highlight Interaction */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.selection-island-item:hover:not(.disabled) {
+    background: rgba(0, 0, 0, 0.05); /* ジンワリ明るく(テキストとのコントラスト比考慮) */
+}
+
+.selection-island-item:active:not(.disabled) {
+    transform: scale(0.98);
+    background: rgba(0, 0, 0, 0.08); /* 押下感 */
+}
+
+.selection-island-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.selection-island-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--color-primary); /* アイコンはプライマリ色を維持 */
+}
+
+.selection-island-label {
+    white-space: normal;
+    overflow: visible;
 }
 
 /* ========================================
@@ -164,11 +286,29 @@
     }
 
     .smart-action-btn {
-        padding: 6px 12px;
+        padding: 8px 12px; /* スマホでも押しやすいパディングはキープ */
         font-size: 12px;
     }
 
-    .smart-action-label {
-        max-width: 150px;
+    .selection-island-container {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .selection-island-header-label {
+        font-size: 13px;
+    }
+
+    .selection-island-item {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+}
+
+/* ダークモード考慮 */
+@media (prefers-color-scheme: dark) {
+    .smart-actions-container.selection-mode .smart-action-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
     }
 }

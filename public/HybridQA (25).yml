@@ -9,7 +9,7 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/gemini:0.7.10@002971bf0936d741f1645427be35520abb0c9dde89cc110764436c4e6da4bb61
+    marketplace_plugin_unique_identifier: langgenius/gemini:0.7.15@ca2b8f2599b87de968354f0e2ccbbc0d76bac5ebf275c3f0fbdae48881d74518
     version: null
 - current_identifier: null
   type: marketplace
@@ -20,6 +20,14 @@ kind: app
 version: 0.6.0
 workflow:
   conversation_variables:
+  - description: ''
+    id: 6d21ea78-ac07-437d-bca5-651e5ff88a3c
+    name: search_strategy_json
+    selector:
+    - conversation
+    - search_strategy_json
+    value: ''
+    value_type: string
   - description: ''
     id: ba1e1bcc-9a00-4104-907c-e604a3ca5b70
     name: is_web_search_executed
@@ -977,17 +985,6 @@ workflow:
       zIndex: 0
     - data:
         isInLoop: false
-        sourceType: llm
-        targetType: code
-      id: 17719989311170-source-17719994416790-target
-      source: '17719989311170'
-      sourceHandle: source
-      target: '17719994416790'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
         sourceType: code
         targetType: http-request
       id: 17719994416790-source-17719995520230-target
@@ -1072,9 +1069,34 @@ workflow:
         sourceType: assigner
         targetType: llm
       id: 1772783154630-source-17715726019570-target
+      selected: false
       source: '1772783154630'
       sourceHandle: source
       target: '17715726019570'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: assigner
+      id: 17719989311170-source-1772785070312-target
+      source: '17719989311170'
+      sourceHandle: source
+      target: '1772785070312'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: code
+      id: 1772785070312-source-17719994416790-target
+      source: '1772785070312'
+      sourceHandle: source
+      target: '17719994416790'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1543,10 +1565,10 @@ workflow:
       height: 102
       id: '1765345440190'
       position:
-        x: 11468
+        x: 11768
         y: 593
       positionAbsolute:
-        x: 11468
+        x: 11768
         y: 593
       selected: false
       sourcePosition: right
@@ -1613,10 +1635,10 @@ workflow:
       height: 80
       id: '1765514869301'
       position:
-        x: 10422
+        x: 10722
         y: 765
       positionAbsolute:
-        x: 10422
+        x: 10722
         y: 765
       selected: false
       sourcePosition: right
@@ -1664,10 +1686,10 @@ workflow:
       height: 220
       id: '1765515071449'
       position:
-        x: 10764
+        x: 11064
         y: 695
       positionAbsolute:
-        x: 10764
+        x: 11064
         y: 695
       selected: false
       sourcePosition: right
@@ -1683,10 +1705,10 @@ workflow:
       height: 102
       id: '17655153615920'
       position:
-        x: 11468
+        x: 11768
         y: 791
       positionAbsolute:
-        x: 11468
+        x: 11768
         y: 791
       selected: false
       sourcePosition: right
@@ -1702,10 +1724,10 @@ workflow:
       height: 102
       id: '17655153626170'
       position:
-        x: 11468
+        x: 11768
         y: 1187
       positionAbsolute:
-        x: 11468
+        x: 11768
         y: 1187
       selected: false
       sourcePosition: right
@@ -1721,10 +1743,10 @@ workflow:
       height: 102
       id: '17655153635450'
       position:
-        x: 11468
+        x: 11768
         y: 989
       positionAbsolute:
-        x: 11468
+        x: 11768
         y: 989
       selected: false
       sourcePosition: right
@@ -1969,11 +1991,13 @@ workflow:
             </system_prompt_json>\n\n# Contextual Conversation Rules (重要: メモリの活用)\n\
             Difyのメモリ機能により、これまでの対話履歴が共有されています。以下のルールを厳守してください。\n1. **文脈の継承**: 「その部分についてもっと詳しく」「次のページはどうなってる？」など、指示語や省略を伴う質問には、直前のやり取りとドキュメント内容を照らし合わせて意図を汲み取ってください。\n\
             2. **スマートな応答**: 「資料を確認しました」「はい、お答えします」などのメタな前置きは絶対に禁止です。常にユーザーと資料の内容について直接議論を開始してください。\n\
-            \n# Structured Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\
-            \n## 1. thinking (内部思考プロセス)\n提供されたドキュメントと会話履歴を分析し、Markdownの箇条書き（日本語）で記述してください。（例:\
-            \ - **文脈**: 先ほどの予算案に対する深掘り質問, - **着眼点**: 該当セクションの例外規定を抽出する）\n\n## 2. answer\
-            \ (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n- **超・結論ファースト**:\
-            \ 挨拶や前置きは一切排除し、検索結果から得られた最も重要な事実（結論）を1文目から直接述べてください。長々とした解説は避け、必要最低限の要点のみを抽出してください。\n\
+            \n## Quote Handling (引用への高速フォーカス)\n- ユーザー入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、提供された資料全体を読むのではなく、その引用部分に関連する該当箇所（背景、詳細ルール、例外など）へ最速で焦点を当ててください。\n\
+            - 「引用された箇所についての結論」を1文目から直接述べ、ユーザーを待たせないスピーディーな回答を構成してください。\n\n# Structured\
+            \ Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\n## 1. thinking\
+            \ (内部思考プロセス)\n提供されたドキュメントと会話履歴を分析し、Markdownの箇条書き（日本語）で記述してください。（例: - **文脈**:\
+            \ 先ほどの予算案に対する深掘り質問, - **着眼点**: 該当セクションの例外規定を抽出する）\n\n## 2. answer (回答本文)\n\
+            ユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n- **超・結論ファースト**: 挨拶や前置きは一切排除し、検索結果から得られた最も重要な事実（結論）を1文目から直接述べてください。長々とした解説は避け、必要最低限の要点のみを抽出してください。\n\
             - ⚠️**【重要: 高密度情報のテーブル化】**: ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
             - **Citation Rule**: 引用した情報の文末には必ず `[1]` のようなInline Markersを付与してください（末尾の出典リスト作成は禁止）。\n\
             - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、詳細な手順の確認や、関連する周辺情報のチェックを促す「短い問いかけ」を1〜2文で添えてください。\n\
@@ -2021,6 +2045,13 @@ workflow:
             {{#1770869430347.text#}}
 
 
+            ## Quote Context (ユーザーが画面上で引用したテキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。最速で回答を構成する際の最も重要な「文脈」として扱ってください。
+
+
             # Instruction
 
             会話履歴と提供されたファイルの内容を統合的に解釈し、ユーザーの質問に対する回答を生成してください。'
@@ -2059,7 +2090,8 @@ workflow:
                   type: object
                 type: array
               session_title:
-                description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+                description: 会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字
+                  "" を返す。
                 type: string
               smart_actions:
                 description: 資料の内容を踏まえ、ユーザーが次に深掘りしたくなるような質問やドキュメントに関するアクションの提案（1〜3つ）
@@ -2102,9 +2134,6 @@ workflow:
             - citations
             - smart_actions
             - session_title
-            session_title:
-              description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
-              type: string
             type: object
         structured_output_enabled: true
         title: LLM_Fast_Doc
@@ -2156,7 +2185,9 @@ workflow:
             1. **文脈の継承**: ユーザーの短い入力（例：「もっと詳しく」「他には？」）に対しては、直前の話題を正確に引き継いで回答してください。\n\
             2. **重複の排除**: 過去のターンで既に説明した定義や基本情報は繰り返さず、差分となる新しい情報や深い洞察を提供してください。\n3.\
             \ **挨拶の省略**: 会話の継続中（2ターン目以降）は、「こんにちは」「承知しました」「ご質問ありがとうございます」などの挨拶や受領の返事は一切禁止です。0秒で結論から書き出してください。\n\
-            \n# Structured Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\
+            \n## Quote Handling (引用への高速フォーカス)\n- ユーザー入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、引用された単語の定義、背景、または関連するアイデアをあなたの知識から即座に引き出し、解説してください。\n- 挨拶や前置きは完全に排除し、「引用された〇〇については〜」と直接本題に入り、ユーザーの思考テンポを崩さない高速なレスポンスを提供してください。\n\
+            \n\n# Structured Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\
             \n## 1. thinking (内部思考プロセス)\n回答を出力する前に、会話履歴から文脈をどう解釈したかをMarkdownの箇条書き形式で格納してください。（例:\
             \ - **文脈**: 直前の〇〇に関する追加質問と判断, - **戦略**: 前回の説明との重複を避け、応用例を提示する）\n\n## 2.\
             \ answer (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n- **超・結論ファースト**:\
@@ -2165,16 +2196,35 @@ workflow:
             - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、さらなる詳細の提示や次の作業を促す「短い問いかけ（質問や提案）」を1〜2文で添えてください。\n\
             \  - （例：「まずは要点をまとめました。さらに詳しい解説が必要ですか？」「この方針で、具体的な構成案も作成しましょうか？」など）\n\n\
             \n\n## 3. citations (出典情報)\n外部コンテキストがないため、必ず空配列 `[]` を出力してください。\n\n##\
-            \ 4. smart_actions (プロアクティブ提案)\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            ⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n- **type**: `suggested_question`, `deep_dive`, または `web_search`\n- ⚠️**【重要:\
-            \ 未知の情報への対応 (Web検索への誘導)】**\n  リアルタイムな情報（天気、株価、最新ニュースなど）や自身の知識にないことを聞かれ、「答えられない」と判断した場合（answerでその旨を伝えた場合）は、**必ず\
-            \ `type: \"web_search\"` を使用して、外部Web検索への切り替えを促すボタンを1つ配置**してください。\n- **label**:\
-            \ UIに表示されるボタンのテキスト（短く簡潔に）。\n  ⚠️【重要: 抽象化禁止】\n  「詳細を聞く」のように一般化せず、ユーザーが「何について答えるボタンなのか」を一目で分かるようにしてください。\n\
-            \  （例: ⭕️「はい、〇〇について詳しく教えて」 ⭕️「はい、Webで『今日の東京の天気』を調べて」）\n- **icon**: Lucide\
-            \ Reactのアイコン名。（例: `zap`, `sparkles`, `globe`, `search`）\n- **payload**:\
-            \ `{\"text\": \"具体的な質問や指示文\"}` （※web_searchの場合は、検索エンジンにそのまま投げられる具体的なクエリテキストをセットしてください）\n\
-            \n## 5. session_title (スレッド名)\n会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n\
+            \ 4. smartactions（プロアクティブ提案）\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
+            \n⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
+            \n---\n\n- **type: `suggestedquestion`**（次の質問候補）\n  【使用条件】\n  - AIが「次にこれを聞くといいですよ」と受動的に提案する場合\n\
+            \  - 例）「導入コストについて詳しく調べますか？」\n  【生成ルール】\n  - **label**：UIに表示されるボタンのテキスト（短く簡潔に。ユーザーの返答として自然な言葉遣いにする）\n\
+            \    ⚠️【抽象化禁止】「特定の〇〇」「別の〇〇」のようにキーワードを伏せたり一般化したりしないこと。\n    payload.textに具体的な用語（例：「P.T.」「ROM」）が含まれる場合は、必ずlabel内にも明記すること。\n\
+            \    （例: ❌「特定の症状について聞く」→ ⭕「『P.T.』の意味を聞く」）\n    ⚠️ファイル名（「〇〇.pdf」）をlabelに含めず、具体的な手法名・テーマ名を使うこと。\n\
+            \    ⚠️テキスト内に絵文字は絶対に含めないこと（フロントエンドで専用アイコンを描画するため）。\n  - **icon**：Lucide\
+            \ Reactのアイコン名（例：`sparkles`, `message-circle-question`）\n  - **payload**：`{\"\
+            text\": \"具体的な質問文\"}`（例：`{\"text\": \"はい、『ROM』についても教えてください。\"}`）\n\n---\n\
+            \n- **type: `websearch`**（Web検索モードで再検索）\n  【使用条件】\n  - 最新情報・外部情報が必要な場合にWebで調べ直すことを提案する場合\n\
+            \  【生成ルール】\n  - **label**：「〇〇をWeb検索で調べる」など、何を検索するかが一目で分かるテキスト\n    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n\
+            \  - **icon**：Lucide Reactのアイコン名（例：`globe`, `search`, `zap`）\n  - **payload**：`{\"\
+            text\": \"検索クエリ文字列\"}`\n\n---\n\n- **type: `deepdive`**（より詳細な解説を求める）\n\
+            \  【使用条件】\n  - 現在の回答に対して、さらに掘り下げた詳細解説を求める場合\n  【生成ルール】\n  - **label**：「〇〇についてもっと詳しく」など、何を深掘りするかが明確なテキスト\n\
+            \    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n  - **icon**：Lucide Reactのアイコン名（例：`sparkles`,\
+            \ `lightbulb`, `code`）\n  - **payload**：`{\"text\": \"詳細を求める質問文\"}`\n\n\
+            ---\n\n- **type: `selection`**（選択肢提示・能動的分岐）\n  【suggestedquestionとの使い分け】\n\
+            \  - `suggestedquestion`：AIが「次にこれを聞くといいですよ」と**受動的**に提案する\n  - `selection`：AIがユーザーに「どちらで進めますか？」と**能動的**に選ばせる必要がある場合\n\
+            \  【使用条件】\n  - ユーザーが「壁打ち」「アイデア出し」「方向性の確認」を求めている場合\n  - 複数の選択肢を提示してユーザーに選んでもらう必要がある場合\n\
+            \  - 次のアクションが複数パターン存在し、AIが絞り込めない場合\n  【生成ルール】\n  - 選択肢は2〜4個を目安に生成する\n\
+            \  - **label**：ユーザーが読む選択肢テキスト（例：「A案：スピード重視で進める」）\n    ⚠️絵文字禁止はsuggestedquestionと同様\n\
+            \  - **icon**：Lucide Reactのアイコン名（例：`list-checks`, `git-branch`, `check-square`）\n\
+            \  - **payload.text のルール**：\n    ・Intent Analysisノードが再実行されるため、意図が明確に伝わる短文にすること\n\
+            \    ・「〇〇の方向で進める」「〇〇を優先する」など10〜20文字程度の具体的な動詞文にする\n    ・曖昧な単語（「これ」「それ」「A案」のみ）はNG\n\
+            \    ✅ 良い例：「スピード重視でMVPを先にリリースする方向で進める」\n    ❌ 悪い例：「A案」「こっち」「方向性1」\n\n\
+            ---\n\n⚠️**【排他ルール: selectionの場合】**\n`smartactions` に `type: selection`\
+            \ を1つでも含める場合、そのターンの `smartactions` は **`selection` のみ**で構成すること。\n`suggestedquestion`\
+            \ / `websearch` / `deepdive` との混在は**絶対に禁止**。\nユーザーの選択に集中させるため、他のアクションは一切出力しない。\n\
+            \n\n## 5. session_title (スレッド名)\n会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n\
             - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
             \  - ⭕️ 良い例：「ドキュメントの要約」「React 19の仕様確認」\n  - ❌ 悪い例：「〜について教えてください」などの冗長な表現。\n\
             - **【2回目以降（継続した会話）の場合】**: 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。"
@@ -2193,14 +2243,24 @@ workflow:
             {{#1770869430347.text#}}
 
 
+            ## Quote Context (ユーザーが画面上で引用したテキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。最速で回答を構成する際の最も重要な「文脈」として扱ってください。
+
+
             # Instruction
 
-            会話履歴と上記の情報に基づいて、ユーザーの質問に対する回答を生成してください。'
+            会話履歴と上記の情報に基づいて、ユーザーの質問に対する回答を生成してください。
+
+
+            '
         retry_config:
           max_retries: 3
           retry_enabled: true
           retry_interval: 1000
-        selected: false
+        selected: true
         structured_output:
           schema:
             properties:
@@ -2222,7 +2282,8 @@ workflow:
                   type: object
                 type: array
               session_title:
-                description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+                description: 会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字
+                  "" を返す。
                 type: string
               smart_actions:
                 description: 現在の文脈を踏まえ、ユーザーが次に取るべきアクションや関連質問の提案（1〜3つ）
@@ -2243,11 +2304,13 @@ workflow:
                           type: string
                       type: object
                     type:
-                      description: アクションの種類
+                      description: suggestedquestion, websearch（Web検索）, deepdive,
+                        selection（壁打ち・選択肢提示）
                       enum:
                       - suggested_question
                       - web_search
                       - deep_dive
+                      - selection
                       type: string
                   required:
                   - type
@@ -2279,7 +2342,7 @@ workflow:
       positionAbsolute:
         x: 2112
         y: 633
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -2316,6 +2379,9 @@ workflow:
             \ Conversation Rules (重要: メモリの活用)\nDifyのメモリ機能により、これまでの対話履歴が共有されています。以下のルールを厳守してください。\n\
             1. **文脈の継承**: 指示語や省略を伴う質問には、直前のやり取りと提供された各ソースを照らし合わせて意図を汲み取ってください。\n2.\
             \ **スマートな応答**: 「検索結果を確認しました」「資料を読みました」などのメタな前置きは絶対に禁止です。0秒で回答から書き出してください。\n\
+            \n# **Quote Handling (引用へのフォーカス)**:\n   - ユーザー入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、その引用内容を「社内の基準（RAG）」と「外部の最新動向（Web）」の両方の視点から多角的に分析してください。\n\
+            \   - 例：社内規定の一部が引用された場合は、「社内ではこう規定されていますが、Web上の一般的な基準（または他社事例）と比較すると〜」といった、ハイブリッドならではの相対的なインサイトを提供してください。\n\
             \n# Structured Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\
             \n## 1. thinking (内部思考プロセス)\n最大3種類の情報源（RAG / Web / Document）をどのように組み合わせ、補完・比較するかをMarkdownの箇条書きで記述してください。（例:\
             \ - **Document分析**: ..., - **RAGとの照合**: ..., - **Web情報での補完**: ..., - **統合戦略**:\
@@ -2373,6 +2439,14 @@ workflow:
             ## 5. User Query
 
             {{#1770869430347.text#}}
+
+
+            ## Quote Context (ユーザーが画面上で引用したテキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。回答を構成する際の最も重要な「文脈」として扱ってください。
+
 
 
             # Instruction
@@ -2465,10 +2539,10 @@ workflow:
       height: 118
       id: '17665511958080'
       position:
-        x: 11126
+        x: 11426
         y: 585
       positionAbsolute:
-        x: 11126
+        x: 11426
         y: 585
       selected: false
       sourcePosition: right
@@ -2505,10 +2579,12 @@ workflow:
             {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n# Contextual\
             \ Conversation Rules (重要: メモリの活用)\nDifyのメモリ機能により、これまでの対話履歴が共有されています。以下のルールを厳守してください。\n\
             1. **文脈の継承**: 「その表の意味は？」「次のセクションは？」など、指示語や省略を伴う質問には、直前のやり取りとドキュメント内容を照らし合わせて意図を汲み取ってください。\n\
-            2. **スマートな応答**: 「資料を確認しました」などのメタな前置きは絶対に禁止です。0秒で回答から書き出してください。\n\n# Structured\
-            \ Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\n## 1. thinking\
-            \ (内部思考プロセス)\nドキュメントのどの部分に該当情報があるかを検索・分析し、Markdownの箇条書きで記述してください。（例: -\
-            \ **検索対象**: 第4章 セキュリティ要件, - **分析**: 該当箇所に記載あり、要約して提示する）\n\n## 2. answer\
+            2. **スマートな応答**: 「資料を確認しました」などのメタな前置きは絶対に禁止です。0秒で回答から書き出してください。\n\n# **Quote\
+            \ Handling (引用へのフォーカス)**:\n   - ユーザー入力に `Quote Context (引用テキスト)` が含まれている場合、ユーザーは提供されたドキュメントの「その部分の解釈」や「例外規定」を知りたがっています。\n\
+            \   - ドキュメントコンテキストの中から、引用文に関連する詳細な条件、前後の文脈、あるいは具体的な手続き方法を最優先で抽出し、「引用された箇所に関する社内の公式な見解」として正確に回答を構成してください。\n\
+            \n# Structured Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\
+            \n## 1. thinking (内部思考プロセス)\nドキュメントのどの部分に該当情報があるかを検索・分析し、Markdownの箇条書きで記述してください。（例:\
+            \ - **検索対象**: 第4章 セキュリティ要件, - **分析**: 該当箇所に記載あり、要約して提示する）\n\n## 2. answer\
             \ (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n- **結論ファースト**:\
             \ 冒頭（`### 結論 \U0001F680` など）で核心を突いてください。\n- ⚠️**【重要: 高密度情報のテーブル化】**: ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
             \n- ⚠️**【テーブル化の注意点】**: \n -情報を表（テーブル）形式で出力する際は、厳密にMarkdownのテーブル記法に従うこと。\n\
@@ -2554,6 +2630,14 @@ workflow:
             ## 3. User Query
 
             {{#1770869430347.text#}}
+
+
+            ## Quote Context (ユーザーが画面上で引用したテキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。回答を構成する際の最も重要な「文脈」として扱ってください。
+
 
 
             # Instruction
@@ -2642,10 +2726,10 @@ workflow:
       height: 118
       id: '17665512107830'
       position:
-        x: 11126
+        x: 11426
         y: 783
       positionAbsolute:
-        x: 11126
+        x: 11426
         y: 783
       selected: false
       sourcePosition: right
@@ -2680,7 +2764,9 @@ workflow:
             \n# Core Guidelines\n\n1. **Smart Colleague Mode**:\n   - 信頼できる同僚のような、簡潔で明快な「です・ます」調を使用してください。\n\
             \   - 「こんにちは」「検索しました」などの挨拶や前置きは一切不要です。0秒で結論から書き出してください。\n   - 単なる要約ではなく、「AとBを合わせると、今回はCという対応がベストです」といった洞察（Insight）を加えてください。\n\
             \n2. **Zero-Trust Handling**:\n   - 検索結果や提供された情報が不十分な場合、推測で事実を埋めないでください。「確実な情報はここまでですが、ここからは推測になります」と明確に線引きを行ってください。\n\
-            \n3. **Context Awareness (重複排除の徹底)**:\n   - 会話履歴を考慮し、直前の回答で既に詳しく説明した内容（機能一覧や定義など）は繰り返さないでください。\n\
+            \n3. **Quote Handling (引用へのフォーカス)**:\n   - ユーザー入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、回答の軸をその引用部分に据えてください。\n   - 引用された未知の用語、企業名、またはニュースの断片に対して、Web検索結果を用いて「それが何なのか」「最新の状況はどうなっているのか」をピンポイントで解説し、ユーザーの疑問を直接的に解決してください。\n\
+            \n4. **Context Awareness (重複排除の徹底)**:\n   - 会話履歴を考慮し、直前の回答で既に詳しく説明した内容（機能一覧や定義など）は繰り返さないでください。\n\
             \   - ユーザーが特定の属性（例：「費用は？」「期間は？」）のみを尋ねている場合、結論（数値や事実）を最優先し、冗長な説明は排除してスマートな差分回答を行ってください。\n\
             \n# Structured Output Generation Rules\n\n生成する各フィールド（thinking, answer,\
             \ citations, smart_actions）には、以下のルールを厳格に適用してください。\n\n## 1. thinking (内部思考プロセス)\n\
@@ -2700,30 +2786,47 @@ workflow:
             - `id`: `answer` 内の番号と紐づく識別子（例: `cite_1`）。\n- `type`: `web` または `rag`\
             \ (社内ドキュメント) など。\n- `source`: ページタイトルやドキュメント名。\n- `url`: 参照URL。不明な場合は\
             \ `\"null\"`。\n- `source`: 必ず「元のファイル名（拡張子含む）」のみを記述してください。資料のタイトルやテーマなどの余計な文字列（例：「資料1.pdf:\
-            \ 〇〇システム」）は絶対に含めないでください。\n\n## 4. smart_actions (プロアクティブ提案)\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            ⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n- **type**: 以下のいずれかを指定。\n  - `suggested_question`: 次の質問候補をチャットに入力する\n\
-            \  - `web_search`: Web検索モードで再検索する\n  - `deep_dive`: より詳細な解説を求める\n- **label**:\
-            \ UIに表示されるボタンのテキスト（短く簡潔に。例：「はい、〇〇について教えて」「別の観点から調べたい」など、ユーザーの返答として自然な言葉遣いにする）。\n\
-            \  ⚠️【重要: 抽象化禁止】\n  「特定の〇〇」「別の〇〇」のようにキーワードを伏せたり一般化したりしないでください。\n  payload.textに具体的な用語（例：「P.T.」「ROM」など）が含まれる場合は、必ずその具体的なキーワードをlabel内にも明記し、ユーザーが「何について質問するボタンなのか」を一目で分かるようにしてください。\n\
-            \  (例: ❌「特定の症状について聞く」 → ⭕️「『P.T.』の意味を聞く」)。**※重要: フロントエンドで専用のアイコンを描画するため、テキスト内に絵文字は絶対に含めないでください。**\n\
-            ⚠️【重要】ボタンのラベル(label)には「〇〇.pdfの手法」といったファイル名を含めず、必ず具体的な手法名やテーマ名を含めてください。\n\
-            \n- **icon**: Lucide Reactのアイコン名。（例: `sparkles`, `search`, `message-circle-question`）\n\
-            - **payload**: アクション実行に必要なデータ。`type` が `suggested_question` の場合は、ユーザーの代わりに入力する質問文として\
-            \ `{\"text\": \"具体的な質問文\"}` を必ず含めてください。（例：`{\"text\": \"はい、『ROM』についても教えてください。\"\
-            }`）"
+            \ 〇〇システム」）は絶対に含めないでください。\n\n## 4. smartactions（プロアクティブ提案）\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
+            \n⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
+            \n---\n\n- **type: `suggestedquestion`**（次の質問候補）\n  【使用条件】\n  - AIが「次にこれを聞くといいですよ」と受動的に提案する場合\n\
+            \  - 例）「導入コストについて詳しく調べますか？」\n  【生成ルール】\n  - **label**：UIに表示されるボタンのテキスト（短く簡潔に。ユーザーの返答として自然な言葉遣いにする）\n\
+            \    ⚠️【抽象化禁止】「特定の〇〇」「別の〇〇」のようにキーワードを伏せたり一般化したりしないこと。\n    payload.textに具体的な用語（例：「P.T.」「ROM」）が含まれる場合は、必ずlabel内にも明記すること。\n\
+            \    （例: ❌「特定の症状について聞く」→ ⭕「『P.T.』の意味を聞く」）\n    ⚠️ファイル名（「〇〇.pdf」）をlabelに含めず、具体的な手法名・テーマ名を使うこと。\n\
+            \    ⚠️テキスト内に絵文字は絶対に含めないこと（フロントエンドで専用アイコンを描画するため）。\n  - **icon**：Lucide\
+            \ Reactのアイコン名（例：`sparkles`, `message-circle-question`）\n  - **payload**：`{\"\
+            text\": \"具体的な質問文\"}`（例：`{\"text\": \"はい、『ROM』についても教えてください。\"}`）\n\n---\n\
+            \n- **type: `websearch`**（Web検索モードで再検索）\n  【使用条件】\n  - 最新情報・外部情報が必要な場合にWebで調べ直すことを提案する場合\n\
+            \  【生成ルール】\n  - **label**：「〇〇をWeb検索で調べる」など、何を検索するかが一目で分かるテキスト\n    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n\
+            \  - **icon**：Lucide Reactのアイコン名（例：`globe`, `search`, `zap`）\n  - **payload**：`{\"\
+            text\": \"検索クエリ文字列\"}`\n\n---\n\n- **type: `deepdive`**（より詳細な解説を求める）\n\
+            \  【使用条件】\n  - 現在の回答に対して、さらに掘り下げた詳細解説を求める場合\n  【生成ルール】\n  - **label**：「〇〇についてもっと詳しく」など、何を深掘りするかが明確なテキスト\n\
+            \    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n  - **icon**：Lucide Reactのアイコン名（例：`sparkles`,\
+            \ `lightbulb`, `code`）\n  - **payload**：`{\"text\": \"詳細を求める質問文\"}`\n\n\
+            ---\n\n- **type: `selection`**（選択肢提示・能動的分岐）\n  【suggestedquestionとの使い分け】\n\
+            \  - `suggestedquestion`：AIが「次にこれを聞くといいですよ」と**受動的**に提案する\n  - `selection`：AIがユーザーに「どちらで進めますか？」と**能動的**に選ばせる必要がある場合\n\
+            \  【使用条件】\n  - ユーザーが「壁打ち」「アイデア出し」「方向性の確認」を求めている場合\n  - 複数の選択肢を提示してユーザーに選んでもらう必要がある場合\n\
+            \  - 次のアクションが複数パターン存在し、AIが絞り込めない場合\n  【生成ルール】\n  - 選択肢は2〜4個を目安に生成する\n\
+            \  - **label**：ユーザーが読む選択肢テキスト（例：「A案：スピード重視で進める」）\n    ⚠️絵文字禁止はsuggestedquestionと同様\n\
+            \  - **icon**：Lucide Reactのアイコン名（例：`list-checks`, `git-branch`, `check-square`）\n\
+            \  - **payload.text のルール**：\n    ・Intent Analysisノードが再実行されるため、意図が明確に伝わる短文にすること\n\
+            \    ・「〇〇の方向で進める」「〇〇を優先する」など10〜20文字程度の具体的な動詞文にする\n    ・曖昧な単語（「これ」「それ」「A案」のみ）はNG\n\
+            \    ✅ 良い例：「スピード重視でMVPを先にリリースする方向で進める」\n    ❌ 悪い例：「A案」「こっち」「方向性1」\n\n\
+            ---\n\n⚠️**【排他ルール: selectionの場合】**\n`smartactions` に `type: selection`\
+            \ を1つでも含める場合、そのターンの `smartactions` は **`selection` のみ**で構成すること。\n`suggestedquestion`\
+            \ / `websearch` / `deepdive` との混在は**絶対に禁止**。\nユーザーの選択に集中させるため、他のアクションは一切出力しない。\n"
         - id: 47bed9c7-8524-46e6-a1ad-f527e121dc97
           role: user
-          text: "# Input Data\n\n## User Query\n{{#1770869430347.text#}}\n\n## Context\
-            \ Data\n- Current Time: {{#1761291739140.current_time#}}\n- Web Search\
-            \ Mode: {{#1761291739140.web_enabled#}}\n\n## User Profile (Dynamic Context)\n\
-            {{#1761291739140.system_prompt#}}\n※このプロファイルの `department`（部署）や `role`（役割）に基づき、情報の粒度や専門性を調整してください。また\
-            \ `custom_directives`（指示）がある場合は最優先で従ってください。\n\n## 1. Internal Knowledge\
-            \ (RAG)\n{{#conversation.context_rag#}}\n※ここが空の場合、社内規定は参照していません。\n\n##\
-            \ 2. Web Search Results\n{{#conversation.context_web#}}\n※ここが空の場合、Web検索結果は取得できていません。\n\
-            \n## Search Execution Status\n- RAG Used: {{#conversation.requires_rag#}}\n\
-            - Web Used: {{#conversation.requires_web#}}\n\n## Tool Execution Status\n\
-            - Store Summary Executed: \n{{#conversation.is_store_summary_executed#}}\n\
+          text: "# Input Data\n\n## User Query\n{{#1770869430347.text#}}\n\n## Quote\
+            \ Context (ユーザーが画面上で引用したテキスト)\n{{#1770869430347.quote#}}\n※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。回答を構成する際の最も重要な「文脈」として扱ってください。\n\
+            \n## Context Data\n- Current Time: {{#1761291739140.current_time#}}\n\
+            - Web Search Mode: {{#1761291739140.web_enabled#}}\n\n## User Profile\
+            \ (Dynamic Context)\n{{#1761291739140.system_prompt#}}\n※このプロファイルの `department`（部署）や\
+            \ `role`（役割）に基づき、情報の粒度や専門性を調整してください。また `custom_directives`（指示）がある場合は最優先で従ってください。\n\
+            \n\n/\n## 1. Internal Knowledge (RAG)\n{{#conversation.context_rag#}}\n\
+            ※ここが空の場合、社内規定は参照していません。\n\n## 2. Web Search Results\n{{#conversation.context_web#}}\n\
+            ※ここが空の場合、Web検索結果は取得できていません。\n\n## Search Execution Status\n- RAG Used:\
+            \ {{#conversation.requires_rag#}}\n- Web Used: {{#conversation.requires_web#}}\n\
+            \n## Tool Execution Status\n- Store Summary Executed: \n{{#conversation.is_store_summary_executed#}}\n\
             - RAG Search Executed: {{#conversation.is_rag_search_executed#}}\n- Web\
             \ Search Executed: {{#conversation.is_web_search_executed#}}\n\n## Previous\
             \ Processes (Reasoning Logs by Node)\n【Intent Analysis Node】\n- Thinking:\
@@ -2731,7 +2834,12 @@ workflow:
             - Thinking: {{#conversation.rag_strategy_thinking#}}\n\n【Web Search Strategy\
             \ Node】\n- Reasoning: {{#conversation.search_strategy_reasoning#}}\n\n\
             ※【重要: 出力フォーマットの厳守】\n上記「Tool Execution Status」の値を文字列からbooleanに変換し、指定されたJSONスキーマの各フラグに正確に反映してください。また、Reasoning\
-            \ Logsの内容はマークダウン等に結合せず、各オブジェクト内にそのままマッピングしてください。\n\n# Instruction\n上記のリソースを使用して、ユーザーの質問に対する「インサイト」を含む回答をJSON形式で生成してください。"
+            \ Logsの内容はマークダウン等に結合せず、各オブジェクト内にそのままマッピングしてください。\n\n【Web Search Strategy\
+            \ Node】\n- Strategy Data (JSON): {{#conversation.search_strategy_json#}}\n\
+            \n※【重要: 出力フォーマットの厳守】\n上記「Strategy Data (JSON)」には、Web検索戦略のパラメータ（query_main,\
+            \ target_domainsなど）がJSON文字列として含まれています。このJSON文字列をパースし、指定されたスキーマの `web_search_strategy`\
+            \ オブジェクト内にマッピングしてそのまま格納してください。\n\n# Instruction\n上記のリソースを使用して、ユーザーの質問に対する「インサイト」を含む回答をJSON形式で生成してください。\n\
+            \n"
         retry_config:
           max_retries: 3
           retry_enabled: true
@@ -2791,10 +2899,24 @@ workflow:
                         type: string
                     type: object
                   web_search_strategy:
-                    description: Web検索戦略ノードの推論結果
+                    description: Web検索戦略ノードの推論結果と検索パラメータ
                     properties:
+                      query_alt:
+                        type: string
+                      query_main:
+                        type: string
                       reasoning:
                         type: string
+                      recency:
+                        type: string
+                      search_mode:
+                        type: string
+                      selected_model:
+                        type: string
+                      target_domains:
+                        items:
+                          type: string
+                        type: array
                     type: object
                 type: object
               smart_actions:
@@ -2817,11 +2939,12 @@ workflow:
                       type: object
                     type:
                       description: 'アクションの種類。suggested_question: 次の質問, web_search:
-                        Web再検索, deep_dive: 詳細解説'
+                        Web再検索, deep_dive: 詳細解説, selection: 壁打ち・選択肢提示）'
                       enum:
-                      - suggested_question
-                      - web_search
-                      - deep_dive
+                      - suggestedquestion
+                      - websearch
+                      - deepdive
+                      - selection
                       type: string
                   required:
                   - type
@@ -2856,10 +2979,10 @@ workflow:
       height: 118
       id: '17665512248470'
       position:
-        x: 11126
+        x: 11426
         y: 1179
       positionAbsolute:
-        x: 11126
+        x: 11426
         y: 1179
       selected: false
       sourcePosition: right
@@ -2897,6 +3020,8 @@ workflow:
             \ Conversation Rules (重要: メモリの活用)\nDifyのメモリ機能により、あなたにはこれまでの会話履歴が提供されています。以下のルールで自然な対話を維持してください。\n\
             1. **文脈の継承**: ユーザーの短い入力（例：「もっと詳しく」「他には？」）に対しては、直前の話題を正確に引き継いで回答してください。\n\
             2. **スマートな応答**: 会話の継続中（2ターン目以降）は、「こんにちは」「承知しました」「ご質問ありがとうございます」などの挨拶や受領の返事は一切禁止です。0秒で結論から書き出してください。\n\
+            \n# **Quote Handling (引用へのフォーカス)**:\n   - ユーザー入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、単なる一問一答ではなく、引用された文章の「背景にある意図」や「関連する概念」を読み解いてください。\n   - 例：コードのスニペットが引用された場合はその解説やリファクタリング案を出し、アイデアの一部が引用された場合はそれをさらに拡張するような、パートナーとしての深い洞察を提供してください。\n\
             \n# Structured Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\
             \n## 1. thinking (内部思考プロセス)\n回答を出力する前に、会話履歴から文脈をどう解釈したかをMarkdownの箇条書き形式で格納してください。\n\
             \n## 2. answer (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n\
@@ -2928,6 +3053,13 @@ workflow:
             ## User Query
 
             {{#1770869430347.text#}}
+
+
+            ## Quote Context (ユーザーが画面上で引用したテキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。回答を構成する際の最も重要な「文脈」として扱ってください。
 
 
             # Instruction
@@ -3006,10 +3138,10 @@ workflow:
       height: 118
       id: '17665512406710'
       position:
-        x: 11126
+        x: 11426
         y: 981
       positionAbsolute:
-        x: 11126
+        x: 11426
         y: 981
       selected: false
       sourcePosition: right
@@ -3123,8 +3255,11 @@ workflow:
             \  - ユーザーが明示的に「最新の情報を調べて」「検索して」と求めた場合。\n- **【Web検索が不要な場合 (requires_web:\
             \ false)】**:\n  - 直前の会話履歴の中に、ユーザーの質問に対する「明確な答え」が既に含まれている場合（深掘り質問や再確認）。\n\
             \  - AIの学習済み知識（一般常識、プログラミングの基本概念、歴史的事実など）で即答可能であり、最新情報を引く必要がない場合。\n\n\
-            # Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n \
-            \  - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
+            ## 3. Quote Handling (引用コンテキストの処理)\nユーザーの入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、ユーザーの真の意図はその引用部分に関連しています。\n- 引用された未知の用語や技術スタックに対して「これの一般的な定義は？」「最新の動向や事例を教えて」と求めている場合、外部Web検索が必要と判断し、`requires_web`\
+            \ を `true` に設定してください。\n- `search_query` を生成する際は、引用テキストの意図を汲み取り、ノイズとなる文脈を削ぎ落として最適化してください。\n\
+            \n\n# Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n\
+            \   - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
             \   - 記載例:\n     - **category**: React 19の新機能に関する質問のため、業務・調査要求（TASK）と判断。\n\
             \     - **requires_web**: 履歴に情報がなく、最新の技術動向であるためWeb検索が必要（true）。\n     -\
             \ **search_query**: 最適な検索用キーワードとして『React 19 新機能 変更点』を生成。\n     - **thinking**:\
@@ -3166,6 +3301,11 @@ workflow:
             ※ここにユーザーの名前(name)や属性、文章スタイル指示等が含まれています。`thinking` フィールドの生成時に参照してください。
 
 
+            ## Quote Context (引用テキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは画面上の特定のテキスト（過去の回答やドキュメントの一部）を選択・引用して質問しています。「User Query」はこの引用内容に対する指示であると解釈してください。
 
 
             ## Conversation History (Context)
@@ -3198,7 +3338,8 @@ workflow:
                 description: Web検索に使用する検索クエリ。CHATの場合は空文字。
                 type: string
               session_title:
-                description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+                description: 会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字
+                  "" を返す。
                 type: string
               thinking:
                 description: ユーザーへの状況に応じた挨拶と、具体的なアクションの宣言。SEARCHの場合は『[トピック]を検索します』、CHATの場合は空文字。
@@ -3221,10 +3362,10 @@ workflow:
       id: '17683770269110'
       position:
         x: 3520
-        y: 225
+        y: 222
       positionAbsolute:
         x: 3520
-        y: 225
+        y: 222
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3948,7 +4089,14 @@ workflow:
             value: gemini-3.1-flash-lite-preview
           query:
             type: mixed
-            value: '【過去の検索結果 (Previous Knowledge)】
+            value: '【ユーザーが引用したテキスト (Quote Context)】
+
+              {{#1770869430347.quote#}}
+
+              ※この値が存在する場合、検索の最優先ターゲットはこの引用内容の裏付け、詳細な手順、または関連する例外規定の抽出です。
+
+
+              【過去の検索結果 (Previous Knowledge)】
 
               {{#conversation.requires_rag#}}
 
@@ -3965,23 +4113,31 @@ workflow:
 
               【回答の行動原理：誠実性と差分抽出の遵守】
 
-              1. **事実の抽出**: 提供されたドキュメント内の事実のみを抽出してください。
 
-              2. **差分抽出の徹底**: 「過去の検索結果」に既に含まれている情報（同じ事実、定義、解説など）は出力から完全に除外し、今回のクエリに対する「新たな回答（差分）」のみを抽出してください。
+              1. **引用へのフォーカス (最優先)**: 「ユーザーが引用したテキスト」が存在する場合、そのテキストが記載されている文脈や、それに関連する詳細条件・規定を優先的にドキュメントから探し出し、抽出してください。
 
-              3. **推測の禁止**: 情報が不足している、あるいはドキュメントから確実な結論が導き出せない場合は、無理に推測（ハルシネーション）をせず、必ず「提供された資料内には該当する情報が見当たりませんでした」と正直に回答してください。
 
-              4. **誠実性の評価**: 「分からない」と答えることは、不正確な情報を伝えることよりも高く評価されます。
+              2. **事実の抽出**: 提供されたドキュメント内の事実のみを抽出してください。
 
-              5. **コンテキストの保持**: 事実を抽出する際は、単なるファイル名だけでなく、その情報が記載されていた「資料のタイトル」や「章の大見出し」を必ず併記し、情報の出どころとテーマが明確になるように出力してください。'
+
+              3. **差分抽出の徹底**: 「過去の検索結果」に既に含まれている情報（同じ事実、定義、解説など）は出力から完全に除外し、今回のクエリに対する「新たな回答（差分）」のみを抽出してください。
+
+
+              4. **推測の禁止**: 情報が不足している、あるいはドキュメントから確実な結論が導き出せない場合は、無理に推測（ハルシネーション）をせず、必ず「提供された資料内には該当する情報が見当たりませんでした」と正直に回答してください。
+
+
+              5. **誠実性の評価**: 「分からない」と答えることは、不正確な情報を伝えることよりも高く評価されます。
+
+
+              6. **コンテキストの保持**: 事実を抽出する際は、単なるファイル名だけでなく、その情報が記載されていた「資料のタイトル」や「章の大見出し」を必ず併記し、情報の出どころとテーマが明確になるように出力してください。'
         type: tool
       height: 82
       id: '1770356105216'
       position:
-        x: 6658
+        x: 6657
         y: 535
       positionAbsolute:
-        x: 6658
+        x: 6657
         y: 535
       selected: false
       sourcePosition: right
@@ -4028,55 +4184,59 @@ workflow:
       positionAbsolute:
         x: 7000
         y: 508
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
         code: "import json\n\ndef main(raw_input: str) -> dict:\n    \"\"\"\n    Desktop\
-          \ Intelligence Protocol Parser v2.2 (Robust Mode)\n    Safe for both JSON\
-          \ Protocol (Frontend) and Plain Text (Dify Debug).\n    \"\"\"\n    \n \
-          \   # 1. デフォルト値の初期化 (全て空文字)\n    extracted_text = \"\"\n    extracted_store_id\
-          \ = \"\"\n    extracted_store_name = \"\"\n\n    # 2. 入力が空(None)の場合のガード\n\
-          \    if raw_input is None:\n        return {\n            \"text\": \"\"\
-          ,\n            \"gemini_store_id\": \"\",\n            \"gemini_store_name\"\
+          \ Intelligence Protocol Parser v2.3 (Robust Mode with Quote Support)\n \
+          \   Safe for both JSON Protocol (Frontend) and Plain Text (Dify Debug).\n\
+          \    \"\"\"\n    \n    # 1. デフォルト値の初期化 (全て空文字)\n    extracted_text = \"\"\
+          \n    extracted_store_id = \"\"\n    extracted_store_name = \"\"\n    extracted_quote\
+          \ = \"\"\n\n    # 2. 入力が空(None)の場合のガード\n    if raw_input is None:\n    \
+          \    return {\n            \"text\": \"\",\n            \"gemini_store_id\"\
+          : \"\",\n            \"gemini_store_name\": \"\",\n            \"quote\"\
           : \"\"\n        }\n\n    # 入力を文字列化してとりあえずテキストとして保持 (デバッグ用)\n    extracted_text\
           \ = str(raw_input)\n\n    try:\n        # 3. JSONパースの試行\n        data =\
           \ json.loads(raw_input)\n        \n        # パース成功し、かつ辞書型である場合のみ構造解析を行う\n\
           \        if isinstance(data, dict):\n            \n            # --- Text\
-          \ Extraction ---\n            # contentキーがあり、かつ辞書型の場合\n            content_block\
-          \ = data.get(\"content\")\n            if isinstance(content_block, dict):\n\
-          \                extracted_text = content_block.get(\"text\", \"\")\n  \
-          \          # もしcontentが文字列ならそれを採用\n            elif isinstance(content_block,\
+          \ Extraction ---\n            content_block = data.get(\"content\")\n  \
+          \          if isinstance(content_block, dict):\n                extracted_text\
+          \ = content_block.get(\"text\", \"\")\n            elif isinstance(content_block,\
           \ str):\n                extracted_text = content_block\n            \n\
           \            # --- Store ID Extraction ---\n            dify_inputs = data.get(\"\
-          dify_inputs\")\n            # dify_inputsが辞書型であることを確認してからアクセス (ここがエラーの原因でした)\n\
-          \            if isinstance(dify_inputs, dict):\n                if \"gemini_store_id\"\
-          \ in dify_inputs:\n                    extracted_store_id = dify_inputs[\"\
-          gemini_store_id\"]\n            \n            # Fallback to Context ID\n\
-          \            if not extracted_store_id:\n                context = data.get(\"\
-          context\")\n                if isinstance(context, dict):\n            \
-          \        selected_ids = context.get(\"selected_store_ids\")\n          \
-          \          if isinstance(selected_ids, list) and len(selected_ids) > 0:\n\
-          \                        extracted_store_id = selected_ids[0]\n\n      \
-          \      # --- Store Name Extraction ---\n            context = data.get(\"\
+          dify_inputs\")\n            if isinstance(dify_inputs, dict):\n        \
+          \        if \"gemini_store_id\" in dify_inputs:\n                    extracted_store_id\
+          \ = dify_inputs[\"gemini_store_id\"]\n            \n            # Fallback\
+          \ to Context ID\n            if not extracted_store_id:\n              \
+          \  context = data.get(\"context\")\n                if isinstance(context,\
+          \ dict):\n                    selected_ids = context.get(\"selected_store_ids\"\
+          )\n                    if isinstance(selected_ids, list) and len(selected_ids)\
+          \ > 0:\n                        extracted_store_id = selected_ids[0]\n\n\
+          \            # --- Store Name Extraction ---\n            context = data.get(\"\
           context\")\n            if isinstance(context, dict):\n                selected_names\
           \ = context.get(\"selected_store_names\")\n                if isinstance(selected_names,\
           \ list) and len(selected_names) > 0:\n                    extracted_store_name\
-          \ = selected_names[0]\n\n    except (json.JSONDecodeError, TypeError):\n\
-          \        # JSONでない場合（デバッグでの直接入力など）は、\n        # extracted_text = raw_input\
-          \ のまま処理を続行する（エラーにしない）\n        pass\n    except Exception as e:\n      \
-          \  # その他の予期せぬエラーはログに出して、デフォルト値を返す\n        print(f\"Parser Warning: {e}\"\
+          \ = selected_names[0]\n\n            # --- Quote Extraction (新規追加) ---\n\
+          \            if \"quote\" in data and isinstance(data[\"quote\"], str):\n\
+          \                extracted_quote = data[\"quote\"]\n\n    except (json.JSONDecodeError,\
+          \ TypeError):\n        # JSONでない場合（デバッグでの直接入力など）は、\n        # extracted_text\
+          \ = raw_input のまま処理を続行する\n        pass\n    except Exception as e:\n   \
+          \     # その他の予期せぬエラーはログに出して、デフォルト値を返す\n        print(f\"Parser Warning: {e}\"\
           )\n\n    # 4. 結果の返却\n    return {\n        \"text\": extracted_text,\n \
           \       \"gemini_store_id\": extracted_store_id,\n        \"gemini_store_name\"\
-          : extracted_store_name\n    }"
+          : extracted_store_name,\n        \"quote\": extracted_quote\n    }"
         code_language: python3
         outputs:
           gemini_store_id:
             children: null
             type: string
           gemini_store_name:
+            children: null
+            type: string
+          quote:
             children: null
             type: string
           text:
@@ -4191,6 +4351,9 @@ workflow:
             \  - 会話履歴や保持しているコンテキストに情報がなく、ユーザーの質問に答えるために社内規定や業務ドキュメントの確認が必要な場合。\n \
             \ - ユーザーが明示的に「資料から探して」「規定を確認して」と求めた場合。\n- **【RAG検索が不要な場合 (requires_rag:\
             \ false)】**:\n  - 直前の会話履歴や既存のコンテキストの中に、ユーザーの質問に対する「明確な答え」が既に含まれている場合（深掘り質問や再確認など、検索し直さなくても回答できる場合）。\n\
+            \n## 3. Quote Handling (引用コンテキストの処理)\nユーザーの入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、ユーザーの真の意図はその引用部分に関連しています。\n- 引用されたキーワードや文章に対して「これの詳しい手順は？」「社内規定ではどうなっている？」といった深掘りを求めている場合、新たな社内ドキュメントの検索が必要と判断し、`requires_rag`\
+            \ を `true` に設定してください。\n- `rag_search_query` を生成する際は、引用されたテキスト内の専門用語を優先的に拾い上げてください。\n\
             \n# Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n\
             \   - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
             \   - 記載例:\n     - **category**: ユーザーは出張旅費について質問しているため、業務要求（TASK）と判断。\n\
@@ -4241,6 +4404,15 @@ workflow:
             (`requires_rag: false`) と判断してください。
 
 
+            ## Quote Context (引用テキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは画面上の特定のテキスト（過去の回答やドキュメントの一部）を選択・引用して質問しています。「User Query」はこの引用内容に対する指示であると解釈してください。
+
+
+
+
             ## Conversation History
 
             ※Difyのメモリ機能により自動付与される会話履歴を参照し、文脈を判断してください。'
@@ -4268,7 +4440,8 @@ workflow:
                 description: Web検索が必要かどうか。このモードでは常にfalse。
                 type: string
               session_title:
-                description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+                description: 会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字
+                  "" を返す。
                 type: string
               thinking:
                 description: ユーザーへの状況に応じた挨拶と、具体的なアクションの宣言。TASKの場合は『社内資料を確認しますね✨』、CHATの場合は空文字。
@@ -4497,24 +4670,18 @@ workflow:
             value: ''
           model:
             type: mixed
-            value: gemini-2.5-flash-preview
+            value: gemini-2.5-flash-lite
           query:
             type: mixed
-            value: "ユーザーの質問: \n{{#1770869430347.text#}}\n\n【AIの推論ログ（検索のヒント）】\n{{#conversation.intent_analysis_thinking#}}\n\
-              \n【指定されたストア内のファイル一覧】\n{{#1771573783623.text#}} （※実際のファイル一覧出力変数を指定してください）\n\
-              \n【過去の検索結果 (Previous Knowledge)】\n{{#conversation.requires_rag#}}\n\n\
-              上記の「ユーザーの質問」「AIの推論ログ」「指定されたストア内のファイル一覧」および「過去の検索結果」を踏まえ、このストア内のファイルがどのように役立つかを判断するため、以下の2つの観点で分析・出力してください。\n\
-              \n⚠️【重要: 差分抽出の徹底】\n「過去の検索結果 (Previous Knowledge)」に既に記載されている内容（同じ事実や定義など）は、今回の抽出結果から完全に除外してください。過去の知識にはなく、今回の回答で「新たに必要となる情報（差分）」だけを狙って抽出・要約してください。\n\
-              \n1. **【質問との関連性（簡易検索・差分抽出）】**\n   推論ログで指摘された意図やキーワードに最も関連し、かつ「過去の検索結果」にはまだ存在しない新しい情報を持つファイルを探してください。\n\
-              \   ※比較や横断的な調査が求められている場合は、関連する「複数」のファイルをピックアップし、それぞれの「ファイル名」と「関連する記述の抜粋」を挙げてください。もし質問が抽象的な場合は、推論ログを参考に中心となりそうなファイルを推測してください。\n\
-              \n2. **【ファイル構成の要約】**\n   コンテキスト全体を把握するため、全てのファイルをリストアップし、それぞれの内容を1文で要約してください。（※ここでも既に知っている情報の反復は避け、今回の文脈においてどう役立つかを中心に要約してください）\n\
-              \n---\n【出力形式】\n### \U0001F3AF 質問との関連（ヒットした情報）\n※関連するファイルが複数ある場合は、以下のようにファイルごとに列挙してください。（新規情報がない場合は「新規情報なし」と記載）\n\
-              \n- **関連ファイル1**: [ファイル名]（資料タイトル・大見出し）\n  - **関連キーワード/記述**: [抜粋や要約]\n\
-              \  - **推奨アクション**: [「〇〇との比較に用いる」など]\n- **関連ファイル2**: [ファイル名]（資料タイトル・大見出し）\n\
-              \  - **関連キーワード/記述**: [抜粋や要約]\n  - **推奨アクション**: [「〇〇との比較に用いる」など]\n\n\
-              ### \U0001F4C2 ストア内ファイル一覧（全体像）\n- ファイル1: [ファイル名]\n  タイトル: [資料から抽出されるタイトル・テーマ]\n\
-              \  概要: [要約]\n- ファイル2: [ファイル名]\n  タイトル: [資料から抽出されるタイトル・テーマ]\n  概要: [要約]\n\
-              ...\n全体テーマ: [1文]"
+            value: "ユーザーの質問: \n{{#1770869430347.text#}}\n\n【ユーザーが引用したコンテキスト (Quote)】\n\
+              {{#1770869430347.quote#}}\n※この値が存在する場合、ユーザーはこの引用部分の詳細や裏付けを知りたがっています。\n\
+              \n【AIの推論ログ（検索のヒント）】\n{{#conversation.intent_analysis_thinking#}}\n\n\
+              【指定されたストア内のファイル一覧】\n{{#1771573783623.text#}}\n\n【過去の検索結果 (Previous Knowledge)】\n\
+              {{#conversation.requires_rag#}}\n\n上記の情報を踏まえ、このストア内のファイルがどのように役立つかを判断するため、以下の2つの観点で分析・出力してください。\n\
+              \n⚠️【重要: 差分抽出と引用フォーカス】\n・「過去の検索結果」に既に記載されている内容は除外してください。\n・【ユーザーが引用したコンテキスト】がある場合は、その引用内容に関連する規定や詳細な手順、背景情報などを最優先で探索し、抽出してください。\n\
+              \n1. **【質問・引用との関連性（簡易検索・差分抽出）】**\n   推論ログや「ユーザーの引用」に最も関連し、かつ過去の検索結果にはない情報を持つファイルを探してください。関連する「複数」のファイルをピックアップし、それぞれの「ファイル名」と「関連する記述の抜粋」を挙げてください。\n\
+              \n2. **【ファイル構成の要約】**\n   全てのファイルをリストアップし、それぞれの内容を1文で要約してください。\n\n---\n\
+              【出力形式】\n（既存の出力形式フォーマットをそのまま維持）"
         type: tool
       height: 82
       id: '1771391749204'
@@ -4548,7 +4715,7 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gemini-2.5-flash-lite
+          name: gemini-3.1-flash-lite-preview
           provider: langgenius/gemini/google
         prompt_template:
         - id: 4f25aea0-7407-404f-bc0f-f90215ebd5b7
@@ -4558,6 +4725,9 @@ workflow:
             - ストア要約（store_summary）の中に、質問に関連しそうな「具体的なファイル名」や「専門用語」があれば、それを積極的にクエリに組み込んでください。\n\
             \  - 悪い例: 「旅費 規定」\n  - 良い例: 「『旅費・経費精算規程_2024.pdf』に基づいて、新幹線のグリーン車利用に関する規定を教えてください。」\n\
             - **【文脈の補完（Contextual Resolution）】**: ユーザーの入力が「それ」「先ほどの」といった代名詞を含んでいる場合や、主語が省略されている深掘り質問の場合は、自動付与される会話履歴（Memory）を参照して意図を汲み取り、RAGエンジンが単独で理解できる「完全な文脈を持った検索クエリ」へと再構築してください。\n\
+            - **【Quote Contextの活用 (最重要)】**: ユーザー入力に `Quote Context (引用テキスト)` が含まれている場合、検索の焦点は完全にその引用部分にあります。\n\
+            \  - 引用されたテキストから「核となる専門用語」や「具体的な文脈」を抽出し、それを軸にRAGエンジンが理解しやすい自然言語の検索クエリ(`rag_search_query`)を構築してください。\n\
+            \  - 例：引用テキストが「第5条 SaaS利用の特例」の場合、単に「SaaS」と検索するのではなく、「『第5条 SaaS利用の特例』におけるセキュリティチェックシートの提出要件と承認フローについて」のように解像度を上げてクエリを生成すること。\n\
             \n## 2. Output Requirements (フィールドの生成ルール)\n- **internal_log**: 推論の根拠を技術的な日本語で記述。\n\
             - **thinking**: \n  - **Concept**: 信頼できる同僚として、思考の結果（リサーチ計画）を報告するスタイル。\n\
             \  - **ファイル名の明示 (重要)**: ストア要約から特定した「具体的なファイル名（複数可）」を自然な文脈で必ず含めてください。\n\
@@ -4624,7 +4794,14 @@ workflow:
             同じ内容を再度検索するクエリは絶対に生成せず、ユーザーの目的を満たすために「現在欠落している情報（Missing Information）」のみをピンポイントで狙い撃ちする
             `rag_search_query` を生成してください。
 
-            （※既に十分な情報が揃っており追加検索が不要な場合は、クエリを空文字 `""` にしてください。）'
+            （※既に十分な情報が揃っており追加検索が不要な場合は、クエリを空文字 `""` にしてください。）
+
+
+            ## 6. Quote Context (引用テキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは画面上の特定のテキストを選択・引用して質問しています。クエリ生成の最重要コンテキストとして扱ってください。'
         retry_config:
           max_retries: 3
           retry_enabled: true
@@ -4656,10 +4833,10 @@ workflow:
       id: '17715726019570'
       position:
         x: 6316
-        y: 517
+        y: 520
       positionAbsolute:
         x: 6316
-        y: 517
+        y: 520
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4822,6 +4999,10 @@ workflow:
             - **【Falseにする場合】**: 直前の会話履歴の中に明確な答えが含まれている場合。または、AIの学習済み知識（一般常識、プログラミングの基本概念、歴史的事実など）で即答可能であり、最新情報を引く必要がない場合。社内情報のみで完結する場合。\n\
             \n## 4. Hybrid Activation (両方 True)\n以下のような「内と外の情報が交差する問い」に対しては、迷わず両方のフラグを\
             \ `true` に設定してください。\n- 「社内の規定（RAG）と、一般的な法律・Webの最新基準（Web）を比較したい」\n- 「社内のこのプロジェクト（RAG）に、最新の外部技術（Web）をどう適用すべきか」\n\
+            \n## 5. Quote Handling (引用コンテキストの処理)\nユーザーの入力に `Quote Context (引用テキスト)`\
+            \ が含まれている場合、ユーザーの真の意図はその引用部分にあります。以下の基準でルーティングを判断してください。\n- **RAG優先**:\
+            \ 引用部分が社内の特定プロジェクトや規定を指しており、その詳細を求めている場合。\n- **Web優先**: 引用部分に含まれる一般用語の定義や、外部の最新トレンドとの比較を求めている場合。\n\
+            - **Hybrid (両方True)**: 引用された社内情報（RAG由来）に対して、「世間一般ではどうなのか？」といった外部基準との照らし合わせを求めている場合。\n\
             \n# Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n\
             \   - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
             \   - 記載例:\n     - **category**: 社内インフラへのAI導入に関する要件確認のため（TASK）と判断。\n \
@@ -4875,6 +5056,13 @@ workflow:
             ※ここにユーザーの名前(name)や属性、文章スタイル指示等が含まれています。`thinking` フィールドの生成時に参照してください。
 
 
+            ## Quote Context (引用テキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは画面上の特定のテキスト（過去の回答やドキュメントの一部）を選択・引用して質問しています。「User Query」はこの引用内容に対する指示であると解釈してください。
+
+
 
             ---
 
@@ -4906,7 +5094,8 @@ workflow:
                 description: Web検索が必要な場合の最適化された検索キーワード（不要なら空文字）
                 type: string
               session_title:
-                description: 【初回のみ】ユーザーの質問内容を表す短いスレッド名（例：『React 19の変更点調査』）。継続した会話（2回目以降）では必ず空文字を設定すること。
+                description: 会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字
+                  "" を返す。
                 type: string
               thinking:
                 description: ユーザーに提示するアクション宣言（例：『社内規定と最新のWeb情報を照らし合わせて確認しますね✨』）
@@ -5132,7 +5321,7 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gemini-flash-lite-latest
+          name: gemini-2.5-flash
           provider: langgenius/gemini/google
         prompt_template:
         - id: 4f25aea0-7407-404f-bc0f-f90215ebd5b7
@@ -5143,6 +5332,9 @@ workflow:
             \n## 2. Model Selection\nコスト最適化フェーズのため、クエリの性質に関わらず**常に「sonar」を選択**してください。\n\
             \n## 3. Query Optimization\n検索エンジン（Perplexity）に投げるクエリを最適化します。\n- **query_main**:\
             \ 検索意図を明確にしたメインクエリ。\n- **query_alt**: 視点を変えた代替クエリ（英語での検索が有効なら英語を含める）。fastモードでは使用されない場合もありますが、予備として生成してください。\n\
+            - ⚠️**【Quote Contextの活用 (最重要)】**: ユーザー入力に `Quote Context (引用テキスト)` が含まれている場合、検索の焦点は完全にその引用部分にあります。\n\
+            \  - 引用されたテキストに含まれる専門用語、未知の単語、企業名、最新トレンドなどを抽出し、それを主軸として検索エンジンが最も精度の高い結果を返せるようにクエリを構築してください。\n\
+            \  - 引用元の文脈から「この〜」「その〜」といったノイズになる指示語や不要な部分を削ぎ落とし、純粋な検索キーワードとして最適化すること。\n\
             \n## 4. Domain Filtering (Target Domains)\n情報の信頼性を担保するため、必要に応じて検索対象ドメインを絞り込みますが、以下のルールを厳守してください。\n\
             \n⚠️**【重要: ドメイン絞り込みの禁止事項（リアルタイム情報）】**\n天気予報、株価、最新の一般ニュース、トレンドなど、即時性や網羅性が求められるリアルタイム情報を検索する場合は、**原則としてドメインの絞り込みを行わず、空の配列\
             \ `[]` に設定**し、検索エンジン独自の最適化アルゴリズムに任せてください。\n無闇に官公庁（`go.jp`）などに絞り込むと、生のデータファイル（JSON等）や古い情報がヒットしてしまい、検索精度が著しく低下する原因になります。\n\
@@ -5181,7 +5373,14 @@ workflow:
 
             {{#conversation.intent_analysis_thinking#}}
 
-            ※直前のノードで生成されたJSON中の `thinking` フィールドです。この発言内容を踏まえ、そこから自然に続くように発言を構成してください。'
+            ※直前のノードで生成されたJSON中の `thinking` フィールドです。この発言内容を踏まえ、そこから自然に続くように発言を構成してください。
+
+
+            ## Quote Context (引用テキスト)
+
+            {{#1770869430347.quote#}}
+
+            ※この値が空でない場合、ユーザーは画面上の特定のテキストを選択・引用して質問しています。検索クエリ最適化の最重要コンテキストとして扱ってください。'
         retry_config:
           max_retries: 3
           retry_enabled: true
@@ -5353,11 +5552,11 @@ workflow:
       height: 52
       id: '17719994416790'
       position:
-        x: 8428
-        y: 957
+        x: 8727.057624571
+        y: 1084.2206829150127
       positionAbsolute:
-        x: 8428
-        y: 957
+        x: 8727.057624571
+        y: 1084.2206829150127
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5399,10 +5598,10 @@ workflow:
       height: 138
       id: '17719995520230'
       position:
-        x: 8790
+        x: 9090
         y: 1126
       positionAbsolute:
-        x: 8790
+        x: 9090
         y: 1126
       selected: false
       sourcePosition: right
@@ -5421,16 +5620,6 @@ workflow:
           - conversation
           - context_web
           write_mode: over-write
-        - input_type: variable
-          operation: over-write
-          value:
-          - '17719989311170'
-          - structured_output
-          - reasoning
-          variable_selector:
-          - conversation
-          - search_strategy_reasoning
-          write_mode: over-write
         - input_type: constant
           operation: set
           value: 'true'
@@ -5442,13 +5631,13 @@ workflow:
         title: SET_Web_Context (3)
         type: assigner
         version: '2'
-      height: 136
+      height: 110
       id: '17719995621490'
       position:
-        x: 10060
+        x: 10360
         y: 1127
       positionAbsolute:
-        x: 10060
+        x: 10360
         y: 1127
       selected: false
       sourcePosition: right
@@ -5490,6 +5679,7 @@ workflow:
       positionAbsolute:
         x: 342
         y: 166
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -5520,8 +5710,46 @@ workflow:
       targetPosition: left
       type: custom
       width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17719989311170'
+          - structured_output
+          - reasoning
+          variable_selector:
+          - conversation
+          - search_strategy_reasoning
+          write_mode: over-write
+        - input_type: variable
+          operation: over-write
+          value:
+          - '17719989311170'
+          - text
+          variable_selector:
+          - conversation
+          - search_strategy_json
+          write_mode: over-write
+        selected: false
+        title: 変数代入 12
+        type: assigner
+        version: '2'
+      height: 110
+      id: '1772785070312'
+      position:
+        x: 8428
+        y: 957
+      positionAbsolute:
+        x: 8428
+        y: 957
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
     viewport:
-      x: -12426.303775353488
-      y: -843.3889686026239
-      zoom: 1.218770788614574
+      x: -2328.1077450643575
+      y: -421.45569648491926
+      zoom: 1.3195079107728953
   rag_pipeline_variables: []
