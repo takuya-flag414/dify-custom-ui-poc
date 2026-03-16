@@ -121,10 +121,26 @@ const thinkingTemplates = {
  */
 const styleTemplates = {
   // ========== Fast Pure (高速モード・ファイルなし) ==========
-  // ※スピードモードはJSON形式ではないため、Smart Actionsは表示されない
+  // ※スピードモードもJSON形式に変更し、Smart Actionsを表示するように修正
   fast_pure: {
-    efficient: "### Difyとは\n\n**Dify**は、大規模言語モデル（LLM）を活用したエンタープライズ向けのAIチャットボット基盤です。\n\n### 特徴\n- **コスト効率**: gpt-4o-miniにより、テキスト対話コストを大幅に低減\n- **Web検索**: Perplexity APIによるリアルタイム情報取得（高コスト注意）\n- **ステートフル対話**: 会話履歴を保持し、連続した対話が可能\n\n### 留意点\n本モードはWeb/RAG検索がOFFのため、最新情報や社内規定の回答には対応していません。",
-    partner: "こんにちは！🤖 Difyについてお聞きですね。\n\nDifyは、OpenAIの**gpt-4o-mini**を中心に構築された、社内向け**AIチャットボット基盤**です。Web検索（Perplexity API）との連携により、リアルタイムの情報も取得できる設計になっています。\n\n今は**高速モード**（Web/RAG OFF）で動作しているため、最新ニュースや社内規定への回答はできませんが、一般的な知識や文章作成・翻訳などはお任せください！ 💪\n\n他にも気になることがあれば、遠慮なくどうぞ！"
+    efficient: createMockJsonCodeBlock(
+      "### Difyとは\n\n**Dify**は、大規模言語モデル（LLM）を活用したエンタープライズ向けのAIチャットボット基盤です。\n\n### 特徴\n- **コスト効率**: gpt-4o-miniにより、テキスト対話コストを大幅に低減\n- **Web検索**: Perplexity APIによるリアルタイム情報取得（高コスト注意）\n- **ステートフル対話**: 会話履歴を保持し、連続した対話が可能\n\n### 留意点\n本モードはWeb/RAG検索がOFFのため、最新情報や社内規定の回答には対応していません。",
+      [],
+      [
+        { type: 'selection', label: 'コスト構造について詳しく', icon: 'list-checks', payload: { text: 'コスト構造について詳しく教えて' } },
+        { type: 'selection', label: '利用可能なモデルは？', icon: 'git-branch', payload: { text: '利用可能なモデルを教えて' } },
+        { type: 'selection', label: '導入のメリットは？', icon: 'sparkles', payload: { text: '導入のメリットを教えて' } }
+      ]
+    ),
+    partner: createMockJsonCodeBlock(
+      "こんにちは！🤖 Difyについてお聞きですね。\n\nDifyは、OpenAIの**gpt-4o-mini**を中心に構築された、社内向け**AIチャットボット基盤**です。Web検索（Perplexity API）との連携により、リアルタイムの情報も取得できる設計になっています。\n\n今は**高速モード**（Web/RAG OFF）で動作しているため、最新ニュースや社内規定への回答はできませんが、一般的な知識や文章作成・翻訳などはお任せください！ 💪\n\n他にも気になることがあれば、遠慮なくどうぞ！",
+      [],
+      [
+        { type: 'selection', label: '何ができるの？', icon: 'list-checks', payload: { text: '具体的に何ができるか教えて' } },
+        { type: 'selection', label: '使い方は簡単？', icon: 'git-branch', payload: { text: '使い方のヒントを教えて' } },
+        { type: 'selection', label: '他のモードも試したい', icon: 'sparkles', payload: { text: '他の検索モードについて教えて' } }
+      ]
+    )
   },
 
   // ========== Fast File (高速モード・ファイルあり) ==========
@@ -697,7 +713,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: styleTemplates.fast_pure.efficient  // 生Markdown（JSON形式ではない）
+        answer: styleTemplates.fast_pure.efficient
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
@@ -706,7 +722,7 @@ export const scenarios = {
       { event: 'node_started', data: { title: 'Answer Generator', node_type: 'llm' } },
       {
         event: 'message',
-        answer: styleTemplates.fast_pure.partner  // 生Markdown（JSON形式ではない）
+        answer: styleTemplates.fast_pure.partner
       },
       { event: 'node_finished', data: { title: 'Answer Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }

@@ -91,61 +91,45 @@ const WelcomeScreen = ({
                 initial="hidden"
                 animate="visible"
             >
-                {/* Greeting Display (Above ChatInput) */}
-                <motion.header
-                    className={`welcome-greeting ${isFaded ? 'faded' : ''}`}
-                    variants={itemVariants}
-                >
-                    <div className="welcome-logo-badge">
-                        Desktop Intelligence
-                    </div>
-                    <h1 className="welcome-title">{greeting}</h1>
-                    <p className="welcome-subtitle">
-                        {subMessage}
-                    </p>
-                </motion.header>
+                {/* Grid-based layout for vertical centering */}
+                <div className="welcome-grid-layout">
+                    {/* Greeting Display (Row 1 bottom-aligned) */}
+                    <motion.header
+                        className={`welcome-greeting ${isFaded ? 'faded' : ''}`}
+                        variants={itemVariants}
+                    >
+                        <div className="welcome-logo-badge">
+                            Desktop Intelligence
+                        </div>
+                        <h1 className="welcome-title">{greeting}</h1>
+                        <p className="welcome-subtitle">
+                            {subMessage}
+                        </p>
+                    </motion.header>
 
-                {/* Hero ChatInput (Centered) */}
-                <motion.div
-                    className="welcome-hero-input"
-                    variants={itemVariants}
-                >
-                    <ChatInput
-                        isLoading={isGenerating}
-                        onSendMessage={onSendMessage}
-                        isCentered={true}
-                        activeContextFiles={activeContextFiles}
-                        setActiveContextFiles={setActiveContextFiles}
-                        searchSettings={searchSettings}
-                        setSearchSettings={setSearchSettings}
-                        onOpenConfig={onOpenConfig}
-                        mockMode={mockMode}
-                        backendBApiKey={backendBApiKey}
-                        backendBApiUrl={backendBApiUrl}
-                    />
-                </motion.div>
+                    {/* Hero ChatInput (Row 2 vertically centered) */}
+                    <motion.div
+                        className="welcome-hero-input"
+                        variants={itemVariants}
+                    >
+                        <ChatInput
+                            isLoading={isGenerating}
+                            onSendMessage={onSendMessage}
+                            isCentered={true}
+                            activeContextFiles={activeContextFiles}
+                            setActiveContextFiles={setActiveContextFiles}
+                            searchSettings={searchSettings}
+                            setSearchSettings={setSearchSettings}
+                            onOpenConfig={onOpenConfig}
+                            mockMode={mockMode}
+                            backendBApiKey={backendBApiKey}
+                            backendBApiUrl={backendBApiUrl}
+                        />
+                    </motion.div>
 
-                {/* Guide Text */}
-                <motion.p
-                    className={`welcome-guide-text ${isFaded ? 'faded' : ''}`}
-                    variants={itemVariants}
-                >
-                    または、サイドバーの「✨ Intelligence」からツールをお選びください。
-                </motion.p>
-
-                {/* Footer */}
-                <motion.footer
-                    className={`welcome-footer-links ${isFaded ? 'faded' : ''}`}
-                    variants={itemVariants}
-                >
-                    <button className="link-button" onClick={onStartTutorial}>
-                        使い方ガイドを見る
-                    </button>
-                    <span className="footer-divider">|</span>
-                    <button className="link-button" onClick={() => window.open('https://wiki.company.local', '_blank')}>
-                        システム更新情報
-                    </button>
-                </motion.footer>
+                    {/* Row 3 (Spacer for symmetry) */}
+                    <div className="welcome-grid-spacer" />
+                </div>
             </motion.div>
         </div>
     );

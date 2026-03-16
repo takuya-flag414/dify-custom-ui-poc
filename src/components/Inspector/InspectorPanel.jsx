@@ -246,42 +246,57 @@ const ThoughtTimeline = ({ steps, isStreaming }) => {
                             <div className="timeline-title">{step.title}</div>
 
                             {/* Detailed Content */}
-                            {hasDetail && (step.status === 'done' || step.status === 'error' || step.status === 'processing') && (
-                                <div className={`timeline-details ${isError ? 'error' : ''}`}>
+                            {hasDetail && (step.status === 'done' || step.status === 'error' || step.status === 'processing') && (() => {
+                                // ★出し分けロジック
+                                // 1. 判定・戦略系ノードは internalLog を優先し、思考は非表示にする
+                                const isStrategicNode = step.title?.includes('判定') || step.title?.includes('戦略');
+                                const showLog = isStrategicNode && step.internalLog;
+                                const showThinking = !isStrategicNode && step.thinking;
 
-                                    {/* Error Message */}
-                                    {isError && step.errorMessage && (
-                                        <div className="timeline-detail-row error">
-                                            <span className="timeline-detail-icon">⚠️</span>
-                                            <span className="timeline-detail-text">{step.errorMessage}</span>
-                                        </div>
-                                    )}
+                                return (
+                                    <div className={`timeline-details ${isError ? 'error' : ''}`}>
+                                        {/* Error Message */}
+                                        {isError && step.errorMessage && (
+                                            <div className="timeline-detail-row error">
+                                                <span className="timeline-detail-icon">⚠️</span>
+                                                <span className="timeline-detail-text">{step.errorMessage}</span>
+                                            </div>
+                                        )}
 
-                                    {/* Thinking Monologue */}
-                                    {step.thinking && !isError && (
-                                        <div className="timeline-detail-row thinking">
-                                            <span className="timeline-detail-icon">🧠</span>
-                                            <span className="timeline-detail-text">{step.thinking}</span>
-                                        </div>
-                                    )}
+                                        {/* Internal Log (Exclusive for Strategic Nodes) */}
+                                        {showLog && (
+                                            <div className="timeline-detail-row log">
+                                                <span className="timeline-detail-icon">📋</span>
+                                                <span className="timeline-detail-text">{step.internalLog}</span>
+                                            </div>
+                                        )}
 
-                                    {/* Main Result */}
-                                    {step.resultLabel && step.resultValue && !isError && (
-                                        <div className="timeline-detail-row result">
-                                            <span className="timeline-detail-label">{step.resultLabel}:</span>
-                                            <span className="timeline-detail-value">{step.resultValue}</span>
-                                        </div>
-                                    )}
+                                        {/* Thinking Monologue (Exclusive for Synthesis/Other Nodes) */}
+                                        {showThinking && !isError && (
+                                            <div className="timeline-detail-row thinking">
+                                                <span className="timeline-detail-icon">🧠</span>
+                                                <span className="timeline-detail-text">{step.thinking}</span>
+                                            </div>
+                                        )}
 
-                                    {/* Additional Results */}
-                                    {step.additionalResults && !isError && step.additionalResults.map((result, i) => (
-                                        <div key={i} className="timeline-detail-row result">
-                                            <span className="timeline-detail-label">{result.label}:</span>
-                                            <span className="timeline-detail-value">{result.value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                        {/* Main Result (Always show if exists) */}
+                                        {step.resultLabel && step.resultValue && !isError && (
+                                            <div className="timeline-detail-row result">
+                                                <span className="timeline-detail-label">{step.resultLabel}:</span>
+                                                <span className="timeline-detail-value">{step.resultValue}</span>
+                                            </div>
+                                        )}
+
+                                        {/* Additional Results (Always show if exists) */}
+                                        {step.additionalResults && !isError && step.additionalResults.map((result, i) => (
+                                            <div key={i} className="timeline-detail-row result">
+                                                <span className="timeline-detail-label">{result.label}:</span>
+                                                <span className="timeline-detail-value">{result.value}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
 
                             {step.timestamp && (
                                 <div className="timeline-meta">{step.timestamp}</div>

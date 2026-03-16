@@ -248,6 +248,20 @@
     border-left: 2px solid var(--color-primary);
 }
 
+.timeline-detail-row.log {
+    background: rgba(0, 0, 0, 0.05); /* ログらしい灰色背景 */
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    border-left: 2px solid var(--color-text-muted);
+}
+
+[data-theme='dark'] .timeline-detail-row.log {
+    background: rgba(255, 255, 255, 0.05);
+}
+
 /* --- Legacy / Shared Styles --- */
 .inspector-empty {
     display: flex;

@@ -16,7 +16,12 @@ const InputCanvas = ({
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'inherit';
-            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+            const scrollHeight = textareaRef.current.scrollHeight;
+            textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
+            
+            // 200pxを超えた場合のみスクロールを許可し、それ以外は隠す
+            // これにより内容が少ない時にスクロールバーの跡（ボタン等）が出るのを防ぐ
+            textareaRef.current.style.overflowY = scrollHeight > 200 ? 'auto' : 'hidden';
         }
     }, [text]);
 
@@ -45,7 +50,7 @@ const InputCanvas = ({
                     text-[15px] leading-relaxed
                     text-gray-900 dark:text-gray-100
                     placeholder-gray-400 dark:placeholder-gray-500
-                    overflow-y-auto custom-scrollbar
+                    custom-scrollbar
                     transition-all duration-200 ease-out
                 `}
                 style={{

@@ -30,8 +30,8 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%;
-    overflow-y: auto;
+    height: 100vh; /* 固定のビューポートの高さ */
+    overflow: hidden; /* スクロールはインナーで制御 */
     position: relative;
     background-color: var(--color-bg-base);
 }
@@ -72,20 +72,30 @@
 .welcome-inner {
     max-width: 800px;
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 3rem;
-    padding: 4rem 1.5rem;
     position: relative;
     z-index: 1;
 }
 
 .welcome-inner--zen {
-    /* Zen Mode: 中央配置、コンパクトなギャップ */
+    /* 禅モード: 画面いっぱいを使いつつグリッドで配置 */
+    padding: 0 1.5rem;
+}
+
+.welcome-grid-layout {
+    display: grid;
+    grid-template-rows: 1.2fr auto 1fr; /* 上部を少し広げて、コンテンツ全体をわずかに下に押し下げる（光学的な中央揃え） */
+    height: 100%;
+    width: 100%;
     align-items: center;
-    text-align: center;
+    justify-items: center;
     gap: 2rem;
-    padding: 2rem 1.5rem;
+}
+
+.welcome-grid-spacer {
+    height: 100%;
 }
 
 /* === Greeting Display === */
@@ -96,6 +106,7 @@
     text-align: center;
     gap: 1rem;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    align-self: end; /* Row 1 の下端に配置 */
 }
 
 /* Focus Fade: フォーカス時にフェードアウト */
@@ -152,7 +163,7 @@
 .welcome-hero-input {
     width: 100%;
     max-width: 640px;
-    margin: 1rem 0;
+    margin: 1rem auto; /* 左右をautoにして中央寄せ */
 }
 
 /* Override ChatInput styles for hero variant */

@@ -263,6 +263,12 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
 
         addLog(`[Intent_Analysis] 判定: ${displayInfo.title}${displayInfo.resultValue ? ' → ' + displayInfo.resultValue : ''}`, 'info');
 
+        // ★追加: internal_log をキャプチャ
+        const internalLog = parsedJson.internal_log || '';
+        if (internalLog) {
+            addLog(`[InternalLog] [Intent_Analysis] ${internalLog}`, 'info');
+        }
+
         return {
             sessionTitle: parsedJson.session_title || null,
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
@@ -271,7 +277,8 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
                 status: 'done',
                 thinking: parsedJson.thinking || '',
                 resultLabel: '検索方針',
-                resultValue: finalResultValue
+                resultValue: finalResultValue,
+                internalLog: internalLog // ★メッセージデータとして保持
             } : t
         };
     } else if (rawText) {
@@ -396,6 +403,11 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
             additionalResults.push({ label: '対象ドメイン', value: parsedJson.target_domains.join(', ') });
         }
 
+        // ★追加: internal_log をキャプチャ
+        const internalLog = parsedJson.internal_log || '';
+        if (internalLog) {
+            addLog(`[InternalLog] [Search_Strategy] ${internalLog}`, 'info');
+        }
 
         return {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
@@ -404,7 +416,8 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
                 thinking: parsedJson.reasoning || '',
                 resultLabel: 'メイン検索',
                 resultValue: parsedJson.query_main || '',
-                additionalResults
+                additionalResults,
+                internalLog: internalLog // ★メッセージデータとして保持
             } : t
         };
     } else if (rawText) {
@@ -435,11 +448,17 @@ export const processLlmSynthesisFinished = (outputs, nodeId, addLog) => {
         addLog(`[LLM_Synthesis] thinking: ${thinking || 'N/A'}`, 'info');
         addLog(`[LLM_Synthesis] internal_log: ${internalLog || 'N/A'}`, 'info');
 
+        // ★追加: internal_log があれば特別なプレフィックスでシステムログに記録
+        if (internalLog) {
+            addLog(`[InternalLog] [LLM_Synthesis] ${internalLog}`, 'info');
+        }
+
         return {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',
-                thinking: thinking  // モノローグとして ThinkingProcess.jsx に表示される
+                thinking: thinking,  // モノローグとして ThinkingProcess.jsx に表示される
+                internalLog: internalLog // ★追加
             } : t
         };
     } else if (rawText) {
@@ -468,11 +487,18 @@ export const processRagStrategyFinished = (outputs, nodeId, addLog) => {
 
         addLog(`[LLM_RAG_Strategy] thinking: ${thinking || 'N/A'}`, 'info');
 
+        // ★追加: internal_log をキャプチャ
+        const internalLog = parsedJson.internal_log || '';
+        if (internalLog) {
+            addLog(`[InternalLog] [RAG_Strategy] ${internalLog}`, 'info');
+        }
+
         return {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',
                 thinking: thinking,  // モノローグとして ThinkingProcess.jsx に表示される
+                internalLog: internalLog // ★追加
             } : t
         };
     } else if (rawText) {
