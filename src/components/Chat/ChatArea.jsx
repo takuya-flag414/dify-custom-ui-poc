@@ -10,6 +10,7 @@ import HistorySkeleton from './HistorySkeleton';
 import WelcomeScreen from './WelcomeScreen';
 import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
+import ArtifactPanel from '../Artifacts/ArtifactPanel';
 
 
 const ChatArea = (props) => {
@@ -25,6 +26,9 @@ const ChatArea = (props) => {
     setSearchSettings,
     onOpenConfig,
     onOpenArtifact,
+    isArtifactOpen,
+    closeArtifact,
+    activeArtifact: openedArtifact,
     userName,
     onStartTutorial,
     stopGeneration,
@@ -46,6 +50,45 @@ const ChatArea = (props) => {
   // ★追加: Table Modalの状態管理をChatAreaに持ち上げ
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
   const [tableContent, setTableContent] = useState(null);
+
+  // ★追加: Artifactの状態管理をChatAreaに持ち上げ（WelcomeScreenからの遷移で消滅しないようにするため）
+  const [activeArtifact, setActiveArtifact] = useState(null);
+
+  // ★変更: 履歴ロード完了時に、直前のユーザーメッセージからArtifact状態を復元する
+  const prevIsHistoryLoading = React.useRef(isHistoryLoading);
+  React.useEffect(() => {
+    if (prevIsHistoryLoading.current && !isHistoryLoading) {
+      // ロード完了時
+      let restoredArtifact = null;
+      if (messages.length > 0) {
+        const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+        if (lastUserMsg && lastUserMsg.text) {
+          try {
+            // メッセージテキストの構造化JSONをパース
+            const parsed = JSON.parse(lastUserMsg.text);
+            if (parsed.artifact && parsed.artifact.requested && parsed.artifact.type) {
+              const type = parsed.artifact.type;
+              const ARTIFACT_LABELS = {
+                summary_report: 'サマリーレポート',
+                checklist: 'チェックリスト',
+                comparison_table: '比較表',
+                faq: 'FAQ',
+                meeting_minutes: '議事録'
+              };
+              restoredArtifact = { type, label: ARTIFACT_LABELS[type] || type };
+            }
+          } catch (e) {
+            // JSONパースエラー時は無視（通常のプレーンテキスト等の場合）
+          }
+        }
+      }
+      setActiveArtifact(restoredArtifact);
+    } else if (isHistoryLoading && !prevIsHistoryLoading.current) {
+      // ロード開始時
+      setActiveArtifact(null);
+    }
+    prevIsHistoryLoading.current = isHistoryLoading;
+  }, [isHistoryLoading, messages]);
 
   const handleOpenTableModal = useCallback((content) => {
     setTableContent(content);
@@ -137,10 +180,49 @@ const ChatArea = (props) => {
         }
         break;
 
+      case 'generatedocument': {
+        // ★Artifact生成リクエスト: generate_document smart action
+        let artifactType = action.payload?.artifact_type;
+        let artifactText = action.payload?.text || action.label;
+
+        // ★フォールバック: LLMが payload.text に "artifact_type:xxx" を埋め込んだ場合の抽出
+        if (!artifactType && artifactText) {
+          const match = artifactText.match(/[.。]?\s*artifact_type\s*:\s*(\w+)\s*$/i);
+          if (match) {
+            artifactType = match[1]; // e.g. 'summary_report'
+            // テキストからartifact_type部分を除去して送信
+            artifactText = artifactText.replace(match[0], '').trim();
+          }
+        }
+
+        artifactType = artifactType || 'summary_report'; // デフォルト
+
+        // ★追加: 画面（Reference Rail）上部にも、ユーザーが手動で選択したのと同じように表示させる
+        const ARTIFACT_LABELS = {
+          summary_report: 'サマリーレポート',
+          checklist: 'チェックリスト',
+          comparison_table: '比較表',
+          faq: 'FAQ',
+          meeting_minutes: '議事録'
+        };
+        const displayLabel = ARTIFACT_LABELS[artifactType] || artifactType;
+        const requestedArtifactInfo = { type: artifactType, label: displayLabel };
+        setActiveArtifact(requestedArtifactInfo);
+        
+        // ★追加: リアルタイムレンダリングのため、要求時にすぐパネルを開く
+        if (onOpenArtifact) {
+          onOpenArtifact(requestedArtifactInfo);
+        }
+
+        // ★変更: artifactオプションの構造を統一し、AIの発話に付与
+        onSendMessage(artifactText, [], { artifact: { requested: true, type: artifactType, label: displayLabel } });
+        break;
+      }
+
       default:
         console.warn('Unknown smart action type:', action.type);
     }
-  }, [messages, onSendMessage, setSearchSettings]);
+  }, [messages, onSendMessage, setSearchSettings, setActiveArtifact]);
 
   // ★追加: ボタンクリック時のハンドラ
   const handleScrollToBottom = () => {
@@ -148,7 +230,7 @@ const ChatArea = (props) => {
   };
 
   return (
-    <div className={`chat-area${isInitialState ? ' chat-area-initial' : ''}`}>
+    <div className={`chat-area${isInitialState ? ' chat-area-initial' : ''} ${isArtifactOpen ? 'artifact-open' : ''}`}>
       {isHistoryLoading ? (
         <>
           <HistorySkeleton userName={userName} />
@@ -182,6 +264,8 @@ const ChatArea = (props) => {
           mockMode={mockMode}
           backendBApiKey={backendBApiKey}
           backendBApiUrl={backendBApiUrl}
+          activeArtifact={activeArtifact} // ★追加
+          setActiveArtifact={setActiveArtifact} // ★追加
         />
       ) : (
         <>
@@ -223,6 +307,8 @@ const ChatArea = (props) => {
               backendBApiUrl={backendBApiUrl}
               quote={quoteContext} // ★追加: 引用テキスト
               onRemoveQuote={() => setQuoteContext(null)} // ★追加: 引用クリアハンドラ
+              activeArtifact={activeArtifact} // ★追加
+              setActiveArtifact={setActiveArtifact} // ★追加
             />
           </div>
         </>
@@ -233,6 +319,14 @@ const ChatArea = (props) => {
         isOpen={isTableModalOpen}
         onClose={() => setIsTableModalOpen(false)}
         tableContent={tableContent}
+      />
+
+      {/* ★追加: streamingMessage を渡す */}
+      <ArtifactPanel
+        isOpen={isArtifactOpen}
+        onClose={closeArtifact}
+        artifact={openedArtifact}
+        streamingMessage={streamingMessage}
       />
     </div>
   );

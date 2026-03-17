@@ -110,6 +110,7 @@ export const processWorkflowFinished = (contentBuffer, protocolMode, addLog, raw
     let smartActions = [];
     let finalThinking = '';
     let finalUsage = null;
+    let finalArtifact = null; // ★追加: Artifactデータ
 
     // rawDataからtotal_tokensを取得 (Chatflowモード等でmessage_endが得られない場合のフォールバック)
     if (rawData?.data?.total_tokens) {
@@ -140,10 +141,15 @@ export const processWorkflowFinished = (contentBuffer, protocolMode, addLog, raw
                 smartActions = parsed.smartActions;
                 addLog(`[Workflow] Smart Actions detected: ${smartActions.length} actions`, 'info');
             }
+            // ★追加: Artifact抽出
+            if (parsed.artifact) {
+                finalArtifact = parsed.artifact;
+                addLog(`[Workflow] Artifact detected: "${finalArtifact.artifact_title}" (${finalArtifact.artifact_type})`, 'info');
+            }
         }
     }
 
-    return { finalText, finalCitations, smartActions, finalThinking, finalUsage };
+    return { finalText, finalCitations, smartActions, finalThinking, finalUsage, finalArtifact };
 };
 
 /**
@@ -155,7 +161,7 @@ export const processWorkflowFinished = (contentBuffer, protocolMode, addLog, raw
  * @returns {Object} 最終メッセージオブジェクト
  */
 export const buildFinalMessage = (currentStreamingMsg, workflowResult, contentBuffer, detectedTraceMode) => {
-    const { finalText, finalCitations, smartActions, finalThinking, finalUsage } = workflowResult;
+    const { finalText, finalCitations, smartActions, finalThinking, finalUsage, finalArtifact } = workflowResult;
 
     return {
         ...currentStreamingMsg,
@@ -169,6 +175,8 @@ export const buildFinalMessage = (currentStreamingMsg, workflowResult, contentBu
         // ★追加: HTTP_LLM_Search通過フラグを最終メッセージに伝播
         usedHttpLlmSearch: currentStreamingMsg.usedHttpLlmSearch || false,
         usage: finalUsage || currentStreamingMsg.usage || null,
+        // ★追加: Artifact情報を最終メッセージに含める
+        artifact: finalArtifact || null,
         thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {
             if (t.title === '情報を整理して回答を生成中...') {
                 return { ...t, title: '回答の生成が完了しました', status: 'done', iconType: 'check' };

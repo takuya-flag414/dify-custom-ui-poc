@@ -48,6 +48,8 @@ const WelcomeScreen = ({
     mockMode = 'OFF',
     backendBApiKey = '',
     backendBApiUrl = '',
+    activeArtifact, // ★追加
+    setActiveArtifact, // ★追加
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
@@ -124,6 +126,8 @@ const WelcomeScreen = ({
                             mockMode={mockMode}
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
+                            activeArtifact={activeArtifact} // ★追加
+                            setActiveArtifact={setActiveArtifact} // ★追加
                         />
                     </motion.div>
 

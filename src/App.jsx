@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -155,6 +155,7 @@ function App() {
     setActiveArtifact(null);
   };
 
+
   // ★一時無効化: Citation クリック連携（Inspectorが開発中のため）
   /*
   useEffect(() => {
@@ -205,6 +206,11 @@ function App() {
     handleTitleExtracted,
     handleTitleFallback,
   } = useConversations(mockMode, authUser?.userId, addLog, apiKey, apiUrl);
+
+  // ★修正: conversationIdの宣言後に配置 (ReferenceError防止)
+  useEffect(() => {
+    closeArtifact();
+  }, [conversationId]);
 
   const {
     messages,
@@ -262,6 +268,26 @@ function App() {
       setLastError(null); // クリア
     }
   }, [lastError]);
+
+  // ★追加: Artifactレスポンス自動展開
+  // メッセージ完了時、最新AIメッセージにartifactが存在したら自動でArtifactPanelを開く
+  // ★修正: 会話履歴ロード時の誤発火を防ぐため、生成中(isGenerating)が終了した直後のみ開くようにする
+  const prevIsGenerating = useRef(isGenerating);
+  useEffect(() => {
+    // 生成中から完了（true -> false）へと遷移したタイミングでのみ評価する
+    if (prevIsGenerating.current && !isGenerating) {
+      const lastAiMsg = messages.slice().reverse().find(m => m.role === 'ai');
+      if (lastAiMsg?.artifact) {
+        openArtifact({
+          title: lastAiMsg.artifact.artifact_title,
+          type: lastAiMsg.artifact.artifact_type,
+          content: lastAiMsg.artifact.artifact_content,
+          citations: lastAiMsg.artifact.citations || lastAiMsg.citations || [],
+        });
+      }
+    }
+    prevIsGenerating.current = isGenerating;
+  }, [messages, isGenerating]);
 
   const handleMockModeChange = (newMode) => {
     setMockMode(newMode);
@@ -440,7 +466,6 @@ function App() {
             <AppLayout
               sidebarCollapsed={isSidebarCollapsed}
               inspectorOpen={inspector.isOpen}
-              artifactOpen={isArtifactOpen}
               sidebar={
                 <motion.div variants={sidebarVariants} style={{ height: '100%' }}>
                   <Sidebar
@@ -497,6 +522,9 @@ function App() {
                             setSearchSettings={setSearchSettings}
                             onOpenConfig={() => setIsConfigModalOpen(true)}
                             openArtifact={openArtifact}
+                            isArtifactOpen={isArtifactOpen}
+                            closeArtifact={closeArtifact}
+                            activeArtifact={activeArtifact}
                             effectiveDisplayName={effectiveDisplayName}
                             startTutorial={startTutorial}
                             stopGeneration={stopGeneration}
@@ -525,6 +553,9 @@ function App() {
                             setSearchSettings={setSearchSettings}
                             onOpenConfig={() => setIsConfigModalOpen(true)}
                             openArtifact={openArtifact}
+                            isArtifactOpen={isArtifactOpen}
+                            closeArtifact={closeArtifact}
+                            activeArtifact={activeArtifact}
                             effectiveDisplayName={effectiveDisplayName}
                             startTutorial={startTutorial}
                             stopGeneration={stopGeneration}
@@ -567,13 +598,6 @@ function App() {
                   />
                 );
               })()}
-              artifactPanel={
-                <ArtifactPanel
-                  isOpen={isArtifactOpen}
-                  onClose={closeArtifact}
-                  artifact={activeArtifact}
-                />
-              }
             />
           </motion.div>
 

@@ -264,7 +264,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             thoughtProcess: [],
             processStatus: null,
             thinking: '',  // ★追加: Chain-of-Thought用
-            mode: isFastMode ? 'fast' : 'normal'
+            mode: isFastMode ? 'fast' : 'normal',
+            artifact: options.artifact // ★追加: 生成中のArtifact情報を付与
         };
         setStreamingMessage(initialAiMessage);
 
@@ -355,6 +356,16 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             const parsedPayload = JSON.parse(structuredQuery);
             parsedPayload.dify_inputs = difyInputs;
 
+            // ★追加: Artifactリクエスト情報をペイロードに含める
+            // generate_document SmartAction経由の場合、options.artifact が設定されている
+            if (options.artifact) {
+                parsedPayload.artifact = options.artifact;
+                // Difyのdify_inputsにも is_artifact を含める（Protocol_Parser用）
+                parsedPayload.dify_inputs.is_artifact = 'true';
+                parsedPayload.dify_inputs.artifact_type = options.artifact.type || 'summary_report';
+                addLog(`[Artifact] Artifact request included: type=${options.artifact.type}`, 'info');
+            }
+
             // ★Phase 2: サニタイズ処理 (全モード共通)
             // setMessages の前に実行し、UI・ログ・ペイロードすべてから平文を排除する
             const sanitizeResult = SecureVaultService.sanitize(text, {
@@ -405,7 +416,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                     files: allFilesToSend.map(f => ({ id: f.id, name: f.name })),
                     searchSettings: currentSettings,
                     promptSettings: promptSettings,
-                    displayName: promptSettings?.displayName || ''
+                    displayName: promptSettings?.displayName || '',
+                    artifact: options.artifact || undefined // ★追加: Artifactリクエスト情報
                 },
                 { mockMode, userId, apiUrl, apiKey }
             );

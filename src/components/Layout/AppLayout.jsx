@@ -15,25 +15,20 @@ import { motion } from 'framer-motion';
 const AppLayout = ({
     sidebarCollapsed = false,
     inspectorOpen = false,
-    artifactOpen = false,
     sidebar,
     main,
     inspector,
-    artifactPanel,
 }) => {
     // サイドバー幅: 折りたたみ時68px、通常260px
     const sidebarWidth = sidebarCollapsed ? '68px' : '260px';
-
-    // Artifact幅: 閉じている時0px、開いている時480px
-    const artifactWidth = artifactOpen ? '480px' : '0px';
 
     return (
         <div
             className="app-layout-grid"
             style={{
                 display: 'grid',
-                // Inspectorをグリッドから除外 (Sidebar | Main | Artifact)
-                gridTemplateColumns: `${sidebarWidth} minmax(0, 1fr) ${artifactWidth}`,
+                // Inspectorをグリッドから除外 (Sidebar | Main)
+                gridTemplateColumns: `${sidebarWidth} minmax(0, 1fr)`,
                 height: '100vh',
                 width: '100vw',
                 overflow: 'hidden',
@@ -89,26 +84,6 @@ const AppLayout = ({
                     {inspector}
                 </aside>
             </main>
-
-            {/* Col 3: Artifact Panel (Collapsible) - z-25 */}
-            <aside
-                className="app-layout-artifact"
-                style={{
-                    position: 'relative',
-                    zIndex: 25,
-                    height: '100%',
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    opacity: artifactOpen ? 1 : 0,
-                    visibility: artifactOpen ? 'visible' : 'hidden',
-                    transition: 'opacity 0.3s ease, visibility 0.3s ease',
-                    borderLeft: artifactOpen ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                    background: 'rgba(30, 30, 30, 0.5)', // 少し背景をつける
-                    backdropFilter: 'blur(20px)',
-                }}
-            >
-                {artifactPanel}
-            </aside>
         </div>
     );
 };

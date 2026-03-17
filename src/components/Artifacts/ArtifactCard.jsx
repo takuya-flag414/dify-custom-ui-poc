@@ -2,12 +2,20 @@
 import React from 'react';
 import './ArtifactCard.css';
 
-const CodeIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="16 18 22 12 16 6"></polyline>
-        <polyline points="8 6 2 12 8 18"></polyline>
-    </svg>
-);
+/**
+ * artifact_type に応じたアイコンとラベルのマッピング
+ */
+const ARTIFACT_TYPE_MAP = {
+    summary_report: { emoji: '📋', label: 'レポート' },
+    checklist: { emoji: '☑', label: 'チェックリスト' },
+    comparison_table: { emoji: '📊', label: '比較表' },
+    faq: { emoji: '❓', label: 'FAQ' },
+    meeting_minutes: { emoji: '📝', label: '議事録' },
+};
+
+const getTypeInfo = (type) => {
+    return ARTIFACT_TYPE_MAP[type] || { emoji: '📄', label: type || 'ドキュメント' };
+};
 
 const ChevronRight = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -16,24 +24,27 @@ const ChevronRight = () => (
 );
 
 /**
- * チャット内に表示される「成果物へのリンク」カード
- * @param {string} title - タイトル
- * @param {string} type - コンテンツタイプ (code, html, image...)
- * @param {string} content - プレビューする内容
+ * チャット内に表示される「Artifactへのリンク」カード（仕様書3.2準拠）
+ * @param {string} title - artifact_title
+ * @param {string} type - artifact_type (summary_report, checklist, etc.)
+ * @param {string} content - artifact_content
+ * @param {Array} citations - citations配列
  * @param {Function} onClick - クリック時のハンドラ
  */
-const ArtifactCard = ({ title, type, content, onClick }) => {
-    // 本来は type に応じてアイコンを変えますが、まずはCode固定
-    const displayType = type === 'code' ? 'Code Snippet' : type.toUpperCase();
+const ArtifactCard = ({ title, type, content, citations = [], onClick }) => {
+    const typeInfo = getTypeInfo(type);
 
     return (
-        <div className="artifact-card" onClick={() => onClick({ title, type, content })}>
+        <div className="artifact-card" onClick={() => onClick({ title, type, content, citations })}>
             <div className="artifact-icon-box">
-                <CodeIcon />
+                <span className="artifact-type-emoji">{typeInfo.emoji}</span>
             </div>
             <div className="artifact-info">
-                <div className="artifact-card-title">{title}</div>
-                <div className="artifact-card-desc">クリックして {displayType} を表示</div>
+                <div className="artifact-card-title">{title || 'Untitled'}</div>
+                <div className="artifact-card-desc">
+                    <span className="artifact-type-badge">{typeInfo.label}</span>
+                    クリックして表示
+                </div>
             </div>
             <div className="artifact-arrow">
                 <ChevronRight />

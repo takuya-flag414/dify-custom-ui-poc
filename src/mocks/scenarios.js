@@ -382,13 +382,14 @@ export const scenarios = {
             { id: 'cite_1', type: 'rag', source: '経費精算マニュアル_2025年度版.pdf', url: null },
             { id: 'cite_2', type: 'rag', source: '総務部_FAQ集.xlsx', url: null }
           ],
-          // ★全5種類のSmart Actions
+          // ★全6種類のSmart Actions (generate_document追加)
           [
             { type: 'retry_mode', label: 'Web検索モードで再試行', icon: 'refresh-cw', payload: { mode: 'web_only' } },
             { type: 'suggested_question', label: '申請書のテンプレートは？', icon: 'file-text', payload: { text: '経費精算の申請書テンプレートはどこにありますか？' } },
             { type: 'web_search', label: 'Web検索で再確認', icon: 'globe', payload: {} },
             { type: 'deep_dive', label: 'もっと詳しく解説', icon: 'sparkles', payload: {} },
-            { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } }
+            { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } },
+            { type: 'generate_document', label: '📋 レポートとして出力', icon: 'file-text', payload: { text: '経費精算のルールをレポートにまとめて', artifact_type: 'summary_report' } }
           ],
           thinkingTemplates.rag_only.efficient
         )
@@ -412,13 +413,14 @@ export const scenarios = {
             { id: 'cite_1', type: 'rag', source: '経費精算マニュアル_2025年度版.pdf', url: null },
             { id: 'cite_2', type: 'rag', source: '総務部_FAQ集.xlsx', url: null }
           ],
-          // ★全5種類のSmart Actions
+          // ★全6種類のSmart Actions (generate_document追加)
           [
             { type: 'retry_mode', label: 'Web検索モードで再試行', icon: 'refresh-cw', payload: { mode: 'web_only' } },
             { type: 'suggested_question', label: '申請書のテンプレートは？', icon: 'file-text', payload: { text: '経費精算の申請書テンプレートはどこにありますか？' } },
             { type: 'web_search', label: 'Web検索で再確認', icon: 'globe', payload: {} },
             { type: 'deep_dive', label: 'もっと詳しく解説', icon: 'sparkles', payload: {} },
-            { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } }
+            { type: 'navigate', label: '経費精算システムを開く', icon: 'external-link', payload: { url: 'https://example.com/expense' } },
+            { type: 'generate_document', label: '📋 レポートとして出力', icon: 'file-text', payload: { text: '経費精算のルールをレポートにまとめて', artifact_type: 'summary_report' } }
           ],
           thinkingTemplates.rag_only.partner
         )
@@ -759,6 +761,51 @@ export const scenarios = {
   },
 
   // =================================================================
+  // Pattern 12: Artifact Demo (ドキュメント生成デモ)
+  // =================================================================
+  'artifact_demo': {
+    efficient: [], // Not implemented
+    partner: [
+      // 1. Intent Analysis
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      {
+        event: 'node_finished', data: {
+          title: 'LLM_Intent_Analysis',
+          outputs: {
+            text: '```json\n' + JSON.stringify({
+              thinking: "レポート形式での出力をリクエストされています。Artifactモードで構造化ドキュメントを生成します 📋",
+              category: "ARTIFACT",
+              requires_rag: true,
+              requires_web: false,
+              resultLabel: "判定: 📋 Artifactモード → ドキュメントを生成します"
+            }, null, 2) + '\n```'
+          }
+        }
+      },
+      // 2. RAG Search
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval', inputs: { query: '経費精算 ルール 締切' } } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索', outputs: { result: '[Doc chunks...]' } } },
+      // 3. Artifact Generator LLM
+      { event: 'node_started', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact_title: '経費精算ルール まとめレポート',
+          artifact_type: 'summary_report',
+          artifact_content: '## 経費精算の基本ルール\n\n社内規定に基づく経費精算の重要ポイントをまとめました。\n\n### 1. 締切日\n\n| 経費種別 | 締切日 | 備考 |\n|---|---|---|\n| 通常経費 | 毎月第3営業日 17:00まで | 期限過ぎは翌月処理 |\n| 交通費 | 月末締め、翌月第2営業日まで | ICカード履歴推奨 |\n| 出張旅費 | 帰社後5営業日以内 | 領収書必須 |\n\n### 2. 申請方法\n\n1. **経費精算システム**にログイン\n2. 「新規申請」をクリック\n3. 費目を選択し、金額・日付・領収書を添付\n4. 承認者を選択して提出\n\n### 3. 注意事項\n\n- ❗ **5,000円以上**の経費は部長承認が必要\n- ❗ **交際費**は事前申請番号の記載が必須\n- ❗ 領収書がない場合は「領収書紛失届」を提出\n\n---\n\n*ℹ️ 詳細は「経費精算マニュアル_2025年度版.pdf」をご参照ください。*',
+          answer: '経費精算のルールをレポートとしてまとめました！📋 右側のArtifactパネルでご確認ください。コピーボタンで内容をそのままクリップボードに保存できます。',
+          citations: [
+            { id: 'cite_1', type: 'rag', source: '経費精算マニュアル_2025年度版.pdf', url: null },
+            { id: 'cite_2', type: 'rag', source: '総務部_FAQ集.xlsx', url: null }
+          ]
+        })
+      },
+      { event: 'node_finished', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 1580, completion_tokens: 842, total_tokens: 2422 } } }
+    ]
+  },
+
+  // =================================================================
   // Pattern 11: Auto Demo (Log Based Logic)
   // =================================================================
   'auto_demo': {
@@ -873,5 +920,10 @@ export const scenarioSuggestions = {
     'Difyとは何ですか？',
     'gpt-4o-miniとは何ですか？',
     'コストはどの程度かかりますか？'
+  ],
+  'artifact_demo': [
+    'チェックリスト形式で出力してほしい',
+    'FAQ形式にまとめて',
+    '比較表を作成して'
   ]
 };

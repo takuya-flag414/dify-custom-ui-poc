@@ -95,6 +95,7 @@ const ControlDeck = ({
     domainFilters,
     onAddDomain,
     onRemoveDomain,
+    onAddArtifact, // ★追加: Artifact追加関数
 
     // v3.0: ContextSelector props
     onStoreSelected,
@@ -178,6 +179,8 @@ const ControlDeck = ({
                                     domainFilters={domainFilters}
                                     onAddDomain={onAddDomain}
                                     onRemoveDomain={onRemoveDomain}
+                                    // Artifact Props
+                                    onAddArtifact={onAddArtifact} // ★追加: UniversalAddMenuへ伝搬
                                 />
                             </motion.div>
                         )}

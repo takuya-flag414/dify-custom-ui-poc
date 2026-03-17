@@ -32,7 +32,9 @@ const ChatInput = ({
   backendBApiKey = '',
   backendBApiUrl = '',
   quote = null, // ★追加: 引用テキスト
-  onRemoveQuote // ★追加: 引用削除ハンドラ
+  onRemoveQuote, // ★追加: 引用削除ハンドラ
+  activeArtifact, // ★追加: Propsから受け取る
+  setActiveArtifact, // ★追加: Propsから受け取る
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -92,8 +94,13 @@ const ChatInput = ({
   const executeSend = useCallback((excludedTypes = []) => {
     const filesToSend = selectedFiles.map(sf => sf.file);
 
-    // ★変更: 第4引数（オプション等）で quote を渡す
-    onSendMessage(text, filesToSend, { sanitizeExcludeTypes: excludedTypes, quote });
+    // ★変更: 第4引数（オプション等）で quote および artifact を渡す
+    const options = {
+      sanitizeExcludeTypes: excludedTypes,
+      quote,
+      ...(activeArtifact && { artifact: { requested: true, type: activeArtifact.type } })
+    };
+    onSendMessage(text, filesToSend, options);
     
     setText('');
     setSelectedFiles([]);
@@ -104,7 +111,8 @@ const ChatInput = ({
     if (onRemoveQuote) {
       onRemoveQuote();
     }
-  }, [text, selectedFiles, onSendMessage, quote, onRemoveQuote]);
+    // ★修正: Artifactの選択は×ボタンが押されるまで維持するため、ここではクリアしない
+  }, [text, selectedFiles, onSendMessage, quote, onRemoveQuote, activeArtifact]);
 
   const handleSend = () => {
     if ((!text.trim() && selectedFiles.length === 0) || isLoading) return;
@@ -256,6 +264,11 @@ const ChatInput = ({
     });
   };
 
+  // ★追加: Artifact関連のハンドラ
+  const handleAddArtifact = (type, label) => {
+    setActiveArtifact({ type, label });
+  };
+
   return (
     <>
       <div className={isCentered ? "chat-input-container-centered" : "chat-input-container"}>
@@ -284,7 +297,9 @@ const ChatInput = ({
             activeStore={activeStore}
             activeDomains={searchSettings.domainFilters || []}
             quote={quote} // ★追加
+            activeArtifact={activeArtifact} // ★追加: 選択されたArtifact
             onRemoveQuote={onRemoveQuote} // ★追加
+            onRemoveArtifact={() => setActiveArtifact(null)} // ★追加: Artifact解除
             onRemoveFile={removeSelectedFile}
             onRemoveStore={() => {
               setActiveStore(null);
@@ -318,6 +333,7 @@ const ChatInput = ({
             domainFilters={searchSettings.domainFilters || []}
             onAddDomain={handleAddDomain}
             onRemoveDomain={handleRemoveDomain}
+            onAddArtifact={handleAddArtifact} // ★追加: Artifact追加ハンドラ
 
             // v3.0: ContextSelector props
             onStoreSelected={handleStoreSelected}

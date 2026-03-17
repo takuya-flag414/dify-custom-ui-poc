@@ -38,12 +38,14 @@ const ReferenceRail = ({
     activeStore = null,
     activeDomains = [],
     quote = null, // ★追加: 引用テキスト
+    activeArtifact = null, // ★追加: 選択されたArtifact
     onRemoveFile,
     onRemoveStore,
     onRemoveDomain,
-    onRemoveQuote // ★追加: 引用削除ハンドラ
+    onRemoveQuote, // ★追加: 引用削除ハンドラ
+    onRemoveArtifact // ★追加: Artifact削除ハンドラ
 }) => {
-    const hasItems = files.length > 0 || activeStore || activeDomains.length > 0 || quote;
+    const hasItems = files.length > 0 || activeStore || activeDomains.length > 0 || quote || activeArtifact;
 
     return (
         <AnimatePresence>
@@ -64,6 +66,13 @@ const ReferenceRail = ({
                                 <span className="line-clamp-2 overflow-hidden text-ellipsis max-w-[300px]" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                                     "{quote}"
                                 </span>
+                            </GlassChip>
+                        )}
+
+                        {/* ★追加: Artifact Badge */}
+                        {activeArtifact && (
+                            <GlassChip onRemove={onRemoveArtifact} className="text-purple-700 dark:text-purple-300 bg-purple-100/30 border-purple-200/50">
+                                <span>📄 {activeArtifact.label}</span>
                             </GlassChip>
                         )}
 

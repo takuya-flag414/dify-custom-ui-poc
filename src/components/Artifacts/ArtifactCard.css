@@ -74,3 +74,22 @@
     color: var(--color-primary);
     transform: translateX(2px);
 }
+
+/* Emoji icon in icon box */
+.artifact-type-emoji {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* Type badge in description */
+.artifact-type-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-primary);
+    background-color: var(--color-primary-bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+    letter-spacing: 0.02em;
+}

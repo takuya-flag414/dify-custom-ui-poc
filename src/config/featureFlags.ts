@@ -15,6 +15,8 @@ export interface FeatureFlags {
      * false: SmartActionsを非表示にし、「関連する質問」を表示
      */
     ENABLE_SMART_ACTIONS: boolean;
+    /** true: Artifact機能（ドキュメント生成・表示）を有効化 */
+    ENABLE_ARTIFACTS: boolean;
 }
 
 const getEnvBoolean = (key: string, defaultValue: boolean): boolean => {
@@ -36,4 +38,6 @@ export const FEATURE_FLAGS: FeatureFlags = {
     // true  → SmartActions表示 / 「関連する質問」非表示
     // false → SmartActions非表示 / 「関連する質問」表示
     ENABLE_SMART_ACTIONS: getEnvBoolean('VITE_FEATURE_ENABLE_SMART_ACTIONS', true),
+    // Artifact（ドキュメント生成・表示）機能の有効化
+    ENABLE_ARTIFACTS: getEnvBoolean('VITE_FEATURE_ENABLE_ARTIFACTS', true),
 };

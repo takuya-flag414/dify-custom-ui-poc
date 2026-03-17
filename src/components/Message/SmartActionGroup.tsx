@@ -18,7 +18,7 @@ import {
 import './SmartActionGroup.css';
 
 export interface SmartAction {
-    type: 'retry_mode' | 'suggested_question' | 'web_search' | 'deep_dive' | 'navigate' | 'selection' | string;
+    type: 'retry_mode' | 'suggested_question' | 'web_search' | 'deep_dive' | 'navigate' | 'selection' | 'generate_document' | string;
     label: string;
     icon?: string;
     payload?: {
@@ -105,7 +105,8 @@ const TYPE_DEFAULT_ICONS: Record<string, LucideIcon> = {
     'websearch': Globe,
     'deepdive': Sparkles,
     'navigate': ExternalLink,
-    'selection': ListChecks
+    'selection': ListChecks,
+    'generatedocument': FileText
 };
 
 /**

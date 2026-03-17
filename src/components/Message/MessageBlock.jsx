@@ -17,6 +17,7 @@ import TypewriterEffect from '../Shared/TypewriterEffect';
 import StructuredUserMessage from './StructuredUserMessage';
 import { parseStructuredMessage, extractPlainText } from '../../utils/messageSerializer';
 import { FEATURE_FLAGS } from '../../config/featureFlags';
+import ArtifactCard from '../Artifacts/ArtifactCard';
 
 // ★追加: 引用(返信)アイコン
 const ReplyIcon = () => (
@@ -96,7 +97,8 @@ const MessageBlock = ({
         // ★追加: ワークフローエラー情報
         hasWorkflowError,
         workflowError,
-        usedHttpLlmSearch
+        usedHttpLlmSearch,
+        artifact // ★追加: Artifact情報
     } = message;
 
     // ★移動: isAi/isUserの定義を先頭に（タイプライター制御で参照するため）
@@ -482,6 +484,25 @@ const MessageBlock = ({
                                         </div>
                                     )}
 
+                                    {/* ★変更: Artifactカードを本文の上に表示。ただしストリーミング完了時かつ、タイトル/タイプが確定した場合のみ表示する */}
+                                    {isAi && artifact && (artifact.artifact_title || artifact.label) && (artifact.artifact_title || artifact.label) !== 'Untitled' && (artifact.artifact_type || artifact.type) && (!isStreaming || isTypewriterComplete) && (
+                                        <div style={{ marginBottom: isTextEmpty ? '0' : '16px' }}>
+                                            <ArtifactCard
+                                                title={artifact.artifact_title || artifact.label}
+                                                type={artifact.artifact_type || artifact.type}
+                                                content={artifact.artifact_content}
+                                                citations={artifact.citations || citations || []}
+                                                onClick={onOpenArtifact ? () => onOpenArtifact({
+                                                    type: artifact.artifact_type || artifact.type,
+                                                    label: artifact.artifact_title || artifact.label,
+                                                    title: artifact.artifact_title || artifact.label,
+                                                    content: artifact.artifact_content,
+                                                    citations: artifact.citations || citations || []
+                                                }) : undefined}
+                                            />
+                                        </div>
+                                    )}
+
                                     {isAi && isStreaming && isTextEmpty && !showRaw && mode !== 'fast' && (
                                         <SkeletonLoader />
                                     )}
@@ -672,7 +693,8 @@ const arePropsEqual = (prev, next) => {
         && p.files === n.files
         && p.hasWorkflowError === n.hasWorkflowError  // ★追加
         && p.workflowError === n.workflowError
-        && p.usage === n.usage;  // ★追加
+        && p.usage === n.usage  // ★追加
+        && p.artifact === n.artifact;  // ★追加
 };
 
 export default React.memo(MessageBlock, arePropsEqual);
