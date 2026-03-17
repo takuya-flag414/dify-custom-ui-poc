@@ -87,7 +87,7 @@ const ChatView = ({
         }
     }, [urlConversationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // State → URL 同期: 新規チャットで会話IDが生成された時にURLを更新
+    // State → URL 同期: 新規チャットで会話IDが生成された時、またはクリアされた時にURLを更新
     const prevConvIdRef = useRef(conversationId);
     useEffect(() => {
         // conversationId が null → 新しいID に変わった場合（新規会話作成）
@@ -103,8 +103,18 @@ const ChatView = ({
             //   明示的に呼ぶことでWelcomeScreen遷移を保証する
             window.history.replaceState(null, '', `/chat/${conversationId}`);
         }
+
+        // 会話IDがクリアされた場合（削除時や未認識時）、URLを /chat に戻す
+        if (
+            conversationId === null &&
+            prevConvIdRef.current !== null &&
+            urlConversationId
+        ) {
+            navigate('/chat', { replace: true });
+        }
+
         prevConvIdRef.current = conversationId;
-    }, [conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [conversationId, urlConversationId, navigate]);
 
     return (
         <motion.div

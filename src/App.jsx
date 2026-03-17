@@ -243,6 +243,7 @@ function App() {
     handleConversationUpdated,
     handleTitleExtracted,
     handleTitleFallback,
+    () => setConversationId(null), // ★追加: onNotFound ハンドラー
     apiKey,
     apiUrl,
     settings?.prompt // ★追加: AI回答スタイルとシステムプロンプトを渡す

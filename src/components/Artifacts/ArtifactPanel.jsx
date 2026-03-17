@@ -50,6 +50,20 @@ const ZoomOutIcon = () => (
     </svg>
 );
 
+const PrintIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+    </svg>
+);
+
+const ChevronIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+);
+
 /**
  * artifact_type に応じたバッジ表示
  */
@@ -78,6 +92,7 @@ const getTypeBadge = (type) => {
  */
 const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
     const [isCopied, setIsCopied] = useState(false);
+    const [isCitationsExpanded, setIsCitationsExpanded] = useState(false);
     
     // ★追加: ズームとスクロール用の状態管理
     const [zoomLevel, setZoomLevel] = useState(100);
@@ -161,6 +176,11 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
         }
     };
 
+    // ★追加: 印刷処理
+    const handlePrint = () => {
+        window.print();
+    };
+
     const citations = displayCitations;
 
     return (
@@ -199,6 +219,17 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                     </div>
 
                     <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
+
+                    {/* ★追加: 印刷ボタン */}
+                    <button
+                        className="artifact-action-btn primary"
+                        onClick={handlePrint}
+                        title="PDFとして保存 / 印刷"
+                        disabled={isGeneratingArtifact} // 生成中は印刷無効
+                    >
+                        <PrintIcon />
+                        <span>印刷</span>
+                    </button>
 
                     <button
                         className={`artifact-action-btn primary ${isCopied ? 'copied' : ''}`}
@@ -249,32 +280,45 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
 
             {/* Footer: Citations Section（仕様書3.2準拠） */}
             {citations.length > 0 && (
-                <div className="artifact-citations-footer">
-                    <div className="artifact-citations-header">
-                        <span className="artifact-citations-label">📚 出典</span>
-                        <span className="artifact-citations-count">{citations.length}件</span>
+                <div className={`artifact-citations-footer ${isCitationsExpanded ? 'expanded' : ''}`}>
+                    <div 
+                        className="artifact-citations-header" 
+                        onClick={() => setIsCitationsExpanded(!isCitationsExpanded)}
+                        role="button"
+                        aria-expanded={isCitationsExpanded}
+                        title={isCitationsExpanded ? "出典を閉じる" : "出典を表示"}
+                    >
+                        <div className="artifact-citations-label-group">
+                            <span className="artifact-citations-label">📚 出典</span>
+                            <span className="artifact-citations-count">{citations.length}件</span>
+                        </div>
+                        <div className={`citation-toggle-icon ${isCitationsExpanded ? 'rotated' : ''}`}>
+                            <ChevronIcon />
+                        </div>
                     </div>
-                    <ul className="artifact-citations-list">
-                        {citations.map((cite, idx) => (
-                            <li key={cite.id || idx} className="artifact-citation-item">
-                                <span className="artifact-citation-number">{idx + 1}</span>
-                                <span className="artifact-citation-source">
-                                    {cite.url && cite.url !== 'null' ? (
-                                        <a href={cite.url} target="_blank" rel="noopener noreferrer">
-                                            {cite.source}
-                                        </a>
-                                    ) : (
-                                        cite.source
-                                    )}
-                                </span>
-                                {cite.type && (
-                                    <span className={`artifact-citation-type artifact-citation-type-${cite.type}`}>
-                                        {cite.type === 'rag' ? '社内' : cite.type === 'web' ? 'Web' : cite.type}
+                    <div className="artifact-citations-content">
+                        <ul className="artifact-citations-list">
+                            {citations.map((cite, idx) => (
+                                <li key={cite.id || idx} className="artifact-citation-item">
+                                    <span className="artifact-citation-number">{idx + 1}</span>
+                                    <span className="artifact-citation-source">
+                                        {cite.url && cite.url !== 'null' ? (
+                                            <a href={cite.url} target="_blank" rel="noopener noreferrer">
+                                                {cite.source}
+                                            </a>
+                                        ) : (
+                                            cite.source
+                                        )}
                                     </span>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
+                                    {cite.type && (
+                                        <span className={`artifact-citation-type artifact-citation-type-${cite.type}`}>
+                                            {cite.type === 'rag' ? '社内' : cite.type === 'web' ? 'Web' : cite.type}
+                                        </span>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             )}
         </div>

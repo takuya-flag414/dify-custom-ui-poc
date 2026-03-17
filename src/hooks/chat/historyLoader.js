@@ -256,6 +256,8 @@ export const loadChatHistory = async ({
       };
     }
   } catch (error) {
+    const isNotFound = error.message && (error.message.includes('404') || error.message.includes('not found') || error.message.includes('Not Found'));
+    
     addLog(`[History Error] ${error.message}`, 'error');
     return {
       messages: [{
@@ -268,7 +270,8 @@ export const loadChatHistory = async ({
       sessionFiles: [],
       searchSettings: savedSettings,
       error: error,
-      shouldSkip: false
+      shouldSkip: false,
+      isNotFound: isNotFound
     };
   }
 };

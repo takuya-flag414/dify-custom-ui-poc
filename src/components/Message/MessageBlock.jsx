@@ -485,7 +485,7 @@ const MessageBlock = ({
                                     )}
 
                                     {/* ★変更: Artifactカードを本文の上に表示。ただしストリーミング完了時かつ、タイトル/タイプが確定した場合のみ表示する */}
-                                    {isAi && artifact && (artifact.artifact_title || artifact.label) && (artifact.artifact_title || artifact.label) !== 'Untitled' && (artifact.artifact_type || artifact.type) && (!isStreaming || isTypewriterComplete) && (
+                                    {isAi && artifact && artifact.artifact_title && artifact.artifact_title !== 'Untitled' && (artifact.artifact_type || artifact.type) && (!isStreaming || isTypewriterComplete) && (
                                         <div style={{ marginBottom: isTextEmpty ? '0' : '16px' }}>
                                             <ArtifactCard
                                                 title={artifact.artifact_title || artifact.label}

@@ -321,8 +321,8 @@
         0 14px 24px rgba(0, 0, 0, 0.12), 
         inset 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
     
-    /* Word標準余白 (25.4mm ≈ 96px) */
-    padding: 96px !important; 
+    /* Word標準余白 (25.4mm ≈ 96px) より少し控えめな20mm余白を採用 */
+    padding: 25mm 20mm !important; 
     margin: 32px auto 64px auto; /* 上部の隙間と、下部の十分なスクロール余白 */
     
     /* Typography - 印刷物としての厳格なスタイリング */
@@ -487,6 +487,18 @@
     margin-bottom: 24px !important;
 }
 
+/* --- sup (上付き文字) --- */
+.artifact-content sup {
+    font-size: 0.75em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+    top: -0.4em;
+    padding-left: 0.1em;
+    color: var(--color-primary, #0563C1); /* リンク色と合わせて視認性を確保 */
+    font-weight: 500;
+}
+
 /* ========================================
    Dark Mode Overrides
    ======================================== */
@@ -515,11 +527,13 @@
 /* --- Citations Footer Section --- */
 .artifact-citations-footer {
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    padding: 16px 24px;
     background-color: transparent;
     flex-shrink: 0;
-    max-height: 200px;
-    overflow-y: auto;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.artifact-citations-footer.expanded {
+    max-height: 250px;
 }
 
 [data-theme='dark'] .artifact-citations-footer {
@@ -529,8 +543,62 @@
 .artifact-citations-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    user-select: none;
+}
+
+.artifact-citations-header:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .artifact-citations-header:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.artifact-citations-label-group {
+    display: flex;
+    align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
+}
+
+.artifact-citations-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    padding: 0 24px;
+    overflow: hidden;
+}
+
+.artifact-citations-footer.expanded .artifact-citations-content {
+    grid-template-rows: 1fr;
+    padding-bottom: 16px;
+}
+
+.citation-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    color: var(--color-text-muted);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s ease;
+}
+
+.citation-toggle-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.artifact-citations-header:hover .citation-toggle-icon {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
+}
+
+[data-theme='dark'] .artifact-citations-header:hover .citation-toggle-icon {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .artifact-citations-label {
@@ -555,6 +623,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-height: 0;
 }
 
 .artifact-citation-item {
@@ -594,6 +663,117 @@
 
 .artifact-citation-source a:hover {
     text-decoration: underline;
+}
+
+/* ========================================
+   Print Mode (PDF Export)
+   ======================================== */
+@media print {
+    /* ★追加: アプリ全体の高さ制約とスクロール制限を完全開放 (ページ分割・見切れ防止) */
+    html, body, #root, .app-layout, .chat-view, .chat-area {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        width: auto !important;
+        overflow: visible !important;
+        position: static !important; /* 絶対配置や固定配置による切り取りを防ぐ */
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* アプリケーション全体の不要なUIを隠す (index.css 等で .app-layout を消すのと同じ効果) */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Artifact本体とその子要素だけを表示 */
+    .artifact-panel,
+    .artifact-panel * {
+        visibility: visible;
+    }
+
+    /* パネル自体の絶対配置、背景、影、枠線を解除して全くズレのない全画面に展開 */
+    .artifact-panel {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        z-index: 9999 !important; /* 最前面 */
+        display: block !important; /* 中央寄せなどの干渉を無効化 */
+    }
+
+    /* 印刷時に不要なヘッダー、操作UI、スクロール設定を解除 */
+    .artifact-header,
+    .artifact-actions,
+    .artifact-zoom-controls,
+    .artifact-close-btn {
+        display: none !important;
+    }
+
+    .artifact-body {
+        overflow: visible !important; /* スクロール枠を開放して全ページ印刷させる */
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* ズーム用ラッパーの制限解除 (幅不足・右側余白の原因を無くす) */
+    .artifact-body > div {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important; /* 強制的に幅いっぱい */
+        display: block !important;
+        padding-bottom: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* ドキュメント本体の制約解除とCSSマージンの無効化 */
+    .artifact-content {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important; /* CSSでの疑似余白を消し、@pageの標準余白に任せる */
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        transform: none !important; /* JSによるズームやずれを強制リセット */
+        page-break-after: always; /* （任意）必要なら末尾で改ページ */
+        background-color: transparent !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 改ページ制御: 見出しの直後での改ページを防止 */
+    .artifact-content h1, 
+    .artifact-content h2, 
+    .artifact-content h3 {
+        page-break-after: avoid;
+    }
+
+    /* 表の途中で不自然に切れないように調整 */
+    .artifact-content table,
+    .artifact-content .code-block-wrapper {
+        page-break-inside: avoid;
+    }
+
+    /* 用紙サイズ（A4）に固定し、ズレを吸収する余裕を持たせた均等マージン */
+    @page {
+        size: A4;
+        margin: 20mm; /* ブラウザ標準の印刷余白を上書きし、PDF上でちょうど良いWord風の余白を取る */
+    }
 }
 
 .artifact-citation-type {

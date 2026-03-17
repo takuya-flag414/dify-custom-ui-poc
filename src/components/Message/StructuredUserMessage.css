@@ -4,11 +4,70 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    position: relative;
+    transition: all 0.3s ease-in-out;
 }
 
 .structured-content {
     font-size: 0.95rem;
-    line-height: 1.5;
+    line-height: 1.625; /* DESIGN_RULE: leading-relaxed */
     white-space: pre-wrap;
     word-break: break-word;
+    color: var(--gray-700, #374151); /* DESIGN_RULE: text-sub */
+    transition: max-height 0.3s ease-in-out;
 }
+
+/* 折り畳み状態のスタイル */
+.structured-user-message.is-folded .structured-content {
+    max-height: 200px;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+
+/* トグルボタンのスタイル */
+.message-fold-toggle {
+    margin-top: 8px; /* 重なりを防ぐため正のマージンに戻す */
+    padding: 6px 14px;
+    display: inline-flex;
+
+
+    align-items: center;
+    gap: 6px;
+    background-color: rgba(255, 255, 255, 0.1); /* わずかな背景色で視認性向上 */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #FFFFFF !important; /* DESIGN_RULE: 青背景テキストは白 */
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 999px; /* 丸みを強調してボタンらしく */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    align-self: flex-start;
+    backdrop-filter: blur(4px);
+}
+
+.message-fold-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.message-fold-toggle:active {
+    transform: scale(0.96);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.toggle-text {
+    opacity: 0.95;
+}
+
+.toggle-icon {
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-icon.is-rotated {
+    transform: rotate(180deg);
+}
+

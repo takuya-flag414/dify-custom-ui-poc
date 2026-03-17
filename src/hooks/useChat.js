@@ -69,7 +69,7 @@ const createConfigError = () => ({
  * @param {string} apiUrl - Dify API URL
  * @param {object} promptSettings - プロンプト設定 (aiStyle, userProfile, customInstructions)
  */
-export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, onTitleFallback, apiKey, apiUrl, promptSettings) => {
+export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, onTitleFallback, onNotFound, apiKey, apiUrl, promptSettings) => {
     const [messages, setMessages] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -165,6 +165,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             }
 
             // 結果を反映
+            if (result.isNotFound) {
+                addLog(`[useChat] Conversation ${conversationId} not found. Triggering reset.`, 'warn');
+                if (onNotFound) onNotFound();
+                setIsHistoryLoading(false);
+                return;
+            }
+
             setSearchSettings(result.searchSettings);
             setMessages(result.messages);
             if (result.sessionFiles.length > 0) {

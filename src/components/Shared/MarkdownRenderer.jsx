@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import { SourceIcon } from './FileIcons';
 import '../Message/MessageBlock.css';
 import { useLogger } from '../../hooks/useLogger';
@@ -405,6 +406,7 @@ const MarkdownRenderer = ({
         return (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
             components={{
               a: ({ node, children, ...props }) => (
                 <LoggedElement as="a" logTag="a" content={String(children)} logFunction={logMarkdownRender} {...props} target="_blank" rel="noopener noreferrer">
@@ -532,7 +534,10 @@ const MarkdownRenderer = ({
                     <table {...props}>{children}</table>
                   </div>
                 );
-              }
+              },
+              sup: ({ node, children, ...props }) => (
+                <sup {...props}>{children}</sup>
+              )
             }}
           >
             {processedContent}
