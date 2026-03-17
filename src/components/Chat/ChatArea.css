@@ -11,6 +11,12 @@
   background-color: var(--color-bg-surface);
   height: 100%;
   position: relative;
+  transition: padding-right 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.chat-area.artifact-open {
+  /* ★変更: 新しい50vwのパネル幅 + 右余白(24px) + ガーター(24px) に合わせてpaddingを設定 */
+  padding-right: calc(50vw + 24px); 
 }
 
 /* --- Initial State Background (Welcome Screen) --- */

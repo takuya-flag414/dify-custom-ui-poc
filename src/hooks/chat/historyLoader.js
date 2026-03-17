@@ -150,6 +150,7 @@ const buildMessagesFromApi = (chronologicalMessages) => {
         thoughtProcess: restoredThoughtProcess,
         processStatus: null,
         thinking: restoredThinking,
+        artifact: parsed.isParsed ? (parsed.artifact || null) : null, // ★追加: Artifact情報を再構成
       });
     }
   }

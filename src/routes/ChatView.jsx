@@ -52,6 +52,9 @@ const ChatView = ({
     setSearchSettings,
     onOpenConfig,
     openArtifact,
+    isArtifactOpen,
+    closeArtifact,
+    activeArtifact,
     effectiveDisplayName,
     startTutorial,
     stopGeneration,
@@ -133,6 +136,9 @@ const ChatView = ({
                 setSearchSettings={setSearchSettings}
                 onOpenConfig={onOpenConfig}
                 onOpenArtifact={openArtifact}
+                isArtifactOpen={isArtifactOpen}
+                closeArtifact={closeArtifact}
+                activeArtifact={activeArtifact}
                 userName={effectiveDisplayName}
                 onStartTutorial={startTutorial}
                 stopGeneration={stopGeneration}

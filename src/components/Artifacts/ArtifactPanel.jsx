@@ -33,6 +33,23 @@ const DocIcon = () => (
     </svg>
 );
 
+const ZoomInIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="11" y1="8" x2="11" y2="14"></line>
+        <line x1="8" y1="11" x2="14" y2="11"></line>
+    </svg>
+);
+
+const ZoomOutIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="8" y1="11" x2="14" y2="11"></line>
+    </svg>
+);
+
 /**
  * artifact_type に応じたバッジ表示
  */
@@ -57,22 +74,85 @@ const getTypeBadge = (type) => {
  *   - isOpen: パネルの開閉状態
  *   - onClose: 閉じるボタンのハンドラ
  *   - artifact: { title, type, content, citations }
+ *   - streamingMessage: 現在生成中のAIメッセージ (リアルタイムレンダリング用)
  */
-const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
+const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
     const [isCopied, setIsCopied] = useState(false);
+    
+    // ★追加: ズームとスクロール用の状態管理
+    const [zoomLevel, setZoomLevel] = useState(100);
+    const [autoFit, setAutoFit] = useState(true);
+    const [panelWidth, setPanelWidth] = useState(0);
+
+    // ★追加: 現在のストリーミングメッセージがArtifact生成用かどうかを判定
+    const isGeneratingArtifact = streamingMessage && streamingMessage.isStreaming && streamingMessage.artifact;
+    
+    // 実表示用のデータ（ストリーミング中ならストリーミング文字列を使用）
+    const displayContent = isGeneratingArtifact ? streamingMessage.text : (artifact?.content || '');
+    const displayTitle = artifact?.title || artifact?.label || 'Untitled Document';
+    const displayType = artifact?.type || 'summary_report';
+    const displayCitations = artifact?.citations || [];
 
     // アーティファクトが切り替わったら状態リセット
     useEffect(() => {
         setIsCopied(false);
-    }, [artifact]);
+    }, [artifact?.title, displayContent]);
 
-    if (!artifact) return <div className="artifact-panel" />;
+    // ★追加: パネル幅の監視と自動ズーム (Auto Fit)
+    useEffect(() => {
+        const panelEl = document.querySelector('.artifact-panel');
+        if (!panelEl) return;
+
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                setPanelWidth(entry.contentRect.width);
+            }
+        });
+
+        resizeObserver.observe(panelEl);
+        return () => resizeObserver.disconnect();
+    }, []);
+
+    // ★追加: AutoFitが有効な場合、パネル幅に応じて最適なズームレベルを計算
+    useEffect(() => {
+        if (!autoFit || panelWidth === 0) return;
+
+        // 用紙の本来の横幅 720px と左右の余白を含めて収まるようにスケール計算
+        // パネル幅からスクロールバー分や安全マージン(約40px)を引いた有効幅
+        const availableWidth = panelWidth - 40; 
+        const basePaperWidth = 720; 
+        
+        let optimalZoom = Math.floor((availableWidth / basePaperWidth) * 100);
+        
+        // 最小50%、最大150%程度に制限
+        optimalZoom = Math.max(50, Math.min(150, optimalZoom));
+        setZoomLevel(optimalZoom);
+
+    }, [panelWidth, autoFit]);
+
+    // ★追加: 手動ズーム操作
+    const handleZoomIn = () => {
+        setAutoFit(false);
+        setZoomLevel(prev => Math.min(200, prev + 10));
+    };
+
+    const handleZoomOut = () => {
+        setAutoFit(false);
+        setZoomLevel(prev => Math.max(30, prev - 10));
+    };
+
+    const handleZoomReset = () => {
+        setAutoFit(true);
+    };
+
+    // ★変更: artifactもストリーミングメッセージもない場合は何も表示しない
+    if (!artifact && !isGeneratingArtifact) return <div className="artifact-panel" />;
 
     // ★仕様書3.4準拠: # タイトル + 本文 でコピー
     const handleCopy = async () => {
         if (isCopied) return;
         try {
-            const copyText = `# ${artifact.title || 'Untitled'}\n\n${artifact.content || ''}`;
+            const copyText = `# ${displayTitle}\n\n${displayContent}`;
             await navigator.clipboard.writeText(copyText);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
@@ -81,7 +161,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
         }
     };
 
-    const citations = artifact.citations || [];
+    const citations = displayCitations;
 
     return (
         <div className={`artifact-panel ${isOpen ? 'open' : ''}`}>
@@ -92,16 +172,39 @@ const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
                         <DocIcon />
                     </div>
                     <div className="artifact-header-info">
-                        <span className="artifact-title">{artifact.title || 'Untitled Document'}</span>
-                        <span className="artifact-type-badge-panel">{getTypeBadge(artifact.type)}</span>
+                        <span className="artifact-title">
+                            {displayTitle}
+                            {isGeneratingArtifact && <span className="typing-cursor"></span>}
+                        </span>
+                        <span className="artifact-type-badge-panel">{getTypeBadge(displayType)}</span>
                     </div>
                 </div>
 
                 <div className="artifact-actions">
+                    {/* ★追加: Zoom Controls */}
+                    <div className="artifact-zoom-controls">
+                        <button className="zoom-btn" onClick={handleZoomOut} title="縮小">
+                            <ZoomOutIcon />
+                        </button>
+                        <button 
+                            className={`zoom-label-btn ${autoFit ? 'auto-fit-active' : ''}`} 
+                            onClick={handleZoomReset} 
+                            title="ウィンドウ幅に合わせる (Auto Fit)"
+                        >
+                            {zoomLevel}%
+                        </button>
+                        <button className="zoom-btn" onClick={handleZoomIn} title="拡大">
+                            <ZoomInIcon />
+                        </button>
+                    </div>
+
+                    <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
+
                     <button
                         className={`artifact-action-btn primary ${isCopied ? 'copied' : ''}`}
                         onClick={handleCopy}
                         title="内容をクリップボードにコピー"
+                        disabled={isGeneratingArtifact} // 生成中はコピーボタンを無効化
                     >
                         {isCopied ? <CheckIcon /> : <CopyIcon />}
                         <span>{isCopied ? 'コピー完了' : 'コピー'}</span>
@@ -115,13 +218,32 @@ const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
                 </div>
             </div>
 
-            {/* Body: Document Viewer */}
-            <div className="artifact-body">
-                <div className="artifact-content">
-                    <MarkdownRenderer
-                        content={artifact.content}
-                        isStreaming={false}
-                    />
+            {/* Body: Document Viewer with Scale Wrapper */}
+            <div className="artifact-body" style={{ overflow: 'auto' }}>
+                {/* 
+                  ★追加: スクロール領域を確保するためのプレースホルダーラッパー 
+                  scaleをかけると要素の実寸（レイアウト計算上の占有サイズ）は変わらないため、
+                  親要素にスケール後のピクセル幅をminWidthとして与えることで正しくスクロールバーを出す。
+                */}
+                <div style={{ 
+                    minWidth: `${720 * (zoomLevel / 100)}px`, 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    paddingBottom: '64px' // 下部余白
+                }}>
+                    <div 
+                        className="artifact-content" 
+                        style={{ 
+                            transform: `scale(${zoomLevel / 100})`, 
+                            transformOrigin: 'top center',
+                            transition: 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)'
+                        }}
+                    >
+                        <MarkdownRenderer
+                            content={displayContent}
+                            isStreaming={isGeneratingArtifact}
+                        />
+                    </div>
                 </div>
             </div>
 

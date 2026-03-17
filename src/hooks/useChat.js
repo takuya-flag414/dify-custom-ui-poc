@@ -264,7 +264,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             thoughtProcess: [],
             processStatus: null,
             thinking: '',  // ★追加: Chain-of-Thought用
-            mode: isFastMode ? 'fast' : 'normal'
+            mode: isFastMode ? 'fast' : 'normal',
+            artifact: options.artifact // ★追加: 生成中のArtifact情報を付与
         };
         setStreamingMessage(initialAiMessage);
 

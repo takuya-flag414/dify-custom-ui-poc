@@ -1,27 +1,69 @@
 /* src/components/Artifacts/ArtifactPanel.css */
 
 .artifact-panel {
-    height: 100%;
-    background-color: var(--color-bg-surface);
-    border-left: 1px solid var(--color-border);
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    bottom: 160px; /* Leave space for ChatInput. */
+    width: calc(50vw - 24px); /* ★変更: 画面幅の約半分に拡張 */
+    min-width: 480px;
+    max-width: 800px;
+    z-index: 50;
+
+    /* Apple Intelligence Material (mat-popover based) */
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+
+    /* Corner Radius (Standard Window Radius: 16px) */
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+
+    /* Shadow and Inner Highlight */
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.12),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.04);
+
+    /* Spring Animation (Stiffness 250, Damping 25 equivalent in CSS transition) */
+    transform: translateX(calc(100% + 40px));
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+}
+
+.artifact-panel.open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+[data-theme='dark'] .artifact-panel {
+    background: rgba(35, 35, 35, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 /* --- Header: ファイル管理風 --- */
 .artifact-header {
     height: 56px;
     padding: 0 20px;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: var(--color-bg-header);
-    backdrop-filter: blur(8px);
+    background-color: transparent;
     flex-shrink: 0;
     z-index: 10;
+}
+
+[data-theme='dark'] .artifact-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .artifact-title-group {
@@ -52,6 +94,24 @@
     overflow: hidden;
     text-overflow: ellipsis;
     letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+}
+
+/* 生成中のカーソルアニメーション */
+.typing-cursor {
+    display: inline-block;
+    width: 6px;
+    height: 14px;
+    background-color: var(--color-text-main);
+    margin-left: 6px;
+    animation: blink 1s step-end infinite;
+    flex-shrink: 0;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 .artifact-meta {
@@ -67,6 +127,78 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* ★追加: Zoom Controls */
+.artifact-zoom-controls {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    padding: 2px;
+    margin-right: 4px;
+}
+
+[data-theme='dark'] .artifact-zoom-controls {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.zoom-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
+}
+
+[data-theme='dark'] .zoom-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.zoom-btn:active {
+    transform: scale(0.95);
+}
+
+.zoom-label-btn {
+    padding: 0 8px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--color-text-main);
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 48px;
+}
+
+.zoom-label-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .zoom-label-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Auto Fit が有効な時のスタイル */
+.zoom-label-btn.auto-fit-active {
+    color: var(--color-primary);
 }
 
 .artifact-action-btn {
@@ -108,9 +240,14 @@
 
 /* Primary Style (通常時の枠線) */
 .artifact-action-btn.primary {
-    background-color: var(--color-bg-surface);
-    border-color: var(--color-border);
+    background-color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(0, 0, 0, 0.1);
     box-shadow: var(--shadow-sm);
+}
+
+[data-theme='dark'] .artifact-action-btn.primary {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .artifact-action-btn.primary:hover {
@@ -161,86 +298,193 @@
 /* --- Body: ドキュメントビューワー --- */
 .artifact-body {
     flex-grow: 1;
-    overflow-y: auto;
-    padding: 40px 48px;
-    /* たっぷりとした余白 */
-    background-color: var(--color-bg-surface);
+    overflow: auto; /* ★変更: X方向スクロールも許可 */
+    padding: 32px 0; 
+    background-color: transparent; 
 }
 
-/* Typography for Document (Article Style) */
+/* Typography for Document (Article Style) -> Ultra-Realistic A4 Paper Style */
 .artifact-content {
-    max-width: 720px;
-    /* 読みやすい一行の長さを確保 */
-    margin: 0 auto;
-    font-family: var(--font-family-base);
-    color: var(--color-text-main);
-    line-height: 1.8;
-    /* ゆったりとした行間 */
-    font-size: 15px;
+    /* Paper sizing and minimum height for A4 aspect ratio (1:1.414) */
+    width: 100%;
+    max-width: 720px; 
+    min-height: calc(720px * 1.414);
+    
+    /* Paper visual styling (No border-radius, pure white) */
+    background-color: #ffffff !important;
+    border-radius: 0 !important; /* 本物のA4用紙は角丸がない */
+    
+    /* 物理的な紙の厚みと設置面の落ち影を多重レイヤーで再現 */
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.04), 
+        0 4px 12px rgba(0, 0, 0, 0.08), 
+        0 14px 24px rgba(0, 0, 0, 0.12), 
+        inset 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
+    
+    /* Word標準余白 (25.4mm ≈ 96px) */
+    padding: 96px !important; 
+    margin: 32px auto 64px auto; /* 上部の隙間と、下部の十分なスクロール余白 */
+    
+    /* Typography - 印刷物としての厳格なスタイリング */
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif; /* 明朝体を優先して文書っぽく */
+    color: #000000 !important; /* インクの純黒 */
+    line-height: 1.6 !important; /* 印刷標準行間 */
+    font-size: 14.5px !important; /* 10.5pt〜11pt相当 */
+    text-align: justify !important; /* 両端揃え */
+    font-feature-settings: "palt" 1; /* プロポーショナルメトリクス */
 }
 
-/* Markdown Styles Override for Artifact */
-.artifact-content h1 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--color-border);
-    letter-spacing: -0.01em;
+/* Markdown Styles Override for Artifact (Force Light Mode styling) */
+/* 見出し: 印刷物のpt仕様に準拠 */
+.artifact-content h1,
+[data-theme='dark'] .artifact-content h1 {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif; /* 見出しはゴシック体 */
+    font-size: 32px !important; /* ~24pt相当 */
+    font-weight: 700 !important;
+    margin-top: 0 !important;
+    margin-bottom: 24px !important;
+    padding-bottom: 0 !important; /* 下線を排除 (印刷物らしく) */
+    border-bottom: none !important;
+    letter-spacing: 0.05em !important;
+    color: #000000 !important;
+    text-align: center !important; /* タイトルは中央揃え */
 }
 
-.artifact-content h2 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-top: 40px;
-    margin-bottom: 16px;
+.artifact-content h2,
+[data-theme='dark'] .artifact-content h2 {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    font-size: 24px !important; /* ~18pt相当 */
+    font-weight: 700 !important;
+    margin-top: 32px !important;
+    margin-bottom: 16px !important;
+    color: #000000 !important;
+    text-align: left !important;
 }
 
-.artifact-content h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-top: 32px;
-    margin-bottom: 12px;
+.artifact-content h3,
+[data-theme='dark'] .artifact-content h3 {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    font-size: 19px !important; /* ~14pt相当 */
+    font-weight: 600 !important;
+    margin-top: 24px !important;
+    margin-bottom: 12px !important;
+    color: #000000 !important;
+    text-align: left !important;
 }
 
-.artifact-content p {
-    margin-bottom: 1.5em;
-    color: var(--color-text-sub);
+.artifact-content p,
+[data-theme='dark'] .artifact-content p {
+    margin-bottom: 1.5em !important;
+    color: #000000 !important;
+    text-indent: 1em !important; /* 日本語文書の段落開始1文字下げ */
+}
+
+/* 箇条書きでは字下げを無効化 */
+.artifact-content li p,
+[data-theme='dark'] .artifact-content li p {
+    text-indent: 0 !important;
+    margin-bottom: 0 !important;
 }
 
 .artifact-content ul,
-.artifact-content ol {
-    margin-bottom: 1.5em;
-    padding-left: 1.5em;
-    color: var(--color-text-sub);
+.artifact-content ol,
+[data-theme='dark'] .artifact-content ul,
+[data-theme='dark'] .artifact-content ol {
+    margin-bottom: 1.5em !important;
+    padding-left: 1.5em !important;
+    color: #000000 !important;
 }
 
-.artifact-content li {
-    margin-bottom: 0.5em;
+.artifact-content li,
+[data-theme='dark'] .artifact-content li {
+    margin-bottom: 0.5em !important;
+    color: #000000 !important;
 }
 
-/* コードブロックもドキュメントの一部として綺麗に見せる */
-.artifact-content .code-block-wrapper {
-    margin: 24px 0;
-    border: 1px solid var(--color-border);
-    box-shadow: none;
-    background-color: var(--color-bg-sidebar);
+/* ハイパーリンク (Word標準の濃い青と常に下線) */
+.artifact-content a,
+[data-theme='dark'] .artifact-content a {
+    color: #0563C1 !important;
+    text-decoration: underline !important;
 }
 
-.artifact-content .code-block-header {
-    background-color: var(--color-bg-sidebar);
-    border-bottom: 1px solid var(--color-border);
-    color: var(--color-text-sub);
+/* コードブロックもドキュメントの一部として印刷風に見せる (角丸排除) */
+.artifact-content .code-block-wrapper,
+[data-theme='dark'] .artifact-content .code-block-wrapper {
+    margin: 24px 0 !important;
+    border: 1px solid #000000 !important; /* 黒枠 */
+    border-radius: 0 !important; /* 角丸なし */
+    box-shadow: none !important;
+    background-color: #ffffff !important; /* 白背景 */
 }
 
-.artifact-content pre {
-    background-color: transparent;
+.artifact-content .code-block-header,
+[data-theme='dark'] .artifact-content .code-block-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #000000 !important;
+    color: #000000 !important;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif !important;
+    border-radius: 0 !important;
 }
 
-.artifact-content pre code {
-    color: var(--color-text-main);
-    font-family: 'Menlo', 'Monaco', monospace;
-    font-size: 13px;
+.artifact-content pre,
+[data-theme='dark'] .artifact-content pre {
+    background-color: transparent !important;
+    border-radius: 0 !important;
+}
+
+.artifact-content pre code,
+[data-theme='dark'] .artifact-content pre code {
+    color: #000000 !important; 
+    font-family: 'Consolas', 'Courier New', monospace !important;
+    font-size: 13px !important;
+}
+
+/* 引用ブロック (Blockquote) -> 簡素な縦線 */
+.artifact-content blockquote,
+[data-theme='dark'] .artifact-content blockquote {
+    border-left: 3px solid #000000 !important; /* 黒線 */
+    padding-left: 16px !important;
+    margin-left: 0 !important;
+    color: #000000 !important;
+    background-color: transparent !important; /* 背景なし */
+    border-radius: 0 !important; /* 角丸なし */
+    font-style: normal !important; /* 斜体は日本語文書に合わないため解除 */
+}
+
+/* テーブルスタイル (ソリッドな黒罫線) */
+.artifact-content table,
+[data-theme='dark'] .artifact-content table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 1px solid #000000 !important; /* 外枠黒 */
+    margin: 24px 0 !important;
+    background-color: #ffffff !important;
+}
+
+.artifact-content th,
+.artifact-content td,
+[data-theme='dark'] .artifact-content th,
+[data-theme='dark'] .artifact-content td {
+    border: 1px solid #000000 !important; /* セル枠黒 */
+    padding: 8px 12px !important;
+    color: #000000 !important;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif !important;
+}
+
+.artifact-content th,
+[data-theme='dark'] .artifact-content th {
+    background-color: #f3f3f3 !important; /* ヘッダは極薄いグレー印刷 */
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
+
+.artifact-content .markdown-table-wrapper,
+[data-theme='dark'] .artifact-content .markdown-table-wrapper {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin-bottom: 24px !important;
 }
 
 /* ========================================
@@ -270,13 +514,16 @@
 
 /* --- Citations Footer Section --- */
 .artifact-citations-footer {
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     padding: 16px 24px;
-    background-color: var(--color-bg-header);
-    backdrop-filter: blur(8px);
+    background-color: transparent;
     flex-shrink: 0;
     max-height: 200px;
     overflow-y: auto;
+}
+
+[data-theme='dark'] .artifact-citations-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .artifact-citations-header {
