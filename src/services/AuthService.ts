@@ -245,7 +245,7 @@ class AuthService {
                 user: profile,
             };
         } catch (error: any) {
-            console.error('[AuthService] Login failed:', error);
+            console.error('[AuthService] Login failed full error:', error);
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                 throw new Error('メールアドレスまたはパスワードが正しくありません');
             }
