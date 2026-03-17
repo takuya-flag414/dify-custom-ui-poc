@@ -193,12 +193,37 @@ class AuthService {
             const firebaseUser = userCredential.user;
 
             // 2. Firestore からプロファイルを取得
-            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-            if (!userDoc.exists()) {
-                throw new Error('ユーザープロファイルが見つかりません');
-            }
+            let userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+            let userData: any;
 
-            const userData = userDoc.data();
+            if (!userDoc.exists()) {
+                // [JIT Provisioning] プロファイルがない場合は初期作成
+                console.log('[AuthService] Profile missing. Creating default profile for:', firebaseUser.email);
+                const now = Timestamp.now();
+                userData = {
+                    user_id: firebaseUser.uid,
+                    email: firebaseUser.email?.toLowerCase() || '',
+                    name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Unknown User',
+                    account_status: 1, // 有効
+                    created_at: now,
+                    updated_at: now,
+                    displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+                    preferences: {
+                        theme: 'system',
+                        aiStyle: 'partner',
+                    }
+                };
+                await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+
+                // デフォルトロール（general）を割り当て
+                await setDoc(doc(collection(db, 'user_roles')), {
+                    user_id: firebaseUser.uid,
+                    role_id: 'role_general',
+                    assigned_at: now
+                });
+            } else {
+                userData = userDoc.data();
+            }
 
             // 3. アカウント状態の検証
             if (userData.account_status === 0) {
