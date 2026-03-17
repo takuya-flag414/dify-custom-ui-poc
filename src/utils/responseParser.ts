@@ -22,6 +22,16 @@ export interface ProcessLogs {
 }
 
 /**
+ * Artifact データの型定義（仕様書 1.3 準拠）
+ */
+export interface ArtifactData {
+    artifact_title: string;
+    artifact_type: 'summary_report' | 'checklist' | 'comparison_table' | 'faq' | 'meeting_minutes' | string;
+    artifact_content: string;
+    citations?: LlmCitation[];
+}
+
+/**
  * LLM応答のパース結果の型定義
  */
 export interface ParsedLlmResponse {
@@ -33,6 +43,7 @@ export interface ParsedLlmResponse {
     processLogs: ProcessLogs | null;
     usedRag: boolean;
     usedWeb: boolean;
+    artifact: ArtifactData | null;
 }
 
 /**
@@ -113,7 +124,7 @@ const extractPartialThinking = (text: string): string | null => extractPartialFi
  */
 export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmResponse => {
     if (!rawText) {
-        return { answer: '', citations: [], smartActions: [], thinking: '', isParsed: false, processLogs: null, usedRag: false, usedWeb: false };
+        return { answer: '', citations: [], smartActions: [], thinking: '', isParsed: false, processLogs: null, usedRag: false, usedWeb: false, artifact: null };
     }
 
     let textToParse = rawText.trim();
@@ -149,6 +160,17 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                 const usedRag = parsed.used_rag === true || parsed.used_rag === 'true';
                 const usedWeb = parsed.used_web === true || parsed.used_web === 'true';
 
+                // ★Artifact判定: artifact_title + artifact_content の両方が存在すればArtifact
+                let artifact: ArtifactData | null = null;
+                if (parsed.artifact_title && parsed.artifact_content) {
+                    artifact = {
+                        artifact_title: parsed.artifact_title,
+                        artifact_type: parsed.artifact_type || 'summary_report',
+                        artifact_content: parsed.artifact_content,
+                        citations: Array.isArray(parsed.citations) ? parsed.citations : [],
+                    };
+                }
+
                 return {
                     answer: parsed.answer || '',
                     citations: Array.isArray(parsed.citations) ? parsed.citations : [],
@@ -158,6 +180,7 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                     processLogs,
                     usedRag,
                     usedWeb,
+                    artifact,
                 };
             }
         }
@@ -194,6 +217,18 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
             }
         } catch { }
 
+        // ★Artifact: ストリーミング中のPartial Artifact抽出
+        let partialArtifact: ArtifactData | null = null;
+        const partialArtifactTitle = extractPartialField(textToParse, 'artifact_title');
+        const partialArtifactContent = extractPartialField(textToParse, 'artifact_content');
+        if (partialArtifactTitle) {
+            partialArtifact = {
+                artifact_title: partialArtifactTitle,
+                artifact_type: extractPartialField(textToParse, 'artifact_type') || 'summary_report',
+                artifact_content: partialArtifactContent || '',
+            };
+        }
+
         return {
             answer: partialAnswer || '',  // ★改善: nullの場合は空文字を返す
             citations: extractedCitations,
@@ -203,6 +238,7 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
             processLogs: null, // ストリーミング中はprocess_logsは不完全なため抽出しない
             usedRag: false,
             usedWeb: false,
+            artifact: partialArtifact,
         };
     }
 
@@ -217,5 +253,6 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
         processLogs: null,
         usedRag: false,
         usedWeb: false,
+        artifact: null,
     };
 };

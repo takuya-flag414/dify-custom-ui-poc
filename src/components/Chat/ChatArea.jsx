@@ -137,6 +137,26 @@ const ChatArea = (props) => {
         }
         break;
 
+      case 'generatedocument': {
+        // ★Artifact生成リクエスト: generate_document smart action
+        let artifactType = action.payload?.artifact_type;
+        let artifactText = action.payload?.text || action.label;
+
+        // ★フォールバック: LLMが payload.text に "artifact_type:xxx" を埋め込んだ場合の抽出
+        if (!artifactType && artifactText) {
+          const match = artifactText.match(/[.。]?\s*artifact_type\s*:\s*(\w+)\s*$/i);
+          if (match) {
+            artifactType = match[1]; // e.g. 'summary_report'
+            // テキストからartifact_type部分を除去して送信
+            artifactText = artifactText.replace(match[0], '').trim();
+          }
+        }
+
+        artifactType = artifactType || 'summary_report'; // デフォルト
+        onSendMessage(artifactText, [], { artifact: { requested: true, type: artifactType } });
+        break;
+      }
+
       default:
         console.warn('Unknown smart action type:', action.type);
     }

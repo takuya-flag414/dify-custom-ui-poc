@@ -286,19 +286,6 @@ workflow:
       type: custom
       zIndex: 0
     - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 1762490237953-false-1765854025663-target
-      selected: false
-      source: '1762490237953'
-      sourceHandle: 'false'
-      target: '1765854025663'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
         isInLoop: false
         sourceType: if-else
         targetType: if-else
@@ -463,143 +450,6 @@ workflow:
       source: '1764914026588'
       sourceHandle: 'false'
       target: '1764914157100'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: assigner
-        targetType: code
-      id: 17696657120690-source-1765514869301-target
-      selected: false
-      source: '17696657120690'
-      sourceHandle: source
-      target: '1765514869301'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: code
-        targetType: iteration
-      id: 1769666802121-source-1769668260271-target
-      selected: false
-      source: '1769666802121'
-      sourceHandle: source
-      target: '1769668260271'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1769668260271'
-        sourceType: iteration-start
-        targetType: http-request
-      id: 1769668260271start-source-1769668322968-target
-      selected: false
-      source: 1769668260271start
-      sourceHandle: source
-      target: '1769668322968'
-      targetHandle: target
-      type: custom
-      zIndex: 1002
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: iteration
-        targetType: llm
-      id: 1769668260271-source-1769668477538-target
-      selected: false
-      source: '1769668260271'
-      sourceHandle: source
-      target: '1769668477538'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: assigner
-      id: 1769668477538-source-17696657120690-target
-      selected: false
-      source: '1769668477538'
-      sourceHandle: source
-      target: '17696657120690'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: if-else
-      id: 1769666720110-source-1769754087217-target
-      selected: false
-      source: '1769666720110'
-      sourceHandle: source
-      target: '1769754087217'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: code
-      id: 1769754087217-false-1769666802121-target
-      selected: false
-      source: '1769754087217'
-      sourceHandle: 'false'
-      target: '1769666802121'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: code
-      id: 1769754087217-true-17697542686310-target
-      selected: false
-      source: '1769754087217'
-      sourceHandle: 'true'
-      target: '17697542686310'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: assigner
-        targetType: code
-      id: 17697542971160-source-1765514869301-target
-      selected: false
-      source: '17697542971160'
-      sourceHandle: source
-      target: '1765514869301'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: http-request
-        targetType: assigner
-      id: 17697558915520-source-17697542971160-target
-      selected: false
-      source: '17697558915520'
-      sourceHandle: source
-      target: '17697542971160'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: code
-        targetType: http-request
-      id: 17697542686310-source-17697558915520-target
-      selected: false
-      source: '17697542686310'
-      sourceHandle: source
-      target: '17697558915520'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -776,19 +626,6 @@ workflow:
     - data:
         isInIteration: false
         isInLoop: false
-        sourceType: if-else
-        targetType: tool
-      id: 1764914026588-f1ff0762-98d8-4a18-aab1-434d65b19404-1771573783623-target
-      selected: false
-      source: '1764914026588'
-      sourceHandle: f1ff0762-98d8-4a18-aab1-434d65b19404
-      target: '1771573783623'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
         sourceType: tool
         targetType: tool
       id: 1771573783623-source-1771391749204-target
@@ -950,40 +787,6 @@ workflow:
       type: custom
       zIndex: 0
     - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: if-else
-      id: 1764914157100-1db66d52-c4bb-4b05-a087-6a73781c2d5b-1771998847270-target
-      source: '1764914157100'
-      sourceHandle: 1db66d52-c4bb-4b05-a087-6a73781c2d5b
-      target: '1771998847270'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 1771998847270-false-1769666720110-target
-      source: '1771998847270'
-      sourceHandle: 'false'
-      target: '1769666720110'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 1771998847270-true-17719989311170-target
-      source: '1771998847270'
-      sourceHandle: 'true'
-      target: '17719989311170'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
         isInLoop: false
         sourceType: code
         targetType: http-request
@@ -1024,18 +827,6 @@ workflow:
       source: '1765514869301'
       sourceHandle: source
       target: '1765515071449'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: start
-        targetType: assigner
-      id: 1761291739140-source-1772782910983-target
-      source: '1761291739140'
-      sourceHandle: source
-      target: '1772782910983'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1097,6 +888,131 @@ workflow:
       source: '1772785070312'
       sourceHandle: source
       target: '17719994416790'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1764914026588-f1ff0762-98d8-4a18-aab1-434d65b19404-1773637747194-target
+      source: '1764914026588'
+      sourceHandle: f1ff0762-98d8-4a18-aab1-434d65b19404
+      target: '1773637747194'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: tool
+      id: 1773637747194-false-1771573783623-target
+      source: '1773637747194'
+      sourceHandle: 'false'
+      target: '1771573783623'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: tool
+      id: 1773637747194-true-17736380657420-target
+      source: '1773637747194'
+      sourceHandle: 'true'
+      target: '17736380657420'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: tool
+        targetType: assigner
+      id: 17736380657420-source-1773638130578-target
+      source: '17736380657420'
+      sourceHandle: source
+      target: '1773638130578'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: assigner
+        targetType: if-else
+      id: 1773638130578-source-1764914157100-target
+      source: '1773638130578'
+      sourceHandle: source
+      target: '1764914157100'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1764914157100-1db66d52-c4bb-4b05-a087-6a73781c2d5b-17719989311170-target
+      source: '1764914157100'
+      sourceHandle: 1db66d52-c4bb-4b05-a087-6a73781c2d5b
+      target: '17719989311170'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1773712161221-true-1773712217417-target
+      source: '1773712161221'
+      sourceHandle: 'true'
+      target: '1773712217417'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1773712217417-source-1773712369475-target
+      source: '1773712217417'
+      sourceHandle: source
+      target: '1773712369475'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: assigner
+      id: 1761291739140-source-1772782910983-target
+      source: '1761291739140'
+      sourceHandle: source
+      target: '1772782910983'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1762490237953-false-1773712161221-target
+      source: '1762490237953'
+      sourceHandle: 'false'
+      target: '1773712161221'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: 1773712161221-false-1765854025663-target
+      source: '1773712161221'
+      sourceHandle: 'false'
+      target: '1765854025663'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1243,10 +1159,10 @@ workflow:
       id: '1761291739140'
       position:
         x: 0
-        y: 62
+        y: 0
       positionAbsolute:
         x: 0
-        y: 62
+        y: 0
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1269,10 +1185,10 @@ workflow:
       id: answer
       position:
         x: 1388
-        y: 401
+        y: 14
       positionAbsolute:
         x: 1388
-        y: 401
+        y: 14
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1298,10 +1214,10 @@ workflow:
       id: '1762490237953'
       position:
         x: 1026
-        y: 172
+        y: 110
       positionAbsolute:
         x: 1026
-        y: 172
+        y: 110
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1326,11 +1242,11 @@ workflow:
       height: 124
       id: '1764913411735'
       position:
-        x: 1750
-        y: 199
+        x: 2132
+        y: 639
       positionAbsolute:
-        x: 1750
-        y: 199
+        x: 2132
+        y: 639
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1347,11 +1263,11 @@ workflow:
       height: 104
       id: '1764913700839'
       position:
-        x: 2112
-        y: 221
+        x: 2494
+        y: 661
       positionAbsolute:
-        x: 2112
-        y: 221
+        x: 2494
+        y: 661
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1384,11 +1300,11 @@ workflow:
       height: 110
       id: '1764913830165'
       position:
-        x: 2796
-        y: 218
+        x: 3178
+        y: 658
       positionAbsolute:
-        x: 2796
-        y: 218
+        x: 3178
+        y: 658
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1427,11 +1343,11 @@ workflow:
       height: 176
       id: '1764914026588'
       position:
-        x: 4928
-        y: 435
+        x: 5290
+        y: 875
       positionAbsolute:
-        x: 4928
-        y: 435
+        x: 5290
+        y: 875
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1463,11 +1379,11 @@ workflow:
       height: 150
       id: '1764914157100'
       position:
-        x: 7362
-        y: 526
+        x: 8086
+        y: 866
       positionAbsolute:
-        x: 7362
-        y: 526
+        x: 8086
+        y: 866
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1498,11 +1414,11 @@ workflow:
       height: 52
       id: '1764924171081'
       position:
-        x: 2454
-        y: 247
+        x: 2836
+        y: 687
       positionAbsolute:
-        x: 2454
-        y: 247
+        x: 2836
+        y: 687
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1527,11 +1443,11 @@ workflow:
       height: 124
       id: '1765343666910'
       position:
-        x: 4566
-        y: 222
+        x: 4928
+        y: 662
       positionAbsolute:
-        x: 4566
-        y: 222
+        x: 4928
+        y: 662
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1546,11 +1462,11 @@ workflow:
       height: 102
       id: '1765345427966'
       position:
-        x: 5270
-        y: 245
+        x: 5632
+        y: 685
       positionAbsolute:
-        x: 5270
-        y: 245
+        x: 5632
+        y: 685
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1565,11 +1481,11 @@ workflow:
       height: 102
       id: '1765345440190'
       position:
-        x: 11768
-        y: 593
+        x: 11224
+        y: 761
       positionAbsolute:
-        x: 11768
-        y: 593
+        x: 11224
+        y: 761
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1635,11 +1551,11 @@ workflow:
       height: 80
       id: '1765514869301'
       position:
-        x: 10722
-        y: 765
+        x: 10178
+        y: 933
       positionAbsolute:
-        x: 10722
-        y: 765
+        x: 10178
+        y: 933
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1686,11 +1602,11 @@ workflow:
       height: 220
       id: '1765515071449'
       position:
-        x: 11064
-        y: 695
+        x: 10520
+        y: 863
       positionAbsolute:
-        x: 11064
-        y: 695
+        x: 10520
+        y: 863
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1705,11 +1621,11 @@ workflow:
       height: 102
       id: '17655153615920'
       position:
-        x: 11768
-        y: 791
+        x: 11224
+        y: 959
       positionAbsolute:
-        x: 11768
-        y: 791
+        x: 11224
+        y: 959
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1724,11 +1640,11 @@ workflow:
       height: 102
       id: '17655153626170'
       position:
-        x: 11768
-        y: 1187
+        x: 11224
+        y: 1355
       positionAbsolute:
-        x: 11768
-        y: 1187
+        x: 11224
+        y: 1355
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1743,11 +1659,11 @@ workflow:
       height: 102
       id: '17655153635450'
       position:
-        x: 11768
-        y: 989
+        x: 11224
+        y: 1157
       positionAbsolute:
-        x: 11768
-        y: 989
+        x: 11224
+        y: 1157
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1779,11 +1695,11 @@ workflow:
       height: 150
       id: '1765854025663'
       position:
-        x: 1388
-        y: 171
+        x: 1750
+        y: 647
       positionAbsolute:
-        x: 1388
-        y: 171
+        x: 1750
+        y: 647
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1798,11 +1714,11 @@ workflow:
       height: 102
       id: '1765854668107'
       position:
-        x: 3520
-        y: 652
+        x: 3882
+        y: 1092
       positionAbsolute:
-        x: 3520
-        y: 652
+        x: 3882
+        y: 1092
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1838,11 +1754,11 @@ workflow:
       height: 172
       id: '17658598785120'
       position:
-        x: 1750
-        y: 403
+        x: 2112
+        y: 843
       positionAbsolute:
-        x: 1750
-        y: 403
+        x: 2112
+        y: 843
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1859,11 +1775,11 @@ workflow:
       height: 104
       id: '17658598785131'
       position:
-        x: 2112
-        y: 449
+        x: 2474
+        y: 889
       positionAbsolute:
-        x: 2112
-        y: 449
+        x: 2474
+        y: 889
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1896,11 +1812,11 @@ workflow:
       height: 110
       id: '17658598785132'
       position:
-        x: 2796
-        y: 446
+        x: 3158
+        y: 886
       positionAbsolute:
-        x: 2796
-        y: 446
+        x: 3158
+        y: 886
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1931,11 +1847,11 @@ workflow:
       height: 52
       id: '17658598785133'
       position:
-        x: 2454
-        y: 475
+        x: 2816
+        y: 915
       positionAbsolute:
-        x: 2454
-        y: 475
+        x: 2816
+        y: 915
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1950,11 +1866,11 @@ workflow:
       height: 102
       id: '1765859958399'
       position:
-        x: 2454
-        y: 641
+        x: 2816
+        y: 1081
       positionAbsolute:
-        x: 2454
-        y: 641
+        x: 2816
+        y: 1081
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2007,19 +1923,57 @@ workflow:
             \ で返すことは禁止します。\n- `id`: `cite_1` などの一意のID。\n- `type`: `document` または `file`。\n\
             - `source`: 参照したファイル名（`File Names`から取得）。\n- `url`: ファイルのパスや、識別できる情報。\n\
             - `source`: 必ず「元のファイル名（拡張子含む）」のみを記述してください。資料のタイトルやテーマなどの余計な文字列（例：「資料1.pdf:\
-            \ 〇〇システム」）は絶対に含めないでください。\n\n## 4. smart_actions (プロアクティブ提案)\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            ⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n- **type**: `suggested_question`, `deep_dive`, または `web_search`\n- ⚠️**【重要:\
-            \ 資料にない情報への対応 (Web検索への誘導)】**\n  提供された社内ドキュメント内に答えが見つからず、「資料にはありませんでした」と回答した場合は、**必ず\
-            \ `type: \"web_search\"` を使用して、一般的な外部Web情報として検索し直すボタンを1つ配置**してください。\n\
-            - **label**: UIに表示されるボタンのテキスト（短く簡潔に）。\n\n  ⚠️【重要: 抽象化禁止】\n  「関連規定を聞く」のように一般化せず、具体的な規定名やキーワードを含めてください。\n\
-            \  （例: ⭕️「はい、『〇〇申請の手順』を詳しく教えて」 ⭕️「社内資料にないので、Webで一般的な『〇〇』について調べて」）\n⚠️【重要】ボタンのラベル(label)には「〇〇.pdfの手法」といったファイル名を含めず、必ず具体的な手法名やテーマ名を含めてください。\n\
-            - **icon**: Lucide Reactのアイコン名。（例: `zap`, `file-search`, `globe`, `search`）\n\
-            - **payload**: `{\"text\": \"具体的な質問や指示文\"}`\n\n## 5. session_title (スレッド名)\n\
-            会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n- **【初回会話（Conversation Historyが空）の場合】**:\
-            \ ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n  - ⭕️ 良い例：「ドキュメントの要約」「React\
-            \ 19の仕様確認」\n  - ❌ 悪い例：「〜について教えてください」などの冗長な表現。\n- **【2回目以降（継続した会話）の場合】**:\
-            \ 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。\n"
+            \ 〇〇システム」）は絶対に含めないでください。\n\n\n##4. Smart Actions（smart_actions）仕様\n\n\
+            ### 概要\n`smart_actions` は、ユーザーの次のアクションを促すためのボタンUIを出力するフィールドです。\n以下に定義する各タイプの仕様・使用条件・禁止事項を厳守してください。\n\
+            \n---\n\n## アクションタイプ一覧\n\n### 1. `selection`（選択肢型）\n\n**目的**\nユーザーがまだ言語化できていない潜在的な条件・好みを引き出し、\n\
+            AIが最適な提案を行うための「絞り込みフェーズ」で使用する。\n\n**使用条件**（以下のいずれかに該当する場合に使用する）\n- ユーザーが「〜したい」「〜を決めたい」「〜を絞りたい」という意思決定の意図を示している場合\n\
+            - 次のアクションが複数パターン存在し、AIが一方的に絞り込めない場合\n- ユーザーの状況・好み・優先事項がまだ不明で、提案に必要な軸が揃っていない場合\n\
+            \n**重要**：たとえ情報（天気・検索結果・データ等）が手元に揃っていても、\nそれをどう活かすかはユーザーの状況・好みに依存する。\n\
+            「情報が揃った＝答えを出してよい」ではなく、\n「情報が揃った＝ユーザーの潜在条件を引き出すフェーズに入る」と判断すること。\n\n---\n\
+            \n### ★ selectionの終了条件（必ず守ること）\n\n以下の条件を **1つでも** 満たした時点で selectionを終了し、\n\
+            `answer` の中で具体的な提案・回答を出すこと。\n\n**条件A：ターン上限**\n同一会話内で selection を連続 **3回**\
+            \ 使用した場合、\n4回目以降は必ず具体的な提案に移行する。\n\n**条件B：提案可能判定**\n以下の軸が揃った時点で提案可能と判断し、即座に提案フェーズへ移行する。\n\
+            （「まだ情報が足りない」と感じても、軸が揃っていれば提案すること）\n\n| ドメイン | 提案に必要な軸 |\n|---|---|\n|\
+            \ 旅行先 | 目的 × 雰囲気（アクティブ/のんびり等） × 地域の大枠 |\n| 服装 | 場面（通勤/外出/イベント等） × スタイル好み\
+            \ |\n| 飲食店 | 料理ジャンル × 雰囲気 × 予算帯 |\n| その他 | 同様に「3軸揃ったら提案可能」と判断する |\n\n\
+            **条件C：同一カテゴリの細分化禁止**\n前のターンの selection が「A → Aの下位分類」という関係の場合、\nそれは深掘りではなく\
+            \ **細分化** であり、selectionを出してはならない。\n同じカテゴリ階層で **3段階以上** 潜ったら即終了。\n\n例（禁止パターン）：\n\
+            観光 → アート → 美術館 → 絵画 → 古典美術\n（これらはすべて「観光」の細分化であり、4ターン目以降は禁止）\n\n---\n\n\
+            ### ★ selectionターンでの逃げ道の義務化\n\nselectionを出力する **すべてのターン** において、必ず最後のアクションとして\n\
+            以下の `suggested_question` を追加すること（省略禁止）。\n\n```json\n{\n  \"type\": \"\
+            suggested_question\",\n  \"label\": \"今の情報でおすすめを提案してください\",\n  \"icon\"\
+            : \"sparkles\",\n  \"payload\": {\n    \"text\": \"今の情報でおすすめを提案してください\"\
+            \n  }\n}\n```\n\n特に「これが最後のselectionになる」と判断したターンでは、\nこの逃げ道ボタンの追加を最優先で守ること。\n\
+            最後のselectionターンに逃げ道がないことは最も危険なパターンである。\n\n---\n\n### ★ selectionターンのanswerの書き方\n\
+            \nselectionを出力するターンの `answer` は、以下のルールに従う。\n\n- **2文以内** を目安にする\n- 「承知いたしました」「〜ですね」は1ターンにつき1回まで\n\
+            - 受け取り確認だけで終わらず、必ず次の問いかけで締めること\n- 網羅的な情報提供の場にしないこと（情報はselection後の提案フェーズで出す）\n\
+            \n```\n❌ NG例：\n「グルメや温泉で癒される旅ですね。承知いたしました。\nそれでは、どのような雰囲気の場所で癒されたいか、\n\
+            もう少し具体的に教えていただけますか？」\n\n✅ OK例：\n「グルメと温泉、いいですね。\nどんな雰囲気の場所で過ごしたいですか？」\n\
+            ```\n\n---\n\n### 2. `suggested_question`（派生質問型）\n\n**目的**\n`answer` の中で具体的な提案・情報を提示した\
+            \ **後** に、\nユーザーが次に取りうる行動を先回りして提示する。\n\n**使用条件**\n- answerの中でテーブル・リスト・具体的な候補を提示した後\n\
+            - 情報提供が完了しており、ユーザーが深掘りしたい場合\n- selectionフェーズが終了し、提案フェーズに入った後\n\n**禁止条件**\n\
+            - selectionの代わりに使うこと（絞り込みフェーズでは selection を使う）\n- answerで情報提示をしていないのに使うこと\n\
+            \n---\n\n### ★ suggested_questionは提示した候補を全カバーすること\n\nanswerのテーブルに **N件**\
+            \ の候補を列挙した場合、\n`suggested_question` は最低でも N件 の候補詳細ボタンを用意するか、\n「まとめておすすめを聞く」ボタンで代替すること。\n\
+            \n候補を提示しながら一部にしかボタンがないのはUX上のバグとして扱う。\n\n```\n❌ NG例：\nanswerに「沖縄離島・奄美大島・伊豆諸島」の3候補を提示\n\
+            → suggested_questionが「沖縄離島」「奄美大島」の2つのみ\n（伊豆諸島が選べない）\n\n✅ OK例：\n→ 「沖縄離島について詳しく」\n\
+            → 「奄美大島について詳しく」\n→ 「伊豆諸島について詳しく」\n→ 「今の情報でおすすめを提案してください」（逃げ道）\n```\n\n\
+            ---\n\n### 3. `websearch`（Web検索型）\n\n**目的**\n最新情報・リアルタイム情報が必要な場面でユーザーに再検索を促す。\n\
+            \n**使用条件**\n- 天気・ニュース・価格など、情報の鮮度が重要な場合\n- 現在の検索結果が古い可能性がある場合\n\n---\n\n\
+            ## ★ 提案後のanswerに推薦の一言を義務化\n\n複数候補をテーブルで提示した後、`answer` の末尾には必ず\n**「この中で最もおすすめは〇〇です。理由：〜」**\
+            \ という\nAIとしての推薦を1文含めること。\n\n問いかけだけで締めることは「情報提示係」の振る舞いであり、\nパートナーとしての役割を果たしていない。\n\
+            \n```\n❌ NG例（情報提示係）：\n「これらのエリアの中で、特に気になる場所はありますか？」\n\n✅ OK例（パートナー）：\n\
+            「3つの中では、グルメと温泉を両立できる **宮古島**（シギラ黄金温泉あり）が\n今回のご希望に最も合っていると思います。\n他のエリアも気になる場合は下のボタンで詳細を確認できます。」\n\
+            ```\n\n---\n\n## selectionとsuggested_questionの切り替え判断（まとめ）\n\n| フェーズ |\
+            \ 状態 | 使うべきタイプ |\n|---|---|---|\n| 絞り込み中 | ユーザーの条件・好みがまだ不明 | `selection`\
+            \ ＋ 逃げ道ボタン |\n| 提案直後 | 具体的な候補を answer に提示済み | `suggested_question` |\n\
+            | 深掘り中 | 特定の候補について詳細を展開中 | `suggested_question` |\n\n**原則**：\n- `selection`\
+            \ → 「答えに向けてユーザーの条件を絞り込む」ためのもの\n- `suggested_question` → 「答えが出た後に、派生する疑問を先回りする」ためのもの\n\
+            \n具体的な候補を出した後に再び selectionで「どれが良いですか？」と聞くのは\n**提案責任の放棄** として禁止する。\n\n\n\
+            ## 5. session_title (スレッド名)\n会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n\
+            - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
+            \  - ⭕️ 良い例：「ドキュメントの要約」「React 19の仕様確認」\n  - ❌ 悪い例：「〜について教えてください」などの冗長な表現。\n\
+            - **【2回目以降（継続した会話）の場合】**: 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。\n"
         - id: 828543d6-8a8e-4790-8d4e-9223e50b27f9
           role: user
           text: '# Input Data
@@ -2112,11 +2066,13 @@ workflow:
                           type: string
                       type: object
                     type:
-                      description: アクションの種類
+                      description: suggestedquestion, websearch（Web検索）, deepdive,
+                        selection（壁打ち・選択肢提示）
                       enum:
                       - suggested_question
                       - web_search
                       - deep_dive
+                      - selection
                       type: string
                   required:
                   - type
@@ -2143,11 +2099,11 @@ workflow:
       height: 118
       id: '17665499392760'
       position:
-        x: 3158
-        y: 462
+        x: 3520
+        y: 902
       positionAbsolute:
-        x: 3158
-        y: 462
+        x: 3520
+        y: 902
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2195,36 +2151,59 @@ workflow:
             \ 高密度情報のテーブル化】**: ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を絶対に避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
             - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、さらなる詳細の提示や次の作業を促す「短い問いかけ（質問や提案）」を1〜2文で添えてください。\n\
             \  - （例：「まずは要点をまとめました。さらに詳しい解説が必要ですか？」「この方針で、具体的な構成案も作成しましょうか？」など）\n\n\
-            \n\n## 3. citations (出典情報)\n外部コンテキストがないため、必ず空配列 `[]` を出力してください。\n\n##\
-            \ 4. smartactions（プロアクティブ提案）\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            \n⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n---\n\n- **type: `suggestedquestion`**（次の質問候補）\n  【使用条件】\n  - AIが「次にこれを聞くといいですよ」と受動的に提案する場合\n\
-            \  - 例）「導入コストについて詳しく調べますか？」\n  【生成ルール】\n  - **label**：UIに表示されるボタンのテキスト（短く簡潔に。ユーザーの返答として自然な言葉遣いにする）\n\
-            \    ⚠️【抽象化禁止】「特定の〇〇」「別の〇〇」のようにキーワードを伏せたり一般化したりしないこと。\n    payload.textに具体的な用語（例：「P.T.」「ROM」）が含まれる場合は、必ずlabel内にも明記すること。\n\
-            \    （例: ❌「特定の症状について聞く」→ ⭕「『P.T.』の意味を聞く」）\n    ⚠️ファイル名（「〇〇.pdf」）をlabelに含めず、具体的な手法名・テーマ名を使うこと。\n\
-            \    ⚠️テキスト内に絵文字は絶対に含めないこと（フロントエンドで専用アイコンを描画するため）。\n  - **icon**：Lucide\
-            \ Reactのアイコン名（例：`sparkles`, `message-circle-question`）\n  - **payload**：`{\"\
-            text\": \"具体的な質問文\"}`（例：`{\"text\": \"はい、『ROM』についても教えてください。\"}`）\n\n---\n\
-            \n- **type: `websearch`**（Web検索モードで再検索）\n  【使用条件】\n  - 最新情報・外部情報が必要な場合にWebで調べ直すことを提案する場合\n\
-            \  【生成ルール】\n  - **label**：「〇〇をWeb検索で調べる」など、何を検索するかが一目で分かるテキスト\n    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n\
-            \  - **icon**：Lucide Reactのアイコン名（例：`globe`, `search`, `zap`）\n  - **payload**：`{\"\
-            text\": \"検索クエリ文字列\"}`\n\n---\n\n- **type: `deepdive`**（より詳細な解説を求める）\n\
-            \  【使用条件】\n  - 現在の回答に対して、さらに掘り下げた詳細解説を求める場合\n  【生成ルール】\n  - **label**：「〇〇についてもっと詳しく」など、何を深掘りするかが明確なテキスト\n\
-            \    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n  - **icon**：Lucide Reactのアイコン名（例：`sparkles`,\
-            \ `lightbulb`, `code`）\n  - **payload**：`{\"text\": \"詳細を求める質問文\"}`\n\n\
-            ---\n\n- **type: `selection`**（選択肢提示・能動的分岐）\n  【suggestedquestionとの使い分け】\n\
-            \  - `suggestedquestion`：AIが「次にこれを聞くといいですよ」と**受動的**に提案する\n  - `selection`：AIがユーザーに「どちらで進めますか？」と**能動的**に選ばせる必要がある場合\n\
-            \  【使用条件】\n  - ユーザーが「壁打ち」「アイデア出し」「方向性の確認」を求めている場合\n  - 複数の選択肢を提示してユーザーに選んでもらう必要がある場合\n\
-            \  - 次のアクションが複数パターン存在し、AIが絞り込めない場合\n  【生成ルール】\n  - 選択肢は2〜4個を目安に生成する\n\
-            \  - **label**：ユーザーが読む選択肢テキスト（例：「A案：スピード重視で進める」）\n    ⚠️絵文字禁止はsuggestedquestionと同様\n\
-            \  - **icon**：Lucide Reactのアイコン名（例：`list-checks`, `git-branch`, `check-square`）\n\
-            \  - **payload.text のルール**：\n    ・Intent Analysisノードが再実行されるため、意図が明確に伝わる短文にすること\n\
-            \    ・「〇〇の方向で進める」「〇〇を優先する」など10〜20文字程度の具体的な動詞文にする\n    ・曖昧な単語（「これ」「それ」「A案」のみ）はNG\n\
-            \    ✅ 良い例：「スピード重視でMVPを先にリリースする方向で進める」\n    ❌ 悪い例：「A案」「こっち」「方向性1」\n\n\
-            ---\n\n⚠️**【排他ルール: selectionの場合】**\n`smartactions` に `type: selection`\
-            \ を1つでも含める場合、そのターンの `smartactions` は **`selection` のみ**で構成すること。\n`suggestedquestion`\
-            \ / `websearch` / `deepdive` との混在は**絶対に禁止**。\nユーザーの選択に集中させるため、他のアクションは一切出力しない。\n\
-            \n\n## 5. session_title (スレッド名)\n会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n\
+            \n\n## 3. citations (出典情報)\n外部コンテキストがないため、必ず空配列 `[]` を出力してください。\n\n\n\
+            ##4. Smart Actions（smart_actions）仕様\n\n### 概要\n`smart_actions` は、ユーザーの次のアクションを促すためのボタンUIを出力するフィールドです。\n\
+            以下に定義する各タイプの仕様・使用条件・禁止事項を厳守してください。\n\n---\n\n## アクションタイプ一覧\n\n### 1. `selection`（選択肢型）\n\
+            \n**目的**\nユーザーがまだ言語化できていない潜在的な条件・好みを引き出し、\nAIが最適な提案を行うための「絞り込みフェーズ」で使用する。\n\
+            \n**使用条件**（以下のいずれかに該当する場合に使用する）\n- ユーザーが「〜したい」「〜を決めたい」「〜を絞りたい」という意思決定の意図を示している場合\n\
+            - 次のアクションが複数パターン存在し、AIが一方的に絞り込めない場合\n- ユーザーの状況・好み・優先事項がまだ不明で、提案に必要な軸が揃っていない場合\n\
+            \n**重要**：たとえ情報（天気・検索結果・データ等）が手元に揃っていても、\nそれをどう活かすかはユーザーの状況・好みに依存する。\n\
+            「情報が揃った＝答えを出してよい」ではなく、\n「情報が揃った＝ユーザーの潜在条件を引き出すフェーズに入る」と判断すること。\n\n---\n\
+            \n### ★ selectionの終了条件（必ず守ること）\n\n以下の条件を **1つでも** 満たした時点で selectionを終了し、\n\
+            `answer` の中で具体的な提案・回答を出すこと。\n\n**条件A：ターン上限**\n同一会話内で selection を連続 **3回**\
+            \ 使用した場合、\n4回目以降は必ず具体的な提案に移行する。\n\n**条件B：提案可能判定**\n以下の軸が揃った時点で提案可能と判断し、即座に提案フェーズへ移行する。\n\
+            （「まだ情報が足りない」と感じても、軸が揃っていれば提案すること）\n\n| ドメイン | 提案に必要な軸 |\n|---|---|\n|\
+            \ 旅行先 | 目的 × 雰囲気（アクティブ/のんびり等） × 地域の大枠 |\n| 服装 | 場面（通勤/外出/イベント等） × スタイル好み\
+            \ |\n| 飲食店 | 料理ジャンル × 雰囲気 × 予算帯 |\n| その他 | 同様に「3軸揃ったら提案可能」と判断する |\n\n\
+            **条件C：同一カテゴリの細分化禁止**\n前のターンの selection が「A → Aの下位分類」という関係の場合、\nそれは深掘りではなく\
+            \ **細分化** であり、selectionを出してはならない。\n同じカテゴリ階層で **3段階以上** 潜ったら即終了。\n\n例（禁止パターン）：\n\
+            観光 → アート → 美術館 → 絵画 → 古典美術\n（これらはすべて「観光」の細分化であり、4ターン目以降は禁止）\n\n---\n\n\
+            ### ★ selectionターンでの逃げ道の義務化\n\nselectionを出力する **すべてのターン** において、必ず最後のアクションとして\n\
+            以下の `suggested_question` を追加すること（省略禁止）。\n\n```json\n{\n  \"type\": \"\
+            suggested_question\",\n  \"label\": \"今の情報でおすすめを提案してください\",\n  \"icon\"\
+            : \"sparkles\",\n  \"payload\": {\n    \"text\": \"今の情報でおすすめを提案してください\"\
+            \n  }\n}\n```\n\n特に「これが最後のselectionになる」と判断したターンでは、\nこの逃げ道ボタンの追加を最優先で守ること。\n\
+            最後のselectionターンに逃げ道がないことは最も危険なパターンである。\n\n---\n\n### ★ selectionターンのanswerの書き方\n\
+            \nselectionを出力するターンの `answer` は、以下のルールに従う。\n\n- **2文以内** を目安にする\n- 「承知いたしました」「〜ですね」は1ターンにつき1回まで\n\
+            - 受け取り確認だけで終わらず、必ず次の問いかけで締めること\n- 網羅的な情報提供の場にしないこと（情報はselection後の提案フェーズで出す）\n\
+            \n```\n❌ NG例：\n「グルメや温泉で癒される旅ですね。承知いたしました。\nそれでは、どのような雰囲気の場所で癒されたいか、\n\
+            もう少し具体的に教えていただけますか？」\n\n✅ OK例：\n「グルメと温泉、いいですね。\nどんな雰囲気の場所で過ごしたいですか？」\n\
+            ```\n\n---\n\n### 2. `suggested_question`（派生質問型）\n\n**目的**\n`answer` の中で具体的な提案・情報を提示した\
+            \ **後** に、\nユーザーが次に取りうる行動を先回りして提示する。\n\n**使用条件**\n- answerの中でテーブル・リスト・具体的な候補を提示した後\n\
+            - 情報提供が完了しており、ユーザーが深掘りしたい場合\n- selectionフェーズが終了し、提案フェーズに入った後\n\n**禁止条件**\n\
+            - selectionの代わりに使うこと（絞り込みフェーズでは selection を使う）\n- answerで情報提示をしていないのに使うこと\n\
+            \n---\n\n### ★ suggested_questionは提示した候補を全カバーすること\n\nanswerのテーブルに **N件**\
+            \ の候補を列挙した場合、\n`suggested_question` は最低でも N件 の候補詳細ボタンを用意するか、\n「まとめておすすめを聞く」ボタンで代替すること。\n\
+            \n候補を提示しながら一部にしかボタンがないのはUX上のバグとして扱う。\n\n```\n❌ NG例：\nanswerに「沖縄離島・奄美大島・伊豆諸島」の3候補を提示\n\
+            → suggested_questionが「沖縄離島」「奄美大島」の2つのみ\n（伊豆諸島が選べない）\n\n✅ OK例：\n→ 「沖縄離島について詳しく」\n\
+            → 「奄美大島について詳しく」\n→ 「伊豆諸島について詳しく」\n→ 「今の情報でおすすめを提案してください」（逃げ道）\n```\n\n\
+            ---\n\n### 3. `websearch`（Web検索型）\n\n**目的**\n最新情報・リアルタイム情報が必要な場面でユーザーに再検索を促す。\n\
+            \n**使用条件**\n- 天気・ニュース・価格など、情報の鮮度が重要な場合\n- 現在の検索結果が古い可能性がある場合\n\n---\n\n\
+            ###  4. \"generate_document\"\n使用条件:\n- answerの情報量が多く、ユーザーが後で参照・共有したいと思われる場合\n\
+            - 手順・チェックリスト・比較情報など、文書化するとメリットがある内容を提示した場合\n\nlabelの例:\n- 「この内容をレポートにまとめる」\n\
+            - 「チェックリストとして保存する」\n- 「比較表をドキュメント化する」\n\npayloadに含めるもの:\n- artifact_type:\
+            \ \"summary_report\" | \"checklist\" | \"comparison_table\" | \"faq\"\n\
+            \n\n---\n\n## ★ 提案後のanswerに推薦の一言を義務化\n\n複数候補をテーブルで提示した後、`answer` の末尾には必ず\n\
+            **「この中で最もおすすめは〇〇です。理由：〜」** という\nAIとしての推薦を1文含めること。\n\n問いかけだけで締めることは「情報提示係」の振る舞いであり、\n\
+            パートナーとしての役割を果たしていない。\n\n```\n❌ NG例（情報提示係）：\n「これらのエリアの中で、特に気になる場所はありますか？」\n\
+            \n✅ OK例（パートナー）：\n「3つの中では、グルメと温泉を両立できる **宮古島**（シギラ黄金温泉あり）が\n今回のご希望に最も合っていると思います。\n\
+            他のエリアも気になる場合は下のボタンで詳細を確認できます。」\n```\n\n---\n\n## selectionとsuggested_questionの切り替え判断（まとめ）\n\
+            \n| フェーズ | 状態 | 使うべきタイプ |\n|---|---|---|\n| 絞り込み中 | ユーザーの条件・好みがまだ不明 |\
+            \ `selection` ＋ 逃げ道ボタン |\n| 提案直後 | 具体的な候補を answer に提示済み | `suggested_question`\
+            \ |\n| 深掘り中 | 特定の候補について詳細を展開中 | `suggested_question` |\n\n**原則**：\n- `selection`\
+            \ → 「答えに向けてユーザーの条件を絞り込む」ためのもの\n- `suggested_question` → 「答えが出た後に、派生する疑問を先回りする」ためのもの\n\
+            \n具体的な候補を出した後に再び selectionで「どれが良いですか？」と聞くのは\n**提案責任の放棄** として禁止する。\n\n\n\
+            ## 5. session_title (スレッド名)\n会話履歴（Memory）を確認し、以下のルールでタイトルを生成してください。\n\
             - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
             \  - ⭕️ 良い例：「ドキュメントの要約」「React 19の仕様確認」\n  - ❌ 悪い例：「〜について教えてください」などの冗長な表現。\n\
             - **【2回目以降（継続した会話）の場合】**: 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。"
@@ -2260,7 +2239,7 @@ workflow:
           max_retries: 3
           retry_enabled: true
           retry_interval: 1000
-        selected: true
+        selected: false
         structured_output:
           schema:
             properties:
@@ -2305,12 +2284,13 @@ workflow:
                       type: object
                     type:
                       description: suggestedquestion, websearch（Web検索）, deepdive,
-                        selection（壁打ち・選択肢提示）
+                        selection（壁打ち・選択肢提示）, generate_document（ドキュメント・Artifact生成）
                       enum:
                       - suggested_question
                       - web_search
                       - deep_dive
                       - selection
+                      - generate_document
                       type: string
                   required:
                   - type
@@ -2337,12 +2317,12 @@ workflow:
       height: 118
       id: '17665500976990'
       position:
-        x: 2112
-        y: 633
+        x: 2474
+        y: 1073
       positionAbsolute:
-        x: 2112
-        y: 633
-      selected: true
+        x: 2474
+        y: 1073
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -2398,13 +2378,53 @@ workflow:
             \ で返すことは原則禁止です（学習知識のみで答えた場合を除く）。\n情報源に応じて `type` を厳密に指定してください：\n- 社内ナレッジ（RAG）からの引用:\
             \ `type: \"rag\"` (sourceにナレッジ名)\n- Web検索結果からの引用: `type: \"web\"` (sourceにページタイトル、urlにURL)\n\
             - アップロードファイルからの引用: `type: \"document\"` (sourceにファイル名)\n- `source`: RAGやアップロードファイルの場合、必ず「元のファイル名（拡張子含む）」のみを記述してください。資料のタイトルやテーマなどの余計な文字列（例：「資料1.pdf:\
-            \ 〇〇システム」）は絶対に含めないでください。\n\n\n## 4. smart_actions (プロアクティブ提案)\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            ⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n- **type**: `suggested_question`, `deep_dive`, または `web_search`\n- **label**:\
-            \ UIに表示されるボタンのテキスト（短く簡潔に）。\n  ⚠️【重要: 抽象化禁止】\n  「他社事例を聞く」「プロジェクトへの適用を考える」のように一般化せず、具体的なキーワードを含めてください。\n\
-            \  （例: ⭕️「はい、他社の『〇〇』の事例をWebで調べて」 ⭕️「社内の『〇〇プロジェクト』への適用案を出して」）\n⚠️【重要】ボタンのラベル(label)には「〇〇.pdfの手法」といったファイル名を含めず、必ず具体的な手法名やテーマ名を含めてください。\n\
-            - **icon**: Lucide Reactのアイコン名。（例: `globe`, `sparkles`, `git-merge`）\n\
-            - **payload**: `{\"text\": \"具体的な質問や指示文\"}`"
+            \ 〇〇システム」）は絶対に含めないでください。\n\n\n\n##4. Smart Actions（smart_actions）仕様\n\n\
+            ### 概要\n`smart_actions` は、ユーザーの次のアクションを促すためのボタンUIを出力するフィールドです。\n以下に定義する各タイプの仕様・使用条件・禁止事項を厳守してください。\n\
+            \n---\n\n## アクションタイプ一覧\n\n### 1. `selection`（選択肢型）\n\n**目的**\nユーザーがまだ言語化できていない潜在的な条件・好みを引き出し、\n\
+            AIが最適な提案を行うための「絞り込みフェーズ」で使用する。\n\n**使用条件**（以下のいずれかに該当する場合に使用する）\n- ユーザーが「〜したい」「〜を決めたい」「〜を絞りたい」という意思決定の意図を示している場合\n\
+            - 次のアクションが複数パターン存在し、AIが一方的に絞り込めない場合\n- ユーザーの状況・好み・優先事項がまだ不明で、提案に必要な軸が揃っていない場合\n\
+            \n**重要**：たとえ情報（天気・検索結果・データ等）が手元に揃っていても、\nそれをどう活かすかはユーザーの状況・好みに依存する。\n\
+            「情報が揃った＝答えを出してよい」ではなく、\n「情報が揃った＝ユーザーの潜在条件を引き出すフェーズに入る」と判断すること。\n\n---\n\
+            \n### ★ selectionの終了条件（必ず守ること）\n\n以下の条件を **1つでも** 満たした時点で selectionを終了し、\n\
+            `answer` の中で具体的な提案・回答を出すこと。\n\n**条件A：ターン上限**\n同一会話内で selection を連続 **3回**\
+            \ 使用した場合、\n4回目以降は必ず具体的な提案に移行する。\n\n**条件B：提案可能判定**\n以下の軸が揃った時点で提案可能と判断し、即座に提案フェーズへ移行する。\n\
+            （「まだ情報が足りない」と感じても、軸が揃っていれば提案すること）\n\n| ドメイン | 提案に必要な軸 |\n|---|---|\n|\
+            \ 旅行先 | 目的 × 雰囲気（アクティブ/のんびり等） × 地域の大枠 |\n| 服装 | 場面（通勤/外出/イベント等） × スタイル好み\
+            \ |\n| 飲食店 | 料理ジャンル × 雰囲気 × 予算帯 |\n| その他 | 同様に「3軸揃ったら提案可能」と判断する |\n\n\
+            **条件C：同一カテゴリの細分化禁止**\n前のターンの selection が「A → Aの下位分類」という関係の場合、\nそれは深掘りではなく\
+            \ **細分化** であり、selectionを出してはならない。\n同じカテゴリ階層で **3段階以上** 潜ったら即終了。\n\n例（禁止パターン）：\n\
+            観光 → アート → 美術館 → 絵画 → 古典美術\n（これらはすべて「観光」の細分化であり、4ターン目以降は禁止）\n\n---\n\n\
+            ### ★ selectionターンでの逃げ道の義務化\n\nselectionを出力する **すべてのターン** において、必ず最後のアクションとして\n\
+            以下の `suggested_question` を追加すること（省略禁止）。\n\n```json\n{\n  \"type\": \"\
+            suggested_question\",\n  \"label\": \"今の情報でおすすめを提案してください\",\n  \"icon\"\
+            : \"sparkles\",\n  \"payload\": {\n    \"text\": \"今の情報でおすすめを提案してください\"\
+            \n  }\n}\n```\n\n特に「これが最後のselectionになる」と判断したターンでは、\nこの逃げ道ボタンの追加を最優先で守ること。\n\
+            最後のselectionターンに逃げ道がないことは最も危険なパターンである。\n\n---\n\n### ★ selectionターンのanswerの書き方\n\
+            \nselectionを出力するターンの `answer` は、以下のルールに従う。\n\n- **2文以内** を目安にする\n- 「承知いたしました」「〜ですね」は1ターンにつき1回まで\n\
+            - 受け取り確認だけで終わらず、必ず次の問いかけで締めること\n- 網羅的な情報提供の場にしないこと（情報はselection後の提案フェーズで出す）\n\
+            \n```\n❌ NG例：\n「グルメや温泉で癒される旅ですね。承知いたしました。\nそれでは、どのような雰囲気の場所で癒されたいか、\n\
+            もう少し具体的に教えていただけますか？」\n\n✅ OK例：\n「グルメと温泉、いいですね。\nどんな雰囲気の場所で過ごしたいですか？」\n\
+            ```\n\n---\n\n### 2. `suggested_question`（派生質問型）\n\n**目的**\n`answer` の中で具体的な提案・情報を提示した\
+            \ **後** に、\nユーザーが次に取りうる行動を先回りして提示する。\n\n**使用条件**\n- answerの中でテーブル・リスト・具体的な候補を提示した後\n\
+            - 情報提供が完了しており、ユーザーが深掘りしたい場合\n- selectionフェーズが終了し、提案フェーズに入った後\n\n**禁止条件**\n\
+            - selectionの代わりに使うこと（絞り込みフェーズでは selection を使う）\n- answerで情報提示をしていないのに使うこと\n\
+            \n---\n\n### ★ suggested_questionは提示した候補を全カバーすること\n\nanswerのテーブルに **N件**\
+            \ の候補を列挙した場合、\n`suggested_question` は最低でも N件 の候補詳細ボタンを用意するか、\n「まとめておすすめを聞く」ボタンで代替すること。\n\
+            \n候補を提示しながら一部にしかボタンがないのはUX上のバグとして扱う。\n\n```\n❌ NG例：\nanswerに「沖縄離島・奄美大島・伊豆諸島」の3候補を提示\n\
+            → suggested_questionが「沖縄離島」「奄美大島」の2つのみ\n（伊豆諸島が選べない）\n\n✅ OK例：\n→ 「沖縄離島について詳しく」\n\
+            → 「奄美大島について詳しく」\n→ 「伊豆諸島について詳しく」\n→ 「今の情報でおすすめを提案してください」（逃げ道）\n```\n\n\
+            ---\n\n### 3. `websearch`（Web検索型）\n\n**目的**\n最新情報・リアルタイム情報が必要な場面でユーザーに再検索を促す。\n\
+            \n**使用条件**\n- 天気・ニュース・価格など、情報の鮮度が重要な場合\n- 現在の検索結果が古い可能性がある場合\n\n---\n\n\
+            ## ★ 提案後のanswerに推薦の一言を義務化\n\n複数候補をテーブルで提示した後、`answer` の末尾には必ず\n**「この中で最もおすすめは〇〇です。理由：〜」**\
+            \ という\nAIとしての推薦を1文含めること。\n\n問いかけだけで締めることは「情報提示係」の振る舞いであり、\nパートナーとしての役割を果たしていない。\n\
+            \n```\n❌ NG例（情報提示係）：\n「これらのエリアの中で、特に気になる場所はありますか？」\n\n✅ OK例（パートナー）：\n\
+            「3つの中では、グルメと温泉を両立できる **宮古島**（シギラ黄金温泉あり）が\n今回のご希望に最も合っていると思います。\n他のエリアも気になる場合は下のボタンで詳細を確認できます。」\n\
+            ```\n\n---\n\n## selectionとsuggested_questionの切り替え判断（まとめ）\n\n| フェーズ |\
+            \ 状態 | 使うべきタイプ |\n|---|---|---|\n| 絞り込み中 | ユーザーの条件・好みがまだ不明 | `selection`\
+            \ ＋ 逃げ道ボタン |\n| 提案直後 | 具体的な候補を answer に提示済み | `suggested_question` |\n\
+            | 深掘り中 | 特定の候補について詳細を展開中 | `suggested_question` |\n\n**原則**：\n- `selection`\
+            \ → 「答えに向けてユーザーの条件を絞り込む」ためのもの\n- `suggested_question` → 「答えが出た後に、派生する疑問を先回りする」ためのもの\n\
+            \n具体的な候補を出した後に再び selectionで「どれが良いですか？」と聞くのは\n**提案責任の放棄** として禁止する。\n"
         - id: 720e2880-6b99-4f54-b077-56ffb08f5ba2
           role: user
           text: '# Input Data
@@ -2509,11 +2529,13 @@ workflow:
                           type: string
                       type: object
                     type:
-                      description: アクションの種類
+                      description: suggestedquestion, websearch（Web検索）, deepdive,
+                        selection（壁打ち・選択肢提示）
                       enum:
                       - suggested_question
                       - web_search
                       - deep_dive
+                      - selection
                       type: string
                   required:
                   - type
@@ -2539,11 +2561,11 @@ workflow:
       height: 118
       id: '17665511958080'
       position:
-        x: 11426
-        y: 585
+        x: 10882
+        y: 753
       positionAbsolute:
-        x: 11426
-        y: 585
+        x: 10882
+        y: 753
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2596,13 +2618,53 @@ workflow:
             \n\n## 3. citations (出典情報) 【極めて重要】\n回答の根拠としたドキュメント情報を**必ず**リストに含めてください。空配列\
             \ `[]` で返すことは重大な規約違反です。\n- `type` は必ず `\"document\"`  としてください。\n- `source`\
             \ にはファイル名を記載してください。\n- `source`: 必ず「元のファイル名（拡張子含む）」のみを記述してください。資料のタイトルやテーマなどの余計な文字列（例：「資料1.pdf:\
-            \ 〇〇システム」）は絶対に含めないでください。\n\n## 4. smart_actions (プロアクティブ提案)\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            ⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n- **type**: `suggested_question` または `deep_dive`\n- **label**: UIに表示されるボタンのテキスト（短く簡潔に）。\n\
-            \  ⚠️【重要: 抽象化禁止】\n  「関連規定を聞く」「手続きを確認する」のように一般化せず、具体的な規定名やキーワードを含めてください。\n\
-            \  （例: ⭕️「はい、『〇〇申請』の手順を教えて」 ⭕️「『〇〇ガイドライン』の該当箇所を詳しく」）\n⚠️【重要】ボタンのラベル(label)には「〇〇.pdfの手法」といったファイル名を含めず、必ず具体的な手法名やテーマ名を含めてください。\n\
-            - **icon**: Lucide Reactのアイコン名。（例: `file-text`, `folder-search`, `arrow-right`）\n\
-            - **payload**: `{\"text\": \"具体的な質問や指示文\"}`"
+            \ 〇〇システム」）は絶対に含めないでください。\n\n\n##4. Smart Actions（smart_actions）仕様\n\n\
+            ### 概要\n`smart_actions` は、ユーザーの次のアクションを促すためのボタンUIを出力するフィールドです。\n以下に定義する各タイプの仕様・使用条件・禁止事項を厳守してください。\n\
+            \n---\n\n## アクションタイプ一覧\n\n### 1. `selection`（選択肢型）\n\n**目的**\nユーザーがまだ言語化できていない潜在的な条件・好みを引き出し、\n\
+            AIが最適な提案を行うための「絞り込みフェーズ」で使用する。\n\n**使用条件**（以下のいずれかに該当する場合に使用する）\n- ユーザーが「〜したい」「〜を決めたい」「〜を絞りたい」という意思決定の意図を示している場合\n\
+            - 次のアクションが複数パターン存在し、AIが一方的に絞り込めない場合\n- ユーザーの状況・好み・優先事項がまだ不明で、提案に必要な軸が揃っていない場合\n\
+            \n**重要**：たとえ情報（天気・検索結果・データ等）が手元に揃っていても、\nそれをどう活かすかはユーザーの状況・好みに依存する。\n\
+            「情報が揃った＝答えを出してよい」ではなく、\n「情報が揃った＝ユーザーの潜在条件を引き出すフェーズに入る」と判断すること。\n\n---\n\
+            \n### ★ selectionの終了条件（必ず守ること）\n\n以下の条件を **1つでも** 満たした時点で selectionを終了し、\n\
+            `answer` の中で具体的な提案・回答を出すこと。\n\n**条件A：ターン上限**\n同一会話内で selection を連続 **3回**\
+            \ 使用した場合、\n4回目以降は必ず具体的な提案に移行する。\n\n**条件B：提案可能判定**\n以下の軸が揃った時点で提案可能と判断し、即座に提案フェーズへ移行する。\n\
+            （「まだ情報が足りない」と感じても、軸が揃っていれば提案すること）\n\n| ドメイン | 提案に必要な軸 |\n|---|---|\n|\
+            \ 旅行先 | 目的 × 雰囲気（アクティブ/のんびり等） × 地域の大枠 |\n| 服装 | 場面（通勤/外出/イベント等） × スタイル好み\
+            \ |\n| 飲食店 | 料理ジャンル × 雰囲気 × 予算帯 |\n| その他 | 同様に「3軸揃ったら提案可能」と判断する |\n\n\
+            **条件C：同一カテゴリの細分化禁止**\n前のターンの selection が「A → Aの下位分類」という関係の場合、\nそれは深掘りではなく\
+            \ **細分化** であり、selectionを出してはならない。\n同じカテゴリ階層で **3段階以上** 潜ったら即終了。\n\n例（禁止パターン）：\n\
+            観光 → アート → 美術館 → 絵画 → 古典美術\n（これらはすべて「観光」の細分化であり、4ターン目以降は禁止）\n\n---\n\n\
+            ### ★ selectionターンでの逃げ道の義務化\n\nselectionを出力する **すべてのターン** において、必ず最後のアクションとして\n\
+            以下の `suggested_question` を追加すること（省略禁止）。\n\n```json\n{\n  \"type\": \"\
+            suggested_question\",\n  \"label\": \"今の情報でおすすめを提案してください\",\n  \"icon\"\
+            : \"sparkles\",\n  \"payload\": {\n    \"text\": \"今の情報でおすすめを提案してください\"\
+            \n  }\n}\n```\n\n特に「これが最後のselectionになる」と判断したターンでは、\nこの逃げ道ボタンの追加を最優先で守ること。\n\
+            最後のselectionターンに逃げ道がないことは最も危険なパターンである。\n\n---\n\n### ★ selectionターンのanswerの書き方\n\
+            \nselectionを出力するターンの `answer` は、以下のルールに従う。\n\n- **2文以内** を目安にする\n- 「承知いたしました」「〜ですね」は1ターンにつき1回まで\n\
+            - 受け取り確認だけで終わらず、必ず次の問いかけで締めること\n- 網羅的な情報提供の場にしないこと（情報はselection後の提案フェーズで出す）\n\
+            \n```\n❌ NG例：\n「グルメや温泉で癒される旅ですね。承知いたしました。\nそれでは、どのような雰囲気の場所で癒されたいか、\n\
+            もう少し具体的に教えていただけますか？」\n\n✅ OK例：\n「グルメと温泉、いいですね。\nどんな雰囲気の場所で過ごしたいですか？」\n\
+            ```\n\n---\n\n### 2. `suggested_question`（派生質問型）\n\n**目的**\n`answer` の中で具体的な提案・情報を提示した\
+            \ **後** に、\nユーザーが次に取りうる行動を先回りして提示する。\n\n**使用条件**\n- answerの中でテーブル・リスト・具体的な候補を提示した後\n\
+            - 情報提供が完了しており、ユーザーが深掘りしたい場合\n- selectionフェーズが終了し、提案フェーズに入った後\n\n**禁止条件**\n\
+            - selectionの代わりに使うこと（絞り込みフェーズでは selection を使う）\n- answerで情報提示をしていないのに使うこと\n\
+            \n---\n\n### ★ suggested_questionは提示した候補を全カバーすること\n\nanswerのテーブルに **N件**\
+            \ の候補を列挙した場合、\n`suggested_question` は最低でも N件 の候補詳細ボタンを用意するか、\n「まとめておすすめを聞く」ボタンで代替すること。\n\
+            \n候補を提示しながら一部にしかボタンがないのはUX上のバグとして扱う。\n\n```\n❌ NG例：\nanswerに「沖縄離島・奄美大島・伊豆諸島」の3候補を提示\n\
+            → suggested_questionが「沖縄離島」「奄美大島」の2つのみ\n（伊豆諸島が選べない）\n\n✅ OK例：\n→ 「沖縄離島について詳しく」\n\
+            → 「奄美大島について詳しく」\n→ 「伊豆諸島について詳しく」\n→ 「今の情報でおすすめを提案してください」（逃げ道）\n```\n\n\
+            ---\n\n### 3. `websearch`（Web検索型）\n\n**目的**\n最新情報・リアルタイム情報が必要な場面でユーザーに再検索を促す。\n\
+            \n**使用条件**\n- 天気・ニュース・価格など、情報の鮮度が重要な場合\n- 現在の検索結果が古い可能性がある場合\n\n---\n\n\
+            ## ★ 提案後のanswerに推薦の一言を義務化\n\n複数候補をテーブルで提示した後、`answer` の末尾には必ず\n**「この中で最もおすすめは〇〇です。理由：〜」**\
+            \ という\nAIとしての推薦を1文含めること。\n\n問いかけだけで締めることは「情報提示係」の振る舞いであり、\nパートナーとしての役割を果たしていない。\n\
+            \n```\n❌ NG例（情報提示係）：\n「これらのエリアの中で、特に気になる場所はありますか？」\n\n✅ OK例（パートナー）：\n\
+            「3つの中では、グルメと温泉を両立できる **宮古島**（シギラ黄金温泉あり）が\n今回のご希望に最も合っていると思います。\n他のエリアも気になる場合は下のボタンで詳細を確認できます。」\n\
+            ```\n\n---\n\n## selectionとsuggested_questionの切り替え判断（まとめ）\n\n| フェーズ |\
+            \ 状態 | 使うべきタイプ |\n|---|---|---|\n| 絞り込み中 | ユーザーの条件・好みがまだ不明 | `selection`\
+            \ ＋ 逃げ道ボタン |\n| 提案直後 | 具体的な候補を answer に提示済み | `suggested_question` |\n\
+            | 深掘り中 | 特定の候補について詳細を展開中 | `suggested_question` |\n\n**原則**：\n- `selection`\
+            \ → 「答えに向けてユーザーの条件を絞り込む」ためのもの\n- `suggested_question` → 「答えが出た後に、派生する疑問を先回りする」ためのもの\n\
+            \n具体的な候補を出した後に再び selectionで「どれが良いですか？」と聞くのは\n**提案責任の放棄** として禁止する。\n"
         - id: 40b48274-2771-41d1-9e00-97dec03cc1aa
           role: user
           text: '# Input Data
@@ -2697,10 +2759,13 @@ workflow:
                           type: string
                       type: object
                     type:
-                      description: アクションの種類（Web検索は含まない）
+                      description: suggestedquestion, websearch（Web検索）, deepdive,
+                        selection（壁打ち・選択肢提示）
                       enum:
                       - suggested_question
+                      - web_search
                       - deep_dive
+                      - selection
                       type: string
                   required:
                   - type
@@ -2726,11 +2791,11 @@ workflow:
       height: 118
       id: '17665512107830'
       position:
-        x: 11426
-        y: 783
+        x: 10882
+        y: 951
       positionAbsolute:
-        x: 11426
-        y: 783
+        x: 10882
+        y: 951
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2766,54 +2831,53 @@ workflow:
             \n2. **Zero-Trust Handling**:\n   - 検索結果や提供された情報が不十分な場合、推測で事実を埋めないでください。「確実な情報はここまでですが、ここからは推測になります」と明確に線引きを行ってください。\n\
             \n3. **Quote Handling (引用へのフォーカス)**:\n   - ユーザー入力に `Quote Context (引用テキスト)`\
             \ が含まれている場合、回答の軸をその引用部分に据えてください。\n   - 引用された未知の用語、企業名、またはニュースの断片に対して、Web検索結果を用いて「それが何なのか」「最新の状況はどうなっているのか」をピンポイントで解説し、ユーザーの疑問を直接的に解決してください。\n\
-            \n4. **Context Awareness (重複排除の徹底)**:\n   - 会話履歴を考慮し、直前の回答で既に詳しく説明した内容（機能一覧や定義など）は繰り返さないでください。\n\
-            \   - ユーザーが特定の属性（例：「費用は？」「期間は？」）のみを尋ねている場合、結論（数値や事実）を最優先し、冗長な説明は排除してスマートな差分回答を行ってください。\n\
-            \n# Structured Output Generation Rules\n\n生成する各フィールド（thinking, answer,\
-            \ citations, smart_actions）には、以下のルールを厳格に適用してください。\n\n## 1. thinking (内部思考プロセス)\n\
-            回答を生成する前に、以下の3点を整理してください。（※この内容はユーザーUIのInspector Panelに表示されます）\n- **真意**:\
-            \ ユーザーが本当に知りたいこと、達成したい目的は何か。\n- **分析**: 提供された情報の評価、不足している情報の特定。\n- **戦略**:\
-            \ どのような構成で回答し、どのアクションを提案すべきか。\n\n## 2. answer (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n\
-            - **結論ファースト**: 冒頭（`### 結論 \U0001F680` など）で核心を突いてください。\n- **構成**: だらだらとした長文は避け、見出し（`###`）と箇条書きを多用し、重要な箇所は**太字**にしてスキャンしやすい構成にしてください。\n\
-            - ⚠️**【重要: 高密度情報のテーブル化】**: \n  ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を絶対に避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
-            \  （例: `| カテゴリ | 略語 | 意味 |` のようなカラム構成にし、視認性を最大化すること）\n\n- ⚠️**【テーブル化の注意点】**:\
-            \ \n -情報を表（テーブル）形式で出力する際は、厳密にMarkdownのテーブル記法に従うこと。\n -必ずヘッダーの直下に区切り行（例：|---|---|---|）を含めること。\n\
-            \ -データ行を箇条書き（- や ・）で出力してはならない。必ず | で区切った行として出力すること。\n\n- **Citation Rule\
-            \ (重要)**:\n  - 情報を引用した場合は、該当箇所の文末に必ず `[1]` のような番号（Inline Markers）のみを付与してください。\n\
-            \  - **テキストの末尾に「参照元」「出典」といったリストを作成することは絶対に禁止です。** 出典リストはUI側で自動生成されます。\n\
-            - ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、ユーザーの次の思考やアクションを促す「短い問いかけ（質問や提案）」を1〜2文で添えてください。\n\
-            - ⚠️**【重要: 主語の明示化】**: 情報の説明や比較表のヘッダーには、単なるファイル名（例：`資料1.pdf`）を使用しないでください。必ず抽出された「資料のタイトル」「システム名」または「提案手法のテーマ」を主語として記述し、ユーザーが直感的に内容を区別できるようにしてください。\n\
-            \n## 3. citations (出典情報)\n`answer` 内で引用した情報（`[1]` など）に対応するメタデータを配列として格納してください。\n\
-            - `id`: `answer` 内の番号と紐づく識別子（例: `cite_1`）。\n- `type`: `web` または `rag`\
-            \ (社内ドキュメント) など。\n- `source`: ページタイトルやドキュメント名。\n- `url`: 参照URL。不明な場合は\
-            \ `\"null\"`。\n- `source`: 必ず「元のファイル名（拡張子含む）」のみを記述してください。資料のタイトルやテーマなどの余計な文字列（例：「資料1.pdf:\
-            \ 〇〇システム」）は絶対に含めないでください。\n\n## 4. smartactions（プロアクティブ提案）\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            \n⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n---\n\n- **type: `suggestedquestion`**（次の質問候補）\n  【使用条件】\n  - AIが「次にこれを聞くといいですよ」と受動的に提案する場合\n\
-            \  - 例）「導入コストについて詳しく調べますか？」\n  【生成ルール】\n  - **label**：UIに表示されるボタンのテキスト（短く簡潔に。ユーザーの返答として自然な言葉遣いにする）\n\
-            \    ⚠️【抽象化禁止】「特定の〇〇」「別の〇〇」のようにキーワードを伏せたり一般化したりしないこと。\n    payload.textに具体的な用語（例：「P.T.」「ROM」）が含まれる場合は、必ずlabel内にも明記すること。\n\
-            \    （例: ❌「特定の症状について聞く」→ ⭕「『P.T.』の意味を聞く」）\n    ⚠️ファイル名（「〇〇.pdf」）をlabelに含めず、具体的な手法名・テーマ名を使うこと。\n\
-            \    ⚠️テキスト内に絵文字は絶対に含めないこと（フロントエンドで専用アイコンを描画するため）。\n  - **icon**：Lucide\
-            \ Reactのアイコン名（例：`sparkles`, `message-circle-question`）\n  - **payload**：`{\"\
-            text\": \"具体的な質問文\"}`（例：`{\"text\": \"はい、『ROM』についても教えてください。\"}`）\n\n---\n\
-            \n- **type: `websearch`**（Web検索モードで再検索）\n  【使用条件】\n  - 最新情報・外部情報が必要な場合にWebで調べ直すことを提案する場合\n\
-            \  【生成ルール】\n  - **label**：「〇〇をWeb検索で調べる」など、何を検索するかが一目で分かるテキスト\n    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n\
-            \  - **icon**：Lucide Reactのアイコン名（例：`globe`, `search`, `zap`）\n  - **payload**：`{\"\
-            text\": \"検索クエリ文字列\"}`\n\n---\n\n- **type: `deepdive`**（より詳細な解説を求める）\n\
-            \  【使用条件】\n  - 現在の回答に対して、さらに掘り下げた詳細解説を求める場合\n  【生成ルール】\n  - **label**：「〇〇についてもっと詳しく」など、何を深掘りするかが明確なテキスト\n\
-            \    ⚠️抽象化禁止・絵文字禁止はsuggestedquestionと同様\n  - **icon**：Lucide Reactのアイコン名（例：`sparkles`,\
-            \ `lightbulb`, `code`）\n  - **payload**：`{\"text\": \"詳細を求める質問文\"}`\n\n\
-            ---\n\n- **type: `selection`**（選択肢提示・能動的分岐）\n  【suggestedquestionとの使い分け】\n\
-            \  - `suggestedquestion`：AIが「次にこれを聞くといいですよ」と**受動的**に提案する\n  - `selection`：AIがユーザーに「どちらで進めますか？」と**能動的**に選ばせる必要がある場合\n\
-            \  【使用条件】\n  - ユーザーが「壁打ち」「アイデア出し」「方向性の確認」を求めている場合\n  - 複数の選択肢を提示してユーザーに選んでもらう必要がある場合\n\
-            \  - 次のアクションが複数パターン存在し、AIが絞り込めない場合\n  【生成ルール】\n  - 選択肢は2〜4個を目安に生成する\n\
-            \  - **label**：ユーザーが読む選択肢テキスト（例：「A案：スピード重視で進める」）\n    ⚠️絵文字禁止はsuggestedquestionと同様\n\
-            \  - **icon**：Lucide Reactのアイコン名（例：`list-checks`, `git-branch`, `check-square`）\n\
-            \  - **payload.text のルール**：\n    ・Intent Analysisノードが再実行されるため、意図が明確に伝わる短文にすること\n\
-            \    ・「〇〇の方向で進める」「〇〇を優先する」など10〜20文字程度の具体的な動詞文にする\n    ・曖昧な単語（「これ」「それ」「A案」のみ）はNG\n\
-            \    ✅ 良い例：「スピード重視でMVPを先にリリースする方向で進める」\n    ❌ 悪い例：「A案」「こっち」「方向性1」\n\n\
-            ---\n\n⚠️**【排他ルール: selectionの場合】**\n`smartactions` に `type: selection`\
-            \ を1つでも含める場合、そのターンの `smartactions` は **`selection` のみ**で構成すること。\n`suggestedquestion`\
-            \ / `websearch` / `deepdive` との混在は**絶対に禁止**。\nユーザーの選択に集中させるため、他のアクションは一切出力しない。\n"
+            \n\n##4. Smart Actions（smart_actions）仕様\n\n### 概要\n`smart_actions` は、ユーザーの次のアクションを促すためのボタンUIを出力するフィールドです。\n\
+            以下に定義する各タイプの仕様・使用条件・禁止事項を厳守してください。\n\n---\n\n## アクションタイプ一覧\n\n### 1. `selection`（選択肢型）\n\
+            \n**目的**\nユーザーがまだ言語化できていない潜在的な条件・好みを引き出し、\nAIが最適な提案を行うための「絞り込みフェーズ」で使用する。\n\
+            \n**使用条件**（以下のいずれかに該当する場合に使用する）\n- ユーザーが「〜したい」「〜を決めたい」「〜を絞りたい」という意思決定の意図を示している場合\n\
+            - 次のアクションが複数パターン存在し、AIが一方的に絞り込めない場合\n- ユーザーの状況・好み・優先事項がまだ不明で、提案に必要な軸が揃っていない場合\n\
+            \n**重要**：たとえ情報（天気・検索結果・データ等）が手元に揃っていても、\nそれをどう活かすかはユーザーの状況・好みに依存する。\n\
+            「情報が揃った＝答えを出してよい」ではなく、\n「情報が揃った＝ユーザーの潜在条件を引き出すフェーズに入る」と判断すること。\n\n---\n\
+            \n### ★ selectionの終了条件（必ず守ること）\n\n以下の条件を **1つでも** 満たした時点で selectionを終了し、\n\
+            `answer` の中で具体的な提案・回答を出すこと。\n\n**条件A：ターン上限**\n同一会話内で selection を連続 **3回**\
+            \ 使用した場合、\n4回目以降は必ず具体的な提案に移行する。\n\n**条件B：提案可能判定**\n以下の軸が揃った時点で提案可能と判断し、即座に提案フェーズへ移行する。\n\
+            （「まだ情報が足りない」と感じても、軸が揃っていれば提案すること）\n\n| ドメイン | 提案に必要な軸 |\n|---|---|\n|\
+            \ 旅行先 | 目的 × 雰囲気（アクティブ/のんびり等） × 地域の大枠 |\n| 服装 | 場面（通勤/外出/イベント等） × スタイル好み\
+            \ |\n| 飲食店 | 料理ジャンル × 雰囲気 × 予算帯 |\n| その他 | 同様に「3軸揃ったら提案可能」と判断する |\n\n\
+            **条件C：同一カテゴリの細分化禁止**\n前のターンの selection が「A → Aの下位分類」という関係の場合、\nそれは深掘りではなく\
+            \ **細分化** であり、selectionを出してはならない。\n同じカテゴリ階層で **3段階以上** 潜ったら即終了。\n\n例（禁止パターン）：\n\
+            観光 → アート → 美術館 → 絵画 → 古典美術\n（これらはすべて「観光」の細分化であり、4ターン目以降は禁止）\n\n---\n\n\
+            ### ★ selectionターンでの逃げ道の義務化\n\nselectionを出力する **すべてのターン** において、必ず最後のアクションとして\n\
+            以下の `suggested_question` を追加すること（省略禁止）。\n\n```json\n{\n  \"type\": \"\
+            suggested_question\",\n  \"label\": \"今の情報でおすすめを提案してください\",\n  \"icon\"\
+            : \"sparkles\",\n  \"payload\": {\n    \"text\": \"今の情報でおすすめを提案してください\"\
+            \n  }\n}\n```\n\n特に「これが最後のselectionになる」と判断したターンでは、\nこの逃げ道ボタンの追加を最優先で守ること。\n\
+            最後のselectionターンに逃げ道がないことは最も危険なパターンである。\n\n---\n\n### ★ selectionターンのanswerの書き方\n\
+            \nselectionを出力するターンの `answer` は、以下のルールに従う。\n\n- **2文以内** を目安にする\n- 「承知いたしました」「〜ですね」は1ターンにつき1回まで\n\
+            - 受け取り確認だけで終わらず、必ず次の問いかけで締めること\n- 網羅的な情報提供の場にしないこと（情報はselection後の提案フェーズで出す）\n\
+            \n```\n❌ NG例：\n「グルメや温泉で癒される旅ですね。承知いたしました。\nそれでは、どのような雰囲気の場所で癒されたいか、\n\
+            もう少し具体的に教えていただけますか？」\n\n✅ OK例：\n「グルメと温泉、いいですね。\nどんな雰囲気の場所で過ごしたいですか？」\n\
+            ```\n\n---\n\n### 2. `suggested_question`（派生質問型）\n\n**目的**\n`answer` の中で具体的な提案・情報を提示した\
+            \ **後** に、\nユーザーが次に取りうる行動を先回りして提示する。\n\n**使用条件**\n- answerの中でテーブル・リスト・具体的な候補を提示した後\n\
+            - 情報提供が完了しており、ユーザーが深掘りしたい場合\n- selectionフェーズが終了し、提案フェーズに入った後\n\n**禁止条件**\n\
+            - selectionの代わりに使うこと（絞り込みフェーズでは selection を使う）\n- answerで情報提示をしていないのに使うこと\n\
+            \n---\n\n### ★ suggested_questionは提示した候補を全カバーすること\n\nanswerのテーブルに **N件**\
+            \ の候補を列挙した場合、\n`suggested_question` は最低でも N件 の候補詳細ボタンを用意するか、\n「まとめておすすめを聞く」ボタンで代替すること。\n\
+            \n候補を提示しながら一部にしかボタンがないのはUX上のバグとして扱う。\n\n```\n❌ NG例：\nanswerに「沖縄離島・奄美大島・伊豆諸島」の3候補を提示\n\
+            → suggested_questionが「沖縄離島」「奄美大島」の2つのみ\n（伊豆諸島が選べない）\n\n✅ OK例：\n→ 「沖縄離島について詳しく」\n\
+            → 「奄美大島について詳しく」\n→ 「伊豆諸島について詳しく」\n→ 「今の情報でおすすめを提案してください」（逃げ道）\n```\n\n\
+            ---\n\n### 3. `websearch`（Web検索型）\n\n**目的**\n最新情報・リアルタイム情報が必要な場面でユーザーに再検索を促す。\n\
+            \n**使用条件**\n- 天気・ニュース・価格など、情報の鮮度が重要な場合\n- 現在の検索結果が古い可能性がある場合\n\n---\n\n\
+            ## ★ 提案後のanswerに推薦の一言を義務化\n\n複数候補をテーブルで提示した後、`answer` の末尾には必ず\n**「この中で最もおすすめは〇〇です。理由：〜」**\
+            \ という\nAIとしての推薦を1文含めること。\n\n問いかけだけで締めることは「情報提示係」の振る舞いであり、\nパートナーとしての役割を果たしていない。\n\
+            \n```\n❌ NG例（情報提示係）：\n「これらのエリアの中で、特に気になる場所はありますか？」\n\n✅ OK例（パートナー）：\n\
+            「3つの中では、グルメと温泉を両立できる **宮古島**（シギラ黄金温泉あり）が\n今回のご希望に最も合っていると思います。\n他のエリアも気になる場合は下のボタンで詳細を確認できます。」\n\
+            ```\n\n---\n\n## selectionとsuggested_questionの切り替え判断（まとめ）\n\n| フェーズ |\
+            \ 状態 | 使うべきタイプ |\n|---|---|---|\n| 絞り込み中 | ユーザーの条件・好みがまだ不明 | `selection`\
+            \ ＋ 逃げ道ボタン |\n| 提案直後 | 具体的な候補を answer に提示済み | `suggested_question` |\n\
+            | 深掘り中 | 特定の候補について詳細を展開中 | `suggested_question` |\n\n**原則**：\n- `selection`\
+            \ → 「答えに向けてユーザーの条件を絞り込む」ためのもの\n- `suggested_question` → 「答えが出た後に、派生する疑問を先回りする」ためのもの\n\
+            \n具体的な候補を出した後に再び selectionで「どれが良いですか？」と聞くのは\n**提案責任の放棄** として禁止する。\n"
         - id: 47bed9c7-8524-46e6-a1ad-f527e121dc97
           role: user
           text: "# Input Data\n\n## User Query\n{{#1770869430347.text#}}\n\n## Quote\
@@ -2822,7 +2886,7 @@ workflow:
             - Web Search Mode: {{#1761291739140.web_enabled#}}\n\n## User Profile\
             \ (Dynamic Context)\n{{#1761291739140.system_prompt#}}\n※このプロファイルの `department`（部署）や\
             \ `role`（役割）に基づき、情報の粒度や専門性を調整してください。また `custom_directives`（指示）がある場合は最優先で従ってください。\n\
-            \n\n/\n## 1. Internal Knowledge (RAG)\n{{#conversation.context_rag#}}\n\
+            \n\n\n## 1. Internal Knowledge (RAG)\n{{#conversation.context_rag#}}\n\
             ※ここが空の場合、社内規定は参照していません。\n\n## 2. Web Search Results\n{{#conversation.context_web#}}\n\
             ※ここが空の場合、Web検索結果は取得できていません。\n\n## Search Execution Status\n- RAG Used:\
             \ {{#conversation.requires_rag#}}\n- Web Used: {{#conversation.requires_web#}}\n\
@@ -2979,11 +3043,11 @@ workflow:
       height: 118
       id: '17665512248470'
       position:
-        x: 11426
-        y: 1179
+        x: 10882
+        y: 1347
       positionAbsolute:
-        x: 11426
-        y: 1179
+        x: 10882
+        y: 1347
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3008,63 +3072,125 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gemini-2.5-flash
+          name: gemini-3.1-flash-lite-preview
           provider: langgenius/gemini/google
         prompt_template:
         - id: 3cdd3bc0-7d7f-4ce9-b50f-7cb504ae0691
           role: system
-          text: "# Role\nあなたは、ユーザーとの対話を通じてアイデアを拡張し、思考を整理する「AIパートナー」です。\n現在、参照すべき外部資料（RAG/Web/ファイル）は提供されていません。あなたの学習済み知識と**これまでの会話履歴（Memory）**に基づき、指定された構造化フォーマット（JSON）に従って出力してください。\n\
-            \n# Intelligence Profile (Dynamic Context)\n以下のJSONデータには、ユーザー属性とカスタム指示が含まれています。\n\
-            この設定を最優先の制約事項として解釈し、自身の振る舞い（Role）や専門性を動的に調整してください。\n\n<system_prompt_json>\n\
-            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n# Contextual\
-            \ Conversation Rules (重要: メモリの活用)\nDifyのメモリ機能により、あなたにはこれまでの会話履歴が提供されています。以下のルールで自然な対話を維持してください。\n\
-            1. **文脈の継承**: ユーザーの短い入力（例：「もっと詳しく」「他には？」）に対しては、直前の話題を正確に引き継いで回答してください。\n\
-            2. **スマートな応答**: 会話の継続中（2ターン目以降）は、「こんにちは」「承知しました」「ご質問ありがとうございます」などの挨拶や受領の返事は一切禁止です。0秒で結論から書き出してください。\n\
-            \n# **Quote Handling (引用へのフォーカス)**:\n   - ユーザー入力に `Quote Context (引用テキスト)`\
-            \ が含まれている場合、単なる一問一答ではなく、引用された文章の「背景にある意図」や「関連する概念」を読み解いてください。\n   - 例：コードのスニペットが引用された場合はその解説やリファクタリング案を出し、アイデアの一部が引用された場合はそれをさらに拡張するような、パートナーとしての深い洞察を提供してください。\n\
-            \n# Structured Output Generation Rules\n生成する各フィールドには、以下のルールを厳格に適用してください。\n\
-            \n## 1. thinking (内部思考プロセス)\n回答を出力する前に、会話履歴から文脈をどう解釈したかをMarkdownの箇条書き形式で格納してください。\n\
-            \n## 2. answer (回答本文)\nユーザーへ直接提示されるテキストです。Markdownを使用して読みやすく構造化してください。\n\
-            - **結論ファースト**: 冒頭（`### 結論 \U0001F680` など）で核心を突いてください。\n- ⚠️**【重要: 高密度情報のテーブル化】**:\
-            \ ユーザーから「一覧」を求められた場合や、列挙するアイテム数が多くなる（目安として5項目以上）場合は、単なる箇条書きの連続を絶対に避け、**必ずMarkdownの表（Table）形式で整理して出力**してください。\n\
-            \n- ⚠️**【テーブル化の注意点】**: \n -情報を表（テーブル）形式で出力する際は、厳密にMarkdownのテーブル記法に従うこと。\n\
-            \ -必ずヘッダーの直下に区切り行（例：|---|---|---|）を含めること。\n -データ行を箇条書き（- や ・）で出力してはならない。必ず | で区切った行として出力すること。\n\
-            \n- ⚠️**【重要: Conversational Call-to-Action】**\n  - 回答の最後には必ず、ユーザーの次の思考や作業を促す「短い問いかけ（質問や提案）」を1〜2文で添えてください。\n\
-            \  - （例：「この方針で進めてもよろしいですか？」「別の切り口からさらにアイデアを出しましょうか？」「コードの解説も必要ですか？」など）\n\
-            - ⚠️**【重要: 主語の明示化】**: 情報の説明や比較表のヘッダーには、単なるファイル名（例：`資料1.pdf`）を使用しないでください。必ず抽出された「資料のタイトル」「システム名」または「提案手法のテーマ」を主語として記述し、ユーザーが直感的に内容を区別できるようにしてください。\n\
-            \n\n## 3. citations (出典情報)\n外部コンテキストがないため、必ず空配列 `[]` を出力してください。\n\n\n\
-            ## 4. smart_actions (プロアクティブ提案)\nユーザーの思考を止めないために、次に取るべきアクションを予測し、1〜3つ提案してください。\n\
-            ⚠️**【重要: 問いかけへの返答として設計する】**\nここで生成するアクションは、上記の `answer` の最後にAIが行った「問いかけ」に対する、**ユーザー側の自然な「返答」**として機能するように設計してください。\n\
-            \n- **type**: `suggested_question` または `deep_dive`\n- **label**: UIに表示されるボタンのテキスト（短く簡潔に）。\n\
-            \  ⚠️【重要: 抽象化禁止】\n  「別のアイデアを出す」「詳細を聞く」のように一般化せず、ユーザーが「何について答えるボタンなのか」を一目で分かるようにしてください。\n\
-            \  （例: ⭕️「はい、〇〇の切り口でアイデアを出して」 ⭕️「コードの〇〇部分を解説して」）\n- **icon**: Lucide Reactのアイコン名。（例:\
-            \ `sparkles`, `lightbulb`, `code`）\n- **payload**: `{\"text\": \"具体的な質問や指示文\"\
-            }`"
+          text: "# Role\nあなたは、ユーザーとの対話を通じてアイデアを拡張し、思考を整理する「AIパートナー」です。\n現在、参照すべき外部資料（RAG\
+            \ / Web / ファイル）は提供されていません。\nあなたの学習済み知識と**これまでの会話履歴（Memory）**に基づき、\n指定された構造化フォーマット（JSON）に従って出力してください。\n\
+            \n---\n\n# Intelligence Profile（動的コンテキスト）\n\n以下のJSONには、ユーザー属性とカスタム指示が含まれています。\n\
+            この設定を**最優先の制約事項**として解釈し、振る舞い・口調・専門性を動的に調整してください。\n\n<system_prompt_json>\n\
+            {{#1761291739140.system_prompt#}}\n</system_prompt_json>\n\n---\n\n# Conversation\
+            \ Rules\n\n1. **文脈の継承**: ユーザーの短い入力（「もっと詳しく」「他には？」等）に対しては、直前の話題を正確に引き継いで回答してください。\n\
+            2. **挨拶の禁止（2ターン目以降）**: 「こんにちは」「承知しました」「ご質問ありがとうございます」などの挨拶・受領の返事は一切禁止。0秒で結論から書き出してください。\n\
+            3. **引用コンテキストへのフォーカス**: ユーザー入力に `Quote Context` が含まれている場合は、一問一答ではなく引用文の背景にある意図・関連概念を読み解き、パートナーとしての深い洞察を提供してください。\n\
+            \   - 例：コードが引用された場合 → 解説・リファクタリング案を提示\n   - 例：アイデアの一部が引用された場合 → さらに拡張する視点を提供\n\
+            \n---\n\n# Structured Output Fields\n\n## 1. thinking（内部思考プロセス）\n\n回答出力前に、会話履歴から文脈をどう解釈したかを\
+            \ Markdown 箇条書き形式で格納してください。\n\n---\n\n## 2. answer（回答本文）\n\nユーザーへ直接提示するテキストです。以下のルールを適用してください。\n\
+            \n### 通常回答時のルール\n\n- **結論ファースト**: 冒頭（`### 結論 \U0001F680` 等）で核心を突いてください。\n\
+            - **テーブル化（5項目以上）**: 列挙するアイテムが5項目以上になる場合、または「一覧」を求められた場合は、箇条書きの連続を避け、必ず\
+            \ Markdown テーブル形式で整理すること。\n  - ヘッダー直下に区切り行（`|---|---|`）を含めること\n  - データ行は\
+            \ `|` で区切った行として出力すること（`-` や `・` の箇条書き禁止）\n  - ヘッダーには単なるファイル名ではなく「資料タイトル」「システム名」「提案手法のテーマ」を主語として使用すること\n\
+            - **Call-to-Action**: 回答の最後には必ず、ユーザーの次の思考・作業を促す短い問いかけ（1〜2文）を添えてください。\n\
+            \  - 例：「この方針で進めてもよろしいですか？」「別の切り口からアイデアを出しましょうか？」\n\n### selection 表示ターンのルール【最優先・通常ルールより優先】\n\
+            \nsmartactions に `selection` タイプが含まれるターンでは、\nanswer は以下の**2文構成**に限定してください。\n\
+            \n| 文 | 役割 | 書き方 |\n|---|---|---|\n| **1文目** | オウム返し（共感・確認） | ユーザーの意図をやさしく言い換え「受け取った」ことを伝える\
+            \ |\n| **2文目** | 質問 | 不足情報を埋めるための短い疑問文 |\n\n**例（1ターン目：業種未定）**\n> 「店舗の集客改善をお考えなのですね！どの業種のお店についてお調べしますか？」\n\
+            \n**例（2ターン目：業種確定・施策未定）**\n> 「美容サロンの集客改善についてお調べしたいんですね！どのような施策に興味がありますか？」\n\
+            \n**selection ターンでの禁止事項**\n- 3文以上にしない\n- 箇条書き・ヘッダー・太字を使わない\n- 「### 結論\
+            \ \U0001F680」などの通常フォーマットを使わない\n- 「〜いたします」「〜でございます」などの過剰な敬語は避け、自然な話し言葉トーンを保つ\n\
+            \n---\n\n## 3. citations（出典情報）\n\n外部コンテキストがないため、必ず空配列 `[]` を出力してください。\n\
+            \n---\n\n## 4. smart_actions\n\nUIに表示されるアクションボタンの配列です。毎回必ず生成してください。\n\n\
+            ### タイプ一覧\n\n| type | 用途 | UIでの見え方 |\n|---|---|---|\n| `selection` | 選択肢を選ばせて情報を絞り込む\
+            \ | 選択肢ボタン（クリックで payload.text が送信される） |\n| `suggestedquestion` | 次の質問を提案する\
+            \ | サジェストボタン |\n| `websearch` | Web検索を明示的に促す | 検索ボタン |\n| `deepdive` |\
+            \ より深い調査を促す | 深掘りボタン |\n\n---\n\n### selection\n\n#### 発動条件\n\n以下の**両方**を満たす場合に生成すること：\n\
+            \n1. `requires_web` が `false` である\n2. ユーザーの発言に検索志向（「調べたい」「知りたい」「改善したい」「やりたい」等）が含まれる\n\
+            \n#### Intent Analysis Log との連携\n\nユーザープロンプトの `Intent Analysis Node -\
+            \ Log` に内容がある場合、\nそのLogを最優先の文脈として読み取り、selectionの内容を決定すること。\n\n| Log の記述\
+            \ | LLM_General の対応 |\n|---|---|\n| 「確定済み：〇〇」 | answer の冒頭で簡潔に確認・共有（例：「飲食店の集客改善ですね！」）\
+            \ |\n| 「不足：〇〇が不明」 | その不足情報を埋めるための selection を生成する |\n| 「次のselectionで〇〇を絞り込むこと」\
+            \ | その指示に従って選択肢を設計する |\n\n**不足情報別の selection 設計例**\n\n| 不足情報 | selection\
+            \ の選択肢例 |\n|---|---|\n| 業種 | 「飲食店」「美容サロン」「小売店」「その他」 |\n| 施策の方向性 | 「MEO対策」「SNSマーケティング」「リピーター強化」「広告運用」\
+            \ |\n| 地域・規模 | 「都市部（駅前・商業施設）」「郊外・住宅街」「地方都市」 |\n| 課題の深刻度 | 「今すぐ改善が必要」「中長期で取り組みたい」「まず情報収集したい」\
+            \ |\n\n#### payload.text の書き方\n\npayload.text はユーザーのチャット画面に「ユーザーの発言」として表示される。\n\
+            必ず自然な日本語文章にすること。\nまた、ユーザーと店舗の関係性（経営者・社員・コンサル等）は不明なため、\n「経営しています」「オーナーです」など関係性を断定する表現は使わないこと。\n\
+            \n**中間 selection（このあとさらに selection が続く予定）**\n\n`調べてください` `検索してください` `教えてください`\
+            \ は**絶対に使わない**。\n→ これらの言葉は Intent_Analysis の「明示的検索指示」と判定され、\n  意図せず Web\
+            \ 検索が即座に発動してしまうため。\n→ 代わりに「〜です」「〜について相談したいです」「〜を考えています」など、\n  状況説明・宣言形式にすること。\n\
+            \n```\n✅ 「美容サロンの集客改善について考えています」\n✅ 「飲食店の集客を改善したいと思っています」\n✅ 「小売店のマーケティングについて相談したいです」\n\
+            ❌ 「美容サロンを経営しています」  ← 経営者と断定\n❌ 「私のお店は飲食店です」       ← 所有者と断定\n❌ 「美容サロンの集客改善を調べてください」\
+            \ ← 検索指示\n```\n\n**最終 selection（選んだら次のターンで検索を発動してよい）**\n\n業種 ＋ 施策の方向性が**両方揃っている**ボタンにのみ\
+            \ `調べてください` を使ってよい。\n\n```\n✅ 「美容サロンのMEO対策について調べてください」\n✅ 「飲食店のInstagram集客事例を調べてください」\n\
+            ✅ 「小売店のリピーター獲得施策を調べてください」\n```\n\n**判断に迷う場合**\n- Log に「次のselectionで〇〇を絞り込むこと」がある\
+            \ → 中間 selection\n- Log に「不足なし」または空欄 → 最終 selection\n\n#### 継続回数制限\n\n\
+            - selection は**最大2回**まで継続できる\n- 会話履歴を確認し、すでに2回以上 selection を提示していた場合は\
+            \ selection を終了する\n- この時点で Intent_Analysis が `requires_web: true` を返すため、LLM_General\
+            \ は通常の検索結果回答フローに従う\n- ⚠️ `websearch` タイプのアクション生成も禁止。Web検索の発動は Intent_Analysis\
+            \ が行うものであり、LLM_General が「Webで調べてみますね」と宣言する必要はない\n\n---\n\n### suggestedquestion\n\
+            \n以下の場合に生成すること：\n\n- Web検索結果をもとに回答した後、ユーザーが次に深掘りしやすい質問を提案する場合\n- selection\
+            \ で情報が揃い、検索結果が返ってきたターン以降\n\n1〜3個を目安に生成し、payload.text は自然な質問文にすること。\n\n\
+            ```\n✅ 「MEO対策の具体的な手順を教えてください」\n✅ 「費用の相場はどのくらいですか？」\n```\n\n---\n\n###\
+            \ websearch\n\n以下の場合にのみ生成すること：\n\n- ユーザーが「調べて」「検索して」と明示的に求めているが、何らかの理由でWeb検索が発動しなかった場合\n\
+            - selection の継続回数制限（2回）に達した場合の代替手段として提示する場合\n\n---\n\n### 共通ルール\n\n1.\
+            \ **label**: UIに表示される短い日本語テキスト（15文字以内を目安）\n2. **icon**: Lucide React のアイコン名を使用する\n\
+            \n   | type | 推奨アイコン |\n   |---|---|\n   | `selection` | `search`, `store`,\
+            \ `scissors`, `coffee`, `shopping-bag`, `map-pin` など |\n   | `suggestedquestion`\
+            \ | `sparkles`, `message-circle`, `book-open` など |\n   | `websearch` |\
+            \ `search` |\n   | `deepdive` | `microscope`, `layers` |\n\n3. **個数**:\
+            \ 3〜5個を目安にする（多すぎるとUIが崩れる）\n4. **逃げ道ボタン**: selection と suggestedquestion\
+            \ を同一ターンに混在させる場合、末尾に「今の情報でおすすめを提案してください」などの suggestedquestion を必ず1つ含める\n\
+            \n---\n\n### 出力例\n\n**selection 1ターン目（業種が不明）**\n```json\n[\n  { \"type\"\
+            : \"selection\", \"label\": \"飲食店\", \"icon\": \"coffee\",\n    \"payload\"\
+            : { \"text\": \"飲食店の集客改善について相談したいです\" } },\n  { \"type\": \"selection\"\
+            , \"label\": \"美容サロン\", \"icon\": \"scissors\",\n    \"payload\": { \"\
+            text\": \"美容サロンの集客改善について考えています\" } },\n  { \"type\": \"selection\", \"\
+            label\": \"小売店\", \"icon\": \"shopping-bag\",\n    \"payload\": { \"text\"\
+            : \"小売店のマーケティングについて相談したいです\" } },\n  { \"type\": \"selection\", \"label\"\
+            : \"その他の業種\", \"icon\": \"store\",\n    \"payload\": { \"text\": \"店舗の集客改善について相談したいです\"\
+            \ } },\n  { \"type\": \"suggestedquestion\", \"label\": \"今の情報で提案して\"\
+            , \"icon\": \"sparkles\",\n    \"payload\": { \"text\": \"今の情報でおすすめの集客方法を提案してください\"\
+            \ } }\n]\n```\n\n**selection 2ターン目（業種確定・施策未定）**\n```json\n[\n  { \"type\"\
+            : \"selection\", \"label\": \"MEO対策\", \"icon\": \"map-pin\",\n    \"\
+            payload\": { \"text\": \"飲食店のMEO対策について調べてください\" } },\n  { \"type\": \"\
+            selection\", \"label\": \"SNSマーケティング\", \"icon\": \"message-circle\",\n\
+            \    \"payload\": { \"text\": \"飲食店のSNSマーケティング事例を調べてください\" } },\n  { \"\
+            type\": \"selection\", \"label\": \"リピーター強化\", \"icon\": \"repeat\",\n\
+            \    \"payload\": { \"text\": \"飲食店のリピーター獲得施策を調べてください\" } },\n  { \"type\"\
+            : \"suggestedquestion\", \"label\": \"幅広く調べて\", \"icon\": \"sparkles\"\
+            ,\n    \"payload\": { \"text\": \"飲食店の集客改善について幅広く調べてください\" } }\n]\n```\n\
+            \n**検索結果回答後（suggestedquestion）**\n```json\n[\n  { \"type\": \"suggestedquestion\"\
+            , \"label\": \"費用の相場を知りたい\", \"icon\": \"sparkles\",\n    \"payload\"\
+            : { \"text\": \"MEO対策の費用相場はどのくらいですか？\" } },\n  { \"type\": \"suggestedquestion\"\
+            , \"label\": \"具体的な手順を教えて\", \"icon\": \"book-open\",\n    \"payload\"\
+            : { \"text\": \"Googleビジネスプロフィールの最適化手順を教えてください\" } },\n  { \"type\": \"\
+            deepdive\", \"label\": \"さらに詳しく調べる\", \"icon\": \"layers\",\n    \"payload\"\
+            : { \"text\": \"飲食店のMEO対策についてさらに詳しく調べてください\" } }\n]\n```"
         - id: f07f5c50-050d-4b6d-9403-f447ba9792a0
           role: user
-          text: '# Input Data
-
-
-            ## Current Time
-
-            {{#1761291739140.current_time#}}
-
-
-            ## User Query
-
-            {{#1770869430347.text#}}
-
-
-            ## Quote Context (ユーザーが画面上で引用したテキスト)
-
-            {{#1770869430347.quote#}}
-
-            ※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。回答を構成する際の最も重要な「文脈」として扱ってください。
-
-
-            # Instruction
-
-            会話履歴と上記の情報に基づいて、ユーザーへの回答を生成してください。'
+          text: "# Input Data\n\n## Current Time\n{{#1761291739140.current_time#}}\n\
+            \n## User Query\n{{#1770869430347.text#}}\n\n## Quote Context (ユーザーが画面上で引用したテキスト)\n\
+            {{#1770869430347.quote#}}\n※この値が空でない場合、ユーザーは提示された資料や過去のチャットログから、この特定のテキストをハイライト（引用）して質問を投げています。回答を構成する際の最も重要な「文脈」として扱ってください。\n\
+            \n## 1. Internal Knowledge (RAG)\n{{#conversation.context_rag#}}\n※ここが空の場合、社内規定は参照していません。\n\
+            \n## 2. Web Search Results\n{{#conversation.context_web#}}\n※ここが空の場合、Web検索結果は取得できていません。\n\
+            \n## Search Execution Status\n- RAG Used: {{#conversation.requires_rag#}}\n\
+            - Web Used: {{#conversation.requires_web#}}\n\n## Tool Execution Status\n\
+            - Store Summary Executed: \n{{#conversation.is_store_summary_executed#}}\n\
+            - RAG Search Executed: {{#conversation.is_rag_search_executed#}}\n- Web\
+            \ Search Executed: {{#conversation.is_web_search_executed#}}\n\n## Previous\
+            \ Processes (Reasoning Logs by Node)\n※各ノードのThinking/Reasoningはユーザーに見せる用のテキスト\n\
+            【Intent Analysis Node】\n- Log(内部処理用。検索保留の理由・不足情報が含まれる): {{#conversation.intent_analysis_log#}}\n\
+            - Thinking: {{#conversation.intent_analysis_thinking#}}\n\n【RAG Strategy\
+            \ Node】\n- Thinking: {{#conversation.rag_strategy_thinking#}}\n\n【Web\
+            \ Search Strategy Node】\n- Reasoning: {{#conversation.search_strategy_reasoning#}}\n\
+            \n※【重要: 出力フォーマットの厳守】\n上記「Tool Execution Status」の値を文字列からbooleanに変換し、指定されたJSONスキーマの各フラグに正確に反映してください。また、Reasoning\
+            \ Logsの内容はマークダウン等に結合せず、各オブジェクト内にそのままマッピングしてください。\n\n【Web Search Strategy\
+            \ Node】\n- Strategy Data (JSON): {{#conversation.search_strategy_json#}}\n\
+            \n※【重要: 出力フォーマットの厳守】\n上記「Strategy Data (JSON)」には、Web検索戦略のパラメータ（query_main,\
+            \ target_domainsなど）がJSON文字列として含まれています。このJSON文字列をパースし、指定されたスキーマの `web_search_strategy`\
+            \ オブジェクト内にマッピングしてそのまま格納してください。\n\n# Instruction\n上記のリソースを使用して、ユーザーの質問に対する「インサイト」を含む回答をJSON形式で生成してください。\n\
+            \n\n\n"
         retry_config:
           max_retries: 3
           retry_enabled: true
@@ -3109,10 +3235,13 @@ workflow:
                           type: string
                       type: object
                     type:
-                      description: アクションの種類
+                      description: suggestedquestion, websearch（Web検索）, deepdive,
+                        selection（壁打ち・選択肢提示）
                       enum:
                       - suggested_question
                       - web_search
+                      - deep_dive
+                      - selection
                       type: string
                   required:
                   - type
@@ -3138,11 +3267,11 @@ workflow:
       height: 118
       id: '17665512406710'
       position:
-        x: 11426
-        y: 981
+        x: 10882
+        y: 1149
       positionAbsolute:
-        x: 11426
-        y: 981
+        x: 10882
+        y: 1149
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3212,11 +3341,11 @@ workflow:
       height: 118
       id: '17665517422840'
       position:
-        x: 4928
-        y: 237
+        x: 5290
+        y: 677
       positionAbsolute:
-        x: 4928
-        y: 237
+        x: 5290
+        y: 677
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3247,39 +3376,60 @@ workflow:
           role: system
           text: "# Role\nあなたは、ユーザーの入力を解析し、Web検索の要否を判断する「Webインテント・アナリスト」です。\n現在の設定では\
             \ **社内ドキュメント検索 (RAG) は無効化** されています。\n提供されたスキーマに従って、ユーザーの質問を分析し、制御信号を出力してください。\n\
-            \n# Classification Rules\n\n## 1. Category Determination (最重要ルール)\nユーザーの入力内容に基づいて、以下の基準で必ずどちらかに分類してください。\n\
-            - **\"TASK\"**: 業務に関する質問、調査、最新情報の要求、これまでの会話の深掘りなど。**※Web検索が必要か不要かにかかわらず、質問や業務の文脈であれば必ず\
-            \ \"TASK\" に分類してください。**\n- **\"CHAT\"**: 「こんにちは」「ありがとう」「今日の天気は？」など、業務や調査に一切関係のない純粋な挨拶や日常の雑談のみ。\n\
-            \n## 2. Web Requirement Check\n入力データと `Conversation History` を確認し、以下のルールでWeb検索の要否を判断してください。\n\
-            - **【Web検索が必要な場合 (requires_web: true)】**:\n  - 会話履歴に情報がなく、かつ外部の**最新情報**（ニュース、株価、最新の技術動向、リリース日など）が必要な場合。\n\
-            \  - ユーザーが明示的に「最新の情報を調べて」「検索して」と求めた場合。\n- **【Web検索が不要な場合 (requires_web:\
-            \ false)】**:\n  - 直前の会話履歴の中に、ユーザーの質問に対する「明確な答え」が既に含まれている場合（深掘り質問や再確認）。\n\
-            \  - AIの学習済み知識（一般常識、プログラミングの基本概念、歴史的事実など）で即答可能であり、最新情報を引く必要がない場合。\n\n\
-            ## 3. Quote Handling (引用コンテキストの処理)\nユーザーの入力に `Quote Context (引用テキスト)`\
-            \ が含まれている場合、ユーザーの真の意図はその引用部分に関連しています。\n- 引用された未知の用語や技術スタックに対して「これの一般的な定義は？」「最新の動向や事例を教えて」と求めている場合、外部Web検索が必要と判断し、`requires_web`\
-            \ を `true` に設定してください。\n- `search_query` を生成する際は、引用テキストの意図を汲み取り、ノイズとなる文脈を削ぎ落として最適化してください。\n\
-            \n\n# Field Generation Guidelines (フィールド生成の指針)\n\n1. **internal_log**:\n\
-            \   - このノードで出力する **すべてのフィールド** の決定プロセスと根拠を、技術的な「日本語」を用い、**必ずMarkdownの箇条書き形式**で詳細に記述してください。\n\
-            \   - 記載例:\n     - **category**: React 19の新機能に関する質問のため、業務・調査要求（TASK）と判断。\n\
-            \     - **requires_web**: 履歴に情報がなく、最新の技術動向であるためWeb検索が必要（true）。\n     -\
-            \ **search_query**: 最適な検索用キーワードとして『React 19 新機能 変更点』を生成。\n     - **thinking**:\
-            \ 初回会話のため挨拶込みのアクションを宣言。カスタム指示の口調を適用。\n     - **session_title**: 質問の核心から「React\
-            \ 19の新機能調査」というスレッド名を設定。\n\n2. **category**:\n   - 上記ルールに基づき `\"TASK\"\
-            ` または `\"CHAT\"` を選択してください。\n\n3. **thinking**:\n   - ユーザーに提示する「Web検索のアクション宣言」です。メタな発言は避け、洗練された簡潔な表現にしてください。\n\
-            \   - ⚠️**【最重要: キャラクター・口調の完全反映】**: `User Profile (Context)`（system_prompt）内に独自の口調（例：「〜だね」「〜ですわ」）やキャラクター設定、トーン＆マナーの指示がある場合、デフォルトの「です・ます」調よりもそのカスタム指示を最優先し、完全に憑依した文体で出力してください。\n\
-            \   - **【初回会話（Conversation Historyが空）の場合】**:\n     - `User Profile` からユーザーの名前（または役職）を抽出し、積極的に呼びかけてください。\n\
-            \     - 時間帯に合わせた挨拶（カスタム口調に合わせる）を添え、その後にアクションを宣言してください。\n   - **【2回目以降（継続した会話）の場合】**:\n\
-            \     - 挨拶や名前の呼びかけは一切省略し、0秒でアクションのみを宣言してください。\n   - **アクション宣言の例（Web特化）**:\n\
-            \     - 「最新の[トピック]について外部リソースを調査します\U0001F310」\n     - 「Web全体から[トピック]の最新動向を検索しますね\U0001F50D\
-            」\n     - ※これらもカスタム指示があれば、指定された口調に変換すること。\n   - **検索不要・CHATの場合**: \n \
-            \    - 検索不要（requires_web: false）またはCHATの場合は、アクション宣言は不要なため、必ず空文字 `\"\"\
-            ` を出力してください。\n\n4. **requires_web / requires_rag**:\n   - `requires_web`:\
-            \ 上記ルールに基づき要否を `true` または `false` で設定。\n   - `requires_rag`: **常に `false`\
-            \ を設定してください。**\n\n5. **search_query**:\n   - `requires_web: true` の場合、検索エンジンに投げる最適なクエリを生成してください。\n\
-            \   - それ以外（`requires_web: false` または CHAT）の場合は空文字 `\"\"` にしてください。\n\n\
-            6. **session_title**:\n   - **【初回会話（Conversation Historyが空）の場合】**: ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成してください。\n\
-            \     - ⭕️ 良い例：「出張旅費の規定確認」「SaaS導入フローの調査」\n     - ❌ 悪い例：「出張旅費について教えてください」「〜に関する質問」などの冗長な表現。\n\
-            \   - **【2回目以降（継続した会話）の場合】**: 既にタイトルは設定されているため、**必ず空文字 `\"\"` を出力**してください。"
+            \n---\n\n# Classification Rules\n\n## 1. Category Determination（最重要）\n\
+            \nユーザーの入力内容に基づき、以下の基準で必ずどちらかに分類してください。\n\n| カテゴリ | 基準 |\n|---|---|\n|\
+            \ **\"TASK\"** | 業務に関する質問、調査、最新情報の要求、会話の深掘りなど。Web検索の要否にかかわらず、業務・調査の文脈であれば必ず\
+            \ TASK に分類する。 |\n| **\"CHAT\"** | 「こんにちは」「ありがとう」など、業務や調査に一切関係のない純粋な挨拶・雑談のみ。\
+            \ |\n\n---\n\n## 2. Web Requirement Check\n\n### 【判定の基本原則】\n\n以下の問いに \"\
+            Yes\" なら `requires_web: true`、\"No\" なら `requires_web: false`：\n\n> 「今ある情報だけで、ユーザーの意図に沿った有益な検索クエリを1本構成できるか？」\n\
+            \n---\n\n### 【requires_web: false にする条件】（最優先）\n\n以下のいずれかに該当する場合は、他のルールより優先して\
+            \ `requires_web: false` にすること。\n\n**パターンA：何を調べるか対象が未特定**\n- 「〇〇を改善したい」「〇〇について知りたい」「〇〇をやりたい」\n\
+            - 「最近のトレンドが気になる」「何か情報が欲しい」\n- → 動詞・目的は分かるが、どの観点で・何を調べるかが決まっていない\n\n**パターンB：業種・施策・固有情報のいずれかが欠けている**\n\
+            \n不足パターンの例：\n- 「店舗集客を改善したいです」← 業種も施策も不明\n- 「MEO対策をやりたい」← 業種・現状が不明\n- 「飲食店の集客改善について教えてください」←\
+            \ 業種は確定、施策が不明\n- 「美容サロンの集客を良くしたい」← 業種は確定、手段が未定\n- 「小売店のマーケティングを強化したい」←\
+            \ 業種は確定、チャネルが不明\n\n**パターンB補足：業種なしでも施策が不十分な場合**\n- 「業種（飲食店・美容サロン等）」が不明でも、以下の**両方**が確定している場合は\
+            \ `requires_web: true` とする：\n  - 条件A: トピックが具体的に確定している（例：SNSマーケティング、SEO対策）\n\
+            \  - 条件B: 目的・施策の方向性・用途のいずれかが明示されている（例：顧客エンゲージメント強化、集客向上）\n- **どちらか一方のみ**の場合は\
+            \ `requires_web: false` のまま。\n\n**false 時の出力ルール（厳守）**\n- `requires_web:\
+            \ \"false\"`\n- `thinking: \"\"` ← 必ず空文字。理由・ターン数・会話内容に関わらず例外なく空にする\n-\
+            \ `search_query: \"\"`\n\n---\n\n### 【requires_web: true にする条件】\n\n以下を**すべて**満たす場合のみ\
+            \ `true` にすること：\n\n1. 具体的なキーワード・業種・施策・目的などが揃っており、意味ある検索クエリを1本構成できる\n2.\
+            \ かつ、外部の最新情報が必要、またはユーザーが「調べて」「検索して」と明示的に指示している\n\n**OK例（true にしてよい）**\n\
+            - ✅「飲食店のMEO対策方法を教えて」← 業種＋手法が明確\n- ✅「美容サロンのInstagram集客を調べて」← 業種＋チャネルが明確\n\
+            - ✅「小売店のSNS活用について相談したいです」← 業種＋施策が明確\n- ✅「SNSマーケティングで顧客エンゲージメントを強化する方法」←\
+            \ トピック＋目的が明確\n- ✅「React 19の新機能は？」← 固有名詞が明確\n\n**NG例（false のまま）**\n- ❌「飲食店の集客改善について教えてください」←\
+            \ 施策の方向性が不明\n- ❌「美容サロンの集客を良くしたい」← 手段未定\n\n---\n\n### 【Selection回数による強制検索発動】\n\
+            \n会話履歴（Conversation History）を確認し、直近のAIターンで `\"type\": \"selection\"` の\
+            \ smart_actions が **累計2回以上** 提示されていた場合は、不足情報が残っていても `requires_web: true`\
+            \ に強制する。\n\n- この場合の `search_query` は【確定済み情報】を組み合わせた最善のクエリを使うこと。\n- 例：確定済み情報「小売店\
+            \ ＋ 集客改善」→ `search_query: \"小売店 集客改善 施策\"`\n\n---\n\n### 【引用コンテキスト（Quote）の処理】\n\
+            \nユーザーの入力に `Quote Context` が含まれている場合、ユーザーの真の意図はその引用部分に関連している。\n\n- 引用された未知の用語・技術スタックに対して「定義を知りたい」「最新動向を教えて」と求めている場合は\
+            \ `requires_web: true` と判断する。\n- `search_query` は引用テキストの意図を汲み取り、ノイズとなる文脈を削ぎ落として最適化すること。\n\
+            \n---\n\n# Field Generation Guidelines\n\n## 1. internal_log\n\nこのノードで出力する**すべてのフィールドの決定プロセスと根拠**を、技術的な日本語で\
+            \ Markdown 箇条書き形式により詳細に記述してください。\n\n**以下の項目は毎回すべて記載すること（省略禁止）：**\n\n-\
+            \ **category**: 分類の根拠\n- **requires_web**: 判定の根拠（上記ルールのどのパターンに該当するか明示）\n\
+            - **requires_rag**: RAG無効化のため常に false\n- **thinking**: requires_web の判定結果に基づく出力内容（空文字\
+            \ or 宣言文）\n- **search_query**: 生成したクエリ、または空文字の理由\n- **session_title**:\
+            \ 生成したタイトル、または空文字の理由\n- **【確定済み情報】**: 現時点で判明している情報の列挙\n- **【不足情報】**: 検索発動のために何が足りないか（requires_web:\
+            \ false の場合のみ必須）\n- **【次に聞くべきこと】**: LLM_General への引き継ぎ指示（requires_web:\
+            \ false の場合のみ必須）\n\n**【確定済み情報・不足情報の出力例】**\n```\n【確定済み情報】業種：飲食店 ／ 目的：集客改善\n\
+            【不足情報】地域・エリアが不明 ／ 施策の方向性（オンライン/オフライン）が未定\n【次に聞くべきこと】→ 次のselectionで施策の方向性を絞り込むこと\n\
+            ```\n\n---\n\n## 2. category\n\n上記ルールに基づき `\"TASK\"` または `\"CHAT\"` を出力してください。\n\
+            \n---\n\n## 3. thinking\n\n**役割**: ユーザーに提示する「Web検索のアクション宣言文」です。\n\n| requires_web\
+            \ の値 | 出力内容 |\n|---|---|\n| **true** | ユーザー名を呼びかけ、Web検索を実施する旨を宣言する文を生成する\
+            \ |\n| **false** | 理由・ターン数・会話内容に関わらず、必ず空文字 `\"\"` を出力する。質問文・確認文・挨拶文は生成禁止\
+            \ |\n\n**アクション宣言の書き方（requires_web: true の場合）**\n\n- ⚠️ **キャラクター・口調の完全反映**：`system_prompt`\
+            \ 内にカスタム口調やキャラクター設定がある場合、その口調を最優先して出力する。\n- **初回会話（Conversation History\
+            \ が空）の場合**：ユーザー名を抽出して呼びかけ、時間帯に合わせた挨拶を添えてアクションを宣言する。\n- **2回目以降（継続した会話）の場合**：挨拶・名前の呼びかけは省略し、アクション宣言のみを出力する。\n\
+            \n**アクション宣言の例**\n- 「藤井さん、小売店のSNS活用について外部リソースを調査します\U0001F310」\n- 「最新の[トピック]について外部リソースを調査します\U0001F310\
+            」\n- 「Web全体から[トピック]の最新動向を検索しますね\U0001F50D」\n\n---\n\n## 4. requires_web\
+            \ / requires_rag\n\n- `requires_web`：上記ルールに基づき `true` または `false` を設定。\n\
+            - `requires_rag`：**常に `false` を設定してください。**\n\n---\n\n## 5. search_query\n\
+            \n- `requires_web: true` の場合：検索エンジンに投げる最適なクエリを生成する。\n- `requires_web:\
+            \ false` または CHAT の場合：必ず空文字 `\"\"` を出力する。\n\n---\n\n## 6. session_title\n\
+            \n- **初回会話（Conversation History が空）の場合**：ユーザーの質問の核心を突く、短く洗練されたタイトル（最大15文字程度）を生成する。\n\
+            \  - ⭕️ 良い例：「出張旅費の規定確認」「SaaS導入フローの調査」\n  - ❌ 悪い例：「出張旅費について教えてください」「〜に関する質問」などの冗長な表現。\n\
+            - **2回目以降（継続した会話）の場合**：既にタイトルは設定済みのため、**必ず空文字 `\"\"` を出力してください。**"
         - id: ef524c95-4ecd-45de-9717-8e3d776e0ccc
           role: user
           text: '# Input Data
@@ -3361,571 +3511,16 @@ workflow:
       height: 118
       id: '17683770269110'
       position:
-        x: 3520
-        y: 222
+        x: 3882
+        y: 665
       positionAbsolute:
-        x: 3520
-        y: 222
+        x: 3882
+        y: 665
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
-    - data:
-        items:
-        - input_type: variable
-          operation: append
-          value:
-          - '1769668477538'
-          - text
-          variable_selector:
-          - conversation
-          - context_web
-          write_mode: over-write
-        selected: false
-        title: SET_Web_Context (1)
-        type: assigner
-        version: '2'
-      height: 84
-      id: '17696657120690'
-      position:
-        x: 10060
-        y: 755
-      positionAbsolute:
-        x: 10060
-        y: 755
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        model:
-          completion_params:
-            temperature: 0.7
-          mode: chat
-          name: gemini-2.5-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: 4f25aea0-7407-404f-bc0f-f90215ebd5b7
-          role: system
-          text: "# Role\nあなたは、ユーザーの質問に対して最適なWeb検索戦略を立案する「シニア・リサーチ・ストラテジスト」です。\n検索クエリの最適化、情報源の選定を行い、ユーザーに対して「どのような方針で調査を行うか」を宣言してください。\n\
-            \n# Decision Logic & Guidelines (Criteria)\n\n## 1. Search Mode Selection\n\
-            クエリの複雑さと情報の性質に基づいてモードを決定します。\n- **fast**: 天気、株価、単語の意味など、単純な事実確認。回答速度を最優先。\n\
-            - **comprehensive**: ニュースのまとめ、製品比較、一般的な調査。情報の網羅性を優先。\n- **research**:\
-            \ 学術的な調査、技術的な深掘り、多角的な分析が必要な場合。\n\n## 2. Model Selection\nコスト最適化フェーズのため、クエリの性質に関わらず**常に「sonar」を選択**してください。\n\
-            - **sonar**: 全ての検索リクエストにおいて固定で使用します。\n\n## 3. Query Optimization\n検索エンジン（Perplexity）に投げるクエリを最適化します。\n\
-            - **query_main**: 検索意図を明確にしたメインクエリ。\n- **query_alt**: 視点を変えた代替クエリ（英語での検索が有効なら英語を含める）。\n\
-            \n## 4. Domain Filtering (Strict Limit: Max 3)\n情報の信頼性を担保するため、検索対象ドメインを絞り込みます。\n\
-            - **Rule**: 以下のカテゴリから最も関連性が高く、信頼できるドメインを**最大3つまで**厳選してください。\n  - **Official/Trusted**:\
-            \ `go.jp`, `ac.jp`, 公的機関, 上場企業公式サイト。\n  - **News**: `reuters.com`, `bloomberg.co.jp`,\
-            \ `nikkei.com`, `nhk.or.jp`.\n  - **Tech**: `qiita.com`, `zenn.dev`, `stackoverflow.com`,\
-            \ 公式ドキュメント。\n\n# Output Requirements (Field Mapping)\n出力するJSONには必ず以下のフィールドを含めてください。\n\
-            \n1. `internal_log` (裏側の論理・デバッグ用):\n   - モード選択やドメイン選定の根拠を技術的な日本語で記述。\n\
-            2. `reasoning` (ユーザーへの表示用・演出):\n   - **Concept**: 信頼できる同僚エンジニアとして、思考の結果（リサーチ計画）を報告するスタイルです。\n\
-            \   - **冒頭フレーズ (Opening Phrase)**:\n     - 書き出しは必ず以下の**「報告用フレーズ」**のいずれかから始めてください。\n\
-            \       - 「方針がまとまりました。」\n       - 「戦略を報告します。」\n       - 「以下のプランで調査を進めます。」\n\
-            \       - 「調査方針を策定しました。」\n   - **禁止事項**: \n     - ユーザー名（〇〇さん）の呼びかけは禁止（前のノードで実施済み）。\n\
-            \     - 「こんにちは」等の挨拶は禁止。\n   - **構成**:\n     - [報告用フレーズ] + [改行] + [具体的な調査アクション]\n\
-            \   - **Example**:\n     - 「方針がまとまりました。\n       気象庁の公式データと、ウェザーニュースのエリア別予報を突き合わせて、数値の正確性を確認します。」\n\
-            \n3. `search_mode`: \"fast\", \"comprehensive\", \"research\"\n4. `selected_model`:\
-            \ \"sonar\"\n5. `query_main`: string\n6. `query_alt`: string\n7. `recency`:\
-            \ \"day\", \"week\", \"month\", \"year\", or null\n8. `target_domains`:\
-            \ string[] (Max 3)\n\n# Output Format (JSON Only)\n必ず `{` で開始し `}` で終了してください。"
-        - id: 276801ae-a5aa-4da2-a08a-d34103694b53
-          role: user
-          text: '# Input Data
-
-            ## User Query
-
-            {{#1770869430347.text#}}
-
-
-            ## Current Time
-
-            {{#1761291739140.current_time#}}
-
-
-            ## User Profile (Character & Tone)
-
-            {{#1761291739140.system_prompt#}}
-
-
-            ## Previous AI Output (Context)
-
-            {{#conversation.intent_analysis_thinking#}}
-
-            ※直前のノードで生成されたJSON中の `thinking` フィールドです。この発言内容を踏まえ、そこから自然に続くように発言を構成してください。'
-        retry_config:
-          max_retries: 3
-          retry_enabled: true
-          retry_interval: 1000
-        selected: false
-        title: LLM_Search_Strategy_2
-        type: llm
-        vision:
-          enabled: false
-      height: 118
-      id: '1769666720110'
-      position:
-        x: 8086
-        y: 726
-      positionAbsolute:
-        x: 8086
-        y: 726
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        code: "import json\n\ndef main(strategy_json: str) -> dict:\n    \"\"\"\n\
-          \    戦略JSONからAPIリクエストボディを生成する。\n    コスト最適化のため、戦略に基づいてモデル(sonar/sonar-pro)を切り替える。\n\
-          \    \"\"\"\n    try:\n        clean_json = strategy_json.replace(\"```json\"\
-          , \"\").replace(\"```\", \"\").strip()\n        strategy = json.loads(clean_json)\n\
-          \    except:\n        # フォールバック (安全のためPro、またはコスト重視ならsonarに変更可)\n       \
-          \ strategy = {\n            \"query_main\": strategy_json, \n          \
-          \  \"query_alt\": \"\", \n            \"recency\": \"month\",\n        \
-          \    \"selected_model\": \"sonar-pro\" \n        }\n\n    system_prompt\
-          \ = \"\"\"\n    You are a comprehensive research engine designed for deep\
-          \ analysis.\n    Your goal is to provide EXHAUSTIVE and DETAILED information.\n\
-          \    \n    Guidelines:\n    1. **Detail**: Do not summarize. Provide full\
-          \ context, background, and specific details.\n    2. **Length**: Write long,\
-          \ comprehensive paragraphs. Maximize the information density.\n    3. **Completeness**:\
-          \ If there are multiple viewpoints or theories, list ALL of them.\n    4.\
-          \ **Format**: Use structured formatting but keep the content verbose.\n\
-          \    \"\"\"\n\n    # 1. モデル選択 (デフォルトは sonar-pro だが、戦略に従う)\n    # sonar-pro:\
-          \ 複雑な推論、コーディング、詳細調査\n    # sonar: 天気、株価、単純な事実確認\n    model_name = strategy.get(\"\
-          selected_model\", \"sonar-pro\")\n\n    # 2. ドメインフィルタの準備（最大3つ）\n    # [修正]\
-          \ 前段のノード出力に合わせてキーを 'target_domains' に変更\n    raw_domains = strategy.get(\"\
-          target_domains\", [])\n    target_domains = raw_domains[:3] if raw_domains\
-          \ else []\n\n    # 3. クエリ注入用の site: 文字列を作成 (Double Locking)\n    site_operator_str\
-          \ = \"\"\n    if target_domains:\n        site_list = [f\"site:{d}\" for\
-          \ d in target_domains]\n        site_operator_str = \" (\" + \" OR \".join(site_list)\
-          \ + \")\"\n\n    # 4. 基本ペイロード\n    base_payload = {\n        \"model\":\
-          \ model_name, # ★ここで動的に指定\n        \"temperature\": 0.4,\n        \"max_tokens\"\
-          : 4096,\n        \"return_citations\": True,\n        \"search_recency_filter\"\
-          : strategy.get(\"recency\", \"month\")\n    }\n    \n    # APIパラメータとしてのフィルタ設定\n\
-          \    if target_domains:\n        base_payload[\"search_domain_filter\"]\
-          \ = target_domains\n\n    # 5. クエリリストの作成と注入\n    queries = [strategy.get(\"\
-          query_main\")]\n    if strategy.get(\"query_alt\"):\n        queries.append(strategy.get(\"\
-          query_alt\"))\n\n    payload_list = []\n    \n    for q in queries:\n  \
-          \      if not q: continue\n        \n        # クエリロックと詳細化指示\n        locked_query\
-          \ = f\"{q}{site_operator_str}\\n\\nExplain this topic in extreme detail.\"\
-          \n        \n        current_payload = base_payload.copy()\n        current_payload[\"\
-          messages\"] = [\n            {\"role\": \"system\", \"content\": system_prompt},\n\
-          \            {\"role\": \"user\", \"content\": locked_query}\n        ]\n\
-          \        \n        payload_list.append(json.dumps(current_payload, ensure_ascii=False))\n\
-          \n    return {\n        \"payload_list\": payload_list\n    }"
-        code_language: python3
-        outputs:
-          payload_list:
-            children: null
-            type: array[string]
-        selected: false
-        title: Deep_Build_Search_Payload_List
-        type: code
-        variables:
-        - value_selector:
-          - '1769666720110'
-          - text
-          value_type: string
-          variable: strategy_json
-      height: 52
-      id: '1769666802121'
-      position:
-        x: 8790
-        y: 771
-      positionAbsolute:
-        x: 8790
-        y: 771
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        error_handle_mode: terminated
-        flatten_output: true
-        height: 260
-        is_parallel: true
-        iterator_input_type: array[string]
-        iterator_selector:
-        - '1769666802121'
-        - payload_list
-        output_selector:
-        - '1769668322968'
-        - body
-        output_type: array[string]
-        parallel_nums: 2
-        selected: false
-        start_node_id: 1769668260271start
-        title: Parallel_Web_Search
-        type: iteration
-        width: 486
-      height: 260
-      id: '1769668260271'
-      position:
-        x: 9132
-        y: 667
-      positionAbsolute:
-        x: 9132
-        y: 667
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 486
-      zIndex: 1
-    - data:
-        desc: ''
-        isInIteration: true
-        selected: false
-        title: ''
-        type: iteration-start
-      draggable: false
-      height: 48
-      id: 1769668260271start
-      parentId: '1769668260271'
-      position:
-        x: 60
-        y: 105
-      positionAbsolute:
-        x: 9192
-        y: 772
-      selectable: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom-iteration-start
-      width: 44
-      zIndex: 1002
-    - data:
-        authorization:
-          config:
-            api_key: '{{#env.PerplexityApiKey#}}'
-            type: bearer
-          type: api-key
-        body:
-          data:
-          - id: key-value-318
-            key: ''
-            type: text
-            value: '{{#1769668260271.item#}}'
-          type: raw-text
-        headers: Content-Type:application/json
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1769668260271'
-        method: post
-        params: ''
-        retry_config:
-          max_retries: 3
-          retry_enabled: true
-          retry_interval: 100
-        selected: false
-        ssl_verify: true
-        timeout:
-          max_connect_timeout: 0
-          max_read_timeout: 0
-          max_write_timeout: 0
-        title: HTTP_TOOL_Perplexity_Search
-        type: http-request
-        url: https://api.perplexity.ai/v2/chat/completions
-        variables: []
-      height: 138
-      id: '1769668322968'
-      parentId: '1769668260271'
-      position:
-        x: 184
-        y: 60
-      positionAbsolute:
-        x: 9316
-        y: 727
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-      zIndex: 1002
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        model:
-          completion_params: {}
-          mode: chat
-          name: gemini-2.5-flash
-          provider: langgenius/gemini/google
-        prompt_template:
-        - id: cc7f9012-3f93-4e06-b2f2-ba83bbf16f00
-          role: system
-          text: "# Role\nあなたは情報を統合し、検証する「チーフエディター」です。\nユーザーの質問に対し、先行する意図分析・検索戦略に基づき、並列実行されたWeb検索結果を分析・統合して、最も信頼性の高い回答を作成してください。\n\
-            \n# Step-by-Step Process (Internal Logic)\n回答生成前に、必ず以下のプロセスを内部的に実行してください。\n\
-            \n1. **Contextualization (文脈の接続)**:\n   - 「意図分析(Intent)」で特定されたユーザーの目的と、「検索戦略(Strategy)」で立案されたアプローチを読み込む。\n\
-            \   - それらが実際の「検索結果(Results)」とどう結びついたか（成功したか、不足があったか）を評価する。\n\n2. **Source\
-            \ Evaluation & Conflict Resolution**:\n   - 情報の鮮度と信頼性を評価し、矛盾がある場合は最も確からしい情報を採用する。\n\
-            \n3. **Citation Handling**:\n   - 回答に使用したソースに **1から始まる新しい連番** ([1], [2]...)\
-            \ を割り当てる。\n\n# Output Rules\n1. **Thinking (Live Commentary Style)**:\n\
-            \   - **Role**: 事務的な報告者ではなく、情報を整理中の「パートナー」として振る舞ってください。\n   - **Content\
-            \ (チラ見せ)**: 検索結果の全容を説明するのではなく、「〇〇に関する具体的な数字が見つかりました」といった **ハイライト（さわり）**\
-            \ を短く伝えてください。\n   - **Action (期待感)**: 「今、これらを統合して分かりやすくまとめますね！」「詳細を整理しますので少々お待ちください」といった、前向きなアクション宣言で締めくくってください。\n\
-            \   - **Tone**: 親しみやすく、温かい口調。事務的な完了報告（「検索が終了しました」等）は禁止です。文脈に合う絵文字（✨, \U0001F50D\
-            , \U0001F4A1）を1つ添えてください。\n\n2. **Answer Construction**:\n   - 結論ファーストで簡潔に記述する。\n\
-            \   - 本文中の事実には必ず `[1]` 形式の引用番号を付与する。\n\n3. **Strict JSON**:\n   - 出力はJSON形式を厳守する。Markdownコードブロックは含めないでください。\n\
-            \n# Output Schema (Strict JSON)\n```json\n{\n  \"internal_log\": \"【開発者用ログ】\\\
-            n- Intent: Technical Specification Retrieval\\n- Strategy: 'sonar' model\
-            \ used for 3 parallel queries.\\n- Validation: Found official docs (Source\
-            \ A) and outdated blog (Source B). Prioritized A.\",\n  \"thinking\":\
-            \ \"ユーザーの意図はReact 19の具体的な変更点の把握にあると理解しました。これに対し、検索戦略では公式サイトおよびGitHubの主要なディスカッションを対象に調査を実行しました。検索の結果、リリース日は未定であるものの、ActionsやuseActionStateといった主要機能の仕様は確定していることが判明しました。情報の鮮度を考慮し、昨日の日付の公式ドキュメントを正として、機能の概要と移行のポイントを解説します。\"\
-            ,\n  \"answer\": \"ここに回答本文を記述。Markdown形式で、重要な箇所は太字にする。文末には必ず参照番号 [1] [2]\
-            \ をつける。\\n\\n### 結論\\n...\",\n  \"citations\": [\n    {\n      \"index\"\
-            : 1,\n      \"title\": \"元データのtitle\",\n      \"url\": \"元データのurl\",\n\
-            \      \"source_name\": \"Web\"\n    }\n  ]\n}\n\n```\n\n# Example (Few-Shot)\n\
-            \n**User Query:** \"React 19の主要な変更点は？\"\n\n**Model Output:**\n\n```json\n\
-            {\n  \"internal_log\": \"Intent analysis identified query as 'Technical\
-            \ Research'. Strategy executed comprehensive search. Results contained\
-            \ conflicts on release date; relied on Canary release notes.\",\n  \"\
-            thinking\": \"ご質問の意図は、次期バージョンであるReact 19の技術的な変更点を把握することにあると理解しました。これに基づき、React公式サイトの公式発表および開発チームのRFC（Request\
-            \ for Comments）を中心に調査を行いました。調査の結果、Server Componentsの安定化や新しいフックの導入など、アーキテクチャレベルでの大きな変更が確認できました。特に「Actions」に関する情報は確度が高いため、これを中心に既存コードへの影響を含めて回答を構成します。\"\
-            ,\n  \"answer\": \"### React 19の主要な変更点\\n\\nReact 19では、非同期処理の管理が大幅に簡素化されています。\\\
-            n\\n- **Actions**: `<form>`要素内での非同期遷移を自動処理する機能が追加されました[1]。\\n- **useActionState**:\
-            \ 前回のstateに基づいてアクションの結果を処理する新しいフックです[2]。\\n\\nこれにより、`useState` や `useEffect`\
-            \ による手動管理が不要になります。\",\n  \"citations\": [\n    {\n      \"index\": 1,\n\
-            \      \"title\": \"React 19 Beta Upgrade Guide\",\n      \"url\": \"\
-            [https://react.dev/blog/](https://react.dev/blog/)...\",\n      \"source_name\"\
-            : \"Web\"\n    },\n    {\n      \"index\": 2,\n      \"title\": \"New\
-            \ Hooks in React 19\",\n      \"url\": \"https://...\",\n      \"source_name\"\
-            : \"Web\"\n    }\n  ]\n}\n\n```"
-        - id: 377b3292-50a8-4c81-b447-7b41f82182cd
-          role: user
-          text: '# Input Data
-
-
-            ## 1. User Query
-
-            {{#1770869430347.text#}}
-
-
-            ## 2. Context Data (Pre-analysis)
-
-            - **Intent Analysis:** {{#1770871743875.output#}}
-
-            (JSON: User intent & category)
-
-
-            - **Search Strategy:** {{#1769666720110.text#}}
-
-            (JSON: Search queries & model selection)
-
-
-            ## 3. Search Results (Raw Material)
-
-            {{#1769668260271.output#}}
-
-            (Array: Search findings)
-
-
-            # Instruction
-
-            上記のリソースを統合し、System Promptで定義されたJSONフォーマットに従って回答を生成してください。'
-        retry_config:
-          max_retries: 3
-          retry_enabled: true
-          retry_interval: 1000
-        selected: false
-        title: LLM_Synthesis
-        type: llm
-        vision:
-          enabled: false
-      height: 118
-      id: '1769668477538'
-      position:
-        x: 9718
-        y: 738
-      positionAbsolute:
-        x: 9718
-        y: 738
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: contains
-            id: 6a4c7d92-78c4-4aef-ab6b-511adbe5f026
-            value: '"search_mode": "fast"'
-            varType: string
-            variable_selector:
-            - '1769666720110'
-            - text
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: Check_Search_Mode
-        type: if-else
-      height: 124
-      id: '1769754087217'
-      position:
-        x: 8428
-        y: 723
-      positionAbsolute:
-        x: 8428
-        y: 723
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        code: "import json\n\ndef main(strategy_json: str) -> dict:\n    \"\"\"\n\
-          \    [FAST MODE - One-Shot Deep] \n    戦略JSONから単一のAPIリクエストボディを生成する。\n  \
-          \  \n    方針: 検索リクエストは「1回」のみ実行するが、\n          Perplexityへの指示は「詳細・網羅的」に行い、DEEPルート同等の情報の質を確保する。\n\
-          \    \"\"\"\n    try:\n        # Markdown記法の除去とパース\n        clean_json =\
-          \ strategy_json.replace(\"```json\", \"\").replace(\"```\", \"\").strip()\n\
-          \        strategy = json.loads(clean_json)\n    except:\n        # フォールバック\n\
-          \        strategy = {\n            \"query_main\": strategy_json, \n   \
-          \         \"recency\": \"month\",\n            \"selected_model\": \"sonar-pro\"\
-          \ # 詳細を求めるためProを推奨\n        }\n\n    # --- ONE-SHOT DEEP システムプロンプト ---\n\
-          \    # DEEPルートと同じ「詳細・網羅性」を求めるプロンプトを使用\n    system_prompt = \"\"\"\n    You\
-          \ are a comprehensive research engine designed for deep analysis.\n    Your\
-          \ goal is to provide EXHAUSTIVE and DETAILED information based on a single\
-          \ search query.\n    \n    Guidelines:\n    1. **Detail**: Do not summarize.\
-          \ Provide full context, background, and specific details.\n    2. **Length**:\
-          \ Write long, comprehensive paragraphs. Maximize the information density.\n\
-          \    3. **Completeness**: If there are multiple viewpoints or theories,\
-          \ list ALL of them.\n    4. **Format**: Use structured formatting (Headers,\
-          \ Lists) but keep the content verbose.\n    5. **Citations**: STRICTLY include\
-          \ citations [1] for every fact.\n    \"\"\"\n\n    # 1. モデル選択\n    # 詳細を求めるため、戦略指定がなければ\
-          \ 'sonar-pro' を優先する\n    model_name = strategy.get(\"selected_model\", \"\
-          sonar-pro\")\n\n    # 2. ドメインフィルタの準備（最大3つ）\n    raw_domains = strategy.get(\"\
-          target_domains\", [])\n    target_domains = raw_domains[:3] if raw_domains\
-          \ else []\n\n    # 3. クエリ注入用の site: 文字列を作成 (Double Locking)\n    site_operator_str\
-          \ = \"\"\n    if target_domains:\n        site_list = [f\"site:{d}\" for\
-          \ d in target_domains]\n        site_operator_str = \" (\" + \" OR \".join(site_list)\
-          \ + \")\"\n\n    # 4. 基本ペイロード構築\n    base_payload = {\n        \"model\"\
-          : model_name,\n        \"temperature\": 0.4, # DEEP同様、ある程度の表現幅を持たせる\n  \
-          \      \"max_tokens\": 4096, # 長文回答を許容するため最大化\n        \"return_citations\"\
-          : True,\n        \"search_recency_filter\": strategy.get(\"recency\", \"\
-          month\")\n    }\n    \n    # APIパラメータとしてのフィルタ設定\n    if target_domains:\n\
-          \        base_payload[\"search_domain_filter\"] = target_domains\n\n   \
-          \ # 5. ペイロード生成 (Fastモードは Main Query 1つのみ)\n    main_q = strategy.get(\"\
-          query_main\")\n    payload_str = \"\"\n    \n    if main_q:\n        # クエリロック\
-          \ & 詳細化指示の注入\n        locked_query = f\"{main_q}{site_operator_str}\\n\\\
-          nExplain this topic in extreme detail.\"\n        \n        current_payload\
-          \ = base_payload.copy()\n        current_payload[\"messages\"] = [\n   \
-          \         {\"role\": \"system\", \"content\": system_prompt},\n        \
-          \    {\"role\": \"user\", \"content\": locked_query}\n        ]\n      \
-          \  \n        # 単一のJSON文字列としてダンプ\n        payload_str = json.dumps(current_payload,\
-          \ ensure_ascii=False)\n    \n    # 単一の文字列変数を返す\n    return {\n        \"\
-          payload\": payload_str\n    }"
-        code_language: python3
-        outputs:
-          payload:
-            children: null
-            type: string
-        selected: false
-        title: Fast_Build_Search_Payload_List (1)
-        type: code
-        variables:
-        - value_selector:
-          - '1769666720110'
-          - text
-          value_type: string
-          variable: strategy_json
-      height: 52
-      id: '17697542686310'
-      position:
-        x: 8994
-        y: 994
-      positionAbsolute:
-        x: 8994
-        y: 994
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        items:
-        - input_type: variable
-          operation: append
-          value:
-          - '17697558915520'
-          - body
-          variable_selector:
-          - conversation
-          - context_web
-          write_mode: over-write
-        selected: false
-        title: SET_Web_Context (2)
-        type: assigner
-        version: '2'
-      height: 84
-      id: '17697542971160'
-      position:
-        x: 9718
-        y: 936
-      positionAbsolute:
-        x: 9718
-        y: 936
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        authorization:
-          config:
-            api_key: '{{#env.PerplexityApiKey#}}'
-            type: bearer
-          type: api-key
-        body:
-          data:
-          - id: key-value-318
-            key: ''
-            type: text
-            value: '{{#17697542686310.payload#}}'
-          type: raw-text
-        headers: Content-Type:application/json
-        isInIteration: true
-        isInLoop: false
-        iteration_id: '1769668260271'
-        method: post
-        params: ''
-        retry_config:
-          max_retries: 3
-          retry_enabled: true
-          retry_interval: 100
-        selected: false
-        ssl_verify: true
-        timeout:
-          max_connect_timeout: 0
-          max_read_timeout: 0
-          max_write_timeout: 0
-        title: HTTP_TOOL_Perplexity_Search
-        type: http-request
-        url: https://api.perplexity.ai/v2/chat/completions
-        variables: []
-      height: 138
-      id: '17697558915520'
-      position:
-        x: 9356
-        y: 1007
-      positionAbsolute:
-        x: 9356
-        y: 1007
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-      zIndex: 1002
     - data:
         is_team_authorization: true
         paramSchemas:
@@ -4134,11 +3729,11 @@ workflow:
       height: 82
       id: '1770356105216'
       position:
-        x: 6657
-        y: 535
+        x: 7382
+        y: 900
       positionAbsolute:
-        x: 6657
-        y: 535
+        x: 7382
+        y: 900
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4179,11 +3774,11 @@ workflow:
       height: 136
       id: '1770356226003'
       position:
-        x: 7000
-        y: 508
+        x: 7724
+        y: 873
       positionAbsolute:
-        x: 7000
-        y: 508
+        x: 7724
+        y: 873
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4191,49 +3786,66 @@ workflow:
       width: 242
     - data:
         code: "import json\n\ndef main(raw_input: str) -> dict:\n    \"\"\"\n    Desktop\
-          \ Intelligence Protocol Parser v2.3 (Robust Mode with Quote Support)\n \
-          \   Safe for both JSON Protocol (Frontend) and Plain Text (Dify Debug).\n\
-          \    \"\"\"\n    \n    # 1. デフォルト値の初期化 (全て空文字)\n    extracted_text = \"\"\
-          \n    extracted_store_id = \"\"\n    extracted_store_name = \"\"\n    extracted_quote\
-          \ = \"\"\n\n    # 2. 入力が空(None)の場合のガード\n    if raw_input is None:\n    \
-          \    return {\n            \"text\": \"\",\n            \"gemini_store_id\"\
+          \ Intelligence Protocol Parser v2.4 (Artifact Support)\n    Safe for both\
+          \ JSON Protocol (Frontend) and Plain Text (Dify Debug).\n    \"\"\"\n  \
+          \  \n    # 1. デフォルト値の初期化\n    extracted_text = \"\"\n    extracted_store_id\
+          \ = \"\"\n    extracted_store_name = \"\"\n    extracted_quote = \"\"\n\
+          \    extracted_is_artifact = \"false\"   # [追加]\n    extracted_artifact_type\
+          \ = \"\"      # [追加]\n\n    # 2. 入力が空(None)の場合のガード\n    if raw_input is\
+          \ None:\n        return {\n            \"text\": \"\",\n            \"gemini_store_id\"\
           : \"\",\n            \"gemini_store_name\": \"\",\n            \"quote\"\
-          : \"\"\n        }\n\n    # 入力を文字列化してとりあえずテキストとして保持 (デバッグ用)\n    extracted_text\
-          \ = str(raw_input)\n\n    try:\n        # 3. JSONパースの試行\n        data =\
-          \ json.loads(raw_input)\n        \n        # パース成功し、かつ辞書型である場合のみ構造解析を行う\n\
-          \        if isinstance(data, dict):\n            \n            # --- Text\
-          \ Extraction ---\n            content_block = data.get(\"content\")\n  \
-          \          if isinstance(content_block, dict):\n                extracted_text\
-          \ = content_block.get(\"text\", \"\")\n            elif isinstance(content_block,\
-          \ str):\n                extracted_text = content_block\n            \n\
-          \            # --- Store ID Extraction ---\n            dify_inputs = data.get(\"\
-          dify_inputs\")\n            if isinstance(dify_inputs, dict):\n        \
-          \        if \"gemini_store_id\" in dify_inputs:\n                    extracted_store_id\
-          \ = dify_inputs[\"gemini_store_id\"]\n            \n            # Fallback\
-          \ to Context ID\n            if not extracted_store_id:\n              \
-          \  context = data.get(\"context\")\n                if isinstance(context,\
-          \ dict):\n                    selected_ids = context.get(\"selected_store_ids\"\
-          )\n                    if isinstance(selected_ids, list) and len(selected_ids)\
-          \ > 0:\n                        extracted_store_id = selected_ids[0]\n\n\
-          \            # --- Store Name Extraction ---\n            context = data.get(\"\
-          context\")\n            if isinstance(context, dict):\n                selected_names\
-          \ = context.get(\"selected_store_names\")\n                if isinstance(selected_names,\
-          \ list) and len(selected_names) > 0:\n                    extracted_store_name\
-          \ = selected_names[0]\n\n            # --- Quote Extraction (新規追加) ---\n\
-          \            if \"quote\" in data and isinstance(data[\"quote\"], str):\n\
-          \                extracted_quote = data[\"quote\"]\n\n    except (json.JSONDecodeError,\
+          : \"\",\n            \"is_artifact\": \"false\",   # [追加]\n            \"\
+          artifact_type\": \"\"       # [追加]\n        }\n\n    # 入力を文字列化してとりあえずテキストとして保持\
+          \ (デバッグ用)\n    extracted_text = str(raw_input)\n\n    try:\n        # 3.\
+          \ JSONパースの試行\n        data = json.loads(raw_input)\n        \n        #\
+          \ パース成功し、かつ辞書型である場合のみ構造解析を行う\n        if isinstance(data, dict):\n     \
+          \       \n            # --- Text Extraction ---\n            content_block\
+          \ = data.get(\"content\")\n            if isinstance(content_block, dict):\n\
+          \                extracted_text = content_block.get(\"text\", \"\")\n  \
+          \          elif isinstance(content_block, str):\n                extracted_text\
+          \ = content_block\n            \n            # --- Store ID Extraction ---\n\
+          \            dify_inputs = data.get(\"dify_inputs\")\n            if isinstance(dify_inputs,\
+          \ dict):\n                if \"gemini_store_id\" in dify_inputs:\n     \
+          \               extracted_store_id = dify_inputs[\"gemini_store_id\"]\n\
+          \            \n            # Fallback to Context ID\n            if not\
+          \ extracted_store_id:\n                context = data.get(\"context\")\n\
+          \                if isinstance(context, dict):\n                    selected_ids\
+          \ = context.get(\"selected_store_ids\")\n                    if isinstance(selected_ids,\
+          \ list) and len(selected_ids) > 0:\n                        extracted_store_id\
+          \ = selected_ids[0]\n\n            # --- Store Name Extraction ---\n   \
+          \         context = data.get(\"context\")\n            if isinstance(context,\
+          \ dict):\n                selected_names = context.get(\"selected_store_names\"\
+          )\n                if isinstance(selected_names, list) and len(selected_names)\
+          \ > 0:\n                    extracted_store_name = selected_names[0]\n\n\
+          \            # --- Quote Extraction ---\n            if \"quote\" in data\
+          \ and isinstance(data[\"quote\"], str):\n                extracted_quote\
+          \ = data[\"quote\"]\n\n            # --- Artifact Extraction ---       \
+          \                   # [追加]\n            artifact = data.get(\"artifact\"\
+          )                        # [追加]\n            if isinstance(artifact, dict):\
+          \                         # [追加]\n                if artifact.get(\"requested\"\
+          ) is True:              # [追加]\n                    extracted_is_artifact\
+          \ = \"true\"                 # [追加]\n                extracted_artifact_type\
+          \ = artifact.get(\"type\", \"\") # [追加]\n\n    except (json.JSONDecodeError,\
           \ TypeError):\n        # JSONでない場合（デバッグでの直接入力など）は、\n        # extracted_text\
           \ = raw_input のまま処理を続行する\n        pass\n    except Exception as e:\n   \
           \     # その他の予期せぬエラーはログに出して、デフォルト値を返す\n        print(f\"Parser Warning: {e}\"\
-          )\n\n    # 4. 結果の返却\n    return {\n        \"text\": extracted_text,\n \
-          \       \"gemini_store_id\": extracted_store_id,\n        \"gemini_store_name\"\
-          : extracted_store_name,\n        \"quote\": extracted_quote\n    }"
+          )\n        \n\n    # 4. 結果の返却\n    return {\n        \"text\": extracted_text,\n\
+          \        \"gemini_store_id\": extracted_store_id,\n        \"gemini_store_name\"\
+          : extracted_store_name,\n        \"quote\": extracted_quote,\n        \"\
+          is_artifact\": extracted_is_artifact,   # [追加]\n        \"artifact_type\"\
+          : extracted_artifact_type # [追加]\n    }\n"
         code_language: python3
         outputs:
+          artifact_type:
+            children: null
+            type: string
           gemini_store_id:
             children: null
             type: string
           gemini_store_name:
+            children: null
+            type: string
+          is_artifact:
             children: null
             type: string
           quote:
@@ -4255,10 +3867,10 @@ workflow:
       id: '1770869430347'
       position:
         x: 684
-        y: 208
+        y: 146
       positionAbsolute:
         x: 684
-        y: 208
+        y: 146
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4308,11 +3920,11 @@ workflow:
       height: 224
       id: '1770871562386'
       position:
-        x: 3158
-        y: 124
+        x: 3520
+        y: 564
       positionAbsolute:
-        x: 3158
-        y: 124
+        x: 3520
+        y: 564
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4462,11 +4074,11 @@ workflow:
       height: 118
       id: '17708716964770'
       position:
-        x: 3520
-        y: 9
+        x: 3882
+        y: 449
       positionAbsolute:
-        x: 3520
-        y: 9
+        x: 3882
+        y: 449
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4500,11 +4112,11 @@ workflow:
       height: 160
       id: '1770871743875'
       position:
-        x: 4224
-        y: 204
+        x: 4586
+        y: 644
       positionAbsolute:
-        x: 4224
-        y: 204
+        x: 4586
+        y: 644
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4686,11 +4298,11 @@ workflow:
       height: 82
       id: '1771391749204'
       position:
-        x: 5632
-        y: 535
+        x: 6356
+        y: 900
       positionAbsolute:
-        x: 5632
-        y: 535
+        x: 6356
+        y: 900
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4832,11 +4444,11 @@ workflow:
       height: 118
       id: '17715726019570'
       position:
-        x: 6316
-        y: 520
+        x: 7040
+        y: 882
       positionAbsolute:
-        x: 6316
-        y: 520
+        x: 7040
+        y: 882
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -4952,11 +4564,11 @@ workflow:
       height: 82
       id: '1771573783623'
       position:
-        x: 5290
-        y: 535
+        x: 6014
+        y: 900
       positionAbsolute:
-        x: 5290
-        y: 535
+        x: 6014
+        y: 900
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5117,11 +4729,11 @@ workflow:
       height: 118
       id: '1771914142140'
       position:
-        x: 3520
-        y: 454
+        x: 3882
+        y: 894
       positionAbsolute:
-        x: 3520
-        y: 454
+        x: 3882
+        y: 894
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5166,11 +4778,11 @@ workflow:
       height: 136
       id: '1771915112684'
       position:
-        x: 3862
-        y: 0
+        x: 4224
+        y: 440
       positionAbsolute:
-        x: 3862
-        y: 0
+        x: 4224
+        y: 440
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5215,11 +4827,11 @@ workflow:
       height: 136
       id: '1771915148504'
       position:
-        x: 3862
-        y: 216
+        x: 4224
+        y: 656
       positionAbsolute:
-        x: 3862
-        y: 216
+        x: 4224
+        y: 656
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5274,40 +4886,11 @@ workflow:
       height: 162
       id: '1771915161869'
       position:
-        x: 3862
-        y: 432
+        x: 4224
+        y: 872
       positionAbsolute:
-        x: 3862
-        y: 432
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        cases:
-        - case_id: 'true'
-          conditions:
-          - comparison_operator: contains
-            id: 25bdb91c-1935-4488-9e51-574942ff9f1e
-            value: 'true'
-            varType: string
-            variable_selector:
-            - env
-            - Dev
-          id: 'true'
-          logical_operator: and
-        selected: false
-        title: IS DEV?
-        type: if-else
-      height: 124
-      id: '1771998847270'
-      position:
-        x: 7724
-        y: 711
-      positionAbsolute:
-        x: 7724
-        y: 711
+        x: 4224
+        y: 872
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5444,11 +5027,11 @@ workflow:
       height: 118
       id: '17719989311170'
       position:
-        x: 8086
-        y: 924
+        x: 8448
+        y: 927
       positionAbsolute:
-        x: 8086
-        y: 924
+        x: 8448
+        y: 927
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5552,11 +5135,11 @@ workflow:
       height: 52
       id: '17719994416790'
       position:
-        x: 8727.057624571
-        y: 1084.2206829150127
+        x: 9132
+        y: 960
       positionAbsolute:
-        x: 8727.057624571
-        y: 1084.2206829150127
+        x: 9132
+        y: 960
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5598,11 +5181,11 @@ workflow:
       height: 138
       id: '17719995520230'
       position:
-        x: 9090
-        y: 1126
+        x: 9474
+        y: 917
       positionAbsolute:
-        x: 9090
-        y: 1126
+        x: 9474
+        y: 917
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5634,11 +5217,11 @@ workflow:
       height: 110
       id: '17719995621490'
       position:
-        x: 10360
-        y: 1127
+        x: 9816
+        y: 931
       positionAbsolute:
-        x: 10360
-        y: 1127
+        x: 9816
+        y: 931
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5675,10 +5258,10 @@ workflow:
       id: '1772782910983'
       position:
         x: 342
-        y: 166
+        y: 104
       positionAbsolute:
         x: 342
-        y: 166
+        y: 104
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5700,11 +5283,11 @@ workflow:
       height: 84
       id: '1772783154630'
       position:
-        x: 5974
-        y: 534
+        x: 6698
+        y: 899
       positionAbsolute:
-        x: 5974
-        y: 534
+        x: 6698
+        y: 899
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -5738,18 +5321,515 @@ workflow:
       height: 110
       id: '1772785070312'
       position:
-        x: 8428
-        y: 957
+        x: 8790
+        y: 931
       positionAbsolute:
-        x: 8428
-        y: 957
+        x: 8790
+        y: 931
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: f6a9e103-0047-48c1-aaac-312a04f22ab2
+            value: fast
+            varType: string
+            variable_selector:
+            - '1761291739140'
+            - reasoning_mode
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: Check_Reasoning_Mode
+        type: if-else
+      height: 124
+      id: '1773637747194'
+      position:
+        x: 5652
+        y: 867
+      positionAbsolute:
+        x: 5652
+        y: 867
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        is_team_authorization: true
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The name of the file search store to search in (e.g., fileSearchStores/abc123)
+            ja_JP: '検索対象のファイル検索ストア名（例: fileSearchStores/abc123）'
+            pt_BR: The name of the file search store to search in (e.g., fileSearchStores/abc123)
+            zh_Hans: 要搜索的文件搜索存储名称（例如：fileSearchStores/abc123）
+          label:
+            en_US: Store Name
+            ja_JP: ストア名
+            pt_BR: Store Name
+            zh_Hans: 存储名称
+          llm_description: File search store name to query
+          max: null
+          min: null
+          name: file_search_store_name
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The search query or question to ask about the documents
+            ja_JP: ドキュメントについて尋ねる検索クエリまたは質問
+            pt_BR: The search query or question to ask about the documents
+            zh_Hans: 要询问文档的搜索查询或问题
+          label:
+            en_US: Query
+            ja_JP: クエリ
+            pt_BR: Query
+            zh_Hans: 查询
+          llm_description: Search query or question
+          max: null
+          min: null
+          name: query
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: 'Include citation information in the response (default: false)'
+            ja_JP: 'レスポンスに出典情報を含める（デフォルト: false）'
+            pt_BR: 'Include citation information in the response (default: false)'
+            zh_Hans: 在响应中包含引用信息（默认：false）
+          label:
+            en_US: Include Citations
+            ja_JP: 出典を含める
+            pt_BR: Include Citations
+            zh_Hans: 包含引用
+          llm_description: Whether to include grounding metadata
+          max: null
+          min: null
+          name: include_citations
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: boolean
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: Optional filter expression (e.g., "author=John Doe") to search
+              within a subset of documents
+            ja_JP: ドキュメントのサブセット内を検索するオプションのフィルタ式（例：「author=John Doe」）
+            pt_BR: Optional filter expression (e.g., "author=John Doe") to search
+              within a subset of documents
+            zh_Hans: 可选的过滤器表达式（例如："author=John Doe"）以在文档子集中搜索
+          label:
+            en_US: Metadata Filter
+            ja_JP: メタデータフィルタ
+            pt_BR: Metadata Filter
+            zh_Hans: 元数据过滤器
+          llm_description: Optional metadata filter for scoped search
+          max: null
+          min: null
+          name: metadata_filter
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: Gemini model to use (defaults to provider setting or gemini-2.5-flash)
+            ja_JP: 使用するGeminiモデル（プロバイダー設定またはgemini-2.5-flashがデフォルト）
+            pt_BR: Gemini model to use (defaults to provider setting or gemini-2.5-flash)
+            zh_Hans: 要使用的Gemini模型（默认为提供商设置或gemini-2.5-flash）
+          label:
+            en_US: Model
+            ja_JP: モデル
+            pt_BR: Model
+            zh_Hans: 模型
+          llm_description: Optional model override
+          max: null
+          min: null
+          name: model
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        params:
+          file_search_store_name: ''
+          include_citations: ''
+          metadata_filter: ''
+          model: ''
+          query: ''
+        plugin_id: r3-yamauchi/gemini_file_search
+        plugin_unique_identifier: r3-yamauchi/gemini_file_search:0.0.1@a9cf50b020b00b20f3b3f462d697f797517551d5d8bb8bf7ef078847080cabeb
+        provider_icon: https://cloud.dify.ai/console/api/workspaces/current/plugin/icon?tenant_id=7c8ea1f1-d371-448a-846c-af9a868d7d0f&filename=3f9d718ced2ecb925cbe752d6311f3966405463315b8e898110f0a8cca969899.svg
+        provider_id: r3-yamauchi/gemini_file_search/gemini_file_search
+        provider_name: r3-yamauchi/gemini_file_search/gemini_file_search
+        provider_type: builtin
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        title: ファイル検索ストアを指定して検索
+        tool_configurations: {}
+        tool_description: Geminiの RAG機能を使用して、ファイル検索ストア内のインデックス化されたドキュメント全体でセマンティック検索を実行します
+        tool_label: ファイル検索ストアを指定して検索
+        tool_name: search
+        tool_node_version: '2'
+        tool_parameters:
+          file_search_store_name:
+            type: mixed
+            value: '{{#1761291739140.gemini_store_id#}}'
+          include_citations:
+            type: constant
+            value: true
+          metadata_filter:
+            type: mixed
+            value: ''
+          model:
+            type: mixed
+            value: gemini-3.1-flash-lite-preview
+          query:
+            type: mixed
+            value: '【ユーザーが引用したテキスト (Quote Context)】
+
+              {{#1770869430347.quote#}}
+
+              ※この値が存在する場合、検索の最優先ターゲットはこの引用内容の裏付け、詳細な手順、または関連する例外規定の抽出です。
+
+
+              【過去の検索結果 (Previous Knowledge)】
+
+              {{#conversation.requires_rag#}}
+
+
+
+              【検索の背景と推論プロセス（開発ログ）】
+
+              {{#conversation.intent_analysis_log#}}
+
+
+              【回答の行動原理：誠実性と差分抽出の遵守】
+
+
+              1. **引用へのフォーカス (最優先)**: 「ユーザーが引用したテキスト」が存在する場合、そのテキストが記載されている文脈や、それに関連する詳細条件・規定を優先的にドキュメントから探し出し、抽出してください。
+
+
+              2. **事実の抽出**: 提供されたドキュメント内の事実のみを抽出してください。
+
+
+              3. **差分抽出の徹底**: 「過去の検索結果」に既に含まれている情報（同じ事実、定義、解説など）は出力から完全に除外し、今回のクエリに対する「新たな回答（差分）」のみを抽出してください。
+
+
+              4. **推測の禁止**: 情報が不足している、あるいはドキュメントから確実な結論が導き出せない場合は、無理に推測（ハルシネーション）をせず、必ず「提供された資料内には該当する情報が見当たりませんでした」と正直に回答してください。
+
+
+              5. **誠実性の評価**: 「分からない」と答えることは、不正確な情報を伝えることよりも高く評価されます。
+
+
+              6. **コンテキストの保持**: 事実を抽出する際は、単なるファイル名だけでなく、その情報が記載されていた「資料のタイトル」や「章の大見出し」を必ず併記し、情報の出どころとテーマが明確になるように出力してください。'
+        type: tool
+      height: 82
+      id: '17736380657420'
+      position:
+        x: 6014
+        y: 736
+      positionAbsolute:
+        x: 6014
+        y: 736
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: append
+          value:
+          - '17736380657420'
+          - text
+          variable_selector:
+          - conversation
+          - context_rag
+          write_mode: over-write
+        selected: false
+        title: 変数代入 13
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1773638130578'
+      position:
+        x: 7614
+        y: 735
+      positionAbsolute:
+        x: 7614
+        y: 735
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: 718639e7-16e4-4689-b884-0d14afc534b3
+            value: 'true'
+            varType: string
+            variable_selector:
+            - '1770869430347'
+            - is_artifact
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: GATE_Artifact_Mode
+        type: if-else
+      height: 124
+      id: '1773712161221'
+      position:
+        x: 1388
+        y: 434
+      positionAbsolute:
+        x: 1388
+        y: 434
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-3.1-flash-lite-preview
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: 545f28ab-db99-4bcb-b34e-e8eeb7c45327
+          role: system
+          text: '# Role
+
+            あなたは会話履歴とコンテキスト情報をもとに、ビジネス向けの構造化ドキュメントを生成するエキスパートアシスタントです。
+
+
+            # Output Language
+
+            必ず日本語で出力すること。
+
+
+            # Artifact Type Rules
+
+            指定された `artifact_type` に応じて、`artifact_content` の構造を切り替えること：
+
+
+            | artifact_type     | artifact_content の形式                                      |
+
+            |-------------------|--------------------------------------------------------------|
+
+            | summary_report    | `## 概要` / `## 詳細` / `## まとめ` のMarkdown見出し構造     |
+
+            | checklist         | `- [ ] アクション項目` 形式のチェックリスト                   |
+
+            | comparison_table  | Markdownテーブル（ヘッダー行あり）                            |
+
+            | faq               | `**Q:** 質問` / `**A:** 回答` の繰り返し形式                 |
+
+            | meeting_minutes   | `## 日時・参加者` / `## 議題` / `## 決定事項` / `## TODO`    |
+
+
+            # General Rules
+
+            - artifact_content は Markdown 形式で記述すること
+
+            - artifact_title は内容を端的に表す20字以内の日本語タイトルにすること
+
+            - answer はチャット上に表示する短い完了メッセージ（1〜2文）にすること
+
+            - citations は参照できるソース情報がある場合のみ含め、ない場合は空配列 `[]` にすること
+
+            - 会話履歴（Memory）を最大限活用し、直前のやり取りの内容をドキュメントに反映させること
+
+            '
+        - id: ab3e582c-4b0b-42ac-b20b-a0876fdc6493
+          role: user
+          text: '# ユーザーの指示
+
+            {{#1770869430347.text#}}
+
+
+            # 生成するドキュメントタイプ
+
+            {{#1770869430347.artifact_type#}}
+
+
+            ---
+
+
+            # 利用可能なコンテキスト情報
+
+
+            ## アップロードファイルのコンテキスト
+
+            {{#conversation.context_file#}}
+
+
+            ## Web検索コンテキスト
+
+            {{#conversation.context_web#}}
+
+
+            ## RAG検索コンテキスト
+
+            {{#conversation.context_rag#}}
+
+
+            ## アップロードファイル名
+
+            {{#conversation.context_file_name#}}
+
+
+            ---
+
+
+            上記の情報と会話履歴をもとに、指定された artifact_type のドキュメントを生成してください。
+
+            '
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            properties:
+              answer:
+                description: チャット上に表示する完了メッセージ（1〜2文）
+                type: string
+              artifact_content:
+                description: ドキュメント本文（Markdown形式）
+                type: string
+              artifact_title:
+                description: 生成ドキュメントのタイトル（20字以内の日本語）
+                type: string
+              artifact_type:
+                description: ドキュメントの種別
+                enum:
+                - summary_report
+                - checklist
+                - comparison_table
+                - faq
+                - meeting_minutes
+                type: string
+              citations:
+                description: 参照した情報ソースの一覧
+                items:
+                  properties:
+                    id:
+                      description: '引用番号（例: ''1'', ''2''）'
+                      type: string
+                    source:
+                      description: ソース名（ファイル名・URL等）
+                      type: string
+                    url:
+                      description: URLがある場合のみ記載、なければnull
+                      type: string
+                  required:
+                  - id
+                  - source
+                  type: object
+                type: array
+            required:
+            - artifact_title
+            - artifact_type
+            - artifact_content
+            - answer
+            - citations
+            type: object
+        structured_output_enabled: true
+        title: LLM_Artifact_Generator
+        type: llm
+        vision:
+          enabled: false
+      height: 118
+      id: '1773712217417'
+      position:
+        x: 1750
+        y: 449
+      positionAbsolute:
+        x: 1750
+        y: 449
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1773712217417.text#}}'
+        selected: false
+        title: ANSWER_Artifact
+        type: answer
+        variables: []
+      height: 102
+      id: '1773712369475'
+      position:
+        x: 2092
+        y: 457
+      positionAbsolute:
+        x: 2092
+        y: 457
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
     viewport:
-      x: -2328.1077450643575
-      y: -421.45569648491926
-      zoom: 1.3195079107728953
+      x: -358.6049832699996
+      y: 146.58240080110846
+      zoom: 1.1486983549970358
   rag_pipeline_variables: []

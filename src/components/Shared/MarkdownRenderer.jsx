@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { SourceIcon } from './FileIcons';
-import ArtifactCard from '../Artifacts/ArtifactCard';
 import '../Message/MessageBlock.css';
 import { useLogger } from '../../hooks/useLogger';
 import SecureVaultService, { TOKEN_PATTERN } from '../../services/SecureVaultService';
@@ -340,51 +339,10 @@ const MarkdownRenderer = ({
     prevStreamingRef.current = isStreaming;
   }, [isStreaming, content, renderMode]);
 
-  // --- 2. Artifact Parsing Logic (成果物タグの解析) ---
-  const parseArtifacts = useMemo(() => {
-    // normalモードのタイピング中は途中経過、それ以外（realtime含む）は全文を使用
-    const textToRender = (displayMode === 'typing' && renderMode === 'normal') ? typedContent : content || '';
-
-    // Regex: :::artifact{...} ... :::
-    const artifactRegex = /:::artifact\{([^}]+)\}\n([\s\S]*?)\n:::/g;
-
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = artifactRegex.exec(textToRender)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push({
-          type: 'text',
-          content: textToRender.substring(lastIndex, match.index)
-        });
-      }
-
-      const attrStr = match[1];
-      const attributes = {};
-      const attrMatcher = /(\w+)="([^"]+)"/g;
-      let attrMatch;
-      while ((attrMatch = attrMatcher.exec(attrStr)) !== null) {
-        attributes[attrMatch[1]] = attrMatch[2];
-      }
-
-      parts.push({
-        type: 'artifact',
-        attributes: attributes,
-        content: match[2]
-      });
-
-      lastIndex = artifactRegex.lastIndex;
-    }
-
-    if (lastIndex < textToRender.length) {
-      parts.push({
-        type: 'text',
-        content: textToRender.substring(lastIndex)
-      });
-    }
-
-    return parts;
+  // --- 2. Content Text Resolution ---
+  // normalモードのタイピング中は途中経過、それ以外（realtime含む）は全文を使用
+  const textToRender = useMemo(() => {
+    return (displayMode === 'typing' && renderMode === 'normal') ? typedContent : content || '';
   }, [content, typedContent, displayMode, renderMode]);
 
   // --- 3. Logging Logic ---
@@ -441,163 +399,146 @@ const MarkdownRenderer = ({
 
   return (
     <div className={`markdown-renderer ${isRealtimeStreaming ? 'streaming-active' : ''}`}>
-      {parseArtifacts.map((part, index) => {
-        if (part.type === 'artifact') {
-          return (
-            <ArtifactCard
-              key={`art-${index}`}
-              title={part.attributes.title || 'Untitled'}
-              type={part.attributes.type || 'code'}
-              content={part.content}
-              onClick={(artifact) => {
-                if (onOpenArtifact) {
-                  onOpenArtifact(artifact);
-                }
-              }}
-            />
-          );
-        } else {
-          const processedContent = part.content.replace(/([％！？。、])\*\*(?![ \t\r\n\v\f　、。，．！？])/g, '$1**@@FIX@@');
+      {(() => {
+        const processedContent = textToRender.replace(/([％！？。、])\*\*(?![ \t\r\n\v\f　、。，．！？])/g, '$1**@@FIX@@');
 
-          return (
-            <ReactMarkdown
-              key={`md-${index}`}
-              remarkPlugins={[remarkGfm]}
-              components={{
-                a: ({ node, children, ...props }) => (
-                  <LoggedElement as="a" logTag="a" content={String(children)} logFunction={logMarkdownRender} {...props} target="_blank" rel="noopener noreferrer">
-                    {cleanChildren(children)}
-                  </LoggedElement>
-                ),
-                h1: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <LoggedElement as="h1" logTag="h1" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
-                },
-                h2: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <LoggedElement as="h2" logTag="h2" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
-                },
-                h3: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <LoggedElement as="h3" logTag="h3" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
-                },
-                h4: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <LoggedElement as="h4" logTag="h4" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
-                },
-                h5: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <LoggedElement as="h5" logTag="h5" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
-                },
-                h6: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <LoggedElement as="h6" logTag="h6" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
-                },
-                strong: ({ node, children, ...props }) => (
-                  <LoggedElement as="strong" logTag="strong" content={String(children)} logFunction={logMarkdownRender} {...props}>
-                    {cleanChildren(children)}
-                  </LoggedElement>
-                ),
-                em: ({ node, children, ...props }) => (
-                  <LoggedElement as="em" logTag="em" content={String(children)} logFunction={logMarkdownRender} {...props}>
-                    {cleanChildren(children)}
-                  </LoggedElement>
-                ),
-                code: ({ node, inline, className, children, ...props }) => (
-                  <CodeBlock
-                    inline={inline}
-                    className={className}
-                    logFunction={logMarkdownRender}
-                    {...props}
-                  >
-                    {cleanChildren(children)}
-                  </CodeBlock>
-                ),
-                p: ({ node, children, ...props }) => {
-                  useEffect(() => {
-                    React.Children.forEach(children, child => {
-                      if (typeof child === 'string') {
-                        checkUnrenderedMarkdown(child);
-                      }
-                    });
-                  }, [children]);
+        return (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a: ({ node, children, ...props }) => (
+                <LoggedElement as="a" logTag="a" content={String(children)} logFunction={logMarkdownRender} {...props} target="_blank" rel="noopener noreferrer">
+                  {cleanChildren(children)}
+                </LoggedElement>
+              ),
+              h1: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <LoggedElement as="h1" logTag="h1" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
+              },
+              h2: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <LoggedElement as="h2" logTag="h2" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
+              },
+              h3: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <LoggedElement as="h3" logTag="h3" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
+              },
+              h4: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <LoggedElement as="h4" logTag="h4" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
+              },
+              h5: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <LoggedElement as="h5" logTag="h5" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
+              },
+              h6: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <LoggedElement as="h6" logTag="h6" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
+              },
+              strong: ({ node, children, ...props }) => (
+                <LoggedElement as="strong" logTag="strong" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                  {cleanChildren(children)}
+                </LoggedElement>
+              ),
+              em: ({ node, children, ...props }) => (
+                <LoggedElement as="em" logTag="em" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                  {cleanChildren(children)}
+                </LoggedElement>
+              ),
+              code: ({ node, inline, className, children, ...props }) => (
+                <CodeBlock
+                  inline={inline}
+                  className={className}
+                  logFunction={logMarkdownRender}
+                  {...props}
+                >
+                  {cleanChildren(children)}
+                </CodeBlock>
+              ),
+              p: ({ node, children, ...props }) => {
+                useEffect(() => {
+                  React.Children.forEach(children, child => {
+                    if (typeof child === 'string') {
+                      checkUnrenderedMarkdown(child);
+                    }
+                  });
+                }, [children]);
 
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <p {...props}>{processed}</p>;
-                },
-                li: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return (
-                    <LoggedElement as="li" logTag="li" content={String(children)} logFunction={logMarkdownRender} {...props}>
-                      {processed}
-                    </LoggedElement>
-                  );
-                },
-                td: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <td {...props}>{processed}</td>;
-                },
-                th: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <th {...props}>{processed}</th>;
-                },
-                blockquote: ({ node, children, ...props }) => {
-                  const cleaned = cleanChildren(children);
-                  const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
-                  const processed = renderWithRestoredTokens(withCitations);
-                  return <blockquote {...props}>{processed}</blockquote>;
-                },
-                table: ({ node, children, ...props }) => {
-                  return (
-                    <div className="markdown-table-wrapper group">
-                      <button
-                        className="table-expand-btn"
-                        onClick={() => {
-                          if (onOpenTableModal) {
-                            onOpenTableModal(<table {...props}>{children}</table>);
-                          }
-                        }}
-                        aria-label="Expand table"
-                        title="View Fullscreen"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="15 3 21 3 21 9"></polyline>
-                          <polyline points="9 21 3 21 3 15"></polyline>
-                          <line x1="21" y1="3" x2="14" y2="10"></line>
-                          <line x1="3" y1="21" x2="10" y2="14"></line>
-                        </svg>
-                      </button>
-                      <table {...props}>{children}</table>
-                    </div>
-                  );
-                }
-              }}
-            >
-              {processedContent}
-            </ReactMarkdown>
-          );
-        }
-      })}
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <p {...props}>{processed}</p>;
+              },
+              li: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return (
+                  <LoggedElement as="li" logTag="li" content={String(children)} logFunction={logMarkdownRender} {...props}>
+                    {processed}
+                  </LoggedElement>
+                );
+              },
+              td: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <td {...props}>{processed}</td>;
+              },
+              th: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <th {...props}>{processed}</th>;
+              },
+              blockquote: ({ node, children, ...props }) => {
+                const cleaned = cleanChildren(children);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const processed = renderWithRestoredTokens(withCitations);
+                return <blockquote {...props}>{processed}</blockquote>;
+              },
+              table: ({ node, children, ...props }) => {
+                return (
+                  <div className="markdown-table-wrapper group">
+                    <button
+                      className="table-expand-btn"
+                      onClick={() => {
+                        if (onOpenTableModal) {
+                          onOpenTableModal(<table {...props}>{children}</table>);
+                        }
+                      }}
+                      aria-label="Expand table"
+                      title="View Fullscreen"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                      </svg>
+                    </button>
+                    <table {...props}>{children}</table>
+                  </div>
+                );
+              }
+            }}
+          >
+            {processedContent}
+          </ReactMarkdown>
+        );
+      })()}
       {/* normalモードのタイピング中カーソル */}
       {displayMode === 'typing' && <span className="blinking-cursor"></span>}
     </div>

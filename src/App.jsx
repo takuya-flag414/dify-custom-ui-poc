@@ -263,6 +263,21 @@ function App() {
     }
   }, [lastError]);
 
+  // ★追加: Artifactレスポンス自動展開
+  // メッセージ完了時、最新AIメッセージにartifactが存在したら自動でArtifactPanelを開く
+  useEffect(() => {
+    if (isGenerating) return; // ストリーミング中はスキップ
+    const lastAiMsg = messages.slice().reverse().find(m => m.role === 'ai');
+    if (lastAiMsg?.artifact) {
+      openArtifact({
+        title: lastAiMsg.artifact.artifact_title,
+        type: lastAiMsg.artifact.artifact_type,
+        content: lastAiMsg.artifact.artifact_content,
+        citations: lastAiMsg.artifact.citations || lastAiMsg.citations || [],
+      });
+    }
+  }, [messages.length, isGenerating]);
+
   const handleMockModeChange = (newMode) => {
     setMockMode(newMode);
     setConversationId(null);

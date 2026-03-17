@@ -17,7 +17,6 @@ const CopyIcon = () => (
     </svg>
 );
 
-// ★追加: 完了アイコン
 const CheckIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="20 6 9 17 4 12"></polyline>
@@ -34,8 +33,32 @@ const DocIcon = () => (
     </svg>
 );
 
+/**
+ * artifact_type に応じたバッジ表示
+ */
+const ARTIFACT_TYPE_MAP = {
+    summary_report: { emoji: '📋', label: 'レポート' },
+    checklist: { emoji: '☑', label: 'チェックリスト' },
+    comparison_table: { emoji: '📊', label: '比較表' },
+    faq: { emoji: '❓', label: 'FAQ' },
+    meeting_minutes: { emoji: '📝', label: '議事録' },
+};
+
+const getTypeBadge = (type) => {
+    const info = ARTIFACT_TYPE_MAP[type];
+    if (info) return `${info.emoji} ${info.label}`;
+    return type || 'ドキュメント';
+};
+
+/**
+ * ArtifactPanel - Artifact表示パネル（仕様書3.2準拠）
+ * 
+ * Props:
+ *   - isOpen: パネルの開閉状態
+ *   - onClose: 閉じるボタンのハンドラ
+ *   - artifact: { title, type, content, citations }
+ */
 const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
-    // ★追加: コピー状態管理
     const [isCopied, setIsCopied] = useState(false);
 
     // アーティファクトが切り替わったら状態リセット
@@ -45,17 +68,20 @@ const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
 
     if (!artifact) return <div className="artifact-panel" />;
 
+    // ★仕様書3.4準拠: # タイトル + 本文 でコピー
     const handleCopy = async () => {
         if (isCopied) return;
         try {
-            await navigator.clipboard.writeText(artifact.content);
+            const copyText = `# ${artifact.title || 'Untitled'}\n\n${artifact.content || ''}`;
+            await navigator.clipboard.writeText(copyText);
             setIsCopied(true);
-            // 2秒後に戻す
             setTimeout(() => setIsCopied(false), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
         }
     };
+
+    const citations = artifact.citations || [];
 
     return (
         <div className={`artifact-panel ${isOpen ? 'open' : ''}`}>
@@ -65,14 +91,13 @@ const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
                     <div className="artifact-icon">
                         <DocIcon />
                     </div>
-                    <div className="artifact-info">
+                    <div className="artifact-header-info">
                         <span className="artifact-title">{artifact.title || 'Untitled Document'}</span>
-                        <span className="artifact-meta">{artifact.type || 'MARKDOWN'}</span>
+                        <span className="artifact-type-badge-panel">{getTypeBadge(artifact.type)}</span>
                     </div>
                 </div>
 
                 <div className="artifact-actions">
-                    {/* ★修正: コピーボタンに状態反映 */}
                     <button
                         className={`artifact-action-btn primary ${isCopied ? 'copied' : ''}`}
                         onClick={handleCopy}
@@ -99,6 +124,37 @@ const ArtifactPanel = ({ isOpen, onClose, artifact }) => {
                     />
                 </div>
             </div>
+
+            {/* Footer: Citations Section（仕様書3.2準拠） */}
+            {citations.length > 0 && (
+                <div className="artifact-citations-footer">
+                    <div className="artifact-citations-header">
+                        <span className="artifact-citations-label">📚 出典</span>
+                        <span className="artifact-citations-count">{citations.length}件</span>
+                    </div>
+                    <ul className="artifact-citations-list">
+                        {citations.map((cite, idx) => (
+                            <li key={cite.id || idx} className="artifact-citation-item">
+                                <span className="artifact-citation-number">{idx + 1}</span>
+                                <span className="artifact-citation-source">
+                                    {cite.url && cite.url !== 'null' ? (
+                                        <a href={cite.url} target="_blank" rel="noopener noreferrer">
+                                            {cite.source}
+                                        </a>
+                                    ) : (
+                                        cite.source
+                                    )}
+                                </span>
+                                {cite.type && (
+                                    <span className={`artifact-citation-type artifact-citation-type-${cite.type}`}>
+                                        {cite.type === 'rag' ? '社内' : cite.type === 'web' ? 'Web' : cite.type}
+                                    </span>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 };

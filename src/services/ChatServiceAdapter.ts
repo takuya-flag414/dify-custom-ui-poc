@@ -47,6 +47,10 @@ export interface SendMessageParams {
     searchSettings?: SearchSettings;
     promptSettings?: PromptSettings;
     displayName?: string;
+    artifact?: {
+        requested: boolean;
+        type: string;
+    };
 }
 
 /**
@@ -122,11 +126,16 @@ export const ChatServiceAdapter = {
             const useRag = searchSettings?.ragEnabled === true;
             const useWeb = searchSettings?.webEnabled === true;
             const hasFile = files.length > 0;
+            // ★追加: Artifactリクエスト検知
+            const isArtifactRequest = params.artifact?.requested === true;
 
             let scenarioKey = 'pure';
 
+            // ★Artifactリクエストの場合は専用シナリオに分岐
+            if (isArtifactRequest) {
+                scenarioKey = 'artifact_demo';
             // Chat mode (no RAG, no Web)
-            if (!useRag && !useWeb && !hasFile) {
+            } else if (!useRag && !useWeb && !hasFile) {
                 scenarioKey = 'fast_pure';
             } else if (hasFile) {
                 if (!useRag && !useWeb) scenarioKey = 'file_only';

@@ -164,52 +164,42 @@ export const mockMessages = {
     {
       id: 'msg_6_1',
       role: 'user',
-      text: '新プロジェクト「Alpha」のキックオフ議事録を作成して。Artifactとして表示してほしい。',
+      text: '新プロジェクト「Alpha」のキックオフ議事録を作成して。レポート形式で出力してほしい。',
       timestamp: '2025-12-06T15:00:00Z',
       files: []
     },
     {
       id: 'msg_6_2',
       role: 'ai',
-      text: `承知いたしました。プロジェクト「Alpha」のキックオフミーティング議事録（ドラフト）を作成しました。
-以下のカードをクリックして、右側のパネルで内容をご確認ください。
-
-:::artifact{type="markdown" title="2025-12-06_Project_Alpha_Kickoff.md"}
-# 議事録: Project Alpha キックオフ
-
-**日時**: 2025年12月6日 10:00 - 11:00  
-**場所**: オンライン (Zoom)  
-**参加者**: 佐藤(PM)、田中(Dev)、鈴木(Design)、高橋(Sales)
-
----
-
-## 1. プロジェクト概要
-**Project Alpha** は、社内業務の効率化を目指す次世代AIアシスタントの開発プロジェクトです。既存のチャットボットをリプレイスし、RAG（検索拡張生成）とWeb検索を統合したハイブリッドな検索体験を提供します。
-
-## 2. 決定事項
-* **リリース目標**: 2026年3月末日（β版は1月末）
-* **開発体制**: アジャイル（2週間スプリント）
-* **使用技術**: 
-    * Frontend: React + Vite
-    * Backend: Python (FastAPI) + Dify
-    * Infra: AWS
-
-## 3. アクションアイテム
-| タスク | 担当者 | 期限 |
-| :--- | :--- | :--- |
-| 要件定義書の初稿作成 | 佐藤 | 12/10 |
-| Dify環境の構築 | 田中 | 12/13 |
-| UIデザイン案の作成 | 鈴木 | 12/15 |
-
-## 4. 次回予定
-* **日時**: 12月13日(金) 10:00〜
-* **議題**: UIデザインレビュー、環境構築状況の確認
-:::
-
-内容に修正が必要な場合は、チャットで指示してください。`,
-      rawContent: '...', // (省略)
-      citations: [],
-      suggestions: ['アジェンダを追加して', '参加者を追加', 'Markdownをダウンロード'],
+      text: 'プロジェクト「Alpha」のキックオフ議事録をレポートとして作成しました！📋 右側のArtifactパネルでご確認ください。コピーボタンで内容をそのままクリップボードに保存できます。',
+      rawContent: JSON.stringify({
+        artifact_title: '議事録: Project Alpha キックオフ',
+        artifact_type: 'meeting_minutes',
+        artifact_content: '# 議事録: Project Alpha キックオフ\n\n**日時**: 2025年12月6日 10:00 - 11:00  \n**場所**: オンライン (Zoom)  \n**参加者**: 佐藤(PM)、田中(Dev)、鈴木(Design)、高橋(Sales)\n\n---\n\n## 1. プロジェクト概要\n**Project Alpha** は、社内業務の効率化を目指す次世代AIアシスタントの開発プロジェクトです。\n\n## 2. 決定事項\n* **リリース目標**: 2026年3月末日（β版は1月末）\n* **開発体制**: アジャイル（2週間スプリント）\n\n## 3. アクションアイテム\n| タスク | 担当者 | 期限 |\n| :--- | :--- | :--- |\n| 要件定義書の初稿作成 | 佐藤 | 12/10 |\n| Dify環境の構築 | 田中 | 12/13 |\n| UIデザイン案の作成 | 鈴木 | 12/15 |\n\n## 4. 次回予定\n* **日時**: 12月13日(金) 10:00〜\n* **議題**: UIデザインレビュー、環境構築状況の確認',
+        answer: 'プロジェクト「Alpha」のキックオフ議事録をレポートとして作成しました！📋 右側のArtifactパネルでご確認ください。コピーボタンで内容をそのままクリップボードに保存できます。',
+        citations: [
+          { id: 'cite_1', type: 'rag', source: 'プロジェクト管理規定.pdf', url: null },
+          { id: 'cite_2', type: 'rag', source: '社内会議テンプレート集.xlsx', url: null }
+        ]
+      }),
+      citations: [
+        { id: 'cite_1', type: 'rag', source: 'プロジェクト管理規定.pdf', url: null },
+        { id: 'cite_2', type: 'rag', source: '社内会議テンプレート集.xlsx', url: null }
+      ],
+      artifact: {
+        artifact_title: '議事録: Project Alpha キックオフ',
+        artifact_type: 'meeting_minutes',
+        artifact_content: '# 議事録: Project Alpha キックオフ\n\n**日時**: 2025年12月6日 10:00 - 11:00  \n**場所**: オンライン (Zoom)  \n**参加者**: 佐藤(PM)、田中(Dev)、鈴木(Design)、高橋(Sales)\n\n---\n\n## 1. プロジェクト概要\n**Project Alpha** は、社内業務の効率化を目指す次世代AIアシスタントの開発プロジェクトです。\n\n## 2. 決定事項\n* **リリース目標**: 2026年3月末日（β版は1月末）\n* **開発体制**: アジャイル（2週間スプリント）\n\n## 3. アクションアイテム\n| タスク | 担当者 | 期限 |\n| :--- | :--- | :--- |\n| 要件定義書の初稿作成 | 佐藤 | 12/10 |\n| Dify環境の構築 | 田中 | 12/13 |\n| UIデザイン案の作成 | 鈴木 | 12/15 |\n\n## 4. 次回予定\n* **日時**: 12月13日(金) 10:00〜\n* **議題**: UIデザインレビュー、環境構築状況の確認',
+        citations: [
+          { id: 'cite_1', type: 'rag', source: 'プロジェクト管理規定.pdf', url: null },
+          { id: 'cite_2', type: 'rag', source: '社内会議テンプレート集.xlsx', url: null }
+        ]
+      },
+      smartActions: [
+        { type: 'suggested_question', label: 'アジェンダを追加して', icon: 'file-text', payload: { text: '議事録にアジェンダセクションを追加してください' } },
+        { type: 'generate_document', label: '📋 チェックリスト形式に変換', icon: 'file-text', payload: { text: 'この議事録をチェックリスト形式に変換して', artifact_type: 'checklist' } }
+      ],
+      suggestions: [],
       isStreaming: false,
       traceMode: 'knowledge',
       thoughtProcess: []
