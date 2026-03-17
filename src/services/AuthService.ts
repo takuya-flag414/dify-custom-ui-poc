@@ -1,21 +1,31 @@
 // src/services/AuthService.ts
-// Phase A: Mock Emulation - クライアントサイド認証サービス
+// Phase B: Firebase Integration - クライアントサイド認証サービス
 // 基本設計書 DES-AUTH-001 準拠 - RBAC対応
 
+import { 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged,
+    User as FirebaseUser
+} from 'firebase/auth';
+import { 
+    doc, 
+    getDoc, 
+    setDoc, 
+    collection, 
+    query, 
+    where, 
+    getDocs,
+    Timestamp 
+} from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 import {
-    MOCK_USERS,
-    MOCK_USER_ROLES,
-    MOCK_ROLES,
-    AUTH_STORAGE_KEYS,
-    MockUser,
-    UserPreferences,
+    AccountStatus,
     PermissionCode,
     RoleCode,
     ResolvedUserRole,
-    AccountStatus,
-    getUserRolesById,
-    resolvePermissionsByRoles,
-    getDepartmentById,
+    UserPreferences,
 } from '../mocks/mockUsers';
 
 // ============================================
@@ -69,207 +79,100 @@ export interface SecurityInfo {
 // ============================================
 
 /**
- * 認証サービス (Mock Implementation)
+ * 認証サービス (Firebase Implementation)
  * 
- * Phase A: クライアントサイドのみで認証を完結
- * Phase B: AuthServiceInterface の実装をAPIクライアントに差し替え
+ * Phase B: Firebase Auth と Firestore を使用
  */
 class AuthService {
-    private mockDelay: { min: number; max: number };
-
     constructor() {
-        this.mockDelay = { min: 500, max: 1000 };
+        // Firebase Auth の状態を監視して、セッション復元の準備をする
     }
 
     /**
-     * 認証遅延を演出（ネットワーク通信のシミュレーション）
+     * Firestore からユーザーの RBAC 情報を取得
      */
-    private _simulateNetworkDelay(): Promise<void> {
-        const delay = Math.random() * (this.mockDelay.max - this.mockDelay.min) + this.mockDelay.min;
-        return new Promise(resolve => setTimeout(resolve, delay));
-    }
+    private async _resolveUserRBAC(userId: string): Promise<{ roles: ResolvedUserRole[], permissions: PermissionCode[] }> {
+        // 1. ユーザーのロールを取得 (user_roles コレクション)
+        const userRolesQuery = query(collection(db, 'user_roles'), where('user_id', '==', userId));
+        const userRolesSnap = await getDocs(userRolesQuery);
+        
+        const roles: ResolvedUserRole[] = [];
+        const permissionIds = new Set<string>();
 
-    /**
-     * ダミートークンを生成
-     */
-    private _generateToken(userId: string): string {
-        return `mock_token_${userId}_${Date.now()}`;
-    }
+        for (const userRoleDoc of userRolesSnap.docs) {
+            const userRoleData = userRoleDoc.data();
+            const roleId = userRoleData.role_id;
 
-    /**
-     * LocalStorageから新規作成ユーザーリストを取得
-     */
-    private _getLocalUsers(): MockUser[] {
-        try {
-            const stored = localStorage.getItem(AUTH_STORAGE_KEYS.LOCAL_USERS);
-            return stored ? JSON.parse(stored) : [];
-        } catch (e) {
-            console.error('[AuthService] Failed to parse local users:', e);
-            return [];
+            // 2. ロール定義を取得 (roles コレクション)
+            const roleDoc = await getDoc(doc(db, 'roles', roleId));
+            if (roleDoc.exists()) {
+                const roleData = roleDoc.data();
+                roles.push({
+                    roleId: roleId,
+                    roleCode: roleData.role_code as RoleCode,
+                    roleName: roleData.name,
+                    assignedAt: userRoleData.assigned_at?.toDate().toISOString() || new Date().toISOString()
+                });
+
+                // 3. ロールの権限を取得 (role_permissions コレクション)
+                const rolePermsQuery = query(collection(db, 'role_permissions'), where('role_id', '==', roleId));
+                const rolePermsSnap = await getDocs(rolePermsQuery);
+                rolePermsSnap.forEach(rpDoc => {
+                    permissionIds.add(rpDoc.data().permission_id);
+                });
+            }
         }
-    }
 
-    /**
-     * LocalStorageに新規ユーザーを保存
-     */
-    private _saveLocalUsers(users: MockUser[]): void {
-        try {
-            localStorage.setItem(AUTH_STORAGE_KEYS.LOCAL_USERS, JSON.stringify(users));
-        } catch (e) {
-            console.error('[AuthService] Failed to save local users:', e);
+        // 4. 権限コードを解決 (permissions コレクション)
+        const permissions: PermissionCode[] = [];
+        for (const permId of Array.from(permissionIds)) {
+            const permDoc = await getDoc(doc(db, 'permissions', permId));
+            if (permDoc.exists()) {
+                permissions.push(permDoc.data().perm_code as PermissionCode);
+            }
         }
+
+        return { roles, permissions };
     }
 
     /**
-     * トークンを保存
+     * Firestore ドキュメントを UserProfile に変換
      */
-    private _saveToken(token: string): void {
-        try {
-            localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, token);
-        } catch (e) {
-            console.error('[AuthService] Failed to save token:', e);
+    private async _toUserProfile(userId: string, userData: any): Promise<UserProfile> {
+        const { roles, permissions } = await this._resolveUserRBAC(userId);
+
+        // 部署名の解決
+        let departmentName = '';
+        if (userData.department_id) {
+            const deptDoc = await getDoc(doc(db, 'departments', userData.department_id.toString()));
+            if (deptDoc.exists()) {
+                departmentName = deptDoc.data().name;
+            }
         }
-    }
-
-    /**
-     * トークンを取得
-     */
-    private _getToken(): string | null {
-        try {
-            return localStorage.getItem(AUTH_STORAGE_KEYS.TOKEN);
-        } catch (e) {
-            console.error('[AuthService] Failed to get token:', e);
-            return null;
-        }
-    }
-
-    /**
-     * トークンを削除
-     */
-    private _removeToken(): void {
-        try {
-            localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN);
-        } catch (e) {
-            console.error('[AuthService] Failed to remove token:', e);
-        }
-    }
-
-    /**
-     * ユーザー情報をトークンから抽出（userIdを取得）
-     */
-    private _extractUserIdFromToken(token: string): string | null {
-        if (!token || !token.startsWith('mock_token_')) return null;
-        const parts = token.split('_');
-        if (parts.length >= 4) {
-            return parts.slice(2, -1).join('_');
-        }
-        return null;
-    }
-
-    /**
-     * 全ユーザーリストを取得（マスター + ローカル）
-     */
-    private _getAllUsers(): MockUser[] {
-        const localUsers = this._getLocalUsers();
-        return [...MOCK_USERS, ...localUsers];
-    }
-
-    /**
-     * ユーザーをメールアドレスで検索
-     */
-    private _findUserByEmail(email: string): MockUser | undefined {
-        const allUsers = this._getAllUsers();
-        return allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-    }
-
-    /**
-     * ユーザーをIDで検索
-     */
-    private _findUserById(userId: string): MockUser | undefined {
-        const allUsers = this._getAllUsers();
-        return allUsers.find(u => u.user_id === userId);
-    }
-
-    /**
-     * MockUser から UserProfile を生成（RBAC解決込み）
-     */
-    private _toUserProfile(user: MockUser): UserProfile {
-        // RBAC解決: ロールと権限を取得
-        const roles = getUserRolesById(user.user_id);
-        const permissions = resolvePermissionsByRoles(roles);
-        const department = getDepartmentById(user.department_id);
 
         // レガシーロール変換（後方互換用）
-        const legacyRole = roles.length > 0 && roles[0].roleCode === 'admin' ? 'admin' : 'user';
+        const legacyRole = roles.some(r => r.roleCode === 'admin') ? 'admin' : 'user';
 
         return {
-            userId: user.user_id,
-            employeeCode: user.employee_code,
-            email: user.email,
-            name: user.name,
-            displayName: user.displayName || user.name,
-            avatarUrl: user.avatarUrl,
-            departmentId: user.department_id,
-            departmentName: department?.name,
-            accountStatus: user.account_status,
+            userId: userId,
+            employeeCode: userData.employee_code,
+            email: userData.email,
+            name: userData.name,
+            displayName: userData.displayName || userData.name,
+            avatarUrl: userData.avatarUrl,
+            departmentId: userData.department_id,
+            departmentName,
+            accountStatus: userData.account_status as AccountStatus,
             roles,
             permissions,
-            preferences: user.preferences || {
+            preferences: userData.preferences || {
                 theme: 'system',
                 aiStyle: 'partner',
             },
-            createdAt: user.created_at,
-            updatedAt: user.updated_at,
-            // 後方互換用
+            createdAt: userData.created_at?.toDate ? userData.created_at.toDate().toISOString() : userData.created_at,
+            updatedAt: userData.updated_at?.toDate ? userData.updated_at.toDate().toISOString() : userData.updated_at,
             role: legacyRole,
         };
-    }
-
-    /**
-     * ユーザーのセキュリティ関連フィールドを更新
-     */
-    private _updateUserSecurityFields(userId: string, fields: Partial<MockUser>): void {
-        const isMasterUser = MOCK_USERS.some(u => u.user_id === userId);
-
-        if (isMasterUser) {
-            const key = `security_overlay_${userId}`;
-            try {
-                const existing = JSON.parse(localStorage.getItem(key) || '{}');
-                localStorage.setItem(key, JSON.stringify({ ...existing, ...fields }));
-            } catch (e) {
-                console.error('[AuthService] Failed to save security overlay:', e);
-            }
-        } else {
-            const localUsers = this._getLocalUsers();
-            const idx = localUsers.findIndex(u => u.user_id === userId);
-            if (idx !== -1) {
-                localUsers[idx] = { ...localUsers[idx], ...fields };
-                this._saveLocalUsers(localUsers);
-            }
-        }
-    }
-
-    /**
-     * LocalStorageから新規ユーザーのロールマッピングを取得
-     */
-    private _getLocalUserRoles(): { user_id: string; role_id: string; assigned_at: string }[] {
-        try {
-            const stored = localStorage.getItem('app_mock_user_roles');
-            return stored ? JSON.parse(stored) : [];
-        } catch (e) {
-            return [];
-        }
-    }
-
-    /**
-     * LocalStorageに新規ユーザーのロールマッピングを保存
-     */
-    private _saveLocalUserRoles(userRoles: { user_id: string; role_id: string; assigned_at: string }[]): void {
-        try {
-            localStorage.setItem('app_mock_user_roles', JSON.stringify(userRoles));
-        } catch (e) {
-            console.error('[AuthService] Failed to save user roles:', e);
-        }
     }
 
     // ============================================
@@ -278,88 +181,55 @@ class AuthService {
 
     /**
      * ログイン
-     * - email/password でユーザーを検索
-     * - account_status を検証（有効なユーザーのみ許可）
-     * - RBAC を解決し、実効権限を含む UserProfile を返却
      */
     async login(email: string, password: string): Promise<LoginResult> {
-        await this._simulateNetworkDelay();
-
         if (!email || !password) {
             throw new Error('メールアドレスとパスワードを入力してください');
         }
 
-        const user = this._findUserByEmail(email);
-        if (!user) {
-            throw new Error('メールアドレスまたはパスワードが正しくありません');
-        }
+        try {
+            // 1. Firebase Auth で認証
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
 
-        // account_status 検証（正式仕様準拠）
-        if (user.account_status === 0) {
-            throw new Error('このアカウントは無効化されています。管理者にお問い合わせください');
-        }
-        if (user.account_status === 2) {
-            throw new Error('このアカウントは退職済みです');
-        }
-
-        // アカウントロック確認
-        if (user.lockedUntil) {
-            const lockTime = new Date(user.lockedUntil);
-            if (lockTime > new Date()) {
-                const remainingMinutes = Math.ceil((lockTime.getTime() - new Date().getTime()) / 60000);
-                throw new Error(`アカウントがロックされています。${remainingMinutes}分後に再試行してください`);
-            } else {
-                this._updateUserSecurityFields(user.user_id, {
-                    failedLoginAttempts: 0,
-                    lockedUntil: null,
-                });
+            // 2. Firestore からプロファイルを取得
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+            if (!userDoc.exists()) {
+                throw new Error('ユーザープロファイルが見つかりません');
             }
-        }
 
-        // パスワード検証
-        if (user.password_hash !== password) {
-            const newAttempts = (user.failedLoginAttempts || 0) + 1;
-            const maxAttempts = 5;
-            const lockDurationMinutes = 15;
+            const userData = userDoc.data();
 
-            if (newAttempts >= maxAttempts) {
-                const lockUntil = new Date(Date.now() + lockDurationMinutes * 60000).toISOString();
-                this._updateUserSecurityFields(user.user_id, {
-                    failedLoginAttempts: newAttempts,
-                    lockedUntil: lockUntil,
-                });
-                throw new Error(`ログイン試行回数が上限に達しました。アカウントは${lockDurationMinutes}分間ロックされます`);
-            } else {
-                this._updateUserSecurityFields(user.user_id, {
-                    failedLoginAttempts: newAttempts,
-                });
-                throw new Error(`メールアドレスまたはパスワードが正しくありません（残り${maxAttempts - newAttempts}回）`);
+            // 3. アカウント状態の検証
+            if (userData.account_status === 0) {
+                await signOut(auth);
+                throw new Error('このアカウントは無効化されています。管理者にお問い合わせください');
             }
+            if (userData.account_status === 2) {
+                await signOut(auth);
+                throw new Error('このアカウントは退職済みです');
+            }
+
+            const profile = await this._toUserProfile(firebaseUser.uid, userData);
+            const token = await firebaseUser.getIdToken();
+
+            console.log('[AuthService] Login successful:', profile.email);
+
+            return {
+                token,
+                user: profile,
+            };
+        } catch (error: any) {
+            console.error('[AuthService] Login failed:', error);
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                throw new Error('メールアドレスまたはパスワードが正しくありません');
+            }
+            throw error;
         }
-
-        // ログイン成功: 失敗カウントリセット
-        if (user.failedLoginAttempts && user.failedLoginAttempts > 0) {
-            this._updateUserSecurityFields(user.user_id, {
-                failedLoginAttempts: 0,
-                lockedUntil: null,
-            });
-        }
-
-        const token = this._generateToken(user.user_id);
-        this._saveToken(token);
-
-        console.log('[AuthService] Login successful:', user.email);
-
-        return {
-            token,
-            user: this._toUserProfile(user),
-        };
     }
 
     /**
-     * サインアップ（新規ユーザー登録）
-     * - 新規ユーザーを作成
-     * - デフォルトで 'general' ロールを割り当て
+     * サインアップ
      */
     async signup(
         email: string,
@@ -367,145 +237,99 @@ class AuthService {
         displayName: string,
         securityInfo: Partial<SecurityInfo> = {}
     ): Promise<LoginResult> {
-        await this._simulateNetworkDelay();
-
         const { lastName, firstName, dateOfBirth, securityQuestion, securityAnswer } = securityInfo;
 
         if (!email || !password || !displayName) {
             throw new Error('すべての項目を入力してください');
         }
 
-        if (!lastName || !firstName) {
-            throw new Error('姓・名を入力してください');
+        try {
+            // 1. Firebase Auth でユーザー作成
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
+
+            // 2. Firestore にプロファイルを保存
+            const now = Timestamp.now();
+            const userData = {
+                user_id: firebaseUser.uid,
+                email: email.toLowerCase(),
+                name: `${lastName} ${firstName}`,
+                account_status: 1, // 有効
+                created_at: now,
+                updated_at: now,
+                displayName,
+                lastName,
+                firstName,
+                avatarUrl: null,
+                dateOfBirth,
+                securityQuestion,
+                securityAnswer,
+                preferences: {
+                    theme: 'system',
+                    aiStyle: 'partner',
+                }
+            };
+
+            await setDoc(doc(db, 'users', firebaseUser.uid), userData);
+
+            // 3. デフォルトロール（general）を割り当て
+            // 注: 'role_general' ID が存在することを確認しておく必要がある（Seeding）
+            await setDoc(doc(collection(db, 'user_roles')), {
+                user_id: firebaseUser.uid,
+                role_id: 'role_general',
+                assigned_at: now
+            });
+
+            const profile = await this._toUserProfile(firebaseUser.uid, userData);
+            const token = await firebaseUser.getIdToken();
+
+            console.log('[AuthService] Signup successful:', profile.email);
+
+            return {
+                token,
+                user: profile,
+            };
+        } catch (error: any) {
+            console.error('[AuthService] Signup failed:', error);
+            if (error.code === 'auth/email-already-in-use') {
+                throw new Error('このメールアドレスは既に使用されています');
+            }
+            throw error;
         }
-        if (!dateOfBirth) {
-            throw new Error('生年月日を入力してください');
-        }
-        if (!securityQuestion || !securityAnswer) {
-            throw new Error('秘密の質問と回答を入力してください');
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            throw new Error('メールアドレスの形式が正しくありません');
-        }
-
-        if (password.length < 8) {
-            throw new Error('パスワードは8文字以上で入力してください');
-        }
-        if (!/(?=.*[a-zA-Z])(?=.*[0-9])/.test(password)) {
-            throw new Error('パスワードは英字と数字を含めてください');
-        }
-
-        const existingUser = this._findUserByEmail(email);
-        if (existingUser) {
-            throw new Error('このメールアドレスは既に使用されています');
-        }
-
-        const newUserId = `usr_local_${Date.now()}`;
-        const now = new Date().toISOString();
-
-        const newUser: MockUser = {
-            user_id: newUserId,
-            email: email.toLowerCase(),
-            password_hash: password,  // Phase A: 平文（Phase Bでハッシュ化）
-            name: `${lastName} ${firstName}`,
-            account_status: 1,  // 有効
-            created_at: now,
-            updated_at: now,
-            // 後方互換用
-            displayName,
-            lastName,
-            firstName,
-            avatarUrl: null,
-            // セキュリティフィールド
-            dateOfBirth,
-            securityQuestion,
-            securityAnswer,
-            failedLoginAttempts: 0,
-            lockedUntil: null,
-            // 設定
-            preferences: {
-                theme: 'system',
-                aiStyle: 'partner',
-                userProfile: {
-                    role: '',
-                    department: '',
-                },
-                customInstructions: '',
-            },
-        };
-
-        // ユーザー保存
-        const localUsers = this._getLocalUsers();
-        localUsers.push(newUser);
-        this._saveLocalUsers(localUsers);
-
-        // デフォルトロール（general）を割り当て
-        const localUserRoles = this._getLocalUserRoles();
-        localUserRoles.push({
-            user_id: newUserId,
-            role_id: 'role_general',
-            assigned_at: now,
-        });
-        this._saveLocalUserRoles(localUserRoles);
-
-        const token = this._generateToken(newUser.user_id);
-        this._saveToken(token);
-
-        console.log('[AuthService] Signup successful:', newUser.email);
-
-        return {
-            token,
-            user: this._toUserProfile(newUser),
-        };
     }
 
     /**
      * セッション復元
-     * - トークンからユーザー情報を復元
-     * - account_status の再検証を実施
      */
-    async restoreSession(token: string | null = null): Promise<UserProfile | null> {
-        await this._simulateNetworkDelay();
-
-        const storedToken = token || this._getToken();
-        if (!storedToken) {
-            console.log('[AuthService] No token found');
-            return null;
-        }
-
-        const userId = this._extractUserIdFromToken(storedToken);
-        if (!userId) {
-            console.log('[AuthService] Invalid token format');
-            this._removeToken();
-            return null;
-        }
-
-        const user = this._findUserById(userId);
-        if (!user) {
-            console.log('[AuthService] User not found for token');
-            this._removeToken();
-            return null;
-        }
-
-        // account_status 再検証
-        if (user.account_status !== 1) {
-            console.log('[AuthService] User account is not active');
-            this._removeToken();
-            return null;
-        }
-
-        console.log('[AuthService] Session restored:', user.email);
-        return this._toUserProfile(user);
+    async restoreSession(): Promise<UserProfile | null> {
+        return new Promise((resolve) => {
+            const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+                unsubscribe();
+                if (firebaseUser) {
+                    try {
+                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            if (userData.account_status === 1) {
+                                const profile = await this._toUserProfile(firebaseUser.uid, userData);
+                                resolve(profile);
+                                return;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('[AuthService] Session restoration failed:', error);
+                    }
+                }
+                resolve(null);
+            });
+        });
     }
 
     /**
      * ログアウト
      */
     async logout(): Promise<void> {
-        await this._simulateNetworkDelay();
-        this._removeToken();
+        await signOut(auth);
         console.log('[AuthService] Logged out');
     }
 
@@ -513,118 +337,74 @@ class AuthService {
      * ユーザー設定を更新
      */
     async updatePreferences(userId: string, prefs: Partial<UserPreferences>): Promise<UserPreferences> {
-        await this._simulateNetworkDelay();
-
-        const user = this._findUserById(userId);
-        if (!user) {
+        const userRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
             throw new Error('ユーザーが見つかりません');
         }
 
-        const currentPrefs = user.preferences || { theme: 'system', aiStyle: 'partner' };
+        const currentPrefs = userDoc.data().preferences || { theme: 'system', aiStyle: 'partner' };
         const updatedPrefs: UserPreferences = {
             ...currentPrefs,
             ...prefs,
         };
 
-        const isMasterUser = MOCK_USERS.some(u => u.user_id === userId);
-        if (isMasterUser) {
-            const key = `${AUTH_STORAGE_KEYS.USER_PREFS_PREFIX}${userId}`;
-            try {
-                localStorage.setItem(key, JSON.stringify(updatedPrefs));
-            } catch (e) {
-                console.error('[AuthService] Failed to save preferences:', e);
-            }
-        } else {
-            const localUsers = this._getLocalUsers();
-            const idx = localUsers.findIndex(u => u.user_id === userId);
-            if (idx !== -1) {
-                localUsers[idx].preferences = updatedPrefs;
-                this._saveLocalUsers(localUsers);
-            }
-        }
+        await setDoc(userRef, { 
+            preferences: updatedPrefs,
+            updated_at: Timestamp.now() 
+        }, { merge: true });
 
         console.log('[AuthService] Preferences updated for:', userId);
         return updatedPrefs;
     }
 
     /**
-     * ユーザー設定を取得（Overlay適用済み）
-     */
-    getUserPreferences(userId: string): UserPreferences | null {
-        const user = this._findUserById(userId);
-        if (!user) return null;
-
-        const defaultPrefs: UserPreferences = { theme: 'system', aiStyle: 'partner' };
-        const basePrefs = user.preferences || defaultPrefs;
-
-        const isMasterUser = MOCK_USERS.some(u => u.user_id === userId);
-        if (isMasterUser) {
-            const key = `${AUTH_STORAGE_KEYS.USER_PREFS_PREFIX}${userId}`;
-            try {
-                const overlay = localStorage.getItem(key);
-                if (overlay) {
-                    return { ...basePrefs, ...JSON.parse(overlay) };
-                }
-            } catch (e) {
-                console.error('[AuthService] Failed to load preferences overlay:', e);
-            }
-        }
-
-        return basePrefs;
-    }
-
-    /**
      * 権限チェックユーティリティ
-     * - ユーザーが指定された権限を持つかどうかを判定
      */
     hasPermission(user: UserProfile, permCode: PermissionCode): boolean {
         return user.permissions.includes(permCode);
     }
 
     /**
-     * ユーザーのロールを取得
-     */
-    getUserRoles(userId: string): ResolvedUserRole[] {
-        return getUserRolesById(userId);
-    }
-
-    /**
-     * ロールから権限を解決
-     */
-    resolvePermissions(roles: ResolvedUserRole[]): PermissionCode[] {
-        return resolvePermissionsByRoles(roles);
-    }
-
-    /**
      * 【DevMode専用】ロール切り替え（デバッグ用）
-     * - 指定されたロールコードに基づいて、一時的にユーザーのロールと権限を書き換えた UserProfile を返す
-     * - 実際のDB/Storageは更新せず、メモリ上のオブジェクトのみ更新する
+     * Firebase環境では実際のDBを一時的に書き換えるのが難しいため、メモリ上のオブジェクトのみ更新
      */
     async switchRoleDebug(currentUser: UserProfile, newRoleCode: RoleCode): Promise<UserProfile> {
-        // 1. 新しいロール定義を取得
-        const newRoleDef = MOCK_ROLES.find(r => r.role_code === newRoleCode);
-        if (!newRoleDef) {
+        // ロール定義をFirestoreから取得
+        const rolesQuery = query(collection(db, 'roles'), where('role_code', '==', newRoleCode));
+        const rolesSnap = await getDocs(rolesQuery);
+        
+        if (rolesSnap.empty) {
             throw new Error(`Role definition not found for code: ${newRoleCode}`);
         }
 
-        // 2. ResolvedUserRole を構築
+        const roleData = rolesSnap.docs[0].data();
+        const roleId = rolesSnap.docs[0].id;
+
         const newRole: ResolvedUserRole = {
-            roleId: newRoleDef.id,
-            roleCode: newRoleDef.role_code,
-            roleName: newRoleDef.name,
+            roleId: roleId,
+            roleCode: roleData.role_code as RoleCode,
+            roleName: roleData.name,
             assignedAt: new Date().toISOString()
         };
 
-        // 3. 権限を再計算
-        const newRoles = [newRole];
-        const newPermissions = resolvePermissionsByRoles(newRoles);
+        // 権限を取得
+        const permsQuery = query(collection(db, 'role_permissions'), where('role_id', '==', roleId));
+        const permsSnap = await getDocs(permsQuery);
+        
+        const permissionCodes: PermissionCode[] = [];
+        for (const rpDoc of permsSnap.docs) {
+            const permDoc = await getDoc(doc(db, 'permissions', rpDoc.data().permission_id));
+            if (permDoc.exists()) {
+                permissionCodes.push(permDoc.data().perm_code as PermissionCode);
+            }
+        }
 
-        // 4. UserProfile を更新して返却
         return {
             ...currentUser,
-            roles: newRoles,
-            permissions: newPermissions,
-            // レガシー互換フィールドも更新
+            roles: [newRole],
+            permissions: permissionCodes,
             role: newRoleCode === 'admin' ? 'admin' : 'user'
         };
     }
@@ -634,5 +414,5 @@ class AuthService {
 export const authService = new AuthService();
 export default AuthService;
 
-// 型のre-export（他のファイルからの参照用）
+// 型のre-export
 export type { PermissionCode, RoleCode, ResolvedUserRole, AccountStatus, UserPreferences };

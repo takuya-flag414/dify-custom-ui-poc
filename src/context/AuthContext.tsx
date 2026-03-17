@@ -12,7 +12,7 @@ import { IS_DEV_MODE } from '../config/devMode';
 export interface SecurityInfo {
     lastName?: string;
     firstName?: string;
-    birthDate?: string;
+    dateOfBirth?: string;
     securityQuestion?: string;
     securityAnswer?: string;
 }
