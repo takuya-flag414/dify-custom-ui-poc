@@ -587,6 +587,11 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                 </div>
             </div>
 
+            {/* ★追加: 免責事項 (Zoomの影響を受けずにスクロール領域の末尾に直上で固定表示) */}
+            <div className="artifact-disclaimer-fixed">
+                ※ プレビュー表示のため、実際の出力レイアウトとは異なる場合があります。
+            </div>
+
             {/* Footer: Citations Section（仕様書3.2準拠） */}
             {citations.length > 0 && (
                 <div className={`artifact-citations-footer ${isCitationsExpanded ? 'expanded' : ''}`}>

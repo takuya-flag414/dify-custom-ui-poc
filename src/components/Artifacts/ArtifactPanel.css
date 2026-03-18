@@ -39,28 +39,9 @@
   --ai-gradient-blue: #007AFF;
 }
 
-/* Glowing Border for AI Generation */
+/* Glowing Border for AI Generation - Completely Removed */
 .artifact-panel.ai-generating::before {
-  content: "";
-  position: absolute;
-  inset: -2px; /* Border width */
-  background: conic-gradient(
-    from 0deg,
-    var(--ai-gradient-cyan),
-    var(--ai-gradient-magenta),
-    var(--ai-gradient-yellow),
-    var(--ai-gradient-blue),
-    var(--ai-gradient-cyan)
-  );
-  filter: blur(8px); /* The glow spread */
-  z-index: -1;
-  animation: ai-spin 4s linear infinite;
-  border-radius: inherit;
-}
-
-@keyframes ai-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  display: none;
 }
 
 /* Panel Open State handled by Framer Motion, but keeping class for reference if needed */
@@ -125,29 +106,16 @@
     align-items: center;
 }
 
-/* 生成中のカーソルアニメーション (AI Text Shimmer) */
+/* 生成中のカーソルアニメーション (Solid Color) */
 .typing-cursor {
     display: inline-block;
-    width: 6px;
+    width: 2px;
     height: 14px;
-    margin-left: 6px;
-    background-image: linear-gradient(
-        90deg, 
-        var(--ai-gradient-cyan), 
-        var(--ai-gradient-magenta), 
-        var(--ai-gradient-yellow), 
-        var(--ai-gradient-cyan)
-    );
-    background-size: 200% 100%;
-    background-position: 100% 0;
-    animation: 
-        ai-text-shimmer 2s linear infinite,
-        blink 1s step-end infinite;
+    margin-left: 4px;
+    background-color: currentColor;
+    opacity: 0.7;
+    animation: blink 1s step-end infinite;
     flex-shrink: 0;
-}
-
-@keyframes ai-text-shimmer {
-    to { background-position: -100% 0; }
 }
 
 @keyframes blink {
@@ -457,6 +425,18 @@
 .artifact-close-btn:active {
     transform: scale(0.95);
     background-color: var(--color-border-strong);
+}
+
+/* 固定表示用の免責事項スタイル */
+.artifact-disclaimer-fixed {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    text-align: center;
+    opacity: 0.8;
+    font-weight: 400;
+    padding: 8px 24px 12px;
+    background: transparent;
+    flex-shrink: 0; /* Flexbox内で潰れないようにする */
 }
 
 
