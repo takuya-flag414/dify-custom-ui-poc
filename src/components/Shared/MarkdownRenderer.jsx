@@ -11,8 +11,9 @@ import RestoredToken from '../Message/RestoredToken';
 
 // --- Helper: Inline Citation Renderer ---
 // (renderWithInlineCitations, LoggedElement, CodeBlock は変更なしのため省略。元のコードを維持してください)
-const renderWithInlineCitations = (children, citations, messageId) => {
+const renderWithInlineCitations = (children, citations, messageId, disableCitationReplacement) => {
   if (!children) return null;
+  if (disableCitationReplacement) return children;
   const childrenArray = Array.isArray(children) ? children : [children];
   const newChildren = [];
   const citationCount = citations ? citations.length : 0;
@@ -276,6 +277,7 @@ const MarkdownRenderer = ({
   renderMode = 'normal',
   citations = [],
   messageId,
+  disableCitationReplacement = false,
   onOpenArtifact,
   onOpenTableModal // ★追加: 親(ChatArea等)から渡されるモーダル開閉ハンドラ
 }) => {
@@ -415,37 +417,37 @@ const MarkdownRenderer = ({
               ),
               h1: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <LoggedElement as="h1" logTag="h1" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
               },
               h2: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <LoggedElement as="h2" logTag="h2" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
               },
               h3: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <LoggedElement as="h3" logTag="h3" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
               },
               h4: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <LoggedElement as="h4" logTag="h4" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
               },
               h5: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <LoggedElement as="h5" logTag="h5" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
               },
               h6: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <LoggedElement as="h6" logTag="h6" content={String(children)} logFunction={logMarkdownRender} {...props}>{processed}</LoggedElement>;
               },
@@ -485,7 +487,7 @@ const MarkdownRenderer = ({
               },
               li: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return (
                   <LoggedElement as="li" logTag="li" content={String(children)} logFunction={logMarkdownRender} {...props}>
@@ -495,19 +497,19 @@ const MarkdownRenderer = ({
               },
               td: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <td {...props}>{processed}</td>;
               },
               th: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <th {...props}>{processed}</th>;
               },
               blockquote: ({ node, children, ...props }) => {
                 const cleaned = cleanChildren(children);
-                const withCitations = renderWithInlineCitations(cleaned, citations, messageId);
+                const withCitations = renderWithInlineCitations(cleaned, citations, messageId, disableCitationReplacement);
                 const processed = renderWithRestoredTokens(withCitations);
                 return <blockquote {...props}>{processed}</blockquote>;
               },

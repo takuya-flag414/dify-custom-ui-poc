@@ -4,7 +4,7 @@
     position: absolute;
     top: 24px;
     right: 24px;
-    bottom: 160px; /* Leave space for ChatInput. */
+    bottom: 42px; /* ChatInputの入力エリア(HUDコンテナ)の下端（16px+テキスト+8px）と統一 */
     width: calc(50vw - 24px); /* ★変更: 画面幅の約半分に拡張 */
     min-width: 480px;
     max-width: 800px;
@@ -15,29 +15,56 @@
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
 
-    /* Corner Radius (Standard Window Radius: 16px) */
-    border-radius: 16px;
+    /* Corner Radius (Standard Window Radius: 22px) */
+    border-radius: 22px;
     border: 1px solid rgba(0, 0, 0, 0.1);
 
     /* Shadow and Inner Highlight */
     box-shadow: 
         0 12px 48px rgba(0, 0, 0, 0.12),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
 
     display: flex;
     flex-direction: column;
     overflow: hidden;
 
-    /* Spring Animation (Stiffness 250, Damping 25 equivalent in CSS transition) */
-    transform: translateX(calc(100% + 40px));
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+    /* Framer Motion is handling the entrance/exit animations */
 }
 
+/* AI Semantic Gradients Setup */
+:root {
+  --ai-gradient-cyan: #00FFFF;
+  --ai-gradient-magenta: #FF00FF;
+  --ai-gradient-yellow: #FFD60A;
+  --ai-gradient-blue: #007AFF;
+}
+
+/* Glowing Border for AI Generation */
+.artifact-panel.ai-generating::before {
+  content: "";
+  position: absolute;
+  inset: -2px; /* Border width */
+  background: conic-gradient(
+    from 0deg,
+    var(--ai-gradient-cyan),
+    var(--ai-gradient-magenta),
+    var(--ai-gradient-yellow),
+    var(--ai-gradient-blue),
+    var(--ai-gradient-cyan)
+  );
+  filter: blur(8px); /* The glow spread */
+  z-index: -1;
+  animation: ai-spin 4s linear infinite;
+  border-radius: inherit;
+}
+
+@keyframes ai-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Panel Open State handled by Framer Motion, but keeping class for reference if needed */
 .artifact-panel.open {
-    transform: translateX(0);
-    opacity: 1;
     pointer-events: auto;
 }
 
@@ -46,7 +73,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 
         0 12px 48px rgba(0, 0, 0, 0.4),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
 
 /* --- Header: ファイル管理風 --- */
@@ -98,15 +125,29 @@
     align-items: center;
 }
 
-/* 生成中のカーソルアニメーション */
+/* 生成中のカーソルアニメーション (AI Text Shimmer) */
 .typing-cursor {
     display: inline-block;
     width: 6px;
     height: 14px;
-    background-color: var(--color-text-main);
     margin-left: 6px;
-    animation: blink 1s step-end infinite;
+    background-image: linear-gradient(
+        90deg, 
+        var(--ai-gradient-cyan), 
+        var(--ai-gradient-magenta), 
+        var(--ai-gradient-yellow), 
+        var(--ai-gradient-cyan)
+    );
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    animation: 
+        ai-text-shimmer 2s linear infinite,
+        blink 1s step-end infinite;
     flex-shrink: 0;
+}
+
+@keyframes ai-text-shimmer {
+    to { background-position: -100% 0; }
 }
 
 @keyframes blink {
@@ -238,6 +279,26 @@
     background-color: var(--color-border-strong);
 }
 
+/* Accessibility Focus Ring (Halo Pattern) */
+.artifact-action-btn:focus-visible,
+.zoom-btn:focus-visible,
+.zoom-label-btn:focus-visible,
+.artifact-close-btn:focus-visible {
+    outline: none;
+    box-shadow: 
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.5);
+    transition: box-shadow 0.2s ease-out;
+}
+[data-theme='dark'] .artifact-action-btn:focus-visible,
+[data-theme='dark'] .zoom-btn:focus-visible,
+[data-theme='dark'] .zoom-label-btn:focus-visible,
+[data-theme='dark'] .artifact-close-btn:focus-visible {
+    box-shadow: 
+        0 0 0 1px #000000,
+        0 0 0 4px rgba(10, 132, 255, 0.5);
+}
+
 /* Primary Style (通常時の枠線) */
 .artifact-action-btn.primary {
     background-color: rgba(255, 255, 255, 0.5);
@@ -254,18 +315,122 @@
     border-color: var(--color-text-muted);
 }
 
-/* ★追加: Copied State (緑色に変化) */
-.artifact-action-btn.primary.copied {
-    background-color: #ECFDF5;
-    /* Green-50 */
-    color: #059669;
-    /* Green-600 */
-    border-color: #A7F3D0;
-    /* Green-200 */
+/* ★追加: Copied State (メニュー内でも使用) */
+.artifact-menu-item.copied {
+    color: #059669; /* Green-600 */
     pointer-events: none;
-    /* 連打防止 */
-    box-shadow: none;
-    transform: none;
+}
+
+/* --- Action Menu Styles --- */
+.artifact-action-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.action-more-btn {
+    width: 32px;
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+.action-more-btn.active {
+    background-color: var(--color-bg-body);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.artifact-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+}
+
+.artifact-actions-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 230px;
+    z-index: 101;
+    
+    /* DESIGN_RULE.md: mat-hud */
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    
+    border-radius: 20px; /* Stronger roundness for HUD */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.15),
+        0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+    
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    
+    transform-origin: top right;
+    animation: menu-appear-spring 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+[data-theme='dark'] .artifact-actions-menu {
+    background: rgba(40, 40, 40, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.4),
+        0 0 0 0.5px rgba(255, 255, 255, 0.2) inset;
+}
+
+@keyframes menu-appear-spring {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.artifact-menu-item {
+    height: 36px;
+    width: 100%;
+    padding: 0 10px;
+    border: none;
+    background: transparent;
+    border-radius: 10px; /* Inset Highlight Pattern */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-text-main);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin: 1px 0;
+}
+
+.artifact-menu-item:hover {
+    background-color: var(--color-primary);
+    color: white;
+    transform: scale(0.99); /* Slight physical resistance on hover */
+}
+
+/* DESIGN_RULE.md: Inset Highlight Pattern */
+.artifact-menu-item:hover svg {
+    color: white;
+}
+
+.artifact-menu-divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.05);
+    margin: 4px 6px;
+}
+
+[data-theme='dark'] .artifact-menu-divider {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* 閉じるボタンのスタイル調整 */
@@ -526,18 +691,30 @@
 
 /* --- Citations Footer Section --- */
 .artifact-citations-footer {
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    background-color: transparent;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
     flex-shrink: 0;
-    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), background 0.4s ease;
+    border-radius: 0 0 22px 22px; /* ★変更: 親と外形を合わせる */
+    position: relative;
+    /* 内部にうっすらとハイライトを入れる */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .artifact-citations-footer.expanded {
-    max-height: 250px;
+    max-height: 400px; /* 少し高さを増やす */
+    background: rgba(255, 255, 255, 0.75);
 }
 
 [data-theme='dark'] .artifact-citations-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(45, 45, 45, 0.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+[data-theme='dark'] .artifact-citations-footer.expanded {
+    background: rgba(50, 50, 50, 0.7);
 }
 
 .artifact-citations-header {
@@ -562,6 +739,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.artifact-citations-icon {
+    display: flex;
+    align-items: center;
+    color: var(--color-primary); /* Liquid Glass: Use a tint color */
+    opacity: 0.8;
 }
 
 .artifact-citations-content {
@@ -602,18 +786,26 @@
 }
 
 .artifact-citations-label {
-    font-size: 12px;
+    font-size: 13px; /* Slightly larger */
     font-weight: 600;
     color: var(--color-text-main);
+    letter-spacing: 0.02em;
 }
 
 .artifact-citations-count {
-    font-size: 10px;
-    color: var(--color-text-muted);
-    background-color: var(--color-bg-body);
-    padding: 1px 6px;
-    border-radius: 8px;
-    font-weight: 500;
+    font-size: 11px;
+    color: var(--color-text-sub);
+    background-color: rgba(0, 0, 0, 0.06); /* Liquid Glass look */
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Specular highlight */
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+}
+
+[data-theme='dark'] .artifact-citations-count {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .artifact-citations-list {
@@ -629,24 +821,85 @@
 .artifact-citation-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--color-text-sub);
-    padding: 4px 0;
+    gap: 12px;
+    font-size: 13px; /* Subheadline 15px is too large, scaling to 13px for density */
+    color: var(--color-text-main); /* Ensure contrast */
+    padding: 10px 14px;
+    border-radius: 12px; /* Rounded corners for Inset Highlight - slightly larger for Glass */
+    cursor: default;
+    transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+    margin: 2px 0;
+    user-select: none;
+    
+    /* Liquid Glass Item Base Styles */
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.02),
+        inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+[data-theme='dark'] .artifact-citation-item {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    color: var(--color-text-main);
+}
+
+/* DESIGN_RULE.md: Inset Highlight Pattern with Vibrancy */
+.artifact-citation-item:hover {
+    background-color: var(--color-bg-body);
+    border-color: rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        inset 0 1px 1px rgba(255, 255, 255, 1);
+}
+
+[data-theme='dark'] .artifact-citation-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+.artifact-citation-item:active {
+    transform: scale(0.985); /* Physical feedback */
+    background-color: rgba(0, 0, 0, 0.02);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    border-color: transparent;
+}
+
+[data-theme='dark'] .artifact-citation-item:active {
+    background-color: rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .artifact-citation-number {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    background-color: var(--color-bg-body);
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 11px; /* Caption 2: 11px Medium */
     font-weight: 600;
-    color: var(--color-text-muted);
+    color: var(--color-text-sub);
     flex-shrink: 0;
+    font-family: var(--font-rounded), var(--font-sans); /* SF Pro Rounded preference */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.5);
+}
+
+[data-theme='dark'] .artifact-citation-number {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-main);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: none;
 }
 
 .artifact-citation-source {
@@ -665,40 +918,80 @@
     text-decoration: underline;
 }
 
-/* ========================================
-   Print Mode (PDF Export)
-   ======================================== */
 @media print {
-    /* ★追加: アプリ全体の高さ制約とスクロール制限を完全開放 (ページ分割・見切れ防止) */
-    html, body, #root, .app-layout, .chat-view, .chat-area {
+    /* ============================================================
+       印刷モード: Artifactコンテンツのみを正確に中央配置して出力
+       
+       戦略:
+       - body * { visibility: hidden } ではなく、主要レイアウト要素を
+         display: none で排除し、artifact-panel だけを表示する
+       - CSS Grid レイアウトとサイドバーを完全無効化する
+       - artifact-panel を position: static にしてドキュメントフローで配置
+       ============================================================ */
+
+    /* 1. ルート要素の制約を全開放 */
+    html, body, #root {
         height: auto !important;
         min-height: auto !important;
         max-height: none !important;
-        width: auto !important;
+        width: 100% !important;
         overflow: visible !important;
-        position: static !important; /* 絶対配置や固定配置による切り取りを防ぐ */
+        position: static !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* アプリケーション全体の不要なUIを隠す (index.css 等で .app-layout を消すのと同じ効果) */
-    body * {
-        visibility: hidden;
+    /* 2. AppLayout のグリッドを完全無効化 (inline style override) */
+    .app-layout-grid {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    /* Artifact本体とその子要素だけを表示 */
-    .artifact-panel,
-    .artifact-panel * {
-        visibility: visible;
+    /* 3. サイドバーを完全排除 (display: none でレイアウトスペースも消す) */
+    .app-layout-sidebar {
+        display: none !important;
     }
 
-    /* パネル自体の絶対配置、背景、影、枠線を解除して全くズレのない全画面に展開 */
+    /* 4. Main領域の制約を解除 */
+    .app-layout-main {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 5. chat-area の制約解除 (artifact-open 時の padding-right: calc(50vw+24px) を消す) */
+    .chat-area {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 6. Artifact以外のUI (ChatHistory, ChatInput, Header等) を非表示 */
+    .chat-history,
+    .bottom-controls-wrapper,
+    .top-bar-container,
+    .app-layout-inspector-floating,
+    .welcome-screen,
+    .app-header {
+        display: none !important;
+    }
+
+    /* 7. Artifact Panel: 全制約を解除し、ドキュメントフローで自然配置 */
     .artifact-panel {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        right: 0 !important;
-        bottom: auto !important;
+        position: static !important;
         width: 100% !important;
         height: auto !important;
         min-width: 0 !important;
@@ -708,71 +1001,73 @@
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
-        z-index: 9999 !important; /* 最前面 */
-        display: block !important; /* 中央寄せなどの干渉を無効化 */
+        overflow: visible !important;
+        transform: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 
-    /* 印刷時に不要なヘッダー、操作UI、スクロール設定を解除 */
+    /* 8. 印刷時に不要なUI + 出典セクションを非表示 */
     .artifact-header,
     .artifact-actions,
     .artifact-zoom-controls,
-    .artifact-close-btn {
+    .artifact-close-btn,
+    .artifact-citations-footer {
         display: none !important;
     }
 
+    /* 9. Body(スクロール領域)の制約を開放 */
     .artifact-body {
-        overflow: visible !important; /* スクロール枠を開放して全ページ印刷させる */
+        overflow: visible !important;
         padding: 0 !important;
         margin: 0 !important;
-        display: block !important;
         width: 100% !important;
+        height: auto !important;
+        flex-grow: 0 !important;
     }
 
-    /* ズーム用ラッパーの制限解除 (幅不足・右側余白の原因を無くす) */
+    /* 10. ズーム用ラッパーの制限解除 */
     .artifact-body > div {
         min-width: 0 !important;
         max-width: 100% !important;
-        width: 100% !important; /* 強制的に幅いっぱい */
-        display: block !important;
+        width: 100% !important;
         padding-bottom: 0 !important;
         margin: 0 !important;
     }
 
-    /* ドキュメント本体の制約解除とCSSマージンの無効化 */
+    /* 11. ドキュメント本体: 用紙上で自然にフロー */
     .artifact-content {
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
         min-height: 0 !important;
         margin: 0 !important;
-        padding: 0 !important; /* CSSでの疑似余白を消し、@pageの標準余白に任せる */
+        padding: 0 !important;
         box-shadow: none !important;
         border: none !important;
         border-radius: 0 !important;
-        transform: none !important; /* JSによるズームやずれを強制リセット */
-        page-break-after: always; /* （任意）必要なら末尾で改ページ */
+        transform: none !important;
         background-color: transparent !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* 改ページ制御: 見出しの直後での改ページを防止 */
+    /* 12. 改ページ制御 */
     .artifact-content h1, 
     .artifact-content h2, 
     .artifact-content h3 {
         page-break-after: avoid;
     }
 
-    /* 表の途中で不自然に切れないように調整 */
     .artifact-content table,
     .artifact-content .code-block-wrapper {
         page-break-inside: avoid;
     }
 
-    /* 用紙サイズ（A4）に固定し、ズレを吸収する余裕を持たせた均等マージン */
+    /* 13. 用紙サイズ（A4）と均等マージン */
     @page {
         size: A4;
-        margin: 20mm; /* ブラウザ標準の印刷余白を上書きし、PDF上でちょうど良いWord風の余白を取る */
+        margin: 20mm;
     }
 }
 
@@ -815,4 +1110,94 @@
 [data-theme='dark'] .artifact-citation-type-document {
     background-color: rgba(234, 179, 8, 0.2);
     color: #fde047;
+}
+
+/* ========================================
+   PDF Export Hidden Container Styles
+   ======================================== */
+.pdf-export-container {
+    width: 800px;
+    background-color: #ffffff !important;
+    color: #000000;
+    padding: 20px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
+
+    /* Override ALL oklch variables to safe HEX colors! */
+    --bg-base: #ffffff !important;
+    --bg-layer-1: #f9f9f9 !important;
+    --bg-layer-2: #f0f0f0 !important;
+    --bg-modal: transparent !important;
+    --color-primary: #000000 !important;
+    --color-primary-hover: #000000 !important;
+    --color-primary-active: #000000 !important;
+    --color-primary-bg: #f5f5f5 !important;
+    --color-primary-bg-hover: #e0e0e0 !important;
+    --color-text-main: #000000 !important;
+    --color-text-sub: #333333 !important;
+    --color-text-muted: #666666 !important;
+    --color-bg-body: #ffffff !important;
+    --color-bg-surface: #ffffff !important;
+    --color-bg-sidebar: #ffffff !important;
+    --color-border: #cccccc !important;
+    --color-border-strong: #999999 !important;
+    --color-error: #ff0000 !important;
+    --color-success: #00ff00 !important;
+    --color-warning-amber: #ffcc00 !important;
+    --color-warning-amber-bg: #fff5cc !important;
+    --color-source-hybrid: #0000ff !important;
+    --ring-focus: 0 0 0 0 transparent !important;
+}
+
+.pdf-export-container .pdf-title {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    text-align: center;
+    border-bottom: 2px solid #000000;
+    padding-bottom: 8px;
+    color: #000000 !important;
+}
+
+.pdf-export-container .pdf-content {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Force light mode styles for PDF and avoid oklch parse errors */
+.pdf-export-container,
+.pdf-export-container * {
+    color: #000000 !important;
+    background-color: transparent !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    outline: none !important;
+    background-image: none !important;
+}
+
+.pdf-export-container {
+    background-color: #ffffff !important;
+}
+
+.pdf-export-container pre,
+.pdf-export-container code {
+    background-color: #f5f5f5 !important;
+    border: 1px solid #ccc !important;
+}
+
+.pdf-export-container table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 16px 0 !important;
+}
+
+.pdf-export-container th,
+.pdf-export-container td {
+    border: 1px solid #000 !important;
+    padding: 8px !important;
+}
+
+.pdf-export-container th {
+    background-color: #f0f0f0 !important;
 }

@@ -1,6 +1,7 @@
-// src/components/Artifacts/ArtifactPanel.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
+// import html2pdf from 'html2pdf.js';
 import './ArtifactPanel.css';
 
 const CloseIcon = () => (
@@ -64,6 +65,38 @@ const ChevronIcon = () => (
     </svg>
 );
 
+const DownloadIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+);
+
+const MoreIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+        <circle cx="5" cy="12" r="1"></circle>
+    </svg>
+);
+
+/* ★追加: 出典アイコン */
+const LinkIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+    </svg>
+);
+
+const SourceIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="4 7 4 4 20 4 20 7"></polyline>
+        <line x1="9" y1="20" x2="15" y2="20"></line>
+        <line x1="12" y1="4" x2="12" y2="20"></line>
+    </svg>
+);
+
 /**
  * artifact_type に応じたバッジ表示
  */
@@ -93,11 +126,20 @@ const getTypeBadge = (type) => {
 const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isCitationsExpanded, setIsCitationsExpanded] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     
     // ★追加: ズームとスクロール用の状態管理
     const [zoomLevel, setZoomLevel] = useState(100);
     const [autoFit, setAutoFit] = useState(true);
     const [panelWidth, setPanelWidth] = useState(0);
+
+    // ★追加: PDFエクスポート用の状態と参照
+    const [isExportingPDF, setIsExportingPDF] = useState(false);
+    
+    // ★追加: Wordエクスポート用の状態
+    const [isExportingWord, setIsExportingWord] = useState(false);
+    
+    const hiddenExportRef = useRef(null);
 
     // ★追加: 現在のストリーミングメッセージがArtifact生成用かどうかを判定
     const isGeneratingArtifact = streamingMessage && streamingMessage.isStreaming && streamingMessage.artifact;
@@ -160,8 +202,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
         setAutoFit(true);
     };
 
-    // ★変更: artifactもストリーミングメッセージもない場合は何も表示しない
-    if (!artifact && !isGeneratingArtifact) return <div className="artifact-panel" />;
+    // ★変更: AnimatePresence でラップするため、ここで null を返すのではなく、
+    // アニメーションの完了を待機できるようにレンダリングツリー内に条件分岐を持っていく
+    // if (!artifact && !isGeneratingArtifact) return <div className="artifact-panel" />;
 
     // ★仕様書3.4準拠: # タイトル + 本文 でコピー
     const handleCopy = async () => {
@@ -181,21 +224,243 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
         window.print();
     };
 
+    // ★追加: Markdown ダウンロード処理
+    const handleDownloadMarkdown = () => {
+        try {
+            // ファイル名に使えない文字をアンダースコアに置換
+            const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
+            const blob = new Blob([displayContent], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${safeTitle}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            setIsMenuOpen(false);
+        } catch (err) {
+            console.error('Failed to download markdown:', err);
+        }
+    };
+
+    // ★追加: PDF ダウンロード処理
+    /*
+    const handleDownloadPDF = async () => {
+        if (!hiddenPdfRef.current) return;
+        try {
+            setIsExportingPDF(true);
+            setIsMenuOpen(false);
+
+            const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
+            
+            const opt = {
+                margin:       15,
+                filename:     `${safeTitle}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 800 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            await html2pdf().set(opt).from(hiddenPdfRef.current).save();
+        } catch (err) {
+            console.error('Failed to download PDF:', err);
+            alert("PDFエクスポートに失敗しました。");
+        } finally {
+            setIsExportingPDF(false);
+        }
+    };
+    */
+
+    // ★追加: Word ダウンロード処理 (CDNのhtml-docx-js利用)
+    const handleDownloadWord = async () => {
+        if (!hiddenExportRef.current) return;
+        try {
+            setIsExportingWord(true);
+            setIsMenuOpen(false);
+
+            // 1. html-docx-js のCDN動的読み込み
+            if (typeof window.htmlDocx === 'undefined') {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    // jsdelivrのCDNから古いhtml-docx-jsをグローバルとして読み込む
+                    script.src = 'https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+
+            const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
+            
+            // 2. 隠しDOM内の MarkdownRenderer の出力コンテンツ(.pdf-content)のみを取得
+            // (外側のラッパーや不要なタイトル要素 <h1> を含めない)
+            const contentContainer = hiddenExportRef.current.querySelector('.pdf-content');
+            if (!contentContainer) {
+                throw new Error("Content container not found");
+            }
+
+            // DOMをクローンしてWord用に加工する
+            const cloneNode = contentContainer.cloneNode(true);
+
+            // [加工処理 ⓪] 最初のH1要素を除去 (document-titleとの二重表示を防ぐ)
+            const firstH1 = cloneNode.querySelector('h1');
+            if (firstH1) {
+                firstH1.remove();
+            }
+
+            // [加工処理]
+            // ① Table要素のスタイリング (Wordで罫線が表示されるように属性を付与)
+            const tables = cloneNode.querySelectorAll('table');
+            tables.forEach(table => {
+                table.setAttribute('border', '1');
+                table.setAttribute('cellspacing', '0');
+                table.setAttribute('cellpadding', '5');
+                table.style.borderCollapse = 'collapse';
+                table.style.width = '100%';
+                table.style.marginBottom = '12px';
+                
+                const thItems = table.querySelectorAll('th');
+                thItems.forEach(th => {
+                    th.style.backgroundColor = '#f0f0f0';
+                    th.style.fontWeight = 'bold';
+                    th.style.padding = '6px';
+                });
+
+                const tdItems = table.querySelectorAll('td');
+                tdItems.forEach(td => {
+                    td.style.padding = '6px';
+                });
+            });
+
+            // ② 太字 (strong, b) 要素がWordでも機能するようフォントウェイトをインライン化
+            const strongItems = cloneNode.querySelectorAll('strong, b');
+            strongItems.forEach(item => {
+                item.style.fontWeight = 'bold';
+            });
+
+            // ③ 見出しタグ・段落のマージン調整
+            const headings = cloneNode.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            headings.forEach(h => {
+                h.style.marginTop = '16px';
+                h.style.marginBottom = '8px';
+            });
+            const paragraphs = cloneNode.querySelectorAll('p');
+            paragraphs.forEach(p => {
+                p.style.marginTop = '8px';
+                p.style.marginBottom = '8px';
+            });
+
+            // ④ リスト項目 (ul, ol, li)
+            const lists = cloneNode.querySelectorAll('ul, ol');
+            lists.forEach(list => {
+                list.style.marginTop = '8px';
+                list.style.marginBottom = '8px';
+                list.style.paddingLeft = '24px';
+            });
+
+            // 加工後のHTML文字列を取得
+            const contentHtml = cloneNode.innerHTML;
+            
+            // 3. Word出力用にインラインCSSを含むHTML文書を構築
+            // (余計なタイトル <h1> や区切り線を削除し、シンプルな文書構成にする)
+            const htmlString = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>${displayTitle}</title>
+                    <style>
+                        body {
+                            font-family: "MS Mincho", "Hiragino Mincho ProN", serif;
+                            color: #000000;
+                            line-height: 1.5;
+                        }
+                        h1, h2, h3, h4, h5, h6 {
+                            font-family: "MS Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+                            color: #000000;
+                            border: none;
+                        }
+                        .document-title {
+                            font-size: 24pt;
+                            font-weight: bold;
+                            text-align: center;
+                            font-family: "MS Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+                            margin-bottom: 24pt;
+                            border: none;
+                        }
+                        p, div, span, ul, ol, li, blockquote {
+                            border: none;
+                        }
+                        code, pre {
+                            font-family: Consolas, "Courier New", monospace;
+                            background-color: #f5f5f5;
+                        }
+                        a {
+                            color: #0000ff;
+                            text-decoration: underline;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <!-- 文書のメインタイトルのみを出力 (二重ヘッダーの防止) -->
+                    <div class="document-title">${displayTitle}</div>
+                    
+                    <!-- Markdown加工済みの本文 -->
+                    ${contentHtml}
+                </body>
+                </html>
+            `;
+
+            // 4. html-docx-js を用いて DOCX ファイル (Blob) に変換
+            const convertedBlob = window.htmlDocx.asBlob(htmlString);
+
+            // 5. ダウンロード実行
+            const url = URL.createObjectURL(convertedBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${safeTitle}.docx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Failed to download Word via CDN:', err);
+            alert("Wordエクスポートに失敗しました。ネットワーク接続等をご確認ください。");
+        } finally {
+            setIsExportingWord(false);
+        }
+    };
+
     const citations = displayCitations;
+    const shouldShowPanel = artifact || isGeneratingArtifact;
 
     return (
-        <div className={`artifact-panel ${isOpen ? 'open' : ''}`}>
-            {/* Header */}
-            <div className="artifact-header">
-                <div className="artifact-title-group">
-                    <div className="artifact-icon">
-                        <DocIcon />
-                    </div>
-                    <div className="artifact-header-info">
-                        <span className="artifact-title">
-                            {displayTitle}
-                            {isGeneratingArtifact && <span className="typing-cursor"></span>}
-                        </span>
+        <AnimatePresence>
+            {shouldShowPanel && (
+                <motion.div 
+                    className={`artifact-panel ${isOpen ? 'open' : ''} ${isGeneratingArtifact ? 'ai-generating' : ''}`}
+                    initial={{ x: '100%', opacity: 0 }}
+                    animate={{ x: isOpen ? 0 : '100%', opacity: isOpen ? 1 : 0 }}
+                    exit={{ x: '100%', opacity: 0 }}
+                    transition={{ 
+                        type: 'spring', 
+                        stiffness: 250, 
+                        damping: 25,
+                        mass: 1 
+                    }}
+                >
+                    {/* Header */}
+                    <div className="artifact-header">
+                        <div className="artifact-title-group">
+                            <div className="artifact-icon">
+                                <DocIcon />
+                            </div>
+                            <div className="artifact-header-info">
+                                <span className="artifact-title">
+                                    {displayTitle}
+                                    {isGeneratingArtifact && <span className="typing-cursor"></span>}
+                                </span>
                         <span className="artifact-type-badge-panel">{getTypeBadge(displayType)}</span>
                     </div>
                 </div>
@@ -220,26 +485,69 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
 
                     <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
 
-                    {/* ★追加: 印刷ボタン */}
-                    <button
-                        className="artifact-action-btn primary"
-                        onClick={handlePrint}
-                        title="PDFとして保存 / 印刷"
-                        disabled={isGeneratingArtifact} // 生成中は印刷無効
-                    >
-                        <PrintIcon />
-                        <span>印刷</span>
-                    </button>
+                    <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
 
-                    <button
-                        className={`artifact-action-btn primary ${isCopied ? 'copied' : ''}`}
-                        onClick={handleCopy}
-                        title="内容をクリップボードにコピー"
-                        disabled={isGeneratingArtifact} // 生成中はコピーボタンを無効化
-                    >
-                        {isCopied ? <CheckIcon /> : <CopyIcon />}
-                        <span>{isCopied ? 'コピー完了' : 'コピー'}</span>
-                    </button>
+                    <div className="artifact-action-group">
+                        <button
+                            className={`artifact-action-btn primary action-more-btn ${isMenuOpen ? 'active' : ''}`}
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            title="アクション"
+                            disabled={isGeneratingArtifact}
+                        >
+                            <MoreIcon />
+                        </button>
+
+                        {isMenuOpen && (
+                            <>
+                                <div className="artifact-menu-backdrop" onClick={() => setIsMenuOpen(false)} />
+                                <div className="artifact-actions-menu">
+                                    <button 
+                                        className="artifact-menu-item"
+                                        onClick={handleDownloadMarkdown}
+                                    >
+                                        <DownloadIcon />
+                                        <span>Markdown (.md)</span>
+                                    </button>
+                                    {/* 
+                                    <button 
+                                        className="artifact-menu-item"
+                                        onClick={handleDownloadPDF}
+                                        disabled={isExportingPDF}
+                                    >
+                                        <DownloadIcon />
+                                        <span>{isExportingPDF ? 'PDF 出力中...' : 'PDF (.pdf)'}</span>
+                                    </button>
+                                    */}
+                                    <button 
+                                        className="artifact-menu-item"
+                                        onClick={handleDownloadWord}
+                                        disabled={isExportingWord}
+                                    >
+                                        <DownloadIcon />
+                                        <span>{isExportingWord ? 'Word 出力中...' : 'Word (.docx)'}</span>
+                                    </button>
+                                    <div className="artifact-menu-divider" />
+                                    {/* 
+                                    <button 
+                                        className="artifact-menu-item"
+                                        onClick={() => { handlePrint(); setIsMenuOpen(false); }}
+                                    >
+                                        <PrintIcon />
+                                        <span>印刷する</span>
+                                    </button>
+                                    */}
+                                    <button 
+                                        className={`artifact-menu-item ${isCopied ? 'copied' : ''}`}
+                                        onClick={() => { handleCopy(); }}
+                                        disabled={isCopied}
+                                    >
+                                        {isCopied ? <CheckIcon /> : <CopyIcon />}
+                                        <span>{isCopied ? 'クリップボードにコピー' : 'コピー'}</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
 
                     <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
 
@@ -273,6 +581,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                         <MarkdownRenderer
                             content={displayContent}
                             isStreaming={isGeneratingArtifact}
+                            disableCitationReplacement={true}
                         />
                     </div>
                 </div>
@@ -289,8 +598,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                         title={isCitationsExpanded ? "出典を閉じる" : "出典を表示"}
                     >
                         <div className="artifact-citations-label-group">
-                            <span className="artifact-citations-label">📚 出典</span>
-                            <span className="artifact-citations-count">{citations.length}件</span>
+                            <span className="artifact-citations-icon"><LinkIcon /></span>
+                            <span className="artifact-citations-label">出典</span>
+                            <span className="artifact-citations-count">{citations.length}</span>
                         </div>
                         <div className={`citation-toggle-icon ${isCitationsExpanded ? 'rotated' : ''}`}>
                             <ChevronIcon />
@@ -321,7 +631,23 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                     </div>
                 </div>
             )}
-        </div>
+
+            {/* ★追加: エクスポート用の隠し領域 */}
+            <div style={{ position: 'absolute', top: -10000, left: -10000, width: '800px', zIndex: -1000 }}>
+                <div ref={hiddenExportRef} className="pdf-export-container">
+                    <h1 className="pdf-title">{displayTitle}</h1>
+                    <div className="pdf-content">
+                        <MarkdownRenderer
+                            content={displayContent}
+                            isStreaming={false}
+                            disableCitationReplacement={true}
+                        />
+                    </div>
+                </div>
+            </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 

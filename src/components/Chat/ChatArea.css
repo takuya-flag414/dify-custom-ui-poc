@@ -108,8 +108,8 @@
   background: linear-gradient(to top, var(--color-bg-surface) 85%, transparent);
   padding-top: var(--space-4);
 
-  /* ★修正: 余白を削減 (24px -> 8px) */
-  padding-bottom: var(--space-2);
+  /* ★修正: 余白を削減 (24px -> 16px) ArtifactPanelと統一 */
+  padding-bottom: 16px;
 
   z-index: 20;
   width: 100%;
