@@ -129,6 +129,7 @@ export const restoreMessageState = (query: string) => {
         intelligence: parsed.intelligence,
         context: parsed.context,
         quote: parsed.quote,
+        artifact: (parsed as any).artifact, // ★追加: artifactメタデータ
         timestamp: parsed.timestamp
     };
 };

@@ -671,7 +671,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     }
 
                                     // ★リファクタリング: メッセージコンテンツ抽出
-                                    const { textToDisplay, thinkingToDisplay, newProtocolMode } = extractMessageContent(
+                                    const { textToDisplay, thinkingToDisplay, newProtocolMode, artifactToDisplay } = extractMessageContent(
                                         contentBuffer,
                                         protocolMode,
                                         messageStartTime,
@@ -683,7 +683,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                         ...prev,
                                         text: textToDisplay,
                                         rawContent: contentBuffer,
-                                        thinking: thinkingToDisplay
+                                        thinking: thinkingToDisplay,
+                                        // ★追加: ストリーミング中のArtifact中間値をリアルタイムに反映
+                                        artifact: artifactToDisplay || prev.artifact
                                     } : prev);
                                 }
                             }
@@ -851,9 +853,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         // ★修正: 元のメッセージから状態を復元 (attachments等)
         const targetMessage = result.targetMessage;
         let attachments = [];
+        let options = {};
         if (targetMessage) {
             const restored = restoreMessageState(targetMessage.text);
             attachments = restored.attachments || [];
+            if (restored.artifact) {
+                options.artifact = restored.artifact;
+            }
             // ここでcontextやintelligenceを復元するか？
             // 仕様としては「現在の設定」で再送信するのが自然かもしれないが、
             // Dify APIに送る際はattachmentsが必要。
@@ -862,7 +868,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         }
 
         // handleSendMessageはFile|AttachmentMeta[]を受け付けるように修正済み
-        await handleSendMessage(newText, attachments);
+        await handleSendMessage(newText, attachments, options);
     }, [messages, handleSendMessage, addLog]);
 
     // ★リファクタリング: 再送信（再生成）関数
@@ -878,7 +884,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         // ★修正: extractPlainText で構造化JSONからプレーンテキストを抽出し、二重ラップを防止
         const textToSend = extractPlainText(result.targetUserMessage.text || '');
 
-        await handleSendMessage(textToSend, result.targetUserMessage.files || []);
+        let options = {};
+        try {
+            const restored = restoreMessageState(result.targetUserMessage.text || '');
+            if (restored.artifact) {
+                options.artifact = restored.artifact;
+            }
+        } catch (e) {}
+
+        await handleSendMessage(textToSend, result.targetUserMessage.files || [], options);
     }, [messages, handleSendMessage, addLog]);
 
     return {

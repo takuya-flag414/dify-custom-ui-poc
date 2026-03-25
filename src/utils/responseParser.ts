@@ -193,9 +193,24 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
     const partialThinking = extractPartialThinking(textToParse);
     const partialAnswer = extractPartialJson(textToParse);
 
-    // ★改善: answerまたはthinkingのどちらかが見つかれば、JSONとして処理
-    if (partialAnswer !== null || partialThinking !== null) {
-        // answerまたはthinkingが見つかった場合
+    // ★Artifact: ストリーミング中のPartial Artifact抽出
+    // ※ return条件チェックの「前」に移動: Artifact JSONではanswerが末尾にあり、
+    //    artifact_content生成中はpartialAnswer === nullのため、
+    //    artifact_titleの存在も判定条件に含める必要がある
+    let partialArtifact: ArtifactData | null = null;
+    const partialArtifactTitle = extractPartialField(textToParse, 'artifact_title');
+    const partialArtifactContent = extractPartialField(textToParse, 'artifact_content');
+    if (partialArtifactTitle) {
+        partialArtifact = {
+            artifact_title: partialArtifactTitle,
+            artifact_type: extractPartialField(textToParse, 'artifact_type') || 'summary_report',
+            artifact_content: partialArtifactContent || '',
+        };
+    }
+
+    // ★改善: answer/thinking/artifact_titleのいずれかが見つかれば、JSONとして処理
+    if (partialAnswer !== null || partialThinking !== null || partialArtifact !== null) {
+        // answerまたはthinkingまたはartifact_titleが見つかった場合
         // citations も同様に部分抽出を試みるのが理想だが、
         // citationsは通常answerの後にあるため、回答中は空でもUX上問題ない
 
@@ -216,18 +231,6 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                 extractedSmartActions = JSON.parse(smartActionsMatch[1]);
             }
         } catch { }
-
-        // ★Artifact: ストリーミング中のPartial Artifact抽出
-        let partialArtifact: ArtifactData | null = null;
-        const partialArtifactTitle = extractPartialField(textToParse, 'artifact_title');
-        const partialArtifactContent = extractPartialField(textToParse, 'artifact_content');
-        if (partialArtifactTitle) {
-            partialArtifact = {
-                artifact_title: partialArtifactTitle,
-                artifact_type: extractPartialField(textToParse, 'artifact_type') || 'summary_report',
-                artifact_content: partialArtifactContent || '',
-            };
-        }
 
         return {
             answer: partialAnswer || '',  // ★改善: nullの場合は空文字を返す

@@ -58,6 +58,7 @@ export interface StructuredUserMessage {
     context: KnowledgeContext;
     quote?: string; // Optioanl quoted text from previous AI message
     dify_inputs?: Record<string, string | boolean>; // Dify API inputs snapshot for traceability
+    artifact?: any; // Artifactメタデータ
 
     // Optional metadata for restoration
     timestamp: number;

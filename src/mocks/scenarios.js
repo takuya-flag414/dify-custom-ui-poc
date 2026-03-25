@@ -761,7 +761,7 @@ export const scenarios = {
   },
 
   // =================================================================
-  // Pattern 12: Artifact Demo (ドキュメント生成デモ)
+  // Pattern 12: Artifact Demo (ドキュメント生成デモ) - 既存Markdown型
   // =================================================================
   'artifact_demo': {
     efficient: [], // Not implemented
@@ -802,6 +802,980 @@ export const scenarios = {
       },
       { event: 'node_finished', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
       { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 1580, completion_tokens: 842, total_tokens: 2422 } } }
+    ]
+  },
+
+  // =================================================================
+  // Pattern 13: HTML Artifact Demo (HTML直接生成方式 v2.0)
+  // =================================================================
+  'html_artifact_demo': {
+    efficient: [], // Not implemented
+    partner: [
+      // 1. Intent Analysis
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      {
+        event: 'node_finished', data: {
+          title: 'LLM_Intent_Analysis',
+          outputs: {
+            text: '```json\n' + JSON.stringify({
+              thinking: "高度なレポート形式での出力をリクエストされています。HTML直接生成モード（Artifact v2.0）でリッチなドキュメントを生成します 📄",
+              category: "ARTIFACT",
+              requires_rag: true,
+              requires_web: false,
+              resultLabel: "判定: 📄 HTML Artifactモード → リッチドキュメントを生成します"
+            }, null, 2) + '\n```'
+          }
+        }
+      },
+      // 2. RAG Search
+      { event: 'node_started', data: { title: '社内ナレッジ検索', node_type: 'knowledge-retrieval', inputs: { query: '売上 分析 レポート' } } },
+      { event: 'node_finished', data: { title: '社内ナレッジ検索', outputs: { result: '[Doc chunks...]' } } },
+      // 3. Artifact Generator LLM
+      { event: 'node_started', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      // 4. Code_HTML_Sanitizer (v2.0 新規ノード)
+      { event: 'node_started', data: { title: 'Code_HTML_Sanitizer', node_type: 'code' } },
+      { event: 'node_finished', data: { title: 'Code_HTML_Sanitizer', node_type: 'code' } },
+      // 5. メッセージ出力
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact_title: '2025年度 Q4 売上分析レポート',
+          artifact_type: 'html_document',
+          artifact_content: `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025年度 Q4 売上分析レポート</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+<style>
+:root {
+  /* 印刷物基準のフォント定義 */
+  --font-body: 'Hiragino Mincho ProN', 'Yu Mincho', 'MS Mincho', serif;
+  --font-heading: 'Hiragino Sans', 'Yu Gothic Medium', 'Meiryo', sans-serif;
+  --font-mono: 'Courier New', 'Osaka-Mono', monospace;
+  
+  /* 印刷基準のサイズ設定 */
+  --text-base: 10.5pt;
+  --text-sm:   9pt;
+  --text-h1:   22pt;
+  --text-h2:   16pt;
+  --text-h3:   12pt;
+  --leading-body:    1.9;
+  --leading-heading: 1.3;
+
+  /* theme-modern カラーパレット */
+  --primary: #1e5f8e;
+  --primary-light: #dce4eb;
+  --accent: #e67e22;
+  --text: #333333;
+  --text-sub: #777777;
+  --bg: #ffffff;
+  --bg-section: #f0f4f8;
+  --border: #cccccc;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  color: var(--text);
+  background: var(--bg);
+  padding: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+h1, h2, h3, th, .kpi-value, .kpi-change, .cover-page h1, .subtitle, .meta {
+  font-family: var(--font-heading);
+}
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 40px;
+  margin-bottom: 60px;
+}
+.cover-page {
+  text-align: center;
+  padding: 120px 40px;
+  background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
+  color: white;
+  border-radius: 0;
+}
+.cover-page h1 {
+  font-size: var(--text-h1);
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+  line-height: var(--leading-heading);
+}
+.cover-page .subtitle {
+  font-size: var(--text-h2);
+  opacity: 0.85;
+  margin-bottom: 40px;
+}
+.cover-page .meta {
+  font-size: var(--text-sm);
+  opacity: 0.7;
+}
+.content-page { background: var(--bg); }
+h2 {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--primary);
+  margin: 32px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary);
+  line-height: var(--leading-heading);
+  break-before: avoid; 
+  break-after: avoid;
+}
+h3 {
+  font-size: var(--text-h3);
+  font-weight: 600;
+  color: var(--primary);
+  margin: 24px 0 12px;
+  line-height: var(--leading-heading);
+  break-before: avoid; 
+  break-after: avoid;
+}
+p { margin-bottom: 16px; color: var(--text); }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 24px 0;
+}
+.kpi-card {
+  padding: 24px;
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: center;
+}
+.kpi-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.kpi-label {
+  font-size: 13px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+.kpi-change {
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.kpi-change.up { color: #16a34a; }
+.kpi-change.down { color: #dc2626; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+}
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+th {
+  background: var(--bg-section);
+  font-weight: 600;
+  color: var(--text-sub);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.chart-container {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 32px auto;
+  padding: 24px;
+  background: var(--bg-section);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.highlight-box {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 16px 20px;
+  margin: 24px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+<section class="page cover-page" style="page-break-after: always; padding: 20mm 18mm;">
+  <h1>2025年度 Q4 売上分析レポート</h1>
+  <div class="subtitle">第4四半期 業績サマリーと今後の展望</div>
+  <div class="meta">作成日: 2026年3月22日 ｜ 作成者: 経営企画部</div>
+</section>
+
+<section class="page content-page" style="padding: 20mm 18mm;">
+  <h2>エグゼクティブサマリー</h2>
+  <p>2025年度第4四半期は、前年同期比で売上高が<strong>15.3%増</strong>と堅調に推移しました。特にSaaS事業の成長が全体を牽引し、ARRは初めて100億円を突破しました。</p>
+  
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-value">¥42.8億</div>
+      <div class="kpi-label">売上高</div>
+      <div class="kpi-change up">▲ 15.3% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">¥12.1億</div>
+      <div class="kpi-label">営業利益</div>
+      <div class="kpi-change up">▲ 22.7% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">28.3%</div>
+      <div class="kpi-label">営業利益率</div>
+      <div class="kpi-change up">▲ 1.7pt</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <strong>📌 重要ポイント:</strong> SaaS ARRが100億円を突破。解約率は1.2%と業界平均（3.5%）を大幅に下回っています。
+  </div>
+
+  <h2>四半期別売上推移</h2>
+  <div class="chart-container">
+    <canvas id="chart-quarterly"></canvas>
+  </div>
+
+  <h2>事業セグメント別実績</h2>
+  <table>
+    <thead>
+      <tr><th>セグメント</th><th>売上高</th><th>前年比</th><th>構成比</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>SaaS事業</td><td>¥25.2億</td><td>+28.4%</td><td>58.9%</td></tr>
+      <tr><td>コンサルティング</td><td>¥10.8億</td><td>+5.2%</td><td>25.2%</td></tr>
+      <tr><td>ライセンス販売</td><td>¥4.5億</td><td>-3.1%</td><td>10.5%</td></tr>
+      <tr><td>その他</td><td>¥2.3億</td><td>+12.0%</td><td>5.4%</td></tr>
+    </tbody>
+  </table>
+
+  <h2>今後の展望と提言</h2>
+  <h3>成長ドライバー</h3>
+  <p>AI機能の強化により、SaaS事業のARPU向上が見込まれます。2026年度は海外展開を本格化し、アジア太平洋地域での売上拡大を推進します。</p>
+  
+  <h3>リスク要因</h3>
+  <p>為替変動リスクおよび競合の価格競争激化に留意が必要です。継続的な製品差別化への投資を推奨します。</p>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  new Chart(document.getElementById('chart-quarterly'), {
+    type: 'bar',
+    data: {
+      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+      datasets: [{
+        label: '2024年度',
+        data: [32.5, 34.8, 35.2, 37.1],
+        backgroundColor: 'rgba(30, 95, 142, 0.2)',
+        borderColor: 'rgba(30, 95, 142, 0.6)',
+        borderWidth: 1.5,
+        borderRadius: 4
+      }, {
+        label: '2025年度',
+        data: [36.1, 38.5, 40.2, 42.8],
+        backgroundColor: 'rgba(30, 95, 142, 0.7)',
+        borderColor: 'rgba(30, 95, 142, 1)',
+        borderWidth: 1.5,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        title: { display: true, text: '四半期別売上高（億円）', font: { size: 14, weight: '600' } }
+      },
+      scales: {
+        y: { beginAtZero: false, min: 25, ticks: { callback: v => '¥' + v + '億' } }
+      }
+    }
+  });
+  // postMessage で親フレームに高さ通知
+  window.parent.postMessage({ type: 'artifact-resize', height: document.documentElement.scrollHeight }, '*');
+});
+<\/script>
+</body>
+</html>`,
+          answer: '2025年度Q4の売上分析レポートを作成しました！📄 Chart.jsグラフを含むリッチなHTMLドキュメントです。右側のパネルでご確認ください。',
+          citations: [
+            { id: 'cite_1', type: 'rag', source: '2025年度_四半期業績報告.xlsx', url: null },
+            { id: 'cite_2', type: 'rag', source: '経営企画_KPIダッシュボード.pdf', url: null }
+          ]
+        })
+      },
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 2100, completion_tokens: 3200, total_tokens: 5300 } } }
+    ]
+  },
+
+  // =================================================================
+  // Pattern 14: HTML Business Document (モノクロ・フォーマル文書)
+  // =================================================================
+  'html_business_document': {
+    efficient: [],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      {
+        event: 'node_finished', data: {
+          title: 'LLM_Intent_Analysis',
+          outputs: {
+            text: '```json\n' + JSON.stringify({
+              thinking: "公式な案内状の形式での出力をリクエストされています。Artifact v2.0仕様に基づき、日本のビジネスマナーに則ったフォーマルなモノクロ文書を生成します 📄",
+              category: "ARTIFACT",
+              requires_rag: true,
+              requires_web: false,
+              resultLabel: "判定: 📄 HTML Artifactモード → フォーマル文書を生成します"
+            }, null, 2) + '\n```'
+          }
+        }
+      },
+      { event: 'node_started', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      { event: 'node_started', data: { title: 'Code_HTML_Sanitizer', node_type: 'code' } },
+      { event: 'node_finished', data: { title: 'Code_HTML_Sanitizer', node_type: 'code' } },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact_title: 'ITインフラ基盤刷新に関するご提案書',
+          artifact_type: 'html_document',
+          artifact_content: `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ITインフラ基盤刷新に関するご提案書</title>
+<!-- [検証用] 許可されていない非CDN外部スクリプト -->
+<script src="https://example.com/malicious.js"></script>
+<!-- [検証用] fetchによる外部通信 -->
+<script>
+  fetch("https://example.com/api");
+</script>
+<!-- [検証用] localStorageの利用 -->
+<script>
+  localStorage.setItem("test", "data");
+  sessionStorage.setItem("test", "data");
+  let xhr = new XMLHttpRequest();
+</script>
+<style>
+:root {
+  --font-body: 'Hiragino Mincho ProN', 'Yu Mincho', 'MS Mincho', serif;
+  --font-heading: 'Hiragino Sans', 'Yu Gothic Medium', 'Meiryo', sans-serif;
+  --text-base: 11pt;
+  --leading-body: 1.6;
+  --page-width: 210mm;
+  --page-height: 297mm;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+@page {
+  size: A4;
+  margin: 0;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+}
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  letter-spacing: 0.02em;
+  color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+.page {
+  width: var(--page-width);
+  min-height: var(--page-height);
+  margin: 0 auto;
+  padding: 25mm 25mm;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: relative;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+}
+@media print {
+  body { background: none; display: block; }
+  .page {
+    margin: 0;
+    box-shadow: none;
+    height: 296.8mm; /* 297mmだとブラウザにより2枚目に溢れる可能性があるため微調整 */
+    width: 210mm;
+  }
+}
+.page-footer {
+  position: absolute;
+  bottom: 10mm;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 9pt;
+  color: #666;
+}
+.cover-page {
+  justify-content: space-between;
+  padding: 40mm 25mm 50mm; /* パディングを控えめにし、中央はjustifyで埋める */
+}
+.cover-title-group { text-align: center; width: 100%; }
+.cover-subtitle { font-size: 1.4em; margin-bottom: 5mm; letter-spacing: 0.2em; }
+.cover-title { font-size: 2.4em; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5mm 0; font-weight: normal; }
+.cover-meta { width: 100%; text-align: right; }
+.cover-client { text-align: left; width: 100%; font-size: 1.2em; }
+.date { text-align: right; margin-bottom: 5mm; }
+.recipient { margin-bottom: 8mm; font-size: 1.1em; }
+.sender { text-align: right; margin-bottom: 12mm; }
+h2.section-title {
+  font-size: 1.4em;
+  font-weight: normal;
+  border-bottom: 1px solid #000;
+  margin-bottom: 6mm;
+  padding-bottom: 2mm;
+}
+.salutation { margin-bottom: 4mm; }
+.main-text {
+  text-indent: 1em;
+  margin-bottom: 4mm;
+  text-align: justify;
+}
+.complimentary-close { text-align: right; margin-bottom: 12mm; }
+.item-list { margin-left: 1.5em; margin-bottom: 8mm; }
+.item-list li { margin-bottom: 3mm; }
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6mm 0;
+}
+.budget-table th, .budget-table td {
+  border: 1px solid #000;
+  padding: 3mm;
+  text-align: left;
+}
+.budget-table th { background: #eee; font-weight: normal; }
+.end-marker { text-align: right; font-weight: bold; margin-top: 10mm; }
+</style>
+</head>
+<body>
+  <div class="page cover-page" style="page-break-after: always;">
+    <div class="cover-client">株式会社フューチャー・システムズ<br>代表取締役社長　佐藤　健一　様</div>
+    <div class="cover-title-group">
+      <div class="cover-subtitle">次世代IT基盤構築に向けた</div>
+      <h1 class="cover-title">ITインフラ基盤刷新に関するご提案書</h1>
+    </div>
+    <div class="cover-meta">
+      提出日：2026年 3月 23日<br><br>
+      日商インテリジェント株式会社<br>
+      執行役員　営業統括本部長<br>
+      小坂　卓也
+    </div>
+    <div class="page-footer">1 / 4</div>
+  </div>
+  <div class="page" style="page-break-after: always;">
+    <div class="date">2026年 3月 23日</div>
+    <div class="recipient">株式会社フューチャー・システムズ　御中</div>
+    <div class="sender">
+      日商インテリジェント株式会社<br>
+      小坂　卓也
+    </div>
+    <h2 class="section-title">1. はじめに</h2>
+    <div class="salutation">謹啓　春陽の候、貴社におかれましては益々ご清栄のこととお慶び申し上げます。</div>
+    <div class="main-text">
+      平素は格別のご高配を賜り、厚く御礼申し上げます。さて、この度、貴社の更なる成長を支える強固な事業基盤の構築に向け、「次世代ITインフラ基盤の刷新」についてご提案させていただきます。
+    </div>
+    <div class="main-text">
+      本提案は、貴社の将来的な事業拡大とセキュリティリスクへの対応を両立させることを目的としております。何卒ご高覧賜りますよう宜しくお願い申し上げます。
+    </div>
+    <div class="complimentary-close">敬白</div>
+    <h2 class="section-title">2. 現状の課題と刷新の必要性</h2>
+    <div class="main-text">
+      現在の貴社IT基盤において、以下の課題が挙げられます。
+    </div>
+    <ul class="item-list">
+      <li><strong>ハードウェアの老朽化：</strong> 導入から7年が経過したオンプレミスサーバーの保守期限が迫り、故障リスクが高まっています。</li>
+      <li><strong>運用コストの高止まり：</strong> 物理インフラの維持管理にリソースが費やされ、戦略的投資へのリソースが不足しています。</li>
+      <li><strong>セキュリティ要件の変化：</strong> リモートワークの常態化に伴い、従来型の境界防御では対応できないリスクが増大しています。</li>
+    </ul>
+    <div class="page-footer">2 / 4</div>
+  </div>
+  <div class="page" style="page-break-after: always;">
+    <h2 class="section-title">3. 刷新後の全体構成案</h2>
+    <div class="main-text">
+      本提案では、「クラウドネイティブかつセキュアな基盤への移行」を核としております。
+    </div>
+    <h3 style="margin-bottom: 4mm; font-weight: normal;">(1) クラウド基盤への移行</h3>
+    <div class="main-text" style="margin-bottom: 8mm;">
+      物理サーバーを廃止し、スケーラビリティに優れたクラウド基盤へ移行します。これにより、ハードウェア更新の負担を解消し、柔軟なリソース調整を可能にします。
+    </div>
+    <h3 style="margin-bottom: 4mm; font-weight: normal;">(2) ゼロトラスト・セキュリティの実装</h3>
+    <div class="main-text" style="margin-bottom: 8mm;">
+      信頼されないネットワークを前提としたアーキテクチャを導入します。ID管理とエンドポイント防御を高度に連携させ、安全な業務環境を実現します。
+    </div>
+    <h2 class="section-title">4. 期待される効果</h2>
+    <ul class="item-list">
+      <li><strong>TCOの約30%削減：</strong> 物理資産の保有に伴う管理費、電力費、設置スペース費を削減。</li>
+      <li><strong>システムの可用性向上：</strong> クラウドの冗長化機能を活用し、高い稼働率を確保。</li>
+      <li><strong>人的リソースの転換：</strong> 定型運用業務の自動化により、IT部門を攻めの組織へと変革。</li>
+    </ul>
+    <div class="page-footer">3 / 4</div>
+  </div>
+  <div class="page">
+    <h2 class="section-title">5. 導入スケジュール（案）</h2>
+    <ul class="item-list">
+      <li><strong>Phase 1: 環境分析・設計 (1〜2ヶ月目)</strong></li>
+      <li><strong>Phase 2: 構築・検証 (3〜4ヶ月目)</strong></li>
+      <li><strong>Phase 3: 本番移行・安定稼働 (5〜6ヶ月目)</strong></li>
+    </ul>
+    <h2 class="section-title">6. 概算費用</h2>
+    <table class="budget-table">
+      <tr><th>項目</th><th>概算費用（税抜）</th><th>備考</th></tr>
+      <tr><td>初期構築・移行費</td><td>¥ 15,000,000</td><td>一式</td></tr>
+      <tr><td>ライセンス初期費用</td><td>¥ 3,500,000</td><td>初期契約分</td></tr>
+      <tr><td>月額ランニング費用</td><td>¥ 850,000 / 月</td><td>クラウド利用料等</td></tr>
+    </table>
+    <div class="main-text" style="margin-top: 10mm;">
+      以上、貴社の未来を拓くパートナーとして、全力を尽くす所存でございます。
+    </div>
+    <div class="end-marker">以上</div>
+    <div class="page-footer">4 / 4</div>
+  </div>
+  <script>
+    window.parent.postMessage({ type: 'artifact-resize', height: document.documentElement.scrollHeight }, '*');
+  </script>
+</body>
+</html>`,
+          answer: 'ITインフラ基盤刷新に関するご提案書を複数ページ構成（全4ページ）のフォーマルな形式で作成しました。📄\\n\\n- 1ページ目: 表紙\\n- 2ページ目: 現状分析・背景\\n- 3ページ目: 提案の全体像・期待効果\\n- 4ページ目: スケジュール・概算予算\\n\\nWordのようにページが分かれた本格的なドキュメント構成となっています。右側のパネルで、スクロールして内容をご確認いただけます。',
+          citations: []
+        })
+      },
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 1500, completion_tokens: 4500, total_tokens: 6000 } } }
+    ]
+  },
+
+  // =================================================================
+  // Pattern 15: HTML Statistical Report (統計報告書 - 複数ページ/グラフ/表)
+  // =================================================================
+  'html_statistical_report': {
+    efficient: [],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      {
+        event: 'node_finished', data: {
+          title: 'LLM_Intent_Analysis',
+          outputs: {
+            text: '```json\n' + JSON.stringify({
+              thinking: "統計データと比較分析を含む高度なレポート作成を承りました。HTML Artifact v1.2仕様に基づき、Chart.jsを使用した可視化とフォーマルなビジネス文書形式で生成します 📈",
+              category: "ARTIFACT",
+              requires_rag: true,
+              requires_web: false,
+              resultLabel: "判定: 📋 HTML統計レポート → 高度な可視化を含む文書を生成します"
+            }, null, 2) + '\n```'
+          }
+        }
+      },
+      { event: 'node_started', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Artifact_Generator', node_type: 'llm' } },
+      { event: 'node_started', data: { title: 'Code_HTML_Sanitizer', node_type: 'code' } },
+      { event: 'node_finished', data: { title: 'Code_HTML_Sanitizer', node_type: 'code' } },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact_title: '2026年度 市場動向比較および統計分析報告書',
+          artifact_type: 'html_document',
+          artifact_content: `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>2026年度 市場動向比較および統計分析報告書</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+    <script>
+        // --- 修正: ポーリングによる初期化 (Guide 7.1, 8.2 準拠) ---
+        function initChartWhenReady() {
+            try {
+                const configs = [
+                    {
+                        id: 'marketChart',
+                        type: 'line',
+                        data: {
+                            labels: ['2023', '2024', '2025', '2026', '2027(予)', '2028(予)'],
+                            datasets: [{ label: '市場規模 (十億円)', data: [380, 410, 445, 480, 520, 570], borderColor: '#1c4587', backgroundColor: 'rgba(28, 69, 135, 0.08)', fill: true, tension: 0.3 }]
+                        },
+                        options: {
+                            locale: 'ja-JP',
+                            responsive: true, maintainAspectRatio: false,
+                            layout: { padding: { right: 30, left: 15, top: 10, bottom: 10 } },
+                            plugins: { legend: { display: false }, title: { display: true, text: '国内市場規模の推移', font: { size: 13 } } },
+                            scales: { y: { suggestedMin: 350, suggestedMax: 600 } }
+                        }
+                    },
+                    {
+                        id: 'sectorChart',
+                        type: 'bar',
+                        data: {
+                            labels: ['製造', '金融', '小売', '公共'],
+                            datasets: [
+                                { label: '既存事業', data: [120, 90, 150, 80], backgroundColor: '#1c4587' },
+                                { label: '新規DX', data: [60, 110, 40, 70], backgroundColor: '#8b0000' }
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } }, title: { display: true, text: 'セクター別需要内訳', font: { size: 13 } } },
+                            scales: { x: { stacked: true }, y: { stacked: true } }
+                        }
+                    },
+                    {
+                        id: 'shareChart',
+                        type: 'pie',
+                        data: {
+                            labels: ['Flag414', '競合A', '競合B', 'その他'],
+                            datasets: [{ data: [28, 22, 18, 32], backgroundColor: ['#1c4587', '#8b0000', '#94a3b8', '#e2e8f0'] }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { position: 'right', labels: { boxWidth: 12 } }, title: { display: true, text: '市場占有率構成', font: { size: 13 } } }
+                        }
+                    },
+                    {
+                        id: 'performanceChart',
+                        type: 'radar',
+                        data: {
+                            labels: ['コスト', '品質', '速度', 'サポート', '拡張性'],
+                            datasets: [
+                                { label: 'Flag414', data: [90, 95, 85, 95, 90], borderColor: '#1c4587', backgroundColor: 'rgba(28, 69, 135, 0.15)' },
+                                { label: '業界平均', data: [75, 80, 70, 75, 80], borderColor: '#94a3b8', backgroundColor: 'rgba(148, 163, 184, 0.15)' }
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom' }, title: { display: true, text: '5軸レーダー比較分析', font: { size: 13 } } },
+                            scales: { r: { suggestedMin: 0, suggestedMax: 100 } }
+                        }
+                    }
+                ];
+
+                if (typeof Chart === 'undefined') {
+                    requestAnimationFrame(initChartWhenReady);
+                    return;
+                }
+
+                let allInitialized = true;
+                configs.forEach(config => {
+                    const canvas = document.getElementById(config.id);
+                    if (canvas) {
+                        if (!window['chart_' + config.id]) {
+                            window['chart_' + config.id] = new Chart(canvas.getContext('2d'), config);
+                        }
+                    } else {
+                        allInitialized = false;
+                    }
+                });
+
+                if (allInitialized) {
+                    window.__chartInitFinished = true;
+                } else {
+                    requestAnimationFrame(initChartWhenReady);
+                }
+            } catch (e) {
+                console.error("Init Error:", e);
+                requestAnimationFrame(initChartWhenReady);
+            }
+        }
+        initChartWhenReady();
+
+        // --- リサイズ通知 (Guide 1.0 準拠) ---
+        function notifyResize() {
+            if (document.documentElement && document.documentElement.scrollHeight > 0) {
+                window.parent.postMessage({ type: 'artifact-resize', height: document.documentElement.scrollHeight }, '*');
+            }
+        }
+
+        // 継続的な通知(requestAnimationFrame)を廃止し、ResizeObserverで効率化
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(() => notifyResize());
+            ro.observe(document.body);
+        } else {
+            notifyResize();
+            setTimeout(notifyResize, 500);
+        }
+    </script>
+    <style>
+        /* --- 1. 基本変数の定義 (Guide 3.1, 4.3 準拠) --- */
+        :root {
+            /* ページ設定 */
+            --page-width: 210mm;
+            --page-height: 297mm;
+            
+            /* タイポグラフィ */
+            --font-body:    "Hiragino Mincho ProN", "Yu Mincho", serif;
+            --font-heading: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+            --text-base: 10.5pt;
+            --text-sm:   9pt;
+            --text-h1:   24pt;
+            --text-h2:   16pt;
+            --text-h3:   12pt;
+
+            /* カラーパレット (theme-color 準拠) */
+            --color-primary:    #1a3a6e;
+            --color-accent:     #c0392b;
+            --color-heading:    #000;
+            --color-body:       #000;
+            --color-muted:      #000;
+            --color-border:     #b0b8c1;
+            --color-rule:       #1a3a6e;
+            --color-bg-accent:  #eef2f7;
+            --color-bg-cover:   #1a3a6e;
+        }
+
+        /* --- 2. リセット & ページ構造 (Guide 3.1 準拠) --- */
+        @page { size: A4; margin: 0; }
+        html, body { margin: 0; padding: 0; overflow: hidden; background: transparent; }
+        body { display: flex; flex-direction: column; align-items: center; }
+
+        .page {
+            width: var(--page-width);
+            min-height: var(--page-height);
+            margin: 0 auto;
+            padding: 30mm 25mm;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            color: var(--color-body);
+            line-height: 1.7;
+        }
+
+        @media print {
+            body { background: none; display: block; }
+            .page { margin: 0; box-shadow: none; width: 210mm; height: 296.8mm; }
+        }
+
+        /* --- 3. コンポーネントスタイル --- */
+        h1, h2, h3 { font-family: var(--font-heading); color: var(--color-heading); }
+        h2 { font-size: var(--text-h2); border-bottom: 2px solid var(--color-rule); padding-bottom: 2pt; margin-bottom: 10pt; margin-top: 16pt; }
+        h3 { font-size: var(--text-h3); margin-top: 12pt; margin-bottom: 6pt; }
+        
+        table { border-collapse: collapse; width: 100%; margin: 15pt 0; }
+        th, td { border: 1px solid var(--color-border); padding: 8pt 10pt; font-size: 10pt; }
+        th { background: var(--color-bg-accent); font-family: var(--font-heading); color: var(--color-primary); text-align: left; }
+        
+        .chart-container { width: 100%; height: 160pt; margin: 8pt auto 2pt auto; padding: 10pt; background: transparent; border: none; box-sizing: border-box; }
+        .caption { text-align: center; font-size: 8.5pt; color: #000; margin-bottom: 15pt; font-family: var(--font-body); font-weight: normal; }
+        
+        /* Flex Layout Utilities */
+        .flex-row { display: flex; gap: 20pt; align-items: flex-start; margin-bottom: 20pt; }
+        .flex-item { flex: 1; min-width: 0; }
+        
+        /* KPI Cards */
+        .kpi-row { display: flex; gap: 15pt; margin: 15pt 0; justify-content: center; }
+        .kpi-card { flex: 1; padding: 12pt; background: var(--color-bg-accent); border-left: 4px solid var(--color-primary); border-radius: 4px; text-align: center; }
+        .kpi-val { font-size: 20pt; font-weight: bold; color: var(--color-primary); display: block; }
+        .kpi-label { font-size: 8.5pt; color: var(--color-muted); }
+        .kpi-trend { font-size: 9pt; font-weight: bold; margin-left: 4pt; }
+        .trend-up { color: var(--color-accent); }
+        
+        /* Badges */
+        .badge { display: inline-block; padding: 2pt 6pt; border-radius: 10pt; font-size: 8pt; font-weight: bold; }
+        .badge-success { background: #d1fae5; color: #065f46; } /* エメラルド・ミント (完了) */
+        .badge-warning { background: #fef3c7; color: #92400e; } /* アンバー (保留) */
+        .badge-primary { background: #dbeafe; color: #1e3a8a; } /* ブルー・インディゴ (進行中) */
+        
+        /* 表紙 (Guide 5.3 準拠) */
+        .cover { background: var(--color-bg-cover); color: #fff; justify-content: space-between; padding: 30mm 25mm; }
+        .cover-header { border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 10mm; }
+        .cover-org { font-family: var(--font-heading); letter-spacing: 0.1em; opacity: 0.9; }
+        .cover-title-block { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .cover-title { font-size: 32pt; font-family: var(--font-heading); color: #fff; line-height: 1.3; margin-bottom: 10pt; border: none; }
+        .cover-subtitle { font-size: 14pt; opacity: 0.8; }
+        .cover-footer-block { border-top: 1px solid rgba(255,255,255,0.4); padding-top: 10mm; }
+        .cover-meta-table { width: 100%; }
+        .cover-meta-table td { border: none; padding: 4pt 0; color: #fff; font-size: 10pt; }
+        .cover-meta-table th { background: transparent; color: rgba(255,255,255,0.6); border: none; padding: 4pt 0; width: 80pt; font-size: 9pt; }
+
+        .footer { position: absolute; bottom: 10mm; left: 0; width: 100%; text-align: center; font-size: var(--text-sm); color: var(--color-muted); }
+    </style>
+</head>
+<body>
+    <!-- PAGE 1: COVER -->
+    <div class="page cover" style="page-break-after: always;">
+        <div class="cover-header">
+            <span class="cover-org">戦略分析部 / 市場動向調査チーム</span>
+        </div>
+        <div class="cover-title-block">
+            <h1 class="cover-title">2026年度<br>市場動向比較および<br>統計分析報告書</h1>
+            <p class="cover-subtitle">主要な業界指標の推移と競合他社の市場シェア分析</p>
+        </div>
+        <div class="cover-footer-block">
+            <table class="cover-meta-table">
+                <tr><th>提出先</th><td>経営会議 メンバー各位</td></tr>
+                <tr><th>作成者</th><td>戦略分析部シニアアナリスト 佐藤 健太</td></tr>
+                <tr><th>作成日</th><td>2026年3月24日</td></tr>
+                <tr><th>機密区分</th><td>社外秘 (CONFIDENTIAL)</td></tr>
+            </table>
+        </div>
+        <div class="footer">1 / 6</div>
+    </div>
+
+    <!-- PAGE 2: MARKET TREND -->
+    <div class="page" style="page-break-after: always;">
+        <h2>1. 市場規模の推移と予測</h2>
+        <p>過去3年間における国内市場規模の推移を分析した結果（図1参照）、年平均成長率（CAGR）は4.2%を維持しています。特にデジタル化の加速に伴う需要増が顕著であり、2030年にかけて堅調な推移を見込んでいます。この背景には、既存インフラの老朽化に伴う刷新需要だけでなく、生成AIの急速な普及によるデータセンター投資の拡大が大きく寄与しています。</p>
+        
+        <p style="margin-top: 10pt;">2024年度の伸び率は、当初の予測を0.5ポイント上回るペースで推移しており、これは特にエンタープライズ領域における「クラウドネイティブ移行」が本格化したことが要因として挙げられます。将来予測においては、2027年以降に量子コンピューティングの商用化に向けた先行投資が開始されることで、さらに成長が加速するシナリオを描いています。</p>
+        
+        <div class="chart-container" style="height: 200pt; margin-top: 20pt;">
+            <canvas id="marketChart"></canvas>
+        </div>
+        <div class="caption">図1：国内市場規模の推移（2023年〜2028年）</div>
+        
+        <div style="margin-top: 20pt;">
+            <h3>1.1 市場成長の背景と外部要因</h3>
+            <p>主要な成長要因として、クラウドシフトによるインフラ投資の増大に加え、特定業種におけるAI活用ニーズの顕在化が挙げられます。これにより、従来のハードウェア依存からサービス依存への構造的転換が進行しています。また、エネルギー効率への関心の高まり（Green IT）も、システムの高能率化に向けたリプレース需要を後押ししています。法規制の面でも、データ保護法案の強化に伴うセキュリティ基盤の再構築が不可欠となっており、全方位的に投資を促す環境が整っています。</p>
+        </div>
+
+        <div class="footer">2 / 6</div>
+    </div>
+
+    <!-- PAGE 3: SECTOR ANALYSIS -->
+    <div class="page" style="page-break-after: always;">
+        <h2>2. セクター別需要の詳細分析</h2>
+        <p>需要構造の細部を報告します。製造業および金融業が依然として市場を牽引しており、特にDX投資が顕著です（図2参照）。2024Q1の実績では、製造業が全体の35%を占め、次いで金融業が28%と、トップ2セクターで過半数を維持しています。この傾向は、次期四半期も継続すると予測されます。</p>
+
+        <div class="chart-container" style="height: 200pt; margin-top: 20pt;">
+            <canvas id="sectorChart"></canvas>
+        </div>
+        <div class="caption">図2：主要セクター別需要構成</div>
+
+        <div style="margin-top: 20pt;">
+            <h3>2.1 各セクターの個別動向と投資傾向</h3>
+            <p><strong>製造業:</strong> スマートファクトリー化に伴うエッジコンピューティング需要が高まっており、特に「AI画像診断による品質管理」への投資が予算全体の20%を占めています。これにより生産効率の飛躍的な向上が期待されています。</p>
+            <p><strong>金融業:</strong> レガシーシステムのマイグレーションが佳境を迎えており、クラウドベースの基幹系システムへの移行が加速しています。ゼロトラスト・アーキテクチャの導入率は前年比で40%増加しました。</p>
+            <p><strong>小売・その他:</strong> オムニチャネル推進に伴う顧客データ基盤(CDP)の構築が主流となっています。リアル店舗とECを融合させた体験向上のため、バックエンドの高度化が急務となっています。</p>
+        </div>
+
+        <div class="footer">3 / 6</div>
+    </div>
+
+    <!-- PAGE 4: MARKET SHARE & KPI -->
+    <div class="page" style="page-break-after: always;">
+        <h2>3. 市場占有率と主要経営指標</h2>
+        <p>現在のマーケットポジションと健全性を報告します（図3参照）。</p>
+
+        <div class="chart-container" style="height: 180pt; width: 85%; margin: 20pt auto;">
+            <canvas id="shareChart"></canvas>
+        </div>
+        <div class="caption">図3：市場占有率の構成比</div>
+
+        <div class="kpi-row" style="margin-top: 40pt;">
+            <div class="kpi-card">
+                <span class="kpi-label">営業利益率</span>
+                <span class="kpi-val">12.4% <span class="kpi-trend trend-up">▲ 2.1%</span></span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">顧客維持率</span>
+                <span class="kpi-val">94.8% <span class="kpi-trend trend-up">▲ 0.5%</span></span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">R&D投資比率</span>
+                <span class="kpi-val">5.2% <span class="kpi-trend">─ 0.0%</span></span>
+            </div>
+        </div>
+
+        <div class="footer">4 / 6</div>
+    </div>
+
+    <!-- PAGE 5: PERFORMANCE RADAR -->
+    <div class="page" style="page-break-after: always;">
+        <h2>4. 競合他社との多次元性能比較</h2>
+        <p>自社（Flag414）と業界平均の性能比較を多角的に分析します。特にサポート体制と品質管理において高い評価を得ています（図4参照）。</p>
+
+        <div class="chart-container" style="height: 250pt; margin-top: 30pt; padding: 30pt;">
+            <canvas id="performanceChart"></canvas>
+        </div>
+        <div class="caption">図4：業界平均との多次元性能比較（5軸評価）</div>
+
+        <div style="margin-top: 20pt;">
+            <p>5つの評価軸（コスト、品質、速度、サポート、拡張性）において、自社は「品質」と「サポート」で圧倒的優位性を確立しています。業界最高水準の満足度を実現している要因は、24時間体制の専門サポートと、独自の品質検証フローにあります。一方で「コスト」面での評価は平均を下回っており、提供価値のプレミアム性を訴求するとともに、内部プロセスの効率化によるコストパフォーマンス向上が今後の課題となります。</p>
+            <p style="margin-top: 10pt;">また、「拡張性」については、次世代API基盤の導入により競合との差別化をさらに深める計画です。これにより、マルチクラウド環境下での運用柔軟性を求める上位顧客層の獲得を確実にします。各評価軸の改善により、トータルバランスに優れた業界リーダーとしての地位を盤石にします。</p>
+        </div>
+
+        <div class="footer">5 / 6</div>
+    </div>
+
+    <!-- PAGE 6: BENCHMARK & SUMMARY -->
+    <div class="page">
+        <h2>5. 指標詳細および戦略的提言</h2>
+        <p>最後に、具体的な製品満足度ランキングと改善施策の進捗状況を提示し、今後の総括をまとめます。</p>
+
+        <div style="margin-top: 20pt;">
+            <h3>5.1 顧客満足度および施策進捗</h3>
+            <div class="flex-row">
+                <div class="flex-item">
+                    <table>
+                        <thead><tr><th>順位</th><th>製品名</th><th>スコア</th></tr></thead>
+                        <tbody>
+                            <tr><td>🥇 1</td><td>Flag Plus</td><td>4.9</td></tr>
+                            <tr><td>🥈 2</td><td>A-Series</td><td>4.3</td></tr>
+                            <tr><td>🥉 3</td><td>C-Cloud</td><td>4.1</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="caption">表1：満足度ランキング</div>
+                </div>
+                <div class="flex-item">
+                    <table>
+                        <thead><tr><th>プロジェクト</th><th>ステータス</th></tr></thead>
+                        <tbody>
+                            <tr><td>UI/UX全面刷新</td><td><span class="badge badge-success">完了</span></td></tr>
+                            <tr><td>API基盤強化</td><td><span class="badge badge-primary">進行中</span></td></tr>
+                            <tr><td>海外拠点連携</td><td><span class="badge badge-warning">保留</span></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="caption">表2：改善施策の遂行状況</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30pt;">
+            <h3>5.2 長期戦略に向けた包括的提言</h3>
+            <p><strong>【短期（〜6ヶ月）】:</strong> 進行中の「API基盤強化」プロジェクトを第2四半期中に完遂することが最優先事項です。これに伴い、導入スピードを現行の2.5ヶ月から2.0ヶ月以下に短縮するオペレーションの自動化を推進します。</p>
+            <p><strong>【中期（〜2年）】:</strong> セクターB（小売）における価格競争の激化に備え、標準化パッケージの拡充と、AIによる自動運用保守サービスを用いた「ランニングコストの低減」を実現し、顧客あたりの生涯価値(LTV)を最大化します。</p>
+            <p><strong>【長期（3年〜）】:</strong> 国内市場の飽和を見据え、海外拠点の基盤連携を強化。グローバル規模でのデータ活用プラットフォームを構築し、地域に依存しない収益モデルを確立します。併せて、先端技術研究への継続投資により次世代の市場ルールを先導します。</p>
+        </div>
+
+        <div class="footer">6 / 6</div>
+    </div>
+
+    <script>
+        // 印刷プレビューおよび全読み込み時用の即時トリガー
+        if (typeof initChartWhenReady === 'function') initChartWhenReady();
+    </script>
+</body>
+</html>`,
+          answer: '「比較表」および関連する統計分析を含む、最新の市場動向報告書を作成しました。📄\\n\\n右側のArtifactパネルにて、Chart.jsを使用したインタラクティブなグラフや詳細な比較分析表をご確認いただけます。複数ページ（全3ページ）構成となっており、スクロールしてご覧いただけます。',
+          citations: [
+            { id: 'cite_1', type: 'rag', source: '2025年度_業界動向調査レポート.pdf', url: null },
+            { id: 'cite_2', type: 'rag', source: '競合調査資料_2026Q1.xlsx', url: null }
+          ]
+        })
+      },
+      { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 1800, completion_tokens: 4200, total_tokens: 6000 } } }
     ]
   },
 
@@ -925,5 +1899,15 @@ export const scenarioSuggestions = {
     'チェックリスト形式で出力してほしい',
     'FAQ形式にまとめて',
     '比較表を作成して'
+  ],
+  'html_artifact_demo': [
+    'グラフ付きで売上分析して',
+    'リッチなHTMLレポートで出力して',
+    'KPIダッシュボードを作って'
+  ],
+  'html_statistical_report': [
+    '市場シェアの詳細を教えて',
+    '2028年の予測の根拠は？',
+    '競合C社の強みを分析して'
   ]
 };

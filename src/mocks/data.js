@@ -55,6 +55,7 @@ export const mockConversations = [
   { id: 'mock_4', name: '🎨 Creative Studio (MD)' },
   { id: 'mock_5', name: '🐛 Error Simulation' },
   { id: 'mock_6', name: '📦 Artifacts Demo' }, 
+  { id: 'mock_7', name: '📄 HTML Artifact Demo' },
 ];
 
 // 会話履歴データ (サイドバーのIDとキーを一致させる)
@@ -199,6 +200,39 @@ export const mockMessages = {
         { type: 'suggested_question', label: 'アジェンダを追加して', icon: 'file-text', payload: { text: '議事録にアジェンダセクションを追加してください' } },
         { type: 'generate_document', label: '📋 チェックリスト形式に変換', icon: 'file-text', payload: { text: 'この議事録をチェックリスト形式に変換して', artifact_type: 'checklist' } }
       ],
+      suggestions: [],
+      isStreaming: false,
+      traceMode: 'knowledge',
+      thoughtProcess: []
+    }
+  ],
+
+  'mock_7': [
+    {
+      id: 'msg_7_1',
+      role: 'user',
+      text: '売上分析レポートをグラフ付きのHTMLで作成して。',
+      timestamp: '2025-12-06T16:00:00Z',
+      files: []
+    },
+    {
+      id: 'msg_7_2',
+      role: 'ai',
+      text: '2025年度Q4の売上分析レポートを作成しました！📄 Chart.jsグラフを含むリッチなHTMLドキュメントです。右側のパネルでご確認ください。',
+      rawContent: '',
+      citations: [
+        { id: 'cite_1', type: 'rag', source: '2025年度_四半期業績報告.xlsx', url: null },
+        { id: 'cite_2', type: 'rag', source: '経営企画_KPIダッシュボード.pdf', url: null }
+      ],
+      artifact: {
+        artifact_title: '2025年度 Q4 売上分析レポート',
+        artifact_type: 'html_document',
+        artifact_content: '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Q4レポート</title><style>:root{--font-body:\'Hiragino Mincho ProN\',\'Yu Mincho\',\'MS Mincho\',serif;--font-heading:\'Hiragino Sans\',\'Yu Gothic Medium\',\'Meiryo\',sans-serif;--text-base:10.5pt;--text-sm:9pt;--text-h1:22pt;--text-h2:16pt;--text-h3:12pt;--leading-body:1.9;--leading-heading:1.3;--primary:#1e5f8e;--primary-light:#dce4eb;--accent:#e67e22;--text:#333333;--text-sub:#777777;--bg:#ffffff;--bg-section:#f0f4f8;--border:#cccccc}*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-body);font-size:var(--text-base);line-height:var(--leading-body);color:var(--text);background:var(--bg);-webkit-print-color-adjust:exact;print-color-adjust:exact}h1,h2,h3,th,.kpi-value{font-family:var(--font-heading)}h1{font-size:var(--text-h1);font-weight:800;margin-bottom:16px;line-height:var(--leading-heading)}h2{font-size:var(--text-h2);font-weight:700;color:var(--primary);margin:32px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--primary);line-height:var(--leading-heading);break-before:avoid;break-after:avoid}.kpi{display:flex;gap:20px;margin:24px 0}.kpi-card{flex:1;padding:24px;background:var(--bg-section);border:1px solid var(--border);border-radius:12px;text-align:center}.kpi-value{font-size:32px;font-weight:800;color:var(--primary);margin-bottom:4px}.kpi-label{font-size:13px;color:var(--text-sub);font-weight:500}table{width:100%;border-collapse:collapse;margin:24px 0}th,td{padding:12px 16px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}th{background:var(--bg-section);font-weight:600;color:var(--text-sub);font-size:12px}</style></head><body><div style="page-break-after: always; padding: 20mm 18mm; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 60vh;"><h1>2025年度 Q4 売上分析レポート</h1><p style="color:var(--text-sub);font-size:var(--text-h2);font-family:var(--font-heading);">第4四半期 業績サマリーと詳細データ</p></div><div style="padding: 20mm 18mm;"><p>第4四半期は前年同期比で売上高が<strong>15.3%増</strong>と堅調に推移しました。</p><div class="kpi"><div class="kpi-card"><div class="kpi-value">¥42.8億</div><div class="kpi-label">売上高 ▲ 15.3%</div></div></div><h2>事業セグメント別実績</h2><table><thead><tr><th>セグメント</th><th>売上高</th></tr></thead><tbody><tr><td>SaaS事業</td><td>¥25.2億</td></tr></tbody></table></div><script>document.addEventListener("DOMContentLoaded",()=>window.parent.postMessage({type:"artifact-resize",height:document.documentElement.scrollHeight},"*"));</script></body></html>',
+        citations: [
+          { id: 'cite_1', type: 'rag', source: '2025年度_四半期業績報告.xlsx', url: null },
+          { id: 'cite_2', type: 'rag', source: '経営企画_KPIダッシュボード.pdf', url: null }
+        ]
+      },
       suggestions: [],
       isStreaming: false,
       traceMode: 'knowledge',

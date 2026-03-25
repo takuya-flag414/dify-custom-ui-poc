@@ -6,6 +6,7 @@ import './ArtifactCard.css';
  * artifact_type に応じたアイコンとラベルのマッピング
  */
 const ARTIFACT_TYPE_MAP = {
+    html_document: { emoji: '📄', label: 'HTMLドキュメント' },
     summary_report: { emoji: '📋', label: 'レポート' },
     checklist: { emoji: '☑', label: 'チェックリスト' },
     comparison_table: { emoji: '📊', label: '比較表' },

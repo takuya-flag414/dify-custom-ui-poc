@@ -19,7 +19,7 @@ import { parseStructuredMessage, extractPlainText } from '../../utils/messageSer
 import { FEATURE_FLAGS } from '../../config/featureFlags';
 import ArtifactCard from '../Artifacts/ArtifactCard';
 
-// ★追加: 引用(返信)アイコン
+// ★追加: 引用アイコン
 const ReplyIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 11l8-8v4.5A11.5 11.5 0 0 1 22 18.5c-2.5-3-6-4.5-11-4.5V19l-8-8z" />
@@ -183,7 +183,7 @@ const MessageBlock = ({
     const handleSelectionChange = useCallback(() => {
         // AIメッセージのみ、かつストリーミングが完了している場合のみ許可
         if (!isAi || isStreaming) return;
-        
+
         // ドラッグ中（選択操作中）はポップオーバーを更新しない
         if (isSelectingRef.current) return;
 
@@ -264,7 +264,7 @@ const MessageBlock = ({
             if (parsed && parsed.v && parsed.v !== "0.0" && parsed.quote) {
                 extractedQuote = parsed.quote;
             }
-        } catch(e) {}
+        } catch (e) { }
     }
 
     // ★追加: 編集開始
@@ -610,7 +610,7 @@ const MessageBlock = ({
                                             style={{ fontFamily: '"SF Pro Text", -apple-system, sans-serif' }}
                                         >
                                             <ReplyIcon />
-                                            <span>返信</span>
+                                            <span>ここを質問</span>
                                         </button>
                                     </motion.div>
                                 </div>

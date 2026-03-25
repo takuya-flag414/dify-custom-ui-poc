@@ -133,7 +133,16 @@ export const ChatServiceAdapter = {
 
             // ★Artifactリクエストの場合は専用シナリオに分岐
             if (isArtifactRequest) {
-                scenarioKey = 'artifact_demo';
+                const type = params.artifact?.type;
+                if (type === 'comparison_table') {
+                    scenarioKey = 'html_statistical_report';
+                } else if (type === 'summary_report') {
+                    scenarioKey = 'artifact_demo';
+                } else if (type === 'meeting_minutes') {
+                    scenarioKey = 'html_artifact_demo';
+                } else {
+                    scenarioKey = 'html_business_document'; 
+                }
             // Chat mode (no RAG, no Web)
             } else if (!useRag && !useWeb && !hasFile) {
                 scenarioKey = 'fast_pure';

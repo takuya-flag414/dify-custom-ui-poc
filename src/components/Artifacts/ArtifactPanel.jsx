@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
+import { SparklesIcon } from '../Shared/SystemIcons';
+import GeneratingAnimation from './GeneratingArtifact';
+import { splitArtifactPages } from '../../utils/splitArtifactPages';
+import { sanitizeArtifactHtml } from '../../utils/sanitizeArtifactHtml';
 // import html2pdf from 'html2pdf.js';
 import './ArtifactPanel.css';
 
@@ -98,9 +103,35 @@ const SourceIcon = () => (
 );
 
 /**
+ * HTML生成中のプレビュー表示 (Apple Intelligence Style)
+ */
+const GeneratingPagePlaceholder = ({ pageNumber }) => (
+    <motion.div
+        className="a4-page-placeholder"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 250, damping: 25, mass: 1 }}
+    >
+        <div className="placeholder-content">
+            <div className="placeholder-animation-container">
+                <GeneratingAnimation className="generating-pencil-animation" />
+            </div>
+            <div className="placeholder-text">
+                {pageNumber}ページ目を生成中...
+            </div>
+            <div className="placeholder-subtext">
+                AIが最適なレイアウトを構成しています
+            </div>
+        </div>
+    </motion.div>
+);
+
+/**
  * artifact_type に応じたバッジ表示
  */
 const ARTIFACT_TYPE_MAP = {
+    html_document: { emoji: '📄', label: 'HTMLドキュメント' },
     summary_report: { emoji: '📋', label: 'レポート' },
     checklist: { emoji: '☑', label: 'チェックリスト' },
     comparison_table: { emoji: '📊', label: '比較表' },
@@ -123,11 +154,11 @@ const getTypeBadge = (type) => {
  *   - artifact: { title, type, content, citations }
  *   - streamingMessage: 現在生成中のAIメッセージ (リアルタイムレンダリング用)
  */
-const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
+const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSelect }) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isCitationsExpanded, setIsCitationsExpanded] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    
+
     // ★追加: ズームとスクロール用の状態管理
     const [zoomLevel, setZoomLevel] = useState(100);
     const [autoFit, setAutoFit] = useState(true);
@@ -135,25 +166,103 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
 
     // ★追加: PDFエクスポート用の状態と参照
     const [isExportingPDF, setIsExportingPDF] = useState(false);
-    
+
     // ★追加: Wordエクスポート用の状態
     const [isExportingWord, setIsExportingWord] = useState(false);
-    
+
     const hiddenExportRef = useRef(null);
+
+    // ★追加: テキスト選択からの「ここを修正」機能用状態
+    const [selectionState, setSelectionState] = useState({ text: '', x: 0, y: 0, show: false });
+
+    // ★v2.0追加: iframe高さ管理（複数ページ対応）
+    const iframeRefs = useRef({});
+    const [pageHeights, setPageHeights] = useState({});
+
+    // ★追加: 描画を安定させるための「確定済みページ」ステート
+    const [stablePages, setStablePages] = useState([]);
 
     // ★追加: 現在のストリーミングメッセージがArtifact生成用かどうかを判定
     const isGeneratingArtifact = streamingMessage && streamingMessage.isStreaming && streamingMessage.artifact;
-    
-    // 実表示用のデータ（ストリーミング中ならストリーミング文字列を使用）
-    const displayContent = isGeneratingArtifact ? streamingMessage.text : (artifact?.content || '');
-    const displayTitle = artifact?.title || artifact?.label || 'Untitled Document';
-    const displayType = artifact?.type || 'summary_report';
+
+    // ★変更: ストリーミング中はstreamingMessage.artifactの中間値を使用
+    const streamingArtifact = isGeneratingArtifact ? streamingMessage.artifact : null;
+    const displayContent = streamingArtifact?.artifact_content || artifact?.content || '';
+    const displayTitle = streamingArtifact?.artifact_title || artifact?.title || artifact?.label || 'Untitled Document';
+    const displayType = streamingArtifact?.artifact_type || artifact?.type || 'summary_report';
     const displayCitations = artifact?.citations || [];
+
+    // ★v2.0追加: HTML直接生成方式かどうかの判定
+    const isHtmlDocument = displayType === 'html_document';
 
     // アーティファクトが切り替わったら状態リセット
     useEffect(() => {
         setIsCopied(false);
-    }, [artifact?.title, displayContent]);
+        setPageHeights({});
+        setStablePages([]); // 新しいドキュメントならリセット
+        iframeRefs.current = {}; // ★修正: 前のArtifactのiframe参照をクリア
+    }, [artifact?.id, artifact?.title, artifact?.content]); // ★修正: contentも監視してカード切り替えを確実にリセット
+
+    /**
+     * ★ちらつき防止：ページバッファリングロジック
+     * ストリーミング中の displayContent を解析し、完全に終了したページのみを stablePages に追加する。
+     */
+    useEffect(() => {
+        if (!isHtmlDocument) {
+            if (stablePages.length > 0) setStablePages([]);
+            return;
+        }
+
+        const { sanitized, error } = sanitizeArtifactHtml(displayContent);
+        if (error && displayContent.length > 20 && !isGeneratingArtifact) {
+            console.warn("Artifact Sanitize Warning:", error);
+        }
+
+        const allPages = splitArtifactPages(sanitized);
+
+        if (isGeneratingArtifact) {
+            // 現在生成中の場合、最後の1ページを除いた「確定済み」の部分だけをチェック
+            if (allPages.length > 1) {
+                const justCompletedPages = allPages.slice(0, -1);
+                // 確定済みページの数が増えた場合のみステートを更新（既存のiframeのリロードを防ぐ）
+                if (justCompletedPages.length > stablePages.length) {
+                    setStablePages(justCompletedPages);
+                }
+            }
+        } else {
+            // 生成が終わっている場合は、全ページを反映
+            // (すでにある内容と等しい場合は更新しないようにして無限ループや不要な再描画を防ぐ)
+            if (allPages.length !== stablePages.length) {
+                setStablePages(allPages);
+            }
+        }
+    }, [displayContent, isGeneratingArtifact, isHtmlDocument]);
+
+    // 以前の useMemo による pages 計算は削除し、stablePages を表示に使う
+    const pages = stablePages;
+
+    // ★v2.0追加: postMessage による iframe 高さ自動調整
+    useEffect(() => {
+        if (!isHtmlDocument) return;
+        const handleMessage = (e) => {
+            if (e.data?.type === 'artifact-resize' && typeof e.data.height === 'number') {
+                const index = Object.keys(iframeRefs.current).find(
+                    key => iframeRefs.current[key] && iframeRefs.current[key].contentWindow === e.source
+                );
+                if (index !== undefined) {
+                    setPageHeights(prev => {
+                        const currentHeight = prev[index] || 0;
+                        const newHeight = Math.max(e.data.height, 297 * 3.7795);
+                        // 2px 未満の微小な変化は無視（フィードバックループ防止）
+                        if (Math.abs(currentHeight - newHeight) < 2) return prev;
+                        return { ...prev, [index]: newHeight };
+                    });
+                }
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [isHtmlDocument, pages.length]);
 
     // ★追加: パネル幅の監視と自動ズーム (Auto Fit)
     useEffect(() => {
@@ -174,18 +283,18 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
     useEffect(() => {
         if (!autoFit || panelWidth === 0) return;
 
-        // 用紙の本来の横幅 720px と左右の余白を含めて収まるようにスケール計算
         // パネル幅からスクロールバー分や安全マージン(約40px)を引いた有効幅
-        const availableWidth = panelWidth - 40; 
-        const basePaperWidth = 720; 
-        
+        const availableWidth = panelWidth - 40;
+        // ★修正: HTML型は用紙幅(約793px)に左右の余白を含めた幅(約850px)を基準に計算し、紙の外側も見えるようにする
+        const basePaperWidth = isHtmlDocument ? 850 : 720;
+
         let optimalZoom = Math.floor((availableWidth / basePaperWidth) * 100);
-        
+
         // 最小50%、最大150%程度に制限
         optimalZoom = Math.max(50, Math.min(150, optimalZoom));
         setZoomLevel(optimalZoom);
 
-    }, [panelWidth, autoFit]);
+    }, [panelWidth, autoFit, isHtmlDocument]);
 
     // ★追加: 手動ズーム操作
     const handleZoomIn = () => {
@@ -244,6 +353,38 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
         }
     };
 
+    // ★追加: HTML ダウンロード処理
+    const handleDownloadHtml = () => {
+        try {
+            const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
+            const blob = new Blob([displayContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${safeTitle}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            setIsMenuOpen(false);
+        } catch (err) {
+            console.error('Failed to download html:', err);
+        }
+    };
+
+    // ★追加: HTML 印刷処理
+    const handlePrintHtml = () => {
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) return;
+        printWindow.document.write(displayContent);
+        printWindow.document.close();
+        printWindow.addEventListener("load", () => {
+            printWindow.print();
+            printWindow.close();
+        });
+        setIsMenuOpen(false);
+    };
+
     // ★追加: PDF ダウンロード処理
     /*
     const handleDownloadPDF = async () => {
@@ -292,7 +433,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
             }
 
             const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
-            
+
             // 2. 隠しDOM内の MarkdownRenderer の出力コンテンツ(.pdf-content)のみを取得
             // (外側のラッパーや不要なタイトル要素 <h1> を含めない)
             const contentContainer = hiddenExportRef.current.querySelector('.pdf-content');
@@ -319,7 +460,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                 table.style.borderCollapse = 'collapse';
                 table.style.width = '100%';
                 table.style.marginBottom = '12px';
-                
+
                 const thItems = table.querySelectorAll('th');
                 thItems.forEach(th => {
                     th.style.backgroundColor = '#f0f0f0';
@@ -361,7 +502,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
 
             // 加工後のHTML文字列を取得
             const contentHtml = cloneNode.innerHTML;
-            
+
             // 3. Word出力用にインラインCSSを含むHTML文書を構築
             // (余計なタイトル <h1> や区切り線を削除し、シンプルな文書構成にする)
             const htmlString = `
@@ -435,19 +576,82 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
     const citations = displayCitations;
     const shouldShowPanel = artifact || isGeneratingArtifact;
 
+    // ★追加: テキスト選択イベントハンドラ (mouseupベース: 選択確定後のみ表示)
+    useEffect(() => {
+        const handleMouseUp = () => {
+            // mouseup後、ブラウザがselectionを確定するまで少し待つ
+            setTimeout(() => {
+                const selection = window.getSelection();
+                if (!selection || selection.isCollapsed) return;
+
+                const text = selection.toString().trim();
+                if (text.length === 0) return;
+
+                // 選択範囲が ArtifactPanel 内かチェック
+                const panelEl = document.querySelector('.artifact-body');
+                if (!panelEl || !panelEl.contains(selection.anchorNode)) return;
+
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+
+                if (rect.width > 0 && rect.height > 0) {
+                    setSelectionState({
+                        text,
+                        x: rect.left + rect.width / 2,
+                        y: rect.bottom + 12, // 選択テキストの下に十分な間隔をあけて配置
+                        show: true
+                    });
+                }
+            }, 10);
+        };
+
+        // パネル外クリックやselection解除でツールチップを閉じる
+        const handleMouseDown = (e) => {
+            // ツールチップ自体のクリックは無視（handleFixRequestで処理）
+            if (e.target.closest('.selection-tooltip')) return;
+            setSelectionState(prev => prev.show ? { text: '', x: 0, y: 0, show: false } : prev);
+        };
+
+        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('mousedown', handleMouseDown);
+        return () => {
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('mousedown', handleMouseDown);
+        };
+    }, []);
+
+    const handleFixRequest = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (onQuoteSelect && selectionState.text) {
+            onQuoteSelect(selectionState.text);
+            // 選択解除
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            }
+        }
+        setSelectionState({ text: '', x: 0, y: 0, show: false });
+    };
+
+    const handleScroll = () => {
+        if (selectionState.show) {
+            setSelectionState(prev => ({ ...prev, show: false }));
+        }
+    };
+
     return (
         <AnimatePresence>
             {shouldShowPanel && (
-                <motion.div 
+                <motion.div
                     className={`artifact-panel ${isOpen ? 'open' : ''} ${isGeneratingArtifact ? 'ai-generating' : ''}`}
                     initial={{ x: '100%', opacity: 0 }}
                     animate={{ x: isOpen ? 0 : '100%', opacity: isOpen ? 1 : 0 }}
                     exit={{ x: '100%', opacity: 0 }}
-                    transition={{ 
-                        type: 'spring', 
-                        stiffness: 250, 
+                    transition={{
+                        type: 'spring',
+                        stiffness: 250,
                         damping: 25,
-                        mass: 1 
+                        mass: 1
                     }}
                 >
                     {/* Header */}
@@ -461,195 +665,277 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                                     {displayTitle}
                                     {isGeneratingArtifact && <span className="typing-cursor"></span>}
                                 </span>
-                        <span className="artifact-type-badge-panel">{getTypeBadge(displayType)}</span>
+                                <span className="artifact-type-badge-panel">{getTypeBadge(displayType)}</span>
+                            </div>
+                        </div>
+
+                        <div className="artifact-actions">
+                            {/* ★追加: Zoom Controls */}
+                            <div className="artifact-zoom-controls">
+                                <button className="zoom-btn" onClick={handleZoomOut} title="縮小">
+                                    <ZoomOutIcon />
+                                </button>
+                                <button
+                                    className={`zoom-label-btn ${autoFit ? 'auto-fit-active' : ''}`}
+                                    onClick={handleZoomReset}
+                                    title="ウィンドウ幅に合わせる (Auto Fit)"
+                                >
+                                    {zoomLevel}%
+                                </button>
+                                <button className="zoom-btn" onClick={handleZoomIn} title="拡大">
+                                    <ZoomInIcon />
+                                </button>
+                            </div>
+
+                            <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
+
+                            {/* ★ エクスポートメニュー */}
+                            <div className="artifact-action-group">
+                                <button
+                                    className={`artifact-action-btn primary action-more-btn ${isMenuOpen ? 'active' : ''}`}
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    title="アクション"
+                                    disabled={isGeneratingArtifact}
+                                >
+                                    <MoreIcon />
+                                </button>
+
+                                {isMenuOpen && (
+                                    <>
+                                        <div className="artifact-menu-backdrop" onClick={() => setIsMenuOpen(false)} />
+                                        <div className="artifact-actions-menu">
+                                            {isHtmlDocument ? (
+                                                <>
+                                                    <button className="artifact-menu-item" onClick={handleDownloadHtml}>
+                                                        <DownloadIcon />
+                                                        <span>HTML (.html)</span>
+                                                    </button>
+                                                    <button className="artifact-menu-item" onClick={handlePrintHtml}>
+                                                        <PrintIcon />
+                                                        <span>印刷 / PDF</span>
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button className="artifact-menu-item" onClick={handleDownloadMarkdown}>
+                                                        <DownloadIcon />
+                                                        <span>Markdown (.md)</span>
+                                                    </button>
+                                                    <button className="artifact-menu-item" onClick={handleDownloadWord} disabled={isExportingWord}>
+                                                        <DownloadIcon />
+                                                        <span>{isExportingWord ? 'Word 出力中...' : 'Word (.docx)'}</span>
+                                                    </button>
+                                                </>
+                                            )}
+                                            <div className="artifact-menu-divider" />
+                                            <button
+                                                className={`artifact-menu-item ${isCopied ? 'copied' : ''}`}
+                                                onClick={() => { handleCopy(); }}
+                                                disabled={isCopied}
+                                            >
+                                                {isCopied ? <CheckIcon /> : <CopyIcon />}
+                                                <span>{isCopied ? 'クリップボードにコピー' : 'コピー'}</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
+
+                            <button className="artifact-close-btn" onClick={onClose} title="閉じる">
+                                <CloseIcon />
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div className="artifact-actions">
-                    {/* ★追加: Zoom Controls */}
-                    <div className="artifact-zoom-controls">
-                        <button className="zoom-btn" onClick={handleZoomOut} title="縮小">
-                            <ZoomOutIcon />
-                        </button>
-                        <button 
-                            className={`zoom-label-btn ${autoFit ? 'auto-fit-active' : ''}`} 
-                            onClick={handleZoomReset} 
-                            title="ウィンドウ幅に合わせる (Auto Fit)"
-                        >
-                            {zoomLevel}%
-                        </button>
-                        <button className="zoom-btn" onClick={handleZoomIn} title="拡大">
-                            <ZoomInIcon />
-                        </button>
-                    </div>
-
-                    <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
-
-                    <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
-
-                    <div className="artifact-action-group">
-                        <button
-                            className={`artifact-action-btn primary action-more-btn ${isMenuOpen ? 'active' : ''}`}
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            title="アクション"
-                            disabled={isGeneratingArtifact}
-                        >
-                            <MoreIcon />
-                        </button>
-
-                        {isMenuOpen && (
-                            <>
-                                <div className="artifact-menu-backdrop" onClick={() => setIsMenuOpen(false)} />
-                                <div className="artifact-actions-menu">
-                                    <button 
-                                        className="artifact-menu-item"
-                                        onClick={handleDownloadMarkdown}
-                                    >
-                                        <DownloadIcon />
-                                        <span>Markdown (.md)</span>
-                                    </button>
-                                    {/* 
-                                    <button 
-                                        className="artifact-menu-item"
-                                        onClick={handleDownloadPDF}
-                                        disabled={isExportingPDF}
-                                    >
-                                        <DownloadIcon />
-                                        <span>{isExportingPDF ? 'PDF 出力中...' : 'PDF (.pdf)'}</span>
-                                    </button>
-                                    */}
-                                    <button 
-                                        className="artifact-menu-item"
-                                        onClick={handleDownloadWord}
-                                        disabled={isExportingWord}
-                                    >
-                                        <DownloadIcon />
-                                        <span>{isExportingWord ? 'Word 出力中...' : 'Word (.docx)'}</span>
-                                    </button>
-                                    <div className="artifact-menu-divider" />
-                                    {/* 
-                                    <button 
-                                        className="artifact-menu-item"
-                                        onClick={() => { handlePrint(); setIsMenuOpen(false); }}
-                                    >
-                                        <PrintIcon />
-                                        <span>印刷する</span>
-                                    </button>
-                                    */}
-                                    <button 
-                                        className={`artifact-menu-item ${isCopied ? 'copied' : ''}`}
-                                        onClick={() => { handleCopy(); }}
-                                        disabled={isCopied}
-                                    >
-                                        {isCopied ? <CheckIcon /> : <CopyIcon />}
-                                        <span>{isCopied ? 'クリップボードにコピー' : 'コピー'}</span>
-                                    </button>
+                    {/* Body: Document Viewer */}
+                    <div
+                        className="artifact-body"
+                        style={{ overflow: 'auto' }}
+                        onScroll={handleScroll}
+                    >
+                        {/* ★v2.0: html_document の場合は A4用紙ビューワーで描画 */}
+                        {isHtmlDocument ? (
+                            <div className="artifact-viewer-bg" style={autoFit ? {} : { alignItems: 'flex-start' }}>
+                                <div style={{
+                                    transform: `scale(${zoomLevel / 100})`,
+                                    transformOrigin: 'top center',
+                                    transition: 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '32px'
+                                }}>
+                                    {pages.map((pageHtml, index) => {
+                                        const h = pageHeights[index] || (297 * 3.7795);
+                                        return (
+                                            <React.Fragment key={index}>
+                                                <motion.div
+                                                    className="a4-page-wrapper"
+                                                    style={{ minHeight: `${h}px` }}
+                                                    initial={{ opacity: 0, scale: 0.98 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    transition={{ duration: 0.4 }}
+                                                >
+                                                    <iframe
+                                                        ref={(el) => { iframeRefs.current[index] = el; }}
+                                                        sandbox="allow-scripts"
+                                                        srcDoc={pageHtml}
+                                                        style={{ height: `${h}px` }}
+                                                        title={`${displayTitle} - Page ${index + 1}`}
+                                                    />
+                                                </motion.div>
+                                                <div className="a4-page-number">
+                                                    {index + 1} / {isGeneratingArtifact ? '?' : pages.length}
+                                                </div>
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                    {/* 生成中のプレビュー表示 */}
+                                    <AnimatePresence mode="wait">
+                                        {isGeneratingArtifact && (
+                                            <motion.div
+                                                key={`generating-p${pages.length + 1}`}
+                                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}
+                                                initial={{ opacity: 0, y: 40 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.98 }}
+                                                transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+                                            >
+                                                <GeneratingPagePlaceholder pageNumber={pages.length + 1} />
+                                                <div className="a4-page-number">
+                                                    {pages.length + 1} / ?
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
-                            </>
+                            </div>
+                        ) : (
+                            /* 既存 Markdown 型: スケール変換付きの MarkdownRenderer */
+                            <div style={{
+                                minWidth: `${720 * (zoomLevel / 100)}px`,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                paddingBottom: '64px'
+                            }}>
+                                <div
+                                    className="artifact-content"
+                                    style={{
+                                        transform: `scale(${zoomLevel / 100})`,
+                                        transformOrigin: 'top center',
+                                        transition: 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)'
+                                    }}
+                                >
+                                    <MarkdownRenderer
+                                        content={displayContent}
+                                        isStreaming={isGeneratingArtifact}
+                                        renderMode={isGeneratingArtifact ? 'realtime' : 'normal'}
+                                        disableCitationReplacement={true}
+                                    />
+                                </div>
+                            </div>
                         )}
                     </div>
 
-                    <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 4px' }} />
-
-                    <button className="artifact-close-btn" onClick={onClose} title="閉じる">
-                        <CloseIcon />
-                    </button>
-                </div>
-            </div>
-
-            {/* Body: Document Viewer with Scale Wrapper */}
-            <div className="artifact-body" style={{ overflow: 'auto' }}>
-                {/* 
-                  ★追加: スクロール領域を確保するためのプレースホルダーラッパー 
-                  scaleをかけると要素の実寸（レイアウト計算上の占有サイズ）は変わらないため、
-                  親要素にスケール後のピクセル幅をminWidthとして与えることで正しくスクロールバーを出す。
-                */}
-                <div style={{ 
-                    minWidth: `${720 * (zoomLevel / 100)}px`, 
-                    display: 'flex', 
-                    justifyContent: 'center',
-                    paddingBottom: '64px' // 下部余白
-                }}>
-                    <div 
-                        className="artifact-content" 
-                        style={{ 
-                            transform: `scale(${zoomLevel / 100})`, 
-                            transformOrigin: 'top center',
-                            transition: 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)'
-                        }}
-                    >
-                        <MarkdownRenderer
-                            content={displayContent}
-                            isStreaming={isGeneratingArtifact}
-                            disableCitationReplacement={true}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* ★追加: 免責事項 (Zoomの影響を受けずにスクロール領域の末尾に直上で固定表示) */}
-            <div className="artifact-disclaimer-fixed">
-                ※ プレビュー表示のため、実際の出力レイアウトとは異なる場合があります。
-            </div>
-
-            {/* Footer: Citations Section（仕様書3.2準拠） */}
-            {citations.length > 0 && (
-                <div className={`artifact-citations-footer ${isCitationsExpanded ? 'expanded' : ''}`}>
-                    <div 
-                        className="artifact-citations-header" 
-                        onClick={() => setIsCitationsExpanded(!isCitationsExpanded)}
-                        role="button"
-                        aria-expanded={isCitationsExpanded}
-                        title={isCitationsExpanded ? "出典を閉じる" : "出典を表示"}
-                    >
-                        <div className="artifact-citations-label-group">
-                            <span className="artifact-citations-icon"><LinkIcon /></span>
-                            <span className="artifact-citations-label">出典</span>
-                            <span className="artifact-citations-count">{citations.length}</span>
+                    {!isHtmlDocument && (
+                        <div className="artifact-disclaimer-fixed">
+                            ※ プレビュー表示のため、実際の出力レイアウトとは異なる場合があります。
                         </div>
-                        <div className={`citation-toggle-icon ${isCitationsExpanded ? 'rotated' : ''}`}>
-                            <ChevronIcon />
-                        </div>
-                    </div>
-                    <div className="artifact-citations-content">
-                        <ul className="artifact-citations-list">
-                            {citations.map((cite, idx) => (
-                                <li key={cite.id || idx} className="artifact-citation-item">
-                                    <span className="artifact-citation-number">{idx + 1}</span>
-                                    <span className="artifact-citation-source">
-                                        {cite.url && cite.url !== 'null' ? (
-                                            <a href={cite.url} target="_blank" rel="noopener noreferrer">
-                                                {cite.source}
-                                            </a>
-                                        ) : (
-                                            cite.source
-                                        )}
-                                    </span>
-                                    {cite.type && (
-                                        <span className={`artifact-citation-type artifact-citation-type-${cite.type}`}>
-                                            {cite.type === 'rag' ? '社内' : cite.type === 'web' ? 'Web' : cite.type}
-                                        </span>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            )}
+                    )}
 
-            {/* ★追加: エクスポート用の隠し領域 */}
-            <div style={{ position: 'absolute', top: -10000, left: -10000, width: '800px', zIndex: -1000 }}>
-                <div ref={hiddenExportRef} className="pdf-export-container">
-                    <h1 className="pdf-title">{displayTitle}</h1>
-                    <div className="pdf-content">
-                        <MarkdownRenderer
-                            content={displayContent}
-                            isStreaming={false}
-                            disableCitationReplacement={true}
-                        />
-                    </div>
-                </div>
-            </div>
+                    {/* Footer: Citations Section（仕様書3.2準拠） */}
+                    {citations.length > 0 && (
+                        <div className={`artifact-citations-footer ${isCitationsExpanded ? 'expanded' : ''}`}>
+                            <div
+                                className="artifact-citations-header"
+                                onClick={() => setIsCitationsExpanded(!isCitationsExpanded)}
+                                role="button"
+                                aria-expanded={isCitationsExpanded}
+                                title={isCitationsExpanded ? "出典を閉じる" : "出典を表示"}
+                            >
+                                <div className="artifact-citations-label-group">
+                                    <span className="artifact-citations-icon"><LinkIcon /></span>
+                                    <span className="artifact-citations-label">出典</span>
+                                    <span className="artifact-citations-count">{citations.length}</span>
+                                </div>
+                                <div className={`citation-toggle-icon ${isCitationsExpanded ? 'rotated' : ''}`}>
+                                    <ChevronIcon />
+                                </div>
+                            </div>
+                            <div className="artifact-citations-content">
+                                <ul className="artifact-citations-list">
+                                    {citations.map((cite, idx) => (
+                                        <li key={cite.id || idx} className="artifact-citation-item">
+                                            <span className="artifact-citation-number">{idx + 1}</span>
+                                            <span className="artifact-citation-source">
+                                                {cite.url && cite.url !== 'null' ? (
+                                                    <a href={cite.url} target="_blank" rel="noopener noreferrer">
+                                                        {cite.source}
+                                                    </a>
+                                                ) : (
+                                                    cite.source
+                                                )}
+                                            </span>
+                                            {cite.type && (
+                                                <span className={`artifact-citation-type artifact-citation-type-${cite.type}`}>
+                                                    {cite.type === 'rag' ? '社内' : cite.type === 'web' ? 'Web' : cite.type}
+                                                </span>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ★追加: エクスポート用の隠し領域 (Markdown型のみ) */}
+                    {!isHtmlDocument && (
+                        <div style={{ position: 'absolute', top: -10000, left: -10000, width: '800px', zIndex: -1000 }}>
+                            <div ref={hiddenExportRef} className="pdf-export-container">
+                                <h1 className="pdf-title">{displayTitle}</h1>
+                                <div className="pdf-content">
+                                    <MarkdownRenderer
+                                        content={displayContent}
+                                        isStreaming={false}
+                                        disableCitationReplacement={true}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ★追加: テキスト選択ツールチップ (Portalでbody直下にレンダリング) */}
+                    {ReactDOM.createPortal(
+                        <AnimatePresence>
+                            {selectionState.show && (
+                                <motion.div
+                                    className="selection-tooltip"
+                                    initial={{ opacity: 0, y: -6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -6 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                                    style={{
+                                        position: 'fixed',
+                                        left: selectionState.x,
+                                        top: selectionState.y,
+                                        transform: 'translateX(-50%)',
+                                        zIndex: 10000
+                                    }}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }}
+                                    onClick={handleFixRequest}
+                                >
+                                    <SparklesIcon className="selection-tooltip-icon" width="14" height="14" />
+                                    <span className="selection-tooltip-text">ここを修正</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>,
+                        document.body
+                    )}
                 </motion.div>
             )}
         </AnimatePresence>

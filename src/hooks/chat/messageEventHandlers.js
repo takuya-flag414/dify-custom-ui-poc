@@ -46,6 +46,7 @@ export const extractMessageContent = (contentBuffer, protocolMode, messageStartT
     let textToDisplay = '';
     let thinkingToDisplay = '';
     let newProtocolMode = protocolMode;
+    let artifactToDisplay = null; // ★追加: ストリーミング中のArtifact中間データ
 
     if (isDelayPeriod) {
         // 待機時間中は表示しない（JSONフィールド検知を待つ）
@@ -55,6 +56,7 @@ export const extractMessageContent = (contentBuffer, protocolMode, messageStartT
             textToDisplay = parsed.answer;
             thinkingToDisplay = parsed.thinking || '';
             newProtocolMode = 'JSON';
+            artifactToDisplay = parsed.artifact || null; // ★追加
         } else {
             textToDisplay = '';
         }
@@ -66,6 +68,7 @@ export const extractMessageContent = (contentBuffer, protocolMode, messageStartT
         const parsed = parseLlmResponse(contentBuffer);
         textToDisplay = parsed.isParsed ? parsed.answer : '';
         thinkingToDisplay = parsed.thinking || '';
+        artifactToDisplay = parsed.isParsed ? (parsed.artifact || null) : null; // ★追加
     } else {
         // RAWモードでも、JSON構造が検出されたらパースを試みる（誤判定対策）
         const trimmed = contentBuffer.trim();
@@ -76,6 +79,7 @@ export const extractMessageContent = (contentBuffer, protocolMode, messageStartT
                 textToDisplay = parsed.answer;
                 thinkingToDisplay = parsed.thinking || '';
                 newProtocolMode = 'JSON';
+                artifactToDisplay = parsed.artifact || null; // ★追加
             } else {
                 textToDisplay = '';
             }
@@ -84,7 +88,7 @@ export const extractMessageContent = (contentBuffer, protocolMode, messageStartT
         }
     }
 
-    return { textToDisplay, thinkingToDisplay, newProtocolMode };
+    return { textToDisplay, thinkingToDisplay, newProtocolMode, artifactToDisplay };
 };
 
 /**

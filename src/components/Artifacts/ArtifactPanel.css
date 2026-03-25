@@ -1181,3 +1181,264 @@
 .pdf-export-container th {
     background-color: #f0f0f0 !important;
 }
+
+/* ★追加: 選択テキストツールチップ (LiquidGlass) */
+.selection-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    user-select: none;
+    pointer-events: auto;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selection-tooltip:hover {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.15),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.selection-tooltip:active {
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: rgba(245, 245, 245, 0.85);
+}
+
+.selection-tooltip-icon {
+    display: flex;
+    color: var(--sys-color-primary, #007AFF);
+}
+
+.selection-tooltip-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-main);
+    letter-spacing: 0.02em;
+}
+
+[data-theme='dark'] .selection-tooltip-icon {
+    color: #66b2ff; /* Lighter blue for better visibility in dark mode */
+}
+
+[data-theme='dark'] .selection-tooltip {
+    background: rgba(40, 40, 40, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.15);
+}
+
+[data-theme='dark'] .selection-tooltip:hover {
+    background: rgba(50, 50, 50, 0.85);
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+[data-theme='dark'] .selection-tooltip:active {
+    background: rgba(30, 30, 30, 0.75);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   Artifact v2.0: HTML Artifact (A4 Viewer) Styles
+   ======================================== */
+
+/* ビューワー背景（グレー）*/
+.artifact-viewer-bg {
+    background: #d0d0d0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;               /* ページ間の余白 */
+    width: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+/* A4用紙フレーム */
+.a4-page-wrapper {
+    width: 210mm;
+    min-height: 297mm;
+    background: #ffffff;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    /* ズーム機能のための基点設定 */
+    transform-origin: top center;
+    transition: transform 0.2s ease-out;
+}
+
+/* iframe */
+.a4-page-wrapper iframe {
+    width: 100%;
+    border: none;
+    display: block;
+}
+
+/* ページ番号 */
+.a4-page-number {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+    width: 210mm;
+    margin-top: -16px;
+}
+
+/* ダークモード対応 */
+[data-theme='dark'] .artifact-viewer-bg {
+    background: #2a2a2a;
+}
+
+/* 印刷時 */
+@media print {
+    .a4-page-wrapper { 
+        box-shadow: none; 
+        width: 100%; 
+        break-after: page; 
+    }
+    .a4-page-number { display: none; }
+    .artifact-viewer-bg { background: none; padding: 0; gap: 0; }
+}
+
+/* ========================================
+   Generating Page Placeholder (Apple Intelligence Style)
+   ======================================== */
+
+.a4-page-placeholder {
+    width: 210mm;
+    height: 297mm;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .a4-page-placeholder {
+    background: rgba(30, 30, 30, 0.6);
+}
+
+/* Glowing Border for Placeholder - Removed as requested */
+/*
+.a4-page-placeholder::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: conic-gradient(
+        from 0deg,
+        var(--ai-gradient-cyan),
+        var(--ai-gradient-magenta),
+        var(--ai-gradient-yellow),
+        var(--ai-gradient-blue),
+        var(--ai-gradient-cyan)
+    );
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
+    animation: ai-spin 4s linear infinite;
+}
+
+@keyframes ai-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+*/
+
+.placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    z-index: 1;
+}
+
+.placeholder-animation-container {
+    width: 240px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+}
+
+.generating-pencil-animation {
+    width: 100%;
+    height: auto;
+}
+
+.placeholder-text {
+    font-family: var(--font-rounded), var(--font-sans);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--color-text-main);
+    position: relative;
+    /* Elegant Silver Shimmer (Monochromatic) */
+    background: linear-gradient(
+        110deg,
+        rgba(0, 0, 0, 0) 40%,
+        rgba(0, 0, 0, 0.1) 45%,
+        rgba(0, 0, 0, 0.2) 50%,
+        rgba(0, 0, 0, 0.1) 55%,
+        rgba(0, 0, 0, 0) 60%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: elegant-shimmer 3s infinite;
+}
+
+[data-theme='dark'] .placeholder-text {
+    background: linear-gradient(
+        110deg,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.2) 45%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.2) 55%,
+        rgba(255, 255, 255, 0) 60%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+@keyframes elegant-shimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+}
+
+.placeholder-subtext {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}

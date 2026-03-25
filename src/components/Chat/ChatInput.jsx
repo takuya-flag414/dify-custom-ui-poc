@@ -101,7 +101,7 @@ const ChatInput = ({
       ...(activeArtifact && { artifact: { requested: true, type: activeArtifact.type } })
     };
     onSendMessage(text, filesToSend, options);
-    
+
     setText('');
     setSelectedFiles([]);
     setPrivacyWarning({ hasWarning: false, detections: [] });

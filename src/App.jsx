@@ -270,9 +270,27 @@ function App() {
     }
   }, [lastError]);
 
+  // ★追加: ストリーミング中のArtifact検出で即座にパネルを開く
+  // artifact_contentの受信を検知したら、ユーザーがリアルタイム表示を確認できるようにする
+  const hasOpenedForStreamingRef = useRef(false);
+  useEffect(() => {
+    if (isGenerating && streamingMessage?.artifact?.artifact_content && !hasOpenedForStreamingRef.current) {
+      // ストリーミング中にartifact_contentが初めて検出された時点でパネルを開く
+      hasOpenedForStreamingRef.current = true;
+      openArtifact({
+        title: streamingMessage.artifact.artifact_title || 'Generating...',
+        type: streamingMessage.artifact.artifact_type || 'summary_report',
+        content: '', // ストリーミング中はstreamingMessage.artifactから表示されるため空でOK
+      });
+    }
+    if (!isGenerating) {
+      // 生成完了後にフラグをリセット
+      hasOpenedForStreamingRef.current = false;
+    }
+  }, [isGenerating, streamingMessage?.artifact?.artifact_content]);
+
   // ★追加: Artifactレスポンス自動展開
-  // メッセージ完了時、最新AIメッセージにartifactが存在したら自動でArtifactPanelを開く
-  // ★修正: 会話履歴ロード時の誤発火を防ぐため、生成中(isGenerating)が終了した直後のみ開くようにする
+  // メッセージ完了時、最新AIメッセージにartifactが存在したら最終データでArtifactPanelを更新
   const prevIsGenerating = useRef(isGenerating);
   useEffect(() => {
     // 生成中から完了（true -> false）へと遷移したタイミングでのみ評価する

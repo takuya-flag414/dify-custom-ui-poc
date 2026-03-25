@@ -208,7 +208,7 @@ const ChatArea = (props) => {
         const displayLabel = ARTIFACT_LABELS[artifactType] || artifactType;
         const requestedArtifactInfo = { type: artifactType, label: displayLabel };
         setActiveArtifact(requestedArtifactInfo);
-        
+
         // ★追加: リアルタイムレンダリングのため、要求時にすぐパネルを開く
         if (onOpenArtifact) {
           onOpenArtifact(requestedArtifactInfo);
@@ -327,6 +327,7 @@ const ChatArea = (props) => {
         onClose={closeArtifact}
         artifact={openedArtifact}
         streamingMessage={streamingMessage}
+        onQuoteSelect={(text) => setQuoteContext(text)}
       />
     </div>
   );
