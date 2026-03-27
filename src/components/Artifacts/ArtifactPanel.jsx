@@ -379,8 +379,11 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         printWindow.document.write(displayContent);
         printWindow.document.close();
         printWindow.addEventListener("load", () => {
-            printWindow.print();
-            printWindow.close();
+            // 非同期のグラフ描画（Chart.js）の完了を待つためにわずかに待機
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
         });
         setIsMenuOpen(false);
     };
@@ -780,7 +783,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                                 >
                                                     <iframe
                                                         ref={(el) => { iframeRefs.current[index] = el; }}
-                                                        sandbox="allow-scripts"
+                                                        sandbox="allow-scripts allow-same-origin"
                                                         srcDoc={pageHtml}
                                                         style={{ height: `${h}px` }}
                                                         title={`${displayTitle} - Page ${index + 1}`}

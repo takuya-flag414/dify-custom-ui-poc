@@ -34,6 +34,7 @@ interface DomainSelectorProps {
     animate: string;
     exit: string;
     transition: any;
+    custom?: any;
 }
 
 // --- Main Component ---
@@ -46,7 +47,8 @@ const DomainSelector: React.FC<DomainSelectorProps> = ({
     initial,
     animate,
     exit,
-    transition
+    transition,
+    custom
 }) => {
     const [urlInput, setUrlInput] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
@@ -87,6 +89,7 @@ const DomainSelector: React.FC<DomainSelectorProps> = ({
     return (
         <motion.div
             key="domains"
+            custom={custom}
             variants={variants}
             initial={initial}
             animate={animate}

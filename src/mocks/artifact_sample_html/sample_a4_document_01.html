@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>2026年3月 月次報告書</title>
+
+  <style>
+    @page { size: A4; margin: 0; }
+
+    :root {
+      --page-width: 210mm;
+      --page-height: 297mm;
+
+      --font-body: "Hiragino Mincho ProN", "Yu Mincho", serif;
+      --font-heading: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --font-mono: "Courier New", "Osaka-Mono", monospace;
+
+      --text-base: 10.5pt;
+      --text-sm: 9pt;
+      --text-h1: 20pt;
+      --text-h2: 14pt;
+      --text-h3: 11.5pt;
+
+      --color-primary: #1e3a8a;
+      --color-accent: #8b0000;
+      --color-heading: #000000;
+      --color-body: #000000;
+      --color-muted: #000000;
+      --color-border: #b0b8c1;
+      --color-rule: #1e3a8a;
+      --color-bg-accent: #f8fafc;
+      --color-bg-cover: #1e3a8a;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.6;
+      letter-spacing: 0.02em;
+      color: var(--color-body);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      width: var(--page-width);
+      min-height: var(--page-height);
+      margin: 0 auto;
+      padding: 25mm 25mm;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-top: 8px solid var(--color-primary);
+    }
+
+    @media print {
+      body { background: none; display: block; }
+      .page {
+        margin: 0;
+        box-shadow: none;
+        width: 210mm;
+        height: 296.8mm;
+      }
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h1);
+      line-height: 1.3;
+      color: var(--color-heading);
+      margin: 0 0 10pt 0;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h2);
+      line-height: 1.3;
+      color: var(--color-heading);
+      border-bottom: 1.5px solid var(--color-rule);
+      padding-bottom: 3pt;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h3);
+      line-height: 1.3;
+      color: var(--color-heading);
+    }
+
+    h2, h3 {
+      break-before: avoid;
+      break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 6pt 0;
+      text-indent: 1em;
+      line-height: 1.6;
+      font-size: var(--text-base);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10pt 0;
+    }
+
+    th, td {
+      border: 1px solid var(--color-border);
+      padding: 5pt 8pt;
+      font-size: var(--text-base);
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    th {
+      background: var(--color-bg-accent);
+      font-family: var(--font-heading);
+      color: var(--color-heading);
+    }
+
+    .caption {
+      text-align: center;
+      font-size: 8.5pt;
+      color: #000;
+      font-family: var(--font-body);
+      margin-top: 5pt;
+      margin-bottom: 20pt;
+    }
+
+    ul {
+      margin: 6pt 0 10pt 0;
+      padding-left: 18pt;
+      list-style-type: disc;
+    }
+
+    ul li, ol li {
+      margin-bottom: 4pt;
+      line-height: 1.6;
+      font-size: var(--text-base);
+    }
+
+    ol {
+      margin: 6pt 0 10pt 0;
+      padding-left: 20pt;
+      list-style-type: decimal;
+    }
+
+    ol.kigaki-list {
+      list-style-type: none;
+      padding-left: 0;
+      counter-reset: kigaki;
+    }
+
+    ol.kigaki-list li::before {
+      counter-increment: kigaki;
+      content: "記" counter(kigaki) ". ";
+      font-family: var(--font-heading);
+    }
+
+    ul ul, ol ol {
+      margin: 3pt 0 3pt 12pt;
+    }
+
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-primary { background: #dbeafe; color: #1e3a8a; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+
+    p.no-indent,
+    .notice-box p, .notice-dash p, .notice-side p { text-indent: 0; }
+
+    .notice-box {
+      border: 1.5pt solid var(--color-heading);
+      padding: 8pt 14pt;
+      margin: 10pt 0;
+      font-size: var(--text-base);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    .notice-box-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: bold;
+      color: var(--color-heading);
+      text-align: center;
+      border-bottom: 0.5pt solid var(--color-border);
+      margin-bottom: 6pt;
+      padding-bottom: 3pt;
+      letter-spacing: 0.1em;
+    }
+
+    .notice-dash {
+      border: 1pt dashed var(--color-heading);
+      padding: 7pt 14pt;
+      margin: 10pt 0;
+      font-size: var(--text-base);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    .notice-dash-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: bold;
+      color: var(--color-heading);
+      margin-bottom: 4pt;
+      letter-spacing: 0.05em;
+    }
+
+    .notice-side {
+      border: none;
+      border-left: 3pt solid var(--color-rule);
+      padding: 3pt 0 3pt 12pt;
+      margin: 8pt 0;
+      font-size: var(--text-base);
+      line-height: 1.6;
+      background: transparent;
+    }
+
+    .notice-side-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: bold;
+      color: var(--color-heading);
+      margin-bottom: 3pt;
+    }
+
+    .text-emphasis {
+      font-weight: bold;
+      color: var(--color-heading);
+    }
+
+    .text-underline {
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-offset: 2pt;
+    }
+
+    .cover {
+      background: #ffffff;
+      color: #1a1a1a;
+      justify-content: flex-end;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-accent-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 14mm;
+      background: #1e3a8a;
+    }
+
+    .cover-inner {
+      margin-left: 14mm;
+      padding: 22mm 22mm 22mm 20mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    .cover-header { border-bottom: none; padding-bottom: 0; }
+
+    .cover-org {
+      font-family: var(--font-heading);
+      font-size: 9pt;
+      letter-spacing: 0.2em;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .cover-title-block {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .cover-year {
+      font-family: var(--font-heading);
+      font-size: 54pt;
+      font-weight: bold;
+      color: #e8eef8;
+      line-height: 1;
+      margin: 0 0 4mm 0;
+      letter-spacing: -2pt;
+    }
+
+    .cover-label {
+      font-family: var(--font-heading);
+      font-size: 8pt;
+      letter-spacing: 0.2em;
+      color: #1e3a8a;
+      margin-bottom: 4mm;
+      text-transform: uppercase;
+    }
+
+    .cover-title {
+      font-family: var(--font-heading);
+      font-size: 26pt;
+      font-weight: bold;
+      line-height: 1.4;
+      color: #1a1a1a;
+      margin: 0 0 4mm 0;
+    }
+
+    .cover-subtitle {
+      font-family: var(--font-body);
+      font-size: 11pt;
+      color: #555;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .cover-footer-block {
+      border-top: 1.5px solid #1e3a8a;
+      padding-top: 6mm;
+    }
+
+    .cover-meta-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .cover-meta-table th, .cover-meta-table td {
+      padding: 3pt 0;
+      font-size: 9pt;
+      border: none;
+      background: transparent;
+      font-family: var(--font-heading);
+    }
+
+    .cover-meta-table th {
+      width: 35%;
+      color: #888;
+      letter-spacing: 0.05em;
+    }
+
+    .cover-meta-table td { color: #1a1a1a; }
+
+    body.corporate .page { border-top: 3px solid #1e3a8a; }
+    body.corporate h1 { font-size: 18pt; }
+    body.corporate h2 {
+      border-bottom: none;
+      border-top: 1.5px solid #1e3a8a;
+      padding-top: 6pt;
+      padding-bottom: 0;
+      margin-top: 18pt;
+    }
+
+    .page-body {
+      flex: 1;
+      box-sizing: border-box;
+      padding-bottom: 14mm;
+    }
+
+    .meta-grid {
+      margin-top: 8pt;
+    }
+
+    .meta-grid table td:first-child {
+      width: 24%;
+      font-family: var(--font-heading);
+      background: var(--color-bg-accent);
+    }
+
+    .kpi-table td:nth-child(2),
+    .kpi-table td:nth-child(3),
+    .kpi-table td:nth-child(4),
+    .kpi-table td:nth-child(5) {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .status-good {
+      color: #065f46;
+      font-weight: bold;
+    }
+
+    .status-watch {
+      color: #92400e;
+      font-weight: bold;
+    }
+
+    .status-risk {
+      color: #8b0000;
+      font-weight: bold;
+    }
+
+    .page-number {
+      position: absolute;
+      right: 25mm;
+      bottom: 12mm;
+      font-family: var(--font-heading);
+      font-size: 9pt;
+      color: #555;
+    }
+
+    .spacer-8 { height: 8pt; }
+  </style>
+
+  <script>
+    function initInteractiveElement() {
+      window.__initFinished = true;
+    }
+    initInteractiveElement();
+  </script>
+</head>
+<body class="corporate">
+  <!-- doc_nature: general -->
+
+  <div class="page cover" style="page-break-after: always;">
+    <div class="cover-accent-bar"></div>
+    <div class="cover-inner">
+      <div class="cover-header">
+        <span class="cover-org">SEIHOKU INDUSTRIES</span>
+      </div>
+
+      <div class="cover-title-block">
+        <div class="cover-year">2026</div>
+        <div class="cover-label">MONTHLY REPORT</div>
+        <h1 class="cover-title">2026年3月 月次報告書</h1>
+        <p class="cover-subtitle">営業・製造・管理部門の主要実績、課題、および翌月対応方針を整理した社内向けサンプル文書</p>
+      </div>
+
+      <div class="cover-footer-block">
+        <table class="cover-meta-table">
+          <tr><th>発行日</th><td>2026年3月31日</td></tr>
+          <tr><th>発行者</th><td>経営企画部　業務改善室</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" style="page-break-after: always;">
+    <div class="page-body">
+      <h1>1. 月次サマリー</h1>
+
+      <div class="meta-grid">
+        <table>
+          <tr>
+            <td>対象期間</td>
+            <td>2026年3月1日〜2026年3月31日</td>
+          </tr>
+          <tr>
+            <td>対象組織</td>
+            <td>営業部、製造部、管理部</td>
+          </tr>
+          <tr>
+            <td>報告責任者</td>
+            <td>経営企画部長　山田 恒一</td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>総括</h2>
+      <p>当月は主力製品の受注増加により、全社売上高は計画を上回って推移した。とくに法人向け大型案件の前倒し計上が寄与し、営業利益も月次計画を超過した。</p>
+      <p>一方、製造部門では一部資材の納入遅延が発生しており、翌月初旬の出荷計画には一定の注意が必要である。管理部門では請求処理の標準化が進み、月末締め作業時間は前月比で短縮した。</p>
+
+      <div class="notice-box">
+        <div class="notice-box-title">重要事項</div>
+        <p class="no-indent">4月第1週の出荷量増加に備え、製造部と物流委託先との事前調整を3月末までに完了させる必要がある。</p>
+      </div>
+
+      <h2>主要KPI</h2>
+      <table class="kpi-table">
+        <thead>
+          <tr>
+            <th>指標</th>
+            <th>実績</th>
+            <th>計画</th>
+            <th>前月</th>
+            <th>差異</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>売上高</td>
+            <td>128,400千円</td>
+            <td>120,000千円</td>
+            <td>116,200千円</td>
+            <td class="status-good">+8,400千円</td>
+          </tr>
+          <tr>
+            <td>営業利益</td>
+            <td>18,900千円</td>
+            <td>16,500千円</td>
+            <td>15,100千円</td>
+            <td class="status-good">+2,400千円</td>
+          </tr>
+          <tr>
+            <td>粗利率</td>
+            <td>32.4%</td>
+            <td>30.0%</td>
+            <td>29.8%</td>
+            <td class="status-good">+2.4pt</td>
+          </tr>
+          <tr>
+            <td>新規案件数</td>
+            <td>27件</td>
+            <td>24件</td>
+            <td>21件</td>
+            <td class="status-good">+3件</td>
+          </tr>
+          <tr>
+            <td>納期遵守率</td>
+            <td>94.2%</td>
+            <td>96.0%</td>
+            <td>95.1%</td>
+            <td class="status-watch">-1.8pt</td>
+          </tr>
+          <tr>
+            <td>経費執行率</td>
+            <td>97.5%</td>
+            <td>100.0%</td>
+            <td>93.8%</td>
+            <td class="status-good">-2.5pt</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="notice-side">
+        <div class="notice-side-title">補足</div>
+        <p class="no-indent">本サンプルに記載の数値は説明用の架空値であり、実在の企業・組織とは関係しない。</p>
+      </div>
+    </div>
+    <div class="page-number">2</div>
+  </div>
+
+  <div class="page" style="page-break-after: always;">
+    <div class="page-body">
+      <h1>2. 実績詳細</h1>
+
+      <h2>部門別概況</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 14%;">部門</th>
+            <th style="width: 47%;">主要実績</th>
+            <th style="width: 11%;">評価</th>
+            <th style="width: 28%;">課題</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>営業部</td>
+            <td>既存顧客向け追加受注14件、新規顧客契約5件を獲得。大型案件2件を当月内に成約。</td>
+            <td class="status-good">好調</td>
+            <td>案件増加に対し提案書レビュー工数が逼迫している。</td>
+          </tr>
+          <tr>
+            <td>製造部</td>
+            <td>月間生産量は計画比101.8%で着地。歩留まり率は前月比0.9pt改善。</td>
+            <td class="status-watch">概ね順調</td>
+            <td>副資材の調達遅延により一部品目の仕掛在庫が滞留した。</td>
+          </tr>
+          <tr>
+            <td>管理部</td>
+            <td>請求処理の定型化により月末処理時間を12.5%削減。稟議回付の平均日数も短縮。</td>
+            <td class="status-good">改善</td>
+            <td>人事評価資料の収集に部門間ばらつきがある。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>収益内訳</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 16%;">区分</th>
+            <th style="width: 17%;">売上高</th>
+            <th style="width: 14%;">構成比</th>
+            <th style="width: 14%;">前月比</th>
+            <th style="width: 39%;">コメント</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>既存顧客</td>
+            <td>82,600千円</td>
+            <td>64.3%</td>
+            <td>108.7%</td>
+            <td>更新案件および追加導入案件が堅調に推移した。</td>
+          </tr>
+          <tr>
+            <td>新規顧客</td>
+            <td>29,800千円</td>
+            <td>23.2%</td>
+            <td>121.4%</td>
+            <td>展示会経由の案件が売上計上につながった。</td>
+          </tr>
+          <tr>
+            <td>保守・サポート</td>
+            <td>16,000千円</td>
+            <td>12.5%</td>
+            <td>102.1%</td>
+            <td>契約更新率が高く、安定した収益源となっている。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="page-number">3</div>
+  </div>
+
+  <div class="page" style="page-break-after: always;">
+    <div class="page-body">
+      <h1>3. 実績詳細（続き）</h1>
+
+      <h2>運用指標</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40%;">項目</th>
+            <th style="width: 20%;">実績</th>
+            <th style="width: 25%;">目標</th>
+            <th style="width: 15%;">評価</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>見積提出リードタイム</td>
+            <td>2.8営業日</td>
+            <td>3.0営業日以内</td>
+            <td class="status-good">達成</td>
+          </tr>
+          <tr>
+            <td>一次回答時間</td>
+            <td>5.2時間</td>
+            <td>4.0時間以内</td>
+            <td class="status-risk">未達</td>
+          </tr>
+          <tr>
+            <td>月末締め処理時間</td>
+            <td>11.5時間</td>
+            <td>12.0時間以内</td>
+            <td class="status-good">達成</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="notice-dash">
+        <div class="notice-dash-title">確認事項</div>
+        <p class="no-indent">一次回答時間の未達は、月末最終週に問い合わせが集中したことが主因である。翌月は営業支援担当の応援配置を試行し、繁忙時間帯の受電・返信体制を平準化する。</p>
+      </div>
+
+      <h2>分析コメント</h2>
+      <p>営業活動は案件創出と成約率の両面で改善が見られた一方、問い合わせ対応とレビュー負荷の増加が運用品質に影響し始めている。今後は案件数の拡大だけでなく、処理能力の標準化を合わせて進める必要がある。</p>
+      <p>製造部門では生産性の改善が継続しているが、資材調達リスクが残存しているため、調達先の分散と安全在庫管理を併行して実施することが望ましい。</p>
+    </div>
+    <div class="page-number">4</div>
+  </div>
+
+  <div class="page">
+    <div class="page-body">
+      <h1>4. 課題と翌月対応</h1>
+
+      <h2>主要課題</h2>
+      <ul>
+        <li>副資材の納入遅延により、一部製品の出荷計画に余裕がなくなっている。</li>
+        <li>案件増加に伴い、営業提案資料のレビュー待ち時間が伸びている。</li>
+        <li>問い合わせの集中時間帯において、初動対応品質にばらつきが見られる。</li>
+      </ul>
+
+      <h2>翌月アクション</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>施策</th>
+            <th>担当</th>
+            <th>期限</th>
+            <th>期待効果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>代替調達先の追加選定と安全在庫水準の見直し</td>
+            <td>製造部 調達課</td>
+            <td>2026年4月10日</td>
+            <td>納期遅延リスクの低減</td>
+          </tr>
+          <tr>
+            <td>提案書テンプレートの統一およびレビュー承認フローの簡素化</td>
+            <td>営業部 営業推進課</td>
+            <td>2026年4月15日</td>
+            <td>案件処理速度の向上</td>
+          </tr>
+          <tr>
+            <td>問い合わせ一次受付の当番制導入</td>
+            <td>管理部 業務支援課</td>
+            <td>2026年4月1日</td>
+            <td>初動応答の平準化</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>所見</h2>
+      <p>全体としては売上・利益の両面で計画を上回っており、当月の業績は良好であった。今後は成長局面で顕在化しやすい処理負荷の増加に対し、部門横断で標準化を進めることが重要である。</p>
+      <p>とくに<span class="text-emphasis">納期遵守率の回復</span>と<span class="text-underline">問い合わせ初動の安定化</span>は、翌月の重点管理項目として継続的にモニタリングする必要がある。</p>
+
+      <div class="notice-box">
+        <div class="notice-box-title">承認依頼</div>
+        <p class="no-indent">上記アクションのうち、調達先追加に関する予備費使用について、4月第1営業日までに部門長承認を取得したい。</p>
+      </div>
+
+      <div class="spacer-8"></div>
+      <p class="no-indent" style="text-align: right;">以上</p>
+    </div>
+    <div class="page-number">5</div>
+  </div>
+
+  <script>
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        window.parent.postMessage({
+          type: 'artifact-resize',
+          height: document.documentElement.scrollHeight
+        }, '*');
+      });
+      ro.observe(document.body);
+    }
+  </script>
+</body>
+</html>

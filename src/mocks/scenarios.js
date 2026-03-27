@@ -1,4 +1,5 @@
 // src/mocks/scenarios.js
+import sampleA4Html from './artifact_sample_html/sample_a4_document_04.html?raw';
 
 /**
  * JSONレスポンス生成用ヘルパー
@@ -218,6 +219,72 @@ const styleTemplates = {
  * 後方互換のため、配列形式のシナリオも引き続きサポートされます。
  */
 export const scenarios = {
+
+  // =================================================================
+  // Pattern: HTML A4 Document
+  // =================================================================
+  'html_a4_document': {
+    efficient: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "html_document"}\n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "A4サイズのビジネスドキュメントを作成しました。",
+          [
+            { id: 'cite_1', type: 'rag', source: '事業計画ガイドライン.pdf', url: null }
+          ],
+          [],
+          "ご要望に基づき、プロフェッショナルなA4書式のドキュメントを生成します。"
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "2026年度 事業戦略報告書",
+            artifact_type: "html_document",
+            artifact_content: sampleA4Html
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 5000 } } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "html_document", "thinking": "A4ドキュメントの作成ですね！承知いたしました。内容を構成して作成します。"} \n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "高品質なA4ビジネスドキュメントを作成しました！📄✨\n\n右側のパネルで、マルチページ構成のレポートをご確認いただけます。印刷にも適したプロフェッショナルなレイアウトになっています。",
+          [
+            { id: 'cite_1', type: 'rag', source: '事業計画ガイドライン.pdf', url: null }
+          ],
+          [
+            { type: 'suggested_question', label: 'PDFとして保存したい', icon: 'file-text', payload: { text: 'PDFでの保存方法を教えて' } },
+            { type: 'suggested_question', label: '内容を修正して', icon: 'edit', payload: { text: '内容の修正をお願い' } }
+          ],
+          "プロフェッショナルなA4書式でドキュメントを構成しています。しばらくお待ちください..."
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "2026年度 事業戦略報告書",
+            artifact_type: "html_document",
+            artifact_content: sampleA4Html
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 5500 } } }
+    ]
+  },
+
 
   // =================================================================
   // Special Pattern: Enterprise Pricing (From Log)
@@ -1909,5 +1976,10 @@ export const scenarioSuggestions = {
     '市場シェアの詳細を教えて',
     '2028年の予測の根拠は？',
     '競合C社の強みを分析して'
+  ],
+  'html_a4_document': [
+    '内容をさらに詳しくして',
+    '表のデータを更新して',
+    'デザインを変更して'
   ]
 };

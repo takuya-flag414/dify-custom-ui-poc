@@ -3,6 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FileIcon from '../../Shared/FileIcon';
 import PrivacyShieldButton from '../PrivacyShieldButton';
 
+const ARTIFACT_TYPE_LABELS = {
+    'html_document': 'A4ドキュメント',
+    'summary_report': '要約・レポート',
+    'meeting_minutes': '議事録・Next Action',
+    'checklist': 'チェックリスト',
+    'comparison_table': '比較表',
+    'faq': 'FAQ (想定問答集)'
+};
+
 // Close Icon Component
 const CloseIcon = () => (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -72,7 +81,7 @@ const ReferenceRail = ({
                         {/* ★追加: Artifact Badge */}
                         {activeArtifact && (
                             <GlassChip onRemove={onRemoveArtifact} className="text-purple-700 dark:text-purple-300 bg-purple-100/30 border-purple-200/50">
-                                <span>📄 {activeArtifact.label}</span>
+                                <span>📄 {ARTIFACT_TYPE_LABELS[activeArtifact.type] || ARTIFACT_TYPE_LABELS[activeArtifact.label] || activeArtifact.label}</span>
                             </GlassChip>
                         )}
 

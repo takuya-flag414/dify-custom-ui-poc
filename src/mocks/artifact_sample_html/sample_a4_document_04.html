@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>営業向けのMEO研修資料</title>
+
+  <style>
+    @page { size: A4; margin: 0; }
+
+    :root {
+      --page-width: 210mm;
+      --page-height: 297mm;
+
+      --font-body: "Hiragino Mincho ProN", "Yu Mincho", serif;
+      --font-heading: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --font-mono: "Courier New", "Osaka-Mono", monospace;
+
+      --text-base: 10.5pt;
+      --text-sm: 9pt;
+      --text-h1: 20pt;
+      --text-h2: 14pt;
+      --text-h3: 11.5pt;
+
+      --color-primary: #1e3a8a;
+      --color-accent: #8b0000;
+      --color-heading: #000000;
+      --color-body: #000000;
+      --color-muted: #333333;
+      --color-border: #b0b8c1;
+      --color-rule: #1e3a8a;
+      --color-bg-accent: #f8fafc;
+      --color-bg-cover: #eaf1ff;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      gap: 8mm;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.6;
+      letter-spacing: 0.02em;
+      color: var(--color-body);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      width: var(--page-width);
+      min-height: var(--page-height);
+      margin: 0 auto;
+      padding: 25mm 25mm;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page.decorated-page {
+      border-top: 8px solid var(--color-primary);
+    }
+
+    .page.letter-page {
+      border-top: none;
+    }
+
+    .page-body {
+      flex: 1;
+      box-sizing: border-box;
+      padding-bottom: 14mm;
+    }
+
+    .page-number {
+      position: absolute;
+      right: 25mm;
+      bottom: 12mm;
+      font-family: var(--font-heading);
+      font-size: 9pt;
+      color: #555;
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h1);
+      line-height: 1.3;
+      color: var(--color-heading);
+      margin: 0 0 8pt 0;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h2);
+      line-height: 1.3;
+      color: var(--color-heading);
+      border-bottom: 1.5px solid var(--color-rule);
+      padding-bottom: 3pt;
+      margin: 0 0 10pt 0;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h3);
+      line-height: 1.3;
+      color: var(--color-heading);
+      margin: 0 0 8pt 0;
+    }
+
+    h2, h3 {
+      break-before: avoid;
+      break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 6pt 0;
+      text-indent: 1em;
+      line-height: 1.6;
+      font-size: var(--text-base);
+    }
+
+    p.no-indent,
+    .cover-meta p,
+    .cover-footer p,
+    .notice-box p,
+    .notice-dash p,
+    .notice-side p,
+    .caption,
+    .kpi-strip p,
+    .agenda-list li,
+    .step-list li {
+      text-indent: 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10pt 0;
+    }
+
+    th, td {
+      border: 1px solid var(--color-border);
+      padding: 5pt 8pt;
+      font-size: var(--text-base);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--color-bg-accent);
+      font-family: var(--font-heading);
+      color: var(--color-heading);
+    }
+
+    .caption {
+      text-align: center;
+      font-size: 8.5pt;
+      color: #000;
+      font-family: var(--font-body);
+      margin-top: 5pt;
+      margin-bottom: 14pt;
+    }
+
+    ul {
+      margin: 6pt 0 10pt 0;
+      padding-left: 18pt;
+      list-style-type: disc;
+    }
+
+    ol {
+      margin: 6pt 0 10pt 0;
+      padding-left: 20pt;
+      list-style-type: decimal;
+    }
+
+    ul li, ol li {
+      margin-bottom: 4pt;
+      line-height: 1.6;
+      font-size: var(--text-base);
+    }
+
+    .notice-box {
+      border: 1.5pt solid var(--color-heading);
+      padding: 8pt 14pt;
+      margin: 10pt 0;
+      font-size: var(--text-base);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    .notice-box-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: bold;
+      color: var(--color-heading);
+      text-align: center;
+      border-bottom: 0.5pt solid var(--color-border);
+      margin-bottom: 6pt;
+      padding-bottom: 3pt;
+      letter-spacing: 0.1em;
+    }
+
+    .notice-dash {
+      border: 1pt dashed var(--color-heading);
+      padding: 7pt 14pt;
+      margin: 10pt 0;
+      font-size: var(--text-base);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    .notice-dash-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: bold;
+      color: var(--color-heading);
+      margin-bottom: 4pt;
+      letter-spacing: 0.05em;
+    }
+
+    .notice-side {
+      border: none;
+      border-left: 3pt solid var(--color-rule);
+      padding: 3pt 0 3pt 12pt;
+      margin: 8pt 0 12pt 0;
+      font-size: var(--text-base);
+      line-height: 1.6;
+      background: transparent;
+    }
+
+    .notice-side-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: bold;
+      color: var(--color-heading);
+      margin-bottom: 3pt;
+    }
+
+    .logo-placeholder {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid var(--color-heading);
+      padding: 4pt 10pt;
+      font-family: var(--font-heading);
+      font-size: 10pt;
+      letter-spacing: 0.1em;
+      color: var(--color-heading);
+    }
+
+    .chart-fallback {
+      border: 1px solid var(--color-border);
+      padding: 12pt;
+      background: var(--color-bg-accent);
+      font-size: var(--text-sm);
+      font-family: var(--font-heading);
+      color: var(--color-muted);
+      text-align: center;
+    }
+
+    .cover-panel {
+      height: 100%;
+      border: 1px solid var(--color-border);
+      background: linear-gradient(180deg, #f7fbff 0%, #eef4ff 100%);
+      padding: 18mm 16mm;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cover-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10pt;
+      margin-bottom: 18pt;
+    }
+
+    .cover-tag {
+      display: inline-block;
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      padding: 3pt 8pt;
+      font-family: var(--font-heading);
+      font-size: 9pt;
+      letter-spacing: 0.08em;
+      background: #fff;
+    }
+
+    .cover-title {
+      margin-top: 26mm;
+      margin-bottom: 10pt;
+    }
+
+    .cover-subtitle {
+      font-family: var(--font-heading);
+      font-size: 12pt;
+      color: var(--color-primary);
+      margin-bottom: 12pt;
+      letter-spacing: 0.04em;
+    }
+
+    .cover-lead {
+      border-top: 1.5px solid var(--color-rule);
+      padding-top: 10pt;
+      margin-top: 10pt;
+      max-width: 120mm;
+    }
+
+    .cover-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8pt 16pt;
+      margin-top: 18pt;
+      margin-bottom: 14pt;
+    }
+
+    .meta-card {
+      border: 1px solid var(--color-border);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8pt 10pt;
+    }
+
+    .meta-label {
+      font-family: var(--font-heading);
+      font-size: 8.5pt;
+      color: var(--color-primary);
+      margin-bottom: 2pt;
+      letter-spacing: 0.06em;
+    }
+
+    .meta-value {
+      font-size: var(--text-base);
+      color: var(--color-heading);
+    }
+
+    .cover-footer {
+      border-top: 1px solid var(--color-border);
+      padding-top: 10pt;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12pt;
+      margin: 8pt 0 12pt 0;
+    }
+
+    .mini-card {
+      border: 1px solid var(--color-border);
+      padding: 9pt 10pt;
+      background: #fff;
+    }
+
+    .mini-card-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      margin-bottom: 4pt;
+      letter-spacing: 0.04em;
+    }
+
+    .agenda-list,
+    .step-list {
+      margin-top: 6pt;
+    }
+
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10pt;
+      margin: 8pt 0 14pt 0;
+    }
+
+    .kpi-card {
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-accent);
+      padding: 10pt;
+      text-align: center;
+    }
+
+    .kpi-label {
+      font-family: var(--font-heading);
+      font-size: 8.5pt;
+      color: var(--color-primary);
+      margin-bottom: 4pt;
+      letter-spacing: 0.06em;
+    }
+
+    .kpi-value {
+      font-family: var(--font-heading);
+      font-size: 15pt;
+      color: var(--color-heading);
+      margin-bottom: 2pt;
+    }
+
+    .small-note {
+      font-size: var(--text-sm);
+      color: var(--color-muted);
+    }
+
+    canvas[data-chart-role] {
+      max-height: 230pt;
+      margin: 6pt auto 0 auto;
+      display: block;
+    }
+
+    @media print {
+      body {
+        background: none;
+        display: block;
+      }
+
+      .page {
+        margin: 0;
+        box-shadow: none;
+        width: 210mm;
+        height: 296.8mm;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    window.addEventListener('error', function(e) {
+      if (e.target && e.target.src && e.target.src.includes('chart.js')) {
+        document.querySelectorAll('canvas[data-fallback]').forEach(function(canvas) {
+          const fallback = document.createElement('div');
+          fallback.className = 'chart-fallback';
+          fallback.innerHTML = canvas.getAttribute('data-fallback');
+          canvas.parentNode.replaceChild(fallback, canvas);
+        });
+      }
+    }, true);
+
+    function initInteractiveElements() {
+      if (typeof Chart === 'undefined') {
+        requestAnimationFrame(initInteractiveElements);
+        return;
+      }
+
+      let pending = false;
+
+      document.querySelectorAll('canvas[data-chart-role]').forEach(function(canvas) {
+        if (canvas.__chartInitialized) return;
+
+        const role = canvas.getAttribute('data-chart-role');
+        if (!role) return;
+
+        canvas.__chartInitialized = true;
+
+        if (role === 'meo-trend-sample') {
+          new Chart(canvas, {
+            type: 'line',
+            data: {
+              labels: ['導入前', '1か月後', '2か月後', '3か月後'],
+              datasets: [{
+                label: 'マップ経由問い合わせ件数',
+                data: [12, 18, 26, 33],
+                borderColor: '#1e3a8a',
+                backgroundColor: 'rgba(30,58,138,0.12)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              animation: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  labels: {
+                    color: '#000000',
+                    font: {
+                      family: '"Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif',
+                      size: 11
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  ticks: { color: '#000000' },
+                  grid: { color: '#d7dde5' }
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: { color: '#000000', stepSize: 5 },
+                  grid: { color: '#d7dde5' }
+                }
+              }
+            }
+          });
+        }
+      });
+
+      document.querySelectorAll('canvas[data-chart-role]').forEach(function(canvas) {
+        if (!canvas.__chartInitialized) pending = true;
+      });
+
+      if (pending) requestAnimationFrame(initInteractiveElements);
+    }
+
+    initInteractiveElements();
+  </script>
+</head>
+<body>
+  <div class="page decorated-page" style="page-break-after: always;">
+    <div class="page-body">
+      <div class="cover-panel">
+        <div>
+          <div class="cover-top">
+            <div class="logo-placeholder">MEO SALES TRAINING</div>
+            <div class="cover-tag">社内研修用</div>
+          </div>
+
+          <div class="cover-title">
+            <h1>営業向けのMEO研修資料</h1>
+            <div class="cover-subtitle">Googleマップ集客を提案につなげるための基礎理解と営業実践</div>
+          </div>
+
+          <div class="cover-lead">
+            <p class="no-indent">本資料は、営業担当者がMEOの仕組みを短時間で理解し、商談時に「なぜ必要か」「何を支援するのか」「どのように成果を語るか」を整理できるように作成した研修用サンプルです。</p>
+          </div>
+
+          <div class="cover-meta">
+            <div class="meta-card">
+              <div class="meta-label">対象</div>
+              <p class="meta-value no-indent">新任営業、提案営業、インサイドセールス</p>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">想定利用</div>
+              <p class="meta-value no-indent">社内勉強会、ロープレ、提案準備</p>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">研修テーマ</div>
+              <p class="meta-value no-indent">MEOの基礎、提案ポイント、反論対応</p>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">作成日</div>
+              <p class="meta-value no-indent">2026年3月26日</p>
+            </div>
+          </div>
+
+          <div class="notice-box">
+            <div class="notice-box-title">研修目的</div>
+            <p class="no-indent">MEOを「運用の話」だけで終わらせず、来店型ビジネスの集客課題に対する営業提案として説明できる状態を目指します。</p>
+          </div>
+        </div>
+
+        <div class="cover-footer">
+          <p class="no-indent">営業現場では、SEOとの違い、Googleビジネスプロフィールの重要性、効果の伝え方、運用体制の説明が特に重要です。</p>
+        </div>
+      </div>
+    </div>
+    <div class="page-number">1</div>
+  </div>
+
+  <div class="page decorated-page" style="page-break-after: always;">
+    <div class="page-body">
+      <h2>研修の目的</h2>
+      <p>営業担当がMEOを理解する意義は、単にサービス説明をするためではなく、顧客の来店導線を言語化して提案の必要性を伝えるためにあります。</p>
+      <p>特に店舗型ビジネスでは、「検索された後にどこで比較され、どこで来店判断が行われるか」を説明できることが受注率に直結します。</p>
+
+      <div class="section-grid">
+        <div class="mini-card">
+          <div class="mini-card-title">営業が押さえるべき視点</div>
+          <ul class="agenda-list">
+            <li>MEOは地図検索面の集客最適化であること。</li>
+            <li>順位だけでなく、閲覧後の行動改善まで含めて語ること。</li>
+            <li>口コミ、写真、情報整備も提案対象になること。</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-title">この研修で扱う範囲</div>
+          <ul class="agenda-list">
+            <li>MEOの基本構造。</li>
+            <li>営業ヒアリングの観点。</li>
+            <li>提案時の切り口と反論対応。</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>営業担当が理解すべき全体像</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 22%;">領域</th>
+            <th style="width: 34%;">営業としての理解</th>
+            <th>顧客への説明ポイント</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>検索導線</td>
+            <td>「地域名＋業種」や近隣検索で候補比較が始まる。</td>
+            <td>Webサイト訪問前に、マップ上で比較検討される場面が多いと説明する。</td>
+          </tr>
+          <tr>
+            <td>店舗情報</td>
+            <td>営業時間、住所、カテゴリ、写真、投稿などが判断材料になる。</td>
+            <td>情報の欠落や古さが機会損失につながると伝える。</td>
+          </tr>
+          <tr>
+            <td>信頼形成</td>
+            <td>口コミ件数、評価、返信状況が安心感を左右する。</td>
+            <td>見込み客は価格だけでなく、安心感でも店舗を選ぶと伝える。</td>
+          </tr>
+          <tr>
+            <td>運用継続</td>
+            <td>初期設定で終わらず、更新・改善・分析が必要になる。</td>
+            <td>「掲載」ではなく「継続運用型支援」として提案する。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="page-number">2</div>
+  </div>
+
+  <div class="page decorated-page" style="page-break-after: always;">
+    <div class="page-body">
+      <h2>MEOの基本理解</h2>
+      <p>MEOは、Googleマップやローカル検索面で自社店舗の情報を見つけてもらいやすくし、比較時の魅力を高めるための取り組みです。</p>
+      <p>営業では、順位だけを強調するのではなく、検索表示から来店・問い合わせまでの一連の接点改善として説明することが重要です。</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 24%;">主要要素</th>
+            <th style="width: 30%;">概要</th>
+            <th>営業トーク例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Googleビジネスプロフィール</td>
+            <td>店舗情報を管理する基盤。基本情報の整備が出発点になる。</td>
+            <td>「まずは見つけた人に正しい情報を届ける状態を作ります。」</td>
+          </tr>
+          <tr>
+            <td>口コミ管理</td>
+            <td>件数・評価・返信の質が信頼感に影響する。</td>
+            <td>「口コミ対策は評価点だけでなく、比較時の安心材料を増やす施策です。」</td>
+          </tr>
+          <tr>
+            <td>写真・投稿</td>
+            <td>店舗の雰囲気や新着情報を視覚的に伝える。</td>
+            <td>「来店前の不安を減らし、選ばれる理由を補強します。」</td>
+          </tr>
+          <tr>
+            <td>カテゴリ整合</td>
+            <td>業種分類や説明文の整合性が関連性に関わる。</td>
+            <td>「誰に・何を提供している店舗かを検索側に正しく伝えます。」</td>
+          </tr>
+          <tr>
+            <td>分析と改善</td>
+            <td>表示回数、経路案内、通話などの行動を見て改善する。</td>
+            <td>「掲載後も数字を見ながら改善するので、投げっぱなしになりません。」</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="notice-side">
+        <div class="notice-side-title">営業メモ</div>
+        <p class="no-indent">顧客がよく誤解するのは、「ホームページがあれば十分」「一度登録すれば終わり」という点です。MEOは比較画面での第一印象づくりと、継続改善の両方を含む施策として整理します。</p>
+      </div>
+
+      <h2>向いている顧客の見分け方</h2>
+      <ul>
+        <li>来店や訪問、地域商圏での集客が売上に直結する業種。</li>
+        <li>口コミや写真の印象が予約率・来店率に影響しやすい業種。</li>
+        <li>営業時間やサービス内容の更新頻度が高い業種。</li>
+      </ul>
+    </div>
+    <div class="page-number">3</div>
+  </div>
+
+  <div class="page decorated-page" style="page-break-after: always;">
+    <div class="page-body">
+      <h2>商談での進め方</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 18%;">商談段階</th>
+            <th style="width: 30%;">確認すること</th>
+            <th style="width: 24%;">営業の狙い</th>
+            <th>使いやすい一言</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>導入</td>
+            <td>店舗集客の現状、広告依存度、商圏を確認する。</td>
+            <td>来店導線に関する課題意識を引き出す。</td>
+            <td>「検索された後の比較場面は、今どのように見えていますか。」</td>
+          </tr>
+          <tr>
+            <td>課題整理</td>
+            <td>口コミ、写真、営業時間、情報更新の状況を確認する。</td>
+            <td>改善余地を具体化する。</td>
+            <td>「情報の鮮度や見え方で取りこぼしている可能性があります。」</td>
+          </tr>
+          <tr>
+            <td>提案</td>
+            <td>運用範囲、更新体制、レポート内容を提示する。</td>
+            <td>単発作業ではなく運用支援として価値を示す。</td>
+            <td>「初期整備と月次改善を分けて設計できます。」</td>
+          </tr>
+          <tr>
+            <td>クロージング</td>
+            <td>開始条件、社内確認事項、スケジュールを整理する。</td>
+            <td>検討停滞を防ぎ、次の行動を明確にする。</td>
+            <td>「まずは現状診断から着手し、改善優先度を見える化します。」</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>よくある反論と返し方</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 28%;">よくある反論</th>
+            <th style="width: 30%;">背景</th>
+            <th>返し方の例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ホームページがあるので十分</td>
+            <td>検索からサイト流入までが集客の全体だと考えている。</td>
+            <td>「サイトの前段で比較される場所がマップ面なので、入口改善としてMEOが必要です。」</td>
+          </tr>
+          <tr>
+            <td>口コミ対応の時間がない</td>
+            <td>現場運用の負荷を懸念している。</td>
+            <td>「返信方針をテンプレート化すると、運用負荷を抑えながら信頼形成ができます。」</td>
+          </tr>
+          <tr>
+            <td>順位保証がないなら不安</td>
+            <td>成果の定義が曖昧で判断しづらい。</td>
+            <td>「順位だけでなく、閲覧数、経路案内、通話など行動指標も追って改善します。」</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="page-number">4</div>
+  </div>
+
+  <div class="page decorated-page">
+    <div class="page-body">
+      <h2>成果イメージ</h2>
+
+      <div class="notice-side">
+        <div class="notice-side-title">注記</div>
+        <p class="no-indent">以下の数値は研修用のサンプルデータです。特定企業の実績ではなく、営業説明のためのモックとして掲載しています。</p>
+      </div>
+
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-label">想定改善指標 1</div>
+          <p class="kpi-value no-indent">+175%</p>
+          <p class="small-note no-indent">問い合わせ件数の伸び幅イメージ</p>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">想定改善指標 2</div>
+          <p class="kpi-value no-indent">+21件</p>
+          <p class="small-note no-indent">月間問い合わせ増加イメージ</p>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">想定改善指標 3</div>
+          <p class="kpi-value no-indent">90日</p>
+          <p class="small-note no-indent">初期成果の共有目安</p>
+        </div>
+      </div>
+
+      <canvas
+        id="chart-1"
+        data-chart-role="meo-trend-sample"
+        data-fallback="サンプル推移データ：導入前12件、1か月後18件、2か月後26件、3か月後33件。"></canvas>
+      <p class="caption">図1：マップ経由問い合わせ件数の推移イメージ（研修用サンプル）</p>
+
+      <h2>次アクション</h2>
+      <ol class="step-list">
+        <li>現状のGoogleビジネスプロフィール情報を棚卸しする。</li>
+        <li>口コミ、写真、投稿、カテゴリ設定の改善優先度を整理する。</li>
+        <li>初期整備と月次運用の提案範囲を分けて見積もる。</li>
+        <li>顧客ごとに「来店率改善」「問い合わせ増加」「比較優位づくり」のどこを主軸に置くか決める。</li>
+      </ol>
+
+      <div class="notice-dash">
+        <div class="notice-dash-title">営業での締め方</div>
+        <p class="no-indent">MEOは「地図で上げる施策」ではなく、「比較段階で選ばれる確率を高める施策」として締めると、価格競争に寄りにくくなります。</p>
+      </div>
+    </div>
+    <div class="page-number">5</div>
+  </div>
+
+  <script>
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        window.parent.postMessage({
+          type: 'artifact-resize',
+          height: document.documentElement.scrollHeight
+        }, '*');
+      });
+      ro.observe(document.body);
+    }
+  </script>
+</body>
+</html>
