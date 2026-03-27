@@ -6,12 +6,12 @@ import './ArtifactCard.css';
  * artifact_type に応じたアイコンとラベルのマッピング
  */
 const ARTIFACT_TYPE_MAP = {
-    html_document: { emoji: '📄', label: 'HTMLドキュメント' },
-    summary_report: { emoji: '📋', label: 'レポート' },
-    checklist: { emoji: '☑', label: 'チェックリスト' },
+    html_document: { emoji: '📄', label: 'A4ドキュメント' },
+    summary_report: { emoji: '📝', label: '要約・レポート' },
+    checklist: { emoji: '✅', label: 'チェックリスト' },
     comparison_table: { emoji: '📊', label: '比較表' },
-    faq: { emoji: '❓', label: 'FAQ' },
-    meeting_minutes: { emoji: '📝', label: '議事録' },
+    faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
+    meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
 };
 
 const getTypeInfo = (type) => {
