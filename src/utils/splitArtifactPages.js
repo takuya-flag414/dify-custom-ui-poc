@@ -12,27 +12,64 @@ export function splitArtifactPages(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
 
-    const allElements = doc.body ? Array.from(doc.body.children) : [];
+    if (!doc.body) {
+        return [];
+    }
+
+    // 1. ラッパーコンテナの検出 (<body> 直下に1つだけ重要な要素がある場合)
+    const bodyChildren = Array.from(doc.body.children).filter(el => el.tagName.toLowerCase() !== 'script');
+    let target = doc.body;
+    let wrapper = null;
+
+    if (bodyChildren.length === 1) {
+        const wrapCandidate = bodyChildren[0];
+        // 中に改ページが含まれているかチェック
+        const hasBreaksInside = !!wrapCandidate.querySelector('[style*="page-break-after: always"], [style*="break-after: page"]');
+        if (hasBreaksInside) {
+            target = wrapCandidate;
+            wrapper = {
+                tagName: wrapCandidate.tagName.toLowerCase(),
+                attributes: Array.from(wrapCandidate.attributes)
+                    .map(a => `${a.name}="${a.value}"`)
+                    .join(' ')
+            };
+        }
+    }
+
+    const allElements = Array.from(target.children);
     const pages = [];
     let currentPage = [];
-    const globalScripts = [];
+    
+    // 全てのページの共通スクリプトを収集 (body全体から)
+    const globalScripts = Array.from(doc.body.querySelectorAll('script')).map(s => s.outerHTML);
+
+    // スライド形式かどうかを判定（.slide クラスを持つ要素があるか）
+    const hasSlides = allElements.some(el => el.classList.contains('slide'));
 
     for (const el of allElements) {
         const tagName = el.tagName.toLowerCase();
+
+        // scriptタグは別途 globalScripts で処理するためスキップ
+        if (tagName === 'script') {
+            continue;
+        }
+
+        const isSlideElement = el.classList.contains('slide');
         const styleAttr = el.getAttribute("style") || "";
         const isPageBreak =
             styleAttr.includes("page-break-after: always") ||
             styleAttr.includes("break-after: page");
 
-        // scriptタグはページ構成要素から除外し、すべてのページに付与する対象とする
-        if (tagName === 'script') {
-            globalScripts.push(el.outerHTML);
-            continue;
+        // スライド形式の場合：新しい .slide が来たら、前のページを確定させて新しく始める
+        if (hasSlides && isSlideElement && currentPage.length > 0) {
+            pages.push(currentPage);
+            currentPage = [];
         }
 
         currentPage.push(el);
             
-        if (isPageBreak) {
+        // 従来通りの属性ベースの分割（スライド形式でない場合や、明示的な改ページ用）
+        if (isPageBreak && !isSlideElement) {
             pages.push(currentPage);
             currentPage = [];
         }
@@ -47,12 +84,18 @@ export function splitArtifactPages(html) {
         return [html];
     }
 
-    // 各ページに <head> を付与して完全なHTMLとして再構築
     const headHtml = doc.head ? doc.head.outerHTML : '<head><meta charset="UTF-8"></head>';
     const globalScriptsHtml = globalScripts.join("\n");
     
     return pages.map((pageElements) => {
-        const bodyContent = pageElements.map((el) => el.outerHTML).join("\n");
+        let bodyContent = pageElements.map((el) => el.outerHTML).join("\n");
+        
+        // ラッパーが存在した場合は復元する
+        if (wrapper) {
+            const attrStr = wrapper.attributes ? ' ' + wrapper.attributes : '';
+            bodyContent = `<${wrapper.tagName}${attrStr}>\n${bodyContent}\n</${wrapper.tagName}>`;
+        }
+        
         return `<!DOCTYPE html>\n<html lang="ja">\n${headHtml}\n<body>\n${bodyContent}\n${globalScriptsHtml}\n</body>\n</html>`;
     });
 }

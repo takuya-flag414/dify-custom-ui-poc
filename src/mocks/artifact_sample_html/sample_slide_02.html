@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>business-manner-training-slides</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @page { size: 960px 540px landscape; margin: 0; }
+
+    :root {
+      --slide-width: 960px;
+      --slide-height: 540px;
+      --font-body: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      --font-heading: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      --font-mono: "Courier New", "Osaka-Mono", monospace;
+      --text-base: 18px;
+      --text-sm: 14px;
+      --text-lg: 22px;
+      --text-h1: 48px;
+      --text-h2: 32px;
+      --text-h3: 22px;
+      --text-eyebrow: 12px;
+      --color-primary: #1f4b99;
+      --color-accent: #c98a2e;
+      --color-heading: #10233f;
+      --color-body: #223045;
+      --color-muted: #6f8098;
+      --color-border: #d8e0ea;
+      --color-rule: #1f4b99;
+      --color-bg-accent: #f4f7fb;
+      --color-slide-bg: #ffffff;
+      --color-cover-bg: #10233f;
+      --color-cover-sub: #b9c7df;
+      --shadow-soft: 0 10px 28px rgba(16,35,63,0.08);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      color: var(--color-body);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      margin: 0 auto;
+      background: var(--color-slide-bg);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    .slide-body {
+      flex: 1;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, p, ul, ol { margin-top: 0; }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h1);
+      line-height: 1.2;
+      color: var(--color-heading);
+      margin: 0 0 16px 0;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h2);
+      line-height: 1.25;
+      color: var(--color-heading);
+      margin: 0 0 12px 0;
+      font-weight: 700;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h3);
+      line-height: 1.3;
+      color: var(--color-heading);
+      margin: 0 0 8px 0;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+      text-indent: 0;
+      line-height: 1.5;
+      font-size: var(--text-base);
+    }
+
+    ul {
+      margin: 0 0 10px 0;
+      padding-left: 20px;
+      list-style-type: disc;
+    }
+
+    ul li, ol li {
+      margin-bottom: 8px;
+      line-height: 1.45;
+      font-size: var(--text-base);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0;
+      font-size: var(--text-sm);
+    }
+
+    th, td {
+      border: 1px solid var(--color-border);
+      padding: 7px 12px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--color-bg-accent);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--color-heading);
+      font-size: var(--text-sm);
+    }
+
+    .eyebrow {
+      font-size: var(--text-eyebrow);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 8px;
+    }
+
+    .caption {
+      text-align: center;
+      font-size: 11px;
+      color: var(--color-muted);
+      margin-top: 6px;
+    }
+
+    .slide-number {
+      position: absolute;
+      right: 32px;
+      bottom: 14px;
+      font-family: var(--font-heading);
+      font-size: 11px;
+      color: var(--color-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .slide-title {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)),
+        linear-gradient(135deg, #10233f 0%, #1f4b99 100%);
+      color: #fff;
+      justify-content: center;
+    }
+
+    .slide-title .slide-body {
+      padding: 60px 80px;
+      justify-content: center;
+      position: relative;
+    }
+
+    .slide-title h1 {
+      color: #fff;
+      font-size: 52px;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      max-width: 760px;
+    }
+
+    .slide-title .subtitle {
+      color: rgba(255,255,255,0.86);
+      font-size: 20px;
+      max-width: 640px;
+      margin-bottom: 34px;
+    }
+
+    .title-mark {
+      position: absolute;
+      top: 58px;
+      right: 72px;
+      width: 118px;
+      height: 118px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      display: grid;
+      place-items: center;
+    }
+
+    .presenter-info {
+      position: absolute;
+      bottom: 40px;
+      right: 80px;
+      text-align: right;
+      color: var(--color-cover-sub);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .slide-section {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+    }
+
+    .slide-section .slide-body {
+      padding: 60px 80px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slide-section h2 {
+      font-size: 42px;
+      color: var(--color-primary);
+      margin-bottom: 12px;
+    }
+
+    .section-sub {
+      font-size: 18px;
+      color: var(--color-muted);
+      max-width: 620px;
+    }
+
+    .slide-content .slide-body,
+    .slide-chart .slide-body {
+      padding: 40px 60px 36px 60px;
+    }
+
+    .slide-content .slide-header,
+    .slide-chart .slide-header,
+    .slide-two-col .slide-header {
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--color-primary);
+      padding-bottom: 12px;
+    }
+
+    .slide-content .lead {
+      font-size: 17px;
+      color: var(--color-muted);
+      margin-bottom: 16px;
+    }
+
+    .agenda-list {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+    }
+
+    .agenda-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 17px;
+    }
+
+    .agenda-item:last-child { border-bottom: none; }
+
+    .agenda-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .agenda-title {
+      font-weight: 600;
+      color: var(--color-heading);
+      margin-bottom: 2px;
+    }
+
+    .agenda-desc {
+      font-size: 14px;
+      color: var(--color-muted);
+    }
+
+    .slide-two-col .slide-body {
+      padding: 40px 60px 36px 60px;
+    }
+
+    .col-container {
+      display: flex;
+      gap: 28px;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .col {
+      flex: 1;
+      min-width: 0;
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 18px 18px 14px 18px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .good-box {
+      background: linear-gradient(180deg, #f5fbf7 0%, #ffffff 100%);
+    }
+
+    .bad-box {
+      background: linear-gradient(180deg, #fff7f6 0%, #ffffff 100%);
+    }
+
+    .mini-label {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    .mini-label.good {
+      background: #dff4e8;
+      color: #25684a;
+    }
+
+    .mini-label.bad {
+      background: #fde4e1;
+      color: #9a3a31;
+    }
+
+    .highlight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 12px 0 14px;
+    }
+
+    .highlight-card {
+      background: var(--color-bg-accent);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      min-height: 110px;
+    }
+
+    .highlight-card .card-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .highlight-card .card-label {
+      font-size: 12px;
+      color: var(--color-muted);
+      margin-top: 4px;
+    }
+
+    .point-box {
+      border: 1.5px solid var(--color-primary);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 8px 0;
+      background: #fff;
+    }
+
+    .point-box-title {
+      font-weight: 700;
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .label-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .label-positive { background: #d1fae5; color: #065f46; }
+    .label-negative { background: #fee2e2; color: #991b1b; }
+    .label-neutral { background: #dbeafe; color: #1e40af; }
+    .label-warning { background: #fef3c7; color: #92400e; }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .matrix .point-box { margin: 0; min-height: 102px; }
+
+    .slide-chart canvas {
+      max-height: 260px;
+      margin: 8px auto 0;
+      display: block;
+    }
+
+    .note-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .note-chip {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--color-body);
+    }
+
+    .slide-closing {
+      background: linear-gradient(135deg, #10233f 0%, #18345d 100%);
+      color: #fff;
+    }
+
+    .slide-closing .slide-body {
+      padding: 58px 72px;
+      justify-content: center;
+    }
+
+    .slide-closing h2,
+    .slide-closing p,
+    .slide-closing li {
+      color: #fff;
+    }
+
+    .closing-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .closing-panel {
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .closing-check {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0 0;
+    }
+
+    .closing-check li {
+      position: relative;
+      padding-left: 22px;
+      margin-bottom: 10px;
+      font-size: 17px;
+    }
+
+    .closing-check li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f0c37a;
+    }
+
+    .quote-mark {
+      font-size: 86px;
+      line-height: 0.8;
+      color: rgba(255,255,255,0.22);
+      margin-bottom: 12px;
+    }
+
+    @media print {
+      body {
+        background: none;
+        display: block;
+      }
+      .slide {
+        margin: 0;
+        box-shadow: none;
+        width: 960px;
+        height: 540px;
+      }
+    }
+  </style>
+  <script>
+    function initInteractiveElements() {
+      if (typeof Chart === 'undefined') {
+        requestAnimationFrame(initInteractiveElements);
+        return;
+      }
+      let pending = false;
+      document.querySelectorAll('canvas[data-chart-role]').forEach(function(canvas) {
+        if (canvas.chartInitialized) return;
+        const role = canvas.getAttribute('data-chart-role');
+        if (!role) return;
+        canvas.chartInitialized = true;
+        if (role === 'example-chart') {
+          new Chart(canvas, {
+            type: 'bar',
+            data: {
+              labels: ['電話応対', 'メール', '敬語', '報連相', '来客対応'],
+              datasets: [{
+                label: '新卒が不安を感じやすい項目（例）',
+                data: [78, 66, 71, 59, 42],
+                backgroundColor: ['rgba(31,75,153,0.82)', 'rgba(48,93,168,0.78)', 'rgba(72,116,188,0.74)', 'rgba(110,145,200,0.72)', 'rgba(201,138,46,0.72)'],
+                borderRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 100,
+                  ticks: { color: '#6f8098', font: { size: 11 } },
+                  grid: { color: '#e6edf5' }
+                },
+                x: {
+                  ticks: { color: '#223045', font: { size: 11 } },
+                  grid: { display: false }
+                }
+              }
+            }
+          });
+        } else {
+          pending = true;
+        }
+      });
+      if (pending) requestAnimationFrame(initInteractiveElements);
+    }
+
+    window.addEventListener('error', function(e) {
+      if (e.target && e.target.src && e.target.src.includes('chart.js')) {
+        document.querySelectorAll('canvas[data-fallback]').forEach(function(canvas) {
+          const fallback = document.createElement('div');
+          fallback.className = 'point-box';
+          fallback.innerHTML = canvas.getAttribute('data-fallback');
+          canvas.parentNode.replaceChild(fallback, canvas);
+        });
+      }
+    }, true);
+
+    document.addEventListener('DOMContentLoaded', initInteractiveElements);
+  </script>
+</head>
+<body>
+  <div class="slide slide-title" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="title-mark" aria-hidden="true">
+        <svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Business Manner Mark">
+          <rect x="10" y="14" width="48" height="38" rx="8" stroke="white" stroke-width="3" opacity="0.9"/>
+          <path d="M20 26H48" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+          <path d="M24 38L31 45L44 30" stroke="#F0C37A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="eyebrow" style="color:#f0c37a;">Business Manners Training</div>
+      <h1>新卒社員向けの<br>社会人ビジネスマナー講座</h1>
+      <p class="subtitle">第一印象、言葉遣い、報連相、電話・メール対応まで。配属初日から信頼を積み上げるための基本を整理したサンプルスライドです。</p>
+      <div class="presenter-info">Sample HTML Slides<br>Training Material Demo</div>
+    </div>
+  </div>
+
+  <div class="slide slide-content" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="eyebrow">Agenda</div>
+        <h2>本日の構成</h2>
+      </div>
+      <ul class="agenda-list">
+        <li class="agenda-item"><div class="agenda-num">1</div><div><div class="agenda-title">社会人マナーが必要な理由</div><div class="agenda-desc">信頼・安心感・仕事の進めやすさにどうつながるかを確認します</div></div></li>
+        <li class="agenda-item"><div class="agenda-num">2</div><div><div class="agenda-title">第一印象を整える基本</div><div class="agenda-desc">表情、姿勢、身だしなみ、挨拶の型を短時間で押さえます</div></div></li>
+        <li class="agenda-item"><div class="agenda-num">3</div><div><div class="agenda-title">言葉遣いと報連相</div><div class="agenda-desc">敬語の基礎と、上司・先輩への伝え方のポイントを整理します</div></div></li>
+        <li class="agenda-item"><div class="agenda-num">4</div><div><div class="agenda-title">電話・メール・来客対応</div><div class="agenda-desc">新人がつまずきやすい実務場面ごとの振る舞いを学びます</div></div></li>
+        <li class="agenda-item"><div class="agenda-num">5</div><div><div class="agenda-title">明日から実践する3原則</div><div class="agenda-desc">講座後すぐ行動に移せる形でまとめます</div></div></li>
+      </ul>
+      <div class="slide-number">2</div>
+    </div>
+  </div>
+
+  <div class="slide slide-content" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="eyebrow">Why It Matters</div>
+        <h2>ビジネスマナーは「形式」ではなく仕事の土台</h2>
+      </div>
+      <p class="lead">社会人としてのマナーは、相手に配慮しながら業務を円滑に進めるための共通ルールです。</p>
+      <div class="highlight-grid">
+        <div class="highlight-card">
+          <div class="card-value">3秒</div>
+          <div><strong>第一印象の初動</strong></div>
+          <div class="card-label">表情・姿勢・声のトーンで印象がほぼ決まる</div>
+        </div>
+        <div class="highlight-card">
+          <div class="card-value">4要素</div>
+          <div><strong>信頼の基本</strong></div>
+          <div class="card-label">時間・態度・言葉遣い・反応速度が評価される</div>
+        </div>
+        <div class="highlight-card">
+          <div class="card-value">毎日</div>
+          <div><strong>積み上げ型の評価</strong></div>
+          <div class="card-label">小さな行動の連続が「任せたい人」をつくる</div>
+        </div>
+      </div>
+      <div class="point-box">
+        <div class="point-box-title">覚えておきたい視点</div>
+        <p>マナーが整っている人は、能力の前に「安心して一緒に働ける人」として認識されます。新人の段階では、完璧さよりも誠実さと基本動作の安定が重要です。</p>
+      </div>
+      <div class="slide-number">3</div>
+    </div>
+  </div>
+
+  <div class="slide slide-two-col" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="eyebrow">Good vs Bad</div>
+        <h2>第一印象で差がつく行動比較</h2>
+      </div>
+      <div class="col-container">
+        <div class="col good-box">
+          <div class="mini-label good">推奨例</div>
+          <h3>好印象をつくる行動</h3>
+          <ul>
+            <li>相手より先に、明るく聞き取りやすい声で挨拶する</li>
+            <li>背筋を伸ばし、視線を合わせて話を聞く</li>
+            <li>「結論→理由→補足」の順で簡潔に伝える</li>
+            <li>不明点は放置せず、早めに確認する</li>
+          </ul>
+        </div>
+        <div class="col bad-box">
+          <div class="mini-label bad">NG例</div>
+          <h3>印象を下げやすい行動</h3>
+          <ul>
+            <li>挨拶の声が小さい、または相手より遅い</li>
+            <li>猫背、腕組み、視線が合わないまま会話する</li>
+            <li>経緯から長く話し、結論が最後になる</li>
+            <li>迷ったまま自己判断し、報告が遅れる</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-number">4</div>
+    </div>
+  </div>
+
+  <div class="slide slide-content" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="eyebrow">Core Skills</div>
+        <h2>新人が最初に身につけるべき基本5項目</h2>
+      </div>
+      <div class="matrix">
+        <div class="point-box">
+          <div class="point-box-title">身だしなみ</div>
+          <p>清潔感、髪型、服装、名札、持ち物の整理。迷ったら「相手に不快感を与えないか」で判断します。</p>
+        </div>
+        <div class="point-box">
+          <div class="point-box-title">挨拶</div>
+          <p>出社時・退社時・来客時・社内すれ違い時に、相手より先に、短くはっきり伝えます。</p>
+        </div>
+        <div class="point-box">
+          <div class="point-box-title">言葉遣い</div>
+          <p>敬語は完璧でなくても、丁寧さを保つことが重要です。「了解しました」より「承知しました」を基本にします。</p>
+        </div>
+        <div class="point-box">
+          <div class="point-box-title">報連相</div>
+          <p>報告・連絡・相談は早さが重要です。悪い情報ほど早く共有し、相談のタイミングを逃さないようにします。</p>
+        </div>
+        <div class="point-box" style="grid-column: 1 / span 2;">
+          <div class="point-box-title">時間管理</div>
+          <p>会議・提出・返信・訪問などは「定刻ぴったり」ではなく、準備を終えた状態で臨めるよう逆算して行動します。</p>
+        </div>
+      </div>
+      <div class="slide-number">5</div>
+    </div>
+  </div>
+
+  <div class="slide slide-content" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="eyebrow">Practical Scenes</div>
+        <h2>電話・メール・来客対応で意識するポイント</h2>
+      </div>
+      <p class="lead">実務では「正確さ」と「感じのよさ」の両方が求められます。迷ったら、簡潔・確認・復唱を徹底します。</p>
+      <p>
+        <span class="label-tag label-warning">電話</span>
+        <span class="label-tag label-neutral">メール</span>
+        <span class="label-tag label-positive">来客</span>
+      </p>
+      <table aria-label="対応場面ごとの基本ポイント">
+        <thead>
+          <tr>
+            <th style="width: 22%;">場面</th>
+            <th>基本動作</th>
+            <th style="width: 26%;">注意点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>電話応対</strong></td>
+            <td>会社名・氏名を名乗り、要件を復唱し、保留や折返しの見通しを伝える</td>
+            <td>聞き取れないまま曖昧に進めない</td>
+          </tr>
+          <tr>
+            <td><strong>メール</strong></td>
+            <td>件名・宛名・本文・締めを整え、要点は箇条書きで簡潔にまとめる</td>
+            <td>誤字、敬称、添付漏れを送信前に確認する</td>
+          </tr>
+          <tr>
+            <td><strong>来客対応</strong></td>
+            <td>立ち上がって挨拶し、担当者への取次ぎと案内を落ち着いて行う</td>
+            <td>待機時の声かけや座席案内を省略しない</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="slide-number">6</div>
+    </div>
+  </div>
+
+  <div class="slide slide-chart" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="eyebrow">Sample Chart</div>
+        <h2>新卒が不安を感じやすい場面の例</h2>
+      </div>
+      <canvas id="chart-1" data-chart-role="example-chart" data-fallback="<strong>Chart unavailable.</strong><br>電話応対 78 / 敬語 71 / メール 66 / 報連相 59 / 来客対応 42"></canvas>
+      <p class="caption">※ サンプル表現用のダミーデータです。研修テーマに合わせた棒グラフ実装例として配置しています。</p>
+      <div class="note-row">
+        <div class="note-chip">電話は即時対応が求められるため、心理的負荷が高い</div>
+        <div class="note-chip">敬語とメールは、言い回しに迷いやすい領域</div>
+        <div class="note-chip">来客対応は手順化すると習得しやすい</div>
+      </div>
+      <div class="slide-number">7</div>
+    </div>
+  </div>
+
+  <div class="slide slide-section" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="eyebrow">Action</div>
+      <h2>明日から実践する3原則</h2>
+      <p class="section-sub">完璧を目指すより、基本を毎日繰り返して安定させることが、もっとも早い成長につながります。</p>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 18px; width: 100%; margin-top: 28px;">
+        <div class="highlight-card"><div class="card-value">先手</div><div><strong>挨拶・報告は先に動く</strong></div><div class="card-label">相手に声をかけられる前に反応する</div></div>
+        <div class="highlight-card"><div class="card-value">簡潔</div><div><strong>結論から短く伝える</strong></div><div class="card-label">長く話す前に要点を示す</div></div>
+        <div class="highlight-card"><div class="card-value">確認</div><div><strong>迷ったら必ず確認する</strong></div><div class="card-label">独断で進めず、早めに相談する</div></div>
+      </div>
+      <div class="slide-number">8</div>
+    </div>
+  </div>
+
+  <div class="slide slide-closing">
+    <div class="slide-body">
+      <div class="closing-grid">
+        <div>
+          <div class="eyebrow" style="color:#f0c37a;">Closing</div>
+          <h2 style="font-size:40px; margin-bottom:12px;">信頼は、基本動作の積み重ねから始まる</h2>
+          <p style="color:rgba(255,255,255,0.82);">新人の段階では、知識の量よりも「感じよく、正確に、誠実に対応できるか」が大きな評価ポイントになります。</p>
+          <ul class="closing-check">
+            <li>相手の立場を考えて行動する</li>
+            <li>迷ったら確認し、報告を遅らせない</li>
+            <li>毎日の小さな習慣を整える</li>
+          </ul>
+        </div>
+        <div class="closing-panel">
+          <div class="quote-mark">”</div>
+          <p style="font-size:22px; line-height:1.5; margin-bottom:12px;">ビジネスマナーは、自分をよく見せる技術ではなく、相手に安心してもらうための仕事の作法です。</p>
+          <p style="font-size:14px; color:rgba(255,255,255,0.72); margin:0;">Sample Ending Message</p>
+        </div>
+      </div>
+      <div class="slide-number" style="color:rgba(255,255,255,0.6);">9</div>
+    </div>
+  </div>
+
+  <script>
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        window.parent.postMessage({ type: 'artifact-resize', height: document.documentElement.scrollHeight }, '*');
+      });
+      ro.observe(document.body);
+    }
+  </script>
+</body>
+</html>

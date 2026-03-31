@@ -1284,6 +1284,16 @@
     transition: transform 0.2s ease-out;
 }
 
+.a4-page-wrapper.is-slide {
+    width: 960px;
+    height: 540px;
+    min-height: auto;
+    aspect-ratio: 16 / 9;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
 /* iframe */
 .a4-page-wrapper iframe {
     width: 100%;
@@ -1298,6 +1308,11 @@
     text-align: center;
     width: 210mm;
     margin-top: -16px;
+}
+
+.a4-page-number.is-slide {
+    width: 960px;
+    margin-top: 8px; /* スライドの下に少し余白 */
 }
 
 /* ダークモード対応 */
@@ -1334,6 +1349,12 @@
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
+}
+
+.a4-page-placeholder.is-slide {
+    width: 960px;
+    height: 540px;
+    aspect-ratio: 16 / 9;
 }
 
 [data-theme='dark'] .a4-page-placeholder {

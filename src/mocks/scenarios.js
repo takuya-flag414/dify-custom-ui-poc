@@ -1,5 +1,6 @@
 // src/mocks/scenarios.js
 import sampleA4Html from './artifact_sample_html/sample_a4_document_04.html?raw';
+import sampleSlideHtml from './artifact_sample_html/sample_slide_01.html?raw';
 
 /**
  * JSONレスポンス生成用ヘルパー
@@ -282,6 +283,71 @@ export const scenarios = {
       },
       { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { usage: { total_tokens: 5500 } } }
+    ]
+  },
+
+  // =================================================================
+  // Pattern: HTML Slide
+  // =================================================================
+  'html_slide': {
+    efficient: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "html_slide"}\n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "プレゼンテーション用のスライドを作成しました。",
+          [
+            { id: 'cite_1', type: 'rag', source: '中期経営計画_骨子.docx', url: null }
+          ],
+          [],
+          "16:9 構成のプレゼンスライドを生成します。"
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "2026年度 中期経営計画案",
+            artifact_type: "html_slide",
+            artifact_content: sampleSlideHtml
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 4500 } } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "html_slide", "thinking": "16:9のスライドを作成しますね！視覚的に分かりやすい構成に仕上げます。"} \n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "プレゼンテーションスライドが完成しました！📽️✨\n\n16:9 の横型レイアウトで、チャートも含めた構成になっています。右側のパネルで各スライドをご確認いただけます。",
+          [
+            { id: 'cite_1', type: 'rag', source: '中期経営計画_骨子.docx', url: null }
+          ],
+          [
+            { type: 'suggested_question', label: 'デザインを変更して', icon: 'edit', payload: { text: 'スライドのデザインをよりモダンに変更して' } },
+            { type: 'suggested_question', label: 'グラフをもっと増やして', icon: 'bar-chart', payload: { text: 'スライドにグラフをさらにもう一つ追加して' } }
+          ],
+          "スライド構成を作成中..."
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "2026年度 中期経営計画案",
+            artifact_type: "html_slide",
+            artifact_content: sampleSlideHtml
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 4800 } } }
     ]
   },
 

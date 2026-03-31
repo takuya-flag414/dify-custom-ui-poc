@@ -12,6 +12,7 @@ const ARTIFACT_TYPE_MAP = {
     comparison_table: { emoji: '📊', label: '比較表' },
     faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
     meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
+    html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
 };
 
 const getTypeInfo = (type) => {

@@ -45,21 +45,21 @@ export class MockStreamGenerator {
             data: { id: `wf_${Date.now()}`, status: 'running' }
           };
           controller.enqueue(self.createSSEData(startEvent));
-          // ★変更: 初期待機 (コールドスタート演出)
-          await sleep(1000 + randomDelay(0, 300));
+          // ★変更: 初期待機 (3倍速)
+          await sleep(333 + randomDelay(0, 100));
 
           // ★追加: 遅延ルール定義
           const DELAY_RULES = {
-            'Query Rewriter': 1500,
-            'Intent Classifier': 2500,
-            'LLM_Intent_Analysis': 2500, // 意図理解の重み
-            'Search Strategy': 3000,
-            'LLM_Search_Strategy': 3000, // 戦略策定の熟考
-            'Perplexity Search': 8000,   // 外部検索の重み
-            'Web Search': 8000,
-            'LLM_Search_Partner': 2000,
-            'default_llm': 1200,         // 標準的なLLM処理
-            'default_tool': 2000         // 標準的なツール処理
+            'Query Rewriter': 500,
+            'Intent Classifier': 800,
+            'LLM_Intent_Analysis': 800,
+            'Search Strategy': 1000,
+            'LLM_Search_Strategy': 1000,
+            'Perplexity Search': 2600,
+            'Web Search': 2600,
+            'LLM_Search_Partner': 660,
+            'default_llm': 400,
+            'default_tool': 660
           };
 
           // 2. シナリオの各イベントを処理
@@ -108,8 +108,8 @@ export class MockStreamGenerator {
                    baseDelay = step.data.node_type === 'tool' ? DELAY_RULES['default_tool'] : DELAY_RULES['default_llm'];
                 }
 
-                // ゆらぎを追加 (0~500ms)
-                const variance = randomDelay(0, 500);
+                // ゆらぎを追加 (3倍速対応 0~166ms)
+                const variance = randomDelay(0, 166);
                 await sleep(baseDelay + variance);
               }
             }
@@ -117,7 +117,7 @@ export class MockStreamGenerator {
             // B. メッセージ本文 (ストリーミング生成)
             else if (step.event === 'message') {
               const fullText = step.answer;
-              const chunkSize = 5; // JSON構造を少しずつ送る
+              const chunkSize = 15; // JSON構造を少しずつ送る
               
               for (let i = 0; i < fullText.length; i += chunkSize) {
                 const chunk = fullText.slice(i, i + chunkSize);
@@ -127,7 +127,7 @@ export class MockStreamGenerator {
                   answer: chunk
                 };
                 controller.enqueue(self.createSSEData(msgData));
-                await sleep(randomDelay(10, 30));
+                await sleep(randomDelay(3, 10));
               }
             }
 

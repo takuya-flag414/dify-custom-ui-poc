@@ -105,9 +105,9 @@ const SourceIcon = () => (
 /**
  * HTML生成中のプレビュー表示 (Apple Intelligence Style)
  */
-const GeneratingPagePlaceholder = ({ pageNumber }) => (
+const GeneratingPagePlaceholder = ({ pageNumber, isSlide, status, subtext }) => (
     <motion.div
-        className="a4-page-placeholder"
+        className={`a4-page-placeholder ${isSlide ? 'is-slide' : ''}`}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98 }}
@@ -118,25 +118,84 @@ const GeneratingPagePlaceholder = ({ pageNumber }) => (
                 <GeneratingAnimation className="generating-pencil-animation" />
             </div>
             <div className="placeholder-text">
-                {pageNumber}ページ目を生成中...
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={status || "default-status"}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        {status || `${pageNumber}ページ目を生成中...`}
+                    </motion.div>
+                </AnimatePresence>
             </div>
             <div className="placeholder-subtext">
-                AIが最適なレイアウトを構成しています
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={subtext || "default-subtext"}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        transition={{ duration: 0.3, delay: 0.05 }}
+                    >
+                        {subtext || "AIが最適なレイアウトを構成しています"}
+                    </motion.div>
+                </AnimatePresence>
             </div>
         </div>
     </motion.div>
 );
 
 /**
+ * ストリーミング中のHTMLから現在の生成ステータスを判定
+ */
+const getGenerationStatus = (html, pageNumber, artifactType) => {
+    const isSlide = artifactType === 'html_slide';
+    
+    if (!html || html.length < 50) return { 
+        text: isSlide ? 'スライドプレゼンテーションを構築しています...' : '高品質なドキュメントを構築しています...', 
+        subtext: 'AIが最適な構成案を作成しています' 
+    };
+
+    // <head>内でまだ <body> に到達していない場合
+    if (!html.includes('<body')) {
+        if (html.includes('<style') && !html.includes('</style>')) {
+            return { 
+                text: isSlide ? 'モダンなビジュアルスタイルを設計しています...' : 'プロフェッショナルな書式を適用しています...', 
+                subtext: '洗練されたデザインを適用しています' 
+            };
+        }
+        if (html.includes('<script') && !html.includes('</script>')) {
+            return { 
+                text: isSlide ? 'インタラクティブな演出を準備しています...' : 'ドキュメントの機能をセットアップしています...', 
+                subtext: '動的な要素とインタラクションを準備しています' 
+            };
+        }
+        return { 
+            text: isSlide ? 'スライドのストーリーを構成しています...' : 'ドキュメントの構成を設計しています...', 
+            subtext: 'ヘッダーとメタデータを構成しています' 
+        };
+    }
+
+    // <body> に到達した後は各ページの生成状況を表示
+    return { 
+        text: isSlide ? `${pageNumber}枚目のスライドをレイアウトしています...` : `${pageNumber}ページ目の内容を詳しく生成しています...`, 
+        subtext: 'AIがコンテンツを最適な形式で配置しています' 
+    };
+};
+
+/**
  * artifact_type に応じたバッジ表示
  */
 const ARTIFACT_TYPE_MAP = {
-    html_document: { emoji: '📄', label: 'HTMLドキュメント' },
-    summary_report: { emoji: '📋', label: 'レポート' },
-    checklist: { emoji: '☑', label: 'チェックリスト' },
+    html_document: { emoji: '📄', label: 'A4ドキュメント' },
+    summary_report: { emoji: '📝', label: '要約・レポート' },
+    checklist: { emoji: '✅', label: 'チェックリスト' },
     comparison_table: { emoji: '📊', label: '比較表' },
-    faq: { emoji: '❓', label: 'FAQ' },
-    meeting_minutes: { emoji: '📝', label: '議事録' },
+    faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
+    meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
+    html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
 };
 
 const getTypeBadge = (type) => {
@@ -192,8 +251,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const displayType = streamingArtifact?.artifact_type || artifact?.type || 'summary_report';
     const displayCitations = artifact?.citations || [];
 
-    // ★v2.0追加: HTML直接生成方式かどうかの判定
-    const isHtmlDocument = displayType === 'html_document';
+    // ★v2.0追加: HTML直接生成方式かどうかの判定 (A4ドキュメントおよびスライド)
+    const isHtmlDocument = displayType === 'html_document' || displayType === 'html_slide';
+    const isHtmlSlide = displayType === 'html_slide';
 
     // アーティファクトが切り替わったら状態リセット
     useEffect(() => {
@@ -202,6 +262,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         setStablePages([]); // 新しいドキュメントならリセット
         iframeRefs.current = {}; // ★修正: 前のArtifactのiframe参照をクリア
     }, [artifact?.id, artifact?.title, artifact?.content]); // ★修正: contentも監視してカード切り替えを確実にリセット
+    
+    // ★追加: 基本となる用紙・キャンバス幅の定義 (AutoFitとレンダリングで共有)
+    const basePaperWidth = isHtmlSlide ? 1020 : (isHtmlDocument ? 850 : 720);
 
     /**
      * ★ちらつき防止：ページバッファリングロジック
@@ -252,7 +315,8 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                 if (index !== undefined) {
                     setPageHeights(prev => {
                         const currentHeight = prev[index] || 0;
-                        const newHeight = Math.max(e.data.height, 297 * 3.7795);
+                        const minHeight = isHtmlSlide ? 540 : (297 * 3.7795);
+                        const newHeight = Math.max(e.data.height, minHeight);
                         // 2px 未満の微小な変化は無視（フィードバックループ防止）
                         if (Math.abs(currentHeight - newHeight) < 2) return prev;
                         return { ...prev, [index]: newHeight };
@@ -286,7 +350,8 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         // パネル幅からスクロールバー分や安全マージン(約40px)を引いた有効幅
         const availableWidth = panelWidth - 40;
         // ★修正: HTML型は用紙幅(約793px)に左右の余白を含めた幅(約850px)を基準に計算し、紙の外側も見えるようにする
-        const basePaperWidth = isHtmlDocument ? 850 : 720;
+        // スライドの場合は guideline に基づき 960px を基準とする
+        const basePaperWidth = isHtmlSlide ? 1020 : (isHtmlDocument ? 850 : 720);
 
         let optimalZoom = Math.floor((availableWidth / basePaperWidth) * 100);
 
@@ -760,7 +825,13 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                     >
                         {/* ★v2.0: html_document の場合は A4用紙ビューワーで描画 */}
                         {isHtmlDocument ? (
-                            <div className="artifact-viewer-bg" style={autoFit ? {} : { alignItems: 'flex-start' }}>
+                            <div 
+                                className="artifact-viewer-bg" 
+                                style={{
+                                    ...(autoFit ? {} : { alignItems: 'flex-start' }),
+                                    minWidth: `${basePaperWidth * (zoomLevel / 100)}px`
+                                }}
+                            >
                                 <div style={{
                                     transform: `scale(${zoomLevel / 100})`,
                                     transformOrigin: 'top center',
@@ -771,12 +842,28 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                     gap: '32px'
                                 }}>
                                     {pages.map((pageHtml, index) => {
-                                        const h = pageHeights[index] || (297 * 3.7795);
+                                        const defaultHeight = isHtmlSlide ? 540 : (297 * 3.7795);
+                                        const h = pageHeights[index] || defaultHeight;
+
+                                        // スライド表示時のスタイル補正：
+                                        // 1. iframe内のbody背景色(#f0f2f5)を透明にして外側の余白(20px)を消す
+                                        // 2. .slideのシャドウとマージンを消してiframeいっぱいに表示する
+                                        const FINAL_HTML = isHtmlSlide 
+                                            ? pageHtml.replace('</head>', `
+                                                <style>
+                                                    html, body { background: transparent !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+                                                    .slide { margin: 0 !important; box-shadow: none !important; border: none !important; width: 100% !important; height: 100vh !important; display: flex !important; flex-direction: column !important; }
+                                                    .slide-body { display: flex !important; flex-direction: column !important; flex: 1 !important; height: auto !important; min-height: 0 !important; }
+                                                    .two-col { display: flex !important; flex-shrink: 0 !important; } /* カラムの縮小による重なりを防止 */
+                                                </style>
+                                                </head>`)
+                                            : pageHtml;
+
                                         return (
                                             <React.Fragment key={index}>
                                                 <motion.div
-                                                    className="a4-page-wrapper"
-                                                    style={{ minHeight: `${h}px` }}
+                                                    className={`a4-page-wrapper ${isHtmlSlide ? 'is-slide' : ''}`}
+                                                    style={{ minHeight: `${isHtmlSlide ? 540 : h}px` }}
                                                     initial={{ opacity: 0, scale: 0.98 }}
                                                     animate={{ opacity: 1, scale: 1 }}
                                                     transition={{ duration: 0.4 }}
@@ -784,12 +871,12 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                                     <iframe
                                                         ref={(el) => { iframeRefs.current[index] = el; }}
                                                         sandbox="allow-scripts allow-same-origin"
-                                                        srcDoc={pageHtml}
-                                                        style={{ height: `${h}px` }}
+                                                        srcDoc={FINAL_HTML}
+                                                        style={{ height: `${isHtmlSlide ? 540 : h}px` }}
                                                         title={`${displayTitle} - Page ${index + 1}`}
                                                     />
                                                 </motion.div>
-                                                <div className="a4-page-number">
+                                                <div className={`a4-page-number ${isHtmlSlide ? 'is-slide' : ''}`}>
                                                     {index + 1} / {isGeneratingArtifact ? '?' : pages.length}
                                                 </div>
                                             </React.Fragment>
@@ -797,21 +884,29 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                     })}
                                     {/* 生成中のプレビュー表示 */}
                                     <AnimatePresence mode="wait">
-                                        {isGeneratingArtifact && (
-                                            <motion.div
-                                                key={`generating-p${pages.length + 1}`}
-                                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}
-                                                initial={{ opacity: 0, y: 40 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, scale: 0.98 }}
-                                                transition={{ type: 'spring', stiffness: 250, damping: 25 }}
-                                            >
-                                                <GeneratingPagePlaceholder pageNumber={pages.length + 1} />
-                                                <div className="a4-page-number">
-                                                    {pages.length + 1} / ?
-                                                </div>
-                                            </motion.div>
-                                        )}
+                                        {isGeneratingArtifact && (() => {
+                                            const statusInfo = getGenerationStatus(displayContent, pages.length + 1, displayType);
+                                            return (
+                                                <motion.div
+                                                    key={`generating-p${pages.length + 1}`}
+                                                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}
+                                                    initial={{ opacity: 0, y: 40 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.98 }}
+                                                    transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+                                                >
+                                                    <GeneratingPagePlaceholder 
+                                                        pageNumber={pages.length + 1} 
+                                                        isSlide={isHtmlSlide} 
+                                                        status={statusInfo.text}
+                                                        subtext={statusInfo.subtext}
+                                                    />
+                                                    <div className={`a4-page-number ${isHtmlSlide ? 'is-slide' : ''}`}>
+                                                        {pages.length + 1} / ?
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })()}
                                     </AnimatePresence>
                                 </div>
                             </div>

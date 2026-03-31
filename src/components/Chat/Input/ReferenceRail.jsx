@@ -9,7 +9,8 @@ const ARTIFACT_TYPE_LABELS = {
     'meeting_minutes': '議事録・Next Action',
     'checklist': 'チェックリスト',
     'comparison_table': '比較表',
-    'faq': 'FAQ (想定問答集)'
+    'faq': 'FAQ (想定問答集)',
+    'html_slide': 'プレゼンスライド'
 };
 
 // Close Icon Component

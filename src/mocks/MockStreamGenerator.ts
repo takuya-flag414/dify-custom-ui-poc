@@ -82,7 +82,7 @@ export class MockStreamGenerator {
                         data: { id: `wf_${Date.now()}`, status: 'running' }
                     };
                     controller.enqueue(self.createSSEData(startEvent));
-                    await sleep(200);
+                    await sleep(66);
 
                     // 2. シナリオの各イベントを処理
                     for (const step of scenario) {
@@ -119,9 +119,9 @@ export class MockStreamGenerator {
                             };
                             controller.enqueue(self.createSSEData(nodeData));
 
-                            // 思考時間のシミュレーション
+                            // 思考時間のシミュレーション (3倍速)
                             if (step.event === 'node_started') {
-                                const waitTime = step.data?.node_type === 'tool' ? 1500 : 600;
+                                const waitTime = step.data?.node_type === 'tool' ? 500 : 200;
                                 await sleep(waitTime);
                             }
                         }
@@ -129,7 +129,7 @@ export class MockStreamGenerator {
                         // B. メッセージ本文 (ストリーミング生成)
                         else if (step.event === 'message') {
                             const fullText = step.answer || '';
-                            const chunkSize = 5;
+                            const chunkSize = 15;
 
                             for (let i = 0; i < fullText.length; i += chunkSize) {
                                 const chunk = fullText.slice(i, i + chunkSize);
@@ -139,7 +139,7 @@ export class MockStreamGenerator {
                                     answer: chunk
                                 };
                                 controller.enqueue(self.createSSEData(msgData));
-                                await sleep(randomDelay(10, 30));
+                                await sleep(randomDelay(3, 10));
                             }
                         }
 

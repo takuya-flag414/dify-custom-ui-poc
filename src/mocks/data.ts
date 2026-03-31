@@ -127,6 +127,7 @@ export const mockConversations: ConversationItem[] = [
     { id: 'mock_5', name: '🐛 Error Simulation' },
     { id: 'mock_6', name: '📦 Artifacts Demo' },
     { id: 'mock_7', name: '📄 HTML Artifact Demo' },
+    { id: 'mock_8', name: '📊 Slide Artifact Demo' },
 ];
 
 // 会話履歴データ (サイドバーのIDとキーを一致させる)
@@ -303,6 +304,37 @@ export const mockMessages: Record<string, MockMessage[]> = {
                 citations: [
                     { id: 'cite_1', type: 'rag', source: '2025年度_四半期業績報告.xlsx', url: null },
                     { id: 'cite_2', type: 'rag', source: '経営企画_KPIダッシュボード.pdf', url: null }
+                ]
+            },
+            suggestions: [],
+            isStreaming: false,
+            traceMode: 'knowledge',
+            thoughtProcess: []
+        }
+    ],
+
+    'mock_8': [
+        {
+            id: 'msg_8_1',
+            role: 'user',
+            text: '中期経営計画案をスライド形式で作成して。',
+            timestamp: '2025-12-06T17:00:00Z',
+            files: []
+        },
+        {
+            id: 'msg_8_2',
+            role: 'ai',
+            text: '2026年度の中期経営計画案を16:9スライド形式で作成しました！📽️ 右側のパネルで、各ページのスライド構成をご確認いただけます。印刷ボタンからPDF保存も可能です。',
+            rawContent: '',
+            citations: [
+                { id: 'cite_1', type: 'rag', source: '中期経営計画_骨子.docx', url: null }
+            ],
+            artifact: {
+                artifact_title: '2026年度 中期経営計画案',
+                artifact_type: 'html_slide',
+                artifact_content: '', // sample_slide_01.htmlの内容が入る前提だが、実際の読み込みは scenarios.js 経由
+                citations: [
+                    { id: 'cite_1', type: 'rag', source: '中期経営計画_骨子.docx', url: null }
                 ]
             },
             suggestions: [],

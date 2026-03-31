@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>MEO提案力を高める営業研修</title>
+
+  <style>
+    @page { size: 960px 540px landscape; margin: 0; }
+
+    :root {
+      --slide-width: 960px;
+      --slide-height: 540px;
+
+      --font-body: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --font-heading: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      --font-mono: "Courier New", "Osaka-Mono", monospace;
+
+      --text-base: 18px;
+      --text-sm: 14px;
+      --text-lg: 22px;
+      --text-h1: 48px;
+      --text-h2: 32px;
+      --text-h3: 22px;
+      --text-eyebrow: 12px;
+    }
+
+    :root {
+      --color-primary: #6366f1;
+      --color-accent: #f59e0b;
+      --color-heading: #0f172a;
+      --color-body: #1e293b;
+      --color-muted: #94a3b8;
+      --color-border: #e2e8f0;
+      --color-rule: #6366f1;
+      --color-bg-accent: #f1f5f9;
+      --color-slide-bg: #ffffff;
+      --color-cover-bg: #0f172a;
+      --color-success-bg: #d1fae5;
+      --color-success-text: #065f46;
+      --color-danger-bg: #fee2e2;
+      --color-danger-text: #991b1b;
+      --color-neutral-bg: #dbeafe;
+      --color-neutral-text: #1e40af;
+      --color-warning-bg: #fef3c7;
+      --color-warning-text: #92400e;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      color: var(--color-body);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .deck {
+      width: 100%;
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      margin: 0 auto;
+      background: var(--color-slide-bg);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .slide-body {
+      flex: 1;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media print {
+      body { background: none; display: block; }
+      .slide {
+        margin: 0;
+        box-shadow: none;
+        width: 960px;
+        height: 540px;
+      }
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h1);
+      line-height: 1.2;
+      color: var(--color-heading);
+      margin: 0 0 16px 0;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h2);
+      line-height: 1.25;
+      color: var(--color-heading);
+      margin: 0 0 12px 0;
+      font-weight: 700;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: var(--text-h3);
+      line-height: 1.3;
+      color: var(--color-heading);
+      margin: 0 0 8px 0;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+      text-indent: 0;
+      line-height: 1.5;
+      font-size: var(--text-base);
+    }
+
+    .eyebrow {
+      font-size: var(--text-eyebrow);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 8px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0;
+      font-size: var(--text-sm);
+    }
+
+    th, td {
+      border: 1px solid var(--color-border);
+      padding: 7px 12px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--color-bg-accent);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--color-heading);
+      font-size: var(--text-sm);
+    }
+
+    .caption {
+      text-align: center;
+      font-size: 11px;
+      color: var(--color-muted);
+      font-family: var(--font-body);
+      margin-top: 6px;
+    }
+
+    ul {
+      margin: 0 0 10px 0;
+      padding-left: 20px;
+      list-style-type: disc;
+    }
+
+    ul li, ol li {
+      margin-bottom: 8px;
+      line-height: 1.45;
+      font-size: var(--text-base);
+    }
+
+    ol {
+      margin: 0 0 10px 0;
+      padding-left: 22px;
+      list-style-type: decimal;
+    }
+
+    ul ul, ol ol {
+      margin: 4px 0 4px 14px;
+      font-size: var(--text-sm);
+    }
+
+    .slide-number {
+      position: absolute;
+      right: 32px;
+      bottom: 14px;
+      font-family: var(--font-heading);
+      font-size: 11px;
+      color: var(--color-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .slide-title.theme-modern {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #ffffff;
+      padding: 60px 80px;
+      justify-content: center;
+    }
+
+    .slide-title.theme-modern h1 {
+      color: #ffffff;
+      font-size: 52px;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    .slide-title.theme-modern .subtitle {
+      color: rgba(255,255,255,0.85);
+      font-size: 20px;
+      margin-bottom: 34px;
+      max-width: 640px;
+    }
+
+    .slide-title .title-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .slide-title .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .slide-title .presenter-info {
+      position: absolute;
+      bottom: 38px;
+      right: 80px;
+      text-align: right;
+      color: rgba(255,255,255,0.78);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .slide-content .slide-body,
+    .slide-two-col .slide-body {
+      padding: 40px 60px 36px 60px;
+    }
+
+    .slide-chart .slide-body {
+      padding: 32px 60px 28px 60px;
+    }
+
+    .slide-content .slide-header,
+    .slide-two-col .slide-header,
+    .slide-chart .slide-header {
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--color-primary);
+      padding-bottom: 12px;
+    }
+
+    .slide-content .slide-header h2,
+    .slide-two-col .slide-header h2,
+    .slide-chart .slide-header h2 {
+      font-size: 28px;
+      margin: 0;
+      color: var(--color-heading);
+    }
+
+    .slide-two-col .col-container {
+      display: flex;
+      gap: 32px;
+      flex: 1;
+      align-items: flex-start;
+    }
+
+    .slide-two-col .col {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .slide-chart canvas {
+      max-height: 340px;
+      margin: auto;
+      display: block;
+    }
+
+    .slide-closing {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+    }
+
+    .slide-closing .slide-body {
+      padding: 56px 80px;
+      justify-content: center;
+    }
+
+    .slide-closing h2 {
+      color: #ffffff;
+      font-size: 40px;
+      margin-bottom: 14px;
+    }
+
+    .slide-closing p,
+    .slide-closing li {
+      color: rgba(255,255,255,0.88);
+    }
+
+    .highlight-card {
+      background: var(--color-bg-accent);
+      border-left: 4px solid var(--color-primary);
+      border-radius: 6px;
+      padding: 14px 20px;
+      margin: 8px 0;
+    }
+
+    .highlight-card .card-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1.1;
+    }
+
+    .highlight-card .card-label {
+      font-size: 12px;
+      color: var(--color-muted);
+      margin-top: 4px;
+    }
+
+    .point-box {
+      border: 1.5px solid var(--color-primary);
+      border-radius: 6px;
+      padding: 12px 18px;
+      margin: 8px 0;
+      background: #fff;
+    }
+
+    .point-box-title {
+      font-weight: 700;
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .label-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      vertical-align: middle;
+    }
+
+    .label-positive { background: var(--color-success-bg); color: var(--color-success-text); }
+    .label-negative { background: var(--color-danger-bg); color: var(--color-danger-text); }
+    .label-neutral  { background: var(--color-neutral-bg); color: var(--color-neutral-text); }
+    .label-warning  { background: var(--color-warning-bg); color: var(--color-warning-text); }
+
+    .agenda-list {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+    }
+
+    .agenda-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 17px;
+    }
+
+    .agenda-item:last-child {
+      border-bottom: none;
+    }
+
+    .agenda-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .agenda-title {
+      font-weight: 600;
+      color: var(--color-heading);
+    }
+
+    .lead {
+      font-size: 19px;
+      color: #334155;
+    }
+
+    .cards-grid {
+      display: flex;
+      gap: 14px;
+      margin: 10px 0 14px 0;
+    }
+
+    .cards-grid .highlight-card {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+    }
+
+    .compact-list li {
+      margin-bottom: 6px;
+      font-size: 17px;
+    }
+
+    .compare-panel {
+      background: #f8fafc;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      min-height: 300px;
+      box-sizing: border-box;
+    }
+
+    .compare-panel h3 {
+      margin-bottom: 10px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+      margin-top: 8px;
+    }
+
+    .chart-note {
+      text-align: right;
+      font-size: 12px;
+      color: var(--color-muted);
+      margin-bottom: 2px;
+    }
+
+    .chart-fallback {
+      border: 1px solid var(--color-border);
+      padding: 16px;
+      background: var(--color-bg-accent);
+      font-size: var(--text-sm);
+      font-family: var(--font-heading);
+      color: var(--color-muted);
+      text-align: center;
+      border-radius: 4px;
+    }
+
+    .closing-points {
+      display: flex;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .closing-points .highlight-card {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255,255,255,0.08);
+      border-left-color: #f59e0b;
+    }
+
+    .closing-points .card-value {
+      color: #ffffff;
+      font-size: 26px;
+    }
+
+    .closing-points .card-label {
+      color: rgba(255,255,255,0.75);
+    }
+
+    .logo-placeholder {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      padding: 4px 12px;
+      font-family: var(--font-heading);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #ffffff;
+      border-radius: 3px;
+      margin-bottom: 18px;
+      width: fit-content;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    function initInteractiveElements() {
+      if (typeof Chart === 'undefined') {
+        requestAnimationFrame(initInteractiveElements);
+        return;
+      }
+
+      let pending = false;
+
+      document.querySelectorAll('canvas[data-chart-role]').forEach(function(canvas) {
+        if (canvas.__chartInitialized) return;
+
+        const role = canvas.getAttribute('data-chart-role');
+        if (!role) return;
+
+        if (role === 'meo-impact-chart') {
+          const ctx = canvas.getContext('2d');
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: ['表示回数', 'ルート検索', '電話タップ', 'Webサイト遷移'],
+              datasets: [
+                {
+                  label: '導入前',
+                  data: [1200, 140, 32, 58],
+                  backgroundColor: 'rgba(148, 163, 184, 0.75)',
+                  borderRadius: 6
+                },
+                {
+                  label: '導入3か月後',
+                  data: [1850, 240, 54, 96],
+                  backgroundColor: 'rgba(99, 102, 241, 0.82)',
+                  borderRadius: 6
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: false,
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    color: '#334155',
+                    font: {
+                      family: '"Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif',
+                      size: 12
+                    }
+                  }
+                },
+                tooltip: {
+                  enabled: true
+                }
+              },
+              scales: {
+                x: {
+                  ticks: {
+                    color: '#475569',
+                    font: {
+                      family: '"Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif',
+                      size: 11
+                    }
+                  },
+                  grid: {
+                    display: false
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    color: '#475569',
+                    font: {
+                      family: '"Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif',
+                      size: 11
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(226, 232, 240, 0.9)'
+                  }
+                }
+              }
+            }
+          });
+
+          canvas.__chartInitialized = true;
+          return;
+        }
+
+        pending = true;
+      });
+
+      if (pending) requestAnimationFrame(initInteractiveElements);
+    }
+
+    window.addEventListener('error', function(e) {
+      if (e.target && e.target.src && e.target.src.includes('chart.js')) {
+        document.querySelectorAll('canvas[data-fallback]').forEach(function(canvas) {
+          const fallback = document.createElement('div');
+          fallback.className = 'chart-fallback';
+          fallback.innerHTML = canvas.getAttribute('data-fallback');
+          canvas.parentNode.replaceChild(fallback, canvas);
+        });
+      }
+    }, true);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      requestAnimationFrame(initInteractiveElements);
+    });
+  </script>
+</head>
+<body>
+  <div class="deck">
+    <!-- Slide 1 -->
+    <div class="slide slide-title theme-modern" style="page-break-after: always;">
+      <div class="slide-body">
+        <div class="logo-placeholder">SALES TRAINING</div>
+        <div class="eyebrow" style="color: rgba(255,255,255,0.78);">Sales Enablement Program</div>
+        <h1>MEO提案力を高める<br>営業研修</h1>
+        <p class="subtitle">地図検索で見つかる店舗づくりを、営業提案の武器に変える。Googleビジネスプロフィールを軸に、価値訴求と商談の進め方を整理する研修サンプルです。</p>
+        <div class="title-meta">
+          <span class="meta-chip">対象：営業担当</span>
+          <span class="meta-chip">形式：60分研修</span>
+          <span class="meta-chip">テーマ：店舗集客</span>
+        </div>
+      </div>
+      <div class="presenter-info">
+        Sample HTML Slide Artifact<br>
+        MEO Sales Training Deck
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide slide-content" style="page-break-after: always;">
+      <div class="slide-body">
+        <div class="slide-header">
+          <h2>本日の研修アジェンダ</h2>
+        </div>
+        <p class="lead">営業が「MEOは何を改善し、なぜ売れるのか」を短時間で説明できる状態を目指します。</p>
+        <ul class="agenda-list">
+          <li class="agenda-item">
+            <div class="agenda-num">1</div>
+            <div class="agenda-title">MEOの基本理解：SEOとの違いと店舗集客への影響</div>
+          </li>
+          <li class="agenda-item">
+            <div class="agenda-num">2</div>
+            <div class="agenda-title">営業訴求の整理：顧客が反応しやすい価値の見せ方</div>
+          </li>
+          <li class="agenda-item">
+            <div class="agenda-num">3</div>
+            <div class="agenda-title">改善イメージ：架空データで見る成果の伝え方</div>
+          </li>
+          <li class="agenda-item">
+            <div class="agenda-num">4</div>
+            <div class="agenda-title">提案の進め方：ヒアリングから次回アクション設計まで</div>
+          </li>
+        </ul>
+      </div>
+      <div class="slide-number">2</div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide slide-content" style="page-break-after: always;">
+      <div class="slide-body">
+        <div class="slide-header">
+          <h2>MEOとは何か</h2>
+        </div>
+        <p>MEOは、地図検索やローカル検索における店舗の見つかりやすさを改善し、来店につながる接点を増やす施策です。営業では「検索順位」だけでなく、「比較される場面で選ばれる状態をつくる提案」として捉えるのが重要です。</p>
+
+        <div class="cards-grid">
+          <div class="highlight-card">
+            <div class="card-value">地図面</div>
+            <div class="card-label">検索結果の一覧で露出を増やす</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">比較</div>
+            <div class="card-label">写真・口コミ・情報量で選ばれる</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">来店導線</div>
+            <div class="card-label">電話・経路・Web遷移を後押しする</div>
+          </div>
+        </div>
+
+        <div class="point-box">
+          <div class="point-box-title">営業視点の押さえどころ</div>
+          <ul class="compact-list">
+            <li>SEOはサイト流入が主戦場、MEOは店舗接点の最前線。</li>
+            <li>顧客は「順位」よりも「問い合わせや来店が増えるか」で判断する。</li>
+            <li>提案時は、情報整備・口コミ運用・投稿更新の3点で話すと整理しやすい。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-number">3</div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide slide-two-col" style="page-break-after: always;">
+      <div class="slide-body">
+        <div class="slide-header">
+          <h2>営業で伝えるべき改善イメージ</h2>
+        </div>
+        <div class="col-container">
+          <div class="col">
+            <div class="compare-panel">
+              <h3>よくある未整備状態</h3>
+              <ul class="compact-list">
+                <li>営業時間や定休日が古い <span class="label-tag label-negative">離脱要因</span></li>
+                <li>写真が少なく店舗の雰囲気が伝わらない <span class="label-tag label-warning">比較で不利</span></li>
+                <li>口コミ返信がなく、放置感が出ている <span class="label-tag label-negative">信頼低下</span></li>
+                <li>投稿更新が止まり、活動実態が見えない <span class="label-tag label-warning">訴求不足</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col">
+            <div class="compare-panel">
+              <h3>改善後の見せ方</h3>
+              <ul class="compact-list">
+                <li>基本情報を統一し、検索者の不安をなくす <span class="label-tag label-positive">来店前安心</span></li>
+                <li>写真を充実させ、店舗の強みを視覚で伝える <span class="label-tag label-positive">印象改善</span></li>
+                <li>口コミ返信で接客姿勢を可視化する <span class="label-tag label-positive">信頼形成</span></li>
+                <li>投稿更新でキャンペーンや季節訴求を届ける <span class="label-tag label-neutral">継続接点</span></li>
+              </ul>
+              <div class="point-box" style="margin-top: 12px;">
+                <div class="point-box-title">ひと言での訴求</div>
+                <p>「見つけてもらう」だけでなく、「比較されたときに選ばれる状態」を作るのがMEOです。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">4</div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide slide-chart" style="page-break-after: always;">
+      <div class="slide-body">
+        <div class="slide-header">
+          <h2>架空データ：導入3か月後の改善イメージ</h2>
+        </div>
+        <div class="chart-note">※ 研修用サンプルデータ</div>
+        <div class="chart-wrap">
+          <canvas
+            id="chart-1"
+            data-chart-role="meo-impact-chart"
+            style="max-height: 340px; margin: auto; display: block;"
+            data-fallback="架空データの比較：導入前→導入3か月後。表示回数 1200→1850、ルート検索 140→240、電話タップ 32→54、Webサイト遷移 58→96。">
+          </canvas>
+        </div>
+        <p class="caption">図1：MEO施策によって検索接点と来店アクションが改善する、という営業説明用のサンプルです。</p>
+      </div>
+      <div class="slide-number">5</div>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide slide-content" style="page-break-after: always;">
+      <div class="slide-body">
+        <div class="slide-header">
+          <h2>商談で使える提案の型</h2>
+        </div>
+
+        <ol>
+          <li>まず現状確認。「営業時間・写真・口コミ返信・投稿更新」の4項目を確認する。</li>
+          <li>次に課題整理。「検索で見られているが、比較で負けている可能性」を伝える。</li>
+          <li>改善イメージを提示。情報整備、写真改善、口コミ運用の順で優先度を示す。</li>
+          <li>最後に次回アクションへつなぐ。無料診断、競合比較、運用提案のいずれかを置く。</li>
+        </ol>
+
+        <div class="point-box">
+          <div class="point-box-title">トーク例</div>
+          <p>「店舗の魅力が弱いのではなく、検索画面で魅力が伝わり切っていない可能性があります。まずは見つかる状態と選ばれる状態を一緒に整えませんか。」</p>
+        </div>
+
+        <div class="cards-grid" style="margin-top: 10px;">
+          <div class="highlight-card">
+            <div class="card-value">診断</div>
+            <div class="card-label">現状の抜け漏れを見つける</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">比較</div>
+            <div class="card-label">競合との差を可視化する</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">継続</div>
+            <div class="card-label">改善運用まで提案する</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">6</div>
+    </div>
+
+    <!-- Slide 7 -->
+    <div class="slide slide-closing">
+      <div class="slide-body">
+        <div class="eyebrow" style="color: rgba(245,158,11,0.92);">Closing Message</div>
+        <h2>MEOは、店舗集客の入口を整える営業提案</h2>
+        <p>営業が伝えるべきなのは、単なる設定作業ではなく「見つかる」「比べて選ばれる」「来店につながる」という改善ストーリーです。</p>
+        <p>この研修サンプルでは、基礎理解、改善イメージ、架空データ、提案トークまでを一連で示せる構成にしています。</p>
+
+        <div class="closing-points">
+          <div class="highlight-card">
+            <div class="card-value">見つかる</div>
+            <div class="card-label">検索接点を増やす</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">選ばれる</div>
+            <div class="card-label">比較優位をつくる</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">続ける</div>
+            <div class="card-label">運用改善で成果を積み上げる</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-number">7</div>
+    </div>
+  </div>
+
+  <script>
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        window.parent.postMessage({
+          type: 'artifact-resize',
+          height: document.documentElement.scrollHeight
+        }, '*');
+      });
+      ro.observe(document.body);
+    }
+  </script>
+</body>
+</html>
