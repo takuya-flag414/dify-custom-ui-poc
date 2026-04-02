@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import FluidOrbBackground from '../Shared/FluidOrbBackground';
 import SignupModal from './SignupModal';
+import ResetPasswordModal from './ResetPasswordModal';
 import './Auth.css';
 
 /**
@@ -22,6 +23,7 @@ const LoginScreen = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isSignupOpen, setIsSignupOpen] = useState(false);
+    const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
     const [localError, setLocalError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false); // ★ローカルローディング
 
@@ -222,6 +224,16 @@ const LoginScreen = () => {
 
                 {/* フッター */}
                 <div className="login-footer">
+                    <p className="login-footer__text" style={{ marginBottom: '0.75rem' }}>
+                        パスワードをお忘れの方は{' '}
+                        <button
+                            type="button"
+                            className="login-footer__link"
+                            onClick={() => setIsResetPasswordOpen(true)}
+                        >
+                            こちら
+                        </button>
+                    </p>
                     <p className="login-footer__text">
                         アカウントをお持ちでない方は{' '}
                         <button
@@ -235,10 +247,13 @@ const LoginScreen = () => {
                 </div>
             </motion.div>
 
-            {/* サインアップモーダル */}
+            {/* モーダル群 */}
             <AnimatePresence>
                 {isSignupOpen && (
                     <SignupModal onClose={() => setIsSignupOpen(false)} />
+                )}
+                {isResetPasswordOpen && (
+                    <ResetPasswordModal onClose={() => setIsResetPasswordOpen(false)} />
                 )}
             </AnimatePresence>
         </motion.div>

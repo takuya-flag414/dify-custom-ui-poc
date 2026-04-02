@@ -7,6 +7,7 @@ import {
     createUserWithEmailAndPassword, 
     signOut, 
     onAuthStateChanged,
+    sendPasswordResetEmail,
     User as FirebaseUser
 } from 'firebase/auth';
 import { 
@@ -251,6 +252,28 @@ class AuthService {
                 throw new Error('メールアドレスまたはパスワードが正しくありません');
             }
             throw error;
+        }
+    }
+
+    /**
+     * パスワードリセットメールを送信
+     */
+    async resetPassword(email: string): Promise<void> {
+        if (!email) {
+            throw new Error('メールアドレスを入力してください');
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            console.log('[AuthService] Password reset email sent to:', email);
+        } catch (error: any) {
+            console.error('[AuthService] Password reset failed:', error);
+            if (error.code === 'auth/user-not-found') {
+                throw new Error('このメールアドレスは登録されていません');
+            } else if (error.code === 'auth/invalid-email') {
+                throw new Error('有効なメールアドレスを入力してください');
+            }
+            throw new Error('パスワード再設定メールの送信に失敗しました');
         }
     }
 

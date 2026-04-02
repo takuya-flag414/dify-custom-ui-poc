@@ -37,6 +37,8 @@ export interface AuthContextValue {
     login: (email: string, password: string) => Promise<LoginResult>;
     /** サインアップ関数 */
     signup: (email: string, password: string, displayName: string, securityInfo?: SecurityInfo) => Promise<LoginResult>;
+    /** パスワードリセット関数 */
+    resetPassword: (email: string) => Promise<void>;
     /** ログアウト関数 */
     logout: () => Promise<void>;
     /** エラークリア関数 */
@@ -134,6 +136,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, []);
 
     /**
+     * パスワードリセットメール送信
+     */
+    const resetPassword = useCallback(async (email: string): Promise<void> => {
+        try {
+            setError(null);
+            await authService.resetPassword(email);
+        } catch (err) {
+            console.error('[AuthContext] Reset password failed:', err);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            setError(errorMessage);
+            throw err;
+        }
+    }, []);
+
+    /**
      * ログアウト
      */
     const logout = useCallback(async (): Promise<void> => {
@@ -200,12 +217,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isDevMode: IS_DEV_MODE,
         login,
         signup,
+        resetPassword,
         logout,
         clearError,
         hasPermission,
         getUserRoles,
         switchRole,
-    }), [user, isLoading, error, isNewUser, login, signup, logout, clearError, hasPermission, getUserRoles, switchRole]);
+    }), [user, isLoading, error, isNewUser, login, signup, resetPassword, logout, clearError, hasPermission, getUserRoles, switchRole]);
 
     return (
         <AuthContext.Provider value={contextValue}>
