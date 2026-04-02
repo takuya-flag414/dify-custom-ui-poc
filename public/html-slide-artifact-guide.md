@@ -588,26 +588,7 @@ slides:
 
 ### 8.4 MODERN タイトルスライド
 
-```css
-.slide-title.theme-modern {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  color: #ffffff;
-  padding: 60px 80px;
-  justify-content: center;
-}
-
-.slide-title.theme-modern h1 {
-  color: #ffffff;
-  font-size: 52px;
-  line-height: 1.15;
-  margin-bottom: 20px;
-}
-
-.slide-title.theme-modern .subtitle {
-  color: rgba(255,255,255,0.8);
-  font-size: 20px;
-}
-```
+※MODERNテーマのタイトルスライドの具体的な実装コード（洗練された背景グリッド、Kicker、リボン装飾など）は、**付録Bの完全版テンプレート**をそのまま使用すること。
 
 ### 8.5 セクションスライド共通
 
@@ -731,6 +712,8 @@ slides:
 - `.label-tag`：インラインのバッジ・ラベル
 
 ### 10.2 CSS定義
+
+※MODERNスタイルの場合は、より洗練された影やグラデーションを備えた**付録Bの実装**を優先的に使用すること。通常のベースラインは以下の通り。
 
 ```css
 /* KPI・数値強調カード */
@@ -1141,3 +1124,724 @@ window.addEventListener('error', function(e) {
 ---
 
 *このガイドラインに従うことで、LLM および実装者はスライドの種別・情報密度・グラフの必要性・スライド構成・収容安全性・分割後ランタイムの挙動を総合的に判断し、崩れにくく視覚的に品位あるプレゼンテーション HTML Artifact を安定して生成できる。*
+
+---
+
+## 20. 付録B：MODERNスタイル 完全版テンプレート (Reusable Sample)
+
+以下のテンプレートは、540pxの固定高さ制限およびコンポーネント間のオーバーラップ防止策を全て適用済みの、MODERNスタイルの基準実装である。生成時はこの構造とスタイルを基準にすること。
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>modern-style-template-fixed</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @page { size: 10in 5.625in; margin: 0; }
+
+    :root {
+      --slide-width: 960px;
+      --slide-height: 540px;
+      --safe-top: 34px;
+      --safe-side: 48px;
+      --safe-bottom: 46px;
+      --safe-number-right: 30px;
+      --safe-number-bottom: 14px;
+
+      --font-body: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      --font-heading: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+
+      --text-base: 17px;
+      --text-sm: 13px;
+      --text-lg: 21px;
+      --text-h1: 46px;
+      --text-h2: 28px;
+      --text-h3: 19px;
+      --text-eyebrow: 12px;
+
+      --color-primary: #6366f1;
+      --color-accent: #8b5cf6;
+      --color-primary-soft: #eef2ff;
+      --color-heading: #0f172a;
+      --color-body: #334155;
+      --color-muted: #94a3b8;
+      --color-border: #dbe3f0;
+      --color-rule: #6366f1;
+      --color-bg-accent: #f8fafc;
+      --color-slide-bg: #ffffff;
+
+      --shadow-soft: 0 16px 40px rgba(15, 23, 42, 0.10);
+      --shadow-card: 0 10px 24px rgba(99, 102, 241, 0.07);
+      --radius-xl: 22px;
+      --radius-lg: 18px;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      color: var(--color-body);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      background:
+        radial-gradient(circle at top, rgba(99,102,241,0.10), transparent 28%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      margin: 0 auto;
+      background: var(--color-slide-bg);
+      box-shadow: var(--shadow-soft);
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      page-break-after: always;
+      isolation: isolate;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at top right, rgba(139,92,246,0.10), transparent 22%),
+        radial-gradient(circle at bottom left, rgba(99,102,241,0.08), transparent 22%);
+      z-index: 0;
+    }
+
+    .slide-body {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: var(--safe-top) var(--safe-side) var(--safe-bottom);
+    }
+
+    .slide-number {
+      position: absolute;
+      right: var(--safe-number-right);
+      bottom: var(--safe-number-bottom);
+      font-size: 11px;
+      color: var(--color-muted);
+      letter-spacing: 0.06em;
+      z-index: 3;
+    }
+
+    h1, h2, h3, p, ul { margin: 0; }
+
+    h1 {
+      font-size: var(--text-h1);
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    h2 {
+      font-size: var(--text-h2);
+      line-height: 1.18;
+      font-weight: 800;
+      color: var(--color-heading);
+    }
+
+    h3 {
+      font-size: var(--text-h3);
+      line-height: 1.25;
+      font-weight: 700;
+      color: var(--color-heading);
+    }
+
+    p {
+      font-size: var(--text-base);
+      line-height: 1.55;
+      color: var(--color-body);
+    }
+
+    .eyebrow {
+      font-size: var(--text-eyebrow);
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 8px;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin-top: 8px;
+    }
+
+    li {
+      margin-bottom: 7px;
+      font-size: 16px;
+      line-height: 1.42;
+    }
+
+    .theme-modern {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 52%, #0f172a 100%);
+      color: #fff;
+    }
+
+    .theme-modern::before {
+      background:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.10), transparent 16%),
+        radial-gradient(circle at 82% 76%, rgba(255,255,255,0.08), transparent 18%);
+      background-size: 28px 28px, 28px 28px, auto, auto;
+      opacity: 0.65;
+    }
+
+    .slide-title .slide-body { justify-content: space-between; }
+    .title-top { display: flex; flex-direction: column; gap: 18px; max-width: 760px; padding-top: 10px; }
+    .title-bottom { display: flex; align-items: end; justify-content: space-between; gap: 18px; padding-top: 18px; min-height: 86px; }
+
+    .title-kicker {
+      display: inline-flex; align-items: center; align-self: flex-start; gap: 10px;
+      min-height: 40px; padding: 0 18px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase; color: #fff;
+      background: rgba(124, 106, 244, 0.96); border: 1px solid rgba(255,255,255,0.28);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05); white-space: nowrap;
+    }
+    .title-kicker::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+    .subtitle { max-width: 650px; font-size: 18px; line-height: 1.6; color: rgba(255,255,255,0.82); }
+    .hero-ribbon { display: flex; flex-wrap: wrap; gap: 10px; max-width: 620px; }
+    .hero-pill, .closing-pill {
+      display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; color: #fff; background: rgba(91, 78, 210, 0.96);
+      border: 1px solid rgba(255,255,255,0.20); white-space: nowrap;
+    }
+    .presenter-info { text-align: right; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.82); min-width: 210px; }
+
+    .slide-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 20px;
+      align-items: end;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--color-rule);
+      flex: 0 0 auto;
+    }
+
+    .slide-header p { font-size: 14px; color: var(--color-muted); line-height: 1.45; text-align: right; }
+    .slide-main { flex: 1; min-height: 0; overflow: hidden; }
+
+    .agenda-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; height: 100%; }
+    .agenda-item {
+      display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: center;
+      padding: 11px 0; border-bottom: 1px solid var(--color-border); min-height: 0;
+    }
+    .agenda-item:last-child { border-bottom: none; }
+    .agenda-num {
+      width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800;
+      box-shadow: 0 8px 18px rgba(99, 102, 241, 0.16);
+    }
+    .agenda-title { display: block; font-size: 16px; font-weight: 700; color: var(--color-heading); margin-bottom: 2px; line-height: 1.3; }
+    .agenda-desc { font-size: 13px; line-height: 1.4; color: var(--color-muted); }
+
+    .panel, .compact-panel, .col, .chart-side, .chart-panel {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .panel { padding: 20px 20px 16px; display: flex; flex-direction: column; min-height: 0; }
+    .compact-panel { padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 12px; min-height: 0; background: linear-gradient(180deg, #fcfcff 0%, #f7f9ff 100%); }
+    .lede { font-size: 17px; line-height: 1.58; color: #334155; margin-bottom: 8px; }
+
+    .highlight-card {
+      border: 1px solid rgba(99,102,241,0.12);
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--color-primary-soft) 0%, #ffffff 100%);
+      padding: 12px;
+      min-height: 74px;
+    }
+    .highlight-card .card-value { font-size: 24px; line-height: 1; font-weight: 800; color: var(--color-primary); letter-spacing: -0.03em; margin-bottom: 6px; }
+    .highlight-card .card-label { font-size: 11px; line-height: 1.3; color: var(--color-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+
+    .label-tag {
+      display: inline-flex; align-items: center; min-height: 30px; padding: 0 12px; border-radius: 999px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    }
+    .label-neutral { background: #dbeafe; color: #1d4ed8; }
+    .label-positive { background: #dcfce7; color: #166534; }
+    .label-warning { background: #fef3c7; color: #92400e; }
+
+    .point-box {
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-primary);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      background: #fff;
+      min-height: 0;
+    }
+    .point-box-title { font-size: 13px; font-weight: 800; letter-spacing: 0.04em; color: var(--color-primary); margin-bottom: 6px; }
+    .point-box p { font-size: 14px; line-height: 1.45; color: var(--color-body); }
+
+    .slide-principles .slide-body {
+      padding-bottom: 52px;
+    }
+    
+    .slide-principles .slide-main {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 12px;
+      min-height: 0;
+    }
+    
+    .slide-principles .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.9fr);
+      gap: 14px;
+      min-height: 0;
+    }
+    
+    .slide-principles .panel {
+      padding: 18px 18px 14px;
+    }
+    
+    .slide-principles .lede {
+      font-size: 16px;
+      line-height: 1.54;
+      margin-bottom: 6px;
+    }
+    
+    .slide-principles ul {
+      margin-top: 6px;
+    }
+    
+    .slide-principles li {
+      margin-bottom: 6px;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+    
+    .slide-principles .compact-panel {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+      min-height: 0;
+    }
+    
+    .slide-principles .mini-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    
+    .slide-principles .label-tag {
+      display: flex;
+      align-items: center;
+      align-self: flex-start;
+      min-height: 28px;
+      padding: 0 11px;
+      font-size: 10px;
+      line-height: 1;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .slide-principles .point-box {
+      margin: 0;
+      padding: 10px 12px;
+      border-radius: 16px;
+      flex-shrink: 0;
+    }
+    
+    .slide-principles .point-box-title {
+      font-size: 12px;
+      margin-bottom: 4px;
+      line-height: 1.25;
+    }
+    
+    .slide-principles .point-box p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    
+    .principles-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      min-height: 0;
+    }
+    
+    .principles-metrics .highlight-card {
+      min-height: 0;
+      padding: 10px 12px;
+    }
+    
+    .principles-metrics .card-value {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    
+    .principles-metrics .card-label {
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    .slide-two-col .slide-main { display: block; }
+    .col-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; height: 100%; min-height: 0; }
+    .col { padding: 18px 18px 16px; display: flex; flex-direction: column; min-height: 0; }
+    .col-topline { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .metric-chip {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 12px;
+      border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; white-space: nowrap;
+    }
+    .metric-chip.good { background: #fee2e2; color: #991b1b; }
+    .metric-chip.focus { background: #e0e7ff; color: #4338ca; }
+    .feature-list { padding-left: 18px; margin-top: 6px; }
+    .feature-list li { font-size: 15px; line-height: 1.42; margin-bottom: 8px; }
+    .quote-box { margin-top: auto; border-radius: 16px; padding: 12px 14px; background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08)); color: #312e81; font-size: 13px; line-height: 1.5; }
+
+    .chart-wrap { display: grid; grid-template-columns: 208px 1fr; gap: 16px; height: 100%; min-height: 0; }
+    .chart-side { padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+    .chart-side .big-number { font-size: 38px; line-height: 1; font-weight: 800; color: var(--color-primary); letter-spacing: -0.04em; }
+    .chart-side .caption { font-size: 12px; line-height: 1.45; color: var(--color-muted); }
+    .stat-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; padding-top: 6px; }
+    .stat-line { display: flex; flex-direction: column; gap: 4px; }
+    .stat-name { font-size: 12px; color: var(--color-body); }
+    .stat-bar { height: 7px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
+    .stat-bar > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); }
+    .chart-panel { padding: 16px 18px 12px; display: grid; grid-template-rows: 1fr auto; min-height: 0; }
+    .chart-area { min-height: 0; position: relative; }
+    .chart-area canvas { width: 100% !important; height: 250px !important; max-height: 250px; display: block; }
+    .chart-note { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--color-border); margin-top: 10px; padding-top: 10px; font-size: 12px; line-height: 1.4; color: var(--color-muted); min-height: 40px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); }
+    .chart-fallback { display: flex; align-items: center; justify-content: center; height: 250px; border-radius: 16px; border: 1px solid var(--color-border); background: var(--color-bg-accent); color: var(--color-muted); font-size: 13px; text-align: center; padding: 16px; box-sizing: border-box; }
+
+    .slide-closing { background: linear-gradient(135deg, #0f172a 0%, #312e81 45%, #8b5cf6 100%); color: #fff; }
+    .slide-closing::before {
+      background:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
+        radial-gradient(circle at 20% 26%, rgba(255,255,255,0.10), transparent 17%),
+        radial-gradient(circle at 86% 78%, rgba(255,255,255,0.08), transparent 18%);
+      background-size: 30px 30px, 30px 30px, auto, auto;
+      opacity: 0.58;
+    }
+    .slide-closing .slide-body { justify-content: center; }
+    .closing-card {
+      max-width: 740px; padding: 26px 28px; border-radius: 24px; background: rgba(83, 70, 194, 0.94);
+      border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    }
+    .closing-card h2 { color: #fff; font-size: 38px; margin-bottom: 10px; }
+    .closing-card p { color: rgba(255,255,255,0.84); font-size: 17px; line-height: 1.55; }
+    .closing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+
+    @media print {
+      html, body { background: none; display: block; overflow: visible; }
+      .slide { width: 960px; height: 540px; margin: 0; box-shadow: none; page-break-inside: avoid; }
+      .title-kicker, .hero-pill, .closing-pill, .closing-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .title-kicker { background: #7868f1 !important; color: #fff !important; border-color: rgba(255,255,255,0.28) !important; }
+      .hero-pill, .closing-pill { background: #5f52d6 !important; color: #fff !important; }
+      .closing-card { background: rgba(83, 70, 194, 0.96) !important; }
+    }
+  </style>
+  <script>
+    function initInteractiveElements() {
+      if (typeof Chart === 'undefined') {
+        requestAnimationFrame(initInteractiveElements);
+        return;
+      }
+      let pending = false;
+      document.querySelectorAll('canvas[data-chart-role]').forEach(function (canvas) {
+        if (canvas.chartInitialized) return;
+        const role = canvas.getAttribute('data-chart-role');
+        if (!role) return;
+        canvas.chartInitialized = true;
+
+        if (role === 'modern-growth') {
+          new Chart(canvas, {
+            type: 'bar',
+            data: {
+              labels: ['構想', '情報設計', 'ドラフト', '磨き込み', '最終化'],
+              datasets: [{
+                label: '完成度',
+                data: [38, 56, 74, 88, 96],
+                backgroundColor: [
+                  'rgba(99,102,241,0.70)',
+                  'rgba(99,102,241,0.72)',
+                  'rgba(99,102,241,0.76)',
+                  'rgba(124,58,237,0.76)',
+                  'rgba(139,92,246,0.82)'
+                ],
+                borderRadius: 10,
+                borderSkipped: false,
+                maxBarThickness: 44
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: false,
+              layout: { padding: { top: 6, right: 6, left: 6, bottom: 0 } },
+              plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: '#0f172a', titleColor: '#fff', bodyColor: '#e2e8f0', padding: 10 }
+              },
+              scales: {
+                x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 11 } }, border: { display: false } },
+                y: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8', stepSize: 20, font: { size: 11 } }, grid: { color: 'rgba(148,163,184,0.18)' }, border: { display: false } }
+              }
+            }
+          });
+        }
+      });
+      document.querySelectorAll('canvas[data-chart-role]').forEach(function (canvas) {
+        if (!canvas.chartInitialized) pending = true;
+      });
+      if (pending) requestAnimationFrame(initInteractiveElements);
+    }
+
+    window.addEventListener('error', function (e) {
+      if (e.target && e.target.src && e.target.src.includes('chart.js')) {
+        document.querySelectorAll('canvas[data-fallback]').forEach(function (canvas) {
+          const fallback = document.createElement('div');
+          fallback.className = 'chart-fallback';
+          fallback.innerHTML = canvas.getAttribute('data-fallback');
+          canvas.parentNode.replaceChild(fallback, canvas);
+        });
+      }
+    }, true);
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initInteractiveElements();
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(function () {
+          window.parent.postMessage({ type: 'artifact-resize', height: document.documentElement.scrollHeight }, '*');
+        });
+        ro.observe(document.body);
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <div class="slide slide-title theme-modern" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="title-top">
+        <div class="title-kicker">MODERN TEMPLATE</div>
+        <h1>制限下でも、美しく伝わる<br>プロフェッショナルなHTMLスライド</h1>
+        <p class="subtitle">情報量と視認性のバランスを保ちながら、派手すぎず、しかし凡庸にも見えない。限られた表現でも完成度を上げるための、再利用前提のモダンな雛形です。</p>
+      </div>
+      <div class="title-bottom">
+        <div class="hero-ribbon">
+          <span class="hero-pill">960 × 540 固定</span>
+          <span class="hero-pill">再利用しやすい単一HTML</span>
+          <span class="hero-pill">Chart.js フォールバック対応</span>
+        </div>
+        <div class="presenter-info">Reusable Sample Code<br>Modern Slide HTML Template<br>2026</div>
+      </div>
+    </div>
+    <div class="slide-number" style="color: rgba(255,255,255,0.78);">1</div>
+  </div>
+
+  <div class="slide slide-content" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div>
+          <div class="eyebrow">Agenda</div>
+          <h2>テンプレートの構成</h2>
+        </div>
+        <p>冒頭から締めまで、最小限の部品で統一感をつくるための基本セット。</p>
+      </div>
+      <div class="slide-main">
+        <ul class="agenda-list">
+          <li class="agenda-item"><span class="agenda-num">1</span><div><span class="agenda-title">タイトルで印象を決める</span><div class="agenda-desc">グラデーション背景、簡潔な見出し、補足情報の三点で第一印象を設計。</div></div></li>
+          <li class="agenda-item"><span class="agenda-num">2</span><div><span class="agenda-title">本文は余白で信頼感をつくる</span><div class="agenda-desc">強い装飾よりも、ヘッダー線・カード・文字階層の整合を優先。</div></div></li>
+          <li class="agenda-item"><span class="agenda-num">3</span><div><span class="agenda-title">比較は2カラムに限定する</span><div class="agenda-desc">要点の数を抑え、視線移動を単純化して読みやすさを維持。</div></div></li>
+          <li class="agenda-item"><span class="agenda-num">4</span><div><span class="agenda-title">数値は装飾よりも整理</span><div class="agenda-desc">KPIとチャートを分離し、ラベルの意味が一目で分かる構成にする。</div></div></li>
+          <li class="agenda-item"><span class="agenda-num">5</span><div><span class="agenda-title">締めは静かに強く終える</span><div class="agenda-desc">結論を短く言い切り、次アクションを控えめなピルで添える。</div></div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="slide-number">2</div>
+  </div>
+
+  <div class="slide slide-content slide-principles" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div>
+          <div class="eyebrow">Content</div>
+          <h2>美しく見せるための実装原則</h2>
+        </div>
+        <p>強い装飾を足すのではなく、ルールを守ることで仕上がりを上げます。</p>
+      </div>
+  
+      <div class="slide-main">
+        <div class="content-grid">
+          <div class="panel">
+            <p class="lede">
+              限られた条件でスライドをプロフェッショナルに見せるには、派手さよりも
+              「整列・余白・文字階層・色数の抑制」を徹底するのが効果的です。
+            </p>
+            <ul>
+              <li>見出しは短く、本文は1スライドあたり3〜5点に絞る。</li>
+              <li>アクセント色は見出し線と重要数値だけに使い、面積を増やしすぎない。</li>
+              <li>カードの角丸・影・境界線を揃え、細部の一貫性で品質を出す。</li>
+            </ul>
+          </div>
+  
+          <div class="compact-panel">
+            <div class="mini-item">
+              <span class="label-tag label-neutral">READABILITY</span>
+              <div class="point-box">
+                <div class="point-box-title">文字階層</div>
+                <p>見出しと本文の強弱を明確にし、メリハリをつける。</p>
+              </div>
+            </div>
+  
+            <div class="mini-item">
+              <span class="label-tag label-positive">RESTRAINT</span>
+              <div class="point-box">
+                <div class="point-box-title">装飾の節度</div>
+                <p>色面は要所のみとし、基本は白背景を保つ。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="principles-metrics">
+          <div class="highlight-card">
+            <div class="card-value">1</div>
+            <div class="card-label">Strong visual system</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">3</div>
+            <div class="card-label">Core colors</div>
+          </div>
+          <div class="highlight-card">
+            <div class="card-value">5</div>
+            <div class="card-label">Max key points</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-number">3</div>
+  </div>
+
+  <div class="slide slide-two-col" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div>
+          <div class="eyebrow">Two Column</div>
+          <h2>悪い例と良い例の並置</h2>
+        </div>
+        <p>比較は情報量を増やしやすいため、各カラムの論点は3つ程度までに制御します。</p>
+      </div>
+      <div class="slide-main">
+        <div class="col-container">
+          <div class="col">
+            <div class="col-topline"><h3>避けたい状態</h3><span class="metric-chip good">OVERLOAD</span></div>
+            <ul class="feature-list">
+              <li>見出しも本文も強く、どこから読むべきか分からない。</li>
+              <li>カード数が多く、1枚の中で視線が往復し続ける。</li>
+              <li>色の意味が定義されず、装飾のためだけに増えていく。</li>
+            </ul>
+            <div class="quote-box">悪い例は「要素が多いこと」よりも「優先順位が曖昧なこと」で発生します。</div>
+          </div>
+          <div class="col">
+            <div class="col-topline"><h3>維持したい状態</h3><span class="metric-chip focus">FOCUS</span></div>
+            <ul class="feature-list">
+              <li>各カラムに1つの結論を置き、下位要素はそれを支えるだけにする。</li>
+              <li>余白を削って詰め込むのではなく、論点の数を減らして収める。</li>
+              <li>アクセント色は「強調」と「誘導」に用途を限定する。</li>
+            </ul>
+            <div class="quote-box">良い例は、読み終えたあとに構造が自然に記憶に残ります。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-number">4</div>
+  </div>
+
+  <div class="slide slide-content" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="slide-header">
+        <div>
+          <div class="eyebrow">Chart</div>
+          <h2>完成度は段階的に積み上がる</h2>
+        </div>
+        <p>モダンな見た目は一度に生まれず、構造整理と磨き込みの反復で上がっていきます。</p>
+      </div>
+      <div class="slide-main">
+        <div class="chart-wrap">
+          <div class="chart-side">
+            <span class="label-tag label-neutral">Progress</span>
+            <div class="big-number">96%</div>
+            <div class="caption">最終化フェーズでは、追加より削減の判断が品質を左右します。</div>
+            <div class="stat-group">
+              <div class="stat-line"><div class="stat-name">情報整理</div><div class="stat-bar"><span style="width:88%"></span></div></div>
+              <div class="stat-line"><div class="stat-name">視線誘導</div><div class="stat-bar"><span style="width:92%"></span></div></div>
+              <div class="stat-line"><div class="stat-name">安全余白</div><div class="stat-bar"><span style="width:94%"></span></div></div>
+            </div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-area">
+              <canvas data-chart-role="modern-growth" data-fallback="Chart.js が利用できない環境では、ここに簡易チャートや表を置いて代替できます。"></canvas>
+            </div>
+            <div class="chart-note"><span class="legend-dot"></span>構想から最終化まで、各段階で要素を増やすより整える比率を高めると完成度が安定します。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-number">5</div>
+  </div>
+
+  <div class="slide slide-closing" style="page-break-after: always;">
+    <div class="slide-body">
+      <div class="closing-card">
+        <div class="eyebrow" style="color: rgba(255,255,255,0.72);">Closing</div>
+        <h2>整えることが、最短の演出になる</h2>
+        <p>MODERNスタイルでは、余白・見出し線・カード・数値の秩序を先に決めることで、少ない装飾でも十分に洗練された印象を作れます。</p>
+        <div class="closing-actions">
+          <span class="closing-pill">テンプレート化しやすい</span>
+          <span class="closing-pill">安全領域を守りやすい</span>
+          <span class="closing-pill">量産時も破綻しにくい</span>
+        </div>
+      </div>
+    </div>
+    <div class="slide-number" style="color: rgba(255,255,255,0.78);">6</div>
+  </div>
+
+</body>
+</html>
+```
+
+*このガイドラインに従うことで、LLM および実装者はスライドの種別・情報密度・グラフの必要性・スライド構成・収容安全性・分割後ランタイムの挙動を総合的に判断し、崩れにくく視覚的に品位あるプレゼンテーション HTML Artifact を安定して生成できる。*
+
