@@ -226,11 +226,12 @@ class AuthService {
             }
 
             // 3. アカウント状態の検証
-            if (userData.account_status === 0) {
+            const status = Number(userData.account_status);
+            if (status === 0) {
                 await signOut(auth);
                 throw new Error('このアカウントは無効化されています。管理者にお問い合わせください');
             }
-            if (userData.account_status === 2) {
+            if (status === 2) {
                 await signOut(auth);
                 throw new Error('このアカウントは退職済みです');
             }
@@ -335,7 +336,8 @@ class AuthService {
                         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                         if (userDoc.exists()) {
                             const userData = userDoc.data();
-                            if (userData.account_status === 1) {
+                            const status = Number(userData.account_status);
+                            if (status === 1) {
                                 const profile = await this._toUserProfile(firebaseUser.uid, userData);
                                 resolve(profile);
                                 return;
