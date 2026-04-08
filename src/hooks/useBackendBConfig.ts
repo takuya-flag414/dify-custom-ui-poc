@@ -1,7 +1,5 @@
-// src/hooks/useBackendBConfig.ts
-// Backend B (Gemini File Search PoC / Workflow) 用の設定管理フック
-
 import { useState, useEffect, useCallback } from 'react';
+import { USE_ENV_API_CONFIG, ENV_API_KEY_B, ENV_API_URL_B } from '../config/env';
 
 const STORAGE_KEYS = {
     apiKey: 'dify_backend_b_api_key',
@@ -17,6 +15,7 @@ export interface UseBackendBConfigReturn {
     apiKey: string;
     apiUrl: string;
     isConfigured: boolean;
+    isEnvConfig: boolean;
     saveConfig: (newKey: string, newUrl: string) => void;
     testConnection: () => Promise<boolean>;
 }
@@ -26,11 +25,17 @@ export interface UseBackendBConfigReturn {
  * LocalStorageに永続化し、接続テスト機能を提供
  */
 export const useBackendBConfig = (): UseBackendBConfigReturn => {
-    const [apiKey, setApiKey] = useState<string>('');
-    const [apiUrl, setApiUrl] = useState<string>(DEFAULT_API_URL);
+    const [apiKey, setApiKey] = useState<string>(USE_ENV_API_CONFIG ? ENV_API_KEY_B : '');
+    const [apiUrl, setApiUrl] = useState<string>(USE_ENV_API_CONFIG ? ENV_API_URL_B : DEFAULT_API_URL);
 
     // LocalStorageから設定を読み込み
     useEffect(() => {
+        if (USE_ENV_API_CONFIG) {
+            setApiKey(ENV_API_KEY_B);
+            setApiUrl(ENV_API_URL_B);
+            return;
+        }
+
         const storedKey = localStorage.getItem(STORAGE_KEYS.apiKey);
         const storedUrl = localStorage.getItem(STORAGE_KEYS.apiUrl);
         if (storedKey) setApiKey(storedKey);
@@ -39,6 +44,10 @@ export const useBackendBConfig = (): UseBackendBConfigReturn => {
 
     // 設定を保存
     const saveConfig = useCallback((newKey: string, newUrl: string): void => {
+        if (USE_ENV_API_CONFIG) {
+            console.warn('[Config] Backend B: Configuration is controlled by environment variables. Manual save ignored.');
+            return;
+        }
         const formattedUrl = newUrl.trim().replace(/\/$/, ''); // 末尾スラッシュ除去
         setApiKey(newKey);
         setApiUrl(formattedUrl);
@@ -80,6 +89,7 @@ export const useBackendBConfig = (): UseBackendBConfigReturn => {
         apiKey,
         apiUrl,
         isConfigured: !!apiKey.trim(),
+        isEnvConfig: USE_ENV_API_CONFIG,
         saveConfig,
         testConnection,
     };

@@ -374,3 +374,45 @@
     border-color: rgba(59, 130, 246, 0.2);
     color: var(--color-primary);
 }
+
+/* Env Config Notice (★追加) */
+.env-config-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    margin: 0 var(--space-6) var(--space-1);
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--color-primary);
+}
+
+.notice-icon {
+    color: var(--color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.notice-content {
+    font-size: var(--text-sm);
+    color: var(--color-text-main);
+    line-height: 1.5;
+}
+
+/* Disabled Input Styles */
+.input-wrapper.disabled {
+    background-color: var(--color-bg-surface-2) !important;
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.input-wrapper.disabled:focus-within {
+    border-color: var(--color-border);
+    box-shadow: none;
+}
+
+.input-wrapper.disabled input {
+    cursor: not-allowed;
+    color: var(--color-text-sub);
+}
