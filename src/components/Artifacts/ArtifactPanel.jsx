@@ -441,10 +441,35 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const handlePrintHtml = () => {
         const printWindow = window.open("", "_blank");
         if (!printWindow) return;
-        printWindow.document.write(displayContent);
+
+        // Chart.js の responsive モードを無効化し、固定サイズで高解像度描画させる
+        // バックグラウンドタブではコンテナの computed width が 0 になるため、
+        // responsive に依存せず Canvas 自体の属性で描画サイズを確定させる
+        // Canvas の内部解像度を 2x（1720x600）にすることで印刷時の鮮明さを確保し、
+        // CSS で表示サイズをコンテナ幅いっぱいに引き伸ばす
+        let processedContent = displayContent
+            .replace(/responsive\s*:\s*true/g, 'responsive: false')
+            .replace('</head>', `
+            <style>
+                /* Canvas をコンテナに合わせてフル幅・フル高さで表示 */
+                .chart-area { width: 100% !important; height: 300px !important; position: relative !important; }
+                .chart-area canvas { width: 100% !important; height: 100% !important; display: block !important; }
+            </style>
+            <script>
+                // Chart.js 初期化より前に Canvas へ高解像度バッファサイズを付与する
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('.chart-area canvas, canvas[data-chart-role]').forEach(c => {
+                        c.setAttribute('width', '1720');
+                        c.setAttribute('height', '600');
+                    });
+                });
+            </script>
+        </head>`);
+
+        printWindow.document.write(processedContent);
         printWindow.document.close();
         printWindow.addEventListener("load", () => {
-            // 非同期のグラフ描画（Chart.js）の完了を待つためにわずかに待機
+            // Chart.js の描画完了を待ってから印刷
             setTimeout(() => {
                 printWindow.print();
                 printWindow.close();
@@ -853,7 +878,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                                 <style>
                                                     html, body { background: transparent !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
                                                     .slide { margin: 0 !important; box-shadow: none !important; border: none !important; width: 100% !important; height: 100vh !important; display: flex !important; flex-direction: column !important; }
-                                                    .slide-body { display: flex !important; flex-direction: column !important; flex: 1 !important; height: auto !important; min-height: 0 !important; }
+                                                    .slide-body { display: flex !important; flex-direction: column !important; height: auto !important; min-height: 0 !important; }
                                                     .two-col { display: flex !important; flex-shrink: 0 !important; } /* カラムの縮小による重なりを防止 */
                                                 </style>
                                                 </head>`)

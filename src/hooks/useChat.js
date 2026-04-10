@@ -340,6 +340,10 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 year: 'numeric', month: 'long', day: 'numeric',
                 weekday: 'long', hour: '2-digit', minute: '2-digit'
             });
+
+            // ★追加: Artifact受信完了済みかどうかを判定
+            const hasReceivedArtifact = messages.some(m => m.role === 'ai' && m.artifact);
+
             const difyInputs = {
                 rag_enabled: currentSettings.ragEnabled ? 'true' : 'false',
                 web_enabled: currentSettings.webEnabled ? 'true' : 'false',
@@ -349,6 +353,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 system_prompt: JSON.stringify(systemPromptPayload),
                 reasoning_mode: currentSettings.reasoningMode || 'fast',
                 gemini_store_id: currentSettings.selectedStoreId || '',
+                has_received_artifact: hasReceivedArtifact,
             };
 
             const structuredQuery = buildStructuredMessage(
