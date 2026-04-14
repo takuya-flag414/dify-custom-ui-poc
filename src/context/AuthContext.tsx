@@ -13,8 +13,6 @@ export interface SecurityInfo {
     lastName?: string;
     firstName?: string;
     dateOfBirth?: string;
-    securityQuestion?: string;
-    securityAnswer?: string;
 }
 
 /**
@@ -36,7 +34,9 @@ export interface AuthContextValue {
     /** ログイン関数 */
     login: (email: string, password: string) => Promise<LoginResult>;
     /** サインアップ関数 */
-    signup: (email: string, password: string, displayName: string, securityInfo?: SecurityInfo) => Promise<LoginResult>;
+    signup: (email: string, password: string, displayName: string, securityInfo?: SecurityInfo) => Promise<{ message: string }>;
+    /** メール認証コード処理関数 */
+    verifyEmailCode: (oobCode: string) => Promise<void>;
     /** パスワードリセット関数 */
     resetPassword: (email: string) => Promise<void>;
     /** ログアウト関数 */
@@ -112,23 +112,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, []);
 
     /**
-     * サインアップ（新規登録）
+     * サインアップ（新規登録） - Firebase Auth作成 + メール認証リンク送信
      */
     const signup = useCallback(async (
         email: string,
         password: string,
         displayName: string,
         securityInfo: SecurityInfo = {}
-    ): Promise<LoginResult> => {
+    ): Promise<{ message: string }> => {
         try {
             setError(null);
+            setIsNewUser(false);
             const result = await authService.signup(email, password, displayName, securityInfo);
-            setUser(result.user);
-            setIsNewUser(true);
-            console.log('[AuthContext] Signup successful:', result.user.email);
+            
+            // メール認証待ちのメッセージを表示
+            setError(result.message);
+            
+            console.log('[AuthContext] Signup successful, awaiting email verification');
             return result;
         } catch (err) {
             console.error('[AuthContext] Signup failed:', err);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            setError(errorMessage);
+            throw err;
+        }
+    }, []);
+
+    /**
+     * メール認証リンク処理（メールリンククリック時に呼び出す）
+     */
+    const verifyEmailCode = useCallback(async (oobCode: string): Promise<void> => {
+        try {
+            setError(null);
+            // new user has been verified, but they are not logged in yet.
+            setIsNewUser(true);
+            await authService.verifyEmailCode(oobCode);
+            console.log('[AuthContext] Email verification successful');
+        } catch (err) {
+            console.error('[AuthContext] Email verification failed:', err);
             const errorMessage = err instanceof Error ? err.message : String(err);
             setError(errorMessage);
             throw err;
@@ -217,13 +238,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isDevMode: IS_DEV_MODE,
         login,
         signup,
+        verifyEmailCode,
         resetPassword,
         logout,
         clearError,
         hasPermission,
         getUserRoles,
         switchRole,
-    }), [user, isLoading, error, isNewUser, login, signup, resetPassword, logout, clearError, hasPermission, getUserRoles, switchRole]);
+    }), [user, isLoading, error, isNewUser, login, signup, verifyEmailCode, resetPassword, logout, clearError, hasPermission, getUserRoles, switchRole]);
 
     return (
         <AuthContext.Provider value={contextValue}>

@@ -5,7 +5,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { SECURITY_QUESTIONS } from '../../mocks/mockUsers';
 import './Auth.css';
 
 /**
@@ -40,7 +39,7 @@ const generateSecurePassword = () => {
 /**
  * サインアップ（新規登録）モーダル
  * - バリデーション（メール形式、パスワード強度、表示名必須）
- * - セキュリティ情報（姓・名・生年月日・秘密の質問）
+ * - セキュリティ情報（姓・名・生年月日）
  * - Framer Motionアニメーション
  */
 const SignupModal = ({ onClose }) => {
@@ -56,8 +55,6 @@ const SignupModal = ({ onClose }) => {
     const [lastName, setLastName] = useState('');
     const [firstName, setFirstName] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
-    const [securityQuestion, setSecurityQuestion] = useState('');
-    const [securityAnswer, setSecurityAnswer] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false); // ★追加
 
     const [localError, setLocalError] = useState('');
@@ -97,14 +94,6 @@ const SignupModal = ({ onClose }) => {
             setLocalError('生年月日を入力してください');
             return;
         }
-        if (!securityQuestion) {
-            setLocalError('秘密の質問を選択してください');
-            return;
-        }
-        if (!securityAnswer.trim()) {
-            setLocalError('秘密の質問の回答を入力してください');
-            return;
-        }
         if (!passwordValidation.isValid) {
             setLocalError('パスワードは8文字以上、英字と数字を含めてください');
             return;
@@ -122,8 +111,6 @@ const SignupModal = ({ onClose }) => {
                 lastName,
                 firstName,
                 dateOfBirth,
-                securityQuestion,
-                securityAnswer,
             });
             // 成功時は自動的にログイン状態になるため、モーダルを閉じる
             onClose();
@@ -134,7 +121,7 @@ const SignupModal = ({ onClose }) => {
         }
     }, [
         lastName, firstName, email, password, dateOfBirth,
-        securityQuestion, securityAnswer, passwordValidation, signup, clearError, onClose
+        passwordValidation, signup, clearError, onClose
     ]);
 
 
@@ -399,46 +386,6 @@ const SignupModal = ({ onClose }) => {
                                 パスワードが一致しません
                             </div>
                         )}
-                    </div>
-
-                    {/* 秘密の質問 */}
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="signup-security-question">
-                            秘密の質問 <span className="form-required">*</span>
-                        </label>
-                        <div className="form-select-wrapper">
-                            <select
-                                id="signup-security-question"
-                                className="form-input form-input--select"
-                                value={securityQuestion}
-                                onChange={(e) => setSecurityQuestion(e.target.value)}
-                                disabled={isSubmitting}
-                            >
-                                <option value="">質問を選択してください</option>
-                                {SECURITY_QUESTIONS.map((q) => (
-                                    <option key={q.id} value={q.question}>
-                                        {q.question}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <span className="form-hint">パスワードリセット時に使用されます</span>
-                    </div>
-
-                    {/* 秘密の質問の回答 */}
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="signup-security-answer">
-                            秘密の質問の回答 <span className="form-required">*</span>
-                        </label>
-                        <input
-                            id="signup-security-answer"
-                            type="text"
-                            className="form-input"
-                            placeholder="回答を入力"
-                            value={securityAnswer}
-                            onChange={(e) => setSecurityAnswer(e.target.value)}
-                            disabled={isSubmitting}
-                        />
                     </div>
 
                     {/* 登録ボタン */}
