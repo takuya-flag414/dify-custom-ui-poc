@@ -2,24 +2,24 @@
 // Phase B: Firebase Integration - クライアントサイド認証サービス
 // 基本設計書 DES-AUTH-001 準拠 - RBAC対応
 
-import { 
+import {
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword, 
-    signOut, 
+    signInWithEmailAndPassword,
+    signOut,
     onAuthStateChanged,
     sendPasswordResetEmail,
     sendEmailVerification,
     applyActionCode,
     User as FirebaseUser
 } from 'firebase/auth';
-import { 
-    doc, 
-    getDoc, 
-    setDoc, 
+import {
+    doc,
+    getDoc,
+    setDoc,
     deleteDoc,
-    collection, 
-    query, 
-    where, 
+    collection,
+    query,
+    where,
     getDocs,
     Timestamp,
     writeBatch
@@ -98,7 +98,7 @@ class AuthService {
         // 1. ユーザーのロールを取得 (user_roles コレクション)
         const userRolesQuery = query(collection(db, 'user_roles'), where('user_id', '==', userId));
         const userRolesSnap = await getDocs(userRolesQuery);
-        
+
         const roles: ResolvedUserRole[] = [];
         const permissionIds = new Set<string>();
 
@@ -221,9 +221,10 @@ class AuthService {
                     preferences: {
                         theme: 'system',
                         aiStyle: 'partner',
+                        isOnboardingCompleted: false,
                     }
                 };
-                
+
                 const batch = writeBatch(db);
                 batch.set(doc(db, 'users', firebaseUser.uid), userData);
                 batch.set(doc(collection(db, 'user_roles')), {
@@ -315,16 +316,19 @@ class AuthService {
             throw new Error('すべての項目を入力してください');
         }
 
-        try {
-            const normalizedEmail = email.toLowerCase().trim();
+        const normalizedEmail = email.toLowerCase().trim();
+        if (!normalizedEmail.endsWith('@iflag.co.jp')) {
+            throw new Error('このアプリは会社用ドメイン（@iflag.co.jp)でのみ登録可能です');
+        }
 
+        try {
             // 1. Firebase Authアカウント作成（この時点で重複チェックが行われる）
             const userCredential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
             const firebaseUser = userCredential.user;
 
             // 2. 確認メール送信
             const actionCodeSettings = {
-                url: `${window.location.origin}/verify-email`, 
+                url: `${window.location.origin}/verify-email`,
                 handleCodeInApp: true,
             };
             await sendEmailVerification(firebaseUser, actionCodeSettings);
@@ -335,7 +339,7 @@ class AuthService {
                 user_id: firebaseUser.uid,
                 email: normalizedEmail,
                 name: `${lastName || ''} ${firstName || ''}`.trim() || displayName,
-                account_status: 1, 
+                account_status: 1,
                 created_at: now,
                 updated_at: now,
                 displayName,
@@ -346,6 +350,7 @@ class AuthService {
                 preferences: {
                     theme: 'system',
                     aiStyle: 'partner',
+                    isOnboardingCompleted: false,
                 }
             };
 
@@ -435,7 +440,7 @@ class AuthService {
     async updatePreferences(userId: string, prefs: Partial<UserPreferences>): Promise<UserPreferences> {
         const userRef = doc(db, 'users', userId);
         const userDoc = await getDoc(userRef);
-        
+
         if (!userDoc.exists()) {
             throw new Error('ユーザーが見つかりません');
         }
@@ -446,9 +451,9 @@ class AuthService {
             ...prefs,
         };
 
-        await setDoc(userRef, { 
+        await setDoc(userRef, {
             preferences: updatedPrefs,
-            updated_at: Timestamp.now() 
+            updated_at: Timestamp.now()
         }, { merge: true });
 
         console.log('[AuthService] Preferences updated for:', userId);
@@ -470,7 +475,7 @@ class AuthService {
         // ロール定義をFirestoreから取得
         const rolesQuery = query(collection(db, 'roles'), where('role_code', '==', newRoleCode));
         const rolesSnap = await getDocs(rolesQuery);
-        
+
         if (rolesSnap.empty) {
             throw new Error(`Role definition not found for code: ${newRoleCode}`);
         }
@@ -488,7 +493,7 @@ class AuthService {
         // 権限を取得
         const permsQuery = query(collection(db, 'role_permissions'), where('role_id', '==', roleId));
         const permsSnap = await getDocs(permsQuery);
-        
+
         const permissionCodes: PermissionCode[] = [];
         for (const rpDoc of permsSnap.docs) {
             const permDoc = await getDoc(doc(db, 'permissions', rpDoc.data().permission_id));

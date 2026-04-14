@@ -142,8 +142,8 @@ function App() {
   } = useTutorial();
 
   // オンボーディング（初回セットアップウィザード）
-  // ★ Phase A: ユーザーIDごとにオンボーディング完了を管理
-  const onboardingState = useOnboarding(authUser?.userId);
+  // ★ Phase A: ユーザーごとにオンボーディング完了を管理（DB連動）
+  const onboardingState = useOnboarding(authUser);
 
   // ArtifactPanelを開く（Inspectorから独立）
   const openArtifact = (artifact) => {
