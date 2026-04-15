@@ -3,10 +3,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // 共通関数：正しいドメインのユーザーか
+    function isCompanyUser() {
+      return request.auth != null && request.auth.token.email.matches('.*@iflag\\.co\\.jp');
+    }
+
+    // ========== 特例：新規登録フロー用のセキュリティ緩和 ==========
+    
+    // 1. ユーザー名簿の作成
+    // メール未認証でも、自分自身のプロフィールデータなら書き込みのみ許可
+    match /users/{userId} {
+      allow write: if isCompanyUser() && request.auth.uid == userId;
+    }
+
+    // 2. ロールの割り当て
+    // 未認証でも、自分が自分に「一般権限（role_general）」を付与する場合のみ許可
+    // 悪意のあるユーザーが未認証の段階でAdmin権限をつけるのを防ぐ
+    match /user_roles/{docId} {
+      allow write: if isCompanyUser() 
+                   && request.resource.data.user_id == request.auth.uid
+                   && request.resource.data.role_id == 'role_general';
+    }
+
+    // =========================================================
+
+    // デフォルトルール（その他のすべての操作はメール認証完了＝true が必須）
     match /{document=**} {
-      // ログイン済みユーザーにのみ、読み取り・書き込みを許可（POC環境用）
-      // 本番環境では各コレクションごとに厳密なルールを設定する必要があります
-      allow read, write: if request.auth != null;
+      allow read, write: if isCompanyUser() && request.auth.token.email_verified == true;
     }
   }
 }

@@ -97,6 +97,7 @@ export interface UserPreferences {
         department: string; // 部署名表示用
     };
     customInstructions?: string;
+    isOnboardingCompleted?: boolean; // オンボーディング完了フラグ
 }
 
 /**

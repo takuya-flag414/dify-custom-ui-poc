@@ -2,23 +2,27 @@
 // Phase B: Firebase Integration - クライアントサイド認証サービス
 // 基本設計書 DES-AUTH-001 準拠 - RBAC対応
 
-import { 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    signOut, 
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
     onAuthStateChanged,
     sendPasswordResetEmail,
+    sendEmailVerification,
+    applyActionCode,
     User as FirebaseUser
 } from 'firebase/auth';
-import { 
-    doc, 
-    getDoc, 
-    setDoc, 
-    collection, 
-    query, 
-    where, 
+import {
+    doc,
+    getDoc,
+    setDoc,
+    deleteDoc,
+    collection,
+    query,
+    where,
     getDocs,
-    Timestamp 
+    Timestamp,
+    writeBatch
 } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import {
@@ -71,8 +75,6 @@ export interface SecurityInfo {
     lastName: string;
     firstName: string;
     dateOfBirth: string;
-    securityQuestion: string;
-    securityAnswer: string;
 }
 
 // ============================================
@@ -96,7 +98,7 @@ class AuthService {
         // 1. ユーザーのロールを取得 (user_roles コレクション)
         const userRolesQuery = query(collection(db, 'user_roles'), where('user_id', '==', userId));
         const userRolesSnap = await getDocs(userRolesQuery);
-        
+
         const roles: ResolvedUserRole[] = [];
         const permissionIds = new Set<string>();
 
@@ -176,6 +178,8 @@ class AuthService {
         };
     }
 
+
+
     // ============================================
     // 公開メソッド
     // ============================================
@@ -193,12 +197,17 @@ class AuthService {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const firebaseUser = userCredential.user;
 
+            if (!firebaseUser.emailVerified) {
+                await signOut(auth);
+                throw new Error('メール認証が完了していません。ご登録のメールアドレスに届いた確認リンクをクリックしてください。');
+            }
+
             // 2. Firestore からプロファイルを取得
             let userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
             let userData: any;
 
             if (!userDoc.exists()) {
-                // [JIT Provisioning] プロファイルがない場合は初期作成
+                // 通常のJIT (SSOなど、想定外の経路で来た場合)
                 console.log('[AuthService] Profile missing. Creating default profile for:', firebaseUser.email);
                 const now = Timestamp.now();
                 userData = {
@@ -212,16 +221,18 @@ class AuthService {
                     preferences: {
                         theme: 'system',
                         aiStyle: 'partner',
+                        isOnboardingCompleted: false,
                     }
                 };
-                await setDoc(doc(db, 'users', firebaseUser.uid), userData);
 
-                // デフォルトロール（general）を割り当て
-                await setDoc(doc(collection(db, 'user_roles')), {
+                const batch = writeBatch(db);
+                batch.set(doc(db, 'users', firebaseUser.uid), userData);
+                batch.set(doc(collection(db, 'user_roles')), {
                     user_id: firebaseUser.uid,
                     role_id: 'role_general',
                     assigned_at: now
                 });
+                await batch.commit();
             } else {
                 userData = userDoc.data();
             }
@@ -256,6 +267,19 @@ class AuthService {
     }
 
     /**
+     * ログアウト
+     */
+    async logout(): Promise<void> {
+        try {
+            await signOut(auth);
+            console.log('[AuthService] Logged out successfully');
+        } catch (error: any) {
+            console.error('[AuthService] Logout failed:', error);
+            throw error;
+        }
+    }
+
+    /**
      * パスワードリセットメールを送信
      */
     async resetPassword(email: string): Promise<void> {
@@ -278,72 +302,99 @@ class AuthService {
     }
 
     /**
-     * サインアップ
+     * サインアップ（Firebase標準 メール確認フロー）
      */
     async signup(
         email: string,
         password: string,
         displayName: string,
         securityInfo: Partial<SecurityInfo> = {}
-    ): Promise<LoginResult> {
-        const { lastName, firstName, dateOfBirth, securityQuestion, securityAnswer } = securityInfo;
+    ): Promise<{ message: string }> {
+        const { lastName, firstName, dateOfBirth } = securityInfo;
 
         if (!email || !password || !displayName) {
             throw new Error('すべての項目を入力してください');
         }
 
+        const normalizedEmail = email.toLowerCase().trim();
+        if (!normalizedEmail.endsWith('@iflag.co.jp')) {
+            throw new Error('このアプリは会社用ドメイン（@iflag.co.jp)でのみ登録可能です');
+        }
+
         try {
-            // 1. Firebase Auth でユーザー作成
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            // 1. Firebase Authアカウント作成（この時点で重複チェックが行われる）
+            const userCredential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
             const firebaseUser = userCredential.user;
 
-            // 2. Firestore にプロファイルを保存
+            // 2. 確認メール送信
+            const actionCodeSettings = {
+                url: `${window.location.origin}/verify-email`,
+                handleCodeInApp: true,
+            };
+            await sendEmailVerification(firebaseUser, actionCodeSettings);
+
+            // 3. Firestoreに未認証ベースでプロファイルを作成 (WriteBatch)
             const now = Timestamp.now();
             const userData = {
                 user_id: firebaseUser.uid,
-                email: email.toLowerCase(),
-                name: `${lastName} ${firstName}`,
-                account_status: 1, // 有効
+                email: normalizedEmail,
+                name: `${lastName || ''} ${firstName || ''}`.trim() || displayName,
+                account_status: 1,
                 created_at: now,
                 updated_at: now,
                 displayName,
-                lastName,
-                firstName,
+                lastName: lastName || '',
+                firstName: firstName || '',
+                dateOfBirth: dateOfBirth || '',
                 avatarUrl: null,
-                dateOfBirth,
-                securityQuestion,
-                securityAnswer,
                 preferences: {
                     theme: 'system',
                     aiStyle: 'partner',
+                    isOnboardingCompleted: false,
                 }
             };
 
-            await setDoc(doc(db, 'users', firebaseUser.uid), userData);
-
-            // 3. デフォルトロール（general）を割り当て
-            // 注: 'role_general' ID が存在することを確認しておく必要がある（Seeding）
-            await setDoc(doc(collection(db, 'user_roles')), {
+            const batch = writeBatch(db);
+            batch.set(doc(db, 'users', firebaseUser.uid), userData);
+            batch.set(doc(collection(db, 'user_roles')), {
                 user_id: firebaseUser.uid,
                 role_id: 'role_general',
                 assigned_at: now
             });
+            await batch.commit();
 
-            const profile = await this._toUserProfile(firebaseUser.uid, userData);
-            const token = await firebaseUser.getIdToken();
-
-            console.log('[AuthService] Signup successful:', profile.email);
+            // 4. 強制的にサインアウト（メール認証完了まで待つ）
+            await signOut(auth);
 
             return {
-                token,
-                user: profile,
+                message: '認証リンクをお送りしました。メール内のリンクから認証をお願いします。',
             };
         } catch (error: any) {
             console.error('[AuthService] Signup failed:', error);
             if (error.code === 'auth/email-already-in-use') {
-                throw new Error('このメールアドレスは既に使用されています');
+                throw new Error('このメールアドレスは既に登録されています');
+            } else if (error.code === 'auth/invalid-email') {
+                throw new Error('メールアドレスの形式が不正です');
+            } else if (error.code === 'auth/weak-password') {
+                throw new Error('パスワードは6文字以上である必要があります');
             }
-            throw error;
+            throw new Error('アカウントの作成に失敗しました');
+        }
+    }
+
+    /**
+     * メール認証リンクのコード検証 (oobCode)
+     */
+    async verifyEmailCode(oobCode: string): Promise<void> {
+        try {
+            await applyActionCode(auth, oobCode);
+            console.log('[AuthService] Email code applied successfully');
+        } catch (error: any) {
+            console.error('[AuthService] Email verification failed:', error);
+            if (error.code === 'auth/invalid-action-code') {
+                throw new Error('認証コードが無効または期限切れです。');
+            }
+            throw new Error('メール認証の処理に失敗しました。');
         }
     }
 
@@ -356,6 +407,14 @@ class AuthService {
                 unsubscribe();
                 if (firebaseUser) {
                     try {
+                        await firebaseUser.reload();
+                        if (!firebaseUser.emailVerified) {
+                            console.log('[AuthService] Unverified user session detected, signing out:', firebaseUser.email);
+                            await signOut(auth);
+                            resolve(null);
+                            return;
+                        }
+
                         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                         if (userDoc.exists()) {
                             const userData = userDoc.data();
@@ -376,20 +435,12 @@ class AuthService {
     }
 
     /**
-     * ログアウト
-     */
-    async logout(): Promise<void> {
-        await signOut(auth);
-        console.log('[AuthService] Logged out');
-    }
-
-    /**
      * ユーザー設定を更新
      */
     async updatePreferences(userId: string, prefs: Partial<UserPreferences>): Promise<UserPreferences> {
         const userRef = doc(db, 'users', userId);
         const userDoc = await getDoc(userRef);
-        
+
         if (!userDoc.exists()) {
             throw new Error('ユーザーが見つかりません');
         }
@@ -400,9 +451,9 @@ class AuthService {
             ...prefs,
         };
 
-        await setDoc(userRef, { 
+        await setDoc(userRef, {
             preferences: updatedPrefs,
-            updated_at: Timestamp.now() 
+            updated_at: Timestamp.now()
         }, { merge: true });
 
         console.log('[AuthService] Preferences updated for:', userId);
@@ -424,7 +475,7 @@ class AuthService {
         // ロール定義をFirestoreから取得
         const rolesQuery = query(collection(db, 'roles'), where('role_code', '==', newRoleCode));
         const rolesSnap = await getDocs(rolesQuery);
-        
+
         if (rolesSnap.empty) {
             throw new Error(`Role definition not found for code: ${newRoleCode}`);
         }
@@ -442,7 +493,7 @@ class AuthService {
         // 権限を取得
         const permsQuery = query(collection(db, 'role_permissions'), where('role_id', '==', roleId));
         const permsSnap = await getDocs(permsQuery);
-        
+
         const permissionCodes: PermissionCode[] = [];
         for (const rpDoc of permsSnap.docs) {
             const permDoc = await getDoc(doc(db, 'permissions', rpDoc.data().permission_id));

@@ -1,6 +1,7 @@
 // src/hooks/useOnboarding.ts
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { DiagnosisAnswers } from '../components/Onboarding/utils/promptGenerator';
+import { UserProfile, authService } from '../services/AuthService';
 
 /**
  * オンボーディングステップの型
@@ -47,8 +48,8 @@ export interface UseOnboardingReturn {
     skipTutorial: () => void;
     setTempName: (name: string) => void;
     setTempInstructions: (instructions: string) => void;
-    completeOnboarding: (updateSettingsFn?: UpdateSettingsFunction) => void;
-    resetOnboarding: () => void;
+    completeOnboarding: (updateSettingsFn?: UpdateSettingsFunction) => Promise<void> | void;
+    resetOnboarding: () => Promise<void> | void;
     // 診断機能
     diagnosisMode: DiagnosisMode;
     diagnosisSubStep: number;
@@ -62,44 +63,17 @@ export interface UseOnboardingReturn {
 /**
  * オンボーディング状態管理Hook
  */
-export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
-    const storageKey = userId ? `onboarding_completed_${userId}` : null;
+export const useOnboarding = (user: UserProfile | null): UseOnboardingReturn => {
+    // 既存ユーザー（DBにフラグが無い）の場合は true とみなし、新規ユーザー（false）のときのみオンボーディングを発火させる
+    const isCompletedDB = user?.preferences?.isOnboardingCompleted ?? true;
 
-    const [isCompleted, setIsCompleted] = useState<boolean>(() => {
-        if (!storageKey) return true;
-        try {
-            return localStorage.getItem(storageKey) === 'true';
-        } catch (e) {
-            console.error('[useOnboarding] Failed to read completion flag:', e);
-            return false;
-        }
-    });
-
-    const [isAppReady, setIsAppReady] = useState<boolean>(() => {
-        if (!storageKey) return true;
-        try {
-            return localStorage.getItem(storageKey) === 'true';
-        } catch (e) {
-            return false;
-        }
-    });
+    const [isCompleted, setIsCompleted] = useState<boolean>(isCompletedDB);
+    const [isAppReady, setIsAppReady] = useState<boolean>(isCompletedDB);
 
     useEffect(() => {
-        if (!storageKey) {
-            setIsCompleted(true);
-            setIsAppReady(true);
-            return;
-        }
-
-        try {
-            const completed = localStorage.getItem(storageKey) === 'true';
-            setIsCompleted(completed);
-            setIsAppReady(completed);
-            console.log(`[useOnboarding] User ${userId}: completed=${completed}`);
-        } catch (e) {
-            console.error('[useOnboarding] Failed to check completion:', e);
-        }
-    }, [storageKey, userId]);
+        setIsCompleted(isCompletedDB);
+        setIsAppReady(isCompletedDB);
+    }, [isCompletedDB]);
 
     const [currentStep, setCurrentStep] = useState<number>(0);
     const transitionLockRef = useRef<boolean>(false);
@@ -221,8 +195,8 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
         }));
     }, []);
 
-    const completeOnboarding = useCallback((updateSettingsFn?: UpdateSettingsFunction): void => {
-        if (!storageKey) return;
+    const completeOnboarding = useCallback(async (updateSettingsFn?: UpdateSettingsFunction): Promise<void> => {
+        if (!user?.userId) return;
 
         try {
             if (updateSettingsFn) {
@@ -232,38 +206,41 @@ export const useOnboarding = (userId: string | null): UseOnboardingReturn => {
                 if (tempProfile.customInstructions) {
                     updateSettingsFn('prompt', 'customInstructions', tempProfile.customInstructions);
                 }
-                // ai_style は廃止。バックエンドには常に 'partner' をデフォルト送信。
             }
 
-            localStorage.setItem(storageKey, 'true');
+            // DBに保存
+            await authService.updatePreferences(user.userId, { isOnboardingCompleted: true });
+
             setIsCompleted(true);
 
             setTimeout(() => {
                 setIsAppReady(true);
             }, 600);
 
-            console.log('[useOnboarding] Onboarding completed for user:', userId, tempProfile);
+            console.log('[useOnboarding] Onboarding completed for user:', user.userId, tempProfile);
         } catch (e) {
             console.error('[useOnboarding] Failed to complete onboarding:', e);
         }
-    }, [storageKey, tempProfile, userId]);
+    }, [user, tempProfile]);
 
-    const resetOnboarding = useCallback((): void => {
-        if (!storageKey) return;
+    const resetOnboarding = useCallback(async (): Promise<void> => {
+        if (!user?.userId) return;
 
         try {
-            localStorage.removeItem(storageKey);
+            // DBをリセット
+            await authService.updatePreferences(user.userId, { isOnboardingCompleted: false });
+
             setIsCompleted(false);
             setIsAppReady(false);
             setCurrentStep(0);
             setTempProfile({ name: '', customInstructions: '' });
             setDiagnosisModeState('none');
             setDiagnosisSubStep(0);
-            console.log('[useOnboarding] Onboarding reset for user:', userId);
+            console.log('[useOnboarding] Onboarding reset for user:', user.userId);
         } catch (e) {
             console.error('[useOnboarding] Failed to reset onboarding:', e);
         }
-    }, [storageKey, userId]);
+    }, [user]);
 
     return {
         isCompleted,
