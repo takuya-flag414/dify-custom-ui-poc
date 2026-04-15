@@ -152,36 +152,36 @@ const GeneratingPagePlaceholder = ({ pageNumber, isSlide, status, subtext }) => 
  */
 const getGenerationStatus = (html, pageNumber, artifactType) => {
     const isSlide = artifactType === 'html_slide';
-    
-    if (!html || html.length < 50) return { 
-        text: isSlide ? 'スライドプレゼンテーションを構築しています...' : '高品質なドキュメントを構築しています...', 
-        subtext: 'AIが最適な構成案を作成しています' 
+
+    if (!html || html.length < 50) return {
+        text: isSlide ? 'スライドプレゼンテーションを構築しています...' : '高品質なドキュメントを構築しています...',
+        subtext: 'AIが最適な構成案を作成しています'
     };
 
     // <head>内でまだ <body> に到達していない場合
     if (!html.includes('<body')) {
         if (html.includes('<style') && !html.includes('</style>')) {
-            return { 
-                text: isSlide ? 'モダンなビジュアルスタイルを設計しています...' : 'プロフェッショナルな書式を適用しています...', 
-                subtext: '洗練されたデザインを適用しています' 
+            return {
+                text: isSlide ? 'モダンなビジュアルスタイルを設計しています...' : 'プロフェッショナルな書式を適用しています...',
+                subtext: '洗練されたデザインを適用しています'
             };
         }
         if (html.includes('<script') && !html.includes('</script>')) {
-            return { 
-                text: isSlide ? 'インタラクティブな演出を準備しています...' : 'ドキュメントの機能をセットアップしています...', 
-                subtext: '動的な要素とインタラクションを準備しています' 
+            return {
+                text: isSlide ? 'インタラクティブな演出を準備しています...' : 'ドキュメントの機能をセットアップしています...',
+                subtext: '動的な要素とインタラクションを準備しています'
             };
         }
-        return { 
-            text: isSlide ? 'スライドのストーリーを構成しています...' : 'ドキュメントの構成を設計しています...', 
-            subtext: 'ヘッダーとメタデータを構成しています' 
+        return {
+            text: isSlide ? 'スライドのストーリーを構成しています...' : 'ドキュメントの構成を設計しています...',
+            subtext: 'ヘッダーとメタデータを構成しています'
         };
     }
 
     // <body> に到達した後は各ページの生成状況を表示
-    return { 
-        text: isSlide ? `${pageNumber}枚目のスライドをレイアウトしています...` : `${pageNumber}ページ目の内容を詳しく生成しています...`, 
-        subtext: 'AIがコンテンツを最適な形式で配置しています' 
+    return {
+        text: isSlide ? `${pageNumber}枚目のスライドをレイアウトしています...` : `${pageNumber}ページ目の内容を詳しく生成しています...`,
+        subtext: 'AIがコンテンツを最適な形式で配置しています'
     };
 };
 
@@ -262,7 +262,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         setStablePages([]); // 新しいドキュメントならリセット
         iframeRefs.current = {}; // ★修正: 前のArtifactのiframe参照をクリア
     }, [artifact?.id, artifact?.title, artifact?.content]); // ★修正: contentも監視してカード切り替えを確実にリセット
-    
+
     // ★追加: 基本となる用紙・キャンバス幅の定義 (AutoFitとレンダリングで共有)
     const basePaperWidth = isHtmlSlide ? 1020 : (isHtmlDocument ? 850 : 720);
 
@@ -419,6 +419,43 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     };
 
     // ★追加: HTML ダウンロード処理
+    const buildSlideRuntimeHtml = (pageHtml, { forPrint = false } = {}) => {
+        if (!isHtmlSlide) return pageHtml;
+
+        return pageHtml.replace('</head>', `
+            <style>
+                html, body {
+                    background: transparent !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    overflow: hidden !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .slide {
+                    margin: 0 !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                    width: var(--slide-width) !important;
+                    height: var(--slide-height) !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                }
+                .slide-body {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    height: auto !important;
+                    min-height: 0 !important;
+                }
+                .two-col {
+                    display: flex !important;
+                    flex-shrink: 0 !important;
+                }
+                ${forPrint ? '.slide { page-break-after: always !important; break-after: page !important; }' : ''}
+            </style>
+            </head>`);
+    };
+
     const handleDownloadHtml = () => {
         try {
             const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
@@ -437,19 +474,78 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         }
     };
 
-    // ★追加: HTML 印刷処理
+    // ★修正: HTML 印刷処理
     const handlePrintHtml = () => {
-        const printWindow = window.open("", "_blank");
+        if (!isHtmlDocument || pages.length === 0) return;
+
+        const printWindow = window.open('', '_blank');
         if (!printWindow) return;
-        printWindow.document.write(displayContent);
+
+        const printShell = `
+            <!DOCTYPE html>
+            <html lang="ja">
+                <head>
+                    <meta charset="UTF-8" />
+                    <title>${displayTitle}</title>
+                    <style>
+                        @page {
+                            size: 10in 5.625in;
+                            margin: 0;
+                        }
+                        html, body {
+                            margin: 0;
+                            padding: 0;
+                            background: #ffffff;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        body {
+                            display: block;
+                        }
+                        .print-page {
+                            width: 960px;
+                            height: 540px;
+                            margin: 0;
+                            overflow: hidden;
+                            break-after: page;
+                            page-break-after: always;
+                        }
+                        .print-page:last-child {
+                            break-after: auto;
+                            page-break-after: auto;
+                        }
+                        .print-frame {
+                            width: 960px;
+                            height: 540px;
+                            border: 0;
+                            display: block;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${pages.map((_, index) => `<div class="print-page"><iframe id="print-frame-${index}" class="print-frame" sandbox="allow-scripts allow-same-origin"></iframe></div>`).join('')}
+                </body>
+            </html>
+        `;
+
+        printWindow.document.open();
+        printWindow.document.write(printShell);
         printWindow.document.close();
-        printWindow.addEventListener("load", () => {
-            // 非同期のグラフ描画（Chart.js）の完了を待つためにわずかに待機
+
+        printWindow.addEventListener('load', () => {
+            pages.forEach((pageHtml, index) => {
+                const frame = printWindow.document.getElementById(`print-frame-${index}`);
+                if (!frame) return;
+                frame.srcdoc = buildSlideRuntimeHtml(pageHtml, { forPrint: true });
+            });
+
             setTimeout(() => {
+                printWindow.focus();
                 printWindow.print();
                 printWindow.close();
-            }, 500);
+            }, 800);
         });
+
         setIsMenuOpen(false);
     };
 
@@ -825,8 +921,8 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                     >
                         {/* ★v2.0: html_document の場合は A4用紙ビューワーで描画 */}
                         {isHtmlDocument ? (
-                            <div 
-                                className="artifact-viewer-bg" 
+                            <div
+                                className="artifact-viewer-bg"
                                 style={{
                                     ...(autoFit ? {} : { alignItems: 'flex-start' }),
                                     minWidth: `${basePaperWidth * (zoomLevel / 100)}px`
@@ -844,20 +940,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                     {pages.map((pageHtml, index) => {
                                         const defaultHeight = isHtmlSlide ? 540 : (297 * 3.7795);
                                         const h = pageHeights[index] || defaultHeight;
-
-                                        // スライド表示時のスタイル補正：
-                                        // 1. iframe内のbody背景色(#f0f2f5)を透明にして外側の余白(20px)を消す
-                                        // 2. .slideのシャドウとマージンを消してiframeいっぱいに表示する
-                                        const FINAL_HTML = isHtmlSlide 
-                                            ? pageHtml.replace('</head>', `
-                                                <style>
-                                                    html, body { background: transparent !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
-                                                    .slide { margin: 0 !important; box-shadow: none !important; border: none !important; width: 100% !important; height: 100vh !important; display: flex !important; flex-direction: column !important; }
-                                                    .slide-body { display: flex !important; flex-direction: column !important; flex: 1 !important; height: auto !important; min-height: 0 !important; }
-                                                    .two-col { display: flex !important; flex-shrink: 0 !important; } /* カラムの縮小による重なりを防止 */
-                                                </style>
-                                                </head>`)
-                                            : pageHtml;
+                                        const FINAL_HTML = buildSlideRuntimeHtml(pageHtml);
 
                                         return (
                                             <React.Fragment key={index}>
@@ -895,9 +978,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                                     exit={{ opacity: 0, scale: 0.98 }}
                                                     transition={{ type: 'spring', stiffness: 250, damping: 25 }}
                                                 >
-                                                    <GeneratingPagePlaceholder 
-                                                        pageNumber={pages.length + 1} 
-                                                        isSlide={isHtmlSlide} 
+                                                    <GeneratingPagePlaceholder
+                                                        pageNumber={pages.length + 1}
+                                                        isSlide={isHtmlSlide}
                                                         status={statusInfo.text}
                                                         subtext={statusInfo.subtext}
                                                     />
