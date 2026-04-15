@@ -252,7 +252,8 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const displayCitations = artifact?.citations || [];
 
     // ★v2.0追加: HTML直接生成方式かどうかの判定 (A4ドキュメントおよびスライド)
-    const isHtmlDocument = displayType === 'html_document' || displayType === 'html_slide';
+    const isHtmlA4Document = displayType === 'html_document';
+    const isHtmlDocument = isHtmlA4Document || displayType === 'html_slide';
     const isHtmlSlide = displayType === 'html_slide';
 
     // アーティファクトが切り替わったら状態リセット
@@ -419,43 +420,6 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     };
 
     // ★追加: HTML ダウンロード処理
-    const buildSlideRuntimeHtml = (pageHtml, { forPrint = false } = {}) => {
-        if (!isHtmlSlide) return pageHtml;
-
-        return pageHtml.replace('</head>', `
-            <style>
-                html, body {
-                    background: transparent !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    overflow: hidden !important;
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                }
-                .slide {
-                    margin: 0 !important;
-                    box-shadow: none !important;
-                    border: none !important;
-                    width: var(--slide-width) !important;
-                    height: var(--slide-height) !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                }
-                .slide-body {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    height: auto !important;
-                    min-height: 0 !important;
-                }
-                .two-col {
-                    display: flex !important;
-                    flex-shrink: 0 !important;
-                }
-                ${forPrint ? '.slide { page-break-after: always !important; break-after: page !important; }' : ''}
-            </style>
-            </head>`);
-    };
-
     const handleDownloadHtml = () => {
         try {
             const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
@@ -474,79 +438,109 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         }
     };
 
-    // ★修正: HTML 印刷処理
-    const handlePrintHtml = () => {
-        if (!isHtmlDocument || pages.length === 0) return;
-
+    const handlePrintHtmlDocument = () => {
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
-        const printShell = `
-            <!DOCTYPE html>
-            <html lang="ja">
-                <head>
-                    <meta charset="UTF-8" />
-                    <title>${displayTitle}</title>
-                    <style>
-                        @page {
-                            size: 10in 5.625in;
-                            margin: 0;
-                        }
-                        html, body {
-                            margin: 0;
-                            padding: 0;
-                            background: #ffffff;
-                            -webkit-print-color-adjust: exact;
-                            print-color-adjust: exact;
-                        }
-                        body {
-                            display: block;
-                        }
-                        .print-page {
-                            width: 960px;
-                            height: 540px;
-                            margin: 0;
-                            overflow: hidden;
-                            break-after: page;
-                            page-break-after: always;
-                        }
-                        .print-page:last-child {
-                            break-after: auto;
-                            page-break-after: auto;
-                        }
-                        .print-frame {
-                            width: 960px;
-                            height: 540px;
-                            border: 0;
-                            display: block;
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${pages.map((_, index) => `<div class="print-page"><iframe id="print-frame-${index}" class="print-frame" sandbox="allow-scripts allow-same-origin"></iframe></div>`).join('')}
-                </body>
-            </html>
+        const { sanitized } = sanitizeArtifactHtml(displayContent);
+        let processedContent = sanitized || displayContent;
+
+        const printEnhancer = `
+            <style>
+                @page { size: A4; margin: 0; }
+                html, body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #ffffff !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            </style>
         `;
 
+        if (processedContent.includes('</head>')) {
+            processedContent = processedContent.replace('</head>', `${printEnhancer}</head>`);
+        } else {
+            processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8" />${printEnhancer}</head><body>${processedContent}</body></html>`;
+        }
+
         printWindow.document.open();
-        printWindow.document.write(printShell);
+        printWindow.document.write(processedContent);
         printWindow.document.close();
 
         printWindow.addEventListener('load', () => {
-            pages.forEach((pageHtml, index) => {
-                const frame = printWindow.document.getElementById(`print-frame-${index}`);
-                if (!frame) return;
-                frame.srcdoc = buildSlideRuntimeHtml(pageHtml, { forPrint: true });
-            });
-
             setTimeout(() => {
                 printWindow.focus();
                 printWindow.print();
                 printWindow.close();
-            }, 800);
+            }, 300);
         });
 
         setIsMenuOpen(false);
+    };
+
+    const handlePrintHtmlSlide = () => {
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) return;
+
+        let processedContent = displayContent
+            .replace(/responsive\s*:\s*true/g, 'responsive: false')
+            .replace(/maintainAspectRatio\s*:\s*true/g, 'maintainAspectRatio: false');
+
+        processedContent = processedContent.replace('</head>', `
+            <style>
+                .chart-area {
+                    width: 860px !important;
+                    height: 300px !important;
+                    position: relative !important;
+                }
+                .chart-area canvas,
+                canvas[data-chart-role] {
+                    width: 860px !important;
+                    height: 300px !important;
+                    display: block !important;
+                }
+                @media print {
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                }
+            </style>
+        </head>`);
+
+        processedContent = processedContent.replace(
+            /(initInteractiveElements\s*\(\s*\)\s*;)/,
+            `// [印刷用パッチ] Chart.js 初期化前に Canvas へ明示的な描画バッファサイズを付与する。
+            (function() {
+                var canvases = document.querySelectorAll('.chart-area canvas, canvas[data-chart-role]');
+                canvases.forEach(function(c) {
+                    c.setAttribute('width', '860');
+                    c.setAttribute('height', '300');
+                    c.style.cssText += 'width:860px!important;height:300px!important;display:block!important;';
+                });
+            })();
+            $1`
+        );
+
+        printWindow.document.write(processedContent);
+        printWindow.document.close();
+
+        printWindow.addEventListener('load', () => {
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 1500);
+        });
+
+        setIsMenuOpen(false);
+    };
+
+    // ★修正: HTML 印刷処理
+    const handlePrintHtml = () => {
+        if (isHtmlA4Document) {
+            handlePrintHtmlDocument();
+            return;
+        }
+
+        handlePrintHtmlSlide();
     };
 
     // ★追加: PDF ダウンロード処理
@@ -940,7 +934,20 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                     {pages.map((pageHtml, index) => {
                                         const defaultHeight = isHtmlSlide ? 540 : (297 * 3.7795);
                                         const h = pageHeights[index] || defaultHeight;
-                                        const FINAL_HTML = buildSlideRuntimeHtml(pageHtml);
+
+                                        // スライド表示時のスタイル補正：
+                                        // 1. iframe内のbody背景色(#f0f2f5)を透明にして外側の余白(20px)を消す
+                                        // 2. .slideのシャドウとマージンを消してiframeいっぱいに表示する
+                                        const FINAL_HTML = isHtmlSlide
+                                            ? pageHtml.replace('</head>', `
+                                                <style>
+                                                    html, body { background: transparent !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+                                                    .slide { margin: 0 !important; box-shadow: none !important; border: none !important; width: 100% !important; height: 100vh !important; display: flex !important; flex-direction: column !important; }
+                                                    .slide-body { display: flex !important; flex-direction: column !important; height: auto !important; min-height: 0 !important; }
+                                                    .two-col { display: flex !important; flex-shrink: 0 !important; } /* カラムの縮小による重なりを防止 */
+                                                </style>
+                                                </head>`)
+                                            : pageHtml;
 
                                         return (
                                             <React.Fragment key={index}>
