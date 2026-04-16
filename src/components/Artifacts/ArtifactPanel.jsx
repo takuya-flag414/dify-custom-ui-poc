@@ -8,6 +8,9 @@ import { splitArtifactPages } from '../../utils/splitArtifactPages';
 import { sanitizeArtifactHtml } from '../../utils/sanitizeArtifactHtml';
 // import html2pdf from 'html2pdf.js';
 import './ArtifactPanel.css';
+import PptxPreviewPane from './PptxPreviewPane';
+import { generatePptx } from '../../utils/pptxGenerator';
+import { mapSlideData, getDefaultSlideData } from '../../utils/slideTypeMapper';
 
 const CloseIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -196,6 +199,7 @@ const ARTIFACT_TYPE_MAP = {
     faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
     meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
     html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
+    pptx_slide: { emoji: '📊', label: 'PowerPointスライド' },
 };
 
 const getTypeBadge = (type) => {
@@ -255,6 +259,182 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const isHtmlA4Document = displayType === 'html_document';
     const isHtmlDocument = isHtmlA4Document || displayType === 'html_slide';
     const isHtmlSlide = displayType === 'html_slide';
+    const isPptxSlide = displayType === 'pptx_slide';
+
+    // PPTX用 JSONパースロジック
+    const [parsedPptxSpec, setParsedPptxSpec] = useState(null);
+    const [pptxViewMode, setPptxViewMode] = useState('visual');
+    // ★編集機能: ユーザー編集用のミュータブルState
+    const [editablePptxSpec, setEditablePptxSpec] = useState(null);
+    // ★編集機能: LLM初期値の参照（編集済みフィールドの検出用）
+    const [originalPptxSpec, setOriginalPptxSpec] = useState(null);
+
+    useEffect(() => {
+        if (isPptxSlide && displayContent) {
+            try {
+                let jsonString = displayContent;
+                if (jsonString.startsWith("```json")) {
+                    jsonString = jsonString.replace(/^```json\n/, "").replace(/\n```$/, "");
+                } else if (jsonString.startsWith("```")) {
+                    jsonString = jsonString.replace(/^```\n/, "").replace(/\n```$/, "");
+                }
+                const parsed = JSON.parse(jsonString);
+                const spec = parsed.pptx_spec || parsed.pptxspec || parsed;
+                setParsedPptxSpec(spec);
+                // 初回パース時のみeditableを初期化（ストリーミング完了後）
+                if (!isGeneratingArtifact) {
+                    setEditablePptxSpec(JSON.parse(JSON.stringify(spec)));
+                    setOriginalPptxSpec(JSON.parse(JSON.stringify(spec)));
+                }
+            } catch (e) {
+                // 不完全なJSON（生成中）の場合は無視
+                setParsedPptxSpec(null);
+            }
+        }
+    }, [displayContent, isPptxSlide, isGeneratingArtifact]);
+
+    // ★編集機能: 更新関数群
+    const pptxUpdaters = React.useMemo(() => {
+        if (!editablePptxSpec) return null;
+
+        const update = (updater) => {
+            setEditablePptxSpec(prev => {
+                const next = JSON.parse(JSON.stringify(prev));
+                updater(next);
+                return next;
+            });
+        };
+
+        return {
+            // メタデータの更新
+            updateMetaData: (field, value) => update(spec => {
+                if (field === 'documentTitle') {
+                    spec.documentTitle = value;
+                } else if (field.startsWith('presentation.')) {
+                    const key = field.split('.')[1];
+                    if (!spec.presentation) spec.presentation = {};
+                    spec.presentation[key] = value;
+                }
+            }),
+            // テーマカラーの更新
+            updateThemeColor: (colorKey, value) => update(spec => {
+                if (!spec.theme) spec.theme = {};
+                spec.theme[colorKey] = value;
+            }),
+            // スライド内フィールドの更新（ドット区切りパス対応）
+            updateSlideField: (slideIndex, fieldPath, value) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = fieldPath.split('.');
+                let target = slide;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    if (!target[parts[i]]) target[parts[i]] = {};
+                    target = target[parts[i]];
+                }
+                target[parts[parts.length - 1]] = value;
+            }),
+            // スライドの追加
+            addSlide: (index, slideType) => update(spec => {
+                const newSlide = getDefaultSlideData(slideType);
+                spec.slides.splice(index, 0, newSlide);
+            }),
+            // スライドの削除
+            removeSlide: (index) => update(spec => {
+                if (spec.slides.length <= 1) return;
+                spec.slides.splice(index, 1);
+            }),
+            // スライドの並び替え
+            moveSlide: (fromIndex, toIndex) => update(spec => {
+                if (toIndex < 0 || toIndex >= spec.slides.length) return;
+                const [moved] = spec.slides.splice(fromIndex, 1);
+                spec.slides.splice(toIndex, 0, moved);
+            }),
+            // スライドタイプの変更（データマッピング付き）
+            changeSlideType: (index, newType) => update(spec => {
+                spec.slides[index] = mapSlideData(spec.slides[index], newType);
+            }),
+            // 配列項目の追加
+            addArrayItem: (slideIndex, arrayPath, newItem) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = arrayPath.split('.');
+                let target = slide;
+                for (let i = 0; i < parts.length; i++) {
+                    if (!target[parts[i]]) target[parts[i]] = [];
+                    target = target[parts[i]];
+                }
+                if (Array.isArray(target)) target.push(newItem);
+            }),
+            // 配列項目の削除
+            removeArrayItem: (slideIndex, arrayPath, itemIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = arrayPath.split('.');
+                let target = slide;
+                for (const part of parts) {
+                    target = target[part];
+                    if (!target) return;
+                }
+                if (Array.isArray(target)) target.splice(itemIndex, 1);
+            }),
+            // 配列項目の更新
+            updateArrayItem: (slideIndex, arrayPath, itemIndex, value) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = arrayPath.split('.');
+                let target = slide;
+                for (const part of parts) {
+                    target = target[part];
+                    if (!target) return;
+                }
+                if (Array.isArray(target)) target[itemIndex] = value;
+            }),
+            // テーブル行の追加
+            addTableRow: (slideIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.headers) return;
+                if (!slide.rows) slide.rows = [];
+                slide.rows.push(new Array(slide.headers.length).fill(''));
+            }),
+            // テーブル列の追加
+            addTableColumn: (slideIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.headers) return;
+                slide.headers.push('新しい列');
+                if (slide.rows) {
+                    slide.rows.forEach(row => row.push(''));
+                }
+            }),
+            // テーブル行の削除
+            removeTableRow: (slideIndex, rowIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.rows) return;
+                slide.rows.splice(rowIndex, 1);
+            }),
+            // テーブル列の削除
+            removeTableColumn: (slideIndex, colIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.headers) return;
+                slide.headers.splice(colIndex, 1);
+                if (slide.rows) {
+                    slide.rows.forEach(row => row.splice(colIndex, 1));
+                }
+            }),
+            // テーブルセルの更新
+            updateTableCell: (slideIndex, rowIndex, colIndex, value) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                // ヘッダー行の場合
+                if (rowIndex === -1 && slide.headers) {
+                    slide.headers[colIndex] = value;
+                    return;
+                }
+                if (slide.rows && slide.rows[rowIndex]) {
+                    slide.rows[rowIndex][colIndex] = value;
+                }
+            }),
+        };
+    }, [editablePptxSpec]);
 
     // アーティファクトが切り替わったら状態リセット
     useEffect(() => {
@@ -262,6 +442,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         setPageHeights({});
         setStablePages([]); // 新しいドキュメントならリセット
         iframeRefs.current = {}; // ★修正: 前のArtifactのiframe参照をクリア
+        setPptxViewMode('visual'); // PPTXビューのリセット
     }, [artifact?.id, artifact?.title, artifact?.content]); // ★修正: contentも監視してカード切り替えを確実にリセット
 
     // ★追加: 基本となる用紙・キャンバス幅の定義 (AutoFitとレンダリングで共有)
@@ -731,6 +912,24 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         }
     };
 
+    const handleDownloadPptx = async () => {
+        const specToDownload = editablePptxSpec || parsedPptxSpec;
+        if (!specToDownload) return;
+        try {
+            setIsExportingWord(true); // Exporting状態を流用
+            setIsMenuOpen(false);
+            if (window.pocAddLog) window.pocAddLog(`[ArtifactPanel] Invoking generatePptx() with ${editablePptxSpec ? 'edited' : 'original'} spec`, 'info');
+            await generatePptx(specToDownload);
+            if (window.pocAddLog) window.pocAddLog(`[ArtifactPanel] PPTX download success`, 'info');
+        } catch (err) {
+            console.error('Failed to download PPTX:', err);
+            if (window.pocAddLog) window.pocAddLog(`[ArtifactPanel] Failed to download PPTX: ${err.message}`, 'error');
+            alert("PPTXファイルの生成に失敗しました。");
+        } finally {
+            setIsExportingWord(false);
+        }
+    };
+
     const citations = displayCitations;
     const shouldShowPanel = artifact || isGeneratingArtifact;
 
@@ -828,6 +1027,20 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                         </div>
 
                         <div className="artifact-actions">
+                            {/* PPTX View Toggle */}
+                            {isPptxSlide && (
+                                <div className="pptx-view-toggle" style={{ display: 'flex', background: 'rgba(0,0,0,0.05)', borderRadius: '16px', padding: '2px', marginRight: '8px' }}>
+                                    <button 
+                                        onClick={() => setPptxViewMode('visual')}
+                                        style={{ background: pptxViewMode === 'visual' ? 'white' : 'transparent', border: 'none', borderRadius: '14px', padding: '4px 12px', fontSize: '12px', fontWeight: pptxViewMode === 'visual' ? 'bold' : 'normal', color: pptxViewMode === 'visual' ? '#007AFF' : '#666', cursor: 'pointer', boxShadow: pptxViewMode === 'visual' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+                                    >ビジュアル</button>
+                                    <button 
+                                        onClick={() => setPptxViewMode('structure')}
+                                        style={{ background: pptxViewMode === 'structure' ? 'white' : 'transparent', border: 'none', borderRadius: '14px', padding: '4px 12px', fontSize: '12px', fontWeight: pptxViewMode === 'structure' ? 'bold' : 'normal', color: pptxViewMode === 'structure' ? '#007AFF' : '#666', cursor: 'pointer', boxShadow: pptxViewMode === 'structure' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+                                    >データ構造</button>
+                                </div>
+                            )}
+
                             {/* ★追加: Zoom Controls */}
                             <div className="artifact-zoom-controls">
                                 <button className="zoom-btn" onClick={handleZoomOut} title="縮小">
@@ -871,6 +1084,13 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                                     <button className="artifact-menu-item" onClick={handlePrintHtml}>
                                                         <PrintIcon />
                                                         <span>印刷 / PDF</span>
+                                                    </button>
+                                                </>
+                                            ) : isPptxSlide ? (
+                                                <>
+                                                    <button className="artifact-menu-item" onClick={handleDownloadPptx} disabled={isExportingWord || !parsedPptxSpec}>
+                                                        <DownloadIcon />
+                                                        <span>{isExportingWord ? '生成中...' : 'PPTX ダウンロード'}</span>
                                                     </button>
                                                 </>
                                             ) : (
@@ -998,6 +1218,24 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                             );
                                         })()}
                                     </AnimatePresence>
+                                </div>
+                            </div>
+                        ) : isPptxSlide ? (
+                            /* PPTX プレビューコンポーネント */
+                            <div className="artifact-content" style={{ paddingBottom: '64px', width: '100%', minWidth: `${800 * (zoomLevel / 100)}px` }}>
+                                <div style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center', transition: 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)', width: '100%' }}>
+                                    {(editablePptxSpec || parsedPptxSpec) ? (
+                                        <PptxPreviewPane
+                                            pptxSpec={editablePptxSpec || parsedPptxSpec}
+                                            viewMode={pptxViewMode}
+                                            onUpdate={pptxUpdaters}
+                                            originalSpec={originalPptxSpec}
+                                        />
+                                    ) : (
+                                        <div style={{ padding: '20px', textAlign: 'center' }}>
+                                            {isGeneratingArtifact ? 'スライドデータを生成中です...' : 'プレビューデータを表示できません'}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
