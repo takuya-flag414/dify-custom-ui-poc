@@ -3,14 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FileIcon from '../../Shared/FileIcon';
 import PrivacyShieldButton from '../PrivacyShieldButton';
 
-const ARTIFACT_TYPE_LABELS = {
-    'html_document': 'A4ドキュメント',
-    'summary_report': '要約・レポート',
-    'meeting_minutes': '議事録・Next Action',
-    'checklist': 'チェックリスト',
-    'comparison_table': '比較表',
-    'faq': 'FAQ (想定問答集)',
-    'html_slide': 'プレゼンスライド'
+const ARTIFACT_TYPE_MAP = {
+    html_document: { emoji: '📄', label: 'A4ドキュメント' },
+    summary_report: { emoji: '📝', label: '要約・レポート' },
+    checklist: { emoji: '✅', label: 'チェックリスト' },
+    comparison_table: { emoji: '📊', label: '比較表' },
+    faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
+    meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
+    html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
+    pptx_slide: { emoji: '📊', label: 'PowerPointスライド' }
+};
+
+const getArtifactBadgeText = (artifact) => {
+    const typeKey = artifact?.type || artifact?.label;
+    const info = ARTIFACT_TYPE_MAP[typeKey];
+    if (info) return `${info.emoji} ${info.label}`;
+    return `📄 ${artifact?.label || artifact?.type || 'ドキュメント'}`;
 };
 
 // Close Icon Component
@@ -82,7 +90,7 @@ const ReferenceRail = ({
                         {/* ★追加: Artifact Badge */}
                         {activeArtifact && (
                             <GlassChip onRemove={onRemoveArtifact} className="text-purple-700 dark:text-purple-300 bg-purple-100/30 border-purple-200/50">
-                                <span>📄 {ARTIFACT_TYPE_LABELS[activeArtifact.type] || ARTIFACT_TYPE_LABELS[activeArtifact.label] || activeArtifact.label}</span>
+                                <span>{getArtifactBadgeText(activeArtifact)}</span>
                             </GlassChip>
                         )}
 
