@@ -43,7 +43,7 @@ import { FEATURE_FLAGS } from './config/featureFlags';
 import { useAuth } from './context/AuthContext';
 import LoginScreen from './components/Auth/LoginScreen';
 import VerifyEmailPage from './components/Auth/VerifyEmailPage';
-import UserManagementScreen from './components/Admin/UserManagementScreen';
+import AdminDashboard from './components/Admin/AdminDashboard';
 
 import { DEFAULT_MOCK_MODE } from './config/env';
 
@@ -601,7 +601,7 @@ function App() {
                           />
                         } />
                         <Route path="/admin/users" element={
-                          currentUser?.role === 'admin' ? <UserManagementScreen /> : <Navigate to="/chat" replace />
+                          currentUser?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/chat" replace />
                         } />
                         <Route path="*" element={<Navigate to="/chat" replace />} />
                       </Routes>

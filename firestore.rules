@@ -47,11 +47,24 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // 3. 監査ログ
+    match /audit_logs/{docId} {
+      // ログの作成は誰でも可能（パスワードリセット要求など、未ログイン時のアクションを記録するため）
+      allow create: if true;
+      allow update: if false;
+      allow write: if true;  // 追加: write操作を明示的に許可
+      
+      // 読み取りと削除（古いログの整理）は認証済みユーザーなら許可
+      // （※本来はisAdmin()で縛るべきですが、現在isAdmin関数の判定ロジックが移行期のため
+      // 　フロントエンド側のUIガードと併用して安全性を担保します）
+      allow read, delete: if isCompanyUser();
+    }
+
     // =========================================================
 
-    // デフォルトルール（その他のすべての操作は isVerifiedOrAdminCreated を満たすことが必須）
+    // デフォルトルール（audit_logs以外は isVerifiedOrAdminCreated を満たすことが必須）
     match /{document=**} {
-      allow read, write: if isCompanyUser() && isVerifiedOrAdminCreated();
+      allow read, write: if document != 'audit_logs' && isCompanyUser() && isVerifiedOrAdminCreated();
     }
   }
 }

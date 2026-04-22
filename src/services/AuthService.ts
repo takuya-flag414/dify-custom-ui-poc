@@ -178,6 +178,29 @@ class AuthService {
         };
     }
 
+    /**
+     * システム監査ログの記録
+     */
+    private async _logAuditAction(
+        action: 'LOGIN_SUCCESS' | 'LOGOUT' | 'PASSWORD_RESET_REQUEST' | 'ACCOUNT_CREATED' | 'ADMIN_CREATED_USER',
+        targetEmail: string,
+        targetUserId: string | null = null,
+        details: Record<string, any> = {}
+    ): Promise<void> {
+        try {
+            const logRef = doc(collection(db, 'audit_logs'));
+            await setDoc(logRef, {
+                timestamp: Timestamp.now(),
+                action,
+                email: targetEmail,
+                user_id: targetUserId,
+                details
+            });
+            console.log(`[AuthService] Audit logged: ${action} for ${targetEmail}`);
+        } catch (e) {
+            console.error('[AuthService] Failed to record audit log:', e);
+        }
+    }
 
 
     // ============================================
@@ -256,6 +279,12 @@ class AuthService {
             const profile = await this._toUserProfile(firebaseUser.uid, userData);
             const token = await firebaseUser.getIdToken();
 
+            // ログ記録
+            this._logAuditAction('LOGIN_SUCCESS', profile.email, firebaseUser.uid, {
+                role: profile.role,
+                displayName: profile.displayName
+            });
+
             console.log('[AuthService] Login successful:', profile.email);
 
             return {
@@ -276,7 +305,16 @@ class AuthService {
      */
     async logout(): Promise<void> {
         try {
+            const currentEmail = auth.currentUser?.email || 'unknown';
+            const currentUid = auth.currentUser?.uid || null;
+
+            // ログアウトを記録（認証状態が有効なうちに）
+            if (currentEmail !== 'unknown') {
+                this._logAuditAction('LOGOUT', currentEmail, currentUid);
+            }
+            
             await signOut(auth);
+            
             console.log('[AuthService] Logged out successfully');
         } catch (error: any) {
             console.error('[AuthService] Logout failed:', error);
@@ -294,6 +332,10 @@ class AuthService {
 
         try {
             await sendPasswordResetEmail(auth, email);
+            
+            // リセット要求を記録（UIDは不明のためnull）
+            this._logAuditAction('PASSWORD_RESET_REQUEST', email, null);
+            
             console.log('[AuthService] Password reset email sent to:', email);
         } catch (error: any) {
             console.error('[AuthService] Password reset failed:', error);
@@ -370,6 +412,9 @@ class AuthService {
 
             // 4. 強制的にサインアウト（メール認証完了まで待つ）
             await signOut(auth);
+
+            // ログ記録
+            this._logAuditAction('ACCOUNT_CREATED', normalizedEmail, firebaseUser.uid);
 
             return {
                 message: '認証リンクをお送りしました。メール内のリンクから認証をお願いします。',
@@ -466,6 +511,12 @@ class AuthService {
             });
             await batch.commit();
 
+            // ログ記録
+            this._logAuditAction('ADMIN_CREATED_USER', normalizedEmail, firebaseUser.uid, {
+                roleId,
+                departmentId
+            });
+
             return {
                 message: 'アカウントを発行しました。設定したパスワードでログイン可能です。',
             };
@@ -491,7 +542,17 @@ class AuthService {
                 unsubscribe();
                 if (firebaseUser) {
                     try {
-                        await firebaseUser.reload();
+                        // ユーザーの情報をリロード（トークン更新）
+                        try {
+                            await firebaseUser.reload();
+                        } catch (reloadError) {
+                            console.warn('[AuthService] Failed to reload user, proceeding with cached data:', reloadError);
+                        }
+                        try {
+                            await firebaseUser.reload();
+                        } catch (reloadError) {
+                            console.warn('[AuthService] Failed to reload user, proceeding with cached data:', reloadError);
+                        }
                         
                         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                         const userData = userDoc.exists() ? userDoc.data() : null;

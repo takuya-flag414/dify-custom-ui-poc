@@ -238,11 +238,7 @@ const UserManagementScreen = () => {
   };
 
   return (
-    <div className="admin-management-container">
-      <div className="admin-header">
-        <h1><ShieldCheck size={28} style={{ color: 'var(--accent-primary)' }}/> ユーザー管理</h1>
-        <p>新しい社員用のアカウントを発行します。作成されたアカウントはメール認証が不要です。</p>
-      </div>
+    <div>
 
       <div className="admin-tabs">
         <button 
