@@ -44,6 +44,9 @@
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
     transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
 }
 
 /* Dark mode: [data-theme='dark'] */
@@ -57,6 +60,29 @@
 
 [data-theme='dark'] .token-usage-total:hover {
     color: rgba(255, 255, 255, 0.55);
+}
+
+/* ========================================
+   Inline detail — 入力・出力・合計のインライン表示
+   ======================================== */
+.token-detail-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.token-detail-label {
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+.token-detail-value {
+    font-weight: 600;
+}
+
+.token-detail-separator {
+    margin: 0 2px;
+    opacity: 0.4;
 }
 
 /* ========================================

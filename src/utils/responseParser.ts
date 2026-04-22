@@ -160,13 +160,18 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                 const usedRag = parsed.used_rag === true || parsed.used_rag === 'true';
                 const usedWeb = parsed.used_web === true || parsed.used_web === 'true';
 
-                // ★Artifact判定: artifact_title + artifact_content の両方が存在すればArtifact
+                // ★Artifact判定: artifact_title + (artifact_content または pptx_spec) が存在すればArtifact
                 let artifact: ArtifactData | null = null;
-                if (parsed.artifact_title && parsed.artifact_content) {
+                if (parsed.artifact_title && (parsed.artifact_content || parsed.pptx_spec || parsed.pptxspec)) {
+                    let content = parsed.artifact_content;
+                    if (!content) {
+                        const specObj = parsed.pptx_spec || parsed.pptxspec;
+                        content = typeof specObj === 'string' ? specObj : JSON.stringify(specObj);
+                    }
                     artifact = {
                         artifact_title: parsed.artifact_title,
                         artifact_type: parsed.artifact_type || 'summary_report',
-                        artifact_content: parsed.artifact_content,
+                        artifact_content: content,
                         citations: Array.isArray(parsed.citations) ? parsed.citations : [],
                     };
                 }

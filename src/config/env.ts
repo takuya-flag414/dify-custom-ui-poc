@@ -45,3 +45,13 @@ export const ENV_API_URL_A = (import.meta.env.VITE_API_URL_A as string) || 'http
 // Backend B (Store Management) 設定
 export const ENV_API_KEY_B = (import.meta.env.VITE_API_KEY_B as string) || '';
 export const ENV_API_URL_B = (import.meta.env.VITE_API_URL_B as string) || 'https://api.dify.ai/v1';
+
+/**
+ * UI Configuration
+ * UIの表示制御に関する設定
+ */
+// ヘッダーを表示するかどうかのフラグ（デフォルトは false: 非表示）
+export const SHOW_HEADER = import.meta.env.VITE_SHOW_HEADER === 'true';
+
+// トークン使用量を表示するかどうかのフラグ（デフォルトは false: 非表示）
+export const SHOW_TOKEN_USAGE = import.meta.env.VITE_SHOW_TOKEN_USAGE === 'true';

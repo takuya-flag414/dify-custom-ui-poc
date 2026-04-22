@@ -701,6 +701,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     // ★修正: usageをローカル変数にもキャプチャ（React state更新は非同期のため）
                                     if (messageEndResult.usage) {
                                         capturedUsage = messageEndResult.usage;
+                                        addLog(`[useChat] message_end usage captured: prompt=${messageEndResult.usage.prompt_tokens}, completion=${messageEndResult.usage.completion_tokens}, total=${messageEndResult.usage.total_tokens}`, 'info');
                                     }
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
@@ -708,6 +709,27 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                         traceMode: messageEndResult.traceMode,
                                         usage: messageEndResult.usage || prev.usage
                                     } : prev);
+
+                                    // ★追加: workflow_finished が先に処理済みの場合のフォールバック
+                                    // Dify Chatflowモードでは workflow_finished → message_end の順で到着することがある
+                                    // その場合 streamingMessage は既に null で、最終メッセージは messages 配列に格納済み
+                                    // → messages 配列の該当AIメッセージに usage を直接マージする
+                                    if (messageEndResult.usage) {
+                                        setMessages(prev => {
+                                            const lastIdx = prev.length - 1;
+                                            if (lastIdx >= 0 && prev[lastIdx].id === aiMessageId) {
+                                                const existingUsage = prev[lastIdx].usage || {};
+                                                return [
+                                                    ...prev.slice(0, lastIdx),
+                                                    {
+                                                        ...prev[lastIdx],
+                                                        usage: { ...existingUsage, ...messageEndResult.usage }
+                                                    }
+                                                ];
+                                            }
+                                            return prev;
+                                        });
+                                    }
                                 }
                                 if (data.message_id) {
                                     fetchSuggestions(data.message_id, aiMessageId);
@@ -737,9 +759,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                             : currentStreamingMsg.workflowError;
                                     }
 
-                                    // ★修正: capturedUsageでフォールバック（streamingMessageRef更新遅延対策）
-                                    if (!finalMessage.usage && capturedUsage) {
-                                        finalMessage.usage = capturedUsage;
+                                    // ★修正: capturedUsage（message_end由来）を常にマージ
+                                    // message_end が先に到着した場合、streamingMessageRef はまだ更新されておらず
+                                    // buildFinalMessage の結果に詳細情報が含まれない。
+                                    // capturedUsage があれば既存の usage に上書きマージして詳細を補完する。
+                                    if (capturedUsage) {
+                                        finalMessage.usage = {
+                                            ...(finalMessage.usage || {}),
+                                            ...capturedUsage
+                                        };
                                     }
 
                                     setMessages(prevMsgs => [...prevMsgs, finalMessage]);

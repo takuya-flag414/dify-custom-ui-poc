@@ -254,7 +254,7 @@ const UniversalAddMenu = ({
                             <MenuItem
                                 icon={<PresentationIcon />}
                                 label="📊 プレゼンスライド"
-                                subtext="16:9 構成のプレゼン用資料"
+                                subtext="ブラウザ閲覧・PDF用のスライド資料"
                                 onClick={() => handleArtifactSelect('html_slide', 'プレゼンスライド')}
                             />
                         </motion.div>
@@ -310,6 +310,7 @@ const UniversalAddMenu = ({
                             />
                         </motion.div>
                     )}
+
                 </AnimatePresence>
             </div>
         </motion.div>

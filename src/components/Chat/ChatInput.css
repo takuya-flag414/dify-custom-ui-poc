@@ -433,3 +433,64 @@
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
 }
+
+/* === Mention Pill: 確定済みファイルメンション === */
+.mention-pill {
+    display: inline-block;
+    max-width: calc(100% - 8px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 1px 8px 1px 5px;
+    margin: 0 2px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--sys-color-primary, #007AFF) 12%, transparent);
+    color: var(--sys-color-primary, #007AFF);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.6;
+    user-select: all; /* クリックで全選択 → Backspaceで一括削除 */
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: default;
+    transition: background 0.15s ease;
+}
+
+.mention-pill:hover {
+    background: color-mix(in srgb, var(--sys-color-primary, #007AFF) 18%, transparent);
+}
+
+[data-theme='dark'] .mention-pill {
+    background: color-mix(in srgb, var(--sys-color-primary, #0A84FF) 18%, transparent);
+    color: var(--sys-color-primary, #0A84FF);
+}
+
+[data-theme='dark'] .mention-pill:hover {
+    background: color-mix(in srgb, var(--sys-color-primary, #0A84FF) 25%, transparent);
+}
+
+/* === ContentEditable エディタの基本スタイル === */
+.mention-editor {
+    /* ContentEditable の空状態でカーソルが見えるようにする */
+    min-height: 32px;
+    caret-color: var(--sys-color-primary, #007AFF);
+}
+
+.mention-editor:empty {
+    /* 空の contenteditable は高さが0になるのを防止 */
+    min-height: 32px;
+}
+
+.mention-editor:focus {
+    outline: none;
+}
+
+/* color-mix 未対応ブラウザのフォールバック */
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+    .mention-pill {
+        background: rgba(0, 122, 255, 0.12);
+    }
+
+    [data-theme='dark'] .mention-pill {
+        background: rgba(10, 132, 255, 0.18);
+    }
+}

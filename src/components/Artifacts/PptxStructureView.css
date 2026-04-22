@@ -1,0 +1,955 @@
+/* ===== PptxStructureView.css ===== */
+/* macOS Sequoia DESIGN_RULE 準拠 — 編集対応版 */
+
+:root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-rounded: "SF Pro Rounded", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.pptx-structure-view {
+    width: 100%;
+    font-family: var(--font-sans);
+}
+
+.pptx-structure-view.empty {
+    padding: 24px;
+    text-align: center;
+    color: #86868b;
+    border-radius: 22px;
+}
+
+/* ====== セクション ====== */
+.pptx-preview-slides {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.slide-data-section {
+    padding: 24px;
+    transition: transform 0.2s ease;
+}
+
+.section-label {
+    font-family: var(--font-rounded);
+    font-size: 12px;
+    font-weight: 700;
+    color: #86868b;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-label-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-type-badge {
+    background: var(--sys-bg-alt);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+}
+
+/* ====== フィールド ====== */
+.data-field {
+    margin-bottom: 16px;
+}
+
+.data-field:last-child {
+    margin-bottom: 0;
+}
+
+.field-label {
+    font-family: var(--font-rounded);
+    font-size: 11px;
+    font-weight: 600;
+    color: #86868b;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.field-value-box {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 16px;
+    color: #1d1d1f;
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+}
+
+.field-value-box.editable-box {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* AI Highlighted Field */
+.ai-highlighted {
+    border: 2px solid var(--sys-color-primary);
+    background: white;
+}
+
+/* 編集済みバッジ */
+.edited-badge {
+    font-size: 9px;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--sys-color-primary, #007AFF);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-left: auto;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* 編集モードバッジ */
+.edit-mode-badge {
+    font-size: 11px;
+    background: rgba(52, 199, 89, 0.12);
+    color: #34C759;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* ====== 編集可能フォーム要素 ====== */
+.editable-input {
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1d1d1f;
+    background: rgba(255, 255, 255, 0.8);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.editable-input:focus {
+    border-color: rgba(0, 122, 255, 0.3);
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.25);
+}
+
+.editable-input.field-edited {
+    border-left: 3px solid var(--sys-color-primary, #007AFF);
+    background: rgba(0, 122, 255, 0.04);
+}
+
+.editable-textarea {
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1d1d1f;
+    background: rgba(255, 255, 255, 0.8);
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    min-height: 40px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+    line-height: 1.5;
+}
+
+.editable-textarea:focus {
+    border-color: rgba(0, 122, 255, 0.3);
+    box-shadow:
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.25);
+}
+
+.editable-textarea.field-edited {
+    border-left: 3px solid var(--sys-color-primary, #007AFF);
+    background: rgba(0, 122, 255, 0.04);
+}
+
+/* メタデータの編集フィールド */
+.meta-title-input {
+    font-size: 20px !important;
+    font-weight: 700;
+    padding: 10px 14px !important;
+    margin-bottom: 12px;
+}
+
+.meta-field-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.meta-field-row strong {
+    white-space: nowrap;
+    font-size: 13px;
+    color: #424245;
+    min-width: 100px;
+}
+
+.meta-field-input {
+    font-size: 14px !important;
+    padding: 6px 10px !important;
+}
+
+/* ====== リスト編集UI ====== */
+.editable-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.editable-list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.list-item-marker {
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #86868b;
+    font-weight: 600;
+}
+
+.list-input {
+    flex: 1;
+}
+
+.item-remove-btn {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(255, 59, 48, 0.08);
+    color: var(--sys-color-danger, #FF3B30);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, opacity 0.15s ease;
+    opacity: 0.5;
+}
+
+.item-remove-btn:hover {
+    background: rgba(255, 59, 48, 0.15);
+    opacity: 1;
+}
+
+.item-remove-btn:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+.item-add-btn {
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+    background: transparent;
+    color: var(--sys-color-primary, #007AFF);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.item-add-btn:hover {
+    background: rgba(0, 122, 255, 0.05);
+    border-color: rgba(0, 122, 255, 0.3);
+}
+
+/* ====== テーブル編集UI ====== */
+.editable-table-wrapper {
+    overflow-x: auto;
+}
+
+.editable-grid th {
+    position: relative;
+    padding: 4px !important;
+}
+
+.th-edit-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-input {
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    color: #86868b !important;
+}
+
+.cell-input {
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 4px 6px !important;
+    font-size: 13px !important;
+    background: transparent !important;
+    width: 100% !important;
+}
+
+.cell-input:focus {
+    background: rgba(0, 122, 255, 0.04) !important;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2) !important;
+}
+
+.editable-grid td {
+    padding: 2px 4px !important;
+}
+
+.row-action-cell {
+    width: 28px !important;
+    padding: 2px !important;
+    text-align: center;
+}
+
+.col-add-cell {
+    width: 32px !important;
+    padding: 2px !important;
+    text-align: center;
+}
+
+.row-remove-btn,
+.col-remove-btn {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: #FF3B30;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+tr:hover .row-remove-btn,
+th:hover .col-remove-btn {
+    opacity: 0.6;
+}
+
+.row-remove-btn:hover,
+.col-remove-btn:hover {
+    opacity: 1 !important;
+    background: rgba(255, 59, 48, 0.1);
+}
+
+.table-add-btn {
+    width: 24px;
+    height: 24px;
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+    background: transparent;
+    color: var(--sys-color-primary, #007AFF);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+
+.table-add-btn:hover {
+    background: rgba(0, 122, 255, 0.05);
+}
+
+.table-row-add {
+    margin-top: 6px;
+}
+
+/* ====== スライドアクションバー ====== */
+.slide-action-bar {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.slide-data-section:hover .slide-action-bar {
+    opacity: 1;
+}
+
+.slide-action-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    color: #424245;
+}
+
+.slide-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+.slide-action-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.slide-action-btn.danger:hover:not(:disabled) {
+    background: rgba(255, 59, 48, 0.08);
+    border-color: rgba(255, 59, 48, 0.2);
+    color: var(--sys-color-danger, #FF3B30);
+}
+
+/* ====== スライド追加セクション ====== */
+.add-slide-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+    position: relative;
+}
+
+.add-slide-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.add-slide-btn {
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    background: transparent;
+    color: #86868b;
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.add-slide-btn:hover {
+    color: var(--sys-color-primary, #007AFF);
+    border-color: rgba(0, 122, 255, 0.3);
+    background: rgba(0, 122, 255, 0.04);
+}
+
+/* スライドタイプ選択メニュー */
+.slide-type-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    min-width: 280px;
+}
+
+.slide-type-option {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #1d1d1f;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.slide-type-option:hover {
+    background: rgba(0, 122, 255, 0.08);
+    color: var(--sys-color-primary, #007AFF);
+}
+
+/* ====== スライドタイプセレクト ====== */
+.slide-type-select {
+    font-family: var(--font-rounded);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sys-color-primary, #007AFF);
+    background: rgba(0, 122, 255, 0.06);
+    border: 1px solid rgba(0, 122, 255, 0.15);
+    border-radius: 6px;
+    padding: 2px 6px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.slide-type-select:focus {
+    border-color: rgba(0, 122, 255, 0.4);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.15);
+}
+
+.chart-type-select {
+    font-size: 13px !important;
+    padding: 6px 10px !important;
+}
+
+/* ====== グラフ編集 ====== */
+.chart-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.chart-edit-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #86868b;
+    min-width: 60px;
+}
+
+/* ====== 番号付き項目の編集 ====== */
+.numbered-point-edit-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.numbered-point-edit-item:last-of-type {
+    border-bottom: none;
+}
+
+.np-number-edit {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sys-color-primary, #007AFF);
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 12px;
+    border-radius: 50%;
+}
+
+.np-content-edit {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ====== 特長カード編集 ====== */
+.feature-card-edit-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    background: rgba(0, 122, 255, 0.02);
+}
+
+.fc-edit-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ====== 料金プラン編集 ====== */
+.pricing-plan-edit-item,
+.feature-row-edit-item,
+.fact-edit-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.highlight-check {
+    font-size: 11px;
+    color: #86868b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+/* ====== プロフィール編集 ====== */
+.profile-edit-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ====== ToC編集 ====== */
+.toc-edit-item {
+    gap: 6px !important;
+}
+
+/* ====== 既存スタイル（読み取り専用）の維持 ====== */
+
+/* Specialized Content Styles */
+.pptx-preview-list {
+    margin: 4px 0 0 0;
+    padding-left: 24px;
+}
+
+ul.pptx-preview-list {
+    list-style-type: disc;
+}
+
+ol.pptx-preview-list {
+    list-style-type: decimal;
+}
+
+.pptx-preview-list li {
+    margin-bottom: 8px;
+}
+
+.data-grid-preview {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+}
+
+.data-grid-preview th {
+    text-align: left;
+    color: #86868b;
+    font-family: var(--font-rounded);
+    padding: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.data-grid-preview td {
+    padding: 8px;
+    border-bottom: 1px dotted rgba(0,0,0,0.05);
+}
+
+.chart-data-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chart-info-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 122, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sys-color-primary);
+}
+
+.insight-box {
+    background: rgba(255, 149, 0, 0.1);
+    border-left: 4px solid #FF9500;
+    padding: 12px;
+    border-radius: 0 12px 12px 0;
+    font-size: 14px;
+}
+
+.notes-box {
+    background: rgba(0,0,0,0.03);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #424245;
+    font-style: italic;
+}
+
+/* Theme Section */
+.pptx-theme-section {
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.pptx-theme-title {
+    font-family: var(--font-rounded);
+    font-size: 12px;
+    font-weight: 700;
+    color: #86868b;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.theme-swatches {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.color-swatch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 6px 12px 6px 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.color-swatch-wrapper.clickable:hover {
+    border-color: rgba(0, 122, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease;
+}
+
+.color-swatch-wrapper.clickable .color-swatch:hover {
+    transform: scale(1.15);
+}
+
+.color-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1d1d1f;
+    display: flex;
+    flex-direction: column;
+}
+
+.color-hex {
+    font-size: 10px;
+    color: #86868b;
+    font-family: monospace;
+}
+
+.font-info {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #424245;
+}
+
+.font-badge {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* ===== 新タイプ用スタイル ===== */
+
+/* numbered-points: 番号付き説明リスト */
+.numbered-points-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.numbered-point-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.numbered-point-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.np-number {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sys-color-primary, #007AFF);
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 50%;
+}
+
+.np-content {
+    flex: 1;
+}
+
+.np-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+}
+
+.np-desc {
+    font-size: 13px;
+    color: #424245;
+    line-height: 1.5;
+}
+
+/* feature-cards: 特長カードグリッド */
+.feature-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.feature-card-item {
+    background: rgba(0, 122, 255, 0.04);
+    border: 1px solid rgba(0, 122, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+}
+
+.fc-icon-hint {
+    font-size: 11px;
+    color: #86868b;
+    margin-bottom: 8px;
+    font-style: italic;
+}
+
+.fc-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1d1d1f;
+    margin-bottom: 6px;
+}
+
+.fc-desc {
+    font-size: 12px;
+    color: #424245;
+    line-height: 1.4;
+}
+
+.fc-caption {
+    font-size: 11px;
+    color: #86868b;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* pricing-table: 料金プランバッジ */
+.pricing-plans-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pricing-plan-badge {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.pricing-plan-badge.highlight {
+    background: rgba(0, 122, 255, 0.08);
+    border: 2px solid var(--sys-color-primary, #007AFF);
+}
+
+.pp-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+}
+
+.pp-price {
+    font-size: 12px;
+    color: #86868b;
+}
+
+.pricing-plan-badge.highlight .pp-name {
+    color: var(--sys-color-primary, #007AFF);
+}
+
+/* profile-fact-sheet: プロフィールカード */
+.profile-card-preview {
+    text-align: center;
+    padding: 8px 0;
+}
+
+.profile-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+}
+
+.profile-role {
+    font-size: 13px;
+    color: var(--sys-color-primary, #007AFF);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.profile-bio {
+    font-size: 13px;
+    color: #424245;
+    line-height: 1.5;
+}
+
+.profile-image-note {
+    font-size: 11px;
+    color: #86868b;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* ====== アクセシビリティ ====== */
+@media (prefers-reduced-motion: reduce) {
+    .slide-action-bar,
+    .row-remove-btn,
+    .col-remove-btn,
+    .item-remove-btn {
+        opacity: 1 !important;
+        transition: none !important;
+    }
+}
