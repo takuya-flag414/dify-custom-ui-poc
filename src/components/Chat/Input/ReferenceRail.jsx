@@ -11,7 +11,7 @@ const ARTIFACT_TYPE_MAP = {
     faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
     meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
     html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
-    pptx_slide: { emoji: '📊', label: 'PowerPointスライド' }
+    // pptx_slide: { emoji: '📊', label: 'PowerPointスライド' }
 };
 
 const getArtifactBadgeText = (artifact) => {

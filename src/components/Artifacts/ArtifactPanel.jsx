@@ -9,7 +9,7 @@ import { sanitizeArtifactHtml } from '../../utils/sanitizeArtifactHtml';
 // import html2pdf from 'html2pdf.js';
 import './ArtifactPanel.css';
 import PptxPreviewPane from './PptxPreviewPane';
-import { generatePptx } from '../../utils/pptxGenerator';
+// import { generatePptx } from '../../utils/pptxGenerator';
 import { mapSlideData, getDefaultSlideData } from '../../utils/slideTypeMapper';
 
 const CloseIcon = () => (
@@ -199,13 +199,68 @@ const ARTIFACT_TYPE_MAP = {
     faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
     meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
     html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
-    pptx_slide: { emoji: '📊', label: 'PowerPointスライド' },
+    // pptx_slide: { emoji: '📊', label: 'PowerPointスライド' },
 };
 
 const getTypeBadge = (type) => {
     const info = ARTIFACT_TYPE_MAP[type];
     if (info) return `${info.emoji} ${info.label}`;
     return type || 'ドキュメント';
+};
+
+/**
+ * PPTX変換ヒントコンポーネント
+ */
+const ConversionHint = ({ isDismissed, onToggle, onDismiss }) => {
+    return (
+        <AnimatePresence>
+            {!isDismissed ? (
+                <motion.div
+                    className="conversion-hint-banner"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+                >
+                    <div className="conversion-hint-content">
+                        <div className="conversion-hint-icon">
+                            <SparklesIcon width="16" height="16" />
+                        </div>
+                        <div className="conversion-hint-text-group">
+                            <div className="conversion-hint-title">📽️ PPTX変換ヒント</div>
+                            <div className="conversion-hint-body">
+                                PowerPoint(PPTX)形式が必要な場合は、右上のアクションメニューから「印刷」を選択してPDFとして保存した後、
+                                <a 
+                                    href="https://acrobat.adobe.com/link/acrobat/pdf-to-ppt?x_api_client_id=adobe_com&x_api_client_location=pdf_to_ppt" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="conversion-hint-link"
+                                >
+                                    Adobe Acrobat
+                                </a>
+                                でPPTXへ変換可能です。
+                            </div>
+                        </div>
+                        <button className="conversion-hint-close" onClick={onDismiss} title="ヒントを隠す">
+                            <CloseIcon />
+                        </button>
+                    </div>
+                </motion.div>
+            ) : (
+                <motion.button
+                    className="conversion-hint-icon-btn"
+                    onClick={onToggle}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="PPTX変換ヒントを表示"
+                >
+                    <SparklesIcon width="20" height="20" />
+                </motion.button>
+            )}
+        </AnimatePresence>
+    );
 };
 
 /**
@@ -221,6 +276,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const [isCopied, setIsCopied] = useState(false);
     const [isCitationsExpanded, setIsCitationsExpanded] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isPptxHintDismissed, setIsPptxHintDismissed] = useState(false);
 
     // ★追加: ズームとスクロール用の状態管理
     const [zoomLevel, setZoomLevel] = useState(100);
@@ -259,7 +315,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const isHtmlA4Document = displayType === 'html_document';
     const isHtmlDocument = isHtmlA4Document || displayType === 'html_slide';
     const isHtmlSlide = displayType === 'html_slide';
-    const isPptxSlide = displayType === 'pptx_slide';
+    const isPptxSlide = false; // displayType === 'pptx_slide'; (pptxgenjs uninstalled)
 
     // PPTX用 JSONパースロジック
     const [parsedPptxSpec, setParsedPptxSpec] = useState(null);
@@ -1027,8 +1083,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                         </div>
 
                         <div className="artifact-actions">
-                            {/* PPTX View Toggle */}
-                            {isPptxSlide && (
+                            {/* PPTX View Toggle - Disabled */}
+                            {/*
+                            isPptxSlide && (
                                 <div className="pptx-view-toggle" style={{ display: 'flex', background: 'rgba(0,0,0,0.05)', borderRadius: '16px', padding: '2px', marginRight: '8px' }}>
                                     <button 
                                         onClick={() => setPptxViewMode('visual')}
@@ -1039,7 +1096,8 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                         style={{ background: pptxViewMode === 'structure' ? 'white' : 'transparent', border: 'none', borderRadius: '14px', padding: '4px 12px', fontSize: '12px', fontWeight: pptxViewMode === 'structure' ? 'bold' : 'normal', color: pptxViewMode === 'structure' ? '#007AFF' : '#666', cursor: 'pointer', boxShadow: pptxViewMode === 'structure' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
                                     >データ構造</button>
                                 </div>
-                            )}
+                            )
+                            */}
 
                             {/* ★追加: Zoom Controls */}
                             <div className="artifact-zoom-controls">
@@ -1361,6 +1419,15 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                             )}
                         </AnimatePresence>,
                         document.body
+                    )}
+
+                    {/* ★追加: PPTX変換ヒント (html_slideのみ) */}
+                    {isHtmlSlide && !isGeneratingArtifact && (
+                        <ConversionHint 
+                            isDismissed={isPptxHintDismissed} 
+                            onToggle={() => setIsPptxHintDismissed(false)}
+                            onDismiss={() => setIsPptxHintDismissed(true)}
+                        />
                     )}
                 </motion.div>
             )}

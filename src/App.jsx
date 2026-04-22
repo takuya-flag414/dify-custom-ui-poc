@@ -43,7 +43,7 @@ import { FEATURE_FLAGS } from './config/featureFlags';
 import { useAuth } from './context/AuthContext';
 import LoginScreen from './components/Auth/LoginScreen';
 
-import { DEFAULT_MOCK_MODE } from './config/env';
+import { DEFAULT_MOCK_MODE, SHOW_HEADER } from './config/env';
 
 // ★追加: メッセージ再送信時のテキスト抽出ユーティリティ
 import { extractPlainText } from './utils/messageSerializer';
@@ -502,21 +502,23 @@ function App() {
               }
               main={
                 <motion.div variants={mainContentVariants} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  {/* Header (Top Bar) */}
-                  <Header
-                    mockMode={mockMode}
-                    setMockMode={handleMockModeChange}
-                    onOpenConfig={() => setIsConfigModalOpen(true)}
-                    handleCopyLogs={handleCopyLogs}
-                    copyButtonText={copyButtonText}
-                    messages={messages}
-                    onStartTutorial={startTutorial}
-                    currentUser={currentUser}
-                    onRoleChange={handleRoleChange}
-                    isInspectorOpen={inspector.isOpen}
-                    onToggleInspector={() => inspector.isOpen ? inspector.closeInspector() : inspector.openInspector()}
-                    onOpenTestPanel={() => setIsTestPanelOpen(true)}
-                  />
+                  {/* Header (Top Bar) - SHOW_HEADER環境変数により制御 */}
+                  {SHOW_HEADER && (
+                    <Header
+                      mockMode={mockMode}
+                      setMockMode={handleMockModeChange}
+                      onOpenConfig={() => setIsConfigModalOpen(true)}
+                      handleCopyLogs={handleCopyLogs}
+                      copyButtonText={copyButtonText}
+                      messages={messages}
+                      onStartTutorial={startTutorial}
+                      currentUser={currentUser}
+                      onRoleChange={handleRoleChange}
+                      isInspectorOpen={inspector.isOpen}
+                      onToggleInspector={() => inspector.isOpen ? inspector.closeInspector() : inspector.openInspector()}
+                      onOpenTestPanel={() => setIsTestPanelOpen(true)}
+                    />
+                  )}
 
                   {/* Main Content Area — URLルーティング */}
                   <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>

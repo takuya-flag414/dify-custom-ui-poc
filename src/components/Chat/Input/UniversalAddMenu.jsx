@@ -254,9 +254,8 @@ const UniversalAddMenu = ({
                             <MenuItem
                                 icon={<PresentationIcon />}
                                 label="📊 プレゼンスライド"
-                                subtext="用途に合わせて形式を選択"
-                                onClick={() => navigateTo('ARTIFACT_SLIDE', 'right')}
-                                showArrow
+                                subtext="ブラウザ閲覧・PDF用のスライド資料"
+                                onClick={() => handleArtifactSelect('html_slide', 'プレゼンスライド')}
                             />
                         </motion.div>
                     )}
@@ -312,38 +311,6 @@ const UniversalAddMenu = ({
                         </motion.div>
                     )}
 
-                    {view === 'ARTIFACT_SLIDE' && (
-                        <motion.div
-                            key="artifact_slide"
-                            variants={slideVariants}
-                            initial={getAnimationState().initial}
-                            animate="center"
-                            exit={getAnimationState().exit}
-                            transition={springTransition}
-                        >
-                            <div className="flex items-center gap-2 px-1 py-1 mb-2">
-                                <button
-                                    onClick={() => navigateTo('ARTIFACT_L1', 'left')}
-                                    className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5 border-none bg-transparent outline-none"
-                                >
-                                    <ChevronLeftIcon />
-                                </button>
-                                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">プレゼンスライド</span>
-                            </div>
-                            <MenuItem
-                                icon={<DocumentRichtextIcon />}
-                                label="💻 印刷可能なスライド"
-                                subtext="ブラウザ閲覧・PDF用 (HTML)"
-                                onClick={() => handleArtifactSelect('html_slide', 'プレゼンスライド')}
-                            />
-                            <MenuItem
-                                icon={<PresentationIcon />}
-                                label="📊 編集可能なスライド"
-                                subtext="PowerPoint等で編集 (PPTX)"
-                                onClick={() => handleArtifactSelect('pptx_slide', 'PowerPointスライド')}
-                            />
-                        </motion.div>
-                    )}
                 </AnimatePresence>
             </div>
         </motion.div>

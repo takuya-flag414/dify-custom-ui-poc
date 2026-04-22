@@ -35,9 +35,11 @@ const ChatInput = ({
   onRemoveQuote, // ★追加: 引用削除ハンドラ
   activeArtifact, // ★追加: Propsから受け取る
   setActiveArtifact, // ★追加: Propsから受け取る
+  activeContextFiles = [], // ★追加: セッションファイル
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const getPlainTextRef = useRef(null); // ★追加: プレーンテキスト抽出用Ref
 
   // showAddMenu state is now managed inside ControlDeck (or triggered via props)
   // We only need to trigger store loading when menu opens.
@@ -94,13 +96,16 @@ const ChatInput = ({
   const executeSend = useCallback((excludedTypes = []) => {
     const filesToSend = selectedFiles.map(sf => sf.file);
 
+    // ★Mention Pillなどを含んだリッチテキストからプレーンテキストを抽出
+    const plainTextToSend = getPlainTextRef.current ? getPlainTextRef.current() : text;
+
     // ★変更: 第4引数（オプション等）で quote および artifact を渡す
     const options = {
       sanitizeExcludeTypes: excludedTypes,
       quote,
       ...(activeArtifact && { artifact: { requested: true, type: activeArtifact.type } })
     };
-    onSendMessage(text, filesToSend, options);
+    onSendMessage(plainTextToSend, filesToSend, options);
 
     setText('');
     setSelectedFiles([]);
@@ -218,6 +223,21 @@ const ChatInput = ({
   const hasFiles = selectedFiles.length > 0;
   const canSend = (text.trim().length > 0 || hasFiles) && !isLoading;
 
+  // --- Available Files for Mentions ---
+  const availableFiles = useMemo(() => {
+    const files = [];
+    const pushIfUnique = (name) => {
+      if (!files.find(f => f.name === name)) {
+        files.push({ name, id: `mention-${name}-${Date.now()}` });
+      }
+    };
+    // Pending selected files
+    selectedFiles.forEach(f => pushIfUnique(f.file.name));
+    // History session files
+    activeContextFiles.forEach(f => pushIfUnique(f.name));
+    return files;
+  }, [selectedFiles, activeContextFiles]);
+
   // --- Handlers for Universal Add Menu ---
   const handleAddMenuOpen = () => {
     // Trigger store loading when menu opens (managed by hook's refetch)
@@ -323,6 +343,8 @@ const ChatInput = ({
             placeholder={placeholder}
             isHistoryLoading={isHistoryLoading}
             focusTrigger={quote} // ★追加: quoteが変更されたらフォーカスするトリガーとして渡す
+            availableFiles={availableFiles} // ★追加: メンション候補ファイル
+            onTextExtract={(fn) => { getPlainTextRef.current = fn; }} // ★追加: テキスト抽出関数を受け取る
           />
 
           {/* Tier 3: Control Deck */}

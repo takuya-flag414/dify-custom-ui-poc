@@ -1,4 +1,4 @@
-import PptxGenJS from 'pptxgenjs';
+// import PptxGenJS from 'pptxgenjs';
 
 const logInfo = (msg) => {
     console.log(`[PPTX_GEN] ${msg}`);
@@ -11,6 +11,12 @@ const logError = (msg, err) => {
 };
 
 export const generatePptx = async (spec) => {
+    logInfo('generatePptx is currently disabled because pptxgenjs is uninstalled.');
+    console.warn('[PPTX_GEN] generatePptx is currently disabled because pptxgenjs is uninstalled.');
+    if (window.pocAddLog) window.pocAddLog('[PPTX_GEN] generatePptx is disabled', 'warning');
+    alert("PPTX生成ライブラリ (pptxgenjs) がインストールされていないため、この機能は現在ご利用いただけません。");
+    return;
+    /*
     logInfo('Starting generatePptx...');
     try {
         const pptx = new PptxGenJS();
@@ -1104,4 +1110,5 @@ export const generatePptx = async (spec) => {
         logError('Error during PPTX generation', e);
         throw e;
     }
+    */
 };

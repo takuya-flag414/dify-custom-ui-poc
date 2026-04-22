@@ -1463,3 +1463,171 @@
     color: var(--color-text-muted);
     font-weight: 500;
 }
+
+/* --- PPTX Conversion Hint --- */
+.conversion-hint-banner {
+    position: absolute;
+    bottom: 84px; /* 出典セクションの上付近 */
+    left: 24px;
+    right: 24px;
+    z-index: 60;
+    
+    /* DESIGN_RULE.md: mat-hud */
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.08),
+        0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+    
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+[data-theme='dark'] .conversion-hint-banner {
+    background: rgba(40, 40, 40, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+}
+
+.conversion-hint-content {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.conversion-hint-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ai-gradient-magenta);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.conversion-hint-text-group {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.conversion-hint-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-main);
+    letter-spacing: 0.02em;
+}
+
+.conversion-hint-body {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--color-text-sub);
+}
+
+.conversion-hint-link {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+    margin: 0 4px;
+    transition: opacity 0.2s;
+}
+
+.conversion-hint-link:hover {
+    opacity: 0.8;
+}
+
+.conversion-hint-close {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    margin-top: -4px;
+    margin-right: -4px;
+}
+
+.conversion-hint-close:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--color-text-main);
+    transform: scale(1.1);
+}
+
+[data-theme='dark'] .conversion-hint-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 最小化ボタン (Icon Button) */
+.conversion-hint-icon-btn {
+    position: absolute;
+    bottom: 84px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    z-index: 61;
+    
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    
+    border-radius: 21px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+[data-theme='dark'] .conversion-hint-icon-btn {
+    background: rgba(45, 45, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Intelligence Glow for the icon button */
+.conversion-hint-icon-btn::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 21px;
+    padding: 1px;
+    background: conic-gradient(
+        from 0deg,
+        var(--ai-gradient-cyan),
+        var(--ai-gradient-magenta),
+        var(--ai-gradient-yellow),
+        var(--ai-gradient-blue),
+        var(--ai-gradient-cyan)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.conversion-hint-icon-btn svg {
+    color: var(--ai-gradient-magenta);
+    filter: drop-shadow(0 0 4px rgba(255, 0, 255, 0.2));
+}
+
+.conversion-hint-icon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+}
