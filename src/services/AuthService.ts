@@ -24,7 +24,7 @@ import {
     Timestamp,
     writeBatch
 } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth, adminAuth, db } from '../lib/firebase';
 import {
     AccountStatus,
     PermissionCode,
@@ -197,14 +197,19 @@ class AuthService {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const firebaseUser = userCredential.user;
 
-            if (!firebaseUser.emailVerified) {
-                await signOut(auth);
-                throw new Error('メール認証が完了していません。ご登録のメールアドレスに届いた確認リンクをクリックしてください。');
-            }
-
             // 2. Firestore からプロファイルを取得
             let userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
             let userData: any;
+
+            if (!firebaseUser.emailVerified) {
+                // メール未認証でも、管理者が作成したアカウントならログインを許可する
+                if (userDoc.exists() && userDoc.data().is_admin_created === true) {
+                    console.log('[AuthService] Admin-created user logging in without email verification');
+                } else {
+                    await signOut(auth);
+                    throw new Error('メール認証が完了していません。ご登録のメールアドレスに届いた確認リンクをクリックしてください。');
+                }
+            }
 
             if (!userDoc.exists()) {
                 // 通常のJIT (SSOなど、想定外の経路で来た場合)
@@ -399,6 +404,85 @@ class AuthService {
     }
 
     /**
+     * 【管理者用】アカウントの発行 (メール認証不要のパスワード渡しフロー)
+     */
+    async adminCreateUser(
+        email: string,
+        password: string,
+        displayName: string,
+        roleId: string = 'role_general',
+        departmentId: number | null = null,
+        securityInfo: Partial<SecurityInfo> = {}
+    ): Promise<{ message: string }> {
+        const { lastName, firstName, dateOfBirth } = securityInfo;
+
+        if (!email || !password || !displayName) {
+            throw new Error('必須項目の入力が足りません');
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+        if (!normalizedEmail.endsWith('@iflag.co.jp')) {
+            throw new Error('このアプリは会社用ドメイン（@iflag.co.jp)でのみ登録可能です');
+        }
+
+        try {
+            // 1. セカンダリFirebaseアプリを使ってアカウントを作成
+            // （これによって、操作している管理者が不本意にログアウトされるのを防ぐ）
+            const userCredential = await createUserWithEmailAndPassword(adminAuth, normalizedEmail, password);
+            const firebaseUser = userCredential.user;
+
+            // 2. セカンダリアプリ側はすぐにサインアウト
+            await signOut(adminAuth);
+
+            // 3. Firestoreにプロファイルを作成し、"is_admin_created: true" を明記する
+            const now = Timestamp.now();
+            const userData = {
+                user_id: firebaseUser.uid,
+                email: normalizedEmail,
+                name: `${lastName || ''} ${firstName || ''}`.trim() || displayName,
+                account_status: 1,
+                created_at: now,
+                updated_at: now,
+                displayName,
+                lastName: lastName || '',
+                firstName: firstName || '',
+                dateOfBirth: dateOfBirth || '',
+                avatarUrl: null,
+                department_id: departmentId,
+                is_admin_created: true, // ★ このフラグによりメール認証がスキップされる
+                preferences: {
+                    theme: 'system',
+                    aiStyle: 'partner',
+                    isOnboardingCompleted: false,
+                }
+            };
+
+            const batch = writeBatch(db);
+            batch.set(doc(db, 'users', firebaseUser.uid), userData);
+            batch.set(doc(collection(db, 'user_roles')), {
+                user_id: firebaseUser.uid,
+                role_id: roleId,
+                assigned_at: now
+            });
+            await batch.commit();
+
+            return {
+                message: 'アカウントを発行しました。設定したパスワードでログイン可能です。',
+            };
+        } catch (error: any) {
+            console.error('[AuthService] Admin Create User failed:', error);
+            if (error.code === 'auth/email-already-in-use') {
+                throw new Error('このメールアドレスは既に登録されています');
+            } else if (error.code === 'auth/invalid-email') {
+                throw new Error('メールアドレスの形式が不正です');
+            } else if (error.code === 'auth/weak-password') {
+                throw new Error('パスワードは6文字以上である必要があります');
+            }
+            throw new Error('アカウントの作成に失敗しました');
+        }
+    }
+
+    /**
      * セッション復元
      */
     async restoreSession(): Promise<UserProfile | null> {
@@ -408,14 +492,21 @@ class AuthService {
                 if (firebaseUser) {
                     try {
                         await firebaseUser.reload();
+                        
+                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                        const userData = userDoc.exists() ? userDoc.data() : null;
+
                         if (!firebaseUser.emailVerified) {
-                            console.log('[AuthService] Unverified user session detected, signing out:', firebaseUser.email);
-                            await signOut(auth);
-                            resolve(null);
-                            return;
+                            if (userData && userData.is_admin_created === true) {
+                                // 管理者作成アカウントなので未認証でも許可
+                            } else {
+                                console.log('[AuthService] Unverified user session detected, signing out:', firebaseUser.email);
+                                await signOut(auth);
+                                resolve(null);
+                                return;
+                            }
                         }
 
-                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                         if (userDoc.exists()) {
                             const userData = userDoc.data();
                             const status = Number(userData.account_status);

@@ -43,6 +43,7 @@ import { FEATURE_FLAGS } from './config/featureFlags';
 import { useAuth } from './context/AuthContext';
 import LoginScreen from './components/Auth/LoginScreen';
 import VerifyEmailPage from './components/Auth/VerifyEmailPage';
+import UserManagementScreen from './components/Admin/UserManagementScreen';
 
 import { DEFAULT_MOCK_MODE } from './config/env';
 
@@ -80,7 +81,9 @@ function App() {
   const backgroundLocation = location.state?.backgroundLocation;
   // RoutesはbackgroundLocationがあればそれを使用（設定画面の裏でチャットを維持）
   const displayLocation = backgroundLocation || location;
-  const currentView = displayLocation.pathname.startsWith('/settings') ? 'settings' : 'chat';
+  const currentView = displayLocation.pathname.startsWith('/settings') ? 'settings' 
+                    : displayLocation.pathname.startsWith('/admin') ? 'admin' 
+                    : 'chat';
   const isSettingsOpen = location.pathname.startsWith('/settings');
 
   // ★追加: テストパネル状態
@@ -343,6 +346,11 @@ function App() {
       return;
     }
 
+    if (view === 'admin') {
+      navigate('/admin/users');
+      return;
+    }
+
     // Studiosに切り替える時はギャラリー強制表示フラグをセット
     if (view === 'studios') {
       setForceShowStudioGallery(true);
@@ -503,6 +511,7 @@ function App() {
                     toggleSidebar={toggleSidebar}
                     currentView={currentView}
                     onViewChange={handleViewChange}
+                    currentUser={currentUser}
                   />
                 </motion.div>
               }
@@ -590,6 +599,9 @@ function App() {
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
                           />
+                        } />
+                        <Route path="/admin/users" element={
+                          currentUser?.role === 'admin' ? <UserManagementScreen /> : <Navigate to="/chat" replace />
                         } />
                         <Route path="*" element={<Navigate to="/chat" replace />} />
                       </Routes>
