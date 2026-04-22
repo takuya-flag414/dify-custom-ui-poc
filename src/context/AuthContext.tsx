@@ -41,6 +41,8 @@ export interface AuthContextValue {
     resetPassword: (email: string) => Promise<void>;
     /** ログアウト関数 */
     logout: () => Promise<void>;
+    /** アカウント削除関数 */
+    deleteAccount: () => Promise<void>;
     /** エラークリア関数 */
     clearError: () => void;
     /** 権限チェック関数（RBAC） */
@@ -182,6 +184,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('[AuthContext] Logout successful');
         } catch (err) {
             console.error('[AuthContext] Logout failed:', err);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            setError(errorMessage);
+            throw err;
+        }
+    }, []);
+
+    /**
+     * アカウント削除
+     */
+    const deleteAccount = useCallback(async (): Promise<void> => {
+        try {
+            setError(null);
+            await authService.deleteAccount();
+            setUser(null);
+            console.log('[AuthContext] Account deleted successfully');
+        } catch (err) {
+            console.error('[AuthContext] Account deletion failed:', err);
             const errorMessage = err instanceof Error ? err.message : String(err);
             setError(errorMessage);
             throw err;

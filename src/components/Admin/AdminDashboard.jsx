@@ -5,7 +5,7 @@ import SystemLogsScreen from './SystemLogsScreen';
 import './UserManagementScreen.css'; // タブのスタイル等を再利用
 
 const AdminDashboard = () => {
-    const [viewTab, setViewTab] = useState('users'); // 'users' or 'logs'
+    const [viewTab, setViewTab] = useState('logs'); // 'users' or 'logs'
     
     return (
         <div style={{ padding: '32px 48px', height: '100%', boxSizing: 'border-box', overflowY: 'auto' }}>

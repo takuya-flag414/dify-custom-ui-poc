@@ -384,12 +384,63 @@
 }
 
 /* ============================================
-   Select Input Wrapper (秘密の質問)
+   Email Verification Page
    ============================================ */
-.form-select-wrapper {
-  position: relative;
+.verification-status {
+  text-align: center;
+  padding: 40px 20px;
 }
 
+.status-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-loading svg {
+  color: var(--sys-color-primary, #007AFF);
+}
+
+.status-loading p {
+  font-size: 16px;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.status-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-success p {
+  font-size: 16px;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.status-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-error p {
+  font-size: 16px;
+  color: var(--color-text-danger, #ef4444);
+  margin: 0;
+}
+
+.status-error .btn-primary {
+  margin-top: 20px;
+}
+
+/* ============================================
+   Select Input Wrapper (秘密の質問)
+   ============================================ */
 .form-select-wrapper::after {
   content: '';
   position: absolute;

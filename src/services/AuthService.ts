@@ -10,6 +10,8 @@ import {
     sendPasswordResetEmail,
     sendEmailVerification,
     applyActionCode,
+    checkActionCode,
+    deleteUser,
     User as FirebaseUser
 } from 'firebase/auth';
 import {
@@ -182,24 +184,40 @@ class AuthService {
      * システム監査ログの記録
      */
     private async _logAuditAction(
-        action: 'LOGIN_SUCCESS' | 'LOGOUT' | 'PASSWORD_RESET_REQUEST' | 'ACCOUNT_CREATED' | 'ADMIN_CREATED_USER',
+        action: 'LOGIN_SUCCESS' | 'LOGIN_FAILED' | 'LOGOUT' | 'PASSWORD_RESET_REQUEST' | 'ACCOUNT_CREATED_PROVISIONAL' | 'ACCOUNT_VERIFIED' | 'ADMIN_CREATED_USER' | 'ACCOUNT_DELETED',
         targetEmail: string,
         targetUserId: string | null = null,
         details: Record<string, any> = {}
     ): Promise<void> {
         try {
+            // セッションID生成（ブラウザセッション単位でユニーク）
+            const sessionId = this._getSessionId();
+            
             const logRef = doc(collection(db, 'audit_logs'));
             await setDoc(logRef, {
                 timestamp: Timestamp.now(),
                 action,
                 email: targetEmail,
                 user_id: targetUserId,
+                session_id: sessionId,
                 details
             });
-            console.log(`[AuthService] Audit logged: ${action} for ${targetEmail}`);
+            console.log(`[AuthService] Audit logged: ${action} for ${targetEmail} (session: ${sessionId})`);
         } catch (e) {
             console.error('[AuthService] Failed to record audit log:', e);
         }
+    }
+
+    /**
+     * セッションIDを取得（ブラウザセッション単位でユニーク）
+     */
+    private _getSessionId(): string {
+        let sessionId = sessionStorage.getItem('audit_session_id');
+        if (!sessionId) {
+            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            sessionStorage.setItem('audit_session_id', sessionId);
+        }
+        return sessionId;
     }
 
 
@@ -293,6 +311,13 @@ class AuthService {
             };
         } catch (error: any) {
             console.error('[AuthService] Login failed full error:', error);
+            
+            // ログイン失敗をログ記録
+            this._logAuditAction('LOGIN_FAILED', email, null, {
+                reason: error.code || 'unknown',
+                message: error.message || 'Login failed'
+            });
+            
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                 throw new Error('メールアドレスまたはパスワードが正しくありません');
             }
@@ -413,8 +438,8 @@ class AuthService {
             // 4. 強制的にサインアウト（メール認証完了まで待つ）
             await signOut(auth);
 
-            // ログ記録
-            this._logAuditAction('ACCOUNT_CREATED', normalizedEmail, firebaseUser.uid);
+            // ログ記録：仮登録
+            this._logAuditAction('ACCOUNT_CREATED_PROVISIONAL', normalizedEmail, firebaseUser.uid);
 
             return {
                 message: '認証リンクをお送りしました。メール内のリンクから認証をお願いします。',
@@ -437,14 +462,68 @@ class AuthService {
      */
     async verifyEmailCode(oobCode: string): Promise<void> {
         try {
+            // 認証コード情報を取得（1回だけ）
+            const actionCodeInfo = await checkActionCode(auth, oobCode);
+            
+            // コード適用（パスワードリセットなど他のアクションの場合も含む）
             await applyActionCode(auth, oobCode);
             console.log('[AuthService] Email code applied successfully');
+            
+            // メール認証の場合のみログ記録（"VERIFY_EMAIL"アクション）
+            if (actionCodeInfo.operation === 'VERIFY_EMAIL') {
+                // メール認証直後はログイン状態でないため、未認証ユーザーでもログを記録できるようにする
+                const emailFromCode = actionCodeInfo.email;
+                this._logAuditAction('ACCOUNT_VERIFIED', emailFromCode || 'unknown', null);
+                console.log('[AuthService] Account verified log recorded for:', emailFromCode);
+            }
         } catch (error: any) {
             console.error('[AuthService] Email verification failed:', error);
             if (error.code === 'auth/invalid-action-code') {
                 throw new Error('認証コードが無効または期限切れです。');
             }
             throw new Error('メール認証の処理に失敗しました。');
+        }
+    }
+
+    /**
+     * アカウント削除
+     */
+    async deleteAccount(): Promise<void> {
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                throw new Error('ログインしていません');
+            }
+
+            const currentEmail = currentUser.email || 'unknown';
+            const currentUid = currentUser.uid;
+
+            // Firestoreデータの削除（ユーザープロファイルとロール）
+            const batch = writeBatch(db);
+            batch.delete(doc(db, 'users', currentUid));
+            
+            // 関連するロール割り当ても削除
+            const userRolesQuery = query(collection(db, 'user_roles'), where('user_id', '==', currentUid));
+            const userRolesSnap = await getDocs(userRolesQuery);
+            userRolesSnap.docs.forEach(doc => batch.delete(doc.ref));
+            
+            await batch.commit();
+
+            // Firebase Authアカウント削除
+            await deleteUser(currentUser);
+
+            // ログ記録（削除後に記録するため、事前に情報を保持）
+            this._logAuditAction('ACCOUNT_DELETED', currentEmail, currentUid, {
+                deletedAt: new Date().toISOString()
+            });
+
+            console.log('[AuthService] Account deleted successfully:', currentEmail);
+        } catch (error: any) {
+            console.error('[AuthService] Account deletion failed:', error);
+            if (error.code === 'auth/requires-recent-login') {
+                throw new Error('セキュリティのため、最近ログインしてから再度お試しください');
+            }
+            throw new Error('アカウント削除に失敗しました');
         }
     }
 
