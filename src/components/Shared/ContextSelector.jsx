@@ -3,6 +3,9 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ContextSelector.css';
 
+// 表示制御フラグをインポート
+import { ENABLE_WEB_SEARCH, ENABLE_INTERNAL_DATA } from '../../config/env';
+
 // Phase B: API経由でストア一覧を取得
 import { useGeminiStores } from '../../hooks/useGeminiStores';
 
@@ -91,6 +94,7 @@ const MAIN_MODES = [
         icon: <GlobeAltIcon />,
         settings: { ragEnabled: false, webEnabled: true },
         colorClass: 'mode-deep',
+        hidden: !ENABLE_WEB_SEARCH, // 環境変数で制御
     },
 ];
 
@@ -245,7 +249,7 @@ const ContextSelector = ({
             <div className="context-section-label">検索モード</div>
 
             <div className="primary-modes-group">
-                {MAIN_MODES.map((mode) => (
+                {MAIN_MODES.filter(m => !m.hidden).map((mode) => (
                     <ModeButton
                         key={mode.id}
                         mode={mode}
@@ -255,31 +259,33 @@ const ContextSelector = ({
                 ))}
 
                 {/* 社内データ > (Enterprise entry point) */}
-                <div className={`mode-item-wrapper ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}>
-                    <button
-                        onClick={() => navigateTo('stores', 'right')}
-                        className={`mode-item ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}
-                    >
-                        <div className="mode-icon-wrapper">
-                            <BuildingOfficeIcon />
-                        </div>
-                        <div className="mode-info">
-                            <div className="mode-label">社内データ</div>
-                            <div className="mode-desc">社内ナレッジを検索</div>
-                        </div>
-                        {['enterprise', 'hybrid'].includes(currentModeId) && <CheckIcon className="check-icon" />}
-                    </button>
-                    <button
-                        className="mode-sub-settings-btn"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            navigateTo('stores', 'right');
-                        }}
-                        title="ストア選択"
-                    >
-                        <ChevronRightIcon />
-                    </button>
-                </div>
+                {ENABLE_INTERNAL_DATA && (
+                    <div className={`mode-item-wrapper ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}>
+                        <button
+                            onClick={() => navigateTo('stores', 'right')}
+                            className={`mode-item ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}
+                        >
+                            <div className="mode-icon-wrapper">
+                                <BuildingOfficeIcon />
+                            </div>
+                            <div className="mode-info">
+                                <div className="mode-label">社内データ</div>
+                                <div className="mode-desc">社内ナレッジを検索</div>
+                            </div>
+                            {['enterprise', 'hybrid'].includes(currentModeId) && <CheckIcon className="check-icon" />}
+                        </button>
+                        <button
+                            className="mode-sub-settings-btn"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigateTo('stores', 'right');
+                            }}
+                            title="ストア選択"
+                        >
+                            <ChevronRightIcon />
+                        </button>
+                    </div>
+                )}
             </div>
         </motion.div>
     );

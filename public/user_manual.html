@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIエージェントアプリ ユーザーマニュアル</title>
+    <style>
+        /* ==========================================================================
+           1. Design Tokens & Variables
+           ========================================================================== */
+        :root {
+            /* Color System */
+            --sys-color-primary: #0A84FF;
+            /* System Blue for Web */
+            --sys-bg-base: #FFFFFF;
+            --sys-bg-alt: #F5F5F7;
+            --text-primary: rgba(0, 0, 0, 0.85);
+            --text-secondary: rgba(0, 0, 0, 0.55);
+            --text-tertiary: rgba(0, 0, 0, 0.4);
+            --border-color: rgba(0, 0, 0, 0.1);
+
+            /* Apple Intelligence Semantic Gradient */
+            --ai-cyan: #00FFFF;
+            --ai-magenta: #FF00FF;
+            --ai-yellow: #FFD60A;
+            --ai-blue: #007AFF;
+
+            /* Typography */
+            --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", Menlo, Monaco, Consolas, monospace;
+            --font-rounded: "SF Pro Rounded", -apple-system, BlinkMacSystemFont, sans-serif;
+
+            /* Motion Physics (Spring-like easing) */
+            --ease-spring: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* ==========================================================================
+           2. Reset & Base Styles
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-primary);
+            background-color: var(--sys-bg-base);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            /* スムーススクロールを追加 */
+        }
+
+        :focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 5px rgba(10, 132, 255, 0.5);
+            transition: box-shadow 0.2s ease-out;
+            border-radius: 4px;
+        }
+
+        ::selection {
+            background-color: rgba(10, 132, 255, 0.2);
+        }
+
+        /* ==========================================================================
+           3. Layout (Full-Screen Document Structure)
+           ========================================================================== */
+        .app-layout {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Mobile Header (Hidden on Desktop) */
+        .mobile-header {
+            display: none;
+        }
+
+        /* Desktop Sidebar Toggle Button */
+        .desktop-toc-toggle {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s var(--ease-spring);
+        }
+
+        .desktop-toc-toggle:hover {
+            color: var(--sys-color-primary);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Sidebar / TOC Container (Desktop) */
+        .toc-container {
+            width: 280px;
+            flex-shrink: 0;
+            background-color: var(--sys-bg-alt);
+            border-right: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 10;
+            transition: width 0.4s var(--ease-spring), opacity 0.4s var(--ease-spring);
+        }
+
+        .toc-container.is-closed {
+            width: 0;
+            opacity: 0;
+            border-right: none;
+        }
+
+        .toc-inner {
+            width: 280px;
+            /* アニメーション中のレイアウト崩れ防止 */
+            padding: 80px 24px 48px;
+            /* トグルボタンのスペース確保 */
+        }
+
+        .nav-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s var(--ease-spring);
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .nav-link.active {
+            color: var(--sys-color-primary);
+            background: rgba(10, 132, 255, 0.08);
+            font-weight: 600;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex-grow: 1;
+            background: var(--sys-bg-base);
+            position: relative;
+        }
+
+        .content-container {
+            max-width: 800px;
+            /* Readability width */
+            margin: 0 auto;
+            padding: 80px 48px 120px;
+        }
+
+        /* ==========================================================================
+           4. Typography System & Content Styling
+           ========================================================================== */
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            scroll-margin-top: 80px;
+            /* スムーススクロールジャンプ時の上部余白 */
+        }
+
+        h1 {
+            font-size: 40px;
+            /* Larger for full-screen */
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 56px;
+            font-weight: 500;
+        }
+
+        h2 {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            margin: 64px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin: 40px 0 16px;
+        }
+
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 28px 0 12px;
+            color: var(--text-secondary);
+        }
+
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        ul,
+        ol {
+            margin: 0 0 24px 24px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: none;
+            height: 1px;
+            background: var(--border-color);
+            margin: 48px 0;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            background: var(--sys-bg-alt);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            color: #d13a5f;
+        }
+
+        /* ==========================================================================
+           5. Components (Tables, Callouts, UI Patterns)
+           ========================================================================== */
+
+        .table-wrapper {
+            background: var(--sys-bg-base);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 32px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        th {
+            background: var(--sys-bg-alt);
+            text-align: left;
+            padding: 16px 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        blockquote {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(50px) saturate(200%);
+            -webkit-backdrop-filter: blur(50px) saturate(200%);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.04),
+                0 0 0 0.5px rgba(255, 255, 255, 0.8) inset;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        blockquote p:last-child {
+            margin-bottom: 0;
+        }
+
+        .callout-title {
+            font-family: var(--font-rounded);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .callout-tip .callout-title {
+            color: var(--sys-color-primary);
+        }
+
+        .callout-tip .icon {
+            background: var(--sys-color-primary);
+        }
+
+        .callout-important .callout-title {
+            color: #FF3B30;
+        }
+
+        .callout-important .icon {
+            background: #FF3B30;
+        }
+
+        .callout-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ==========================================================================
+           6. Apple Intelligence UI Patterns
+           ========================================================================== */
+
+        .ai-concept {
+            background-image: linear-gradient(90deg,
+                    var(--ai-blue),
+                    var(--ai-magenta));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+
+        .ai-shield-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.05);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            vertical-align: middle;
+            margin-left: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* ==========================================================================
+           7. Responsive Design (Mobile overlay TOC)
+           ========================================================================== */
+        @media (max-width: 800px) {
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .desktop-toc-toggle {
+                display: none;
+            }
+
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                height: 56px;
+                padding: 0 20px;
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border-bottom: 1px solid var(--border-color);
+                position: sticky;
+                top: 0;
+                z-index: 30;
+            }
+
+            .toc-toggle {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: transparent;
+                border: none;
+                font-family: var(--font-sans);
+                font-size: 15px;
+                font-weight: 600;
+                color: var(--text-primary);
+                cursor: pointer;
+            }
+
+            .toc-toggle .chevron {
+                transition: transform 0.4s var(--ease-spring);
+            }
+
+            .toc-toggle[aria-expanded="true"] .chevron {
+                transform: rotate(180deg);
+            }
+
+            .toc-container {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                background: rgba(245, 245, 247, 0.95);
+                backdrop-filter: blur(30px) saturate(180%);
+                -webkit-backdrop-filter: blur(30px) saturate(180%);
+                border-bottom: 1px solid var(--border-color);
+                z-index: 25;
+
+                /* Accordion behavior for mobile */
+                display: grid;
+                grid-template-rows: 0fr;
+                transition: grid-template-rows 0.4s var(--ease-spring);
+                overflow: hidden;
+            }
+
+            .toc-container.is-open {
+                grid-template-rows: 1fr;
+            }
+
+            .toc-container.is-closed {
+                width: 100%;
+                /* モバイル時はPC側の閉じるスタイルを無効化 */
+                opacity: 1;
+            }
+
+            .toc-inner {
+                width: 100%;
+                min-height: 0;
+                /* Required for grid animation */
+                padding: 0;
+                /* はみ出し防止のためゼロにする */
+            }
+
+            .nav-content {
+                padding: 16px 20px 24px;
+                /* 代わりに内側の要素で余白を確保する */
+            }
+
+            .content-container {
+                padding: 40px 24px 80px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- Desktop Sidebar Toggle -->
+        <button id="desktop-toc-toggle" class="desktop-toc-toggle" aria-label="目次を開閉">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+        </button>
+
+        <!-- Mobile Header (Visible only on narrow screens) -->
+        <header class="mobile-header">
+            <button class="toc-toggle" aria-expanded="false" aria-controls="toc-panel">
+                <span class="toc-toggle-text">目次</span>
+                <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Table of Contents Container (Sidebar on Desktop, Dropdown on Mobile) -->
+        <aside id="toc-panel" class="toc-container">
+            <div class="toc-inner">
+                <nav class="nav-content">
+                    <a href="#ch1" class="nav-link active">第1章：はじめに</a>
+                    <a href="#ch2" class="nav-link">第2章：基本の使い方</a>
+                    <a href="#ch3" class="nav-link">第3章：高度な入力・参照機能</a>
+                    <a href="#ch4" class="nav-link">第4章：アーティファクトの活用</a>
+                    <a href="#ch5" class="nav-link">第5章：プライバシーシールド</a>
+                    <a href="#ch6" class="nav-link">第6章：Q&A</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-container">
+
+                <h1>ユーザーマニュアル：<br><span class="ai-concept">AIエージェントアプリ</span></h1>
+                <p class="subtitle">(詳細版)</p>
+
+                <p>本アプリケーションは、AIとの対話をビジネスや創作活動に最適化するための高度なインターフェースを提供します。このマニュアルでは、各機能の背後にある仕組みから、効率的な操作手順までを詳細に解説します。
+                </p>
+
+                <!-- Chapter 1 -->
+                <section id="ch1">
+                    <h2>第1章：はじめに</h2>
+                    <h3>コンセプト：Intelligence at Your Fingertips</h3>
+                    <p>本AIエージェントアプリは、強力なAIの能力を最大限に引き出し、業務の生産性を高めるために設計されました。</p>
+                    <ul>
+                        <li><strong>シームレスな参照</strong>: ローカルファイルやWeb情報を AI の知識として即座に組み込めます。</li>
+                        <li><strong>構造化されたアウトプット</strong>: チャットの枠を超え、スライドやドキュメント（アーティファクト）として情報を整理・保存できます。</li>
+                        <li><strong>プロアクティブな保護</strong>: 入力内容をリアルタイムでスキャンし、機密情報の漏洩を未然に防ぎます。</li>
+                    </ul>
+                </section>
+
+                <!-- Chapter 2 -->
+                <section id="ch2">
+                    <h2>第2章：基本の使い方</h2>
+                    <h3>効率的なチャット操作</h3>
+                    <ul>
+                        <li><strong>メッセージ送信</strong>: 入力フィールドで <code>Enter</code> キーを押すか、右側の送信ボタンをクリックします。</li>
+                        <li><strong>改行</strong>: <code>Shift + Enter</code> で入力フィールド内で改行できます。</li>
+                        <li><strong>新規チャット (New Chat)</strong>: 目次メニューなどのボタンから、AIの記憶（コンテキスト）をリセットし、クリーンな状態で新しい会話を開始できます。
+                        </li>
+                        <li><strong>履歴の再開</strong>: 過去のタイトルをクリックするだけで、いつでもその時点の文脈から再開可能です。</li>
+                    </ul>
+
+                    <h3>メッセージアクション</h3>
+                    <p>AIの回答の下には、以下のクイックアクションが用意されています。</p>
+                    <ul>
+                        <li><strong>コピー</strong>: 回答テキストをクリップボードに保存します。</li>
+                        <li><strong>リテイク（再生成）</strong>: 回答が満足のいくものでなかった場合、同じ指示で別の回答をリクエストします。</li>
+                    </ul>
+                </section>
+
+                <!-- Chapter 3 -->
+                <section id="ch3">
+                    <h2>第3章：高度な入力・参照機能</h2>
+                    <h3>Universal Add Menu (「+」ボタン)</h3>
+                    <p>入力欄左側の「+」アイコンをクリックして、外部情報の追加や、特定の形式でのコンテンツ作成を開始できます。</p>
+
+                    <h4>1. ファイルアップロード</h4>
+                    <p>ローカルのドキュメントをアップロードして、AIの知識（コンテキスト）として追加できます。アップロードされた内容に基づいた分析や要約が可能になります。</p>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>カテゴリ</th>
+                                    <th>対応ファイル形式</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>ドキュメント</strong></td>
+                                    <td>PDF (<code>.pdf</code>), Word (<code>.docx</code>)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>テキスト</strong></td>
+                                    <td>テキスト (<code>.txt</code>), Markdown (<code>.md</code>)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>データ・表計算</strong></td>
+                                    <td>Excel (<code>.xlsx</code>), CSV (<code>.csv</code>)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5>⚠️ 非対応・制限のある形式</h5>
+                    <ul>
+                        <li><strong>画像ファイル</strong>: <code>.png</code>, <code>.jpg</code>, <code>.svg</code> など（※将来のアップデートで対応予定です）</li>
+                        <li><strong>マルチメディア</strong>: 音声 (<code>.mp3</code> 等)、動画 (<code>.mp4</code> 等)</li>
+                        <li><strong>圧縮・実行ファイル</strong>: <code>.zip</code>, <code>.exe</code>, <code>.js</code>, <code>.py</code> 等</li>
+                        <li><strong>保護ファイル</strong>: パスワード保護や暗号化されたファイルは読み取ることができません。</li>
+                    </ul>
+
+                    <blockquote class="callout-important">
+                        <div class="callout-title"><span class="callout-icon icon"></span>IMPORTANT</div>
+                        <p><strong>プライバシーシールドに関する制限</strong></p>
+                        <p>アップロードされたファイル内のテキストについては、プライバシーシールドによるトークン化（自動隠蔽）が適用されません。機密情報が含まれるファイルは、事前に内容を確認または編集してからアップロードしてください。</p>
+                    </blockquote>
+
+                    <h4>2. Artifact（アーティファクト）の作成</h4>
+                    <p>メニューから作成したいドキュメント形式を直接指定できます。</p>
+                    <ul>
+                        <li><strong>クイックまとめ</strong>: 要約・レポート、議事録・Next Action、チェックリスト、比較表、FAQ (想定問答集)。</li>
+                        <li><strong>A4ドキュメント</strong>: 印刷や正式な報告書に適したリッチなレイアウト。</li>
+                        <li><strong>プレゼンスライド</strong>: ブラウザ上で閲覧可能なスライドショー形式。</li>
+                    </ul>
+
+                    <h4>3. 将来追加予定の機能</h4>
+                    <ul>
+                        <li><strong>Webサイトを指定</strong>: 特定のサイトのURLを指定し、情報を取得します。（今後のアップデートで提供予定）</li>
+                    </ul>
+                </section>
+
+                <!-- Chapter 4 -->
+                <section id="ch4">
+                    <h2>第4章：アーティファクト（生成物）の活用</h2>
+                    <p>アーティファクトとは、AIが生成した「まとまった情報（スライドやドキュメント）」を閲覧・編集・保存するための専用機能です。</p>
+
+                    <h3>1. リアルタイム生成プロセス</h3>
+                    <p>AIに資料作成を依頼すると、チャットの右側に専用の「アーティファクト・パネル」が自動的に開きます。</p>
+                    <ul>
+                        <li><strong>生成ステータスの表示</strong>:
+                            AIが思考し、レイアウトを構成する過程がリアルタイムで表示されます（例：「デザインを設計中...」「3枚目のスライドをレイアウト中...」）。</li>
+                        <li><strong>ストリーミング描画</strong>: 完成を待たずに、生成されている途中経過を確認できます。</li>
+                    </ul>
+
+                    <h3>2. パネルの高度な操作</h3>
+                    <p>パネル上部のコントロールツールを使用して、閲覧環境を最適化できます。</p>
+                    <ul>
+                        <li><strong>ズームコントロール</strong>:
+                            <ul>
+                                <li><strong>ズームイン/アウト</strong>: マグニファイア（+ / -）アイコンで <strong>10%刻み</strong> の調整が可能です。
+                                </li>
+                                <li><strong>オートフィット (Auto Fit)</strong>: パネルの幅に合わせて、読みやすい最適な倍率に自動調整されます。</li>
+                                <li><strong>リセット</strong>: 標準のフィット状態（100%基準）に瞬時に戻します。</li>
+                            </ul>
+                        </li>
+                        <li><strong>全画面プレビュー</strong>: 拡大アイコンをクリックすると、スライドなどを画面全体に表示してプレゼンテーション形式で閲覧できます。</li>
+                        <li><strong>出典の参照 (Citations)</strong>: アーティファクト内に引用元がある場合、出典アイコンから元の資料のどの部分を参照したかを確認できます。</li>
+                    </ul>
+
+                    <h3>3. 多彩なエクスポートオプション</h3>
+                    <p>パネル右上の「…」アクションメニューから、用途に合わせた保存方法を選択できます。</p>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>オプション</th>
+                                    <th>特徴・推奨用途</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Markdown として保存</strong></td>
+                                    <td>文書構造を維持したテキスト形式。GitHub, Notion, Obsidian への貼り付けに最適。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>HTML として保存</strong></td>
+                                    <td>ブラウザで見たままのデザインを維持したファイル。オフラインでの閲覧や共有に。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PDF として保存</strong></td>
+                                    <td>「印刷」メニューから実行します。正式な提出資料や印刷用として最適です。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>タイトル＋本文をコピー</strong></td>
+                                    <td>クリップボードにマークダウン形式でコピーし、メール等へ即座に貼り付けられます。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <blockquote class="callout-tip">
+                        <div class="callout-title"><span class="callout-icon icon"></span>TIP</div>
+                        <p><strong>スライド資料を PowerPoint (PPTX) に変換する方法</strong></p>
+                        <ol>
+                            <li>アクションメニューから「印刷」を選択し、送信先を「PDFに保存」にしてPDFファイルを書き出します。</li>
+                            <li>保存したPDFをオンラインのPDF変換ツール（Canva等）にアップロードすることで、編集可能な PPTX 形式に変換できます。</li>
+                        </ol>
+                    </blockquote>
+                </section>
+
+                <!-- Chapter 5 -->
+                <section id="ch5">
+                    <h2>第5章：プライバシーシールド <span class="ai-shield-badge">🔒 保護機能</span></h2>
+                    <p>プライバシーシールドは、機密情報をブラウザの外に出さないための「セキュア・トンネリング」機能です。</p>
+
+                    <h3>技術的な仕組み：トークン化と復元</h3>
+                    <p>本機能は、AIへの資料作成依頼などの作業中に<strong>「うっかり混入してしまった個人情報」</strong>をサーバーへ送る前に自動で検知し、無意味な記号（トークン）に置き換えます。
+                    </p>
+
+                    <h4>1. トークン化（情報の秘匿）</h4>
+                    <p>置換処理はすべて<strong>ユーザーのブラウザ内（クライアントサイド）</strong>で完結します。サーバーへは置換後のトークンのみが送信されるため、元の生の情報は一度もネットワークを流れません。
+                    </p>
+
+                    <h4>2. 自動復元（情報の書き戻し）</h4>
+                    <p>AIからの回答にトークンが含まれている場合、画面に表示される直前に、ブラウザが保持している対応表（Vault）を参照して元の情報に書き戻します。</p>
+
+                    <blockquote class="callout-important">
+                        <div class="callout-title"><span class="callout-icon icon"></span>IMPORTANT</div>
+                        <p><strong>添付ファイルについての注意点</strong></p>
+                        <p>プライバシーシールド（トークン化処理）は、チャット入力欄に直接入力されたテキストに対してのみ機能します。<strong>アップロードされたファイル内の機密情報は検知・保護の対象外</strong>となり、平文のまま送信されるため、十分にご注意ください。</p>
+                    </blockquote>
+
+                    <h4>【具体例】会議の要約レポート作成中に個人情報を誤って含めたシーン</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ステップ</th>
+                                    <th>処理内容とメッセージの変化</th>
+                                    <th>セキュリティ上の効果</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>ユーザーの入力</strong></td>
+                                    <td>「以下のメモを元に要約レポートを作って。参加者：山田（<strong>090-1234-5678</strong>）、備考：会費はカード（<strong>4111-1111-1111-1111</strong>）で支払済」
+                                    </td>
+                                    <td>生の情報がブラウザ上にある</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AIへの送信データ</strong></td>
+                                    <td>「以下のメモを元に要約レポートを作って。参加者：山田（<code>{{PHONE_A1}}</code>）、備考：会費はカード（<code>{{CARD_B1}}</code>）で支払済」
+                                    </td>
+                                    <td><strong>生の情報はここで遮断され、送信されない</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AIからの回答</strong></td>
+                                    <td>「会議の要約を作成しました。参加者の山田様（<code>{{PHONE_A1}}</code>）の会費精算（カード：<code>{{CARD_B1}}</code>）も完了している旨を記載しています。」
+                                    </td>
+                                    <td>サーバー上にはトークンしか残らない</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>画面上の表示</strong></td>
+                                    <td>「会議の要約を作成しました。参加者の山田様（<strong>090-1234-5678</strong>）の会費精算（カード：<strong>4111-1111...</strong>）も完了している旨を記載しています。」
+                                    </td>
+                                    <td>ブラウザ内で元の情報が復元される</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>安全性の根拠：Secure Vault（保管庫）</h3>
+                    <p>トークンと元の情報の対応表は、ブラウザのメモリ上にある一時的な保管庫（Secure Vault）にのみ存在します。</p>
+                    <ul>
+                        <li><strong>セッション限定</strong>:
+                            この保管庫は現在のブラウザセッション（タブ）にのみ紐付いています。ページをリロードしたり、タブを閉じたりすると、メモリ上の対応表は完全に消去されます。</li>
+                        <li><strong>追跡不可</strong>: サーバー側にはトークンしか記録されないため、万が一サーバー上のデータが流出したとしても、ユーザーの生情報を特定することは不可能です。
+                        </li>
+                    </ul>
+
+                    <h3>検知対象と対象外の項目</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>項目</th>
+                                    <th>検知内容</th>
+                                    <th>マスク・保護の有無</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>クレジットカード</strong></td>
+                                    <td>13～19桁の番号 (Luhnアルゴリズム検証付)</td>
+                                    <td><strong>あり</strong> (中間をマスク)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>APIキー</strong></td>
+                                    <td>各種クラウドサービスの秘密鍵</td>
+                                    <td><strong>あり</strong> (末尾のみ表示)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>個人連絡先</strong></td>
+                                    <td>メールアドレス、携帯・固定電話番号</td>
+                                    <td><strong>あり</strong> (一部をマスク)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>マイナンバー</strong></td>
+                                    <td>12桁の個人番号 (キーワード検知付)</td>
+                                    <td><strong>あり</strong> (先頭4桁のみ表示)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>社外秘キーワード</strong></td>
+                                    <td>「社外秘」「極秘」「Confidential」等</td>
+                                    <td>なし (警告のみ表示)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>郵便番号</strong></td>
+                                    <td>日本の郵便番号形式 (3桁-4桁)</td>
+                                    <td>なし (公開情報のため)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>検知時のアクション</h3>
+                    <p>機密情報が検知された場合、送信確認ダイアログでトグルを切り替えることで、あえて保護を解除（🔓 除外）してそのままの情報を送信することも可能です。</p>
+                </section>
+
+                <!-- Chapter 6 -->
+                <section id="ch6">
+                    <h2>第6章：Q&A（よくある質問）</h2>
+
+                    <h3>Q: プライバシーシールドを解除しても大丈夫ですか？</h3>
+                    <p><strong>A:</strong> 解除（🔓 除外）すると、その情報は平文のままサーバーへ送信されます。誤検知であることが確実な場合を除き、デフォルトの「🔒
+                        保護」のまま使用することを強く推奨します。</p>
+
+                </section>
+
+                <blockquote class="callout-important">
+                    <div class="callout-title"><span class="callout-icon icon"></span>IMPORTANT</div>
+                    <p>機密性の高い情報を AI に送信する際は、組織のガイドラインに従い、プライバシーシールドの警告内容を必ず確認してから送信してください。</p>
+                </blockquote>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Interaction Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tocToggle = document.querySelector('.toc-toggle');
+            const desktopTocToggle = document.getElementById('desktop-toc-toggle');
+            const tocContainer = document.querySelector('.toc-container');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const mainContent = document.querySelector('.main-content');
+
+            let isScrollingToTarget = false;
+            let scrollTimeout = null;
+
+            // サイドバーの開閉トグル処理 (Desktop用)
+            if (desktopTocToggle) {
+                desktopTocToggle.addEventListener('click', () => {
+                    tocContainer.classList.toggle('is-closed');
+                });
+            }
+
+            // アコーディオンの開閉トグル処理 (Mobile用)
+            if (tocToggle) {
+                tocToggle.addEventListener('click', () => {
+                    const isExpanded = tocToggle.getAttribute('aria-expanded') === 'true';
+                    tocToggle.setAttribute('aria-expanded', !isExpanded);
+                    tocContainer.classList.toggle('is-open');
+                });
+            }
+
+            // 目次のリンクをクリックした際の処理
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    // スムーススクロール中のObserverによるアクティブ更新を停止
+                    isScrollingToTarget = true;
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        isScrollingToTarget = false;
+                    }, 800); // 800ms後に再開 (スクロールの完了目安に合わせて調整)
+
+                    // リンクがクリックされたらアコーディオンを閉じる (Mobile用)
+                    if (window.innerWidth <= 800 && tocToggle) {
+                        tocToggle.setAttribute('aria-expanded', 'false');
+                        tocContainer.classList.remove('is-open');
+                    }
+
+                    // アクティブ状態の切り替え
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // スクロールに応じた目次のハイライト連動
+            const observerOptions = {
+                root: null, // ブラウザのビューポートを基準にする
+                rootMargin: '0px 0px -60% 0px', // 画面上部40%の位置で判定
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                if (isScrollingToTarget) return; // ジャンプ中は監視処理をスキップする
+
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+
+                        if (activeLink) {
+                            navLinks.forEach(l => l.classList.remove('active'));
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

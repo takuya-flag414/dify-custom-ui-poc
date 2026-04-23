@@ -55,3 +55,15 @@ export const SHOW_HEADER = import.meta.env.VITE_SHOW_HEADER === 'true';
 
 // トークン使用量を表示するかどうかのフラグ（デフォルトは false: 非表示）
 export const SHOW_TOKEN_USAGE = import.meta.env.VITE_SHOW_TOKEN_USAGE === 'true';
+
+// Web検索（Deep）モードを表示するかどうか（デフォルトは true: 表示）
+export const ENABLE_WEB_SEARCH = import.meta.env.VITE_ENABLE_WEB_SEARCH !== 'false';
+
+// 社内データ（Enterprise/Hybrid）モードを表示するかどうか（デフォルトは true: 表示）
+export const ENABLE_INTERNAL_DATA = import.meta.env.VITE_ENABLE_INTERNAL_DATA !== 'false';
+
+// 「Webサイトを指定」を表示するかどうか（デフォルトは true: 表示）
+export const ENABLE_SPECIFY_WEBSITE = import.meta.env.VITE_ENABLE_SPECIFY_WEBSITE !== 'false';
+
+// 「Artifact を作成」を表示するかどうか（デフォルトは true: 表示）
+export const ENABLE_CREATE_ARTIFACT = import.meta.env.VITE_ENABLE_CREATE_ARTIFACT !== 'false';

@@ -105,6 +105,14 @@ const SourceIcon = () => (
     </svg>
 );
 
+const LightbulbIcon = ({ width = 20, height = 20, className = "" }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M9 18h6"></path>
+        <path d="M10 22h4"></path>
+        <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path>
+    </svg>
+);
+
 /**
  * HTML生成中のプレビュー表示 (Apple Intelligence Style)
  */
@@ -209,6 +217,11 @@ const getTypeBadge = (type) => {
 };
 
 /**
+ * LocalStorage キー
+ */
+const LOCAL_STORAGE_PPTX_BANNER_KEY = 'dify_pptx_banner_seen';
+
+/**
  * PPTX変換ヒントコンポーネント
  */
 const ConversionHint = ({ isDismissed, onToggle, onDismiss }) => {
@@ -224,21 +237,21 @@ const ConversionHint = ({ isDismissed, onToggle, onDismiss }) => {
                 >
                     <div className="conversion-hint-content">
                         <div className="conversion-hint-icon">
-                            <SparklesIcon width="16" height="16" />
+                            <LightbulbIcon width="16" height="16" />
                         </div>
                         <div className="conversion-hint-text-group">
                             <div className="conversion-hint-title">📽️ PPTX変換ヒント</div>
                             <div className="conversion-hint-body">
                                 PowerPoint(PPTX)形式が必要な場合は、右上のアクションメニューから「印刷」を選択してPDFとして保存した後、
-                                <a 
-                                    href="https://acrobat.adobe.com/link/acrobat/pdf-to-ppt?x_api_client_id=adobe_com&x_api_client_location=pdf_to_ppt" 
-                                    target="_blank" 
+                                <a
+                                    href="https://www.canva.com/ja_jp/features/pdf-to-ppt-converter/"
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="conversion-hint-link"
                                 >
-                                    Adobe Acrobat
+                                    Canva
                                 </a>
-                                でPPTXへ変換可能です。
+                                などの外部ツールでPPTXへ変換可能です。
                             </div>
                         </div>
                         <button className="conversion-hint-close" onClick={onDismiss} title="ヒントを隠す">
@@ -256,7 +269,7 @@ const ConversionHint = ({ isDismissed, onToggle, onDismiss }) => {
                     whileTap={{ scale: 0.9 }}
                     title="PPTX変換ヒントを表示"
                 >
-                    <SparklesIcon width="20" height="20" />
+                    <LightbulbIcon width="20" height="20" />
                 </motion.button>
             )}
         </AnimatePresence>
@@ -276,11 +289,17 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const [isCopied, setIsCopied] = useState(false);
     const [isCitationsExpanded, setIsCitationsExpanded] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isPptxHintDismissed, setIsPptxHintDismissed] = useState(false);
+    const [isPptxHintDismissed, setIsPptxHintDismissed] = useState(() => {
+        try {
+            return localStorage.getItem(LOCAL_STORAGE_PPTX_BANNER_KEY) === 'true';
+        } catch (e) {
+            return false;
+        }
+    });
 
     // ★追加: ズームとスクロール用の状態管理
     const [zoomLevel, setZoomLevel] = useState(100);
-    const [autoFit, setAutoFit] = useState(true);
+    const [zoomOffset, setZoomOffset] = useState(0); // ★追加: 標準フィットに対するオフセット
     const [panelWidth, setPanelWidth] = useState(0);
 
     // ★追加: PDFエクスポート用の状態と参照
@@ -303,6 +322,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
 
     // ★追加: 現在のストリーミングメッセージがArtifact生成用かどうかを判定
     const isGeneratingArtifact = streamingMessage && streamingMessage.isStreaming && streamingMessage.artifact;
+    
+    // パネル表示判定
+    const shouldShowPanel = artifact || isGeneratingArtifact;
 
     // ★変更: ストリーミング中はstreamingMessage.artifactの中間値を使用
     const streamingArtifact = isGeneratingArtifact ? streamingMessage.artifact : null;
@@ -316,6 +338,17 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const isHtmlDocument = isHtmlA4Document || displayType === 'html_slide';
     const isHtmlSlide = displayType === 'html_slide';
     const isPptxSlide = false; // displayType === 'pptx_slide'; (pptxgenjs uninstalled)
+
+    // バナー表示時に表示済みフラグを保存
+    useEffect(() => {
+        if (isHtmlSlide && !isGeneratingArtifact && !isPptxHintDismissed) {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_PPTX_BANNER_KEY, 'true');
+            } catch (e) {
+                console.warn('Failed to save banner status to LocalStorage:', e);
+            }
+        }
+    }, [isHtmlSlide, isGeneratingArtifact, isPptxHintDismissed]);
 
     // PPTX用 JSONパースロジック
     const [parsedPptxSpec, setParsedPptxSpec] = useState(null);
@@ -502,7 +535,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     }, [artifact?.id, artifact?.title, artifact?.content]); // ★修正: contentも監視してカード切り替えを確実にリセット
 
     // ★追加: 基本となる用紙・キャンバス幅の定義 (AutoFitとレンダリングで共有)
-    const basePaperWidth = isHtmlSlide ? 1020 : (isHtmlDocument ? 850 : 720);
+    const basePaperWidth = isHtmlSlide ? 960 : (isHtmlDocument ? 850 : 720);
 
     /**
      * ★ちらつき防止：ページバッファリングロジック
@@ -579,39 +612,38 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
 
         resizeObserver.observe(panelEl);
         return () => resizeObserver.disconnect();
-    }, []);
+    }, [shouldShowPanel, isOpen]);
 
-    // ★追加: AutoFitが有効な場合、パネル幅に応じて最適なズームレベルを計算
+    // ★修正: 常にAutoFitを有効にし、パネル幅とユーザー指定のオフセットに応じて最適な倍率を計算
     useEffect(() => {
-        if (!autoFit || panelWidth === 0) return;
+        if (panelWidth === 0) return;
 
         // パネル幅からスクロールバー分や安全マージン(約40px)を引いた有効幅
         const availableWidth = panelWidth - 40;
-        // ★修正: HTML型は用紙幅(約793px)に左右の余白を含めた幅(約850px)を基準に計算し、紙の外側も見えるようにする
-        // スライドの場合は guideline に基づき 960px を基準とする
         const basePaperWidth = isHtmlSlide ? 1020 : (isHtmlDocument ? 850 : 720);
 
         let optimalZoom = Math.floor((availableWidth / basePaperWidth) * 100);
+        
+        // 最終的な表示倍率は、最適倍率にユーザーの指定したオフセットを加えたもの
+        let finalZoom = optimalZoom + zoomOffset;
 
-        // 最小50%、最大150%程度に制限
-        optimalZoom = Math.max(50, Math.min(150, optimalZoom));
-        setZoomLevel(optimalZoom);
+        // 最小30%、最大250%程度に制限
+        finalZoom = Math.max(30, Math.min(250, finalZoom));
+        setZoomLevel(finalZoom);
 
-    }, [panelWidth, autoFit, isHtmlDocument]);
+    }, [panelWidth, zoomOffset, isHtmlDocument, isHtmlSlide]);
 
-    // ★追加: 手動ズーム操作
+    // ★修正: 手動ズーム操作を「オフセット（増減値）」の変更として扱う
     const handleZoomIn = () => {
-        setAutoFit(false);
-        setZoomLevel(prev => Math.min(200, prev + 10));
+        setZoomOffset(prev => Math.min(150, prev + 10)); // 最大オフセット制限
     };
 
     const handleZoomOut = () => {
-        setAutoFit(false);
-        setZoomLevel(prev => Math.max(30, prev - 10));
+        setZoomOffset(prev => Math.max(-80, prev - 10)); // 最小オフセット制限
     };
 
     const handleZoomReset = () => {
-        setAutoFit(true);
+        setZoomOffset(0); // オフセットリセット（ジャストフィット）
     };
 
     // ★変更: AnimatePresence でラップするため、ここで null を返すのではなく、
@@ -716,56 +748,241 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         setIsMenuOpen(false);
     };
 
+
+    const injectIntoHead = (html, injection) => {
+        if (html.includes('</head>')) {
+            return html.replace('</head>', `${injection}
+</head>`);
+        }
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8">${injection}</head><body>${html}</body></html>`;
+    };
+
+    const buildPrintReadySlideHtml = (html) => {
+        const printEnhancer = `
+            <style>
+                html, body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #ffffff !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                    overflow: visible !important;
+                }
+
+                body {
+                    display: block !important;
+                    min-height: auto !important;
+                }
+
+                .slide {
+                    width: 960px !important;
+                    height: 540px !important;
+                    margin: 0 !important;
+                    box-shadow: none !important;
+                    overflow: hidden !important;
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                }
+
+                .slide-body {
+                    height: 100% !important;
+                    min-height: 0 !important;
+                    box-sizing: border-box !important;
+                    overflow: hidden !important;
+                }
+
+                .chart-shell {
+                    display: grid !important;
+                    grid-template-columns: 200px minmax(0, 1fr) !important;
+                    gap: 18px !important;
+                    align-items: stretch !important;
+                    min-width: 0 !important;
+                }
+
+                .chart-side,
+                .chart-panel,
+                .chart-area {
+                    min-width: 0 !important;
+                }
+
+                .chart-panel {
+                    display: flex !important;
+                    flex-direction: column !important;
+                }
+
+                .chart-area {
+                    position: relative !important;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                    min-height: 220px !important;
+                    height: 100% !important;
+                    overflow: hidden !important;
+                }
+
+                .chart-area canvas,
+                canvas[data-chart-role] {
+                    display: block !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-width: 100% !important;
+                    max-height: 100% !important;
+                }
+
+                @media print {
+                    @page {
+                        size: 10in 5.625in;
+                        margin: 0;
+                    }
+
+                    html, body {
+                        background: none !important;
+                        overflow: visible !important;
+                    }
+
+                    body {
+                        display: block !important;
+                    }
+
+                    .slide {
+                        width: 960px !important;
+                        height: 540px !important;
+                        margin: 0 !important;
+                        box-shadow: none !important;
+                        page-break-after: always;
+                    }
+                }
+            </style>
+
+            <script>
+                (function() {
+                    function waitForChartsReady(callback, attempts) {
+                        attempts = attempts || 0;
+                        if (typeof Chart === 'undefined') {
+                            if (attempts > 120) {
+                                callback();
+                                return;
+                            }
+                            setTimeout(function() {
+                                waitForChartsReady(callback, attempts + 1);
+                            }, 50);
+                            return;
+                        }
+                        callback();
+                    }
+
+                    function syncCanvasResolution(canvas) {
+                        if (!canvas) return;
+                        var rect = canvas.getBoundingClientRect();
+                        var cssWidth = Math.max(1, Math.round(rect.width));
+                        var cssHeight = Math.max(1, Math.round(rect.height));
+                        var dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+
+                        var targetWidth = Math.round(cssWidth * dpr);
+                        var targetHeight = Math.round(cssHeight * dpr);
+
+                        if (canvas.width !== targetWidth) canvas.width = targetWidth;
+                        if (canvas.height !== targetHeight) canvas.height = targetHeight;
+
+                        canvas.style.width = cssWidth + 'px';
+                        canvas.style.height = cssHeight + 'px';
+
+                        var ctx = canvas.getContext && canvas.getContext('2d');
+                        if (ctx) {
+                            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                        }
+                    }
+
+                    function resizeChartsForPrint() {
+                        var canvases = document.querySelectorAll('.chart-area canvas, canvas[data-chart-role]');
+                        canvases.forEach(function(canvas) {
+                            syncCanvasResolution(canvas);
+
+                            var chart =
+                                (window.Chart && Chart.getChart && Chart.getChart(canvas)) ||
+                                canvas.__chartInstance ||
+                                null;
+
+                            if (chart) {
+                                chart.resize();
+                                if (chart.render) chart.render();
+                                syncCanvasResolution(canvas);
+                                chart.resize();
+                                if (chart.update) chart.update('none');
+                            }
+                        });
+                    }
+
+                    function runPrintLayoutPass() {
+                        waitForChartsReady(function() {
+                            requestAnimationFrame(function() {
+                                requestAnimationFrame(function() {
+                                    resizeChartsForPrint();
+                                });
+                            });
+                        });
+                    }
+
+                    window.addEventListener('load', runPrintLayoutPass);
+                    window.addEventListener('resize', runPrintLayoutPass);
+
+                    if (document.fonts && document.fonts.ready) {
+                        document.fonts.ready.then(runPrintLayoutPass);
+                    }
+
+                    if (window.matchMedia) {
+                        var mediaQueryList = window.matchMedia('print');
+                        if (mediaQueryList.addEventListener) {
+                            mediaQueryList.addEventListener('change', function(e) {
+                                if (e.matches) runPrintLayoutPass();
+                            });
+                        } else if (mediaQueryList.addListener) {
+                            mediaQueryList.addListener(function(e) {
+                                if (e.matches) runPrintLayoutPass();
+                            });
+                        }
+                    }
+
+                    window.addEventListener('beforeprint', runPrintLayoutPass);
+                })();
+            </script>
+        `;
+
+        return injectIntoHead(html, printEnhancer);
+    };
+
     const handlePrintHtmlSlide = () => {
         const printWindow = window.open("", "_blank");
         if (!printWindow) return;
 
-        let processedContent = displayContent
-            .replace(/responsive\s*:\s*true/g, 'responsive: false')
-            .replace(/maintainAspectRatio\s*:\s*true/g, 'maintainAspectRatio: false');
+        const processedContent = buildPrintReadySlideHtml(displayContent);
 
-        processedContent = processedContent.replace('</head>', `
-            <style>
-                .chart-area {
-                    width: 860px !important;
-                    height: 300px !important;
-                    position: relative !important;
-                }
-                .chart-area canvas,
-                canvas[data-chart-role] {
-                    width: 860px !important;
-                    height: 300px !important;
-                    display: block !important;
-                }
-                @media print {
-                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                }
-            </style>
-        </head>`);
-
-        processedContent = processedContent.replace(
-            /(initInteractiveElements\s*\(\s*\)\s*;)/,
-            `// [印刷用パッチ] Chart.js 初期化前に Canvas へ明示的な描画バッファサイズを付与する。
-            (function() {
-                var canvases = document.querySelectorAll('.chart-area canvas, canvas[data-chart-role]');
-                canvases.forEach(function(c) {
-                    c.setAttribute('width', '860');
-                    c.setAttribute('height', '300');
-                    c.style.cssText += 'width:860px!important;height:300px!important;display:block!important;';
-                });
-            })();
-            $1`
-        );
-
+        printWindow.document.open();
         printWindow.document.write(processedContent);
         printWindow.document.close();
 
-        printWindow.addEventListener('load', () => {
+        const triggerPrint = () => {
             setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 1500);
-        });
+                try {
+                    printWindow.focus();
+                    if (printWindow.dispatchEvent) {
+                        printWindow.dispatchEvent(new Event('beforeprint'));
+                    }
+                    printWindow.print();
+                } finally {
+                    setTimeout(() => {
+                        try {
+                            printWindow.close();
+                        } catch (e) { }
+                    }, 300);
+                }
+            }, 700);
+        };
+
+        if (printWindow.document.readyState === 'complete') {
+            triggerPrint();
+        } else {
+            printWindow.addEventListener('load', triggerPrint, { once: true });
+        }
 
         setIsMenuOpen(false);
     };
@@ -987,7 +1204,6 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     };
 
     const citations = displayCitations;
-    const shouldShowPanel = artifact || isGeneratingArtifact;
 
     // ★追加: テキスト選択イベントハンドラ (mouseupベース: 選択確定後のみ表示)
     useEffect(() => {
@@ -1105,7 +1321,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                     <ZoomOutIcon />
                                 </button>
                                 <button
-                                    className={`zoom-label-btn ${autoFit ? 'auto-fit-active' : ''}`}
+                                    className="zoom-label-btn auto-fit-active"
                                     onClick={handleZoomReset}
                                     title="ウィンドウ幅に合わせる (Auto Fit)"
                                 >
@@ -1196,7 +1412,6 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                             <div
                                 className="artifact-viewer-bg"
                                 style={{
-                                    ...(autoFit ? {} : { alignItems: 'flex-start' }),
                                     minWidth: `${basePaperWidth * (zoomLevel / 100)}px`
                                 }}
                             >
@@ -1219,10 +1434,80 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                         const FINAL_HTML = isHtmlSlide
                                             ? pageHtml.replace('</head>', `
                                                 <style>
-                                                    html, body { background: transparent !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
-                                                    .slide { margin: 0 !important; box-shadow: none !important; border: none !important; width: 100% !important; height: 100vh !important; display: flex !important; flex-direction: column !important; }
-                                                    .slide-body { display: flex !important; flex-direction: column !important; height: auto !important; min-height: 0 !important; }
-                                                    .two-col { display: flex !important; flex-shrink: 0 !important; } /* カラムの縮小による重なりを防止 */
+                                                    html, body {
+                                                        background: transparent !important;
+                                                        margin: 0 !important;
+                                                        padding: 0 !important;
+                                                        overflow: hidden !important;
+                                                        width: 960px !important;
+                                                        height: 540px !important;
+                                                    }
+
+                                                    body {
+                                                        display: block !important;
+                                                        min-height: 540px !important;
+                                                    }
+
+                                                    .slide {
+                                                        margin: 0 !important;
+                                                        box-shadow: none !important;
+                                                        border: none !important;
+                                                        width: 960px !important;
+                                                        height: 540px !important;
+                                                        display: flex !important;
+                                                        flex-direction: column !important;
+                                                        overflow: hidden !important;
+                                                    }
+
+                                                    .slide-body {
+                                                        display: flex !important;
+                                                        flex-direction: column !important;
+                                                        height: 100% !important;
+                                                        min-height: 0 !important;
+                                                        overflow: hidden !important;
+                                                    }
+
+                                                    .chart-shell {
+                                                        display: grid !important;
+                                                        grid-template-columns: 200px minmax(0, 1fr) !important;
+                                                        gap: 18px !important;
+                                                        align-items: stretch !important;
+                                                        min-width: 0 !important;
+                                                    }
+
+                                                    .chart-side,
+                                                    .chart-panel,
+                                                    .chart-area {
+                                                        min-width: 0 !important;
+                                                    }
+
+                                                    .chart-panel {
+                                                        display: flex !important;
+                                                        flex-direction: column !important;
+                                                    }
+
+                                                    .chart-area {
+                                                        position: relative !important;
+                                                        width: 100% !important;
+                                                        min-width: 0 !important;
+                                                        min-height: 220px !important;
+                                                        height: 100% !important;
+                                                        overflow: hidden !important;
+                                                    }
+
+                                                    .chart-area canvas,
+                                                    canvas[data-chart-role] {
+                                                        width: 100% !important;
+                                                        height: 100% !important;
+                                                        max-width: 100% !important;
+                                                        max-height: 100% !important;
+                                                        display: block !important;
+                                                    }
+
+                                                    .two-col {
+                                                        display: flex !important;
+                                                        flex-shrink: 0 !important;
+                                                    }
                                                 </style>
                                                 </head>`)
                                             : pageHtml;
@@ -1423,8 +1708,8 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
 
                     {/* ★追加: PPTX変換ヒント (html_slideのみ) */}
                     {isHtmlSlide && !isGeneratingArtifact && (
-                        <ConversionHint 
-                            isDismissed={isPptxHintDismissed} 
+                        <ConversionHint
+                            isDismissed={isPptxHintDismissed}
                             onToggle={() => setIsPptxHintDismissed(false)}
                             onDismiss={() => setIsPptxHintDismissed(true)}
                         />

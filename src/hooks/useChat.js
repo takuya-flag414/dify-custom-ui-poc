@@ -118,6 +118,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         }
     };
 
+    // ★追加: チャット状態（検索設定・ファイル）のリセット
+    const resetChatState = useCallback(() => {
+        setSearchSettings(DEFAULT_SEARCH_SETTINGS);
+        setSessionFiles([]);
+        addLog('[useChat] Chat state reset to default.', 'info');
+    }, [addLog]);
+
     useEffect(() => {
         if (mockMode === 'FE' && conversationId && messages.length > 0) {
             setDynamicMockMessages((prev) => ({ ...prev, [conversationId]: messages }));
@@ -955,5 +962,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         // ★追加: IntelligenceErrorHandler連携
         lastError,
         setLastError,
+        // ★追加: 状態リセット関数
+        resetChatState,
     };
 };

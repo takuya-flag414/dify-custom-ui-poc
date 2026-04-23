@@ -104,76 +104,100 @@ const PrivacyConfirmDialog: React.FC<PrivacyConfirmDialogProps> = ({
                     機密情報が含まれている可能性があります
                 </h3>
 
-                <div className="privacy-confirm-detections-scroll">
-                    {hasTextDetections && (
-                        <div className="privacy-confirm-section">
-                            <h4 className="privacy-confirm-section-title">入力テキスト</h4>
-                            <ul className="privacy-confirm-list">
-                                {detections.map((item) => (
-                                    <li key={item.id} className="privacy-confirm-item">
-                                        <span className="privacy-confirm-item-label">
-                                            {item.label}（{item.count}件）
-                                        </span>
-                                        <button
-                                            type="button"
-                                            className={`privacy-toggle ${sanitizeFlags[item.id] ? 'privacy-toggle--on' : 'privacy-toggle--off'}`}
-                                            onClick={() => toggleFlag(item.id)}
-                                            title={sanitizeFlags[item.id] ? 'サニタイズ ON: トークン化して送信' : 'サニタイズ OFF: 平文のまま送信'}
-                                            aria-label={`${item.label} のサニタイズ切替`}
-                                        >
-                                            <span className="privacy-toggle__icon">
-                                                {sanitizeFlags[item.id] ? '🔒' : '🔓'}
-                                            </span>
-                                            <span className="privacy-toggle__label">
-                                                {sanitizeFlags[item.id] ? '保護' : '除外'}
-                                            </span>
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {hasFileDetections && (
-                        <div className="privacy-confirm-section">
-                            <h4 className="privacy-confirm-section-title">添付ファイル</h4>
-                            {fileDetections.map((fileItem, idx) => (
-                                <div key={idx} className="privacy-confirm-file-item">
-                                    <span className="privacy-confirm-file-name">{fileItem.fileName}</span>
+                <div className="privacy-confirm-main-layout">
+                    {/* 左カラム：検出リスト */}
+                    <div className="privacy-confirm-col-left">
+                        <div className="privacy-confirm-detections-scroll">
+                            {hasTextDetections && (
+                                <div className="privacy-confirm-section">
+                                    <h4 className="privacy-confirm-section-title">入力テキスト</h4>
                                     <ul className="privacy-confirm-list">
-                                        {fileItem.detections.map((item) => (
-                                            <li key={item.id}>
-                                                {item.label}（{item.count}件）
+                                        {detections.map((item) => (
+                                            <li key={item.id} className="privacy-confirm-item">
+                                                <span className="privacy-confirm-item-label">
+                                                    {item.label}（{item.count}件）
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    className={`privacy-toggle ${sanitizeFlags[item.id] ? 'privacy-toggle--on' : 'privacy-toggle--off'}`}
+                                                    onClick={() => toggleFlag(item.id)}
+                                                    title={sanitizeFlags[item.id] ? 'サニタイズ ON: トークン化して送信' : 'サニタイズ OFF: 平文のまま送信'}
+                                                    aria-label={`${item.label} のサニタイズ切替`}
+                                                >
+                                                    <span className="privacy-toggle__icon">
+                                                        {sanitizeFlags[item.id] ? '🔒' : '🔓'}
+                                                    </span>
+                                                    <span className="privacy-toggle__label">
+                                                        {sanitizeFlags[item.id] ? '保護' : '除外'}
+                                                    </span>
+                                                </button>
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
-                            ))}
+                            )}
+
+                            {hasFileDetections && (
+                                <div className="privacy-confirm-section">
+                                    <h4 className="privacy-confirm-section-title">添付ファイル</h4>
+                                    {fileDetections.map((fileItem, idx) => (
+                                        <div key={idx} className="privacy-confirm-file-item">
+                                            <span className="privacy-confirm-file-name">{fileItem.fileName}</span>
+                                            <ul className="privacy-confirm-list">
+                                                {fileItem.detections.map((item) => (
+                                                    <li key={item.id}>
+                                                        {item.label}（{item.count}件）
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-
-                {/* 除外項目がある場合の注意書き */}
-                {hasExcluded && (
-                    <div className="privacy-confirm-warning">
-                        <span className="privacy-confirm-warning__icon">⚠️</span>
-                        <p className="privacy-confirm-warning__text">
-                            🔓の項目は<strong>平文のまま</strong>送信されます。サーバーに元の値がそのまま記録され、第三者に閲覧される可能性があります。
-                        </p>
                     </div>
-                )}
 
-                <p className="privacy-confirm-message">
-                    このまま続行してもよろしいですか？
-                </p>
+                    {/* 右カラム：警告と操作 */}
+                    <div className="privacy-confirm-col-right">
+                        <div className="privacy-confirm-warning-group">
+                            {/* 添付ファイルで検知された場合の注意書き */}
+                            {hasFileDetections && (
+                                <div className="privacy-confirm-warning">
+                                    <span className="privacy-confirm-warning__icon">⚠️</span>
+                                    <p className="privacy-confirm-warning__text">
+                                        <strong>添付ファイル内の情報は保護対象外です。</strong><br />
+                                        検知された機密情報はすべて平文で送信されます。続行することで、これに同意したものとみなされます。
+                                    </p>
+                                </div>
+                            )}
 
-                <div className="privacy-confirm-actions">
-                    <button className="privacy-confirm-btn-cancel" onClick={onCancel}>
-                        キャンセル
-                    </button>
-                    <button className="privacy-confirm-btn-send" onClick={handleConfirm}>
-                        続行する
-                    </button>
+                            {/* 除外項目がある場合の注意書き */}
+                            {hasExcluded && (
+                                <div className="privacy-confirm-warning">
+                                    <span className="privacy-confirm-warning__icon">⚠️</span>
+                                    <p className="privacy-confirm-warning__text">
+                                        <strong>一部の項目が保護から除外されています。</strong><br />
+                                        🔓の項目は平文のまま送信され、サーバーに記録されます。続行することで、これに同意したものとみなされます。
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="privacy-confirm-footer-content">
+                            <p className="privacy-confirm-message">
+                                このまま続行してもよろしいですか？
+                            </p>
+
+                            <div className="privacy-confirm-actions">
+                                <button className="privacy-confirm-btn-send" onClick={handleConfirm}>
+                                    続行する
+                                </button>
+                                <button className="privacy-confirm-btn-cancel" onClick={onCancel}>
+                                    キャンセル
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>,

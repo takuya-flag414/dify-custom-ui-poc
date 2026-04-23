@@ -159,11 +159,65 @@
     font-weight: 400;
 }
 
+/* === Manual Link (Subtle Style) === */
+.welcome-manual-link {
+    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--color-text-sub);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.welcome-manual-link:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-primary);
+}
+
+.welcome-manual-link.faded {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+}
+
+[data-theme='dark'] .welcome-manual-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.welcome-manual-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.8;
+}
+
+.welcome-manual-arrow {
+    width: 10px;
+    height: 10px;
+    opacity: 0.5;
+    transition: transform 0.2s ease;
+}
+
+.welcome-manual-link:hover .welcome-manual-arrow {
+    transform: translate(1px, -1px);
+}
+
 /* === Hero ChatInput (Centered) === */
 .welcome-hero-input {
     width: 100%;
     max-width: 640px;
     margin: 1rem auto; /* 左右をautoにして中央寄せ */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Override ChatInput styles for hero variant */

@@ -235,6 +235,8 @@ function App() {
     // ★Phase 2: サニタイズ通知
     sanitizeNotification,
     setSanitizeNotification,
+    // ★追加: 状態リセット関数
+    resetChatState,
   } = useChat(
     mockMode,
     authUser?.userId,
@@ -251,6 +253,16 @@ function App() {
       ? { ...settings.prompt, displayName: settings?.profile?.displayName || '' }
       : undefined
   );
+
+  // ★追加: 会話切り替え・新規チャット開始時のハンドラー
+  const handleSetConversationId = (id) => {
+    if (id === null) {
+      // 新しいチャットを始める際は検索設定や添付ファイルをリセット
+      resetChatState();
+      setMessages([]);
+    }
+    setConversationId(id);
+  };
 
   // ★追加: IntelligenceErrorHandler
   const errorIntelligence = useErrorIntelligence();
@@ -311,6 +323,7 @@ function App() {
 
   const handleMockModeChange = (newMode) => {
     setMockMode(newMode);
+    resetChatState();
     setConversationId(null);
     setMessages([]);
     setIsArtifactOpen(false);
@@ -325,6 +338,7 @@ function App() {
     onboardingState.resetOnboarding();
 
     // 2. 現在の会話選択を解除（これによりWelcomeScreenが表示される）
+    resetChatState();
     setConversationId(null);
     setMessages([]);
 
@@ -495,7 +509,7 @@ function App() {
                 <motion.div variants={sidebarVariants} style={{ height: '100%' }}>
                   <Sidebar
                     conversationId={conversationId}
-                    setConversationId={setConversationId}
+                    setConversationId={handleSetConversationId}
                     conversations={conversations}
                     onDeleteConversation={handleDeleteConversation}
                     onRenameConversation={handleRenameConversation}
@@ -539,7 +553,7 @@ function App() {
                             isGenerating={isGenerating}
                             isHistoryLoading={isHistoryLoading}
                             conversationId={conversationId}
-                            setConversationId={setConversationId}
+                            setConversationId={handleSetConversationId}
                             addLog={addLog}
                             handleConversationCreated={handleConversationCreated}
                             activeContextFiles={activeContextFiles}
@@ -570,7 +584,7 @@ function App() {
                             isGenerating={isGenerating}
                             isHistoryLoading={isHistoryLoading}
                             conversationId={conversationId}
-                            setConversationId={setConversationId}
+                            setConversationId={handleSetConversationId}
                             addLog={addLog}
                             handleConversationCreated={handleConversationCreated}
                             activeContextFiles={activeContextFiles}

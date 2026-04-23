@@ -24,7 +24,7 @@
   background: var(--color-bg-surface);
   border-radius: var(--radius-2xl);
   padding: var(--space-6);
-  max-width: 400px;
+  max-width: 720px; /* 400px から拡張 */
   width: 90%;
   text-align: center;
   box-shadow: var(--shadow-lg);
@@ -163,7 +163,7 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  margin: var(--space-3) 0 0 0;
+  margin: 0;
   background: rgba(220, 38, 38, 0.06);
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: var(--radius-lg);
@@ -209,27 +209,62 @@
 
 /* 検知項目スクロールエリア */
 .privacy-confirm-detections-scroll {
-  max-height: 280px;
+  max-height: 400px;
   overflow-y: auto;
-  margin-bottom: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+/* 2カラムレイアウト（メイン） */
+.privacy-confirm-main-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+  text-align: left;
+}
+
+/* 右カラムの構成 */
+.privacy-confirm-col-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.privacy-confirm-warning-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-height: 180px; /* 複数の警告が出る場合に備えて制限 */
+  overflow-y: auto;
   padding-right: var(--space-1);
 }
 
+.privacy-confirm-footer-content {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
 /* スクロールバースタイル */
-.privacy-confirm-detections-scroll::-webkit-scrollbar {
+.privacy-confirm-detections-scroll::-webkit-scrollbar,
+.privacy-confirm-warning-group::-webkit-scrollbar {
   width: 6px;
 }
 
-.privacy-confirm-detections-scroll::-webkit-scrollbar-track {
+.privacy-confirm-detections-scroll::-webkit-scrollbar-track,
+.privacy-confirm-warning-group::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.privacy-confirm-detections-scroll::-webkit-scrollbar-thumb {
+.privacy-confirm-detections-scroll::-webkit-scrollbar-thumb,
+.privacy-confirm-warning-group::-webkit-scrollbar-thumb {
   background-color: var(--color-border-strong);
   border-radius: 3px;
 }
 
-.privacy-confirm-detections-scroll::-webkit-scrollbar-thumb:hover {
+.privacy-confirm-detections-scroll::-webkit-scrollbar-thumb:hover,
+.privacy-confirm-warning-group::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-text-muted);
 }
 
@@ -251,14 +286,16 @@
 .privacy-confirm-message {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  margin: var(--space-4) 0 var(--space-6) 0;
+  margin: 0 0 var(--space-4) 0;
   line-height: 1.5;
+  text-align: center;
 }
 
 /* アクションボタン */
 .privacy-confirm-actions {
   display: flex;
-  gap: var(--space-3);
+  flex-direction: column; /* 縦並び */
+  gap: var(--space-2);
   justify-content: center;
 }
 
@@ -270,7 +307,7 @@
   font-weight: var(--font-medium);
   cursor: pointer;
   transition: all 0.15s ease;
-  min-width: 120px;
+  width: 100%; /* 全幅 */
 }
 
 .privacy-confirm-btn-cancel {
