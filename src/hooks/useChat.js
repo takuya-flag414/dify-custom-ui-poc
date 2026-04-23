@@ -348,8 +348,26 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 weekday: 'long', hour: '2-digit', minute: '2-digit'
             });
 
-            // ★追加: Artifact受信完了済みかどうかを判定
-            const hasReceivedArtifact = messages.some(m => m.role === 'ai' && m.artifact);
+            // ★追加: Artifact受信完了済みかどうかをタイプ別に判定
+            const ARTIFACT_TYPES = [
+                'html_document',
+                'html_slide',
+                'summary_report',
+                'checklist',
+                'comparison_table',
+                'faq',
+                'meeting_minutes'
+            ];
+
+            // 履歴から受信済みのタイプを抽出
+            const receivedTypes = new Set();
+            messages.forEach(m => {
+                if (m.role === 'ai' && m.artifact?.artifact_type) {
+                    receivedTypes.add(m.artifact.artifact_type);
+                }
+            });
+
+            const hasReceivedAnyArtifact = receivedTypes.size > 0;
 
             const difyInputs = {
                 rag_enabled: currentSettings.ragEnabled ? 'true' : 'false',
@@ -360,8 +378,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 system_prompt: JSON.stringify(systemPromptPayload),
                 reasoning_mode: currentSettings.reasoningMode || 'fast',
                 gemini_store_id: currentSettings.selectedStoreId || '',
-                has_received_artifact: hasReceivedArtifact,
+                has_received_artifact: hasReceivedAnyArtifact ? 'true' : 'false',
             };
+
+            // 各タイプ別のフラグを追加
+            ARTIFACT_TYPES.forEach(type => {
+                difyInputs[`has_received_${type}`] = receivedTypes.has(type) ? 'true' : 'false';
+            });
 
             const structuredQuery = buildStructuredMessage(
                 text,

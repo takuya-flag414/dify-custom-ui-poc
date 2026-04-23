@@ -39,6 +39,7 @@ const ChatArea = (props) => {
     mockMode = 'OFF',
     backendBApiKey = '',
     backendBApiUrl = '',
+    sendKey = 'enter',
   } = props;
 
   // ★追加: 自動スクロール有効状態管理
@@ -247,6 +248,7 @@ const ChatArea = (props) => {
               mockMode={mockMode}
               backendBApiKey={backendBApiKey}
               backendBApiUrl={backendBApiUrl}
+              sendKey={sendKey}
             />
           </div>
         </>
@@ -266,6 +268,7 @@ const ChatArea = (props) => {
           backendBApiUrl={backendBApiUrl}
           activeArtifact={activeArtifact} // ★追加
           setActiveArtifact={setActiveArtifact} // ★追加
+          sendKey={sendKey}
         />
       ) : (
         <>
@@ -309,6 +312,7 @@ const ChatArea = (props) => {
               onRemoveQuote={() => setQuoteContext(null)} // ★追加: 引用クリアハンドラ
               activeArtifact={activeArtifact} // ★追加
               setActiveArtifact={setActiveArtifact} // ★追加
+              sendKey={sendKey}
             />
           </div>
         </>

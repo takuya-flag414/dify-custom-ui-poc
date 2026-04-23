@@ -18,6 +18,7 @@ import StructuredUserMessage from './StructuredUserMessage';
 import { parseStructuredMessage, extractPlainText } from '../../utils/messageSerializer';
 import { FEATURE_FLAGS } from '../../config/featureFlags';
 import ArtifactCard from '../Artifacts/ArtifactCard';
+import { ENABLE_MESSAGE_EDIT, ENABLE_MESSAGE_REGENERATE } from '../../config/env';
 
 // ★追加: 引用アイコン
 const ReplyIcon = () => (
@@ -325,7 +326,7 @@ const MessageBlock = ({
 
     // ★追加: ユーザーメッセージの編集ボタン
     const renderEditButton = () => {
-        if (isAi || isStreaming || isEditing) return null;
+        if (!ENABLE_MESSAGE_EDIT || isAi || isStreaming || isEditing) return null;
         return (
             <button
                 className="message-edit-btn"
@@ -340,7 +341,7 @@ const MessageBlock = ({
     // ★追加: AI回答の再送信ボタン（アイコンのみ）
     // ストリーミング中もDOMを維持（レイアウトシフト防止）
     const renderRegenerateButton = () => {
-        if (!isAi) return null;
+        if (!ENABLE_MESSAGE_REGENERATE || !isAi) return null;
         const isHidden = isStreaming || !isLastAiMessage || !onRegenerate;
         return (
             <button

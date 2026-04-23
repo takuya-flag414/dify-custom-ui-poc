@@ -67,3 +67,9 @@ export const ENABLE_SPECIFY_WEBSITE = import.meta.env.VITE_ENABLE_SPECIFY_WEBSIT
 
 // 「Artifact を作成」を表示するかどうか（デフォルトは true: 表示）
 export const ENABLE_CREATE_ARTIFACT = import.meta.env.VITE_ENABLE_CREATE_ARTIFACT !== 'false';
+
+// メッセージ編集機能を有効にするかどうか（デフォルトは true: 表示）
+export const ENABLE_MESSAGE_EDIT = import.meta.env.VITE_ENABLE_MESSAGE_EDIT !== 'false';
+
+// 回答の再生成機能を有効にするかどうか（デフォルトは true: 表示）
+export const ENABLE_MESSAGE_REGENERATE = import.meta.env.VITE_ENABLE_MESSAGE_REGENERATE !== 'false';

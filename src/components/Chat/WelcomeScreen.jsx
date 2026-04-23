@@ -50,6 +50,7 @@ const WelcomeScreen = ({
     backendBApiUrl = '',
     activeArtifact, // ★追加
     setActiveArtifact, // ★追加
+    sendKey,
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
@@ -128,6 +129,7 @@ const WelcomeScreen = ({
                             backendBApiUrl={backendBApiUrl}
                             activeArtifact={activeArtifact} // ★追加
                             setActiveArtifact={setActiveArtifact} // ★追加
+                            sendKey={sendKey}
                         />
 
                         {/* さりげないマニュアルリンク */}

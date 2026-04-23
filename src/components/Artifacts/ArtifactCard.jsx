@@ -1,5 +1,6 @@
 // src/components/Artifacts/ArtifactCard.jsx
 import React from 'react';
+import { motion } from 'framer-motion';
 import './ArtifactCard.css';
 
 /**
@@ -28,17 +29,32 @@ const ChevronRight = () => (
 
 /**
  * チャット内に表示される「Artifactへのリンク」カード（仕様書3.2準拠）
- * @param {string} title - artifact_title
- * @param {string} type - artifact_type (summary_report, checklist, etc.)
- * @param {string} content - artifact_content
- * @param {Array} citations - citations配列
- * @param {Function} onClick - クリック時のハンドラ
+ * macOS Sequoia & Apple Intelligence デザイン刷新版
  */
 const ArtifactCard = ({ title, type, content, citations = [], onClick }) => {
     const typeInfo = getTypeInfo(type);
 
     return (
-        <div className="artifact-card" onClick={() => onClick({ title, type, content, citations })}>
+        <motion.div
+            className="artifact-card"
+            onClick={() => onClick({ title, type, content, citations })}
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            whileHover={{ 
+                scale: 1.02, 
+                y: -2,
+                transition: { type: "spring", stiffness: 400, damping: 25 }
+            }}
+            whileTap={{ 
+                scale: 0.98,
+                transition: { type: "spring", stiffness: 500, damping: 30 }
+            }}
+            transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 20
+            }}
+        >
             <div className="artifact-icon-box">
                 <span className="artifact-type-emoji">{typeInfo.emoji}</span>
             </div>
@@ -46,14 +62,14 @@ const ArtifactCard = ({ title, type, content, citations = [], onClick }) => {
                 <div className="artifact-card-title">{title || 'Untitled'}</div>
                 <div className="artifact-card-desc">
                     <span className="artifact-type-badge">{typeInfo.label}</span>
-                    クリックして表示
+                    <span>クリックして表示</span>
                 </div>
             </div>
             <div className="artifact-arrow">
                 <ChevronRight />
             </div>
-        </div>
+        </motion.div>
     );
 };
 
-export default ArtifactCard;
+export default ArtifactCard;

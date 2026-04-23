@@ -574,6 +574,7 @@ function App() {
                             mockMode={mockMode}
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
+                            sendKey={settings?.general?.sendKey || 'enter'}
                           />
                         } />
                         <Route path="/chat/:conversationId" element={
@@ -605,6 +606,7 @@ function App() {
                             mockMode={mockMode}
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
+                            sendKey={settings?.general?.sendKey || 'enter'}
                           />
                         } />
                         <Route path="*" element={<Navigate to="/chat" replace />} />

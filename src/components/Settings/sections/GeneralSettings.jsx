@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import {
   Moon, Sun, Monitor,
-  RotateCcw, Type, Keyboard,
-  MousePointer2, Laptop
+  RotateCcw, Keyboard,
+  Laptop
 }
   from 'lucide-react';
 import { MacSettingsSection, MacSettingsRow, MacSelect } from './MacSettingsComponents';
@@ -39,6 +39,7 @@ const GeneralSettings = ({ settings, onUpdateSettings, onResetOnboarding }) => {
         <MacSettingsRow
           icon={Laptop}
           label="外観モード"
+          isLast
         >
           <div className="mac-segmented">
             <button
@@ -60,37 +61,6 @@ const GeneralSettings = ({ settings, onUpdateSettings, onResetOnboarding }) => {
               <Monitor size={12} /> Auto
             </button>
           </div>
-        </MacSettingsRow>
-
-        {/* Font Size */}
-        <MacSettingsRow
-          icon={Type}
-          label="文字サイズ"
-        >
-          <MacSelect
-            value={currentFontSize}
-            onChange={(e) => onUpdateSettings('general', 'fontSize', e.target.value)}
-            options={[
-              { value: 'small', label: '小 (15px)' },
-              { value: 'medium', label: '標準 (17px)' },
-              { value: 'large', label: '大 (19px)' }
-            ]}
-          />
-        </MacSettingsRow>
-
-        {/* Reduce Motion - Last Item */}
-        <MacSettingsRow
-          icon={MousePointer2}
-          label="視差効果を減らす"
-          description="アニメーションを抑制し、パフォーマンスを優先します"
-          isLast
-        >
-          <input
-            type="checkbox"
-            className="mac-toggle"
-            checked={reduceMotion}
-            onChange={() => onUpdateSettings('general', 'reduceMotion', !reduceMotion)}
-          />
         </MacSettingsRow>
       </MacSettingsSection>
 

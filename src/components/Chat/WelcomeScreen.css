@@ -64,9 +64,9 @@
     transition: background-image 0.4s ease-in-out;
 }
 
-/* [data-theme='dark'] .welcome-container--zen.bg-early-summer {
+[data-theme='dark'] .welcome-container--zen.bg-early-summer {
     background-image: url('/svg/early-summer-background-dark.svg');
-} */
+}
 
 /* === Content Wrapper === */
 .welcome-inner {

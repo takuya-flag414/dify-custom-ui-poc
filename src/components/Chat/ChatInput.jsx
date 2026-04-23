@@ -36,6 +36,7 @@ const ChatInput = ({
   activeArtifact, // ★追加: Propsから受け取る
   setActiveArtifact, // ★追加: Propsから受け取る
   activeContextFiles = [], // ★追加: セッションファイル
+  sendKey = 'enter',
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -103,6 +104,7 @@ const ChatInput = ({
     const options = {
       sanitizeExcludeTypes: excludedTypes,
       quote,
+      currentArtifactType: activeArtifact?.type,
       ...(activeArtifact && { artifact: { requested: true, type: activeArtifact.type } })
     };
     onSendMessage(plainTextToSend, filesToSend, options);
@@ -142,7 +144,13 @@ const ChatInput = ({
 
   const handleKeyDown = (e) => {
     if (e.nativeEvent.isComposing || e.keyCode === 229) return;
-    if (e.key === 'Enter' && !e.shiftKey) {
+
+    // 設定に基づいた送信判定
+    const isSendKey = (sendKey === 'ctrl_enter')
+      ? (e.ctrlKey || e.metaKey) && e.key === 'Enter' // Ctrl + Enter モード
+      : e.key === 'Enter' && !e.shiftKey;           // Enter モード (Shiftなし)
+
+    if (isSendKey) {
       e.preventDefault();
       handleSend();
     }

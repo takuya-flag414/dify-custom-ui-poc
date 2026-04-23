@@ -63,6 +63,7 @@ const ChatView = ({
     mockMode,
     backendBApiKey,
     backendBApiUrl,
+    sendKey,
 }) => {
     const { conversationId: urlConversationId } = useParams();
     const navigate = useNavigate();
@@ -157,6 +158,7 @@ const ChatView = ({
                 mockMode={mockMode}
                 backendBApiKey={backendBApiKey}
                 backendBApiUrl={backendBApiUrl}
+                sendKey={sendKey}
             />
         </motion.div>
     );
