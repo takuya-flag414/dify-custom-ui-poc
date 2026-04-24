@@ -64,6 +64,9 @@ const ChatView = ({
     backendBApiKey,
     backendBApiUrl,
     sendKey,
+    newChatTrigger,
+    restoreText,              // ★追加: 復元テキスト
+    onRestoreTextConsumed,    // ★追加: 復元完了コールバック
 }) => {
     const { conversationId: urlConversationId } = useParams();
     const navigate = useNavigate();
@@ -119,7 +122,7 @@ const ChatView = ({
 
     return (
         <motion.div
-            key={`chat-view-${urlConversationId || 'new'}`}
+            key={`chat-view-${urlConversationId || `new-${newChatTrigger}`}`}
             variants={pageTransitionVariants}
             initial="initial"
             animate="enter"
@@ -159,6 +162,8 @@ const ChatView = ({
                 backendBApiKey={backendBApiKey}
                 backendBApiUrl={backendBApiUrl}
                 sendKey={sendKey}
+                restoreText={restoreText}
+                onRestoreTextConsumed={onRestoreTextConsumed}
             />
         </motion.div>
     );

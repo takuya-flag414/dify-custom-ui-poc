@@ -37,10 +37,15 @@ const ChatInput = ({
   setActiveArtifact, // ★追加: Propsから受け取る
   activeContextFiles = [], // ★追加: セッションファイル
   sendKey = 'enter',
+  // ★追加: エラー/停止時のテキスト復元
+  restoreText = null,
+  onRestoreTextConsumed,
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const getPlainTextRef = useRef(null); // ★追加: プレーンテキスト抽出用Ref
+  // ★追加: テキスト復元時にフォーカスを強制するトリガー
+  const [restoreFocusTrigger, setRestoreFocusTrigger] = useState(0);
 
   // showAddMenu state is now managed inside ControlDeck (or triggered via props)
   // We only need to trigger store loading when menu opens.
@@ -93,6 +98,19 @@ const ChatInput = ({
       setActiveStore(null);
     }
   }, [searchSettings.selectedStoreId, stores]);
+
+  // ★追加: テキスト復元処理（エラー時/停止時）
+  useEffect(() => {
+    if (restoreText !== null && restoreText !== undefined) {
+      setText(restoreText);
+      // フォーカストリガーを更新（InputCanvasのfocusTriggerが反応）
+      setRestoreFocusTrigger(prev => prev + 1);
+      // 親に復元完了を通知
+      if (onRestoreTextConsumed) {
+        onRestoreTextConsumed();
+      }
+    }
+  }, [restoreText]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const executeSend = useCallback((excludedTypes = []) => {
     const filesToSend = selectedFiles.map(sf => sf.file);
@@ -350,7 +368,7 @@ const ChatInput = ({
             disabled={isLoading}
             placeholder={placeholder}
             isHistoryLoading={isHistoryLoading}
-            focusTrigger={quote} // ★追加: quoteが変更されたらフォーカスするトリガーとして渡す
+            focusTrigger={quote || restoreFocusTrigger || undefined} // ★改修: quoteまたは復元時にフォーカス
             availableFiles={availableFiles} // ★追加: メンション候補ファイル
             onTextExtract={(fn) => { getPlainTextRef.current = fn; }} // ★追加: テキスト抽出関数を受け取る
           />

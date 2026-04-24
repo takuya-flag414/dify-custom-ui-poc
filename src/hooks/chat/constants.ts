@@ -53,6 +53,10 @@ export const NODE_DISPLAY_MAP: Record<string, NodeDisplayInfo> = {
     'LLM_Fast_Doc': { title: 'ドキュメントを高速分析中...', icon: 'writing', renderMode: 'silent', thinkingText: '回答を生成中...' },
     'LLM_Fast_General': { title: '高速回答を生成中...', icon: 'writing', renderMode: 'silent', thinkingText: '回答を生成中...' },
 
+    // アーティファクト生成ノード (時間がかかる処理)
+    'LLM_Artifact_Slide_Generator': { title: 'スライドを生成中...', icon: 'writing', renderMode: 'silent', thinkingText: 'このタスクは時間がかかります。今しばらくお待ちください。' },
+    'LLM_Artifact_Doc_Generator': { title: 'ドキュメントを生成中...', icon: 'writing', renderMode: 'silent', thinkingText: 'このタスクは時間がかかります。今しばらくお待ちください。' },
+
     // ツールノード (動的タイトル生成)
     'TOOL_Doc_Extractor': { title: 'ドキュメントを解析中...', icon: 'document', dynamic: 'document' },
     'TOOL_Perplexity_Search': { title: 'Web検索中...', icon: 'search', dynamic: 'search' },

@@ -20,6 +20,26 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* Custom Scrollbar */
+.onboarding-screen-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.onboarding-screen-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.onboarding-screen-content::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 10px;
+}
+
+.onboarding-screen-content::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
 }
 
 /* Background Shapes for Slide Design */
@@ -116,10 +136,11 @@
     background: transparent;
     border: none;
     box-shadow: none;
-    min-height: 440px;
+    min-height: min-content;
     flex: 1;
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start; /* Changed from center */
+    padding-top: var(--space-12);
 }
 
 /* スライド風2カラムレイアウト用 */
@@ -127,6 +148,7 @@
     flex-direction: row;
     text-align: left;
     gap: 8vw;
+    align-items: flex-start; /* Ensure top alignment on small height */
 }
 
 .onboarding-step-left {

@@ -70,14 +70,7 @@ const RetryIcon = () => (
     </svg>
 );
 
-const ICON_MAP: Record<string, React.FC> = {
-    clock: ClockIcon,
-    chat: ChatIcon,
-    shield: ShieldIcon,
-    wifi: WifiIcon,
-    settings: SettingsIcon,
-    alert: AlertIcon,
-};
+// ICON_MAP は追加アイコンセクション内で定義（lock, file, search 含む）
 
 // ========================================
 // Animation Variants
@@ -124,6 +117,77 @@ const shakeVariants = {
 };
 
 // ========================================
+// Additional Icons (★追加)
+// ========================================
+
+const LockIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+);
+
+const FileIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+    </svg>
+);
+
+const SearchIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+);
+
+const ChevronDownIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 12 15 18 9" />
+    </svg>
+);
+
+const ICON_MAP: Record<string, React.FC> = {
+    clock: ClockIcon,
+    chat: ChatIcon,
+    shield: ShieldIcon,
+    wifi: WifiIcon,
+    settings: SettingsIcon,
+    alert: AlertIcon,
+    lock: LockIcon,
+    file: FileIcon,
+    search: SearchIcon,
+};
+
+// ========================================
+// Animation Variants (★追加: アコーディオン)
+// ========================================
+
+const detailsVariants = {
+    closed: {
+        height: 0,
+        opacity: 0,
+        transition: {
+            height: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+            opacity: { duration: 0.15 },
+        },
+    },
+    open: {
+        height: 'auto',
+        opacity: 1,
+        transition: {
+            height: {
+                type: 'spring' as const,
+                stiffness: 250,
+                damping: 25,
+                mass: 1,
+            },
+            opacity: { duration: 0.2, delay: 0.1 },
+        },
+    },
+};
+
+// ========================================
 // Props
 // ========================================
 
@@ -162,6 +226,8 @@ const ErrorGlassCard: React.FC<ErrorGlassCardProps> = ({
 }) => {
     // Shake アニメーション制御
     const [shouldShake, setShouldShake] = useState(false);
+    // ★追加: 詳細表示のトグル
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     useEffect(() => {
         if (shakeKey > 0) {
@@ -170,6 +236,14 @@ const ErrorGlassCard: React.FC<ErrorGlassCardProps> = ({
             return () => clearTimeout(timer);
         }
     }, [shakeKey]);
+
+    // エラーが変わったら詳細を閉じる
+    useEffect(() => {
+        setIsDetailsOpen(false);
+    }, [error?.type]);
+
+    // 詳細表示が可能か（生メッセージまたはステータスコードがある場合）
+    const hasDetails = error && (error.rawErrorMessage || error.statusCode);
 
     return (
         <div className="error-hud-overlay">
@@ -200,32 +274,74 @@ const ErrorGlassCard: React.FC<ErrorGlassCardProps> = ({
 
                             {/* Body */}
                             <div className="error-glass-body">
+                                {/* 第1段階: ユーザー向け表示（常に表示） */}
                                 <div className="error-glass-title">{error.title}</div>
                                 <div className="error-glass-desc">{error.description}</div>
 
-                                {/* Auto-Retry Status */}
-                                {error.action === 'auto-retry' && (
+                                {/* Auto-Retry Status（★改修: 表示文言を強化） */}
+                                {error.retryStrategy === 'auto-retry' && (
                                     <div className="error-glass-retry-status">
                                         {isRetrying ? (
                                             <>
                                                 <div className="error-glass-spinner" />
-                                                <span>{retryCountdown}秒後に再試行...</span>
+                                                <span>
+                                                    通信が不安定なため、自動で再送信を試みています...
+                                                    {retryCountdown > 0 && ` (${retryCountdown}秒後)`}
+                                                </span>
                                                 {retryCount > 0 && (
-                                                    <span style={{ opacity: 0.6 }}>
-                                                        ({retryCount}/{error.maxRetries}回目)
+                                                    <span className="error-glass-retry-count">
+                                                        ({retryCount}/{error.maxRetries})
                                                     </span>
                                                 )}
                                             </>
                                         ) : (
                                             <>
-                                                <div className="error-glass-countdown">
-                                                    {retryCountdown}
-                                                </div>
+                                                <div className="error-glass-spinner" />
                                                 <span>自動リトライ待機中...</span>
                                             </>
                                         )}
                                     </div>
                                 )}
+
+                                {/* ★追加: 第2段階トグル（詳細表示ボタン） */}
+                                {hasDetails && (
+                                    <button
+                                        className={`error-glass-details-toggle ${isDetailsOpen ? 'is-open' : ''}`}
+                                        onClick={() => setIsDetailsOpen(prev => !prev)}
+                                        aria-expanded={isDetailsOpen}
+                                    >
+                                        <span>エラーの詳細を確認する</span>
+                                        <ChevronDownIcon />
+                                    </button>
+                                )}
+
+                                {/* ★追加: 第2段階 - 詳細表示（アコーディオン） */}
+                                <AnimatePresence initial={false}>
+                                    {isDetailsOpen && hasDetails && (
+                                        <motion.div
+                                            key="error-details"
+                                            className="error-glass-details"
+                                            variants={detailsVariants}
+                                            initial="closed"
+                                            animate="open"
+                                            exit="closed"
+                                            style={{ overflow: 'hidden' }}
+                                        >
+                                            <div className="error-glass-details-content">
+                                                {error.statusCode && (
+                                                    <div className="error-glass-details-status">
+                                                        HTTP {error.statusCode}
+                                                    </div>
+                                                )}
+                                                {error.rawErrorMessage && (
+                                                    <pre className="error-glass-details-raw">
+                                                        {error.rawErrorMessage}
+                                                    </pre>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
                                 {/* Action Buttons */}
                                 <div className="error-glass-actions">
@@ -283,3 +399,4 @@ const ErrorGlassCard: React.FC<ErrorGlassCardProps> = ({
 };
 
 export default ErrorGlassCard;
+

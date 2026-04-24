@@ -2,6 +2,8 @@
 // useChat.js から分離した停止・編集・再生成アクション
 
 import { stopGenerationApi } from '../../api/dify';
+// ★追加: 停止時にrawContentからSmartActionsを抽出するためのパーサー
+import { parseLlmResponse } from '../../utils/responseParser';
 
 /**
  * 生成停止処理を実行する
@@ -12,6 +14,7 @@ export const executeStopGeneration = async ({
   abortControllerRef,
   currentTaskIdRef,
   streamingMessageRef,
+  previousInputTextRef,  // ★追加: 入力テキスト復元用
   mockMode,
   apiKey,
   apiUrl,
@@ -42,6 +45,27 @@ export const executeStopGeneration = async ({
   // 3. ストリーミング中のメッセージがあれば、途中までのテキストを確定メッセージとして返す
   const currentStreaming = streamingMessageRef.current;
   if (currentStreaming) {
+    // ★追加: rawContentからSmartActionsの抽出を試みる
+    // workflow_finished到達前に停止された場合でも、JSONバッファに
+    // smart_actionsが含まれていればボタンを表示可能にする
+    let extractedSmartActions = [];
+    if (currentStreaming.rawContent) {
+      try {
+        const parsed = parseLlmResponse(currentStreaming.rawContent);
+        if (parsed.isParsed && parsed.smartActions && parsed.smartActions.length > 0) {
+          extractedSmartActions = parsed.smartActions;
+          addLog(`[Stop] SmartActions extracted from partial content: ${extractedSmartActions.length} actions`, 'info');
+        }
+      } catch (e) {
+        // パース失敗は無視（途中までのデータなので失敗は正常）
+      }
+    }
+
+    // ★追加: 停止時の入力テキストを取得
+    const inputText = previousInputTextRef?.current || null;
+    // refをクリア（使い切り）
+    if (previousInputTextRef) previousInputTextRef.current = null;
+
     return {
       stoppedMessage: {
         ...currentStreaming,
@@ -50,12 +74,16 @@ export const executeStopGeneration = async ({
         text: currentStreaming.text || '',
         thoughtProcess: currentStreaming.thoughtProcess?.map(t => ({ ...t, status: 'done' })) || [],
         suggestions: [],
-        smartActions: []
-      }
+        smartActions: extractedSmartActions
+      },
+      inputText, // ★追加: ChatInputへの復元用
     };
   }
 
-  return { stoppedMessage: null };
+  // ★追加: ストリーミング中でなくても入力テキストは復元
+  const inputText = previousInputTextRef?.current || null;
+  if (previousInputTextRef) previousInputTextRef.current = null;
+  return { stoppedMessage: null, inputText };
 };
 
 /**

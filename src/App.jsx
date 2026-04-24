@@ -89,6 +89,9 @@ function App() {
   // ★追加: Studiosギャラリー強制表示フラグ
   const [forceShowStudioGallery, setForceShowStudioGallery] = useState(false);
 
+  // ★追加: 新規チャット開始時のコンテキストリセット用トリガー
+  const [newChatTrigger, setNewChatTrigger] = useState(0);
+
   // ★ Phase A: currentUser を useAuth から取得したユーザー情報で構成
   // 認証済みの場合は authUser を使用、未認証の場合はフォールバック
   const currentUser = useMemo(() => {
@@ -260,6 +263,7 @@ function App() {
       // 新しいチャットを始める際は検索設定や添付ファイルをリセット
       resetChatState();
       setMessages([]);
+      setNewChatTrigger(prev => prev + 1); // ★追加: トリガーを更新
     }
     setConversationId(id);
   };
@@ -267,9 +271,21 @@ function App() {
   // ★追加: IntelligenceErrorHandler
   const errorIntelligence = useErrorIntelligence();
 
-  // ★追加: useChat の lastError を useErrorIntelligence にブリッジ
+  // ★追加: ChatInputへ復元するテキスト（エラー/停止時）
+  const [pendingRestoreText, setPendingRestoreText] = useState(null);
+
+  // ★改修: useChat の lastError を useErrorIntelligence にブリッジ（inputText/statusCode対応）
   useEffect(() => {
     if (lastError) {
+      // ★追加: 停止時のテキスト復元（エラーではないのでErrorGlassCardは表示しない）
+      if (lastError.isStopRestore) {
+        if (lastError.inputText) {
+          setPendingRestoreText(lastError.inputText);
+        }
+        setLastError(null);
+        return;
+      }
+
       errorIntelligence.reportError(lastError.raw, () => {
         // リトライコールバック: 最後のユーザーメッセージを再送信
         // ★修正: extractPlainText で構造化JSONからプレーンテキストを抽出し、二重ラップを防止
@@ -278,12 +294,24 @@ function App() {
           const plainText = extractPlainText(lastUserMsg.text);
           handleSendMessage(plainText, []);
         }
+      }, {
+        inputText: lastError.inputText || undefined,
+        statusCode: lastError.statusCode || undefined,
       });
       setLastError(null); // クリア
     }
   }, [lastError]);
 
+  // ★追加: useErrorIntelligence の pendingInputText を ChatInput へ伝搬
+  useEffect(() => {
+    if (errorIntelligence.pendingInputText) {
+      setPendingRestoreText(errorIntelligence.pendingInputText);
+      errorIntelligence.clearPendingInput();
+    }
+  }, [errorIntelligence.pendingInputText]);
+
   // ★追加: ストリーミング中のArtifact検出で即座にパネルを開く
+
   // artifact_contentの受信を検知したら、ユーザーがリアルタイム表示を確認できるようにする
   const hasOpenedForStreamingRef = useRef(false);
   useEffect(() => {
@@ -575,6 +603,9 @@ function App() {
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
                             sendKey={settings?.general?.sendKey || 'enter'}
+                            newChatTrigger={newChatTrigger}
+                            restoreText={pendingRestoreText}
+                            onRestoreTextConsumed={() => setPendingRestoreText(null)}
                           />
                         } />
                         <Route path="/chat/:conversationId" element={
@@ -607,6 +638,9 @@ function App() {
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
                             sendKey={settings?.general?.sendKey || 'enter'}
+                            newChatTrigger={newChatTrigger}
+                            restoreText={pendingRestoreText}
+                            onRestoreTextConsumed={() => setPendingRestoreText(null)}
                           />
                         } />
                         <Route path="*" element={<Navigate to="/chat" replace />} />

@@ -94,6 +94,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     const currentTaskIdRef = useRef(null);
     // ★追加: 最後のユーザーメッセージを追跡（再送信用）
     const lastUserMessageRef = useRef(null);
+    // ★追加: SSEストリーム排他制御用のリクエストID
+    // 新しいリクエスト開始時に更新し、古いストリームのイベントを無視するために使用
+    const activeRequestIdRef = useRef(null);
+    // ★追加: エラー/停止時にChatInputへ復元する入力テキストの一時保存
+    const previousInputTextRef = useRef(null);
 
     // ★追加: IntelligenceErrorHandler連携用
     // エラー発生時にエラー情報をstateに保持し、App.jsxのuseErrorIntelligenceが検知する
@@ -194,6 +199,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         const tracker = createPerfTracker(addLog);
         tracker.markStart();
 
+        // ★追加: 送信テキストを一時保存（エラー/停止時の復元用）
+        previousInputTextRef.current = text;
+
         // 1. Config Validation
         if ((mockMode === 'OFF' || mockMode === 'BE') && (!apiKey || !apiUrl || !userId)) {
             const userMessage = {
@@ -264,6 +272,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
         setIsGenerating(true);
 
+        // ★追加: SSEストリーム排他制御 - 新しいリクエストIDを生成し、前回のリクエストを無効化
+        // これにより古いストリームのイベントハンドラが自動的に無視される
+        const requestId = `req_${Date.now()}`;
+        activeRequestIdRef.current = requestId;
+
         // ★変更: ストリーミング中はstreamingMessage stateで管理（messages配列を更新しない）
         const initialAiMessage = {
             id: aiMessageId,
@@ -314,8 +327,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         // 5. Send Request via Adapter
         let reader;
         try {
-            // sessionFilesと新規アップロードファイル、さらに復元ファイルを合わせた配列を作成
-            const allFilesToSend = [...sessionFiles, ...uploadedFiles, ...restoredFiles];
+            // ★修正: 現在の添付ファイル（新規アップロード + 入力欄にある既存）のみを対象にする
+            // sessionFiles (履歴全体の蓄積) は含めないことで、期限切れIDの送信を防ぐ
+            const activeAttachments = [...uploadedFiles, ...restoredFiles];
+
+            // IDでユニーク化して安全性を確保
+            const allFilesToSend = Array.from(
+                new Map(activeAttachments.map(f => [f.id, f])).values()
+            );
 
             // ★構造化メッセージの構築 (Protocol v1.0)
             const intelligenceMode = currentSettings.reasoningMode === 'deep' ? 'deep' : 'speed';
@@ -484,6 +503,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             let lineBuffer = '';
 
             while (true) {
+                // ★追加: SSEストリーム排他制御 - 古いリクエストのイベントを無視
+                // stopGeneration() または新しいhandleSendMessage()でIDが変更された場合、
+                // このループを安全に終了して競合を防ぐ
+                if (activeRequestIdRef.current !== requestId) {
+                    addLog('[Stream] Stale request detected, exiting stream loop', 'warn');
+                    break;
+                }
                 const { value, done } = await reader.read();
                 tracker.markFirstByte();
                 if (done) {
@@ -825,12 +851,19 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 const errorCode = data.code || 'UNKNOWN';
                                 const errorMessage = data.message || '不明なエラーが発生しました';
                                 const fullErrorMsg = `${errorCode}: ${errorMessage}`;
-                                addLog(`[SSE Error] ${fullErrorMsg}`, 'error');
+                                // ★追加: SSEエラーからHTTPステータスコードを抽出
+                                const sseStatusCode = data.status || data.code || null;
+                                addLog(`[SSE Error] ${fullErrorMsg} (status: ${sseStatusCode})`, 'error');
 
                                 // ストリーミング中のメッセージをクリーンアップ
                                 setStreamingMessage(null);
-                                // IntelligenceErrorHandler にエラーを報告
-                                setLastError({ raw: fullErrorMsg, timestamp: Date.now() });
+                                // ★改修: IntelligenceErrorHandler にエラー + 入力テキスト + ステータスコードを報告
+                                setLastError({
+                                    raw: fullErrorMsg,
+                                    timestamp: Date.now(),
+                                    inputText: previousInputTextRef.current,
+                                    statusCode: typeof sseStatusCode === 'number' ? sseStatusCode : null,
+                                });
                             }
                         } catch (e) {
                             console.error('Stream Parse Error:', e);
@@ -844,9 +877,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
         } catch (error) {
             addLog(`[Stream Error] ${error.message}`, 'error');
-            // ★変更: IntelligenceErrorHandler にエラーを委譲
+            // ★改修: IntelligenceErrorHandler にエラー + 入力テキスト + ステータスコードを委譲
             setStreamingMessage(null);
-            setLastError({ raw: error.message, timestamp: Date.now() });
+            setLastError({
+                raw: error.message,
+                timestamp: Date.now(),
+                inputText: previousInputTextRef.current,
+                statusCode: error.status || null,
+            });
             setIsGenerating(false);
         }
     };
@@ -884,10 +922,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
     // ★リファクタリング: 生成停止関数
     const stopGeneration = useCallback(async () => {
+        // ★追加: SSEストリーム排他制御 - 現在のリクエストを無効化
+        // これにより進行中のSSEイベントループが次のイテレーションで安全に終了する
+        activeRequestIdRef.current = null;
+
         const result = await executeStopGeneration({
             abortControllerRef,
             currentTaskIdRef,
             streamingMessageRef,
+            previousInputTextRef,  // ★追加: 入力テキスト復元用
             mockMode,
             apiKey,
             apiUrl,
@@ -898,6 +941,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         if (result.stoppedMessage) {
             setMessages(prev => [...prev, result.stoppedMessage]);
             setStreamingMessage(null);
+        }
+
+        // ★追加: 停止時のテキスト復元をlastErrorとは別のchannelで通知
+        // inputTextがある場合はsetLastErrorで伝搬（App.jsx経由でChatInputに復元）
+        if (result.inputText) {
+            setLastError({
+                raw: '__STOP_RESTORE__',
+                timestamp: Date.now(),
+                inputText: result.inputText,
+                isStopRestore: true,
+            });
         }
 
         setIsGenerating(false);
