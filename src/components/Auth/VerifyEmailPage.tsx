@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+
 /**
  * メール認証リンククリック後の処理ページ
  * oobCodeをURLから取得してメール認証コードの検証を実行

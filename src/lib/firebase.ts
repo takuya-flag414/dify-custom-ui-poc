@@ -15,8 +15,12 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// 管理者による新規ユーザー作成用セカンダリアプリ (現在の管理者ログアウトを防ぐため)
+const secondaryApp = initializeApp(firebaseConfig, 'SecondaryAdminApp');
+
 // Initialize Services
 export const auth = getAuth(app);
+export const adminAuth = getAuth(secondaryApp);
 export const db = getFirestore(app);
 
 export default app;

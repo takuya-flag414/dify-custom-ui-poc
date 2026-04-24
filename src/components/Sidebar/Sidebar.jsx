@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon, Users as UsersIcon } from 'lucide-react';
 import DeletePopover from './DeletePopover';
 import ContextMenu from './ContextMenu';
 import { groupConversationsByDate } from '../../utils/dateUtils';
@@ -177,7 +177,8 @@ const Sidebar = ({
   isCollapsed,
   toggleSidebar,
   currentView: currentViewProp, // 後方互換のため残すが、URLから導出する
-  onViewChange
+  onViewChange,
+  currentUser
 }) => {
   // ★ URLルーティング: navigate/location を使用
   const navigate = useNavigate();
@@ -428,6 +429,34 @@ const Sidebar = ({
                     style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
                   >
                     Intelligence
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          )}
+
+          {/* Admin User Management Button */}
+          {currentUser?.role === 'admin' && (
+            <button
+              className={`footer-btn admin-btn ${currentView === 'admin' ? 'active' : ''}`}
+              onClick={() => onViewChange && onViewChange('admin')}
+              title="ユーザー管理"
+            >
+              <motion.div layout className="footer-icon-anchor">
+                <UsersIcon size={18} strokeWidth={2} />
+              </motion.div>
+
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10, width: 0 }}
+                    animate={{ opacity: 1, x: 0, width: 'auto' }}
+                    exit={{ opacity: 0, x: -10, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="footer-label"
+                    style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                  >
+                    ユーザー管理
                   </motion.span>
                 )}
               </AnimatePresence>
