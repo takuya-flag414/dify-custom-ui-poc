@@ -118,10 +118,8 @@ const SystemLogsScreen = () => {
                 };
             });
 
-            // 本登録完了ログをフィルタリングして確認
-            const accountVerifiedLogs = fetchedLogs.filter(log => log.action === 'ACCOUNT_VERIFIED');
-            console.log('🔍 [SystemLogs] Found', accountVerifiedLogs.length, 'ACCOUNT_VERIFIED logs:', accountVerifiedLogs);
-
+            // データをステートにセット（これを忘れていたため表示されなかった）
+            setLogs(fetchedLogs);
 
             // 2. Lazy cleanup (delete older than 30 days)
             lazyCleanup();
