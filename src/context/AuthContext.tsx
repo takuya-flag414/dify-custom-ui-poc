@@ -35,8 +35,6 @@ export interface AuthContextValue {
     login: (email: string, password: string) => Promise<LoginResult>;
     /** サインアップ関数 */
     signup: (email: string, password: string, displayName: string, securityInfo?: SecurityInfo) => Promise<{ message: string }>;
-    /** メール認証コード処理関数 */
-    verifyEmailCode: (oobCode: string) => Promise<void>;
     /** パスワードリセット関数 */
     resetPassword: (email: string) => Promise<void>;
     /** ログアウト関数 */
@@ -140,23 +138,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     }, []);
 
-    /**
-     * メール認証リンク処理（メールリンククリック時に呼び出す）
-     */
-    const verifyEmailCode = useCallback(async (oobCode: string): Promise<void> => {
-        try {
-            setError(null);
-            // new user has been verified, but they are not logged in yet.
-            setIsNewUser(true);
-            await authService.verifyEmailCode(oobCode);
-            console.log('[AuthContext] Email verification successful');
-        } catch (err) {
-            console.error('[AuthContext] Email verification failed:', err);
-            const errorMessage = err instanceof Error ? err.message : String(err);
-            setError(errorMessage);
-            throw err;
-        }
-    }, []);
 
     /**
      * パスワードリセットメール送信
@@ -257,14 +238,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isDevMode: IS_DEV_MODE,
         login,
         signup,
-        verifyEmailCode,
         resetPassword,
         logout,
         clearError,
         hasPermission,
         getUserRoles,
         switchRole,
-    }), [user, isLoading, error, isNewUser, login, signup, verifyEmailCode, resetPassword, logout, clearError, hasPermission, getUserRoles, switchRole]);
+    }), [user, isLoading, error, isNewUser, login, signup, resetPassword, logout, clearError, hasPermission, getUserRoles, switchRole]);
 
     return (
         <AuthContext.Provider value={contextValue}>

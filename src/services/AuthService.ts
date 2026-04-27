@@ -184,7 +184,7 @@ class AuthService {
      * システム監査ログの記録
      */
     private async _logAuditAction(
-        action: 'LOGIN_SUCCESS' | 'LOGIN_FAILED' | 'LOGOUT' | 'PASSWORD_RESET_REQUEST' | 'ACCOUNT_CREATED_PROVISIONAL' | 'ACCOUNT_VERIFIED' | 'ADMIN_CREATED_USER' | 'ACCOUNT_DELETED',
+        action: string, // 型を緩和して柔軟なアクション記録を可能にする
         targetEmail: string,
         targetUserId: string | null = null,
         details: Record<string, any> = {}
@@ -200,6 +200,7 @@ class AuthService {
                 email: targetEmail,
                 user_id: targetUserId,
                 session_id: sessionId,
+                project_id: import.meta.env.VITE_PROJECT_ID || 'unknown-project',
                 details
             });
             console.log(`[AuthService] Audit logged: ${action} for ${targetEmail} (session: ${sessionId})`);
@@ -300,7 +301,10 @@ class AuthService {
             // ログ記録
             this._logAuditAction('LOGIN_SUCCESS', profile.email, firebaseUser.uid, {
                 role: profile.role,
-                displayName: profile.displayName
+                displayName: profile.displayName,
+                method: firebaseUser.providerData[0]?.providerId || 'password',
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+                language: typeof navigator !== 'undefined' ? navigator.language : 'unknown'
             });
 
             console.log('[AuthService] Login successful:', profile.email);
@@ -312,10 +316,11 @@ class AuthService {
         } catch (error: any) {
             console.error('[AuthService] Login failed full error:', error);
             
-            // ログイン失敗をログ記録
+            // ログイン失敗をログ記録 (ブラウザ情報追加)
             this._logAuditAction('LOGIN_FAILED', email, null, {
                 reason: error.code || 'unknown',
-                message: error.message || 'Login failed'
+                message: error.message || 'Login failed',
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
             });
             
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -335,7 +340,9 @@ class AuthService {
 
             // ログアウトを記録（認証状態が有効なうちに）
             if (currentEmail !== 'unknown') {
-                this._logAuditAction('LOGOUT', currentEmail, currentUid);
+                this._logAuditAction('LOGOUT', currentEmail, currentUid, {
+                    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+                });
             }
             
             await signOut(auth);
@@ -358,12 +365,23 @@ class AuthService {
         try {
             await sendPasswordResetEmail(auth, email);
             
-            // リセット要求を記録（UIDは不明のためnull）
-            this._logAuditAction('PASSWORD_RESET_REQUEST', email, null);
+            // メール送信成功を記録
+            this._logAuditAction('EMAIL_SENT_SUCCESS', email, null, {
+                type: 'password_reset',
+                status: 'accepted_by_firebase'
+            });
             
             console.log('[AuthService] Password reset email sent to:', email);
         } catch (error: any) {
             console.error('[AuthService] Password reset failed:', error);
+            
+            // メール送信失敗を記録
+            this._logAuditAction('EMAIL_SENT_FAILED', email, null, {
+                type: 'password_reset',
+                error_code: error.code,
+                error_message: error.message
+            });
+
             if (error.code === 'auth/user-not-found') {
                 throw new Error('このメールアドレスは登録されていません');
             } else if (error.code === 'auth/invalid-email') {
@@ -398,12 +416,21 @@ class AuthService {
             const userCredential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
             const firebaseUser = userCredential.user;
 
-            // 2. 確認メール送信
+            // 2. 確認メール送信 (Firebase標準のハンドラーを使用)
             const actionCodeSettings = {
-                url: `${window.location.origin}/verify-email`,
-                handleCodeInApp: true,
+                // 認証完了後に「アプリに戻る」ボタンの遷移先
+                url: `${window.location.origin}`,
+                handleCodeInApp: false,
             };
+            
             await sendEmailVerification(firebaseUser, actionCodeSettings);
+            
+            // メール送信成功を記録
+            this._logAuditAction('EMAIL_SENT_SUCCESS', normalizedEmail, firebaseUser.uid, {
+                type: 'email_verification',
+                status: 'standard_flow',
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+            });
 
             // 3. Firestoreに未認証ベースでプロファイルを作成 (WriteBatch)
             const now = Timestamp.now();
@@ -446,6 +473,12 @@ class AuthService {
             };
         } catch (error: any) {
             console.error('[AuthService] Signup failed:', error);
+            
+            // アカウント作成自体の失敗ログ
+            this._logAuditAction('ACCOUNT_CREATE_FAILED', normalizedEmail, null, {
+                error_code: error.code
+            });
+
             if (error.code === 'auth/email-already-in-use') {
                 throw new Error('このメールアドレスは既に登録されています');
             } else if (error.code === 'auth/invalid-email') {
@@ -458,30 +491,36 @@ class AuthService {
     }
 
     /**
-     * メール認証リンクのコード検証 (oobCode)
+     * パスワードリセットメール送信
      */
-    async verifyEmailCode(oobCode: string): Promise<void> {
+    async resetPassword(email: string): Promise<void> {
+        if (!email) {
+            throw new Error('メールアドレスを入力してください');
+        }
+
         try {
-            // 認証コード情報を取得（1回だけ）
-            const actionCodeInfo = await checkActionCode(auth, oobCode);
+            await sendPasswordResetEmail(auth, email);
+            console.log('[AuthService] Password reset email sent to:', email);
             
-            // コード適用（パスワードリセットなど他のアクションの場合も含む）
-            await applyActionCode(auth, oobCode);
-            console.log('[AuthService] Email code applied successfully');
-            
-            // メール認証の場合のみログ記録（"VERIFY_EMAIL"アクション）
-            if (actionCodeInfo.operation === 'VERIFY_EMAIL') {
-                // メール認証直後はログイン状態でないため、未認証ユーザーでもログを記録できるようにする
-                const emailFromCode = actionCodeInfo.email;
-                this._logAuditAction('ACCOUNT_VERIFIED', emailFromCode || 'unknown', null);
-                console.log('[AuthService] Account verified log recorded for:', emailFromCode);
-            }
+            // 監査ログ記録
+            this._logAuditAction('PASSWORD_RESET_REQUESTED', email, null, {
+                status: 'success',
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+                language: typeof navigator !== 'undefined' ? navigator.language : 'unknown'
+            });
         } catch (error: any) {
-            console.error('[AuthService] Email verification failed:', error);
-            if (error.code === 'auth/invalid-action-code') {
-                throw new Error('認証コードが無効または期限切れです。');
+            console.error('[AuthService] Password reset failed:', error);
+            
+            // 監査ログ記録（失敗）
+            this._logAuditAction('PASSWORD_RESET_FAILED', email, null, {
+                error_code: error.code,
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+            });
+
+            if (error.code === 'auth/user-not-found') {
+                throw new Error('このメールアドレスは登録されていません');
             }
-            throw new Error('メール認証の処理に失敗しました。');
+            throw new Error('パスワードリセットメールの送信に失敗しました');
         }
     }
 
@@ -593,7 +632,8 @@ class AuthService {
             // ログ記録
             this._logAuditAction('ADMIN_CREATED_USER', normalizedEmail, firebaseUser.uid, {
                 roleId,
-                departmentId
+                departmentId,
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
             });
 
             return {

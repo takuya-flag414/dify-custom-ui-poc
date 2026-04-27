@@ -42,7 +42,6 @@ import { FEATURE_FLAGS } from './config/featureFlags';
 // Phase A: 認証機能
 import { useAuth } from './context/AuthContext';
 import LoginScreen from './components/Auth/LoginScreen';
-import VerifyEmailPage from './components/Auth/VerifyEmailPage';
 import AdminDashboard from './components/Admin/AdminDashboard';
 
 import { DEFAULT_MOCK_MODE } from './config/env';
@@ -437,11 +436,6 @@ function App() {
 
   // 初期状態の判定（グラデーション背景表示用）
   const isInitialState = messages.length === 0 && !isHistoryLoading && currentView === 'chat';
-
-  // ★ Phase A: メール認証ページの処理（認証状態判定の前に処理する）
-  if (location.pathname === '/verify-email') {
-    return <VerifyEmailPage />;
-  }
 
   // ★ Phase A: 認証ローディング中
   if (isAuthLoading) {
