@@ -70,9 +70,10 @@ export const mapCitationsFromLLM = (citations: LLMCitation[] | null | undefined)
     if (!citations || !Array.isArray(citations)) return [];
 
     return citations.map((cite, index) => {
-        // ★修正: LLMが指定した type を最優先する
-        // typeがない場合のみ、URLの有無で web/file を推論するフォールバックを行う
-        const type: CitationType = cite.type || (cite.url ? 'web' : 'file');
+        // LLMが指定した type を最優先する
+        // typeがない場合のみ、URLの形式で web/file を推論するフォールバックを行う
+        const isWebUrl = cite.url && (cite.url.startsWith('http') || cite.url.startsWith('/'));
+        const type: CitationType = cite.type || (isWebUrl ? 'web' : 'file');
 
         return {
             id: cite.id || `cite_llm_hist_${index}`,

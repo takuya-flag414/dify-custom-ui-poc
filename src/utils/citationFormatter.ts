@@ -64,12 +64,28 @@ export const groupCitationsByCategory = (
     if (num > 0 && num <= citations.length) {
       const citation = citations[num - 1];
       
-      // category判定 (APIまたはLLMのtype、またはurlの有無から推論)
-      let category: 'web' | 'file' | 'rag' = 'file';
-      if (citation.type === 'web' || citation.url) {
-        category = 'web';
-      } else if (citation.type === 'rag' || citation.type === 'dataset') {
-        category = 'rag';
+      // category判定 (APIまたはLLMのtypeを優先。typeがない場合はurlの形式から推論)
+      let category: 'web' | 'file' | 'rag';
+      
+      if (citation.type) {
+        // typeが明示されている場合はその指定を尊重する
+        if (citation.type === 'web') {
+          category = 'web';
+        } else if (citation.type === 'rag' || citation.type === 'dataset') {
+          category = 'rag';
+        } else {
+          // 'file' またはそれ以外の未知のタイプは 'file' として扱う
+          category = 'file';
+        }
+      } else {
+        // typeがない場合のみ、URLの有無や形式から推論する（フォールバック）
+        // httpで始まる場合はweb、それ以外でURLがある場合は一旦web（従来互換）だが
+        // 判定を厳格にするなら startsWith('http') を見る
+        if (citation.url && (citation.url.startsWith('http') || citation.url.startsWith('/'))) {
+          category = 'web';
+        } else {
+          category = 'file';
+        }
       }
 
       groups[category].push({

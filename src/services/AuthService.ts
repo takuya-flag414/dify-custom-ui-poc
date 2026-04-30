@@ -392,7 +392,7 @@ class AuthService {
     }
 
     /**
-     * パスワードリセットメールを送信
+     * パスワードリセットメール送信
      */
     async resetPassword(email: string): Promise<void> {
         if (!email) {
@@ -402,21 +402,23 @@ class AuthService {
         try {
             await sendPasswordResetEmail(auth, email);
 
-            // メール送信成功を記録
-            this._logAuditAction('EMAIL_SENT_SUCCESS', email, null, {
+            // 監査ログ記録
+            this._logAuditAction('PASSWORD_RESET_REQUESTED', email, null, {
+                status: 'success',
                 type: 'password_reset',
-                status: 'accepted_by_firebase'
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+                language: typeof navigator !== 'undefined' ? navigator.language : 'unknown'
             });
 
             console.log('[AuthService] Password reset email sent to:', email);
         } catch (error: any) {
             console.error('[AuthService] Password reset failed:', error);
 
-            // メール送信失敗を記録
-            this._logAuditAction('EMAIL_SENT_FAILED', email, null, {
-                type: 'password_reset',
+            // 監査ログ記録（失敗）
+            this._logAuditAction('PASSWORD_RESET_FAILED', email, null, {
                 error_code: error.code,
-                error_message: error.message
+                error_message: error.message,
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
             });
 
             if (error.code === 'auth/user-not-found') {
@@ -424,7 +426,7 @@ class AuthService {
             } else if (error.code === 'auth/invalid-email') {
                 throw new Error('有効なメールアドレスを入力してください');
             }
-            throw new Error('パスワード再設定メールの送信に失敗しました');
+            throw new Error('パスワードリセットメールの送信に失敗しました');
         }
     }
 
@@ -527,39 +529,6 @@ class AuthService {
         }
     }
 
-    /**
-     * パスワードリセットメール送信
-     */
-    async resetPassword(email: string): Promise<void> {
-        if (!email) {
-            throw new Error('メールアドレスを入力してください');
-        }
-
-        try {
-            await sendPasswordResetEmail(auth, email);
-            console.log('[AuthService] Password reset email sent to:', email);
-
-            // 監査ログ記録
-            this._logAuditAction('PASSWORD_RESET_REQUESTED', email, null, {
-                status: 'success',
-                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-                language: typeof navigator !== 'undefined' ? navigator.language : 'unknown'
-            });
-        } catch (error: any) {
-            console.error('[AuthService] Password reset failed:', error);
-
-            // 監査ログ記録（失敗）
-            this._logAuditAction('PASSWORD_RESET_FAILED', email, null, {
-                error_code: error.code,
-                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
-            });
-
-            if (error.code === 'auth/user-not-found') {
-                throw new Error('このメールアドレスは登録されていません');
-            }
-            throw new Error('パスワードリセットメールの送信に失敗しました');
-        }
-    }
 
     /**
      * アカウント削除
@@ -728,11 +697,6 @@ class AuthService {
                 if (firebaseUser) {
                     try {
                         // ユーザーの情報をリロード（トークン更新）
-                        try {
-                            await firebaseUser.reload();
-                        } catch (reloadError) {
-                            console.warn('[AuthService] Failed to reload user, proceeding with cached data:', reloadError);
-                        }
                         try {
                             await firebaseUser.reload();
                         } catch (reloadError) {
