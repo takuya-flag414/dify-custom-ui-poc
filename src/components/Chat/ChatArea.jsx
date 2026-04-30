@@ -43,6 +43,7 @@ const ChatArea = (props) => {
     // ★追加: エラー/停止時のテキスト復元
     restoreText = null,
     onRestoreTextConsumed,
+    isShieldActive = false,  // ★追加: シールドモード状態
   } = props;
 
   // ★追加: 自動スクロール有効状態管理
@@ -324,6 +325,7 @@ const ChatArea = (props) => {
               sendKey={sendKey}
               restoreText={restoreText}
               onRestoreTextConsumed={onRestoreTextConsumed}
+              isShieldActive={isShieldActive}
             />
           </div>
         </>

@@ -8,6 +8,8 @@ import '../Message/MessageBlock.css';
 import { useLogger } from '../../hooks/useLogger';
 import SecureVaultService, { TOKEN_PATTERN } from '../../services/SecureVaultService';
 import RestoredToken from '../Message/RestoredToken';
+import { CitationBadge } from '../Chat/CitationBadge';
+import { groupCitationsByCategory } from '../../utils/citationFormatter';
 
 // --- Helper: Inline Citation Renderer ---
 // (renderWithInlineCitations, LoggedElement, CodeBlock は変更なしのため省略。元のコードを維持してください)
@@ -18,116 +20,46 @@ const renderWithInlineCitations = (children, citations, messageId, disableCitati
   const newChildren = [];
   const citationCount = citations ? citations.length : 0;
 
+  // 連続する引用バッジ（スペースやカンマで区切られたものも含む）にマッチする正規表現
+  const citationBlockRegex = /((?:\[\s*\d+\s*\](?:[\s,]*))+)/g;
+
   childrenArray.forEach((child, i) => {
     if (typeof child === 'string') {
-      // 変更点: [1, 2] のようにカンマ区切りで複数の数字が含まれるケースに対応
-      const parts = child.split(/(\[\s*\d+(?:\s*,\s*\d+)*\s*\])/g);
+      const parts = child.split(citationBlockRegex);
       parts.forEach((part, j) => {
-        if (/^\[\s*\d+(?:\s*,\s*\d+)*\s*\]$/.test(part)) {
-          const numbersStr = part.replace(/[\[\]]/g, '');
-          const numberItems = numbersStr.split(',');
+        // マッチしたブロックの判定 (少なくとも1つの [数字] を含む)
+        if (/(?:\[\s*\d+\s*\])/.test(part)) {
+          // ブロック内の全ての数字を抽出
+          const matches = part.match(/\d+/g);
+          if (matches) {
+            const numbers = matches.map(n => parseInt(n, 10));
+            // カテゴリごとにグループ化
+            const groups = groupCitationsByCategory(numbers, citations);
+            const groupNodes = [];
 
-          const groupNodes = [];
+            // web, file, rag の順でレンダリング
+            ['web', 'file', 'rag'].forEach(category => {
+              const groupSources = groups[category];
+              if (groupSources && groupSources.length > 0) {
+                groupNodes.push(
+                  <CitationBadge 
+                    key={`${i}-${j}-${category}`}
+                    category={category}
+                    sources={groupSources}
+                    messageId={messageId}
+                  />
+                );
+              }
+            });
 
-          numberItems.forEach((nStr, k) => {
-            const number = parseInt(nStr.trim(), 10);
-
-            if (number > 0 && number <= citationCount) {
-              const citation = citations[number - 1];
-              groupNodes.push(
-                <span key={`${i}-${j}-${k}`} className="citation-badge-wrapper">
-                  <a
-                    href={`#citation-${messageId}-${number}`}
-                    className="citation-badge"
-                    onClick={(e) => {
-                      e.preventDefault();
-
-                      // ★Phase 3: InspectorPanel連携用イベントを発火
-                      const inspectorEvent = new CustomEvent('openInspectorCitation', {
-                        detail: { citationIndex: number, messageId }
-                      });
-                      window.dispatchEvent(inspectorEvent);
-
-                      // 従来の出典リスト展開も維持（フォールバック）
-                      const expandEvent = new CustomEvent('expandCitationList', {
-                        detail: { messageId }
-                      });
-                      window.dispatchEvent(expandEvent);
-
-                      // アコーディオン展開アニメーション後にスクロール（従来のチャット内CitationList用）
-                      setTimeout(() => {
-                        const el = document.getElementById(`citation-${messageId}-${number}`);
-                        if (el) {
-                          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          el.classList.add('highlight-citation');
-                          setTimeout(() => el.classList.remove('highlight-citation'), 2000);
-                        }
-                      }, 350);
-                    }}
-                  >
-                    {number}
-                  </a>
-                  {citation.url ? (
-                    <a
-                      href={citation.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="citation-tooltip citation-tooltip-link"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span className="citation-tooltip-content">
-                        <span className="citation-tooltip-icon">
-                          <SourceIcon
-                            type={citation.type === 'dataset' ? 'rag' : citation.type}
-                            source={citation.source}
-                            url={citation.url}
-                            className="w-4 h-4"
-                          />
-                        </span>
-                        <span className="citation-tooltip-text">
-                          <span className="citation-tooltip-title" style={{ display: 'block' }}>
-                            {citation.source.replace(/^\[\d+\]\s*/, '')}
-                          </span>
-                          <span className="citation-tooltip-url" style={{ display: 'block' }}>{citation.url}</span>
-                        </span>
-                      </span>
-                    </a>
-                  ) : (
-                    <span className="citation-tooltip">
-                      <span className="citation-tooltip-content">
-                        <span className="citation-tooltip-icon">
-                          <SourceIcon
-                            type={citation.type === 'dataset' ? 'rag' : citation.type}
-                            source={citation.source}
-                            url={citation.url}
-                            className="w-4 h-4"
-                          />
-                        </span>
-                        <span className="citation-tooltip-text">
-                          <span className="citation-tooltip-title" style={{ display: 'block' }}>
-                            {citation.source.replace(/^\[\d+\]\s*/, '')}
-                          </span>
-                        </span>
-                      </span>
-                    </span>
-                  )}
-                </span>
-              );
-            } else {
-              groupNodes.push(<span key={`${i}-${j}-${k}-invalid`}>{nStr}</span>);
-            }
-
-            // 複数のバッジの間の隙間を少し空ける
-            if (k < numberItems.length - 1) {
-              groupNodes.push(<span key={`${i}-${j}-${k}-space`} className="citation-comma"> </span>);
-            }
-          });
-
-          newChildren.push(
-            <span key={`${i}-${j}-group`} className="inline-citation-group">
-              {groupNodes}
-            </span>
-          );
+            newChildren.push(
+              <span key={`${i}-${j}-group`} className="inline-citation-group">
+                {groupNodes}
+              </span>
+            );
+          } else {
+            newChildren.push(part);
+          }
         } else if (part) {
           newChildren.push(part);
         }

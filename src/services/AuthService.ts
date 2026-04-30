@@ -33,7 +33,11 @@ import {
     RoleCode,
     ResolvedUserRole,
     UserPreferences,
+    MOCK_USERS,
+    getUserRolesById,
+    resolvePermissionsByRoles
 } from '../mocks/mockUsers';
+import { isStrictFEMode } from '../config/env';
 
 // ============================================
 // 型定義（正式仕様準拠）
@@ -192,7 +196,7 @@ class AuthService {
         try {
             // セッションID生成（ブラウザセッション単位でユニーク）
             const sessionId = this._getSessionId();
-            
+
             const logRef = doc(collection(db, 'audit_logs'));
             await setDoc(logRef, {
                 timestamp: Timestamp.now(),
@@ -232,6 +236,33 @@ class AuthService {
     async login(email: string, password: string): Promise<LoginResult> {
         if (!email || !password) {
             throw new Error('メールアドレスとパスワードを入力してください');
+        }
+
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Simulating login locally...');
+            const user = MOCK_USERS.find(u => u.email === email && u.password_hash === password);
+
+            if (user) {
+                localStorage.setItem('mock_session', JSON.stringify({ uid: user.user_id, email: user.email }));
+                const roles = getUserRolesById(user.user_id);
+                const permissions = resolvePermissionsByRoles(roles);
+                const profile: UserProfile = {
+                    userId: user.user_id,
+                    email: user.email,
+                    name: user.name,
+                    displayName: user.displayName || user.name,
+                    accountStatus: user.account_status,
+                    roles: roles,
+                    permissions: permissions,
+                    preferences: user.preferences || { theme: 'system', aiStyle: 'partner' }
+                };
+                return {
+                    token: 'mock-token-fe-mode',
+                    user: profile
+                };
+            } else {
+                throw new Error('メールアドレスまたはパスワードが正しくありません');
+            }
         }
 
         try {
@@ -315,14 +346,14 @@ class AuthService {
             };
         } catch (error: any) {
             console.error('[AuthService] Login failed full error:', error);
-            
+
             // ログイン失敗をログ記録 (ブラウザ情報追加)
             this._logAuditAction('LOGIN_FAILED', email, null, {
                 reason: error.code || 'unknown',
                 message: error.message || 'Login failed',
                 userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
             });
-            
+
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                 throw new Error('メールアドレスまたはパスワードが正しくありません');
             }
@@ -334,6 +365,12 @@ class AuthService {
      * ログアウト
      */
     async logout(): Promise<void> {
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Simulating logout locally...');
+            localStorage.removeItem('mock_session');
+            return;
+        }
+
         try {
             const currentEmail = auth.currentUser?.email || 'unknown';
             const currentUid = auth.currentUser?.uid || null;
@@ -344,9 +381,9 @@ class AuthService {
                     userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
                 });
             }
-            
+
             await signOut(auth);
-            
+
             console.log('[AuthService] Logged out successfully');
         } catch (error: any) {
             console.error('[AuthService] Logout failed:', error);
@@ -364,17 +401,17 @@ class AuthService {
 
         try {
             await sendPasswordResetEmail(auth, email);
-            
+
             // メール送信成功を記録
             this._logAuditAction('EMAIL_SENT_SUCCESS', email, null, {
                 type: 'password_reset',
                 status: 'accepted_by_firebase'
             });
-            
+
             console.log('[AuthService] Password reset email sent to:', email);
         } catch (error: any) {
             console.error('[AuthService] Password reset failed:', error);
-            
+
             // メール送信失敗を記録
             this._logAuditAction('EMAIL_SENT_FAILED', email, null, {
                 type: 'password_reset',
@@ -422,9 +459,9 @@ class AuthService {
                 url: `${window.location.origin}`,
                 handleCodeInApp: false,
             };
-            
+
             await sendEmailVerification(firebaseUser, actionCodeSettings);
-            
+
             // メール送信成功を記録
             this._logAuditAction('EMAIL_SENT_SUCCESS', normalizedEmail, firebaseUser.uid, {
                 type: 'email_verification',
@@ -473,7 +510,7 @@ class AuthService {
             };
         } catch (error: any) {
             console.error('[AuthService] Signup failed:', error);
-            
+
             // アカウント作成自体の失敗ログ
             this._logAuditAction('ACCOUNT_CREATE_FAILED', normalizedEmail, null, {
                 error_code: error.code
@@ -501,7 +538,7 @@ class AuthService {
         try {
             await sendPasswordResetEmail(auth, email);
             console.log('[AuthService] Password reset email sent to:', email);
-            
+
             // 監査ログ記録
             this._logAuditAction('PASSWORD_RESET_REQUESTED', email, null, {
                 status: 'success',
@@ -510,7 +547,7 @@ class AuthService {
             });
         } catch (error: any) {
             console.error('[AuthService] Password reset failed:', error);
-            
+
             // 監査ログ記録（失敗）
             this._logAuditAction('PASSWORD_RESET_FAILED', email, null, {
                 error_code: error.code,
@@ -540,12 +577,12 @@ class AuthService {
             // Firestoreデータの削除（ユーザープロファイルとロール）
             const batch = writeBatch(db);
             batch.delete(doc(db, 'users', currentUid));
-            
+
             // 関連するロール割り当ても削除
             const userRolesQuery = query(collection(db, 'user_roles'), where('user_id', '==', currentUid));
             const userRolesSnap = await getDocs(userRolesQuery);
             userRolesSnap.docs.forEach(doc => batch.delete(doc.ref));
-            
+
             await batch.commit();
 
             // Firebase Authアカウント削除
@@ -656,6 +693,35 @@ class AuthService {
      * セッション復元
      */
     async restoreSession(): Promise<UserProfile | null> {
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Simulating restore session locally...');
+            const sessionStr = localStorage.getItem('mock_session');
+            if (sessionStr) {
+                try {
+                    const session = JSON.parse(sessionStr);
+                    const user = MOCK_USERS.find(u => u.email === session.email);
+                    if (user) {
+                        const roles = getUserRolesById(user.user_id);
+                        const permissions = resolvePermissionsByRoles(roles);
+                        const profile: UserProfile = {
+                            userId: user.user_id,
+                            email: user.email,
+                            name: user.name,
+                            displayName: user.displayName || user.name,
+                            accountStatus: user.account_status,
+                            roles: roles,
+                            permissions: permissions,
+                            preferences: user.preferences || { theme: 'system', aiStyle: 'partner' }
+                        };
+                        return profile;
+                    }
+                } catch (e) {
+                    // Ignore parse errors
+                }
+            }
+            return null;
+        }
+
         return new Promise((resolve) => {
             const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
                 unsubscribe();
@@ -672,7 +738,7 @@ class AuthService {
                         } catch (reloadError) {
                             console.warn('[AuthService] Failed to reload user, proceeding with cached data:', reloadError);
                         }
-                        
+
                         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                         const userData = userDoc.exists() ? userDoc.data() : null;
 

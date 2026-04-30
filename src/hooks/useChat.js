@@ -68,8 +68,9 @@ const createConfigError = () => ({
  * @param {string} apiKey - Dify API キー
  * @param {string} apiUrl - Dify API URL
  * @param {object} promptSettings - プロンプト設定 (aiStyle, userProfile, customInstructions)
+ * @param {function} onShieldActivated - ★追加: シールドモード自動移行コールバック (conversationId) => void
  */
-export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, onTitleFallback, onNotFound, apiKey, apiUrl, promptSettings) => {
+export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, onTitleFallback, onNotFound, apiKey, apiUrl, promptSettings, onShieldActivated) => {
     const [messages, setMessages] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -431,6 +432,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             // setMessages の前に実行し、UI・ログ・ペイロードすべてから平文を排除する
             const sanitizeResult = SecureVaultService.sanitize(text, {
                 excludeTypes: options.sanitizeExcludeTypes || [],
+                excludeValues: options.sanitizeExcludeValues || [],
             });
             if (sanitizeResult.appliedTokens.length > 0) {
                 // 構造化JSONのtextフィールドをサニタイズ済みテキストに置換
@@ -443,6 +445,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                 // トースト通知
                 setSanitizeNotification({ visible: true, count: sanitizeResult.appliedTokens.length });
+
+                // ★追加: シールドモード自動移行通知
+                if (onShieldActivated) {
+                    const targetConvId = conversationId || creatingConversationIdRef.current;
+                    if (targetConvId) {
+                        onShieldActivated(targetConvId);
+                    }
+                }
             }
 
             const finalStructuredQuery = JSON.stringify(parsedPayload);

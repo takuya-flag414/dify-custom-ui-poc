@@ -107,8 +107,9 @@ class SecureVaultServiceImpl {
     /**
      * テキスト内の機密情報をトークンに置換し、Vault に保存する
      * @param options.excludeTypes - サニタイズから除外する検知タイプ ID の配列（例: ["email", "phone_number"]）
+     * @param options.excludeValues - サニタイズから除外する具体的な文字列の配列（例: ["090-1234-5678"]）
      */
-    public sanitize(text: string, options?: { excludeTypes?: string[] }): SanitizeResult {
+    public sanitize(text: string, options?: { excludeTypes?: string[], excludeValues?: string[] }): SanitizeResult {
         const result = scanTextWithPositions(text);
 
         if (!result.hasWarning || result.highlights.length === 0) {
@@ -117,12 +118,15 @@ class SecureVaultServiceImpl {
 
         const codeBlocks = this.getCodeBlockRanges(text);
         const excludeTypes = options?.excludeTypes || [];
+        const excludeValues = options?.excludeValues || [];
 
-        // コードブロック内のハイライト + ユーザー除外タイプを除外
-        const filteredHighlights = result.highlights.filter(
-            h => !this.isInsideCodeBlock(h.start, codeBlocks) &&
-                !excludeTypes.includes(h.type)
-        );
+        // コードブロック内のハイライト + ユーザー除外タイプ + ユーザー除外値 を除外
+        const filteredHighlights = result.highlights.filter(h => {
+            const originalValue = text.slice(h.start, h.end);
+            return !this.isInsideCodeBlock(h.start, codeBlocks) &&
+                !excludeTypes.includes(h.type) &&
+                !excludeValues.includes(originalValue);
+        });
 
         if (filteredHighlights.length === 0) {
             return { sanitizedText: text, appliedTokens: [], originalText: text };

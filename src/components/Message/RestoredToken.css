@@ -7,37 +7,118 @@
 .restored-token {
     display: inline;
     position: relative;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
 }
 
-/* ── 復元済みモード ── */
+/* ── 共通スタイル ── */
 .restored-token--resolved {
     display: inline-flex;
-    align-items: baseline;
-    gap: 2px;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    vertical-align: middle;
+    border-radius: 6px;
+    outline: none;
 }
 
 .restored-token__badge {
-    font-size: 10px;
-    line-height: 1;
-    opacity: 0.5;
-    cursor: help;
-    vertical-align: baseline;
-    position: relative;
-    top: -1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.restored-token__value {
+.token-icon {
+    opacity: 0.7;
+    transition: transform 0.2s ease;
+}
+
+.restored-token--resolved:hover .token-icon {
+    transform: scale(1.1);
+}
+
+/* ── トークン表示モード (is-hidden) - デフォルト（アシスタント側） ── */
+.is-hidden.restored-token--resolved {
+    background: rgba(0, 122, 255, 0.08);
+    border: 1px solid rgba(0, 122, 255, 0.25);
+    padding: 1px 8px;
+    margin: 0 2px;
+    color: var(--color-primary, #007AFF);
+}
+
+/* ダークモード時のアシスタント側トークンバッジ */
+[data-theme="dark"] .is-hidden.restored-token--resolved {
+    background: rgba(10, 132, 255, 0.15);
+    border-color: rgba(10, 132, 255, 0.4);
+    color: #0A84FF; /* 明るいブルー */
+}
+
+.is-hidden .restored-token__display-value {
+    font-family: var(--font-mono, "SF Mono", monospace);
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* ── 値表示モード (is-revealed) - デフォルト ── */
+.is-revealed.restored-token--resolved {
+    background: rgba(0, 122, 255, 0.04);
+    padding: 0 4px;
+    margin: 0 1px;
+}
+
+.is-revealed .restored-token__display-value {
     text-decoration: underline;
-    text-decoration-color: rgba(0, 122, 255, 0.2);
-    text-underline-offset: 2px;
+    text-decoration-style: dotted;
+    text-decoration-color: rgba(0, 122, 255, 0.4);
+    text-underline-offset: 4px;
     text-decoration-thickness: 1.5px;
+}
+
+[data-theme="dark"] .is-revealed .restored-token__display-value {
+    text-decoration-color: rgba(10, 132, 255, 0.6);
+}
+
+/* ── ユーザーバブル内オーバーライド (青背景用) ──
+ * ユーザーバブルは常に青色なので、テーマに関わらず白ベースのスタイルを適用する */
+
+/* トークンバッジ (白ガラススタイル) */
+.user-bubble .is-hidden.restored-token--resolved {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+    color: #FFFFFF !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 値表示モード */
+.user-bubble .is-revealed.restored-token--resolved {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+}
+
+.user-bubble .is-revealed .restored-token__display-value {
+    text-decoration-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.user-bubble .token-icon {
+    color: #FFFFFF !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
 
 /* ── 未復元（伏字）モード ── */
 .restored-token--redacted {
     display: inline-flex;
     position: relative;
-    vertical-align: baseline;
+    vertical-align: middle;
 }
 
 .restored-token__chip {
@@ -50,130 +131,58 @@
     font-weight: 500;
     line-height: 1.4;
     cursor: help;
-
-    /* sys-color-warning の薄い背景 */
     background: rgba(255, 149, 0, 0.1);
     color: rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 149, 0, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-    .restored-token__chip {
-        background: rgba(255, 159, 10, 0.15);
-        color: rgba(255, 255, 255, 0.7);
-        border-color: rgba(255, 159, 10, 0.25);
-    }
-}
-
 [data-theme="dark"] .restored-token__chip {
     background: rgba(255, 159, 10, 0.15);
-    color: rgba(255, 255, 255, 0.7);
-    border-color: rgba(255, 159, 10, 0.25);
+    color: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 159, 10, 0.3);
 }
 
-.restored-token__lock {
-    font-size: 11px;
-    flex-shrink: 0;
-}
-
-.restored-token__redacted-text {
-    white-space: nowrap;
+.user-bubble .restored-token__chip {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #FFFFFF !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
 }
 
 /* ── ツールチップ ── */
 .restored-token__tooltip {
     position: absolute;
-    bottom: calc(100% + 6px);
+    bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-
     padding: 8px 12px;
     max-width: 260px;
-    white-space: normal;
-
-    /* mat-popover */
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     font-size: 12px;
-    font-weight: 400;
     line-height: 1.5;
-    color: rgba(0, 0, 0, 0.7);
-
+    color: rgba(0, 0, 0, 0.8);
     pointer-events: none;
-    animation: restored-tooltip-in 0.15s ease-out;
-}
-
-@media (prefers-color-scheme: dark) {
-    .restored-token__tooltip {
-        background: rgba(35, 35, 35, 0.9);
-        border-color: rgba(255, 255, 255, 0.15);
-        color: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-    }
+    animation: restored-tooltip-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="dark"] .restored-token__tooltip {
-    background: rgba(35, 35, 35, 0.9);
+    background: rgba(35, 35, 35, 0.95);
     border-color: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 @keyframes restored-tooltip-in {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(4px);
+        transform: translateX(-50%) translateY(4px) scale(0.95);
     }
-
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateX(-50%) translateY(0) scale(1);
     }
 }
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-    @keyframes restored-tooltip-in {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-}
-
-/* ── ユーザーバブル内オーバーライド ──
- * DESIGN_RULE §2: 青背景でのテキスト色は常に白色
- * ユーザーバブルの青グラデーション上で視認性を確保する */
-
-/* バッジ: 不透明度を上げて白テキストに映えるように */
-.user-bubble .restored-token__badge {
-    opacity: 0.85;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
-}
-
-/* 下線: 青地に映える白の半透明ラインに変更 */
-.user-bubble .restored-token__value {
-    text-decoration-color: rgba(255, 255, 255, 0.5);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-}
-
-/* 伏字チップ: 白ベースのガラスモーフィズム */
-.user-bubble .restored-token__chip {
-    background: rgba(255, 255, 255, 0.2);
-    color: #FFFFFF;
-    border-color: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-/* ツールチップ: ユーザーバブル上方に表示されるため通常スタイルのまま */
