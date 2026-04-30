@@ -178,7 +178,37 @@ const ChatInput = ({
 
   const addFiles = useCallback(async (newFiles) => {
     if (newFiles && newFiles.length > 0) {
-      const initialFiles = newFiles.map(file => ({
+      // --- 重複チェックとリネーム ---
+      const processedFiles = [];
+      // 選択中のファイル名と、すでに会話履歴にあるファイル名の両方をチェック対象にする
+      const currentNames = [
+        ...selectedFiles.map(sf => sf.file.name),
+        ...activeContextFiles.map(af => af.name)
+      ];
+
+      for (const file of newFiles) {
+        let name = file.name;
+        const dotIndex = name.lastIndexOf('.');
+        const baseName = dotIndex !== -1 ? name.substring(0, dotIndex) : name;
+        const extension = dotIndex !== -1 ? name.substring(dotIndex) : '';
+        
+        let counter = 1;
+        let newName = name;
+        
+        // すでに存在する名前、またはこのバッチ内で決定した名前と重複している間ループ
+        while (currentNames.includes(newName) || processedFiles.some(f => f.name === newName)) {
+          newName = `${baseName} (${counter})${extension}`;
+          counter++;
+        }
+        
+        // 名前が変わった場合のみ新しいFileオブジェクトを作成
+        const finalFile = newName !== name 
+          ? new File([file], newName, { type: file.type, lastModified: file.lastModified }) 
+          : file;
+        processedFiles.push(finalFile);
+      }
+
+      const initialFiles = processedFiles.map(file => ({
         id: `file-${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`,
         file,
         scanStatus: isScannableFile(file.name) ? 'scanning' : 'skipped',
@@ -188,7 +218,7 @@ const ChatInput = ({
 
       setSelectedFiles(prev => [...prev, ...initialFiles]);
 
-      const scannedResults = await scanFiles(newFiles);
+      const scannedResults = await scanFiles(processedFiles);
 
       setSelectedFiles(prev => {
         return prev.map(sf => {
@@ -200,7 +230,7 @@ const ChatInput = ({
         });
       });
     }
-  }, []);
+  }, [selectedFiles, activeContextFiles]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -327,7 +357,7 @@ const ChatInput = ({
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleFileChange}
-          accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
+          accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.gif,.webp"
           multiple
         />
 
@@ -373,6 +403,7 @@ const ChatInput = ({
             focusTrigger={quote || restoreFocusTrigger || undefined} // ★改修: quoteまたは復元時にフォーカス
             availableFiles={availableFiles} // ★追加: メンション候補ファイル
             onTextExtract={(fn) => { getPlainTextRef.current = fn; }} // ★追加: テキスト抽出関数を受け取る
+            onFilesPaste={addFiles} // ★追加: クリップボード貼り付け対応
           />
 
           {/* Tier 3: Control Deck */}

@@ -24,6 +24,7 @@ const InputCanvas = ({
     focusTrigger, // 動的にフォーカスを当てるためのトリガー
     availableFiles = [], // ★追加: メンション候補ファイル一覧
     onTextExtract, // ★追加: プレーンテキスト抽出関数を親に公開
+    onFilesPaste, // ★追加: クリップボードからのファイル貼り付け
 }) => {
     const editorRef = useRef(null);
     const containerRef = useRef(null);
@@ -148,11 +149,29 @@ const InputCanvas = ({
      * ペースト処理: プレーンテキストのみ受け付ける（リッチテキストの混入防止）
      */
     const handlePaste = useCallback((e) => {
+        const items = e.clipboardData.items;
+        const files = [];
+
+        // クリップボードからファイルを抽出
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].kind === 'file') {
+                const file = items[i].getAsFile();
+                if (file) files.push(file);
+            }
+        }
+
+        // ファイルがある場合は親に通知
+        if (files.length > 0 && onFilesPaste) {
+            onFilesPaste(files);
+        }
+
+        // 既存のプレーンテキスト貼り付け処理
         e.preventDefault();
         const text = e.clipboardData.getData('text/plain');
-        // プレーンテキストとして挿入
-        document.execCommand('insertText', false, text);
-    }, []);
+        if (text) {
+            document.execCommand('insertText', false, text);
+        }
+    }, [onFilesPaste]);
 
     /**
      * メンション確定時のコールバック
