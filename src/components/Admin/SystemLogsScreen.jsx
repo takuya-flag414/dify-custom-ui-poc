@@ -76,6 +76,7 @@ const SystemLogsScreen = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [cleaning, setCleaning] = useState(false);
+    const [expandedLogId, setExpandedLogId] = useState(null); // 展開中の行ID
 
     useEffect(() => {
         console.log('SystemLogsScreen useEffect triggered');
@@ -90,27 +91,15 @@ const SystemLogsScreen = () => {
     }, []);
 
     const fetchLogsAndCleanup = async () => {
-        console.log('🔍 [SystemLogs] Starting fetchLogsAndCleanup...');
         setLoading(true);
         setError('');
         try {
-            console.log('🔍 [SystemLogs] Connecting to Firestore...');
             const logsRef = collection(db, 'audit_logs');
-
-            // 1. Fetch Logs
-            console.log('🔍 [SystemLogs] Executing query...');
-            const q = query(logsRef, orderBy('timestamp', 'desc'), limit(100)); // Get latest 100
+            const q = query(logsRef, orderBy('timestamp', 'desc'), limit(100));
             const snap = await getDocs(q);
-            console.log('🔍 [SystemLogs] Query completed. Found', snap.docs.length, 'documents');
 
             const fetchedLogs = snap.docs.map(doc => {
                 const data = doc.data();
-                console.log('🔍 [SystemLogs] Processing doc:', doc.id, {
-                    action: data.action,
-                    userId: data.userId,
-                    timestamp: data.timestamp?.toDate(),
-                    details: data.details
-                });
                 return {
                     id: doc.id,
                     ...data,
@@ -118,24 +107,12 @@ const SystemLogsScreen = () => {
                 };
             });
 
-            // 本登録完了ログをフィルタリングして確認
-            const accountVerifiedLogs = fetchedLogs.filter(log => log.action === 'ACCOUNT_VERIFIED');
-            console.log('🔍 [SystemLogs] Found', accountVerifiedLogs.length, 'ACCOUNT_VERIFIED logs:', accountVerifiedLogs);
-
-
-            // 2. Lazy cleanup (delete older than 30 days)
+            setLogs(fetchedLogs);
             lazyCleanup();
-            
         } catch (err) {
             console.error('❌ [SystemLogs] Failed to fetch logs:', err);
-            console.error('❌ [SystemLogs] Error details:', {
-                message: err.message,
-                code: err.code,
-                stack: err.stack
-            });
-            setError('ログの読み込みに失敗しました。権限設定等をご確認ください。');
+            setError('ログの読み込みに失敗しました。');
         } finally {
-            console.log('🔍 [SystemLogs] fetchLogsAndCleanup completed');
             setLoading(false);
         }
     };
@@ -147,7 +124,6 @@ const SystemLogsScreen = () => {
             const oldTimestamp = Timestamp.fromDate(thirtyDaysAgo);
 
             const logsRef = collection(db, 'audit_logs');
-            // Fetch old documents
             const cleanupQuery = query(logsRef, where('timestamp', '<', oldTimestamp), limit(100));
             const oldSnap = await getDocs(cleanupQuery);
             
@@ -156,13 +132,16 @@ const SystemLogsScreen = () => {
                 const batch = writeBatch(db);
                 oldSnap.docs.forEach(d => batch.delete(d.ref));
                 await batch.commit();
-                console.log(`[Audit] Deleted ${oldSnap.size} logs older than 30 days.`);
                 setCleaning(false);
             }
         } catch (e) {
             console.error('Lazy cleanup failed', e);
             setCleaning(false);
         }
+    };
+
+    const toggleRow = (id) => {
+        setExpandedLogId(expandedLogId === id ? null : id);
     };
 
     const formatAction = (action) => {
@@ -175,6 +154,9 @@ const SystemLogsScreen = () => {
             case 'ACCOUNT_VERIFIED': return '本登録完了';
             case 'ACCOUNT_DELETED': return 'アカウント削除';
             case 'ADMIN_CREATED_USER': return 'アカウント発行完了(管理者)';
+            case 'EMAIL_SENT_SUCCESS': return 'メール送信成功';
+            case 'EMAIL_SENT_FAILED': return 'メール送信失敗';
+            case 'ACCOUNT_CREATE_FAILED': return 'アカウント作成失敗';
             default: return action;
         }
     };
@@ -207,34 +189,107 @@ const SystemLogsScreen = () => {
                     <table className="logs-table">
                         <thead>
                             <tr>
+                                <th style={{ width: '40px' }}></th>
                                 <th>日時</th>
                                 <th>アクション</th>
                                 <th>対象者</th>
-                                <th>セッションID</th>
                                 <th>詳細・備考</th>
                             </tr>
                         </thead>
                         <tbody>
                             {logs.map(log => (
-                                <tr key={log.id}>
-                                    <td className="log-time">{formatDate(log.createdAt)}</td>
-                                    <td><span className={`action-badge ${log.action || ''}`}>{formatAction(log.action)}</span></td>
-                                    <td>{log.email || '-'}</td>
-                                    <td className="session-id">{log.session_id ? log.session_id.substring(0, 12) + '...' : '-'}</td>
-                                    <td className="log-details">
-                                        {log.details && Object.keys(log.details).length > 0 
-                                            ? JSON.stringify(log.details) 
-                                            : '-'
-                                        }
-                                    </td>
-                                </tr>
+                                <React.Fragment key={log.id}>
+                                    <tr 
+                                        className={`log-row ${expandedLogId === log.id ? 'expanded' : ''}`}
+                                        onClick={() => toggleRow(log.id)}
+                                    >
+                                        <td className="expand-icon">
+                                            {expandedLogId === log.id ? '▼' : '▶'}
+                                        </td>
+                                        <td className="log-time">{formatDate(log.createdAt)}</td>
+                                        <td><span className={`action-badge ${log.action || ''}`}>{formatAction(log.action)}</span></td>
+                                        <td>{log.email || '-'}</td>
+                                        <td className="log-summary">
+                                            {log.details && Object.keys(log.details).length > 0 
+                                                ? JSON.stringify(log.details) 
+                                                : '-'
+                                            }
+                                        </td>
+                                    </tr>
+                                    {expandedLogId === log.id && (
+                                        <tr className="detail-row">
+                                            <td colSpan={5}>
+                                                <div className="detail-expanded-content">
+                                                    <div className="detail-grid">
+                                                        {/* 基本情報 */}
+                                                        <div className="detail-item">
+                                                            <label>システムUID</label>
+                                                            <code>{log.user_id || 'N/A'}</code>
+                                                        </div>
+                                                        <div className="detail-item">
+                                                            <label>セッションID</label>
+                                                            <code>{log.session_id || 'N/A'}</code>
+                                                        </div>
+                                                        <div className="detail-item">
+                                                            <label>プロジェクトID</label>
+                                                            <code>{log.project_id || 'N/A'}</code>
+                                                        </div>
+
+                                                        {/* Detailsの中身をパースして主要なものを表示 */}
+                                                        {log.details && Object.entries(log.details).map(([key, value]) => {
+                                                            // すでに表示したものはスキップ
+                                                            if (['user_id', 'session_id'].includes(key)) return null;
+                                                            
+                                                            // 表示ラベルの変換
+                                                            let label = key;
+                                                            let className = "";
+                                                            if (key === 'error_code') { label = 'エラーコード'; className = "text-error"; }
+                                                            else if (key === 'error_message') { label = 'エラー詳細'; className = "text-error"; }
+                                                            else if (key === 'reason') { label = '失敗理由'; className = "text-error"; }
+                                                            else if (key === 'type') label = '操作タイプ';
+                                                            else if (key === 'role' || key === 'roleId') label = '割り当てロール';
+                                                            else if (key === 'status') label = 'ステータス';
+                                                            else if (key === 'displayName') label = '表示名';
+                                                            else if (key === 'userAgent') label = 'アクセス環境 (UA)';
+                                                            else if (key === 'method') label = 'ログイン方法';
+                                                            else if (key === 'language') label = 'ブラウザ言語';
+                                                            else if (key === 'deletedAt') label = '削除日時';
+                                                            else if (key === 'oobCode') label = '認証コード(一部)';
+                                                            else if (key === 'departmentId') label = '部署ID';
+
+                                                            // 値が長すぎる場合の処理 (UAなど)
+                                                            const displayValue = (typeof value === 'string' && value.length > 100) 
+                                                                ? value.substring(0, 100) + '...' 
+                                                                : String(value);
+
+                                                            return (
+                                                                <div className={`detail-item ${key === 'userAgent' ? 'full-width' : ''}`} key={key}>
+                                                                    <label>{label}</label>
+                                                                    <span className={className}>{displayValue}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+
+                                                        {/* 全データ (JSON) */}
+                                                        <div className="detail-item full-width">
+                                                            <label>生データ (JSON形式)</label>
+                                                            <pre className="json-pre">
+                                                                {JSON.stringify(log.details, null, 2)}
+                                                            </pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
                             ))}
                         </tbody>
                     </table>
                 )}
             </div>
             <div className="logs-footer">
-                * システム負荷軽減のため、最新100件を表示しています。30日以上経過したログは自動的に順次削除されます。
+                * リストの行をクリックすると、その場ですぐに詳細データを確認できます。
             </div>
         </div>
     );
