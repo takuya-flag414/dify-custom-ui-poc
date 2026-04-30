@@ -7,6 +7,8 @@ import { fetchSuggestionsApi } from '../api/dify';
 import { mapCitationsFromApi } from '../utils/citationMapper';
 // ★Phase 2: SecureVaultServiceをインポート
 import SecureVaultService from '../services/SecureVaultService';
+// ★追加: エラー解析（ワークフローエラー → IntelligenceError変換用）
+import { analyzeIntelligenceError } from '../utils/errorIntelligence';
 
 // ★リファクタリング: 分離したモジュールからインポート
 import { DEFAULT_SEARCH_SETTINGS } from './chat/constants';
@@ -20,6 +22,7 @@ import {
     processRagStrategyFinished,
     processLlmSynthesisFinished,
     logWorkflowOutput,
+    processArtifactNodeFinished,
     processNodeError,
     processWorkflowError
 } from './chat/nodeEventHandlers';
@@ -622,11 +625,16 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 // ★追加: ノードエラー処理（status === 'failed' の場合）
                                 const nodeError = processNodeError(data, addLog);
                                 if (nodeError) {
+                                    // ★改修: IntelligenceError型に変換してメッセージに埋め込む
+                                    const nodeIntelligenceError = analyzeIntelligenceError(
+                                        nodeError.errorMessage,
+                                        nodeError.statusCode || undefined
+                                    );
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         thoughtProcess: prev.thoughtProcess.map(nodeError.thoughtProcessUpdate),
                                         hasWorkflowError: true,
-                                        workflowError: { nodeTitle: nodeError.nodeTitle, message: nodeError.errorMessage }
+                                        workflowError: nodeIntelligenceError
                                     } : prev);
                                     // エラーが発生しても処理は継続（部分的な結果を表示するため）
                                 }
@@ -716,8 +724,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     }
                                 }
 
+                                // ★追加: Artifact関連ノードの出力をキャプチャ
+                                const artifactResult = processArtifactNodeFinished(outputs, nodeId, title, addLog);
+                                if (artifactResult) {
+                                    setStreamingMessage(prev => prev ? {
+                                        ...prev,
+                                        thoughtProcess: prev.thoughtProcess.map(artifactResult.thoughtProcessUpdate)
+                                    } : prev);
+                                }
+
                                 // その他のノードは完了ステータスに更新（エラーでない場合のみ）
-                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_Intent_Analysis_Hybrid' && title !== 'LLM_RAG_Strategy' && title !== 'LLM_Synthesis' && !nodeError) {
+                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_Intent_Analysis_Hybrid' && title !== 'LLM_RAG_Strategy' && title !== 'LLM_Synthesis' && !nodeError && !artifactResult) {
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
@@ -817,12 +834,30 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                         detectedTraceMode
                                     );
 
-                                    // ★追加: ワークフローエラー情報を最終メッセージに含める
+                                    // ★改修: ワークフローエラーをIntelligenceError型に変換して埋め込む
                                     if (wfError || currentStreamingMsg.hasWorkflowError) {
+                                        const rawError = wfError?.errorMessage || currentStreamingMsg.workflowError?.rawErrorMessage || '';
+                                        const extractedStatusCode = wfError?.statusCode || currentStreamingMsg.workflowError?.statusCode || null;
+                                        const intelligenceError = analyzeIntelligenceError(rawError, extractedStatusCode || undefined);
+
                                         finalMessage.hasWorkflowError = true;
-                                        finalMessage.workflowError = wfError
-                                            ? { nodeTitle: 'ワークフロー', message: wfError.errorMessage }
-                                            : currentStreamingMsg.workflowError;
+                                        // すでにIntelligenceError型（ノードエラー経由）ならそのまま使用、
+                                        // それ以外（wfError直接）なら新規変換
+                                        finalMessage.workflowError = (currentStreamingMsg.workflowError?.type && !wfError)
+                                            ? currentStreamingMsg.workflowError
+                                            : intelligenceError;
+
+                                        // ★追加: auto-retry対象エラーの場合はlastErrorにも報告（リトライ処理のため）
+                                        // isWorkflowError: trueフラグでErrorGlassCardの表示を抑制
+                                        if (intelligenceError.retryStrategy === 'auto-retry') {
+                                            setLastError({
+                                                raw: rawError,
+                                                timestamp: Date.now(),
+                                                inputText: previousInputTextRef.current,
+                                                statusCode: extractedStatusCode,
+                                                isWorkflowError: true, // ★追加: ワークフローエラー由来フラグ
+                                            });
+                                        }
                                     }
 
                                     // ★修正: capturedUsage（message_end由来）を常にマージ

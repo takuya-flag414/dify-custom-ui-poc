@@ -298,6 +298,24 @@ function App() {
         return;
       }
 
+      // ★追加: ワークフローエラー由来の場合はErrorGlassCardに表示せず、リトライのみ実行
+      // InlineErrorCard（チャット内）で表示済みのため、画面下部のErrorGlassCardとの二重表示を防止
+      if (lastError.isWorkflowError) {
+        // リトライコールバックのみ予約（ErrorGlassCardは表示しない）
+        const retryCallback = () => {
+          const lastUserMsg = messages.slice().reverse().find(m => m.role === 'user');
+          if (lastUserMsg) {
+            const plainText = extractPlainText(lastUserMsg.text);
+            handleSendMessage(plainText, []);
+          }
+        };
+        // 遅延リトライを直接スケジュール
+        const delayMs = 3000; // 3秒後にリトライ
+        const timer = setTimeout(retryCallback, delayMs);
+        setLastError(null);
+        return () => clearTimeout(timer);
+      }
+
       errorIntelligence.reportError(lastError.raw, () => {
         // リトライコールバック: 最後のユーザーメッセージを再送信
         // ★修正: extractPlainText で構造化JSONからプレーンテキストを抽出し、二重ラップを防止

@@ -1975,7 +1975,27 @@ h2.section-title {
       { event: 'node_finished', data: { title: 'LLM_Search_Partner', node_type: 'llm', status: 'succeeded' } },
       { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 780, completion_tokens: 145, total_tokens: 925 } } }
     ]
-  }
+  },
+
+  // =================================================================
+  // ★追加: エラーシミュレーション用シナリオ (mock_error)
+  // =================================================================
+  'mock_error': [
+    { event: 'node_started', data: { title: 'LLM_Query_Rewrite', node_type: 'llm' } },
+    { event: 'node_finished', data: { title: 'LLM_Query_Rewrite', node_type: 'llm', status: 'succeeded' } },
+    { event: 'message', answer: 'ご質問ありがとうございます。回答を生成中に' },
+    { event: 'node_started', data: { title: 'LLM_Slide_Generator', node_type: 'llm' } },
+    { 
+      event: 'node_finished', 
+      data: { 
+        title: 'LLM_Slide_Generator', 
+        node_type: 'llm', 
+        status: 'failed', 
+        // テスト用の生エラーメッセージ（503を含む形式）
+        error: "req_id: 123 PluginInvokeError: {'error_type':'ServerError','message':'503 UNAVAILABLE. {\"code\": 503}'}" 
+      } 
+    }
+  ]
 };
 
 /**

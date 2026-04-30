@@ -34,6 +34,9 @@ export const DEFAULT_MOCK_MODE = getDefaultMockMode();
 // これが true の場合、外部通信を一切行わない
 export const isStrictFEMode = DEFAULT_MOCK_MODE === 'FE';
 
+// FEモード時にエラーを疑似的に発生させるフラグ（デフォルトは false）
+export const SIMULATE_FE_ERROR = import.meta.env.VITE_SIMULATE_FE_ERROR === 'true';
+
 /**
  * API Configuration via Environment Variables
  * 環境変数によるAPI設定の制御

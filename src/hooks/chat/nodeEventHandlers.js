@@ -5,6 +5,39 @@ import { NODE_DISPLAY_MAP, HIDDEN_NODE_PREFIXES } from './constants';
 import { extractJsonFromLlmOutput } from '../../utils/llmOutputParser';
 
 /**
+ * Difyのエラーメッセージ文字列からHTTPステータスコードを抽出するヘルパー関数
+ * 例: "503 UNAVAILABLE. {'error': {'code': 503, ...}}" → 503
+ * 例: "400 Bad Request" → 400
+ * @param {string} errorMessage - エラーメッセージ
+ * @returns {number|null} 抽出されたHTTPステータスコード、または null
+ */
+export const extractHttpStatusCode = (errorMessage) => {
+    if (!errorMessage || typeof errorMessage !== 'string') return null;
+
+    // パターン1: "503 UNAVAILABLE" や "400 Bad Request" のようなHTTPレスポンス形式
+    const httpPattern = /\b(4\d{2}|5\d{2})\s+[A-Z]/;
+    let match = errorMessage.match(httpPattern);
+    if (match) return parseInt(match[1], 10);
+
+    // パターン2: "'code': 503" のようなPythonのdict形式（Dify Plugin内部エラー）
+    const pythonCodePattern = /'code':\s*(\d{3})/;
+    match = errorMessage.match(pythonCodePattern);
+    if (match) return parseInt(match[1], 10);
+
+    // パターン3: ""code": 503" のようなJSON形式
+    const jsonCodePattern = /"code":\s*(\d{3})/;
+    match = errorMessage.match(jsonCodePattern);
+    if (match) return parseInt(match[1], 10);
+
+    // パターン4: メッセージ中に "503" "429" 等の単独数字がある場合（フォールバック）
+    const standalonePattern = /\b(4\d{2}|5\d{2})\b/;
+    match = errorMessage.match(standalonePattern);
+    if (match) return parseInt(match[1], 10);
+
+    return null;
+};
+
+/**
  * ファイル名を動的に取得するヘルパー関数
  * @param {Object} inputs - ノードの入力パラメータ
  * @param {Array} sessionFiles - セッションファイル
@@ -512,6 +545,76 @@ export const processRagStrategyFinished = (outputs, nodeId, addLog) => {
 };
 
 /**
+ * ログ出力用に長大な artifact_content 等を省略したテキストを生成するヘルパー関数
+ * @param {string} rawText - 生の出力テキスト
+ * @returns {string} 省略処理後のテキスト
+ */
+export const truncateForLog = (rawText) => {
+    if (!rawText || typeof rawText !== 'string') return rawText;
+
+    // JSONとしてのパースを試みる
+    try {
+        const parsed = JSON.parse(rawText);
+        if (parsed && typeof parsed === 'object') {
+            let modified = false;
+
+            // artifact_content フィールドを省略
+            if (typeof parsed.artifact_content === 'string' && parsed.artifact_content.length > 100) {
+                parsed.artifact_content = `<省略: ${parsed.artifact_content.length}文字>`;
+                modified = true;
+            }
+
+            // その他、非常に長いフィールドがあればここに追加可能
+
+            if (modified) {
+                return JSON.stringify(parsed, null, 2);
+            }
+        }
+    } catch (e) {
+        // パースエラー（通常のテキスト）の場合は何もしない
+    }
+
+    // JSONではないが全体が長すぎる場合のフォールバック
+    if (rawText.length > 5000) {
+        return rawText.substring(0, 1000) + `\n... <長文のため省略: 残り約${rawText.length - 1000}文字>`;
+    }
+
+    return rawText;
+};
+
+/**
+ * node_finished イベントを処理する (Artifact関連: Generator, Quality Check等)
+ * @param {Object} outputs - ノード出力
+ * @param {string} nodeId - ノードID
+ * @param {string} title - ノードタイトル
+ * @param {Function} addLog - ログ関数
+ * @returns {Object|null} thoughtProcessUpdate または null
+ */
+export const processArtifactNodeFinished = (outputs, nodeId, title, addLog) => {
+    const outputText = outputs?.text;
+    if (!outputText || !title) return null;
+
+    // 対象ノードの判定
+    const isTarget = title.includes('Generator') || title.includes('Quality_Check');
+
+    if (isTarget) {
+        const logText = truncateForLog(outputText);
+        addLog(`[ArtifactNode] ${title} 出力:\n${logText}`, 'info');
+        return {
+            thoughtProcessUpdate: (t) => t.id === nodeId ? {
+                ...t,
+                status: 'done',
+                resultLabel: '出力結果',
+                resultValue: outputText,
+                isSpecialArtifact: true // ログコピー時に抽出するためのフラグ
+            } : t
+        };
+    }
+
+    return null;
+};
+
+/**
  * ワークフローログ出力用の処理
  * @param {Object} outputs - ノード出力
  * @param {string} title - ノードタイトル
@@ -528,7 +631,9 @@ export const logWorkflowOutput = (outputs, title, addLog) => {
         title.includes('Search') || title.includes('General') ||
         title.includes('Chat') || title.includes('Fast')
     )) {
-        addLog(`[Workflow] ${title} 出力:\n${outputText}`, 'info');
+        // 対象ノードの場合（Generatorなどは processArtifactNodeFinished で処理されるが、念のため適用）
+        const logText = truncateForLog(outputText);
+        addLog(`[Workflow] ${title} 出力:\n${logText}`, 'info');
     }
 };
 
@@ -548,12 +653,15 @@ export const processNodeError = (data, addLog) => {
         return null;
     }
 
-    addLog(`[Workflow] ❌ ノード「${title}」でエラー: ${errorMessage}`, 'error');
+    // ★改修: エラーメッセージからHTTPステータスコードを抽出
+    const statusCode = extractHttpStatusCode(errorMessage);
+    addLog(`[Workflow] ❌ ノード「${title}」でエラー: ${errorMessage} (extracted status: ${statusCode})`, 'error');
 
     return {
         nodeId,
         nodeTitle: title,
         errorMessage,
+        statusCode, // ★追加: 抽出されたHTTPステータスコード
         thoughtProcessUpdate: (t) => t.id === nodeId
             ? { ...t, status: 'error', errorMessage }
             : t
@@ -574,10 +682,13 @@ export const processWorkflowError = (data, addLog) => {
         return null;
     }
 
-    addLog(`[Workflow] ❌ ワークフロー全体がエラーで終了: ${errorMessage}`, 'error');
+    // ★改修: エラーメッセージからHTTPステータスコードを抽出
+    const statusCode = extractHttpStatusCode(errorMessage);
+    addLog(`[Workflow] ❌ ワークフロー全体がエラーで終了: ${errorMessage} (extracted status: ${statusCode})`, 'error');
 
     return {
         status,
-        errorMessage
+        errorMessage,
+        statusCode // ★追加: 抽出されたHTTPステータスコード
     };
 };
