@@ -40,6 +40,7 @@ const ChatInput = ({
   // ★追加: エラー/停止時のテキスト復元
   restoreText = null,
   onRestoreTextConsumed,
+  isShieldActive = false, // ★追加: シールドモード状態
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -112,7 +113,7 @@ const ChatInput = ({
     }
   }, [restoreText]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const executeSend = useCallback((excludedTypes = []) => {
+  const executeSend = useCallback((excludedTypes = [], excludedValues = []) => {
     const filesToSend = selectedFiles.map(sf => sf.file);
 
     // ★Mention Pillなどを含んだリッチテキストからプレーンテキストを抽出
@@ -121,6 +122,7 @@ const ChatInput = ({
     // ★変更: 第4引数（オプション等）で quote および artifact を渡す
     const options = {
       sanitizeExcludeTypes: excludedTypes,
+      sanitizeExcludeValues: excludedValues,
       quote,
       currentArtifactType: activeArtifact?.type,
       ...(activeArtifact && { artifact: { requested: true, type: activeArtifact.type } })
@@ -412,8 +414,9 @@ const ChatInput = ({
         <PrivacyConfirmDialog
           detections={privacyWarning.detections}
           fileDetections={fileWarnings.detections}
-          onConfirm={(excludedTypes) => executeSend(excludedTypes)}
+          onConfirm={(excludedTypes, excludedValues) => executeSend(excludedTypes, excludedValues)}
           onCancel={() => setShowPrivacyConfirm(false)}
+          isShieldActive={isShieldActive}
         />
       )}
     </>

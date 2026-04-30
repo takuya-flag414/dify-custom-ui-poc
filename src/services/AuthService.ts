@@ -33,7 +33,11 @@ import {
     RoleCode,
     ResolvedUserRole,
     UserPreferences,
+    MOCK_USERS,
+    getUserRolesById,
+    resolvePermissionsByRoles
 } from '../mocks/mockUsers';
+import { isStrictFEMode } from '../config/env';
 
 // ============================================
 // 型定義（正式仕様準拠）
@@ -233,6 +237,33 @@ class AuthService {
             throw new Error('メールアドレスとパスワードを入力してください');
         }
 
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Simulating login locally...');
+            const user = MOCK_USERS.find(u => u.email === email && u.password_hash === password);
+            
+            if (user) {
+                localStorage.setItem('mock_session', JSON.stringify({ uid: user.user_id, email: user.email }));
+                const roles = getUserRolesById(user.user_id);
+                const permissions = resolvePermissionsByRoles(roles);
+                const profile: UserProfile = {
+                    userId: user.user_id,
+                    email: user.email,
+                    name: user.name,
+                    displayName: user.displayName || user.name,
+                    accountStatus: user.account_status,
+                    roles: roles,
+                    permissions: permissions,
+                    preferences: user.preferences || { theme: 'system', aiStyle: 'partner' }
+                };
+                return {
+                    token: 'mock-token-fe-mode',
+                    user: profile
+                };
+            } else {
+                throw new Error('メールアドレスまたはパスワードが正しくありません');
+            }
+        }
+
         try {
             // 1. Firebase Auth で認証
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -329,6 +360,12 @@ class AuthService {
      * ログアウト
      */
     async logout(): Promise<void> {
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Simulating logout locally...');
+            localStorage.removeItem('mock_session');
+            return;
+        }
+
         try {
             const currentEmail = auth.currentUser?.email || 'unknown';
             const currentUid = auth.currentUser?.uid || null;
@@ -472,8 +509,8 @@ class AuthService {
             // メール認証の場合のみログ記録（"VERIFY_EMAIL"アクション）
             if (actionCodeInfo.operation === 'VERIFY_EMAIL') {
                 // メール認証直後はログイン状態でないため、未認証ユーザーでもログを記録できるようにする
-                const emailFromCode = actionCodeInfo.email;
-                this._logAuditAction('ACCOUNT_VERIFIED', emailFromCode || 'unknown', null);
+                const emailFromCode = (actionCodeInfo.data as any)?.email || 'unknown';
+                this._logAuditAction('ACCOUNT_VERIFIED', emailFromCode, null);
                 console.log('[AuthService] Account verified log recorded for:', emailFromCode);
             }
         } catch (error: any) {
@@ -616,6 +653,35 @@ class AuthService {
      * セッション復元
      */
     async restoreSession(): Promise<UserProfile | null> {
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Simulating restore session locally...');
+            const sessionStr = localStorage.getItem('mock_session');
+            if (sessionStr) {
+                try {
+                    const session = JSON.parse(sessionStr);
+                    const user = MOCK_USERS.find(u => u.email === session.email);
+                    if (user) {
+                        const roles = getUserRolesById(user.user_id);
+                        const permissions = resolvePermissionsByRoles(roles);
+                        const profile: UserProfile = {
+                            userId: user.user_id,
+                            email: user.email,
+                            name: user.name,
+                            displayName: user.displayName || user.name,
+                            accountStatus: user.account_status,
+                            roles: roles,
+                            permissions: permissions,
+                            preferences: user.preferences || { theme: 'system', aiStyle: 'partner' }
+                        };
+                        return profile;
+                    }
+                } catch(e) {
+                    // Ignore parse errors
+                }
+            }
+            return null;
+        }
+
         return new Promise((resolve) => {
             const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
                 unsubscribe();

@@ -30,6 +30,10 @@ const getDefaultMockMode = (): MockMode => {
 
 export const DEFAULT_MOCK_MODE = getDefaultMockMode();
 
+// Strict FE Mode の判定フラグ
+// これが true の場合、外部通信を一切行わない
+export const isStrictFEMode = DEFAULT_MOCK_MODE === 'FE';
+
 /**
  * API Configuration via Environment Variables
  * 環境変数によるAPI設定の制御

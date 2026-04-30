@@ -196,8 +196,8 @@ const styleTemplates = {
 
   // ========== Full (File + Web + RAG) ==========
   full: {
-    efficient: "### 総合分析レポート\n\n「事業計画書案」について、社内実績と市場動向の両面から分析しました。\n\n#### 計画書の分析\n提案されている「AIカスタマーサポート」機能[1]は、コスト削減効果が高いとされています。\n\n#### 社内実績\n過去の類似プロジェクト「ChatBot 2023」[2]では、導入により問い合わせが30%削減。\n\n#### 市場動向\n競合他社も同様の機能をリリース[3]。早期リリースが重要。\n\n**結論**: 本計画は妥当性が高く、推進を推奨します。",
-    partner: "事業計画書について、社内実績と市場動向の両面から分析してみました！📊\n\nまず計画書[1]で提案されている「**AIカスタマーサポート**」機能、コスト削減効果が期待できそうですね。\n\n**社内の実績**を見てみると...過去の「ChatBot 2023」プロジェクト[2]では、導入後に問い合わせが**30%削減**されたそうです！これは心強いデータですね 💪\n\n**市場動向**としては、競合他社も同様の機能をリリースし始めています[3]。競争力を維持するためにも、**早期リリース**が重要になりそうです。\n\n総合的に見て、この計画は**推進を推奨**します！✅\n\n次のステップとして、リスク管理表の作成などお手伝いしましょうか？"
+    efficient: "### 総合分析レポート\n\n「事業計画書案」について、社内実績と市場動向の両面から分析しました。\n\n#### 計画書の分析\n提案されている「AIカスタマーサポート」機能[1]は、コスト削減効果が高いとされています。\n\n#### 社内実績\n過去の類似プロジェクト「ChatBot 2023」[2]では、導入により問い合わせが30%削減。\n\n#### 市場動向\n競合他社も同様の機能をリリース[3]。早期リリースが重要。\n\n**結論**: 本計画は妥当性が高く、推進を推奨します [1][2][3][4][5]。",
+    partner: "事業計画書について、社内実績と市場動向の両面から分析してみました！📊\n\nまず計画書[1]で提案されている「**AIカスタマーサポート**」機能、コスト削減効果が期待できそうですね。\n\n**社内の実績**を見てみると...過去の「ChatBot 2023」プロジェクト[2]では、導入後に問い合わせが**30%削減**されたそうです！これは心強いデータですね 💪\n\n**市場動向**としては、競合他社も同様の機能をリリースし始めています[3]。競争力を維持するためにも、**早期リリース**が重要になりそうです。\n\n総合的に見て、社内実績と市場動向、および提供いただいた資料の内容を総合的に判断した結果、本計画は非常に妥当性が高く、今期の最重要プロジェクトとして推進することを推奨します [1][2][3][4][5]！✅\n\n次のステップとして、リスク管理表の作成などお手伝いしましょうか？"
   },
 
   // ========== Auto Demo (Log based) ==========
@@ -800,7 +800,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'document', source: '2025_事業計画案.docx', url: null },
             { id: 'cite_2', type: 'rag', source: 'プロジェクト完了報告書_ChatBot2023.pdf', url: null },
-            { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' }
+            { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' },
+            { id: 'cite_4', type: 'web', source: 'Gartner: 2026年 AI予測レポート', url: 'https://gartner.com/ai-2026' },
+            { id: 'cite_5', type: 'rag', source: '社内IT投資ガイドライン.xlsx', url: null }
           ],
           [],
           thinkingTemplates.full.efficient
@@ -828,7 +830,9 @@ export const scenarios = {
           [
             { id: 'cite_1', type: 'document', source: '2025_事業計画案.docx', url: null },
             { id: 'cite_2', type: 'rag', source: 'プロジェクト完了報告書_ChatBot2023.pdf', url: null },
-            { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' }
+            { id: 'cite_3', type: 'web', source: 'TechNews: Customer Support Trends', url: 'https://technews.com/ai-support' },
+            { id: 'cite_4', type: 'web', source: 'Gartner: 2026年 AI予測レポート', url: 'https://gartner.com/ai-2026' },
+            { id: 'cite_5', type: 'rag', source: '社内IT投資ガイドライン.xlsx', url: null }
           ],
           [],
           thinkingTemplates.full.partner

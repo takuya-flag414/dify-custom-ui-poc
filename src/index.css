@@ -266,6 +266,12 @@
   --glow-primary-alpha: rgba(0, 122, 255, 0.25);
   --glow-secondary-alpha: rgba(0, 85, 255, 0.25);
   --glow-transition-duration: 1500ms;
+
+  /* ========================================
+     Shield Mode (Privacy Shield)
+     ======================================== */
+  --shield-watermark-opacity: 0.04;
+  --shield-watermark-color: oklch(40% 0 0);
 }
 
 /* ========================================
@@ -367,6 +373,9 @@
   --glass-hud-shadow:
     0 20px 50px rgba(0, 0, 0, 0.4),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+
+  /* Shield Mode - Dark */
+  --shield-watermark-color: oklch(70% 0 0);
 }
 
 /* AI Spin Animation */

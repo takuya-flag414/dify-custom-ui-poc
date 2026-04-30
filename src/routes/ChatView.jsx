@@ -67,6 +67,7 @@ const ChatView = ({
     newChatTrigger,
     restoreText,              // ★追加: 復元テキスト
     onRestoreTextConsumed,    // ★追加: 復元完了コールバック
+    isShieldActive,           // ★追加: シールドモード状態
 }) => {
     const { conversationId: urlConversationId } = useParams();
     const navigate = useNavigate();
@@ -164,6 +165,7 @@ const ChatView = ({
                 sendKey={sendKey}
                 restoreText={restoreText}
                 onRestoreTextConsumed={onRestoreTextConsumed}
+                isShieldActive={isShieldActive}
             />
         </motion.div>
     );

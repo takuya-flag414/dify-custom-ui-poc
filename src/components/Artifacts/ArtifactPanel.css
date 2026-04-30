@@ -1417,6 +1417,17 @@
     height: auto;
 }
 
+.generating-slide-animation {
+    width: 100%;
+    height: auto;
+    max-width: 320px; /* スライドなので少し横幅を広めに許可 */
+}
+
+/* スライド表示時のコンテナ調整 */
+.a4-page-placeholder.is-slide .placeholder-animation-container {
+    width: 320px;
+}
+
 .placeholder-text {
     font-family: var(--font-rounded), var(--font-sans);
     font-size: 19px;

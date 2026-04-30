@@ -28,9 +28,11 @@ import { useSettings } from './hooks/useSettings';
 import { useTheme } from './hooks/useTheme';
 import { useInspector } from './hooks/useInspector';
 import { useErrorIntelligence } from './hooks/useErrorIntelligence';
+import { useShieldMode } from './hooks/useShieldMode';
 
 import ErrorGlassCard from './components/IntelligenceHUD/ErrorGlassCard';
 import SanitizeToast from './components/Chat/SanitizeToast';
+import ShieldModeOverlay from './components/Chat/ShieldModeOverlay';
 
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
@@ -219,6 +221,9 @@ function App() {
     closeArtifact();
   }, [conversationId]);
 
+  // ★追加: プライバシーシールドモード管理（useChatより前に初期化）
+  const shieldMode = useShieldMode(conversationId);
+
   const {
     messages,
     setMessages,
@@ -257,7 +262,12 @@ function App() {
     apiUrl,
     settings?.prompt // ★追加: AI回答スタイルとシステムプロンプトを渡す
       ? { ...settings.prompt, displayName: settings?.profile?.displayName || '' }
-      : undefined
+      : undefined,
+    // ★追加: シールドモード自動移行コールバック
+    (convId) => {
+      shieldMode.activateShield(convId);
+      addLog(`[Shield Mode] 会話 ${convId} がシールドモードに移行しました`, 'info');
+    }
   );
 
   // ★追加: 会話切り替え・新規チャット開始時のハンドラー
@@ -615,6 +625,7 @@ function App() {
                             newChatTrigger={newChatTrigger}
                             restoreText={pendingRestoreText}
                             onRestoreTextConsumed={() => setPendingRestoreText(null)}
+                            isShieldActive={shieldMode.isCurrentShieldActive}
                           />
                         } />
                         <Route path="/chat/:conversationId" element={
@@ -650,6 +661,7 @@ function App() {
                             newChatTrigger={newChatTrigger}
                             restoreText={pendingRestoreText}
                             onRestoreTextConsumed={() => setPendingRestoreText(null)}
+                            isShieldActive={shieldMode.isCurrentShieldActive}
                           />
                         } />
                         <Route path="/admin/users" element={
@@ -737,6 +749,9 @@ function App() {
             onManualRetry={errorIntelligence.triggerManualRetry}
             onOpenConfig={() => setIsConfigModalOpen(true)}
           />
+
+          {/* ★追加: シールドモード ウォーターマーク */}
+          <ShieldModeOverlay isActive={shieldMode.isCurrentShieldActive} />
         </>
       )
       }

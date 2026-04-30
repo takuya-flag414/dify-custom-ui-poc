@@ -18,14 +18,37 @@ interface RestoredTokenProps {
 
 const RestoredToken: React.FC<RestoredTokenProps> = ({ restoredValue, token }) => {
     const [showTooltip, setShowTooltip] = useState(false);
+    const [isRevealed, setIsRevealed] = useState(false);
 
-    // 復元済み: 元の値をインライン表示
+    // 復元済み: 元の値とトークンを切り替えて表示
     if (restoredValue) {
         return (
-            <span className="restored-token restored-token--resolved">
-                <span className="restored-token__badge" title="保護された機密情報（復元済み）">🛡️</span>
-                <span className="restored-token__value">{restoredValue}</span>
-            </span>
+            <button
+                type="button"
+                className={`restored-token restored-token--resolved ${isRevealed ? 'is-revealed' : 'is-hidden'}`}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsRevealed(!isRevealed);
+                }}
+                title={isRevealed ? "クリックして隠す" : "クリックして表示"}
+                aria-expanded={isRevealed}
+            >
+                <span className="restored-token__badge">
+                    {isRevealed ? (
+                        <svg className="token-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                        </svg>
+                    ) : (
+                        <svg className="token-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    )}
+                </span>
+                <span className="restored-token__display-value">
+                    {isRevealed ? restoredValue : token}
+                </span>
+            </button>
         );
     }
 

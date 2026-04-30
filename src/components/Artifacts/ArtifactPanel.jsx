@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
 import { SparklesIcon } from '../Shared/SystemIcons';
 import GeneratingAnimation from './GeneratingArtifact';
+import GeneratingSlideAnimation from './GeneratingArtifactSlide';
 import { splitArtifactPages } from '../../utils/splitArtifactPages';
 import { sanitizeArtifactHtml } from '../../utils/sanitizeArtifactHtml';
 // import html2pdf from 'html2pdf.js';
@@ -126,7 +127,11 @@ const GeneratingPagePlaceholder = ({ pageNumber, isSlide, status, subtext }) => 
     >
         <div className="placeholder-content">
             <div className="placeholder-animation-container">
-                <GeneratingAnimation className="generating-pencil-animation" />
+                {isSlide ? (
+                    <GeneratingSlideAnimation className="generating-slide-animation" />
+                ) : (
+                    <GeneratingAnimation className="generating-pencil-animation" />
+                )}
             </div>
             <div className="placeholder-text">
                 <AnimatePresence mode="wait">

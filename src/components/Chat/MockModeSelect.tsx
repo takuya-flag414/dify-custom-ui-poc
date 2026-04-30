@@ -1,5 +1,6 @@
 // src/components/Chat/MockModeSelect.tsx
 import React, { useState, useRef, useEffect } from 'react';
+import { isStrictFEMode } from '../../config/env';
 import {
     ServerIcon,
     FlaskIcon,
@@ -78,11 +79,12 @@ const MockModeSelect: React.FC<MockModeSelectProps> = ({ mockMode, setMockMode }
     };
 
     return (
-        <div className="mock-mode-wrapper" ref={dropdownRef}>
+        <div className="mock-mode-wrapper" ref={dropdownRef} title={isStrictFEMode ? "環境変数によりFEモードに固定されています（通信遮断中）" : ""}>
             <button
-                className={`mock-trigger-btn ${isOpen ? 'open' : ''}`}
-                onClick={() => setIsOpen(!isOpen)}
-                title="実行モード切り替え"
+                className={`mock-trigger-btn ${isOpen ? 'open' : ''} ${isStrictFEMode ? 'locked' : ''}`}
+                onClick={() => { if (!isStrictFEMode) setIsOpen(!isOpen); }}
+                disabled={isStrictFEMode}
+                title={isStrictFEMode ? "環境変数によりFEモードに固定されています" : "実行モード切り替え"}
             >
                 <div className="mock-trigger-icon">
                     <CurrentIcon width="14" height="14" />
@@ -92,6 +94,10 @@ const MockModeSelect: React.FC<MockModeSelectProps> = ({ mockMode, setMockMode }
                     <ChevronDownIcon />
                 </div>
             </button>
+            
+            {isStrictFEMode && (
+                <span className="locked-badge" style={{ marginLeft: '8px', fontSize: '11px', color: '#f59e0b', fontWeight: 'bold' }}>🔒 Strict Mode</span>
+            )}
 
             {isOpen && (
                 <div className="mock-dropdown-menu">
