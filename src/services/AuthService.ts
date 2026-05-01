@@ -354,42 +354,6 @@ class AuthService {
         }
     }
 
-    /**
-     * パスワードリセットメールを送信
-     */
-    async resetPassword(email: string): Promise<void> {
-        if (!email) {
-            throw new Error('メールアドレスを入力してください');
-        }
-
-        try {
-            await sendPasswordResetEmail(auth, email);
-            
-            // メール送信成功を記録
-            this._logAuditAction('EMAIL_SENT_SUCCESS', email, null, {
-                type: 'password_reset',
-                status: 'accepted_by_firebase'
-            });
-            
-            console.log('[AuthService] Password reset email sent to:', email);
-        } catch (error: any) {
-            console.error('[AuthService] Password reset failed:', error);
-            
-            // メール送信失敗を記録
-            this._logAuditAction('EMAIL_SENT_FAILED', email, null, {
-                type: 'password_reset',
-                error_code: error.code,
-                error_message: error.message
-            });
-
-            if (error.code === 'auth/user-not-found') {
-                throw new Error('このメールアドレスは登録されていません');
-            } else if (error.code === 'auth/invalid-email') {
-                throw new Error('有効なメールアドレスを入力してください');
-            }
-            throw new Error('パスワード再設定メールの送信に失敗しました');
-        }
-    }
 
     /**
      * サインアップ（Firebase標準 メール確認フロー）
@@ -486,7 +450,8 @@ class AuthService {
             } else if (error.code === 'auth/weak-password') {
                 throw new Error('パスワードは6文字以上である必要があります');
             }
-            throw new Error('アカウントの作成に失敗しました');
+            // エラー原因を特定するために、詳細なエラーメッセージを出力する
+            throw new Error(`アカウントの作成に失敗しました: ${error.code || error.message}`);
         }
     }
 
