@@ -1052,7 +1052,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             if (restored.artifact) {
                 options.artifact = restored.artifact;
             }
-        } catch (e) {}
+        } catch (e) { }
 
         await handleSendMessage(textToSend, result.targetUserMessage.files || [], options);
     }, [messages, handleSendMessage, addLog]);
