@@ -176,6 +176,22 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                     };
                 }
 
+                // ★追加: json_slide判定 (presentation_title + slides[] のトップレベルJSON形式)
+                // DifyのLLM_JSON_Slide_Generatorはartifactラッパーを使わず、
+                // thinking/answer/presentation_title/theme/slides をフラットに出力する
+                if (!artifact && parsed.presentation_title && Array.isArray(parsed.slides)) {
+                    artifact = {
+                        artifact_title: parsed.presentation_title,
+                        artifact_type: 'json_slide',
+                        artifact_content: JSON.stringify({
+                            presentation_title: parsed.presentation_title,
+                            theme: parsed.theme || 'corporate-modern',
+                            slides: parsed.slides,
+                        }),
+                        citations: Array.isArray(parsed.citations) ? parsed.citations : [],
+                    };
+                }
+
                 return {
                     answer: parsed.answer || '',
                     citations: Array.isArray(parsed.citations) ? parsed.citations : [],
@@ -211,6 +227,19 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
             artifact_type: extractPartialField(textToParse, 'artifact_type') || 'summary_report',
             artifact_content: partialArtifactContent || '',
         };
+    }
+
+    // ★追加: json_slide用ストリーミング中のPartial Artifact抽出
+    // presentation_titleが存在し、slidesフィールドの開始が見つかった場合
+    if (!partialArtifact) {
+        const partialPresentationTitle = extractPartialField(textToParse, 'presentation_title');
+        if (partialPresentationTitle && textToParse.includes('"slides"')) {
+            partialArtifact = {
+                artifact_title: partialPresentationTitle,
+                artifact_type: 'json_slide',
+                artifact_content: '', // ストリーミング中は生成中アニメーション用に空文字
+            };
+        }
     }
 
     // ★改善: answer/thinking/artifact_titleのいずれかが見つかれば、JSONとして処理

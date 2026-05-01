@@ -145,7 +145,7 @@ const UniversalAddMenu = ({
     onRemoveDomain,
     onAddArtifact
 }) => {
-    const [view, setView] = useState('MAIN'); // MAIN, DOMAIN, ARTIFACT_L1, ARTIFACT_L2
+    const [view, setView] = useState('MAIN'); // MAIN, DOMAIN, ARTIFACT_L1, ARTIFACT_L2, ARTIFACT_SLIDE_SUB
     const [slideDirection, setSlideDirection] = useState('right');
 
     const navigateTo = (targetView, direction = 'right') => {
@@ -261,8 +261,9 @@ const UniversalAddMenu = ({
                             <MenuItem
                                 icon={<PresentationIcon />}
                                 label="📊 プレゼンスライド"
-                                subtext="ブラウザ閲覧・PDF用のスライド資料"
-                                onClick={() => handleArtifactSelect('html_slide', 'プレゼンスライド')}
+                                subtext="用途に合わせて形式を選択"
+                                onClick={() => navigateTo('ARTIFACT_SLIDE_SUB', 'right')}
+                                showArrow
                             />
                         </motion.div>
                     )}
@@ -314,6 +315,39 @@ const UniversalAddMenu = ({
                                 label="❓ FAQ"
                                 subtext="よくある質問と回答のリスト"
                                 onClick={() => handleArtifactSelect('faq', 'FAQ (想定問答集)')}
+                            />
+                        </motion.div>
+                    )}
+
+                    {view === 'ARTIFACT_SLIDE_SUB' && (
+                        <motion.div
+                            key="artifact_slide_sub"
+                            variants={slideVariants}
+                            initial={getAnimationState().initial}
+                            animate="center"
+                            exit={getAnimationState().exit}
+                            transition={springTransition}
+                        >
+                            <div className="flex items-center gap-2 px-1 py-1 mb-2">
+                                <button
+                                    onClick={() => navigateTo('ARTIFACT_L1', 'left')}
+                                    className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5 border-none bg-transparent outline-none"
+                                >
+                                    <ChevronLeftIcon />
+                                </button>
+                                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">プレゼンスライド形式</span>
+                            </div>
+                            <MenuItem
+                                icon={<PresentationIcon />}
+                                label="印刷可能なプレゼンスライド"
+                                subtext="HTML形式 (リッチな装飾・印刷向け)"
+                                onClick={() => handleArtifactSelect('html_slide', '印刷可能なプレゼンスライド')}
+                            />
+                            <MenuItem
+                                icon={<PresentationIcon />}
+                                label="印刷可能なプレゼンスライド"
+                                subtext="JSON形式 (構造化データ・再利用向け)"
+                                onClick={() => handleArtifactSelect('json_slide', '印刷可能なプレゼンスライド')}
                             />
                         </motion.div>
                     )}

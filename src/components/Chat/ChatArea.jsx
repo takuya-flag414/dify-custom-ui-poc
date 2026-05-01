@@ -11,6 +11,7 @@ import WelcomeScreen from './WelcomeScreen';
 import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
+import JsonSlidePanel from '../Artifacts/JsonSlidePanel';
 
 
 const ChatArea = (props) => {
@@ -338,14 +339,29 @@ const ChatArea = (props) => {
         tableContent={tableContent}
       />
 
-      {/* ★追加: streamingMessage を渡す */}
-      <ArtifactPanel
-        isOpen={isArtifactOpen}
-        onClose={closeArtifact}
-        artifact={openedArtifact}
-        streamingMessage={streamingMessage}
-        onQuoteSelect={(text) => setQuoteContext(text)}
-      />
+      {/* ★追加: json_slideかどうかの判定 */}
+      {(() => {
+        const currentArtifactType = openedArtifact?.type || streamingMessage?.artifact?.artifact_type;
+        const isJsonSlide = currentArtifactType === 'json_slide';
+
+        return (
+          <>
+            <JsonSlidePanel
+              isOpen={isArtifactOpen && isJsonSlide}
+              onClose={closeArtifact}
+              artifact={openedArtifact}
+              streamingMessage={streamingMessage}
+            />
+            <ArtifactPanel
+              isOpen={isArtifactOpen && !isJsonSlide}
+              onClose={closeArtifact}
+              artifact={openedArtifact}
+              streamingMessage={streamingMessage}
+              onQuoteSelect={(text) => setQuoteContext(text)}
+            />
+          </>
+        );
+      })()}
     </div>
   );
 };

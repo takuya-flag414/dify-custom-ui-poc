@@ -1978,6 +1978,27 @@ h2.section-title {
   },
 
   // =================================================================
+  // ★追加: JSON Slide 生成シミュレーション
+  // =================================================================
+  'json_slide': [
+    { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+    { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', node_type: 'llm', text: '{"thinking":"JSONスライド生成の要求です。","category":"TASK","requires_rag":false,"requires_web":false}' }, status: 'succeeded' },
+    { event: 'node_started', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm' } },
+    { event: 'message', answer: '', thinking: '営業担当者向けのMEO研修スライドを作成します...' },
+    { 
+      event: 'message', 
+      answer: createMockJson(
+        '営業担当者向けのMEO研修スライドを作成しました。MEOの基礎から具体的な提案ステップ、よくある質問まで、現場で即座に活用できる構成にしています。特にSEOとの違いや提案の5ステップに重点を置いています。',
+        [],
+        [],
+        '営業担当者がMEO（Map Engine Optimization）の価値を正しく理解し、顧客へ自信を持って提案できるよう、論理的な構成でスライドを作成します。MEOの定義、SEOとの比較、Googleビジネスプロフィール（GBP）の重要性、具体的な提案ステップ、FAQ、成功事例という、研修に不可欠な要素を網羅します。各スライドは、フロントエンドでの表示を考慮し、文字数を制限しつつ視覚的に情報を整理します。'
+      ).slice(0, -1) + ',"presentation_title":"営業担当者のためのMEO研修資料","theme":"corporate-modern","slides":[{"id":"slide_1","layout_type":"title_slide","content":{"title":"営業担当者向けMEO研修","subtitle":"顧客の来店を最大化する提案スキルを習得する","author":"営業推進部 研修担当"}},{"id":"slide_2","layout_type":"content_slide","content":{"title":"MEO（マップ検索最適化）とは","body_text":"MEOは「Map Engine Optimization」の略称で、Googleマップでの検索結果を上位に表示させる施策です。","bullet_points":["地域+目的の検索に特化","店舗ビジネスに不可欠な施策","地図枠に表示されるため視認性が高い","スマートフォンの普及で重要性が増大","来店意欲の高いユーザーにリーチ可能"]}},{"id":"slide_3","layout_type":"split_slide","content":{"title":"MEOとSEOの違い","left_column":["対象：地図検索結果","表示：検索結果の上部","期間：比較的短期間で成果","費用：SEOに比べ低コスト"],"right_column":["対象：検索結果全体","表示：広告と地図の下","期間：成果まで半年以上","費用：専門知識と高コストが必要"]}},{"id":"slide_4","layout_type":"content_slide","content":{"title":"Googleビジネスプロフィールの重要性","body_text":"Googleビジネスプロフィール（GBP）は、店舗の「デジタル上の顔」となるプラットフォームです。","bullet_points":["ユーザーの8割が来店前に検索","口コミが信頼性に直結する","写真や動画で視覚的にアピール可能","最新情報をリアルタイムで発信","通話やルート検索へ直接誘導"]}},{"id":"slide_5","layout_type":"content_slide","content":{"title":"具体的な営業提案の5ステップ","bullet_points":["1. 顧客の現在地での順位を確認","2. 競合店舗の運用状況を分析","3. 口コミの返信状況をチェック","4. 運用代行による工数削減を提示","5. 期待できる来店数増加を予測"]}},{"id":"slide_6","layout_type":"content_slide","content":{"title":"現場で役立つFAQ","bullet_points":["Q. 費用対効果は？ → 低コストで来店直結","Q. 悪い口コミが来たら？ → 誠実な返信が信頼を生む","Q. SEOは不要？ → 併用で相乗効果がある","Q. 自分でできる？ → 継続的な運用に工数がかかる","Q. 順位は保証される？ → 施策の継続が上位維持の鍵"]}},{"id":"slide_7","layout_type":"content_slide","content":{"title":"成功事例：飲食店A社の場合","bullet_points":["導入3ヶ月で「地域+ランチ」1位獲得","Googleマップ経由の電話数が200%増","写真の最適化で閲覧数が3倍に","口コミ返信の徹底により平均評価が向上","週末の予約が1.5倍に増加"]}},{"id":"slide_8","layout_type":"quote_slide","content":{"title":"まとめ：MEOは信頼の構築","quote":"検索結果は店舗のデジタルな看板である。看板を磨くことが、最高の顧客体験の第一歩となる。\"}},{"id":"slide_9","layout_type":"content_slide","content":{"title":"次のアクション","bullet_points":["自社ツールのデモ画面を確認","ターゲット顧客のリストアップ","現状の検索順位チェックの練習","提案スクリプトのロープレ実施","事例資料のダウンロード"]}}]}'
+    },
+    { event: 'node_finished', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm', status: 'succeeded' } },
+    { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 3265, completion_tokens: 1732, total_tokens: 4997 } } }
+  ],
+
+  // =================================================================
   // ★追加: エラーシミュレーション用シナリオ (mock_error)
   // =================================================================
   'mock_error': [

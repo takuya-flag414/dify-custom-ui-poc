@@ -379,7 +379,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 'checklist',
                 'comparison_table',
                 'faq',
-                'meeting_minutes'
+                'meeting_minutes',
+                'json_slide'
             ];
 
             // 履歴から受信済みのタイプを抽出
