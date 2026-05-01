@@ -181,6 +181,7 @@ exports.createSecureUserProfile = onCall(async (request) => {
             user_id: uid,
             email: encryptedEmail,
             email_h: emailHash, // 検索用
+            last_login_at: now, // 最終アクティビティ
             displayName: encryptedName,
             lastName: encryptedLastName,
             firstName: encryptedFirstName,
@@ -210,8 +211,8 @@ exports.createSecureUserProfile = onCall(async (request) => {
         logger.info(`KMS: Secure Profile Created for ${uid}`);
         return { success: true };
     } catch (error) {
-        logger.error(`Secure Profile Creation Failed:`, error);
-        throw new HttpsError("internal", "プロファイルの作成に失敗しました");
+        logger.error(`Secure Profile Creation Failed for ${uid}:`, error);
+        throw new HttpsError("internal", `プロファイルの作成に失敗しました: ${error.message || 'Unknown Error'}`);
     }
 });
 
@@ -234,6 +235,21 @@ exports.getSecureUserProfile = onCall(async (request) => {
         }
 
         const data = userDoc.data();
+        const now = Timestamp.now();
+        const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+
+        // 30日間のアクティビティチェック
+        const lastActive = data.last_login_at; 
+        if (lastActive && (now.toMillis() - lastActive.toMillis() > thirtyDaysInMs)) {
+            logger.warn(`Session Expired for ${uid}: Last active ${lastActive.toDate()}`);
+            throw new HttpsError("unauthenticated", "セッションの有効期限（30日間）が切れました。再度ログインしてください");
+        }
+
+        // アクティビティ時刻を更新 (スライディング有効期限)
+        await db.collection('users').doc(uid).update({ 
+            last_login_at: now,
+            updated_at: now 
+        });
 
         // 暗号化されていない古いデータの場合はそのまま返す
         if (!data.is_encrypted) {
@@ -259,7 +275,8 @@ exports.getSecureUserProfile = onCall(async (request) => {
             dateOfBirth: dob
         };
     } catch (error) {
-        logger.error(`Secure Profile Retrieval Failed:`, error);
-        throw new HttpsError("internal", "プロファイルの取得に失敗しました");
+        logger.error(`Secure Profile Retrieval Failed for ${uid}:`, error);
+        // デバッグのためにエラーメッセージを詳細化（本番では汎用メッセージに戻すのが望ましい）
+        throw new HttpsError("internal", `プロファイルの取得に失敗しました: ${error.message || 'Unknown Error'}`);
     }
 });
