@@ -347,7 +347,7 @@ const UniversalAddMenu = ({
                                 icon={<PresentationIcon />}
                                 label="印刷可能なプレゼンスライド"
                                 subtext="JSON形式 (構造化データ・再利用向け)"
-                                onClick={() => handleArtifactSelect('json_slide', '印刷可能なプレゼンスライド')}
+                                onClick={() => handleArtifactSelect('json_slide_advanced', '印刷可能なプレゼンスライド')}
                             />
                         </motion.div>
                     )}

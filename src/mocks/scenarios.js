@@ -1999,6 +1999,28 @@ h2.section-title {
   ],
 
   // =================================================================
+  // ★追加: JSON Slide Advanced（全レイアウトタイプ検証用）
+  // =================================================================
+  'json_slide_advanced': [
+    { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+    { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', node_type: 'llm', text: '{"thinking":"高度なスライド生成の要求です。","category":"TASK","requires_rag":false,"requires_web":false}' }, status: 'succeeded' },
+    { event: 'node_started', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm' } },
+    { event: 'message', answer: '', thinking: 'AI活用業務改善提案のスライドを作成します。アジェンダ、表、棒・折れ線・円グラフ、KPIダッシュボード、統計、タイムライン、プロフィール等の多彩なレイアウトを使用します...' },
+    { 
+      event: 'message', 
+      answer: createMockJson(
+        'AI活用業務改善提案のスライドを作成しました。アジェンダ、KPIダッシュボード、折れ線グラフなど16枚のデータドリブンな提案資料に仕上げています。',
+        [],
+        [],
+        'アジェンダ、表、棒グラフ、折れ線グラフ、円グラフ、統計カード、KPIダッシュボード、タイムライン、画像付きスライド、会社概要など、全レイアウトタイプを駆使した16枚構成です。'
+      ).slice(0, -1) + ',"presentation_title":"AI活用による業務改善提案","theme":"corporate-modern","slides":[{"id":"slide_1","layout_type":"title_slide","content":{"title":"AI活用による業務改善提案","subtitle":"生成AIで実現する次世代の働き方改革","author":"DX推進室"}},{"id":"slide_2","layout_type":"agenda_slide","content":{"title":"本日のアジェンダ","items":[{"number":"01","label":"現状分析","description":"データに基づく業務課題の可視化"},{"number":"02","label":"定量評価","description":"KPIダッシュボードによる現状把握"},{"number":"03","label":"ソリューション","description":"AIチャットボットと自動化施策"},{"number":"04","label":"ロードマップ","description":"4フェーズの段階的導入計画"},{"number":"05","label":"投資対効果","description":"コスト構造と期待ROI"},{"number":"06","label":"推進体制","description":"プロジェクト体制と次のステップ"}]}},{"id":"slide_3","layout_type":"section_slide","content":{"title":"第1章：現状分析","subtitle":"業務課題の可視化とデータに基づく診断"}},{"id":"slide_4","layout_type":"table_slide","content":{"title":"部門別 業務課題の比較","headers":["部門","主な課題","月間工数(h)","影響度","AI適用可能性"],"rows":[["営業部","提案書作成の属人化","120","高","◎"],["総務部","問い合わせ対応の負荷","85","中","◎"],["企画部","市場分析の遅延","60","高","○"],["経理部","請求書処理の手作業","95","中","◎"]]}},{"id":"slide_5","layout_type":"chart_slide","content":{"title":"月別 社内問い合わせ件数の推移","chart_type":"bar","data":[{"label":"1月","value":245},{"label":"2月","value":312},{"label":"3月","value":287},{"label":"4月","value":356},{"label":"5月","value":398},{"label":"6月","value":421},{"label":"7月","value":389},{"label":"8月","value":345}],"body_text":"問い合わせ件数は増加傾向にあり、人的対応の限界に近づいています。"}},{"id":"slide_6","layout_type":"chart_slide","content":{"title":"四半期別売上推移（過去2年間）","chart_type":"line","data":[{"label":"2024 Q1","value":85},{"label":"2024 Q2","value":92},{"label":"2024 Q3","value":88},{"label":"2024 Q4","value":105},{"label":"2025 Q1","value":112},{"label":"2025 Q2","value":128},{"label":"2025 Q3","value":135},{"label":"2025 Q4","value":148}],"body_text":"売上は堅調に成長しており、AI投資の原資は確保されています。"}},{"id":"slide_7","layout_type":"stats_slide","content":{"title":"AI導入による期待効果","stats":[{"value":"40%","label":"工数削減率","description":"定型業務の自動化による"},{"value":"¥2.5M","label":"年間コスト削減","description":"人件費・外注費の最適化"},{"value":"92%","label":"従業員満足度","description":"PoC参加者アンケート結果"},{"value":"3倍","label":"処理速度向上","description":"AIチャットボット応答"}]}},{"id":"slide_8","layout_type":"kpi_dashboard_slide","content":{"title":"2025年度 Q3 KPIダッシュボード","kpis":[{"value":"¥128M","label":"売上高","trend":"up","change":"+12.5%"},{"value":"23.4%","label":"営業利益率","trend":"up","change":"+2.1pt"},{"value":"94.2%","label":"顧客満足度","trend":"flat","change":"±0.3pt"},{"value":"8.2%","label":"離職率","trend":"down","change":"-1.5pt"},{"value":"720件","label":"月間対応件数","trend":"up","change":"+18%"},{"value":"4.2分","label":"平均応答時間","trend":"down","change":"-35%"}]}},{"id":"slide_9","layout_type":"section_slide","content":{"title":"第2章：ソリューション","subtitle":"具体的なAI活用施策と導入アプローチ"}},{"id":"slide_10","layout_type":"image_content_slide","content":{"title":"AIチャットボットの導入イメージ","image_url":"https://placehold.co/800x450/e2e8f0/64748b?text=AI+Chatbot+Dashboard","image_alt":"AIチャットボットのダッシュボード画面","body_text":"社内ナレッジベースと連携したAIチャットボットにより、24時間365日の自動応答を実現します。","bullet_points":["自然言語による質問応答","過去の問い合わせ履歴からの学習","エスカレーション機能付き","多言語対応"]}},{"id":"slide_11","layout_type":"timeline_slide","content":{"title":"導入ロードマップ","events":[{"step":"Phase 1（1-2月目）","description":"要件定義とPoC環境の構築。対象部門の選定と現状ワークフローの詳細分析を実施。"},{"step":"Phase 2（3-4月目）","description":"パイロット導入と効果測定。営業部と総務部の2部門で先行導入し、KPIを定量評価。"},{"step":"Phase 3（5-6月目）","description":"全社展開とトレーニング。フィードバックを反映した最終版を全社に展開し、操作研修を実施。"},{"step":"Phase 4（7月目〜）","description":"運用最適化と機能拡張。利用データに基づく継続的な改善サイクルを確立。"}]}},{"id":"slide_12","layout_type":"split_slide","content":{"title":"導入リスクと対策","left_column":["データセキュリティの懸念","従業員の抵抗感","既存システムとの連携","AIの精度と信頼性"],"right_column":["オンプレミス環境での運用","段階的な導入と成功体験","API連携による統合設計","Human-in-the-loop体制"]}},{"id":"slide_13","layout_type":"chart_slide","content":{"title":"年間予算配分（予定）","chart_type":"pie","data":[{"label":"ライセンス費用","value":35},{"label":"インフラ構築","value":25},{"label":"コンサルティング","value":15},{"label":"トレーニング","value":10},{"label":"運用・保守","value":15}]}},{"id":"slide_14","layout_type":"content_slide","content":{"title":"期待される具体的成果","bullet_points":["提案書作成時間を平均2時間→30分に短縮","社内問い合わせの70%をAIが自動回答","月次レポート作成の完全自動化","顧客対応スピードの50%向上","年間2,500時間の工数削減"]}},{"id":"slide_15","layout_type":"profile_slide","content":{"title":"プロジェクト推進体制","subtitle":"DX推進室 AI導入プロジェクト","entries":[{"label":"プロジェクト名","value":"AI業務改善イニシアチブ 2025"},{"label":"推進責任者","value":"DX推進室 室長 山田太郎"},{"label":"期間","value":"2025年4月〜2026年3月（12ヶ月）"},{"label":"対象部門","value":"営業部・総務部・企画部・経理部"},{"label":"予算規模","value":"年間 ¥15M（ライセンス・構築・運用含む）"},{"label":"外部パートナー","value":"株式会社テクノソリューションズ"}],"footer_text":"「テクノロジーで、もっとクリエイティブな働き方を。」"}},{"id":"slide_16","layout_type":"quote_slide","content":{"title":"最後に","quote":"AIは人を置き換えるものではない。人がより創造的な仕事に集中するための、最強のパートナーである。","author":"DX推進室"}}]}'
+    },
+    { event: 'node_finished', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm', status: 'succeeded' } },
+    { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 5200, completion_tokens: 3600, total_tokens: 8800 } } }
+  ],
+
+
+  // =================================================================
   // ★追加: エラーシミュレーション用シナリオ (mock_error)
   // =================================================================
   'mock_error': [
@@ -2092,5 +2114,15 @@ export const scenarioSuggestions = {
     '内容をさらに詳しくして',
     '表のデータを更新して',
     'デザインを変更して'
+  ],
+  'json_slide': [
+    'もっと詳細な内容に',
+    'グラフを追加して',
+    'デザインを変更して'
+  ],
+  'json_slide_advanced': [
+    '予算配分を見直したい',
+    'ロードマップを短縮して',
+    'KPIを追加して'
   ]
 };

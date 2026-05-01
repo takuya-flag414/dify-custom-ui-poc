@@ -32,7 +32,10 @@ const SplitSlide = ({ content, isStatic = false }) => {
                                     transition: { delay: idx * 0.05, duration: 0.3 }
                                 })}
                             >
-                                <span className="bullet-marker" />
+                                {/* 番号付きリスト判定: 先頭が数字+記号か */}
+                                {!/^\d+[.、)\s]/.test(item) && (
+                                    <span className="bullet-marker">・</span>
+                                )}
                                 <span className="bullet-text">{item}</span>
                             </ListItem>
                         );
