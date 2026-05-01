@@ -7,9 +7,11 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 // v2 のインポートを整理
 const { beforeUserSignedIn } = require("firebase-functions/v2/identity");
 const functionsV1 = require("firebase-functions/v1");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, Timestamp, FieldValue } = require("firebase-admin/firestore");
 const logger = require("firebase-functions/logger");
+const { encrypt, decrypt, createSearchHash } = require("./kmsUtils");
 
 // グローバルオプションの設定
 setGlobalOptions({ region: "asia-northeast1" });
@@ -146,4 +148,118 @@ exports.beforeSignIn = beforeUserSignedIn(async (event) => {
     
     // 何があっても undefined/void を返せばログインは続行される
     return;
+});
+
+/**
+ * 暗号化を伴うユーザープロファイル作成 (Callable Function)
+ */
+exports.createSecureUserProfile = onCall(async (request) => {
+    logger.info("Function createSecureUserProfile started", { uid: request.auth?.uid });
+    // 認証チェック
+    if (!request.auth) {
+        throw new HttpsError("unauthenticated", "ログインが必要です");
+    }
+
+    const { userData, securityInfo } = request.data;
+    const uid = request.auth.uid;
+    const db = getFirestore();
+
+    try {
+        // PIIの暗号化
+        const encryptedName = await encrypt(userData.displayName || "");
+        const encryptedEmail = await encrypt(userData.email || "");
+        const encryptedLastName = await encrypt(securityInfo?.lastName || "");
+        const encryptedFirstName = await encrypt(securityInfo?.firstName || "");
+        const encryptedDob = await encrypt(securityInfo?.dateOfBirth || "");
+
+        // 検索用ハッシュの生成
+        const emailHash = createSearchHash(userData.email?.toLowerCase().trim() || "");
+
+        const now = Timestamp.now();
+        
+        const secureDoc = {
+            user_id: uid,
+            email: encryptedEmail,
+            email_h: emailHash, // 検索用
+            displayName: encryptedName,
+            lastName: encryptedLastName,
+            firstName: encryptedFirstName,
+            dateOfBirth: encryptedDob,
+            account_status: 1,
+            email_verified: false,
+            created_at: now,
+            updated_at: now,
+            is_encrypted: true, // 暗号化済みフラグ
+            preferences: userData.preferences || {
+                theme: 'system',
+                aiStyle: 'partner',
+                isOnboardingCompleted: false
+            }
+        };
+
+        // Firestoreに保存
+        await db.collection('users').doc(uid).set(secureDoc);
+
+        // 権限も併せて作成
+        await db.collection('user_roles').add({
+            user_id: uid,
+            role_id: 'role_general',
+            assigned_at: now
+        });
+
+        logger.info(`KMS: Secure Profile Created for ${uid}`);
+        return { success: true };
+    } catch (error) {
+        logger.error(`Secure Profile Creation Failed:`, error);
+        throw new HttpsError("internal", "プロファイルの作成に失敗しました");
+    }
+});
+
+/**
+ * 暗号化されたユーザープロファイルの取得と復号 (Callable Function)
+ */
+exports.getSecureUserProfile = onCall(async (request) => {
+    logger.info("Function getSecureUserProfile started", { uid: request.auth?.uid });
+    if (!request.auth) {
+        throw new HttpsError("unauthenticated", "ログインが必要です");
+    }
+
+    const uid = request.auth.uid;
+    const db = getFirestore();
+
+    try {
+        const userDoc = await db.collection('users').doc(uid).get();
+        if (!userDoc.exists) {
+            throw new HttpsError("not-found", "ユーザーが見つかりません");
+        }
+
+        const data = userDoc.data();
+
+        // 暗号化されていない古いデータの場合はそのまま返す
+        if (!data.is_encrypted) {
+            return data;
+        }
+
+        // PIIの復号
+        const [name, email, lastName, firstName, dob] = await Promise.all([
+            decrypt(data.displayName),
+            decrypt(data.email),
+            decrypt(data.lastName),
+            decrypt(data.firstName),
+            decrypt(data.dateOfBirth)
+        ]);
+
+        // 復号したデータを結合して返す
+        return {
+            ...data,
+            displayName: name,
+            email: email,
+            lastName: lastName,
+            firstName: firstName,
+            dateOfBirth: dob
+        };
+    } catch (error) {
+        logger.error(`Secure Profile Retrieval Failed:`, error);
+        throw new HttpsError("internal", "プロファイルの取得に失敗しました");
+    }
 });
