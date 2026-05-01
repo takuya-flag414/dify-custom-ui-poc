@@ -18,6 +18,9 @@ import StructuredUserMessage from './StructuredUserMessage';
 import { parseStructuredMessage, extractPlainText } from '../../utils/messageSerializer';
 import { FEATURE_FLAGS } from '../../config/featureFlags';
 import ArtifactCard from '../Artifacts/ArtifactCard';
+import { ENABLE_MESSAGE_EDIT, ENABLE_MESSAGE_REGENERATE } from '../../config/env';
+// ★追加: インラインエラーカード（ワークフローエラー表示用）
+import InlineErrorCard from './InlineErrorCard';
 
 // ★追加: 引用アイコン
 const ReplyIcon = () => (
@@ -325,7 +328,7 @@ const MessageBlock = ({
 
     // ★追加: ユーザーメッセージの編集ボタン
     const renderEditButton = () => {
-        if (isAi || isStreaming || isEditing) return null;
+        if (!ENABLE_MESSAGE_EDIT || isAi || isStreaming || isEditing) return null;
         return (
             <button
                 className="message-edit-btn"
@@ -340,7 +343,7 @@ const MessageBlock = ({
     // ★追加: AI回答の再送信ボタン（アイコンのみ）
     // ストリーミング中もDOMを維持（レイアウトシフト防止）
     const renderRegenerateButton = () => {
-        if (!isAi) return null;
+        if (!ENABLE_MESSAGE_REGENERATE || !isAi) return null;
         const isHidden = isStreaming || !isLastAiMessage || !onRegenerate;
         return (
             <button
@@ -463,25 +466,9 @@ const MessageBlock = ({
                                         />
                                     )}
 
-                                    {/* ★追加: ワークフローエラーバナー */}
+                                    {/* ★改修: ワークフローエラーをInlineErrorCardで表示 */}
                                     {isAi && hasWorkflowError && workflowError && (
-                                        <div className="workflow-error-banner">
-                                            <div className="workflow-error-icon">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                                </svg>
-                                            </div>
-                                            <div className="workflow-error-content">
-                                                <span className="workflow-error-title">
-                                                    ワークフローエラー: {workflowError.nodeTitle}
-                                                </span>
-                                                <span className="workflow-error-message">
-                                                    {workflowError.message}
-                                                </span>
-                                            </div>
-                                        </div>
+                                        <InlineErrorCard error={workflowError} />
                                     )}
 
                                     {/* ★変更: Artifactカードを本文の上に表示。ただしストリーミング完了時かつ、タイトル/タイプが確定した場合のみ表示する */}

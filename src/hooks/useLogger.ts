@@ -62,6 +62,8 @@ export const useLogger = (): UseLoggerReturn => {
     // グローバルコンソールの上書きは削除 (無限ループ回避のため)
     useEffect(() => {
         addLog('--- PoC App Initialized (useLogger) ---', 'info');
+        // ★追加: 任意の関数からログ出力できるようにwindowへエクスポート
+        (window as any).pocAddLog = addLog;
     }, [addLog]);
 
     // ログコピー機能

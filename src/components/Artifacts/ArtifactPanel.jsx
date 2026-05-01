@@ -4,10 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
 import { SparklesIcon } from '../Shared/SystemIcons';
 import GeneratingAnimation from './GeneratingArtifact';
+import GeneratingSlideAnimation from './GeneratingArtifactSlide';
 import { splitArtifactPages } from '../../utils/splitArtifactPages';
 import { sanitizeArtifactHtml } from '../../utils/sanitizeArtifactHtml';
 // import html2pdf from 'html2pdf.js';
 import './ArtifactPanel.css';
+import PptxPreviewPane from './PptxPreviewPane';
+// import { generatePptx } from '../../utils/pptxGenerator';
+import { mapSlideData, getDefaultSlideData } from '../../utils/slideTypeMapper';
 
 const CloseIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -102,6 +106,14 @@ const SourceIcon = () => (
     </svg>
 );
 
+const LightbulbIcon = ({ width = 20, height = 20, className = "" }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M9 18h6"></path>
+        <path d="M10 22h4"></path>
+        <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path>
+    </svg>
+);
+
 /**
  * HTML生成中のプレビュー表示 (Apple Intelligence Style)
  */
@@ -115,7 +127,11 @@ const GeneratingPagePlaceholder = ({ pageNumber, isSlide, status, subtext }) => 
     >
         <div className="placeholder-content">
             <div className="placeholder-animation-container">
-                <GeneratingAnimation className="generating-pencil-animation" />
+                {isSlide ? (
+                    <GeneratingSlideAnimation className="generating-slide-animation" />
+                ) : (
+                    <GeneratingAnimation className="generating-pencil-animation" />
+                )}
             </div>
             <div className="placeholder-text">
                 <AnimatePresence mode="wait">
@@ -196,12 +212,73 @@ const ARTIFACT_TYPE_MAP = {
     faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
     meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
     html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
+    // pptx_slide: { emoji: '📊', label: 'PowerPointスライド' },
 };
 
 const getTypeBadge = (type) => {
     const info = ARTIFACT_TYPE_MAP[type];
     if (info) return `${info.emoji} ${info.label}`;
     return type || 'ドキュメント';
+};
+
+/**
+ * LocalStorage キー
+ */
+const LOCAL_STORAGE_PPTX_BANNER_KEY = 'dify_pptx_banner_seen';
+
+/**
+ * PPTX変換ヒントコンポーネント
+ */
+const ConversionHint = ({ isDismissed, onToggle, onDismiss }) => {
+    return (
+        <AnimatePresence>
+            {!isDismissed ? (
+                <motion.div
+                    className="conversion-hint-banner"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+                >
+                    <div className="conversion-hint-content">
+                        <div className="conversion-hint-icon">
+                            <LightbulbIcon width="16" height="16" />
+                        </div>
+                        <div className="conversion-hint-text-group">
+                            <div className="conversion-hint-title">📽️ PPTX変換ヒント</div>
+                            <div className="conversion-hint-body">
+                                PowerPoint(PPTX)形式が必要な場合は、右上のアクションメニューから「印刷」を選択してPDFとして保存した後、
+                                <a
+                                    href="https://www.canva.com/ja_jp/features/pdf-to-ppt-converter/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="conversion-hint-link"
+                                >
+                                    Canva
+                                </a>
+                                などの外部ツールでPPTXへ変換可能です。
+                            </div>
+                        </div>
+                        <button className="conversion-hint-close" onClick={onDismiss} title="ヒントを隠す">
+                            <CloseIcon />
+                        </button>
+                    </div>
+                </motion.div>
+            ) : (
+                <motion.button
+                    className="conversion-hint-icon-btn"
+                    onClick={onToggle}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="PPTX変換ヒントを表示"
+                >
+                    <LightbulbIcon width="20" height="20" />
+                </motion.button>
+            )}
+        </AnimatePresence>
+    );
 };
 
 /**
@@ -217,10 +294,17 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const [isCopied, setIsCopied] = useState(false);
     const [isCitationsExpanded, setIsCitationsExpanded] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isPptxHintDismissed, setIsPptxHintDismissed] = useState(() => {
+        try {
+            return localStorage.getItem(LOCAL_STORAGE_PPTX_BANNER_KEY) === 'true';
+        } catch (e) {
+            return false;
+        }
+    });
 
     // ★追加: ズームとスクロール用の状態管理
     const [zoomLevel, setZoomLevel] = useState(100);
-    const [autoFit, setAutoFit] = useState(true);
+    const [zoomOffset, setZoomOffset] = useState(0); // ★追加: 標準フィットに対するオフセット
     const [panelWidth, setPanelWidth] = useState(0);
 
     // ★追加: PDFエクスポート用の状態と参照
@@ -243,6 +327,9 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
 
     // ★追加: 現在のストリーミングメッセージがArtifact生成用かどうかを判定
     const isGeneratingArtifact = streamingMessage && streamingMessage.isStreaming && streamingMessage.artifact;
+    
+    // パネル表示判定
+    const shouldShowPanel = artifact || isGeneratingArtifact;
 
     // ★変更: ストリーミング中はstreamingMessage.artifactの中間値を使用
     const streamingArtifact = isGeneratingArtifact ? streamingMessage.artifact : null;
@@ -252,8 +339,196 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const displayCitations = artifact?.citations || [];
 
     // ★v2.0追加: HTML直接生成方式かどうかの判定 (A4ドキュメントおよびスライド)
-    const isHtmlDocument = displayType === 'html_document' || displayType === 'html_slide';
+    const isHtmlA4Document = displayType === 'html_document';
+    const isHtmlDocument = isHtmlA4Document || displayType === 'html_slide';
     const isHtmlSlide = displayType === 'html_slide';
+    const isPptxSlide = false; // displayType === 'pptx_slide'; (pptxgenjs uninstalled)
+
+    // バナー表示時に表示済みフラグを保存
+    useEffect(() => {
+        if (isHtmlSlide && !isGeneratingArtifact && !isPptxHintDismissed) {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_PPTX_BANNER_KEY, 'true');
+            } catch (e) {
+                console.warn('Failed to save banner status to LocalStorage:', e);
+            }
+        }
+    }, [isHtmlSlide, isGeneratingArtifact, isPptxHintDismissed]);
+
+    // PPTX用 JSONパースロジック
+    const [parsedPptxSpec, setParsedPptxSpec] = useState(null);
+    const [pptxViewMode, setPptxViewMode] = useState('visual');
+    // ★編集機能: ユーザー編集用のミュータブルState
+    const [editablePptxSpec, setEditablePptxSpec] = useState(null);
+    // ★編集機能: LLM初期値の参照（編集済みフィールドの検出用）
+    const [originalPptxSpec, setOriginalPptxSpec] = useState(null);
+
+    useEffect(() => {
+        if (isPptxSlide && displayContent) {
+            try {
+                let jsonString = displayContent;
+                if (jsonString.startsWith("```json")) {
+                    jsonString = jsonString.replace(/^```json\n/, "").replace(/\n```$/, "");
+                } else if (jsonString.startsWith("```")) {
+                    jsonString = jsonString.replace(/^```\n/, "").replace(/\n```$/, "");
+                }
+                const parsed = JSON.parse(jsonString);
+                const spec = parsed.pptx_spec || parsed.pptxspec || parsed;
+                setParsedPptxSpec(spec);
+                // 初回パース時のみeditableを初期化（ストリーミング完了後）
+                if (!isGeneratingArtifact) {
+                    setEditablePptxSpec(JSON.parse(JSON.stringify(spec)));
+                    setOriginalPptxSpec(JSON.parse(JSON.stringify(spec)));
+                }
+            } catch (e) {
+                // 不完全なJSON（生成中）の場合は無視
+                setParsedPptxSpec(null);
+            }
+        }
+    }, [displayContent, isPptxSlide, isGeneratingArtifact]);
+
+    // ★編集機能: 更新関数群
+    const pptxUpdaters = React.useMemo(() => {
+        if (!editablePptxSpec) return null;
+
+        const update = (updater) => {
+            setEditablePptxSpec(prev => {
+                const next = JSON.parse(JSON.stringify(prev));
+                updater(next);
+                return next;
+            });
+        };
+
+        return {
+            // メタデータの更新
+            updateMetaData: (field, value) => update(spec => {
+                if (field === 'documentTitle') {
+                    spec.documentTitle = value;
+                } else if (field.startsWith('presentation.')) {
+                    const key = field.split('.')[1];
+                    if (!spec.presentation) spec.presentation = {};
+                    spec.presentation[key] = value;
+                }
+            }),
+            // テーマカラーの更新
+            updateThemeColor: (colorKey, value) => update(spec => {
+                if (!spec.theme) spec.theme = {};
+                spec.theme[colorKey] = value;
+            }),
+            // スライド内フィールドの更新（ドット区切りパス対応）
+            updateSlideField: (slideIndex, fieldPath, value) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = fieldPath.split('.');
+                let target = slide;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    if (!target[parts[i]]) target[parts[i]] = {};
+                    target = target[parts[i]];
+                }
+                target[parts[parts.length - 1]] = value;
+            }),
+            // スライドの追加
+            addSlide: (index, slideType) => update(spec => {
+                const newSlide = getDefaultSlideData(slideType);
+                spec.slides.splice(index, 0, newSlide);
+            }),
+            // スライドの削除
+            removeSlide: (index) => update(spec => {
+                if (spec.slides.length <= 1) return;
+                spec.slides.splice(index, 1);
+            }),
+            // スライドの並び替え
+            moveSlide: (fromIndex, toIndex) => update(spec => {
+                if (toIndex < 0 || toIndex >= spec.slides.length) return;
+                const [moved] = spec.slides.splice(fromIndex, 1);
+                spec.slides.splice(toIndex, 0, moved);
+            }),
+            // スライドタイプの変更（データマッピング付き）
+            changeSlideType: (index, newType) => update(spec => {
+                spec.slides[index] = mapSlideData(spec.slides[index], newType);
+            }),
+            // 配列項目の追加
+            addArrayItem: (slideIndex, arrayPath, newItem) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = arrayPath.split('.');
+                let target = slide;
+                for (let i = 0; i < parts.length; i++) {
+                    if (!target[parts[i]]) target[parts[i]] = [];
+                    target = target[parts[i]];
+                }
+                if (Array.isArray(target)) target.push(newItem);
+            }),
+            // 配列項目の削除
+            removeArrayItem: (slideIndex, arrayPath, itemIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = arrayPath.split('.');
+                let target = slide;
+                for (const part of parts) {
+                    target = target[part];
+                    if (!target) return;
+                }
+                if (Array.isArray(target)) target.splice(itemIndex, 1);
+            }),
+            // 配列項目の更新
+            updateArrayItem: (slideIndex, arrayPath, itemIndex, value) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                const parts = arrayPath.split('.');
+                let target = slide;
+                for (const part of parts) {
+                    target = target[part];
+                    if (!target) return;
+                }
+                if (Array.isArray(target)) target[itemIndex] = value;
+            }),
+            // テーブル行の追加
+            addTableRow: (slideIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.headers) return;
+                if (!slide.rows) slide.rows = [];
+                slide.rows.push(new Array(slide.headers.length).fill(''));
+            }),
+            // テーブル列の追加
+            addTableColumn: (slideIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.headers) return;
+                slide.headers.push('新しい列');
+                if (slide.rows) {
+                    slide.rows.forEach(row => row.push(''));
+                }
+            }),
+            // テーブル行の削除
+            removeTableRow: (slideIndex, rowIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.rows) return;
+                slide.rows.splice(rowIndex, 1);
+            }),
+            // テーブル列の削除
+            removeTableColumn: (slideIndex, colIndex) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide || !slide.headers) return;
+                slide.headers.splice(colIndex, 1);
+                if (slide.rows) {
+                    slide.rows.forEach(row => row.splice(colIndex, 1));
+                }
+            }),
+            // テーブルセルの更新
+            updateTableCell: (slideIndex, rowIndex, colIndex, value) => update(spec => {
+                const slide = spec.slides[slideIndex];
+                if (!slide) return;
+                // ヘッダー行の場合
+                if (rowIndex === -1 && slide.headers) {
+                    slide.headers[colIndex] = value;
+                    return;
+                }
+                if (slide.rows && slide.rows[rowIndex]) {
+                    slide.rows[rowIndex][colIndex] = value;
+                }
+            }),
+        };
+    }, [editablePptxSpec]);
 
     // アーティファクトが切り替わったら状態リセット
     useEffect(() => {
@@ -261,10 +536,11 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         setPageHeights({});
         setStablePages([]); // 新しいドキュメントならリセット
         iframeRefs.current = {}; // ★修正: 前のArtifactのiframe参照をクリア
+        setPptxViewMode('visual'); // PPTXビューのリセット
     }, [artifact?.id, artifact?.title, artifact?.content]); // ★修正: contentも監視してカード切り替えを確実にリセット
 
     // ★追加: 基本となる用紙・キャンバス幅の定義 (AutoFitとレンダリングで共有)
-    const basePaperWidth = isHtmlSlide ? 1020 : (isHtmlDocument ? 850 : 720);
+    const basePaperWidth = isHtmlSlide ? 960 : (isHtmlDocument ? 850 : 720);
 
     /**
      * ★ちらつき防止：ページバッファリングロジック
@@ -341,39 +617,38 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
 
         resizeObserver.observe(panelEl);
         return () => resizeObserver.disconnect();
-    }, []);
+    }, [shouldShowPanel, isOpen]);
 
-    // ★追加: AutoFitが有効な場合、パネル幅に応じて最適なズームレベルを計算
+    // ★修正: 常にAutoFitを有効にし、パネル幅とユーザー指定のオフセットに応じて最適な倍率を計算
     useEffect(() => {
-        if (!autoFit || panelWidth === 0) return;
+        if (panelWidth === 0) return;
 
         // パネル幅からスクロールバー分や安全マージン(約40px)を引いた有効幅
         const availableWidth = panelWidth - 40;
-        // ★修正: HTML型は用紙幅(約793px)に左右の余白を含めた幅(約850px)を基準に計算し、紙の外側も見えるようにする
-        // スライドの場合は guideline に基づき 960px を基準とする
         const basePaperWidth = isHtmlSlide ? 1020 : (isHtmlDocument ? 850 : 720);
 
         let optimalZoom = Math.floor((availableWidth / basePaperWidth) * 100);
+        
+        // 最終的な表示倍率は、最適倍率にユーザーの指定したオフセットを加えたもの
+        let finalZoom = optimalZoom + zoomOffset;
 
-        // 最小50%、最大150%程度に制限
-        optimalZoom = Math.max(50, Math.min(150, optimalZoom));
-        setZoomLevel(optimalZoom);
+        // 最小30%、最大250%程度に制限
+        finalZoom = Math.max(30, Math.min(250, finalZoom));
+        setZoomLevel(finalZoom);
 
-    }, [panelWidth, autoFit, isHtmlDocument]);
+    }, [panelWidth, zoomOffset, isHtmlDocument, isHtmlSlide]);
 
-    // ★追加: 手動ズーム操作
+    // ★修正: 手動ズーム操作を「オフセット（増減値）」の変更として扱う
     const handleZoomIn = () => {
-        setAutoFit(false);
-        setZoomLevel(prev => Math.min(200, prev + 10));
+        setZoomOffset(prev => Math.min(150, prev + 10)); // 最大オフセット制限
     };
 
     const handleZoomOut = () => {
-        setAutoFit(false);
-        setZoomLevel(prev => Math.max(30, prev - 10));
+        setZoomOffset(prev => Math.max(-80, prev - 10)); // 最小オフセット制限
     };
 
     const handleZoomReset = () => {
-        setAutoFit(true);
+        setZoomOffset(0); // オフセットリセット（ジャストフィット）
     };
 
     // ★変更: AnimatePresence でラップするため、ここで null を返すのではなく、
@@ -419,43 +694,6 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     };
 
     // ★追加: HTML ダウンロード処理
-    const buildSlideRuntimeHtml = (pageHtml, { forPrint = false } = {}) => {
-        if (!isHtmlSlide) return pageHtml;
-
-        return pageHtml.replace('</head>', `
-            <style>
-                html, body {
-                    background: transparent !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    overflow: hidden !important;
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                }
-                .slide {
-                    margin: 0 !important;
-                    box-shadow: none !important;
-                    border: none !important;
-                    width: var(--slide-width) !important;
-                    height: var(--slide-height) !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                }
-                .slide-body {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    height: auto !important;
-                    min-height: 0 !important;
-                }
-                .two-col {
-                    display: flex !important;
-                    flex-shrink: 0 !important;
-                }
-                ${forPrint ? '.slide { page-break-after: always !important; break-after: page !important; }' : ''}
-            </style>
-            </head>`);
-    };
-
     const handleDownloadHtml = () => {
         try {
             const safeTitle = displayTitle.replace(/[\\/:*?"<>|]/g, '_');
@@ -474,79 +712,294 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         }
     };
 
-    // ★修正: HTML 印刷処理
-    const handlePrintHtml = () => {
-        if (!isHtmlDocument || pages.length === 0) return;
-
+    const handlePrintHtmlDocument = () => {
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
-        const printShell = `
-            <!DOCTYPE html>
-            <html lang="ja">
-                <head>
-                    <meta charset="UTF-8" />
-                    <title>${displayTitle}</title>
-                    <style>
-                        @page {
-                            size: 10in 5.625in;
-                            margin: 0;
-                        }
-                        html, body {
-                            margin: 0;
-                            padding: 0;
-                            background: #ffffff;
-                            -webkit-print-color-adjust: exact;
-                            print-color-adjust: exact;
-                        }
-                        body {
-                            display: block;
-                        }
-                        .print-page {
-                            width: 960px;
-                            height: 540px;
-                            margin: 0;
-                            overflow: hidden;
-                            break-after: page;
-                            page-break-after: always;
-                        }
-                        .print-page:last-child {
-                            break-after: auto;
-                            page-break-after: auto;
-                        }
-                        .print-frame {
-                            width: 960px;
-                            height: 540px;
-                            border: 0;
-                            display: block;
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${pages.map((_, index) => `<div class="print-page"><iframe id="print-frame-${index}" class="print-frame" sandbox="allow-scripts allow-same-origin"></iframe></div>`).join('')}
-                </body>
-            </html>
+        const { sanitized } = sanitizeArtifactHtml(displayContent);
+        let processedContent = sanitized || displayContent;
+
+        const printEnhancer = `
+            <style>
+                @page { size: A4; margin: 0; }
+                html, body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #ffffff !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            </style>
         `;
 
+        if (processedContent.includes('</head>')) {
+            processedContent = processedContent.replace('</head>', `${printEnhancer}</head>`);
+        } else {
+            processedContent = `<!DOCTYPE html><html><head><meta charset="UTF-8" />${printEnhancer}</head><body>${processedContent}</body></html>`;
+        }
+
         printWindow.document.open();
-        printWindow.document.write(printShell);
+        printWindow.document.write(processedContent);
         printWindow.document.close();
 
         printWindow.addEventListener('load', () => {
-            pages.forEach((pageHtml, index) => {
-                const frame = printWindow.document.getElementById(`print-frame-${index}`);
-                if (!frame) return;
-                frame.srcdoc = buildSlideRuntimeHtml(pageHtml, { forPrint: true });
-            });
-
             setTimeout(() => {
                 printWindow.focus();
                 printWindow.print();
                 printWindow.close();
-            }, 800);
+            }, 300);
         });
 
         setIsMenuOpen(false);
+    };
+
+
+    const injectIntoHead = (html, injection) => {
+        if (html.includes('</head>')) {
+            return html.replace('</head>', `${injection}
+</head>`);
+        }
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8">${injection}</head><body>${html}</body></html>`;
+    };
+
+    const buildPrintReadySlideHtml = (html) => {
+        const printEnhancer = `
+            <style>
+                html, body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #ffffff !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                    overflow: visible !important;
+                }
+
+                body {
+                    display: block !important;
+                    min-height: auto !important;
+                }
+
+                .slide {
+                    width: 960px !important;
+                    height: 540px !important;
+                    margin: 0 !important;
+                    box-shadow: none !important;
+                    overflow: hidden !important;
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                }
+
+                .slide-body {
+                    height: 100% !important;
+                    min-height: 0 !important;
+                    box-sizing: border-box !important;
+                    overflow: hidden !important;
+                }
+
+                .chart-shell {
+                    display: grid !important;
+                    grid-template-columns: 200px minmax(0, 1fr) !important;
+                    gap: 18px !important;
+                    align-items: stretch !important;
+                    min-width: 0 !important;
+                }
+
+                .chart-side,
+                .chart-panel,
+                .chart-area {
+                    min-width: 0 !important;
+                }
+
+                .chart-panel {
+                    display: flex !important;
+                    flex-direction: column !important;
+                }
+
+                .chart-area {
+                    position: relative !important;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                    min-height: 220px !important;
+                    height: 100% !important;
+                    overflow: hidden !important;
+                }
+
+                .chart-area canvas,
+                canvas[data-chart-role] {
+                    display: block !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-width: 100% !important;
+                    max-height: 100% !important;
+                }
+
+                @media print {
+                    @page {
+                        size: 10in 5.625in;
+                        margin: 0;
+                    }
+
+                    html, body {
+                        background: none !important;
+                        overflow: visible !important;
+                    }
+
+                    body {
+                        display: block !important;
+                    }
+
+                    .slide {
+                        width: 960px !important;
+                        height: 540px !important;
+                        margin: 0 !important;
+                        box-shadow: none !important;
+                        page-break-after: always;
+                    }
+                }
+            </style>
+
+            <script>
+                (function() {
+                    function waitForChartsReady(callback, attempts) {
+                        attempts = attempts || 0;
+                        if (typeof Chart === 'undefined') {
+                            if (attempts > 120) {
+                                callback();
+                                return;
+                            }
+                            setTimeout(function() {
+                                waitForChartsReady(callback, attempts + 1);
+                            }, 50);
+                            return;
+                        }
+                        callback();
+                    }
+
+                    function syncCanvasResolution(canvas) {
+                        if (!canvas) return;
+                        var rect = canvas.getBoundingClientRect();
+                        var cssWidth = Math.max(1, Math.round(rect.width));
+                        var cssHeight = Math.max(1, Math.round(rect.height));
+                        var dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+
+                        var targetWidth = Math.round(cssWidth * dpr);
+                        var targetHeight = Math.round(cssHeight * dpr);
+
+                        if (canvas.width !== targetWidth) canvas.width = targetWidth;
+                        if (canvas.height !== targetHeight) canvas.height = targetHeight;
+
+                        canvas.style.width = cssWidth + 'px';
+                        canvas.style.height = cssHeight + 'px';
+
+                        var ctx = canvas.getContext && canvas.getContext('2d');
+                        if (ctx) {
+                            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                        }
+                    }
+
+                    function resizeChartsForPrint() {
+                        var canvases = document.querySelectorAll('.chart-area canvas, canvas[data-chart-role]');
+                        canvases.forEach(function(canvas) {
+                            syncCanvasResolution(canvas);
+
+                            var chart =
+                                (window.Chart && Chart.getChart && Chart.getChart(canvas)) ||
+                                canvas.__chartInstance ||
+                                null;
+
+                            if (chart) {
+                                chart.resize();
+                                if (chart.render) chart.render();
+                                syncCanvasResolution(canvas);
+                                chart.resize();
+                                if (chart.update) chart.update('none');
+                            }
+                        });
+                    }
+
+                    function runPrintLayoutPass() {
+                        waitForChartsReady(function() {
+                            requestAnimationFrame(function() {
+                                requestAnimationFrame(function() {
+                                    resizeChartsForPrint();
+                                });
+                            });
+                        });
+                    }
+
+                    window.addEventListener('load', runPrintLayoutPass);
+                    window.addEventListener('resize', runPrintLayoutPass);
+
+                    if (document.fonts && document.fonts.ready) {
+                        document.fonts.ready.then(runPrintLayoutPass);
+                    }
+
+                    if (window.matchMedia) {
+                        var mediaQueryList = window.matchMedia('print');
+                        if (mediaQueryList.addEventListener) {
+                            mediaQueryList.addEventListener('change', function(e) {
+                                if (e.matches) runPrintLayoutPass();
+                            });
+                        } else if (mediaQueryList.addListener) {
+                            mediaQueryList.addListener(function(e) {
+                                if (e.matches) runPrintLayoutPass();
+                            });
+                        }
+                    }
+
+                    window.addEventListener('beforeprint', runPrintLayoutPass);
+                })();
+            </script>
+        `;
+
+        return injectIntoHead(html, printEnhancer);
+    };
+
+    const handlePrintHtmlSlide = () => {
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) return;
+
+        const processedContent = buildPrintReadySlideHtml(displayContent);
+
+        printWindow.document.open();
+        printWindow.document.write(processedContent);
+        printWindow.document.close();
+
+        const triggerPrint = () => {
+            setTimeout(() => {
+                try {
+                    printWindow.focus();
+                    if (printWindow.dispatchEvent) {
+                        printWindow.dispatchEvent(new Event('beforeprint'));
+                    }
+                    printWindow.print();
+                } finally {
+                    setTimeout(() => {
+                        try {
+                            printWindow.close();
+                        } catch (e) { }
+                    }, 300);
+                }
+            }, 700);
+        };
+
+        if (printWindow.document.readyState === 'complete') {
+            triggerPrint();
+        } else {
+            printWindow.addEventListener('load', triggerPrint, { once: true });
+        }
+
+        setIsMenuOpen(false);
+    };
+
+    // ★修正: HTML 印刷処理
+    const handlePrintHtml = () => {
+        if (isHtmlA4Document) {
+            handlePrintHtmlDocument();
+            return;
+        }
+
+        handlePrintHtmlSlide();
     };
 
     // ★追加: PDF ダウンロード処理
@@ -737,8 +1190,25 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         }
     };
 
+    const handleDownloadPptx = async () => {
+        const specToDownload = editablePptxSpec || parsedPptxSpec;
+        if (!specToDownload) return;
+        try {
+            setIsExportingWord(true); // Exporting状態を流用
+            setIsMenuOpen(false);
+            if (window.pocAddLog) window.pocAddLog(`[ArtifactPanel] Invoking generatePptx() with ${editablePptxSpec ? 'edited' : 'original'} spec`, 'info');
+            await generatePptx(specToDownload);
+            if (window.pocAddLog) window.pocAddLog(`[ArtifactPanel] PPTX download success`, 'info');
+        } catch (err) {
+            console.error('Failed to download PPTX:', err);
+            if (window.pocAddLog) window.pocAddLog(`[ArtifactPanel] Failed to download PPTX: ${err.message}`, 'error');
+            alert("PPTXファイルの生成に失敗しました。");
+        } finally {
+            setIsExportingWord(false);
+        }
+    };
+
     const citations = displayCitations;
-    const shouldShowPanel = artifact || isGeneratingArtifact;
 
     // ★追加: テキスト選択イベントハンドラ (mouseupベース: 選択確定後のみ表示)
     useEffect(() => {
@@ -834,13 +1304,29 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                         </div>
 
                         <div className="artifact-actions">
+                            {/* PPTX View Toggle - Disabled */}
+                            {/*
+                            isPptxSlide && (
+                                <div className="pptx-view-toggle" style={{ display: 'flex', background: 'rgba(0,0,0,0.05)', borderRadius: '16px', padding: '2px', marginRight: '8px' }}>
+                                    <button 
+                                        onClick={() => setPptxViewMode('visual')}
+                                        style={{ background: pptxViewMode === 'visual' ? 'white' : 'transparent', border: 'none', borderRadius: '14px', padding: '4px 12px', fontSize: '12px', fontWeight: pptxViewMode === 'visual' ? 'bold' : 'normal', color: pptxViewMode === 'visual' ? '#007AFF' : '#666', cursor: 'pointer', boxShadow: pptxViewMode === 'visual' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+                                    >ビジュアル</button>
+                                    <button 
+                                        onClick={() => setPptxViewMode('structure')}
+                                        style={{ background: pptxViewMode === 'structure' ? 'white' : 'transparent', border: 'none', borderRadius: '14px', padding: '4px 12px', fontSize: '12px', fontWeight: pptxViewMode === 'structure' ? 'bold' : 'normal', color: pptxViewMode === 'structure' ? '#007AFF' : '#666', cursor: 'pointer', boxShadow: pptxViewMode === 'structure' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+                                    >データ構造</button>
+                                </div>
+                            )
+                            */}
+
                             {/* ★追加: Zoom Controls */}
                             <div className="artifact-zoom-controls">
                                 <button className="zoom-btn" onClick={handleZoomOut} title="縮小">
                                     <ZoomOutIcon />
                                 </button>
                                 <button
-                                    className={`zoom-label-btn ${autoFit ? 'auto-fit-active' : ''}`}
+                                    className="zoom-label-btn auto-fit-active"
                                     onClick={handleZoomReset}
                                     title="ウィンドウ幅に合わせる (Auto Fit)"
                                 >
@@ -877,6 +1363,13 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                                     <button className="artifact-menu-item" onClick={handlePrintHtml}>
                                                         <PrintIcon />
                                                         <span>印刷 / PDF</span>
+                                                    </button>
+                                                </>
+                                            ) : isPptxSlide ? (
+                                                <>
+                                                    <button className="artifact-menu-item" onClick={handleDownloadPptx} disabled={isExportingWord || !parsedPptxSpec}>
+                                                        <DownloadIcon />
+                                                        <span>{isExportingWord ? '生成中...' : 'PPTX ダウンロード'}</span>
                                                     </button>
                                                 </>
                                             ) : (
@@ -924,7 +1417,6 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                             <div
                                 className="artifact-viewer-bg"
                                 style={{
-                                    ...(autoFit ? {} : { alignItems: 'flex-start' }),
                                     minWidth: `${basePaperWidth * (zoomLevel / 100)}px`
                                 }}
                             >
@@ -940,7 +1432,90 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                     {pages.map((pageHtml, index) => {
                                         const defaultHeight = isHtmlSlide ? 540 : (297 * 3.7795);
                                         const h = pageHeights[index] || defaultHeight;
-                                        const FINAL_HTML = buildSlideRuntimeHtml(pageHtml);
+
+                                        // スライド表示時のスタイル補正：
+                                        // 1. iframe内のbody背景色(#f0f2f5)を透明にして外側の余白(20px)を消す
+                                        // 2. .slideのシャドウとマージンを消してiframeいっぱいに表示する
+                                        const FINAL_HTML = isHtmlSlide
+                                            ? pageHtml.replace('</head>', `
+                                                <style>
+                                                    html, body {
+                                                        background: transparent !important;
+                                                        margin: 0 !important;
+                                                        padding: 0 !important;
+                                                        overflow: hidden !important;
+                                                        width: 960px !important;
+                                                        height: 540px !important;
+                                                    }
+
+                                                    body {
+                                                        display: block !important;
+                                                        min-height: 540px !important;
+                                                    }
+
+                                                    .slide {
+                                                        margin: 0 !important;
+                                                        box-shadow: none !important;
+                                                        border: none !important;
+                                                        width: 960px !important;
+                                                        height: 540px !important;
+                                                        display: flex !important;
+                                                        flex-direction: column !important;
+                                                        overflow: hidden !important;
+                                                    }
+
+                                                    .slide-body {
+                                                        display: flex !important;
+                                                        flex-direction: column !important;
+                                                        height: 100% !important;
+                                                        min-height: 0 !important;
+                                                        overflow: hidden !important;
+                                                    }
+
+                                                    .chart-shell {
+                                                        display: grid !important;
+                                                        grid-template-columns: 200px minmax(0, 1fr) !important;
+                                                        gap: 18px !important;
+                                                        align-items: stretch !important;
+                                                        min-width: 0 !important;
+                                                    }
+
+                                                    .chart-side,
+                                                    .chart-panel,
+                                                    .chart-area {
+                                                        min-width: 0 !important;
+                                                    }
+
+                                                    .chart-panel {
+                                                        display: flex !important;
+                                                        flex-direction: column !important;
+                                                    }
+
+                                                    .chart-area {
+                                                        position: relative !important;
+                                                        width: 100% !important;
+                                                        min-width: 0 !important;
+                                                        min-height: 220px !important;
+                                                        height: 100% !important;
+                                                        overflow: hidden !important;
+                                                    }
+
+                                                    .chart-area canvas,
+                                                    canvas[data-chart-role] {
+                                                        width: 100% !important;
+                                                        height: 100% !important;
+                                                        max-width: 100% !important;
+                                                        max-height: 100% !important;
+                                                        display: block !important;
+                                                    }
+
+                                                    .two-col {
+                                                        display: flex !important;
+                                                        flex-shrink: 0 !important;
+                                                    }
+                                                </style>
+                                                </head>`)
+                                            : pageHtml;
 
                                         return (
                                             <React.Fragment key={index}>
@@ -991,6 +1566,24 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                             );
                                         })()}
                                     </AnimatePresence>
+                                </div>
+                            </div>
+                        ) : isPptxSlide ? (
+                            /* PPTX プレビューコンポーネント */
+                            <div className="artifact-content" style={{ paddingBottom: '64px', width: '100%', minWidth: `${800 * (zoomLevel / 100)}px` }}>
+                                <div style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center', transition: 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)', width: '100%' }}>
+                                    {(editablePptxSpec || parsedPptxSpec) ? (
+                                        <PptxPreviewPane
+                                            pptxSpec={editablePptxSpec || parsedPptxSpec}
+                                            viewMode={pptxViewMode}
+                                            onUpdate={pptxUpdaters}
+                                            originalSpec={originalPptxSpec}
+                                        />
+                                    ) : (
+                                        <div style={{ padding: '20px', textAlign: 'center' }}>
+                                            {isGeneratingArtifact ? 'スライドデータを生成中です...' : 'プレビューデータを表示できません'}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -1116,6 +1709,15 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                             )}
                         </AnimatePresence>,
                         document.body
+                    )}
+
+                    {/* ★追加: PPTX変換ヒント (html_slideのみ) */}
+                    {isHtmlSlide && !isGeneratingArtifact && (
+                        <ConversionHint
+                            isDismissed={isPptxHintDismissed}
+                            onToggle={() => setIsPptxHintDismissed(false)}
+                            onDismiss={() => setIsPptxHintDismissed(true)}
+                        />
                     )}
                 </motion.div>
             )}

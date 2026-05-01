@@ -45,7 +45,7 @@ export const DIAGNOSIS_QUESTIONS: QuestionData[] = [
     subtitle: '業務中にちょっとした疑問が浮かんでAIに聞きました。どちらの話し方が心地いいですか？',
     optionA: {
       label: '丁寧・ビジネスライクに',
-      description: '「〜でございます。ご確認ください。」と敬語で端的に対応。',
+      description: '「〜です。まず、〜をご確認ください。」と丁寧かつ簡潔に対応。',
       icon: '👔',
     },
     optionB: {

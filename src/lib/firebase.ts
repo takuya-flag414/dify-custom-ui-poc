@@ -2,6 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { isStrictFEMode } from '../config/env';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,15 +13,26 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app: any, auth: any, adminAuth: any, db: any;
 
-// 管理者による新規ユーザー作成用セカンダリアプリ (現在の管理者ログアウトを防ぐため)
-const secondaryApp = initializeApp(firebaseConfig, 'SecondaryAdminApp');
+if (isStrictFEMode) {
+  console.info('🔒 [Strict FE Mode] Firebase initialization bypassed. Running entirely offline.');
+  app = {};
+  auth = { currentUser: null };
+  adminAuth = { currentUser: null };
+  db = {};
+} else {
+  // Initialize Firebase
+  app = initializeApp(firebaseConfig);
 
-// Initialize Services
-export const auth = getAuth(app);
-export const adminAuth = getAuth(secondaryApp);
-export const db = getFirestore(app);
+  // 管理者による新規ユーザー作成用セカンダリアプリ (現在の管理者ログアウトを防ぐため)
+  const secondaryApp = initializeApp(firebaseConfig, 'SecondaryAdminApp');
 
+  // Initialize Services
+  auth = getAuth(app);
+  adminAuth = getAuth(secondaryApp);
+  db = getFirestore(app);
+}
+
+export { app, auth, adminAuth, db };
 export default app;

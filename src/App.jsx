@@ -28,9 +28,11 @@ import { useSettings } from './hooks/useSettings';
 import { useTheme } from './hooks/useTheme';
 import { useInspector } from './hooks/useInspector';
 import { useErrorIntelligence } from './hooks/useErrorIntelligence';
+import { useShieldMode } from './hooks/useShieldMode';
 
 import ErrorGlassCard from './components/IntelligenceHUD/ErrorGlassCard';
 import SanitizeToast from './components/Chat/SanitizeToast';
+import ShieldModeOverlay from './components/Chat/ShieldModeOverlay';
 
 import { useTutorial } from './hooks/useTutorial';
 import TutorialOverlay from './components/Tutorial/TutorialOverlay';
@@ -44,7 +46,7 @@ import { useAuth } from './context/AuthContext';
 import LoginScreen from './components/Auth/LoginScreen';
 import AdminDashboard from './components/Admin/AdminDashboard';
 
-import { DEFAULT_MOCK_MODE } from './config/env';
+import { DEFAULT_MOCK_MODE, SHOW_HEADER } from './config/env';
 
 // ★追加: メッセージ再送信時のテキスト抽出ユーティリティ
 import { extractPlainText } from './utils/messageSerializer';
@@ -90,6 +92,9 @@ function App() {
 
   // ★追加: Studiosギャラリー強制表示フラグ
   const [forceShowStudioGallery, setForceShowStudioGallery] = useState(false);
+
+  // ★追加: 新規チャット開始時のコンテキストリセット用トリガー
+  const [newChatTrigger, setNewChatTrigger] = useState(0);
 
   // ★ Phase A: currentUser を useAuth から取得したユーザー情報で構成
   // 認証済みの場合は authUser を使用、未認証の場合はフォールバック
@@ -215,6 +220,9 @@ function App() {
     closeArtifact();
   }, [conversationId]);
 
+  // ★追加: プライバシーシールドモード管理（useChatより前に初期化）
+  const shieldMode = useShieldMode(conversationId);
+
   const {
     messages,
     setMessages,
@@ -237,6 +245,8 @@ function App() {
     // ★Phase 2: サニタイズ通知
     sanitizeNotification,
     setSanitizeNotification,
+    // ★追加: 状態リセット関数
+    resetChatState,
   } = useChat(
     mockMode,
     authUser?.userId,
@@ -251,15 +261,61 @@ function App() {
     apiUrl,
     settings?.prompt // ★追加: AI回答スタイルとシステムプロンプトを渡す
       ? { ...settings.prompt, displayName: settings?.profile?.displayName || '' }
-      : undefined
+      : undefined,
+    // ★追加: シールドモード自動移行コールバック
+    (convId) => {
+      shieldMode.activateShield(convId);
+      addLog(`[Shield Mode] 会話 ${convId} がシールドモードに移行しました`, 'info');
+    }
   );
+
+  // ★追加: 会話切り替え・新規チャット開始時のハンドラー
+  const handleSetConversationId = (id) => {
+    if (id === null) {
+      // 新しいチャットを始める際は検索設定や添付ファイルをリセット
+      resetChatState();
+      setMessages([]);
+      setNewChatTrigger(prev => prev + 1); // ★追加: トリガーを更新
+    }
+    setConversationId(id);
+  };
 
   // ★追加: IntelligenceErrorHandler
   const errorIntelligence = useErrorIntelligence();
 
-  // ★追加: useChat の lastError を useErrorIntelligence にブリッジ
+  // ★追加: ChatInputへ復元するテキスト（エラー/停止時）
+  const [pendingRestoreText, setPendingRestoreText] = useState(null);
+
+  // ★改修: useChat の lastError を useErrorIntelligence にブリッジ（inputText/statusCode対応）
   useEffect(() => {
     if (lastError) {
+      // ★追加: 停止時のテキスト復元（エラーではないのでErrorGlassCardは表示しない）
+      if (lastError.isStopRestore) {
+        if (lastError.inputText) {
+          setPendingRestoreText(lastError.inputText);
+        }
+        setLastError(null);
+        return;
+      }
+
+      // ★追加: ワークフローエラー由来の場合はErrorGlassCardに表示せず、リトライのみ実行
+      // InlineErrorCard（チャット内）で表示済みのため、画面下部のErrorGlassCardとの二重表示を防止
+      if (lastError.isWorkflowError) {
+        // リトライコールバックのみ予約（ErrorGlassCardは表示しない）
+        const retryCallback = () => {
+          const lastUserMsg = messages.slice().reverse().find(m => m.role === 'user');
+          if (lastUserMsg) {
+            const plainText = extractPlainText(lastUserMsg.text);
+            handleSendMessage(plainText, []);
+          }
+        };
+        // 遅延リトライを直接スケジュール
+        const delayMs = 3000; // 3秒後にリトライ
+        const timer = setTimeout(retryCallback, delayMs);
+        setLastError(null);
+        return () => clearTimeout(timer);
+      }
+
       errorIntelligence.reportError(lastError.raw, () => {
         // リトライコールバック: 最後のユーザーメッセージを再送信
         // ★修正: extractPlainText で構造化JSONからプレーンテキストを抽出し、二重ラップを防止
@@ -268,12 +324,24 @@ function App() {
           const plainText = extractPlainText(lastUserMsg.text);
           handleSendMessage(plainText, []);
         }
+      }, {
+        inputText: lastError.inputText || undefined,
+        statusCode: lastError.statusCode || undefined,
       });
       setLastError(null); // クリア
     }
   }, [lastError]);
 
+  // ★追加: useErrorIntelligence の pendingInputText を ChatInput へ伝搬
+  useEffect(() => {
+    if (errorIntelligence.pendingInputText) {
+      setPendingRestoreText(errorIntelligence.pendingInputText);
+      errorIntelligence.clearPendingInput();
+    }
+  }, [errorIntelligence.pendingInputText]);
+
   // ★追加: ストリーミング中のArtifact検出で即座にパネルを開く
+
   // artifact_contentの受信を検知したら、ユーザーがリアルタイム表示を確認できるようにする
   const hasOpenedForStreamingRef = useRef(false);
   useEffect(() => {
@@ -313,6 +381,7 @@ function App() {
 
   const handleMockModeChange = (newMode) => {
     setMockMode(newMode);
+    resetChatState();
     setConversationId(null);
     setMessages([]);
     setIsArtifactOpen(false);
@@ -327,6 +396,7 @@ function App() {
     onboardingState.resetOnboarding();
 
     // 2. 現在の会話選択を解除（これによりWelcomeScreenが表示される）
+    resetChatState();
     setConversationId(null);
     setMessages([]);
 
@@ -497,7 +567,7 @@ function App() {
                 <motion.div variants={sidebarVariants} style={{ height: '100%' }}>
                   <Sidebar
                     conversationId={conversationId}
-                    setConversationId={setConversationId}
+                    setConversationId={handleSetConversationId}
                     conversations={conversations}
                     onDeleteConversation={handleDeleteConversation}
                     onRenameConversation={handleRenameConversation}
@@ -511,21 +581,23 @@ function App() {
               }
               main={
                 <motion.div variants={mainContentVariants} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  {/* Header (Top Bar) */}
-                  <Header
-                    mockMode={mockMode}
-                    setMockMode={handleMockModeChange}
-                    onOpenConfig={() => setIsConfigModalOpen(true)}
-                    handleCopyLogs={handleCopyLogs}
-                    copyButtonText={copyButtonText}
-                    messages={messages}
-                    onStartTutorial={startTutorial}
-                    currentUser={currentUser}
-                    onRoleChange={handleRoleChange}
-                    isInspectorOpen={inspector.isOpen}
-                    onToggleInspector={() => inspector.isOpen ? inspector.closeInspector() : inspector.openInspector()}
-                    onOpenTestPanel={() => setIsTestPanelOpen(true)}
-                  />
+                  {/* Header (Top Bar) - SHOW_HEADER環境変数により制御 */}
+                  {SHOW_HEADER && (
+                    <Header
+                      mockMode={mockMode}
+                      setMockMode={handleMockModeChange}
+                      onOpenConfig={() => setIsConfigModalOpen(true)}
+                      handleCopyLogs={handleCopyLogs}
+                      copyButtonText={copyButtonText}
+                      messages={messages}
+                      onStartTutorial={startTutorial}
+                      currentUser={currentUser}
+                      onRoleChange={handleRoleChange}
+                      isInspectorOpen={inspector.isOpen}
+                      onToggleInspector={() => inspector.isOpen ? inspector.closeInspector() : inspector.openInspector()}
+                      onOpenTestPanel={() => setIsTestPanelOpen(true)}
+                    />
+                  )}
 
                   {/* Main Content Area — URLルーティング */}
                   <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
@@ -540,7 +612,7 @@ function App() {
                             isGenerating={isGenerating}
                             isHistoryLoading={isHistoryLoading}
                             conversationId={conversationId}
-                            setConversationId={setConversationId}
+                            setConversationId={handleSetConversationId}
                             addLog={addLog}
                             handleConversationCreated={handleConversationCreated}
                             activeContextFiles={activeContextFiles}
@@ -561,6 +633,11 @@ function App() {
                             mockMode={mockMode}
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
+                            sendKey={settings?.general?.sendKey || 'enter'}
+                            newChatTrigger={newChatTrigger}
+                            restoreText={pendingRestoreText}
+                            onRestoreTextConsumed={() => setPendingRestoreText(null)}
+                            isShieldActive={shieldMode.isCurrentShieldActive}
                           />
                         } />
                         <Route path="/chat/:conversationId" element={
@@ -571,7 +648,7 @@ function App() {
                             isGenerating={isGenerating}
                             isHistoryLoading={isHistoryLoading}
                             conversationId={conversationId}
-                            setConversationId={setConversationId}
+                            setConversationId={handleSetConversationId}
                             addLog={addLog}
                             handleConversationCreated={handleConversationCreated}
                             activeContextFiles={activeContextFiles}
@@ -592,6 +669,11 @@ function App() {
                             mockMode={mockMode}
                             backendBApiKey={backendBApiKey}
                             backendBApiUrl={backendBApiUrl}
+                            sendKey={settings?.general?.sendKey || 'enter'}
+                            newChatTrigger={newChatTrigger}
+                            restoreText={pendingRestoreText}
+                            onRestoreTextConsumed={() => setPendingRestoreText(null)}
+                            isShieldActive={shieldMode.isCurrentShieldActive}
                           />
                         } />
                         <Route path="/admin/users" element={
@@ -679,6 +761,9 @@ function App() {
             onManualRetry={errorIntelligence.triggerManualRetry}
             onOpenConfig={() => setIsConfigModalOpen(true)}
           />
+
+          {/* ★追加: シールドモード ウォーターマーク */}
+          <ShieldModeOverlay isActive={shieldMode.isCurrentShieldActive} />
         </>
       )
       }

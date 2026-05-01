@@ -154,7 +154,7 @@ const ControlDeck = ({
                         onClick={handleAddClick}
                         disabled={isLoading}
                         className={`flex items-center justify-center w-8 h-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors ${isAddMenuOpen ? 'bg-black/5 dark:bg-white/10' : ''}`}
-                        title="追加 (ファイル, ドメイン)"
+                        title="コンテキストを追加"
                     >
                         <PlusIcon />
                     </motion.button>

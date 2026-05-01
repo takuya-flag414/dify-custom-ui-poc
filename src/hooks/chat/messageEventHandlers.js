@@ -120,8 +120,9 @@ export const processWorkflowFinished = (contentBuffer, protocolMode, addLog, raw
     if (rawData?.data?.total_tokens) {
         finalUsage = {
             total_tokens: rawData.data.total_tokens,
-            prompt_tokens: null,
-            completion_tokens: null
+            // プロパティが存在する場合のみセットし、既存データを null で上書きしないようにする
+            ...(rawData.data.prompt_tokens && { prompt_tokens: rawData.data.prompt_tokens }),
+            ...(rawData.data.completion_tokens && { completion_tokens: rawData.data.completion_tokens })
         };
     }
 
@@ -178,7 +179,11 @@ export const buildFinalMessage = (currentStreamingMsg, workflowResult, contentBu
         traceMode: detectedTraceMode,
         // ★追加: HTTP_LLM_Search通過フラグを最終メッセージに伝播
         usedHttpLlmSearch: currentStreamingMsg.usedHttpLlmSearch || false,
-        usage: finalUsage || currentStreamingMsg.usage || null,
+        // ★修正: message_end で得られた詳細を保持しつつ、workflow_finished の最終合計値等で補完する
+        usage: currentStreamingMsg.usage ? {
+            ...currentStreamingMsg.usage,
+            ...(finalUsage || {})
+        } : (finalUsage || null),
         // ★追加: Artifact情報を最終メッセージに含める
         artifact: finalArtifact || null,
         thoughtProcess: currentStreamingMsg.thoughtProcess.map(t => {

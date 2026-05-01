@@ -3,73 +3,82 @@ import React, { useEffect, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import './PrivacyConfirmDialog.css';
 
-/**
- * 検知項目の型
- */
 export interface Detection {
     id: string;
     label: string;
     count: number;
+    matches?: string[]; // ★追加: 具体的なマッチ文字列
 }
 
-/**
- * ファイル検知項目の型
- */
 export interface FileDetection {
     fileName: string;
     detections: Detection[];
 }
 
-/**
- * PrivacyConfirmDialog のProps型
- */
 interface PrivacyConfirmDialogProps {
-    /** テキストから検知された項目リスト */
     detections?: Detection[];
-    /** ファイルから検知された項目リスト */
     fileDetections?: FileDetection[];
-    /** 送信確認時のコールバック（除外された検知タイプIDの配列を渡す） */
-    onConfirm: (excludedTypes: string[]) => void;
-    /** キャンセル時のコールバック */
+    onConfirm: (excludedTypes: string[], excludedValues: string[]) => void; // ★変更
     onCancel: () => void;
+    isShieldActive?: boolean;
 }
 
-/**
- * 盾アイコン
- */
 const ShieldIcon: React.FC = () => (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
     </svg>
 );
 
-/**
- * 機密情報検知時の送信確認ダイアログ
- * 各検知項目のサニタイズON/OFF切替と平文送信の注意書きを含む
- */
+interface TextItem {
+    id: string; // "phone_number_09012345678" のようなユニークID
+    typeId: string;
+    label: string;
+    value: string;
+}
+
 const PrivacyConfirmDialog: React.FC<PrivacyConfirmDialogProps> = ({
     detections = [],
     fileDetections = [],
     onConfirm,
-    onCancel
+    onCancel,
+    isShieldActive = false,
 }) => {
-    // 各検知項目のサニタイズ有効/無効状態（true = サニタイズ ON）
+    // 1. 個別の検知値をフラットなリストに展開
+    const textItems: TextItem[] = [];
+    detections.forEach(d => {
+        if (d.matches && d.matches.length > 0) {
+            // 重複を排除してユニークな値ごとにリスト化
+            const uniqueMatches = Array.from(new Set(d.matches));
+            uniqueMatches.forEach((match, index) => {
+                textItems.push({
+                    id: `${d.id}_${index}_${match}`,
+                    typeId: d.id,
+                    label: d.label,
+                    value: match
+                });
+            });
+        }
+    });
+
+    // 2. 各文字列（value）ごとのサニタイズ有効/無効状態
     const [sanitizeFlags, setSanitizeFlags] = useState<Record<string, boolean>>(() => {
         const initial: Record<string, boolean> = {};
-        detections.forEach(d => { initial[d.id] = true; });
+        textItems.forEach(item => { initial[item.value] = true; });
         return initial;
     });
 
-    const toggleFlag = useCallback((id: string) => {
-        setSanitizeFlags(prev => ({ ...prev, [id]: !prev[id] }));
+    // 3. 詳細情報のアコーディオン開閉状態
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+    const toggleFlag = useCallback((value: string) => {
+        setSanitizeFlags(prev => ({ ...prev, [value]: !prev[value] }));
     }, []);
 
-    // 除外された（OFF にした）検知タイプ ID のリスト
-    const excludedTypes = Object.entries(sanitizeFlags)
+    const excludedValues = Object.entries(sanitizeFlags)
         .filter(([, enabled]) => !enabled)
-        .map(([id]) => id);
+        .map(([value]) => value);
 
-    const hasExcluded = excludedTypes.length > 0;
+    const hasExcluded = excludedValues.length > 0;
 
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent): void => {
@@ -87,94 +96,116 @@ const PrivacyConfirmDialog: React.FC<PrivacyConfirmDialogProps> = ({
     }, []);
 
     const handleConfirm = () => {
-        onConfirm(excludedTypes);
+        // ★変更: textItems展開後は個別除外(excludedValues)のみを利用し、
+        // カテゴリ除外(excludedTypes)は使わないので空配列を渡す。
+        onConfirm([], excludedValues);
     };
 
-    const hasTextDetections = detections.length > 0;
+    const hasTextDetections = textItems.length > 0;
     const hasFileDetections = fileDetections.length > 0;
+
+    const totalTextDetections = detections.reduce((sum, d) => sum + d.count, 0);
+    const totalFileDetections = fileDetections.reduce((sum, f) => sum + f.detections.reduce((s, d) => s + d.count, 0), 0);
+    const totalDetections = totalTextDetections + totalFileDetections;
 
     return ReactDOM.createPortal(
         <div className="privacy-confirm-overlay" onClick={onCancel}>
             <div className="privacy-confirm-dialog" onClick={(e) => e.stopPropagation()}>
-                <div className="privacy-confirm-icon">
-                    <ShieldIcon />
+                
+                <div className="privacy-confirm-header">
+                    <div className="privacy-confirm-icon">
+                        <ShieldIcon />
+                    </div>
+                    <h3 className="privacy-confirm-title">
+                        機密情報を検知しました
+                    </h3>
                 </div>
 
-                <h3 className="privacy-confirm-title">
-                    機密情報が含まれている可能性があります
-                </h3>
-
-                <div className="privacy-confirm-detections-scroll">
-                    {hasTextDetections && (
-                        <div className="privacy-confirm-section">
-                            <h4 className="privacy-confirm-section-title">入力テキスト</h4>
-                            <ul className="privacy-confirm-list">
-                                {detections.map((item) => (
-                                    <li key={item.id} className="privacy-confirm-item">
-                                        <span className="privacy-confirm-item-label">
-                                            {item.label}（{item.count}件）
-                                        </span>
-                                        <button
-                                            type="button"
-                                            className={`privacy-toggle ${sanitizeFlags[item.id] ? 'privacy-toggle--on' : 'privacy-toggle--off'}`}
-                                            onClick={() => toggleFlag(item.id)}
-                                            title={sanitizeFlags[item.id] ? 'サニタイズ ON: トークン化して送信' : 'サニタイズ OFF: 平文のまま送信'}
-                                            aria-label={`${item.label} のサニタイズ切替`}
-                                        >
-                                            <span className="privacy-toggle__icon">
-                                                {sanitizeFlags[item.id] ? '🔒' : '🔓'}
-                                            </span>
-                                            <span className="privacy-toggle__label">
-                                                {sanitizeFlags[item.id] ? '保護' : '除外'}
-                                            </span>
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {hasFileDetections && (
-                        <div className="privacy-confirm-section">
-                            <h4 className="privacy-confirm-section-title">添付ファイル</h4>
-                            {fileDetections.map((fileItem, idx) => (
-                                <div key={idx} className="privacy-confirm-file-item">
-                                    <span className="privacy-confirm-file-name">{fileItem.fileName}</span>
-                                    <ul className="privacy-confirm-list">
-                                        {fileItem.detections.map((item) => (
-                                            <li key={item.id}>
-                                                {item.label}（{item.count}件）
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* 除外項目がある場合の注意書き */}
-                {hasExcluded && (
-                    <div className="privacy-confirm-warning">
-                        <span className="privacy-confirm-warning__icon">⚠️</span>
-                        <p className="privacy-confirm-warning__text">
-                            🔓の項目は<strong>平文のまま</strong>送信されます。サーバーに元の値がそのまま記録され、第三者に閲覧される可能性があります。
+                <div className="privacy-confirm-summary">
+                    {hasFileDetections ? (
+                        <p>
+                            以下の情報を自動でマスキングして送信します。<br />
+                            <strong>添付ファイル内の情報は保護対象外です。</strong>
                         </p>
+                    ) : (
+                        <p>安全のため、以下の情報を自動でマスキング（トークン化）して送信します。</p>
+                    )}
+                </div>
+
+                <div className="privacy-confirm-accordion">
+                    <button 
+                        type="button"
+                        className="privacy-confirm-accordion-toggle"
+                        onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+                    >
+                        {isDetailsOpen ? '▲ 詳細情報を閉じる' : '▼ 詳細情報（個別に保護/除外）'}
+                    </button>
+
+                    {isDetailsOpen && (
+                        <div className="privacy-confirm-list-container">
+                            {hasTextDetections && (
+                                <ul className="privacy-confirm-list">
+                                    {textItems.map((item) => (
+                                        <li key={item.id} className="privacy-confirm-item">
+                                            <span className="privacy-confirm-item-label">
+                                                <span className="privacy-confirm-item-category">[{item.label}]</span>
+                                                <span className="privacy-confirm-item-value">{item.value}</span>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className={`privacy-toggle ${sanitizeFlags[item.value] ? 'privacy-toggle--on' : 'privacy-toggle--off'}`}
+                                                onClick={() => toggleFlag(item.value)}
+                                                title={sanitizeFlags[item.value] ? '保護（ON）' : '除外（OFF）'}
+                                            >
+                                                <span className="privacy-toggle__circle" />
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {hasFileDetections && (
+                                <ul className="privacy-confirm-list privacy-confirm-list--files">
+                                    {fileDetections.map((fileItem, idx) => (
+                                        fileItem.detections.map((item, dIdx) => (
+                                            <li key={`${idx}-${dIdx}`} className="privacy-confirm-item privacy-confirm-item--file">
+                                                <span className="privacy-confirm-item-label">
+                                                    <span className="privacy-confirm-item-category">[{item.label}]</span>
+                                                    <span className="privacy-confirm-item-value">{fileItem.fileName}</span>
+                                                </span>
+                                                <span className="privacy-file-warning-icon" title="添付ファイルは保護できません">⚠️</span>
+                                            </li>
+                                        ))
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {hasExcluded && (
+                    <div className="privacy-confirm-warning-inline">
+                        <span className="privacy-confirm-warning__icon">⚠️</span>
+                        <span>除外された項目はマスキングされず、そのまま送信されます。</span>
                     </div>
                 )}
 
-                <p className="privacy-confirm-message">
-                    このまま続行してもよろしいですか？
-                </p>
-
-                <div className="privacy-confirm-actions">
-                    <button className="privacy-confirm-btn-cancel" onClick={onCancel}>
-                        キャンセル
-                    </button>
-                    <button className="privacy-confirm-btn-send" onClick={handleConfirm}>
-                        続行する
-                    </button>
+                <div className="privacy-confirm-footer">
+                    {!isShieldActive && (
+                        <p className="privacy-confirm-shield-footer-notice">
+                            ※送信後はシールドモードとなり、ブラウザ終了で元の情報は完全に消去されます。
+                        </p>
+                    )}
+                    <div className="privacy-confirm-actions">
+                        <button className="privacy-confirm-btn-cancel" onClick={onCancel}>
+                            キャンセル
+                        </button>
+                        <button className="privacy-confirm-btn-send" onClick={handleConfirm}>
+                            マスキングして送信
+                        </button>
+                    </div>
                 </div>
+
             </div>
         </div>,
         document.body
@@ -182,3 +213,4 @@ const PrivacyConfirmDialog: React.FC<PrivacyConfirmDialogProps> = ({
 };
 
 export default PrivacyConfirmDialog;
+

@@ -114,7 +114,8 @@ export class MockStreamGenerator {
                                 data: {
                                     ...step.data,
                                     node_id: nodeId,
-                                    status: step.event === 'node_finished' ? 'succeeded' : 'running'
+                                    // ★変更: シナリオのステータスを優先し、なければsucceeded
+                                    status: step.event === 'node_finished' ? (step.data?.status || 'succeeded') : 'running'
                                 }
                             };
                             controller.enqueue(self.createSSEData(nodeData));
@@ -155,10 +156,15 @@ export class MockStreamGenerator {
                     }
 
                     // 3. ワークフロー終了
+                    // ★追加: シナリオにfailedのノードがあれば、ワークフローもfailedにする
+                    const failedStep = scenario.find(s => s.data?.status === 'failed');
                     const finishEvent: SSEEventData = {
                         event: 'workflow_finished',
                         task_id: `task_${Date.now()}`,
-                        data: { status: 'succeeded' }
+                        data: { 
+                            status: failedStep ? 'failed' : 'succeeded',
+                            ...(failedStep && failedStep.data?.error ? { error: failedStep.data.error } : {})
+                        }
                     };
                     controller.enqueue(self.createSSEData(finishEvent));
 

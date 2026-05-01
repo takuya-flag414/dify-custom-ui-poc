@@ -39,6 +39,11 @@ const ChatArea = (props) => {
     mockMode = 'OFF',
     backendBApiKey = '',
     backendBApiUrl = '',
+    sendKey = 'enter',
+    // ★追加: エラー/停止時のテキスト復元
+    restoreText = null,
+    onRestoreTextConsumed,
+    isShieldActive = false,  // ★追加: シールドモード状態
   } = props;
 
   // ★追加: 自動スクロール有効状態管理
@@ -103,9 +108,15 @@ const ChatArea = (props) => {
   // 初期状態: メッセージ0件 かつ 履歴ロード中でない
   const isInitialState = messages.length === 0 && !isHistoryLoading;
 
-  const handleSuggestionClick = useCallback((q) => {
-    onSendMessage(q, []);
+  // ★追加: メッセージ送信時に自動スクロールを強制的にONに戻す共通ハンドラ
+  const handleSendMessageInternal = useCallback((text, attachments = [], options = {}) => {
+    setAutoScrollEnabled(true);
+    onSendMessage(text, attachments, options);
   }, [onSendMessage]);
+
+  const handleSuggestionClick = useCallback((q) => {
+    handleSendMessageInternal(q, []);
+  }, [handleSendMessageInternal]);
 
   const handleSmartActionSelect = useCallback((action) => {
     // LLMによってアンダースコアが省かれるケースがあるため正規化する
@@ -114,7 +125,7 @@ const ChatArea = (props) => {
     switch (normalizedType) {
       case 'suggestedquestion':
         if (action.payload?.text) {
-          onSendMessage(action.payload.text, []);
+          handleSendMessageInternal(action.payload.text, []);
         }
         break;
 
@@ -141,7 +152,7 @@ const ChatArea = (props) => {
           setTimeout(() => {
             // payload.textがあればLLM生成文を優先、なければ直前入力をフォールバック
             const textToSend = action.payload.text || extractPlainText(lastUserMsg.text);
-            onSendMessage(textToSend, []);
+            handleSendMessageInternal(textToSend, []);
           }, 100);
         }
         break;
@@ -156,7 +167,7 @@ const ChatArea = (props) => {
           setTimeout(() => {
             // payload.textがあればLLM生成文を優先、なければ直前入力をフォールバック
             const textToSend = action.payload?.text || extractPlainText(lastUserMsgForWeb.text);
-            onSendMessage(textToSend, []);
+            handleSendMessageInternal(textToSend, []);
           }, 100);
         }
         break;
@@ -164,7 +175,7 @@ const ChatArea = (props) => {
       case 'deepdive':
         if (action.payload?.text) {
           // LLMが生成したpayload.textを直接送信（自然な質問文）
-          onSendMessage(action.payload.text, []);
+          handleSendMessageInternal(action.payload.text, []);
         }
         break;
 
@@ -176,7 +187,7 @@ const ChatArea = (props) => {
 
       case 'selection':
         if (action.payload?.text) {
-          onSendMessage(action.payload.text, []);
+          handleSendMessageInternal(action.payload.text, []);
         }
         break;
 
@@ -215,14 +226,14 @@ const ChatArea = (props) => {
         }
 
         // ★変更: artifactオプションの構造を統一し、AIの発話に付与
-        onSendMessage(artifactText, [], { artifact: { requested: true, type: artifactType, label: displayLabel } });
+        handleSendMessageInternal(artifactText, [], { artifact: { requested: true, type: artifactType, label: displayLabel } });
         break;
       }
 
       default:
         console.warn('Unknown smart action type:', action.type);
     }
-  }, [messages, onSendMessage, setSearchSettings, setActiveArtifact]);
+  }, [messages, handleSendMessageInternal, setSearchSettings, setActiveArtifact, onOpenArtifact]);
 
   // ★追加: ボタンクリック時のハンドラ
   const handleScrollToBottom = () => {
@@ -247,13 +258,14 @@ const ChatArea = (props) => {
               mockMode={mockMode}
               backendBApiKey={backendBApiKey}
               backendBApiUrl={backendBApiUrl}
+              sendKey={sendKey}
             />
           </div>
         </>
       ) : isInitialState ? (
         <WelcomeScreen
           userName={userName}
-          onSendMessage={onSendMessage}
+          onSendMessage={handleSendMessageInternal}
           onStartTutorial={onStartTutorial}
           isGenerating={isGenerating}
           activeContextFiles={activeContextFiles}
@@ -266,6 +278,7 @@ const ChatArea = (props) => {
           backendBApiUrl={backendBApiUrl}
           activeArtifact={activeArtifact} // ★追加
           setActiveArtifact={setActiveArtifact} // ★追加
+          sendKey={sendKey}
         />
       ) : (
         <>
@@ -275,7 +288,7 @@ const ChatArea = (props) => {
             onSuggestionClick={handleSuggestionClick}
             onSmartActionSelect={handleSmartActionSelect}
             isLoading={isGenerating}
-            onSendMessage={onSendMessage}
+            onSendMessage={handleSendMessageInternal}
             onOpenConfig={onOpenConfig}
             onOpenArtifact={onOpenArtifact}
             userName={userName}
@@ -294,7 +307,7 @@ const ChatArea = (props) => {
             />
             <ChatInput
               isLoading={isGenerating}
-              onSendMessage={onSendMessage}
+              onSendMessage={handleSendMessageInternal}
               isCentered={false}
               activeContextFiles={activeContextFiles}
               setActiveContextFiles={setActiveContextFiles}
@@ -309,6 +322,10 @@ const ChatArea = (props) => {
               onRemoveQuote={() => setQuoteContext(null)} // ★追加: 引用クリアハンドラ
               activeArtifact={activeArtifact} // ★追加
               setActiveArtifact={setActiveArtifact} // ★追加
+              sendKey={sendKey}
+              restoreText={restoreText}
+              onRestoreTextConsumed={onRestoreTextConsumed}
+              isShieldActive={isShieldActive}
             />
           </div>
         </>

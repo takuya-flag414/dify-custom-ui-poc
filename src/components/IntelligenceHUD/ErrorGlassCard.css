@@ -232,6 +232,104 @@
 }
 
 /* ========================================
+   Retry Count Badge
+   ======================================== */
+.error-glass-retry-count {
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ========================================
+   Details Toggle (★追加: 2段階表示トグル)
+   ======================================== */
+.error-glass-details-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-primary);
+    font-size: var(--text-footnote, 13px);
+    cursor: pointer;
+    transition: color 0.2s, opacity 0.2s;
+    opacity: 0.8;
+}
+
+.error-glass-details-toggle:hover {
+    opacity: 1;
+}
+
+.error-glass-details-toggle svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.error-glass-details-toggle.is-open svg {
+    transform: rotate(180deg);
+}
+
+/* ========================================
+   Details Accordion (★追加: 詳細表示領域)
+   ======================================== */
+.error-glass-details {
+    margin-top: 8px;
+}
+
+.error-glass-details-content {
+    padding: 10px 12px;
+    border-radius: var(--radius-md, 10px);
+    background: var(--color-bg-inset, rgba(0, 0, 0, 0.06));
+    border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+}
+
+/* ダークモード時の背景 */
+:root[data-theme="dark"] .error-glass-details-content,
+[data-theme="dark"] .error-glass-details-content {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.error-glass-details-status {
+    font-size: var(--text-caption, 12px);
+    font-weight: var(--font-semibold, 600);
+    color: var(--color-text-sub);
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+}
+
+.error-glass-details-raw {
+    font-family: var(--font-mono, 'SF Mono', Menlo, Monaco, Consolas, monospace);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
+    padding: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 120px;
+    overflow-y: auto;
+    /* スクロールバーを控えめに */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.error-glass-details-raw::-webkit-scrollbar {
+    width: 4px;
+}
+
+.error-glass-details-raw::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.error-glass-details-raw::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 2px;
+}
+
+/* ========================================
    Reduced Motion
    ======================================== */
 @media (prefers-reduced-motion: reduce) {
@@ -240,4 +338,9 @@
         border-top-color: var(--color-warning-amber);
         opacity: 0.6;
     }
+
+    .error-glass-details-toggle svg {
+        transition: none;
+    }
 }
+

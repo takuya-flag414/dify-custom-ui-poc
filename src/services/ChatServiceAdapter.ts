@@ -3,6 +3,7 @@ import { uploadFile as apiUploadFile, sendChatMessageApi, fetchConversationsApi,
 import { MockStreamGenerator, ScenarioStep } from '../mocks/MockStreamGenerator';
 import { scenarios } from '../mocks/scenarios';
 import SecureVaultService from './SecureVaultService';
+import { SIMULATE_FE_ERROR } from '../config/env';
 
 /**
  * 検索設定の型
@@ -163,6 +164,11 @@ export const ChatServiceAdapter = {
                 else if (!useRag && useWeb) scenarioKey = 'web_only';
                 else if (useRag && useWeb) scenarioKey = 'hybrid';
                 else scenarioKey = 'pure';
+            }
+
+            // ★追加: エラーシミュレーションフラグが有効な場合は強制的にエラーシナリオに切り替え
+            if (SIMULATE_FE_ERROR) {
+                scenarioKey = 'mock_error';
             }
 
             const aiStyle = promptSettings?.aiStyle || 'partner';

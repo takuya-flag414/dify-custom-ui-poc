@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DomainSelector from '../../Shared/DomainSelector';
 
+// 表示制御フラグをインポート
+import { ENABLE_SPECIFY_WEBSITE, ENABLE_CREATE_ARTIFACT } from '../../../config/env';
+
 // --- Icons (SF Symbols Inspired) ---
 
 const BoltIcon = () => (
@@ -167,7 +170,7 @@ const UniversalAddMenu = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.15 } }}
             transition={springTransition}
-            className="w-[300px] bg-white/60 dark:bg-[#1c1c1e]/70 backdrop-blur-[40px] saturate-[180%] rounded-[22px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/40 dark:border-white/10 overflow-hidden"
+            className="w-[300px] bg-white/95 dark:bg-[#26242a]/95 backdrop-blur-[40px] saturate-[180%] rounded-[22px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/40 dark:border-white/10 overflow-hidden"
         >
             <div className="p-2 relative overflow-hidden">
                 <AnimatePresence mode="wait" initial={false}>
@@ -189,20 +192,24 @@ const UniversalAddMenu = ({
                                 subtext="PDF、テキスト、Wordなど"
                                 onClick={onFileUpload}
                             />
-                            <MenuItem
-                                icon={<GlobeAltIcon />}
-                                label="Webサイトを指定"
-                                subtext="URLを入力して情報を取得"
-                                onClick={() => navigateTo('DOMAIN', 'right')}
-                                showArrow
-                            />
-                            <MenuItem
-                                icon={<BoltIcon />}
-                                label="Artifact を作成"
-                                subtext="ドキュメントやレポートを生成"
-                                onClick={() => navigateTo('ARTIFACT_L1', 'right')}
-                                showArrow
-                            />
+                            {ENABLE_SPECIFY_WEBSITE && (
+                                <MenuItem
+                                    icon={<GlobeAltIcon />}
+                                    label="Webサイトを指定"
+                                    subtext="URLを入力して情報を取得"
+                                    onClick={() => navigateTo('DOMAIN', 'right')}
+                                    showArrow
+                                />
+                            )}
+                            {ENABLE_CREATE_ARTIFACT && (
+                                <MenuItem
+                                    icon={<BoltIcon />}
+                                    label="Artifact を作成"
+                                    subtext="ドキュメントやレポートを生成"
+                                    onClick={() => navigateTo('ARTIFACT_L1', 'right')}
+                                    showArrow
+                                />
+                            )}
                         </motion.div>
                     )}
 
@@ -254,7 +261,7 @@ const UniversalAddMenu = ({
                             <MenuItem
                                 icon={<PresentationIcon />}
                                 label="📊 プレゼンスライド"
-                                subtext="16:9 構成のプレゼン用資料"
+                                subtext="ブラウザ閲覧・PDF用のスライド資料"
                                 onClick={() => handleArtifactSelect('html_slide', 'プレゼンスライド')}
                             />
                         </motion.div>
@@ -310,6 +317,7 @@ const UniversalAddMenu = ({
                             />
                         </motion.div>
                     )}
+
                 </AnimatePresence>
             </div>
         </motion.div>

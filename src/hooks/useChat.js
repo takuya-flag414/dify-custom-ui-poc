@@ -7,6 +7,8 @@ import { fetchSuggestionsApi } from '../api/dify';
 import { mapCitationsFromApi } from '../utils/citationMapper';
 // ★Phase 2: SecureVaultServiceをインポート
 import SecureVaultService from '../services/SecureVaultService';
+// ★追加: エラー解析（ワークフローエラー → IntelligenceError変換用）
+import { analyzeIntelligenceError } from '../utils/errorIntelligence';
 
 // ★リファクタリング: 分離したモジュールからインポート
 import { DEFAULT_SEARCH_SETTINGS } from './chat/constants';
@@ -20,6 +22,7 @@ import {
     processRagStrategyFinished,
     processLlmSynthesisFinished,
     logWorkflowOutput,
+    processArtifactNodeFinished,
     processNodeError,
     processWorkflowError
 } from './chat/nodeEventHandlers';
@@ -68,8 +71,9 @@ const createConfigError = () => ({
  * @param {string} apiKey - Dify API キー
  * @param {string} apiUrl - Dify API URL
  * @param {object} promptSettings - プロンプト設定 (aiStyle, userProfile, customInstructions)
+ * @param {function} onShieldActivated - ★追加: シールドモード自動移行コールバック (conversationId) => void
  */
-export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, onTitleFallback, onNotFound, apiKey, apiUrl, promptSettings) => {
+export const useChat = (mockMode, userId, conversationId, addLog, onConversationCreated, onConversationUpdated, onTitleExtracted, onTitleFallback, onNotFound, apiKey, apiUrl, promptSettings, onShieldActivated) => {
     const [messages, setMessages] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -94,6 +98,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     const currentTaskIdRef = useRef(null);
     // ★追加: 最後のユーザーメッセージを追跡（再送信用）
     const lastUserMessageRef = useRef(null);
+    // ★追加: SSEストリーム排他制御用のリクエストID
+    // 新しいリクエスト開始時に更新し、古いストリームのイベントを無視するために使用
+    const activeRequestIdRef = useRef(null);
+    // ★追加: エラー/停止時にChatInputへ復元する入力テキストの一時保存
+    const previousInputTextRef = useRef(null);
 
     // ★追加: IntelligenceErrorHandler連携用
     // エラー発生時にエラー情報をstateに保持し、App.jsxのuseErrorIntelligenceが検知する
@@ -117,6 +126,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             settingsMapRef.current[conversationId] = newSettings;
         }
     };
+
+    // ★追加: チャット状態（検索設定・ファイル）のリセット
+    const resetChatState = useCallback(() => {
+        setSearchSettings(DEFAULT_SEARCH_SETTINGS);
+        setSessionFiles([]);
+        addLog('[useChat] Chat state reset to default.', 'info');
+    }, [addLog]);
 
     useEffect(() => {
         if (mockMode === 'FE' && conversationId && messages.length > 0) {
@@ -186,6 +202,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     const handleSendMessage = async (text, attachments = [], options = {}) => {
         const tracker = createPerfTracker(addLog);
         tracker.markStart();
+
+        // ★追加: 送信テキストを一時保存（エラー/停止時の復元用）
+        previousInputTextRef.current = text;
 
         // 1. Config Validation
         if ((mockMode === 'OFF' || mockMode === 'BE') && (!apiKey || !apiUrl || !userId)) {
@@ -257,6 +276,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
         setIsGenerating(true);
 
+        // ★追加: SSEストリーム排他制御 - 新しいリクエストIDを生成し、前回のリクエストを無効化
+        // これにより古いストリームのイベントハンドラが自動的に無視される
+        const requestId = `req_${Date.now()}`;
+        activeRequestIdRef.current = requestId;
+
         // ★変更: ストリーミング中はstreamingMessage stateで管理（messages配列を更新しない）
         const initialAiMessage = {
             id: aiMessageId,
@@ -307,8 +331,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         // 5. Send Request via Adapter
         let reader;
         try {
-            // sessionFilesと新規アップロードファイル、さらに復元ファイルを合わせた配列を作成
-            const allFilesToSend = [...sessionFiles, ...uploadedFiles, ...restoredFiles];
+            // ★修正: 現在の添付ファイル（新規アップロード + 入力欄にある既存）のみを対象にする
+            // sessionFiles (履歴全体の蓄積) は含めないことで、期限切れIDの送信を防ぐ
+            const activeAttachments = [...uploadedFiles, ...restoredFiles];
+
+            // IDでユニーク化して安全性を確保
+            const allFilesToSend = Array.from(
+                new Map(activeAttachments.map(f => [f.id, f])).values()
+            );
 
             // ★構造化メッセージの構築 (Protocol v1.0)
             const intelligenceMode = currentSettings.reasoningMode === 'deep' ? 'deep' : 'speed';
@@ -341,8 +371,26 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 weekday: 'long', hour: '2-digit', minute: '2-digit'
             });
 
-            // ★追加: Artifact受信完了済みかどうかを判定
-            const hasReceivedArtifact = messages.some(m => m.role === 'ai' && m.artifact);
+            // ★追加: Artifact受信完了済みかどうかをタイプ別に判定
+            const ARTIFACT_TYPES = [
+                'html_document',
+                'html_slide',
+                'summary_report',
+                'checklist',
+                'comparison_table',
+                'faq',
+                'meeting_minutes'
+            ];
+
+            // 履歴から受信済みのタイプを抽出
+            const receivedTypes = new Set();
+            messages.forEach(m => {
+                if (m.role === 'ai' && m.artifact?.artifact_type) {
+                    receivedTypes.add(m.artifact.artifact_type);
+                }
+            });
+
+            const hasReceivedAnyArtifact = receivedTypes.size > 0;
 
             const difyInputs = {
                 rag_enabled: currentSettings.ragEnabled ? 'true' : 'false',
@@ -353,8 +401,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                 system_prompt: JSON.stringify(systemPromptPayload),
                 reasoning_mode: currentSettings.reasoningMode || 'fast',
                 gemini_store_id: currentSettings.selectedStoreId || '',
-                has_received_artifact: hasReceivedArtifact,
+                has_received_artifact: hasReceivedAnyArtifact ? 'true' : 'false',
             };
+
+            // 各タイプ別のフラグを追加
+            ARTIFACT_TYPES.forEach(type => {
+                difyInputs[`has_received_${type}`] = receivedTypes.has(type) ? 'true' : 'false';
+            });
 
             const structuredQuery = buildStructuredMessage(
                 text,
@@ -382,6 +435,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             // setMessages の前に実行し、UI・ログ・ペイロードすべてから平文を排除する
             const sanitizeResult = SecureVaultService.sanitize(text, {
                 excludeTypes: options.sanitizeExcludeTypes || [],
+                excludeValues: options.sanitizeExcludeValues || [],
             });
             if (sanitizeResult.appliedTokens.length > 0) {
                 // 構造化JSONのtextフィールドをサニタイズ済みテキストに置換
@@ -394,6 +448,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                 // トースト通知
                 setSanitizeNotification({ visible: true, count: sanitizeResult.appliedTokens.length });
+
+                // ★追加: シールドモード自動移行通知
+                if (onShieldActivated) {
+                    const targetConvId = conversationId || creatingConversationIdRef.current;
+                    if (targetConvId) {
+                        onShieldActivated(targetConvId);
+                    }
+                }
             }
 
             const finalStructuredQuery = JSON.stringify(parsedPayload);
@@ -454,6 +516,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             let lineBuffer = '';
 
             while (true) {
+                // ★追加: SSEストリーム排他制御 - 古いリクエストのイベントを無視
+                // stopGeneration() または新しいhandleSendMessage()でIDが変更された場合、
+                // このループを安全に終了して競合を防ぐ
+                if (activeRequestIdRef.current !== requestId) {
+                    addLog('[Stream] Stale request detected, exiting stream loop', 'warn');
+                    break;
+                }
                 const { value, done } = await reader.read();
                 tracker.markFirstByte();
                 if (done) {
@@ -556,11 +625,16 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 // ★追加: ノードエラー処理（status === 'failed' の場合）
                                 const nodeError = processNodeError(data, addLog);
                                 if (nodeError) {
+                                    // ★改修: IntelligenceError型に変換してメッセージに埋め込む
+                                    const nodeIntelligenceError = analyzeIntelligenceError(
+                                        nodeError.errorMessage,
+                                        nodeError.statusCode || undefined
+                                    );
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         thoughtProcess: prev.thoughtProcess.map(nodeError.thoughtProcessUpdate),
                                         hasWorkflowError: true,
-                                        workflowError: { nodeTitle: nodeError.nodeTitle, message: nodeError.errorMessage }
+                                        workflowError: nodeIntelligenceError
                                     } : prev);
                                     // エラーが発生しても処理は継続（部分的な結果を表示するため）
                                 }
@@ -650,8 +724,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     }
                                 }
 
+                                // ★追加: Artifact関連ノードの出力をキャプチャ
+                                const artifactResult = processArtifactNodeFinished(outputs, nodeId, title, addLog);
+                                if (artifactResult) {
+                                    setStreamingMessage(prev => prev ? {
+                                        ...prev,
+                                        thoughtProcess: prev.thoughtProcess.map(artifactResult.thoughtProcessUpdate)
+                                    } : prev);
+                                }
+
                                 // その他のノードは完了ステータスに更新（エラーでない場合のみ）
-                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_Intent_Analysis_Hybrid' && title !== 'LLM_RAG_Strategy' && title !== 'LLM_Synthesis' && !nodeError) {
+                                if (nodeId && title !== 'LLM_Query_Rewrite' && title !== 'LLM_Intent_Analysis' && title !== 'LLM_Intent_Analysis_RAG' && title !== 'LLM_Intent_Analysis_Web' && title !== 'LLM_Intent_Analysis_Hybrid' && title !== 'LLM_RAG_Strategy' && title !== 'LLM_Synthesis' && !nodeError && !artifactResult) {
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         thoughtProcess: prev.thoughtProcess.map(t => t.id === nodeId ? { ...t, status: 'done' } : t)
@@ -701,6 +784,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     // ★修正: usageをローカル変数にもキャプチャ（React state更新は非同期のため）
                                     if (messageEndResult.usage) {
                                         capturedUsage = messageEndResult.usage;
+                                        addLog(`[useChat] message_end usage captured: prompt=${messageEndResult.usage.prompt_tokens}, completion=${messageEndResult.usage.completion_tokens}, total=${messageEndResult.usage.total_tokens}`, 'info');
                                     }
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
@@ -708,6 +792,27 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                         traceMode: messageEndResult.traceMode,
                                         usage: messageEndResult.usage || prev.usage
                                     } : prev);
+
+                                    // ★追加: workflow_finished が先に処理済みの場合のフォールバック
+                                    // Dify Chatflowモードでは workflow_finished → message_end の順で到着することがある
+                                    // その場合 streamingMessage は既に null で、最終メッセージは messages 配列に格納済み
+                                    // → messages 配列の該当AIメッセージに usage を直接マージする
+                                    if (messageEndResult.usage) {
+                                        setMessages(prev => {
+                                            const lastIdx = prev.length - 1;
+                                            if (lastIdx >= 0 && prev[lastIdx].id === aiMessageId) {
+                                                const existingUsage = prev[lastIdx].usage || {};
+                                                return [
+                                                    ...prev.slice(0, lastIdx),
+                                                    {
+                                                        ...prev[lastIdx],
+                                                        usage: { ...existingUsage, ...messageEndResult.usage }
+                                                    }
+                                                ];
+                                            }
+                                            return prev;
+                                        });
+                                    }
                                 }
                                 if (data.message_id) {
                                     fetchSuggestions(data.message_id, aiMessageId);
@@ -729,17 +834,41 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                         detectedTraceMode
                                     );
 
-                                    // ★追加: ワークフローエラー情報を最終メッセージに含める
+                                    // ★改修: ワークフローエラーをIntelligenceError型に変換して埋め込む
                                     if (wfError || currentStreamingMsg.hasWorkflowError) {
+                                        const rawError = wfError?.errorMessage || currentStreamingMsg.workflowError?.rawErrorMessage || '';
+                                        const extractedStatusCode = wfError?.statusCode || currentStreamingMsg.workflowError?.statusCode || null;
+                                        const intelligenceError = analyzeIntelligenceError(rawError, extractedStatusCode || undefined);
+
                                         finalMessage.hasWorkflowError = true;
-                                        finalMessage.workflowError = wfError
-                                            ? { nodeTitle: 'ワークフロー', message: wfError.errorMessage }
-                                            : currentStreamingMsg.workflowError;
+                                        // すでにIntelligenceError型（ノードエラー経由）ならそのまま使用、
+                                        // それ以外（wfError直接）なら新規変換
+                                        finalMessage.workflowError = (currentStreamingMsg.workflowError?.type && !wfError)
+                                            ? currentStreamingMsg.workflowError
+                                            : intelligenceError;
+
+                                        // ★追加: auto-retry対象エラーの場合はlastErrorにも報告（リトライ処理のため）
+                                        // isWorkflowError: trueフラグでErrorGlassCardの表示を抑制
+                                        if (intelligenceError.retryStrategy === 'auto-retry') {
+                                            setLastError({
+                                                raw: rawError,
+                                                timestamp: Date.now(),
+                                                inputText: previousInputTextRef.current,
+                                                statusCode: extractedStatusCode,
+                                                isWorkflowError: true, // ★追加: ワークフローエラー由来フラグ
+                                            });
+                                        }
                                     }
 
-                                    // ★修正: capturedUsageでフォールバック（streamingMessageRef更新遅延対策）
-                                    if (!finalMessage.usage && capturedUsage) {
-                                        finalMessage.usage = capturedUsage;
+                                    // ★修正: capturedUsage（message_end由来）を常にマージ
+                                    // message_end が先に到着した場合、streamingMessageRef はまだ更新されておらず
+                                    // buildFinalMessage の結果に詳細情報が含まれない。
+                                    // capturedUsage があれば既存の usage に上書きマージして詳細を補完する。
+                                    if (capturedUsage) {
+                                        finalMessage.usage = {
+                                            ...(finalMessage.usage || {}),
+                                            ...capturedUsage
+                                        };
                                     }
 
                                     setMessages(prevMsgs => [...prevMsgs, finalMessage]);
@@ -767,12 +896,19 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 const errorCode = data.code || 'UNKNOWN';
                                 const errorMessage = data.message || '不明なエラーが発生しました';
                                 const fullErrorMsg = `${errorCode}: ${errorMessage}`;
-                                addLog(`[SSE Error] ${fullErrorMsg}`, 'error');
+                                // ★追加: SSEエラーからHTTPステータスコードを抽出
+                                const sseStatusCode = data.status || data.code || null;
+                                addLog(`[SSE Error] ${fullErrorMsg} (status: ${sseStatusCode})`, 'error');
 
                                 // ストリーミング中のメッセージをクリーンアップ
                                 setStreamingMessage(null);
-                                // IntelligenceErrorHandler にエラーを報告
-                                setLastError({ raw: fullErrorMsg, timestamp: Date.now() });
+                                // ★改修: IntelligenceErrorHandler にエラー + 入力テキスト + ステータスコードを報告
+                                setLastError({
+                                    raw: fullErrorMsg,
+                                    timestamp: Date.now(),
+                                    inputText: previousInputTextRef.current,
+                                    statusCode: typeof sseStatusCode === 'number' ? sseStatusCode : null,
+                                });
                             }
                         } catch (e) {
                             console.error('Stream Parse Error:', e);
@@ -786,9 +922,14 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
         } catch (error) {
             addLog(`[Stream Error] ${error.message}`, 'error');
-            // ★変更: IntelligenceErrorHandler にエラーを委譲
+            // ★改修: IntelligenceErrorHandler にエラー + 入力テキスト + ステータスコードを委譲
             setStreamingMessage(null);
-            setLastError({ raw: error.message, timestamp: Date.now() });
+            setLastError({
+                raw: error.message,
+                timestamp: Date.now(),
+                inputText: previousInputTextRef.current,
+                statusCode: error.status || null,
+            });
             setIsGenerating(false);
         }
     };
@@ -826,10 +967,15 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
     // ★リファクタリング: 生成停止関数
     const stopGeneration = useCallback(async () => {
+        // ★追加: SSEストリーム排他制御 - 現在のリクエストを無効化
+        // これにより進行中のSSEイベントループが次のイテレーションで安全に終了する
+        activeRequestIdRef.current = null;
+
         const result = await executeStopGeneration({
             abortControllerRef,
             currentTaskIdRef,
             streamingMessageRef,
+            previousInputTextRef,  // ★追加: 入力テキスト復元用
             mockMode,
             apiKey,
             apiUrl,
@@ -840,6 +986,17 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         if (result.stoppedMessage) {
             setMessages(prev => [...prev, result.stoppedMessage]);
             setStreamingMessage(null);
+        }
+
+        // ★追加: 停止時のテキスト復元をlastErrorとは別のchannelで通知
+        // inputTextがある場合はsetLastErrorで伝搬（App.jsx経由でChatInputに復元）
+        if (result.inputText) {
+            setLastError({
+                raw: '__STOP_RESTORE__',
+                timestamp: Date.now(),
+                inputText: result.inputText,
+                isStopRestore: true,
+            });
         }
 
         setIsGenerating(false);
@@ -927,5 +1084,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         // ★追加: IntelligenceErrorHandler連携
         lastError,
         setLastError,
+        // ★追加: 状態リセット関数
+        resetChatState,
     };
 };

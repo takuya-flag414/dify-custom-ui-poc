@@ -1,0 +1,304 @@
+:root {
+  /* Core Colors */
+  --sys-color-primary: #007AFF;
+  --sys-color-primary-dark: #0A84FF;
+  --sys-bg-base: rgba(255, 255, 255, 0.4);
+  --sys-bg-alt: #F5F5F7;
+  
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-rounded: "SF Pro Rounded", var(--font-sans);
+}
+
+.pptx-preview-pane {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background: transparent;
+    border-radius: 22px;
+    padding: 24px;
+    font-family: var(--font-sans);
+}
+
+/* HUD Material Style */
+.mat-hud {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.1),
+        0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+    border-radius: 22px;
+}
+
+/* Header Style */
+.pptx-preview-header {
+    margin-bottom: 32px;
+    padding: 24px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+}
+
+.pptx-preview-title {
+    font-family: var(--font-rounded);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sys-color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pptx-preview-meta h2 {
+    font-family: var(--font-rounded);
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: #1d1d1f;
+    letter-spacing: -0.015em;
+}
+
+.pptx-meta-pills {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.pill {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--sys-color-primary);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: var(--font-rounded);
+    font-weight: 600;
+}
+
+/* Sections */
+.pptx-preview-slides {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.slide-data-section {
+    padding: 24px;
+    transition: transform 0.2s ease;
+}
+
+.section-label {
+    font-family: var(--font-rounded);
+    font-size: 12px;
+    font-weight: 700;
+    color: #86868b;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-type-badge {
+    background: var(--sys-bg-alt);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+}
+
+/* Fields */
+.data-field {
+    margin-bottom: 16px;
+}
+
+.data-field:last-child {
+    margin-bottom: 0;
+}
+
+.field-label {
+    font-family: var(--font-rounded);
+    font-size: 11px;
+    font-weight: 600;
+    color: #86868b;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.field-value-box {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 16px;
+    color: #1d1d1f;
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+}
+
+/* AI Highlighted Field */
+.ai-highlighted {
+    border: 2px solid var(--sys-color-primary);
+    background: white;
+}
+
+/* Specialized Content Styles */
+.pptx-preview-list {
+    margin: 4px 0 0 0;
+    padding-left: 24px;
+}
+
+ul.pptx-preview-list {
+    list-style-type: disc;
+}
+
+ol.pptx-preview-list {
+    list-style-type: decimal;
+}
+
+.pptx-preview-list li {
+    margin-bottom: 8px;
+}
+
+.data-grid-preview {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+}
+
+.data-grid-preview th {
+    text-align: left;
+    color: #86868b;
+    font-family: var(--font-rounded);
+    padding: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.data-grid-preview td {
+    padding: 8px;
+    border-bottom: 1px dotted rgba(0,0,0,0.05);
+}
+
+.chart-data-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chart-info-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 122, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sys-color-primary);
+}
+
+.insight-box {
+    background: rgba(255, 149, 0, 0.1);
+    border-left: 4px solid #FF9500;
+    padding: 12px;
+    border-radius: 0 12px 12px 0;
+    font-size: 14px;
+}
+
+.notes-box {
+    background: rgba(0,0,0,0.03);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #424245;
+    font-style: italic;
+}
+
+.pptx-preview-footer {
+    margin-top: 48px;
+    padding: 32px;
+    text-align: center;
+    font-family: var(--font-rounded);
+    font-size: 14px;
+    color: #86868b;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 22px;
+    line-height: 1.6;
+}
+
+/* Theme Section */
+.pptx-theme-section {
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.pptx-theme-title {
+    font-family: var(--font-rounded);
+    font-size: 12px;
+    font-weight: 700;
+    color: #86868b;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.theme-swatches {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.color-swatch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 6px 12px 6px 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.color-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1d1d1f;
+    display: flex;
+    flex-direction: column;
+}
+
+.color-hex {
+    font-size: 10px;
+    color: #86868b;
+    font-family: monospace;
+}
+
+.font-info {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #424245;
+}
+
+.font-badge {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}

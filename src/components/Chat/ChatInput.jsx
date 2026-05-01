@@ -35,9 +35,18 @@ const ChatInput = ({
   onRemoveQuote, // ★追加: 引用削除ハンドラ
   activeArtifact, // ★追加: Propsから受け取る
   setActiveArtifact, // ★追加: Propsから受け取る
+  activeContextFiles = [], // ★追加: セッションファイル
+  sendKey = 'enter',
+  // ★追加: エラー/停止時のテキスト復元
+  restoreText = null,
+  onRestoreTextConsumed,
+  isShieldActive = false, // ★追加: シールドモード状態
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const getPlainTextRef = useRef(null); // ★追加: プレーンテキスト抽出用Ref
+  // ★追加: テキスト復元時にフォーカスを強制するトリガー
+  const [restoreFocusTrigger, setRestoreFocusTrigger] = useState(0);
 
   // showAddMenu state is now managed inside ControlDeck (or triggered via props)
   // We only need to trigger store loading when menu opens.
@@ -91,16 +100,34 @@ const ChatInput = ({
     }
   }, [searchSettings.selectedStoreId, stores]);
 
-  const executeSend = useCallback((excludedTypes = []) => {
+  // ★追加: テキスト復元処理（エラー時/停止時）
+  useEffect(() => {
+    if (restoreText !== null && restoreText !== undefined) {
+      setText(restoreText);
+      // フォーカストリガーを更新（InputCanvasのfocusTriggerが反応）
+      setRestoreFocusTrigger(prev => prev + 1);
+      // 親に復元完了を通知
+      if (onRestoreTextConsumed) {
+        onRestoreTextConsumed();
+      }
+    }
+  }, [restoreText]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const executeSend = useCallback((excludedTypes = [], excludedValues = []) => {
     const filesToSend = selectedFiles.map(sf => sf.file);
+
+    // ★Mention Pillなどを含んだリッチテキストからプレーンテキストを抽出
+    const plainTextToSend = getPlainTextRef.current ? getPlainTextRef.current() : text;
 
     // ★変更: 第4引数（オプション等）で quote および artifact を渡す
     const options = {
       sanitizeExcludeTypes: excludedTypes,
+      sanitizeExcludeValues: excludedValues,
       quote,
+      currentArtifactType: activeArtifact?.type,
       ...(activeArtifact && { artifact: { requested: true, type: activeArtifact.type } })
     };
-    onSendMessage(text, filesToSend, options);
+    onSendMessage(plainTextToSend, filesToSend, options);
 
     setText('');
     setSelectedFiles([]);
@@ -137,7 +164,13 @@ const ChatInput = ({
 
   const handleKeyDown = (e) => {
     if (e.nativeEvent.isComposing || e.keyCode === 229) return;
-    if (e.key === 'Enter' && !e.shiftKey) {
+
+    // 設定に基づいた送信判定
+    const isSendKey = (sendKey === 'ctrl_enter')
+      ? (e.ctrlKey || e.metaKey) && e.key === 'Enter' // Ctrl + Enter モード
+      : e.key === 'Enter' && !e.shiftKey;           // Enter モード (Shiftなし)
+
+    if (isSendKey) {
       e.preventDefault();
       handleSend();
     }
@@ -145,7 +178,37 @@ const ChatInput = ({
 
   const addFiles = useCallback(async (newFiles) => {
     if (newFiles && newFiles.length > 0) {
-      const initialFiles = newFiles.map(file => ({
+      // --- 重複チェックとリネーム ---
+      const processedFiles = [];
+      // 選択中のファイル名と、すでに会話履歴にあるファイル名の両方をチェック対象にする
+      const currentNames = [
+        ...selectedFiles.map(sf => sf.file.name),
+        ...activeContextFiles.map(af => af.name)
+      ];
+
+      for (const file of newFiles) {
+        let name = file.name;
+        const dotIndex = name.lastIndexOf('.');
+        const baseName = dotIndex !== -1 ? name.substring(0, dotIndex) : name;
+        const extension = dotIndex !== -1 ? name.substring(dotIndex) : '';
+        
+        let counter = 1;
+        let newName = name;
+        
+        // すでに存在する名前、またはこのバッチ内で決定した名前と重複している間ループ
+        while (currentNames.includes(newName) || processedFiles.some(f => f.name === newName)) {
+          newName = `${baseName} (${counter})${extension}`;
+          counter++;
+        }
+        
+        // 名前が変わった場合のみ新しいFileオブジェクトを作成
+        const finalFile = newName !== name 
+          ? new File([file], newName, { type: file.type, lastModified: file.lastModified }) 
+          : file;
+        processedFiles.push(finalFile);
+      }
+
+      const initialFiles = processedFiles.map(file => ({
         id: `file-${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`,
         file,
         scanStatus: isScannableFile(file.name) ? 'scanning' : 'skipped',
@@ -155,7 +218,7 @@ const ChatInput = ({
 
       setSelectedFiles(prev => [...prev, ...initialFiles]);
 
-      const scannedResults = await scanFiles(newFiles);
+      const scannedResults = await scanFiles(processedFiles);
 
       setSelectedFiles(prev => {
         return prev.map(sf => {
@@ -167,7 +230,7 @@ const ChatInput = ({
         });
       });
     }
-  }, []);
+  }, [selectedFiles, activeContextFiles]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -217,6 +280,21 @@ const ChatInput = ({
   const placeholder = isHistoryLoading ? "履歴を読み込んでいます..." : isLoading ? "思考中..." : "AIに相談...";
   const hasFiles = selectedFiles.length > 0;
   const canSend = (text.trim().length > 0 || hasFiles) && !isLoading;
+
+  // --- Available Files for Mentions ---
+  const availableFiles = useMemo(() => {
+    const files = [];
+    const pushIfUnique = (name) => {
+      if (!files.find(f => f.name === name)) {
+        files.push({ name, id: `mention-${name}-${Date.now()}` });
+      }
+    };
+    // Pending selected files
+    selectedFiles.forEach(f => pushIfUnique(f.file.name));
+    // History session files
+    activeContextFiles.forEach(f => pushIfUnique(f.name));
+    return files;
+  }, [selectedFiles, activeContextFiles]);
 
   // --- Handlers for Universal Add Menu ---
   const handleAddMenuOpen = () => {
@@ -279,7 +357,7 @@ const ChatInput = ({
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleFileChange}
-          accept=".pdf,.docx,.txt,.md,.csv,.xlsx"
+          accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.gif,.webp"
           multiple
         />
 
@@ -322,7 +400,10 @@ const ChatInput = ({
             disabled={isLoading}
             placeholder={placeholder}
             isHistoryLoading={isHistoryLoading}
-            focusTrigger={quote} // ★追加: quoteが変更されたらフォーカスするトリガーとして渡す
+            focusTrigger={quote || restoreFocusTrigger || undefined} // ★改修: quoteまたは復元時にフォーカス
+            availableFiles={availableFiles} // ★追加: メンション候補ファイル
+            onTextExtract={(fn) => { getPlainTextRef.current = fn; }} // ★追加: テキスト抽出関数を受け取る
+            onFilesPaste={addFiles} // ★追加: クリップボード貼り付け対応
           />
 
           {/* Tier 3: Control Deck */}
@@ -364,8 +445,9 @@ const ChatInput = ({
         <PrivacyConfirmDialog
           detections={privacyWarning.detections}
           fileDetections={fileWarnings.detections}
-          onConfirm={(excludedTypes) => executeSend(excludedTypes)}
+          onConfirm={(excludedTypes, excludedValues) => executeSend(excludedTypes, excludedValues)}
           onCancel={() => setShowPrivacyConfirm(false)}
+          isShieldActive={isShieldActive}
         />
       )}
     </>

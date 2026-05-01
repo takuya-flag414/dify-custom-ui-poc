@@ -50,6 +50,7 @@ const WelcomeScreen = ({
     backendBApiUrl = '',
     activeArtifact, // ★追加
     setActiveArtifact, // ★追加
+    sendKey,
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
@@ -128,7 +129,28 @@ const WelcomeScreen = ({
                             backendBApiUrl={backendBApiUrl}
                             activeArtifact={activeArtifact} // ★追加
                             setActiveArtifact={setActiveArtifact} // ★追加
+                            sendKey={sendKey}
                         />
+
+                        {/* さりげないマニュアルリンク */}
+                        <motion.a
+                            href="/user_manual.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`welcome-manual-link ${isFaded ? 'faded' : ''}`}
+                            variants={itemVariants}
+                            whileHover={{ y: -1 }}
+                        >
+                            <svg className="welcome-manual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                            </svg>
+                            <span>ユーザーマニュアル</span>
+                            <svg className="welcome-manual-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="7" y1="17" x2="17" y2="7"></line>
+                                <polyline points="7 7 17 7 17 17"></polyline>
+                            </svg>
+                        </motion.a>
                     </motion.div>
 
                     {/* Row 3 (Spacer for symmetry) */}
