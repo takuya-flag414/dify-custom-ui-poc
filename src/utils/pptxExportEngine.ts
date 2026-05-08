@@ -1480,10 +1480,20 @@ export class PptxExportEngine {
     const rawSteps = process_steps.length > 0 ? process_steps : (steps.length > 0 ? steps : items);
     const activeSteps = Array.isArray(rawSteps) ? rawSteps : [];
     const count = activeSteps.length;
-    const mainText = body_text || key_message;
+    const mainText = key_message; // インサイトボックスは key_message のみを使用
 
-    slide.addText(this.stripFormatting(title || 'プロセスフロー'), { x: 0.5, y: 0.4, w: 9.0, h: 0.6, fontSize: 26, bold: true, color: '0F172A', margin: 0 });
+    const slideTitle = title || 'プロセスフロー';
+    const titleParts = this.parseRichText(slideTitle);
+    slide.addText(titleParts, { x: 0.5, y: 0.4, w: 9.0, h: 0.6, fontSize: 26, bold: true, color: '0F172A', margin: 0 });
     slide.addShape(this.pptx.ShapeType.rect, { x: 0.5, y: 1.0, w: 9.0, h: 0.03, fill: { color: '6366F1' } });
+
+    // 補足分析テキスト (body_text) の描画と配置調整
+    let gridStartYBase = 1.3;
+    if (body_text) {
+      const bodyParts = this.parseRichText(body_text);
+      slide.addText(bodyParts, { x: 0.5, y: 1.15, w: 9.0, h: 0.5, fontSize: 13, color: '475569', valign: 'top' });
+      gridStartYBase = 1.7; // テキストの分だけグリッドの開始位置を下げる
+    }
 
     // レイアウト計算
     const cols = count <= 4 ? count : (count <= 8 ? Math.ceil(count / 2) : 5);
@@ -1496,12 +1506,13 @@ export class PptxExportEngine {
     const cardH = count <= 4 ? 1.6 : 1.2;
 
     const gridH = rows * cardH + (rows - 1) * cardGap;
-    const boxH = mainText ? 0.8 : 0;
-    const boxGap = 0.4;
+    const boxH = mainText ? 0.7 : 0;
+    const boxGap = 0.3;
     const totalH = gridH + (mainText ? (boxGap + boxH) : 0);
     
-    // 垂直中央寄せの開始位置
-    const startY = 1.3 + Math.max(0, (3.8 - totalH) / 2);
+    // 垂直中央寄せの開始位置 (5.0 までの残りのスペースで中央寄せ)
+    const availableSpace = 5.0 - gridStartYBase;
+    const startY = gridStartYBase + Math.max(0, (availableSpace - totalH) / 2);
 
     activeSteps.forEach((step: any, idx: number) => {
       const col = idx % cols;
@@ -1527,19 +1538,21 @@ export class PptxExportEngine {
       // ステップ番号
       slide.addText(`STEP ${String(idx + 1).padStart(2, '0')}`, {
         x: x + 0.15, y: y + 0.1, w: cardW - 0.2, h: 0.2,
-        fontSize: 9, bold: true, color: '94A3B8' // 透過の代わりに薄いグレーを使用
+        fontSize: 9, bold: true, color: '94A3B8'
       });
 
       // ステップタイトル
       const stepTitle = step.title || step.label || (typeof step === 'string' ? step : 'ステップ');
-      slide.addText(this.stripFormatting(stepTitle), {
+      const stepTitleParts = this.parseRichText(stepTitle);
+      slide.addText(stepTitleParts, {
         x: x + 0.15, y: y + 0.3, w: cardW - 0.2, h: 0.4,
         fontSize: count <= 4 ? 14 : 12, bold: true, color: '0F172A', valign: 'top'
       });
 
       // ステップ詳細
       if (step.description) {
-        slide.addText(this.stripFormatting(step.description), {
+        const stepDescParts = this.parseRichText(step.description);
+        slide.addText(stepDescParts, {
           x: x + 0.15, y: y + 0.7, w: cardW - 0.2, h: cardH - 0.8,
           fontSize: count <= 4 ? 10 : 9, color: '64748B', valign: 'top'
         });
@@ -1571,13 +1584,15 @@ export class PptxExportEngine {
       const boxY = startY + gridH + boxGap;
       slide.addShape(this.pptx.ShapeType.roundRect, {
         x: 0.5, y: boxY, w: 9.0, h: boxH,
-        fill: { color: 'FFFFFF' },
-        line: { color: '6366F1', width: 1.5, transparency: 80 },
-        rectRadius: 0.05
+        fill: { color: 'F5F6FF' },
+        line: { color: '6366F1', width: 1, transparency: 80 },
+        rectRadius: 0.08
       });
-      slide.addText(`✦ ${this.stripFormatting(mainText)}`, {
+
+      const insightParts = this.parseRichText(`✦ ${mainText}`);
+      slide.addText(insightParts, {
         x: 0.7, y: boxY, w: 8.6, h: boxH,
-        fontSize: 12, color: '475569', bold: true, align: 'center', valign: 'middle'
+        fontSize: 12, color: '6366F1', bold: true, align: 'center', valign: 'middle'
       });
     }
 

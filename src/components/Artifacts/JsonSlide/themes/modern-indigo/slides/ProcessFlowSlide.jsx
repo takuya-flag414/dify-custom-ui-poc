@@ -33,6 +33,12 @@ const ProcessFlowSlide = ({ content, isStatic = false }) => {
                 <h2 style={{ fontSize: '2.8cqi', margin: 0, color: 'var(--slide-heading)', fontWeight: 700 }}>
                     <SlideMarkdown content={title || 'プロセスフロー'} />
                 </h2>
+                {/* 補足分析テキストをヘッダーの下に配置 */}
+                {body_text && (
+                    <div style={{ marginTop: '1cqi', fontSize: '1.4cqi', color: '#475569', lineHeight: 1.5 }}>
+                        <SlideMarkdown content={body_text} />
+                    </div>
+                )}
             </motion.div>
 
             {/* ボディエリア */}
@@ -42,31 +48,31 @@ const ProcessFlowSlide = ({ content, isStatic = false }) => {
                 flexDirection: 'column', 
                 minHeight: 0,
                 justifyContent: 'flex-start',
-                paddingTop: '2cqi'
+                paddingTop: '2cqi',
+                overflow: 'visible'
             }}>
                 {(() => {
                     const count = activeSteps.length;
                     const aCount = annotations.length;
-                    const mainText = body_text || key_message;
                     
                     // 情報密度のスコア化（垂直方向を重視）
-                    const densityScore = (count * 3.5) + (mainText ? 4 : 0) + (aCount > 0 ? 1 : 0);
+                    const densityScore = (count * 3.5) + (key_message ? 4 : 0) + (body_text ? 3 : 0) + (aCount > 0 ? 1 : 0);
                     
                     // レイアウト判定
                     const gridCols = count <= 4 ? count : (count <= 8 ? Math.ceil(count / 2) : 5);
                     const rows = Math.ceil(count / gridCols);
 
-                    // スケーリング感度（より大きく表示されるように緩和）
-                    const scaleFactor = densityScore > 32 ? 0.7
-                                      : densityScore > 24 ? 0.8
-                                      : densityScore > 18 ? 0.9
-                                      : 1.0;
+                    // スケーリング感度（より確実に収まるように調整）
+                    const scaleFactor = densityScore > 35 ? 0.65
+                                      : densityScore > 28 ? 0.75
+                                      : densityScore > 20 ? 0.85
+                                      : 0.95;
                     
-                    const gridGap = count <= 3 ? '5cqi' : '3cqi';
-                    const cardPadding = count <= 3 ? '3.5cqi 4cqi' : '2.5cqi 3cqi';
+                    const gridGap = count <= 3 ? '4cqi' : '2.5cqi';
+                    const cardPadding = count <= 3 ? '3cqi 3.5cqi' : '2cqi 2.5cqi';
                     
-                    const titleSize = count <= 3 ? '2.4cqi' : '1.9cqi';
-                    const descSize = count <= 3 ? '1.5cqi' : '1.3cqi';
+                    const titleSize = count <= 3 ? '2.3cqi' : '1.8cqi';
+                    const descSize = count <= 3 ? '1.4cqi' : '1.2cqi';
 
                     return (
                         <div style={{ 
@@ -75,10 +81,9 @@ const ProcessFlowSlide = ({ content, isStatic = false }) => {
                             width: '100%',
                             display: 'flex', 
                             flexDirection: 'column',
-                            gap: '4cqi',
-                            justifyContent: densityScore < 18 ? 'center' : 'flex-start',
-                            marginTop: densityScore < 18 ? 'auto' : '1cqi',
-                            marginBottom: densityScore < 18 ? 'auto' : '0'
+                            gap: '2.5cqi',
+                            justifyContent: 'flex-start',
+                            marginTop: '1cqi'
                         }}>
                             {/* フローグリッド */}
                             <div style={{ 
@@ -108,7 +113,7 @@ const ProcessFlowSlide = ({ content, isStatic = false }) => {
                                                     boxShadow: '0 6px 20px rgba(99, 102, 241, 0.06)',
                                                     position: 'relative',
                                                     zIndex: 2,
-                                                    minHeight: count <= 4 ? '20cqi' : '16cqi'
+                                                    minHeight: count <= 3 ? '18cqi' : '13cqi' // 高さを圧縮
                                                 }}
                                                 {...(!isStatic && {
                                                     initial: { opacity: 0, y: 20 },
@@ -188,24 +193,33 @@ const ProcessFlowSlide = ({ content, isStatic = false }) => {
                                 })}
                             </div>
 
-                            {/* インサイト解説 */}
-                            {mainText && (
+                            {/* インサイト解説 (下部の補足ボックス) */}
+                            {key_message && (
                                 <motion.div 
-                                    className="indigo-point-box" 
                                     style={{ 
                                         width: '100%',
-                                        marginTop: '1.5cqi', 
-                                        padding: '2.5cqi 4cqi',
+                                        marginTop: '1cqi', 
+                                        padding: '1.5cqi 3cqi',
                                         textAlign: 'center',
                                         background: 'rgba(99, 102, 241, 0.04)',
-                                        border: 'none',
-                                        borderRadius: '2cqi'
+                                        border: '1.5px solid rgba(99, 102, 241, 0.12)',
+                                        borderRadius: '1cqi',
+                                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.03)'
                                     }}
                                     {...(!isStatic && { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.5 } })}
                                 >
-                                    <div style={{ fontSize: count <= 4 ? '2cqi' : '1.7cqi', margin: 0, color: '#475569', fontWeight: 600, lineHeight: 1.6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <span style={{ color: 'var(--slide-primary)', marginRight: '1.2cqi' }}>✦</span>
-                                        <SlideMarkdown content={mainText} />
+                                    <div style={{ 
+                                        fontSize: count <= 4 ? '1.9cqi' : '1.7cqi', 
+                                        margin: 0, 
+                                        color: 'var(--slide-primary, #6366f1)', 
+                                        fontWeight: 700, 
+                                        lineHeight: 1.5, 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center' 
+                                    }}>
+                                        <span style={{ marginRight: '1cqi', opacity: 0.8 }}>✦</span>
+                                        <SlideMarkdown content={key_message} />
                                     </div>
                                 </motion.div>
                             )}

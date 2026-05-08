@@ -706,11 +706,17 @@ const SlideFormEditor = ({ slide, globalTheme, onSlideChange, onThemeChange }) =
                     <>
                         <TextInput label="タイトル" value={content.title} onChange={v => updateContent('title', v)} required />
                         <TextInput label="キーメッセージ (インサイト)" value={content.key_message} onChange={v => updateContent('key_message', v)} placeholder="プロセス全体の要約や最も重要な点" />
-                        <TextareaInput label="補足分析テキスト" value={content.body_text} onChange={v => updateContent('body_text', v)} rows={3} placeholder="プロセス全体の補足やポイントを入力してください" />
+                        <TextareaInput 
+                            label="補足分析テキスト" 
+                            value={content.body_text} 
+                            onChange={v => updateContent('body_text', v)} 
+                            rows={3} 
+                            placeholder="プロセス全体の補足やポイントを入力してください" 
+                        />
                         <SectionDivider title="ステップ" />
                         <ItemListEditor
                             label="プロセスステップ"
-                            items={content.process_steps}
+                            items={content.process_steps || content.steps || content.items}
                             onChange={v => updateContent('process_steps', v)}
                             fields={[
                                 { key: 'title', label: 'ステップ名', placeholder: 'ステップタイトル' },
