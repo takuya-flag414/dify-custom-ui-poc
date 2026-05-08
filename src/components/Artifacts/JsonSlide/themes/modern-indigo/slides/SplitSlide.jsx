@@ -77,7 +77,8 @@ const SplitSlide = ({ content, isStatic = false }) => {
                                 fontWeight: 800,
                                 margin: 0,
                                 textAlign: 'center',
-                                textTransform: 'uppercase',
+                                lineHeight: 1.4,
+                                paddingTop: '0.8cqi',
                                 letterSpacing: '0.05em'
                             }}>
                                 <SlideMarkdown content={cTitle} />
@@ -117,7 +118,7 @@ const SplitSlide = ({ content, isStatic = false }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'flex-start', // 中央から上寄せに変更
-                            marginTop: '-2cqi'           // タイトルに引き寄せる
+                            marginTop: '0'           // ネガティブマージンを廃止して見切れを防止
                         }}>
                             <div style={{ 
                                 display: 'flex', 
@@ -138,7 +139,7 @@ const SplitSlide = ({ content, isStatic = false }) => {
                                 <div style={{ 
                                     position: 'absolute',
                                     left: '50%',
-                                    top: '10%',
+                                    top: '15%',
                                     bottom: '5%',
                                     width: '1px',
                                     background: 'linear-gradient(to bottom, transparent, var(--slide-border), transparent)',

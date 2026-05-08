@@ -262,9 +262,10 @@ export const processQueryRewriteFinished = (outputs, nodeId, addLog) => {
  * @param {Object} outputs - ノード出力
  * @param {string} nodeId - ノードID
  * @param {Function} addLog - ログ関数
+ * @param {string} title - ノードタイトル (RAG/Web/Hybridの判定に使用)
  * @returns {Object|null} thoughtProcessUpdate または null
  */
-export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
+export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) => {
     const rawText = outputs?.text;
     const parsedJson = extractJsonFromLlmOutput(rawText);
 
@@ -302,13 +303,24 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
             addLog(`[InternalLog] [Intent_Analysis] ${internalLog}`, 'info');
         }
 
+        // --- Thinkingの表示制御 (ガードロジック) ---
+        let finalThinking = parsedJson.thinking || '';
+        if (title === 'LLM_Intent_Analysis_RAG') {
+            if (parsedJson.requires_rag === false) finalThinking = '';
+        } else if (title === 'LLM_Intent_Analysis_Web') {
+            if (parsedJson.requires_web === false) finalThinking = '';
+        } else if (title === 'LLM_Intent_Analysis_Hybrid') {
+            // 両方falseのときのみ非表示
+            if (parsedJson.requires_rag === false && parsedJson.requires_web === false) finalThinking = '';
+        }
+
         return {
             sessionTitle: parsedJson.session_title || null,
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 title: `判定: ${displayInfo.title}`,
                 status: 'done',
-                thinking: parsedJson.thinking || '',
+                thinking: finalThinking,
                 resultLabel: '検索方針',
                 resultValue: finalResultValue,
                 internalLog: internalLog // ★メッセージデータとして保持
@@ -337,6 +349,15 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
             }
         } catch (e) {
             addLog(`[Intent_Analysis] フォールバックJSON抽出も失敗: ${e.message}`, 'warn');
+        }
+
+        // --- Thinkingの表示制御 (ガードロジック - フォールバック用) ---
+        if (title === 'LLM_Intent_Analysis_RAG') {
+            if (fallbackRequiresRag === false) fallbackThinking = '';
+        } else if (title === 'LLM_Intent_Analysis_Web') {
+            if (fallbackRequiresWeb === false) fallbackThinking = '';
+        } else if (title === 'LLM_Intent_Analysis_Hybrid') {
+            if (fallbackRequiresRag === false && fallbackRequiresWeb === false) fallbackThinking = '';
         }
 
         // フォールバックからも session_title を抽出
@@ -372,10 +393,11 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog) => {
                 ...t,
                 title: resultText || t.title,
                 status: 'done',
-                ...(fallbackThinking ? { thinking: fallbackThinking } : {})
+                thinking: fallbackThinking // ここでも反映
             } : t
         };
     }
+
 
     return null;
 };

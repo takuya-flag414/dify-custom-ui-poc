@@ -217,6 +217,53 @@ export class PptxExportEngine {
       .trim();
   }
 
+  /**
+   * テキスト内の基本的なHTMLタグやMarkdownを解析し、PptxGenJSのテキストオブジェクト配列に変換する
+   * @param ignoreColor タイトルスライド等で特定の色指定を無効化する場合にtrue
+   */
+  private parseRichText(text: string, baseOptions: any = {}, ignoreColor: boolean = false): any[] {
+    if (!text) return [];
+    
+    // 改行コードの正規化
+    let processed = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n');
+    
+    // 簡易パースロジック (spanタグと太字を抽出)
+    const parts: any[] = [];
+    
+    // タグを抽出するための正規表現
+    const regex = /(<span\s+class=["']text-primary["']>.*?<\/span>|\*\*.*?\*\*)/g;
+    const segments = processed.split(regex);
+    
+    segments.forEach(segment => {
+      if (!segment) return;
+      
+      if (segment.startsWith('<span')) {
+        const content = segment.replace(/<span[^>]*>(.*?)<\/span>/, '$1');
+        parts.push({
+          text: this.stripFormatting(content),
+          options: { 
+            ...baseOptions, 
+            color: ignoreColor ? baseOptions.color : '6366F1', 
+            bold: true 
+          }
+        });
+      } else if (segment.startsWith('**')) {
+        const content = segment.replace(/\*\*(.*?)\*\*/, '$1');
+        parts.push({
+          text: this.stripFormatting(content),
+          options: { ...baseOptions, bold: true }
+        });
+      } else {
+        parts.push({
+          text: segment,
+          options: baseOptions
+        });
+      }
+    });
+    
+    return parts;
+  }
+
   // --- 各スライドのレンダリングメソッド ---
 
   private async renderTitleSlide(slideData: any, index: number) {
@@ -238,99 +285,102 @@ export class PptxExportEngine {
     const content = slideData.content || {};
     const xPos = 1.0; // 基準となる左端ライン (1インチ)
 
-    // 1. Logo Text (左端ラインに枠の左側を合わせる)
+    // 1. Logo Text (リッチテキスト対応、色無視)
     if (content.logo_text) {
-      const logoText = this.stripFormatting(content.logo_text).toUpperCase();
-      const logoW = (logoText.length * 0.08) + 0.2;
-      slide.addText(logoText, {
-        x: xPos, y: 1.4, w: logoW, h: 0.25,
-        color: 'FFFFFF',
-        fontSize: 10,
-        bold: true,
+      const logoParts = this.parseRichText(content.logo_text.toUpperCase(), { 
+        fontSize: 10, bold: true, color: 'FFFFFF' 
+      }, true); // ignoreColor = true
+
+      const logoW = (this.stripFormatting(content.logo_text).length * 0.08) + 0.3;
+      slide.addText(logoParts, {
+        x: xPos, y: 1.2, w: logoW, h: 0.3,
         align: 'center',
         valign: 'middle',
-        line: { color: 'FFFFFF', width: 1.0 },
-        margin: 0 // 内側余白を排除
+        line: { color: 'FFFFFF', width: 1.0, transparency: 30 },
+        margin: 0
       });
     }
 
-    // 2. Eyebrow
+    // 2. Eyebrow (色無視)
     if (content.eyebrow) {
-      slide.addText(this.stripFormatting(content.eyebrow).toUpperCase(), {
-        x: xPos, y: 1.9, w: 8.0, h: 0.25,
-        color: 'E0E7FF',
-        fontSize: 12,
-        bold: true,
+      const ebParts = this.parseRichText(content.eyebrow.toUpperCase(), { 
+        fontSize: 12, bold: true, color: 'E0E7FF' 
+      }, true); // ignoreColor = true
+      slide.addText(ebParts, {
+        x: xPos, y: 1.7, w: 8.0, h: 0.3,
         align: 'left',
         charSpacing: 1.2,
-        margin: 0 // 左端ラインに文字を密着させる
+        margin: 0
       });
     }
 
-    // 3. Title
-    slide.addText(this.stripFormatting(content.title || 'タイトル未設定'), {
-      x: xPos, y: 2.15, w: 8.0, h: 0.8,
-      color: 'FFFFFF',
-      fontSize: 38,
-      bold: true,
+    // 3. Title (色無視)
+    const titleParts = this.parseRichText(content.title || 'タイトル未設定', { 
+      fontSize: 38, bold: true, color: 'FFFFFF' 
+    }, true); // ignoreColor = true
+    slide.addText(titleParts, {
+      x: xPos, y: 2.05, w: 8.0, h: 1.0,
       align: 'left',
       lineSpacing: 42,
       breakLine: true,
-      margin: 0 // 左端ラインに文字を密着させる
+      margin: 0
     });
 
-    // 4. Subtitle
+    // 4. Subtitle (色無視)
     if (content.subtitle) {
-      slide.addText(this.stripFormatting(content.subtitle), {
-        x: xPos, y: 3.1, w: 7.0, h: 0.5,
-        color: 'E0E7FF',
-        fontSize: 16,
+      const subParts = this.parseRichText(content.subtitle, { 
+        fontSize: 16, color: 'E0E7FF' 
+      }, true); // ignoreColor = true
+      slide.addText(subParts, {
+        x: xPos, y: 3.1, w: 7.5, h: 0.6,
         align: 'left',
         lineSpacing: 24,
         breakLine: true,
-        margin: 0 // 左端ラインに文字を密着させる
+        margin: 0
       });
     }
 
-    // 5. Tags
+    // 5. Tags (バッジ内もリッチテキスト対応、色無視)
     if (content.tags && Array.isArray(content.tags) && content.tags.length > 0) {
       let currentX = xPos;
-      const tagY = 3.8;
+      const tagY = 3.9;
       
       content.tags.forEach((tag: string) => {
-        const tagText = this.stripFormatting(tag);
-        const tagW = (tagText.length * 0.08) + 0.2;
+        const plainTag = this.stripFormatting(tag);
+        const tagW = (plainTag.length * 0.08) + 0.3;
+        const tagParts = this.parseRichText(tag, { fontSize: 9, bold: true, color: 'FFFFFF' }, true);
         
         slide.addShape(this.pptx.ShapeType.roundRect, {
-          x: currentX, y: tagY, w: tagW, h: 0.25,
+          x: currentX, y: tagY, w: tagW, h: 0.28,
           fill: { color: 'FFFFFF', transparency: 84 },
           rectRadius: 0.12
         });
         
-        slide.addText(tagText, {
-          x: currentX, y: tagY, w: tagW, h: 0.25,
-          fontSize: 9,
-          color: 'FFFFFF',
+        slide.addText(tagParts, {
+          x: currentX, y: tagY, w: tagW, h: 0.28,
           align: 'center',
-          bold: true,
           valign: 'middle',
-          margin: 0 // バッジ内でも中央寄せを維持
+          margin: 0
         });
         
-        currentX += tagW + 0.1;
+        currentX += tagW + 0.15;
       });
     }
 
-    // 6. Author / Organization
-    const authorText = [content.author, content.organization].filter(Boolean).join(' | ');
-    if (authorText) {
-      slide.addText(this.stripFormatting(authorText), {
-        x: 1.0, y: 4.8, w: 8.0, h: 0.4,
+    // 6. Author / Organization / Date (右下に縦並びで配置)
+    const presenterLines: any[] = [];
+    if (content.author) presenterLines.push({ text: this.stripFormatting(content.author), options: { bold: true } });
+    if (content.organization) presenterLines.push({ text: `\n${this.stripFormatting(content.organization)}` });
+    if (content.date) presenterLines.push({ text: `\n${this.stripFormatting(content.date)}` });
+
+    if (presenterLines.length > 0) {
+      slide.addText(presenterLines, {
+        x: 1.0, y: 4.8, w: 8.0, h: 0.5,
         color: 'E0E7FF',
         fontSize: 12,
         align: 'right',
-        lineSpacing: 18,
-        valign: 'middle'
+        valign: 'middle',
+        lineSpacing: 18
       });
     }
   }
@@ -339,12 +389,12 @@ export class PptxExportEngine {
     const slide = this.pptx.addSlide({ masterName: 'MASTER_MODERN_INDIGO_CONTENT' });
     const content = slideData.content || {};
 
-    // 1. Header (Title)
-    slide.addText(this.stripFormatting(content.title || 'タイトル'), {
+    // 1. Header (Title - リッチテキスト対応)
+    const titleParts = this.parseRichText(content.title || 'タイトル', { 
+      fontSize: 26, bold: true, color: '0F172A' 
+    });
+    slide.addText(titleParts, {
       x: 0.5, y: 0.4, w: 9.0, h: 0.6,
-      color: '0F172A',
-      fontSize: 26,
-      bold: true,
       margin: 0
     });
     
@@ -356,7 +406,7 @@ export class PptxExportEngine {
 
     let currentY = 1.3;
 
-    // 2. Key Message
+    // 2. Key Message (リッチテキスト対応)
     if (content.key_message) {
       slide.addShape(this.pptx.ShapeType.rect, {
         x: 0.5, y: currentY, w: 9.0, h: 0.8,
@@ -367,11 +417,12 @@ export class PptxExportEngine {
         x: 0.5, y: currentY, w: 0.05, h: 0.8,
         fill: { color: '6366F1' }
       });
-      slide.addText(this.stripFormatting(content.key_message), {
+
+      const kmParts = this.parseRichText(content.key_message, { 
+        fontSize: 18, bold: true, color: '4F46E5' 
+      });
+      slide.addText(kmParts, {
         x: 0.7, y: currentY, w: 8.6, h: 0.8,
-        color: '4F46E5',
-        fontSize: 18,
-        bold: true,
         valign: 'middle',
         margin: 0
       });
@@ -656,43 +707,63 @@ export class PptxExportEngine {
     const content = slideData.content || {};
     const { quote, author, role, annotations = [] } = content;
 
-    // 巨大な引用符 (背景) - 透過指定ができないため非常に薄い色で代用
+    // 1. 背景の巨大な引用符
     slide.addText('“', {
-      x: 1.0, y: 0.5, w: 2.0, h: 1.5,
-      fontSize: 120, color: 'EEF2FF', align: 'left'
+      x: 0.6, y: 0.4, w: 3.0, h: 2.0,
+      fontSize: 160, color: 'F1F5F9', 
+      fontFace: 'Georgia',
+      align: 'left', valign: 'top'
     });
 
-    // メッセージ本体
-    slide.addText(this.stripFormatting(quote || 'メッセージを入力してください'), {
-      x: 1.5, y: 1.8, w: 7.0, h: 2.0,
-      fontSize: 28, bold: true, color: '0F172A', align: 'center', valign: 'middle',
-      italic: true
+    // レイアウト計算
+    const plainQuote = this.stripFormatting(quote || 'メッセージを入力してください');
+    const quoteLines = Math.ceil(plainQuote.length / 38) || 1;
+    const quoteH = quoteLines * 0.55;
+    const sepSpace = 0.3;
+    const authorH = (author ? 0.35 : 0) + (role ? 0.25 : 0);
+    const totalH = quoteH + (author || role ? (sepSpace + authorH) : 0);
+    
+    const startY = 1.3 + Math.max(0, (3.8 - totalH) / 2);
+
+    // 2. 引用メッセージ本体 (リッチテキスト対応、フォントサイズ縮小)
+    const quoteParts = this.parseRichText(quote || 'メッセージを入力してください', { 
+      fontSize: 24, bold: true, color: '0F172A' 
+    });
+    
+    slide.addText(quoteParts, {
+      x: 1.0, y: startY, w: 8.0, h: quoteH,
+      align: 'center', valign: 'middle',
+      lineSpacing: 34
     });
 
-    // 著者情報
+    // 3. 著者情報セクション
     if (author || role) {
-      // Separator
+      const sepY = startY + quoteH + 0.15;
+      
       slide.addShape(this.pptx.ShapeType.rect, {
-        x: 4.0, y: 4.0, w: 2.0, h: 0.01, fill: { color: 'E2E8F0' }
+        x: 4.0, y: sepY, w: 2.0, h: 0.01, 
+        fill: { color: 'E2E8F0' }
       });
 
-      let authorY = 4.2;
+      let currentAuthorY = sepY + 0.15;
       if (author) {
-        slide.addText(this.stripFormatting(author), {
-          x: 2.0, y: authorY, w: 6.0, h: 0.4,
-          fontSize: 18, bold: true, color: '6366F1', align: 'center'
+        const authorParts = this.parseRichText(author, { fontSize: 16, bold: true, color: '6366F1' });
+        slide.addText(authorParts, {
+          x: 2.0, y: currentAuthorY, w: 6.0, h: 0.35,
+          align: 'center'
         });
-        authorY += 0.4;
+        currentAuthorY += 0.35;
       }
       if (role) {
-        slide.addText(this.stripFormatting(role), {
-          x: 2.0, y: authorY, w: 6.0, h: 0.3,
-          fontSize: 14, color: '64748B', align: 'center'
+        const roleParts = this.parseRichText(role, { fontSize: 12, color: '64748B' });
+        slide.addText(roleParts, {
+          x: 2.0, y: currentAuthorY, w: 6.0, h: 0.25,
+          align: 'center'
         });
       }
     }
 
-    // Annotations
+    // Annotations (Footer)
     if (annotations.length > 0) {
       const noteText = annotations.map((n: string) => this.stripFormatting(n)).join(' | ');
       slide.addText(noteText, {
@@ -701,6 +772,8 @@ export class PptxExportEngine {
       });
     }
   }
+
+
 
   private async renderProfileSlide(slideData: any, index: number) {
     const slide = this.pptx.addSlide({ masterName: 'MASTER_MODERN_INDIGO_CONTENT' });
@@ -1243,39 +1316,155 @@ export class PptxExportEngine {
     });
 
     const activeStats = Array.isArray(stats) ? stats : [];
+    const count = activeStats.length;
+
     if (layout_variation === 'two-column') {
+      // 2カラムレイアウト（左説明、右統計グリッド）
+      const gridCols = count >= 3 ? 2 : 1;
+      const cardW = 2.5;
+      const cardH = 1.4;
+      const gridGap = 0.2;
+
       if (mainText) {
-        slide.addShape(this.pptx.ShapeType.rect, {
+        slide.addShape(this.pptx.ShapeType.roundRect, {
           x: 0.5, y: 1.5, w: 3.5, h: 3.0,
-          fill: { color: 'F8FAFC' }, line: { color: 'E2E8F0', width: 1 }
+          fill: { color: 'F8FAFC' }, 
+          line: { color: 'E2E8F0', width: 1 },
+          rectRadius: 0.05
+        });
+        slide.addShape(this.pptx.ShapeType.rect, {
+          x: 0.5, y: 1.5, w: 0.05, h: 3.0, fill: { color: '6366F1' }
         });
         slide.addText(this.stripFormatting(mainText), {
           x: 0.7, y: 1.5, w: 3.1, h: 3.0,
           fontSize: 16, color: '334155', valign: 'middle'
         });
       }
+
       activeStats.forEach((stat: any, idx: number) => {
-        const x = 4.3 + (idx % 2) * 2.6;
-        const y = 1.5 + Math.floor(idx / 2) * 1.6;
-        slide.addShape(this.pptx.ShapeType.rect, { x, y, w: 2.5, h: 1.4, fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 } });
-        slide.addText(`${stat.value}${stat.unit || ''}`, { x, y: y + 0.2, w: 2.5, h: 0.6, fontSize: 28, bold: true, color: '6366F1', align: 'center' });
-        slide.addText(this.stripFormatting(stat.label), { x, y: y + 0.8, w: 2.5, h: 0.3, fontSize: 12, bold: true, color: '0F172A', align: 'center' });
+        const col = idx % gridCols;
+        const row = Math.floor(idx / gridCols);
+        const x = 4.3 + col * (cardW + gridGap);
+        const y = 1.5 + row * (cardH + gridGap);
+        
+        slide.addShape(this.pptx.ShapeType.rect, { 
+          x, y, w: cardW, h: cardH, 
+          fill: { color: 'FFFFFF' }, 
+          line: { color: 'E2E8F0', width: 1 } 
+        });
+        slide.addText(`${stat.value}${stat.unit || ''}`, { 
+          x, y: y + 0.2, w: cardW, h: 0.6, 
+          fontSize: 28, bold: true, color: '6366F1', align: 'center' 
+        });
+        slide.addText(this.stripFormatting(stat.label), { 
+          x, y: y + 0.8, w: cardW, h: 0.3, 
+          fontSize: 12, bold: true, color: '0F172A', align: 'center' 
+        });
       });
     } else {
-      const cols = activeStats.length <= 2 ? activeStats.length : Math.ceil(activeStats.length / 2);
-      const cardW = (9.0 - (cols - 1) * 0.4) / cols;
+      // 標準レイアウト（動的グリッド & 中央寄せ）
+      const cols = count <= 3 ? count : (count === 4 ? 2 : 3);
+      const rows = Math.ceil(count / cols);
+      
+      // デザインパラメータの決定
+      const cardGap = 0.3;
+      const maxGridW = 9.0;
+      let cardW = (maxGridW - (cols - 1) * cardGap) / cols;
+      // 1枚の時に巨大化するのを防ぐ
+      if (count === 1) cardW = 4.0;
+      
+      const cardH = count <= 2 ? 2.2 : (count <= 3 ? 1.8 : 1.4);
+      const valueFontSize = count <= 2 ? 48 : (count <= 3 ? 42 : 32);
+      const labelFontSize = count <= 2 ? 18 : 14;
+
+      const gridH = rows * cardH + (rows - 1) * cardGap;
+      const boxH = mainText ? 1.2 : 0;
+      const boxGap = 0.4;
+      const totalH = gridH + (mainText ? (boxGap + boxH) : 0);
+      
+      // 垂直方向の開始位置（タイトル下 y=1.2 から フッター y=5.2 までの間）
+      const startY = 1.3 + Math.max(0, (3.8 - totalH) / 2);
+
+      // 統計カードの描画
       activeStats.forEach((stat: any, idx: number) => {
-        const x = 0.5 + (idx % cols) * (cardW + 0.4);
-        const y = 1.5 + Math.floor(idx / cols) * 2.0;
-        slide.addShape(this.pptx.ShapeType.rect, { x, y, w: cardW, h: 1.8, fill: { color: 'F8FAFC' }, line: { color: 'E2E8F0', width: 1 } });
-        // Decorative circle in background
+        const col = idx % cols;
+        const row = Math.floor(idx / cols);
+        
+        // 各行でセンタリング（最後の行が欠けている場合に対応）
+        const itemsInThisRow = Math.min(cols, count - row * cols);
+        const rowW = itemsInThisRow * cardW + (itemsInThisRow - 1) * cardGap;
+        const rowX = 0.5 + (maxGridW - rowW) / 2;
+        
+        const x = rowX + col * (cardW + cardGap);
+        const y = startY + row * (cardH + cardGap);
+
+        // カード本体
+        slide.addShape(this.pptx.ShapeType.rect, {
+          x, y, w: cardW, h: cardH,
+          fill: { color: 'F8FAFC' },
+          line: { color: 'E2E8F0', width: 1 }
+        });
+
+        // 装飾用サークル
+        const circleSize = cardH * 0.5;
         slide.addShape(this.pptx.ShapeType.ellipse, {
-          x: x + cardW - 1.0, y: y - 0.2, w: 1.2, h: 1.2,
+          x: x + cardW - (circleSize * 0.7),
+          y: y - (circleSize * 0.3),
+          w: circleSize, h: circleSize,
           fill: { color: '6366F1', transparency: 95 }
         });
-        slide.addText(`${stat.value}${stat.unit || ''}`, { x, y: y + 0.3, w: cardW, h: 0.8, fontSize: 42, bold: true, color: '6366F1', align: 'center' });
-        slide.addText(this.stripFormatting(stat.label), { x, y: y + 1.1, w: cardW, h: 0.4, fontSize: 16, bold: true, color: '0F172A', align: 'center' });
+
+        // 値
+        slide.addText(`${stat.value}${stat.unit || ''}`, {
+          x, y: y + (cardH * 0.15), w: cardW, h: cardH * 0.5,
+          fontSize: valueFontSize, bold: true, color: '6366F1', align: 'center', valign: 'middle'
+        });
+
+        // ラベル
+        slide.addText(this.stripFormatting(stat.label), {
+          x, y: y + (cardH * 0.55), w: cardW, h: cardH * 0.3,
+          fontSize: labelFontSize, bold: true, color: '0F172A', align: 'center', valign: 'middle'
+        });
+
+        // サブテキスト（あれば）
+        if (stat.subtext || stat.description) {
+          slide.addText(this.stripFormatting(stat.subtext || stat.description), {
+            x, y: y + (cardH * 0.8), w: cardW, h: 0.2,
+            fontSize: labelFontSize * 0.7, color: '64748B', align: 'center'
+          });
+        }
       });
+
+      // 説明文ボックスの描画（カード群の下）
+      if (mainText) {
+        const boxY = startY + gridH + boxGap;
+        
+        slide.addShape(this.pptx.ShapeType.roundRect, {
+          x: 0.5, y: boxY, w: 9.0, h: boxH,
+          fill: { color: 'FFFFFF' },
+          line: { color: '6366F1', width: 1.5 },
+          rectRadius: 0.05
+        });
+
+        const parseContentToItems = (text: string) => {
+          if (!text) return [];
+          return text.split('\n').filter(l => l.trim()).map(line => {
+            const trimmed = line.trim();
+            const isBullet = trimmed.startsWith('-');
+            const cleanText = isBullet ? trimmed.replace(/^-\s*/, '') : trimmed;
+            return { 
+              text: this.stripFormatting(cleanText), 
+              options: { bullet: isBullet, fontSize: 13, color: '334155', lineSpacing: 22 }
+            };
+          });
+        };
+
+        const boxItems = parseContentToItems(mainText);
+        slide.addText(boxItems, {
+          x: 0.7, y: boxY + 0.1, w: 8.6, h: boxH - 0.2,
+          valign: 'middle', margin: 0
+        });
+      }
     }
 
     if (annotations.length > 0) {
@@ -1290,21 +1479,107 @@ export class PptxExportEngine {
     const { title, steps = [], process_steps = [], items = [], key_message, body_text, annotations = [] } = content;
     const rawSteps = process_steps.length > 0 ? process_steps : (steps.length > 0 ? steps : items);
     const activeSteps = Array.isArray(rawSteps) ? rawSteps : [];
+    const count = activeSteps.length;
+    const mainText = body_text || key_message;
 
-    slide.addText(this.stripFormatting(title || 'プロセスフロー'), { x: 0.5, y: 0.4, w: 9.0, h: 0.6, fontSize: 26, bold: true, color: '0F172A' });
+    slide.addText(this.stripFormatting(title || 'プロセスフロー'), { x: 0.5, y: 0.4, w: 9.0, h: 0.6, fontSize: 26, bold: true, color: '0F172A', margin: 0 });
     slide.addShape(this.pptx.ShapeType.rect, { x: 0.5, y: 1.0, w: 9.0, h: 0.03, fill: { color: '6366F1' } });
 
-    const cols = activeSteps.length <= 4 ? activeSteps.length : Math.ceil(activeSteps.length / 2);
-    const cardW = (9.0 - (cols - 1) * 0.3) / cols;
+    // レイアウト計算
+    const cols = count <= 4 ? count : (count <= 8 ? Math.ceil(count / 2) : 5);
+    const rows = Math.ceil(count / cols);
+    
+    const cardGap = 0.3;
+    const arrowSpace = 0.25;
+    const maxGridW = 9.0;
+    const cardW = (maxGridW - (cols - 1) * (cardGap + arrowSpace)) / cols;
+    const cardH = count <= 4 ? 1.6 : 1.2;
+
+    const gridH = rows * cardH + (rows - 1) * cardGap;
+    const boxH = mainText ? 0.8 : 0;
+    const boxGap = 0.4;
+    const totalH = gridH + (mainText ? (boxGap + boxH) : 0);
+    
+    // 垂直中央寄せの開始位置
+    const startY = 1.3 + Math.max(0, (3.8 - totalH) / 2);
+
     activeSteps.forEach((step: any, idx: number) => {
-      const x = 0.5 + (idx % cols) * (cardW + 0.3);
-      const y = 1.5 + Math.floor(idx / cols) * 1.8;
-      slide.addShape(this.pptx.ShapeType.rect, { x, y, w: cardW, h: 1.5, fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 } });
-      slide.addShape(this.pptx.ShapeType.rect, { x, y, w: 0.05, h: 1.5, fill: { color: '6366F1' } });
-      slide.addText(`STEP ${idx + 1}`, { x: x + 0.1, y: y + 0.1, w: cardW - 0.2, h: 0.2, fontSize: 9, bold: true, color: '6366F1' });
-      slide.addText(this.stripFormatting(step.title || step.label || step), { x: x + 0.1, y: y + 0.3, w: cardW - 0.2, h: 0.4, fontSize: 14, bold: true });
-      if (step.description) slide.addText(this.stripFormatting(step.description), { x: x + 0.1, y: y + 0.7, w: cardW - 0.2, h: 0.7, fontSize: 10, color: '64748B', valign: 'top' });
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      
+      const x = 0.5 + col * (cardW + cardGap + arrowSpace);
+      const y = startY + row * (cardH + cardGap);
+
+      // カード本体
+      slide.addShape(this.pptx.ShapeType.roundRect, {
+        x, y, w: cardW, h: cardH,
+        fill: { color: 'FFFFFF' },
+        line: { color: 'E2E8F0', width: 1 },
+        rectRadius: 0.05
+      });
+
+      // 左端アクセント線
+      slide.addShape(this.pptx.ShapeType.rect, {
+        x, y, w: 0.08, h: cardH,
+        fill: { color: '6366F1' }
+      });
+
+      // ステップ番号
+      slide.addText(`STEP ${String(idx + 1).padStart(2, '0')}`, {
+        x: x + 0.15, y: y + 0.1, w: cardW - 0.2, h: 0.2,
+        fontSize: 9, bold: true, color: '94A3B8' // 透過の代わりに薄いグレーを使用
+      });
+
+      // ステップタイトル
+      const stepTitle = step.title || step.label || (typeof step === 'string' ? step : 'ステップ');
+      slide.addText(this.stripFormatting(stepTitle), {
+        x: x + 0.15, y: y + 0.3, w: cardW - 0.2, h: 0.4,
+        fontSize: count <= 4 ? 14 : 12, bold: true, color: '0F172A', valign: 'top'
+      });
+
+      // ステップ詳細
+      if (step.description) {
+        slide.addText(this.stripFormatting(step.description), {
+          x: x + 0.15, y: y + 0.7, w: cardW - 0.2, h: cardH - 0.8,
+          fontSize: count <= 4 ? 10 : 9, color: '64748B', valign: 'top'
+        });
+      }
+
+      // コネクタ矢印 (>)
+      const isLastInRow = (idx + 1) % cols === 0;
+      const isLastTotal = idx === count - 1;
+
+      if (!isLastTotal) {
+        if (!isLastInRow) {
+          // 右向き矢印
+          slide.addText('>', {
+            x: x + cardW, y: y, w: arrowSpace + cardGap, h: cardH,
+            fontSize: 20, color: 'CBD5E1', align: 'center', valign: 'middle' // 透過の代わりに薄いグレーを使用
+          });
+        } else if (idx < count - 1) {
+          // 下向き矢印（折り返し）
+          slide.addText('v', {
+            x: x + cardW * 0.7, y: y + cardH, w: cardW * 0.3, h: cardGap,
+            fontSize: 16, color: 'CBD5E1', align: 'center', valign: 'middle' // 透過の代わりに薄いグレーを使用
+          });
+        }
+      }
     });
+
+    // インサイト解説ボックス
+    if (mainText) {
+      const boxY = startY + gridH + boxGap;
+      slide.addShape(this.pptx.ShapeType.roundRect, {
+        x: 0.5, y: boxY, w: 9.0, h: boxH,
+        fill: { color: 'FFFFFF' },
+        line: { color: '6366F1', width: 1.5, transparency: 80 },
+        rectRadius: 0.05
+      });
+      slide.addText(`✦ ${this.stripFormatting(mainText)}`, {
+        x: 0.7, y: boxY, w: 8.6, h: boxH,
+        fontSize: 12, color: '475569', bold: true, align: 'center', valign: 'middle'
+      });
+    }
 
     if (annotations.length > 0) {
       const noteText = annotations.map((n: string) => this.stripFormatting(n)).join(' | ');

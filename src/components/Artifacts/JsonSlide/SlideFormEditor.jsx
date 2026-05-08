@@ -2,6 +2,7 @@
 // layout_type に応じてフォームフィールドを動的に切り替えるコンポーネント
 import React, { useCallback } from 'react';
 import { getAvailableThemeIds } from './config/themeRegistry';
+import { IS_DEV_MODE } from '../../../config/devMode';
 
 // ======================================
 // 汎用フォームパーツ
@@ -511,8 +512,8 @@ const SlideFormEditor = ({ slide, globalTheme, onSlideChange, onThemeChange }) =
                         />
                         <TextareaInput 
                             label="説明文（補足テキスト）" 
-                            value={content.description} 
-                            onChange={v => updateContent('description', v)} 
+                            value={content.body_text || content.description} 
+                            onChange={v => updateContent('body_text', v)} 
                             rows={4} 
                             placeholder="主要な指標に関する背景や分析を入力してください"
                         />
@@ -558,8 +559,8 @@ const SlideFormEditor = ({ slide, globalTheme, onSlideChange, onThemeChange }) =
                         />
                         <TextareaInput 
                             label="説明文（補足テキスト）" 
-                            value={content.description} 
-                            onChange={v => updateContent('description', v)} 
+                            value={content.body_text || content.description} 
+                            onChange={v => updateContent('body_text', v)} 
                             rows={4} 
                             placeholder="表の内容に関する説明や、主要なポイントを入力してください"
                         />
@@ -818,13 +819,17 @@ const SlideFormEditor = ({ slide, globalTheme, onSlideChange, onThemeChange }) =
             {renderForm()}
 
             {/* テーマ変更（全スライド共通） */}
-            <SectionDivider title="プレゼン設定（全スライド共通）" />
-            <SelectInput
-                label="テーマ"
-                value={globalTheme}
-                onChange={onThemeChange}
-                options={THEMES}
-            />
+            {IS_DEV_MODE && (
+                <>
+                    <SectionDivider title="プレゼン設定（全スライド共通）" />
+                    <SelectInput
+                        label="テーマ"
+                        value={globalTheme}
+                        onChange={onThemeChange}
+                        options={THEMES}
+                    />
+                </>
+            )}
         </div>
     );
 };

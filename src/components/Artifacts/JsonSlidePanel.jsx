@@ -110,7 +110,7 @@ const JsonSlidePanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                                     {displayTitle}
                                     {isGeneratingArtifact && <span className="typing-cursor"></span>}
                                 </span>
-                                <span className="artifact-type-badge-panel">🎯 プレゼンスライド(JSON)</span>
+                                <span className="artifact-type-badge-panel">🎯 プレゼンスライド</span>
                             </div>
                         </div>
 

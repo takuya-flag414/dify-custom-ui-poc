@@ -6,7 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SlideRenderer from './SlideRenderer';
 import SlideNavigation from './SlideNavigation';
 import EditModeModal from './EditModeModal';
+import GeneratingSlideAnimation from '../GeneratingArtifactSlide';
 import { PptxExportEngine } from '../../../utils/pptxExportEngine';
+import { IS_DEV_MODE } from '../../../config/devMode';
 import './PresentationPanel.css';
 
 /**
@@ -119,9 +121,14 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
         if (presentationData && !slideData) {
             setSlideData(presentationData.slides);
             // 初期テーマの設定：データのthemeが有効ならそれを使用、無ければデフォルト
-            const initialTheme = (presentationData.theme && themeRegistry[presentationData.theme])
+            let initialTheme = (presentationData.theme && themeRegistry[presentationData.theme])
                 ? presentationData.theme
                 : defaultThemeId;
+            
+            // DEVモードでない場合は強制的に modern-indigo
+            if (!IS_DEV_MODE) {
+                initialTheme = 'modern-indigo';
+            }
             setCurrentTheme(initialTheme);
             originalSlides.current = presentationData.slides;
         }
@@ -267,15 +274,14 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
             <div className="presentation-panel" data-theme="corporate-modern">
                 <div className="slide-canvas">
                     <div className="json-slide-generating">
-                        <motion.div
-                            className="generating-pulse"
-                            animate={{ opacity: [0.3, 1, 0.3] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                        >
-                            <span className="generating-icon">🎯</span>
+                        <div className="generating-pulse">
+                            <GeneratingSlideAnimation 
+                                className="w-full max-w-[280px] h-auto" 
+                                style={{ marginBottom: '8px' }}
+                            />
                             <p className="generating-text">プレゼンスライドを構成しています...</p>
                             <p className="generating-subtext">AIが最適なレイアウトを設計しています</p>
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -311,23 +317,25 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                 tabIndex={0}
             >
                 {/* ヘッダーエリア */}
-                <div className="panel-header">
-                    <div className="theme-selector">
-                        <label htmlFor="theme-select">Theme</label>
-                        <select
-                            id="theme-select"
-                            className="theme-select-input"
-                            value={activeTheme}
-                            onChange={(e) => handleThemeChange(e.target.value)}
-                        >
-                            {getAvailableThemeIds().map(themeId => (
-                                <option key={themeId} value={themeId}>
-                                    {themeId}
-                                </option>
-                            ))}
-                        </select>
+                {IS_DEV_MODE && (
+                    <div className="panel-header">
+                        <div className="theme-selector">
+                            <label htmlFor="theme-select">Theme</label>
+                            <select
+                                id="theme-select"
+                                className="theme-select-input"
+                                value={activeTheme}
+                                onChange={(e) => handleThemeChange(e.target.value)}
+                            >
+                                {getAvailableThemeIds().map(themeId => (
+                                    <option key={themeId} value={themeId}>
+                                        {themeId}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="slide-list-container">
                     {activeSlides.map((slide, index) => (
@@ -365,23 +373,25 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                 tabIndex={0}
             >
                 {/* ヘッダーエリア */}
-                <div className="panel-header">
-                    <div className="theme-selector">
-                        <label htmlFor="theme-select-single">Theme</label>
-                        <select
-                            id="theme-select-single"
-                            className="theme-select-input"
-                            value={activeTheme}
-                            onChange={(e) => handleThemeChange(e.target.value)}
-                        >
-                            {getAvailableThemeIds().map(themeId => (
-                                <option key={themeId} value={themeId}>
-                                    {themeId}
-                                </option>
-                            ))}
-                        </select>
+                {IS_DEV_MODE && (
+                    <div className="panel-header">
+                        <div className="theme-selector">
+                            <label htmlFor="theme-select-single">Theme</label>
+                            <select
+                                id="theme-select-single"
+                                className="theme-select-input"
+                                value={activeTheme}
+                                onChange={(e) => handleThemeChange(e.target.value)}
+                            >
+                                {getAvailableThemeIds().map(themeId => (
+                                    <option key={themeId} value={themeId}>
+                                        {themeId}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* スライドキャンバス（16:9アスペクト比） */}
                 <div className="slide-canvas">

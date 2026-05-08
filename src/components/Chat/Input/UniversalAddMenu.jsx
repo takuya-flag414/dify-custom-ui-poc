@@ -4,6 +4,7 @@ import DomainSelector from '../../Shared/DomainSelector';
 
 // 表示制御フラグをインポート
 import { ENABLE_SPECIFY_WEBSITE, ENABLE_CREATE_ARTIFACT } from '../../../config/env';
+import { IS_DEV_MODE } from '../../../config/devMode';
 
 // --- Icons (SF Symbols Inspired) ---
 
@@ -145,7 +146,7 @@ const UniversalAddMenu = ({
     onRemoveDomain,
     onAddArtifact
 }) => {
-    const [view, setView] = useState('MAIN'); // MAIN, DOMAIN, ARTIFACT_L1, ARTIFACT_L2, ARTIFACT_SLIDE_SUB, ARTIFACT_A4_SUB
+    const [view, setView] = useState('MAIN'); // MAIN, DOMAIN, ARTIFACT_L1, ARTIFACT_L2, ARTIFACT_A4_SUB
     const [slideDirection, setSlideDirection] = useState('right');
 
     const navigateTo = (targetView, direction = 'right') => {
@@ -255,16 +256,18 @@ const UniversalAddMenu = ({
                             <MenuItem
                                 icon={<DocumentRichtextIcon />}
                                 label="📄 A4ドキュメント"
-                                subtext="用途に合わせて形式を選択"
-                                onClick={() => navigateTo('ARTIFACT_A4_SUB', 'right')}
-                                showArrow
+                                subtext={IS_DEV_MODE ? "用途に合わせて形式を選択" : "印刷可能なA4ドキュメント"}
+                                onClick={IS_DEV_MODE 
+                                    ? () => navigateTo('ARTIFACT_A4_SUB', 'right')
+                                    : () => handleArtifactSelect('html_document', 'A4ドキュメント')
+                                }
+                                showArrow={IS_DEV_MODE}
                             />
                             <MenuItem
                                 icon={<PresentationIcon />}
                                 label="📊 プレゼンスライド"
-                                subtext="用途に合わせて形式を選択"
-                                onClick={() => navigateTo('ARTIFACT_SLIDE_SUB', 'right')}
-                                showArrow
+                                subtext="構造化データ形式のプレゼン資料"
+                                onClick={() => handleArtifactSelect('json_slide', 'プレゼンスライド')}
                             />
                         </motion.div>
                     )}
@@ -293,12 +296,14 @@ const UniversalAddMenu = ({
                                 subtext="HTML形式 (レイアウト固定・印刷向け)"
                                 onClick={() => handleArtifactSelect('html_document', '印刷可能なA4ドキュメント')}
                             />
-                            <MenuItem
-                                icon={<DocumentRichtextIcon />}
-                                label="編集可能なA4ドキュメント"
-                                subtext="JSON形式 (構造化データ・ページ分割対応)"
-                                onClick={() => handleArtifactSelect('json_document', '編集可能なA4ドキュメント')}
-                            />
+                            {IS_DEV_MODE && (
+                                <MenuItem
+                                    icon={<DocumentRichtextIcon />}
+                                    label="編集可能なA4ドキュメント"
+                                    subtext="JSON形式 (構造化データ・ページ分割対応)"
+                                    onClick={() => handleArtifactSelect('json_document', '編集可能なA4ドキュメント')}
+                                />
+                            )}
                         </motion.div>
                     )}
 
@@ -353,6 +358,7 @@ const UniversalAddMenu = ({
                         </motion.div>
                     )}
 
+                    {/* プレゼンスライドの階層は廃止されました
                     {view === 'ARTIFACT_SLIDE_SUB' && (
                         <motion.div
                             key="artifact_slide_sub"
@@ -385,6 +391,7 @@ const UniversalAddMenu = ({
                             />
                         </motion.div>
                     )}
+                    */}
 
                 </AnimatePresence>
             </div>

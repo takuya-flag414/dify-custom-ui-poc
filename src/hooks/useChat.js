@@ -654,7 +654,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
                                 // ★リファクタリング: LLM_Intent_Analysis処理
                                 if (title === 'LLM_Intent_Analysis' || title === 'LLM_Intent_Analysis_RAG' || title === 'LLM_Intent_Analysis_Web' || title === 'LLM_Intent_Analysis_Hybrid') {
-                                    const result = processIntentAnalysisFinished(outputs, nodeId, addLog);
+                                    const result = processIntentAnalysisFinished(outputs, nodeId, addLog, title);
                                     if (result) {
                                         // ★変更: session_titleをキャプチャ（workflow_finished後に遅延適用）
                                         if (result.sessionTitle && result.sessionTitle.trim() !== '') {
