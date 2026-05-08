@@ -162,6 +162,8 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
 
                 // ★Artifact判定: artifact_title + (artifact_content または pptx_spec) が存在すればArtifact
                 let artifact: ArtifactData | null = null;
+                
+                // 1. ルートレベルのフィールドをチェック
                 if (parsed.artifact_title && (parsed.artifact_content || parsed.pptx_spec || parsed.pptxspec)) {
                     let content = parsed.artifact_content;
                     if (!content) {
@@ -171,9 +173,24 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                     artifact = {
                         artifact_title: parsed.artifact_title,
                         artifact_type: parsed.artifact_type || 'summary_report',
-                        artifact_content: content,
+                        artifact_content: typeof content === 'string' ? content : JSON.stringify(content),
                         citations: Array.isArray(parsed.citations) ? parsed.citations : [],
                     };
+                }
+                
+                // 2. ネストされた artifact オブジェクトをチェック（提案書 3.3 準拠）
+                if (!artifact && parsed.artifact && typeof parsed.artifact === 'object') {
+                    const pA = parsed.artifact;
+                    if (pA.artifact_title && (pA.artifact_content || pA.pptx_spec)) {
+                        artifact = {
+                            artifact_title: pA.artifact_title,
+                            artifact_type: pA.artifact_type || 'summary_report',
+                            artifact_content: typeof pA.artifact_content === 'string' 
+                                ? pA.artifact_content 
+                                : JSON.stringify(pA.artifact_content),
+                            citations: Array.isArray(pA.citations) ? pA.citations : (Array.isArray(parsed.citations) ? parsed.citations : []),
+                        };
+                    }
                 }
 
                 // ★追加: json_slide判定 (presentation_title + slides[] のトップレベルJSON形式)

@@ -131,7 +131,7 @@ const MenuItem = ({ icon, label, subtext, onClick, showArrow = false }) => (
                 <ChevronRightIcon />
             </span>
         )}
-        
+
         {/* Hover Highlight Overlay */}
         <div className="absolute inset-0 bg-black/5 dark:bg-white/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity pointer-events-none" />
     </motion.button>
@@ -145,7 +145,7 @@ const UniversalAddMenu = ({
     onRemoveDomain,
     onAddArtifact
 }) => {
-    const [view, setView] = useState('MAIN'); // MAIN, DOMAIN, ARTIFACT_L1, ARTIFACT_L2, ARTIFACT_SLIDE_SUB
+    const [view, setView] = useState('MAIN'); // MAIN, DOMAIN, ARTIFACT_L1, ARTIFACT_L2, ARTIFACT_SLIDE_SUB, ARTIFACT_A4_SUB
     const [slideDirection, setSlideDirection] = useState('right');
 
     const navigateTo = (targetView, direction = 'right') => {
@@ -164,7 +164,7 @@ const UniversalAddMenu = ({
     });
 
     return (
-        <motion.div 
+        <motion.div
             layout
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -255,8 +255,9 @@ const UniversalAddMenu = ({
                             <MenuItem
                                 icon={<DocumentRichtextIcon />}
                                 label="📄 A4ドキュメント"
-                                subtext="印刷・PDF保存向けのリッチな資料"
-                                onClick={() => handleArtifactSelect('html_document', 'A4ドキュメント')}
+                                subtext="用途に合わせて形式を選択"
+                                onClick={() => navigateTo('ARTIFACT_A4_SUB', 'right')}
+                                showArrow
                             />
                             <MenuItem
                                 icon={<PresentationIcon />}
@@ -264,6 +265,39 @@ const UniversalAddMenu = ({
                                 subtext="用途に合わせて形式を選択"
                                 onClick={() => navigateTo('ARTIFACT_SLIDE_SUB', 'right')}
                                 showArrow
+                            />
+                        </motion.div>
+                    )}
+
+                    {view === 'ARTIFACT_A4_SUB' && (
+                        <motion.div
+                            key="artifact_a4_sub"
+                            variants={slideVariants}
+                            initial={getAnimationState().initial}
+                            animate="center"
+                            exit={getAnimationState().exit}
+                            transition={springTransition}
+                        >
+                            <div className="flex items-center gap-2 px-1 py-1 mb-2">
+                                <button
+                                    onClick={() => navigateTo('ARTIFACT_L1', 'left')}
+                                    className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5 border-none bg-transparent outline-none"
+                                >
+                                    <ChevronLeftIcon />
+                                </button>
+                                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">A4ドキュメント形式</span>
+                            </div>
+                            <MenuItem
+                                icon={<DocumentRichtextIcon />}
+                                label="印刷可能なA4ドキュメント"
+                                subtext="HTML形式 (レイアウト固定・印刷向け)"
+                                onClick={() => handleArtifactSelect('html_document', '印刷可能なA4ドキュメント')}
+                            />
+                            <MenuItem
+                                icon={<DocumentRichtextIcon />}
+                                label="編集可能なA4ドキュメント"
+                                subtext="JSON形式 (構造化データ・ページ分割対応)"
+                                onClick={() => handleArtifactSelect('json_document', '編集可能なA4ドキュメント')}
                             />
                         </motion.div>
                     )}
@@ -345,9 +379,9 @@ const UniversalAddMenu = ({
                             />
                             <MenuItem
                                 icon={<PresentationIcon />}
-                                label="印刷可能なプレゼンスライド"
+                                label="編集可能なプレゼンスライド"
                                 subtext="JSON形式 (構造化データ・再利用向け)"
-                                onClick={() => handleArtifactSelect('json_slide_advanced', '印刷可能なプレゼンスライド')}
+                                onClick={() => handleArtifactSelect('json_slide_advanced', '編集可能なプレゼンスライド')}
                             />
                         </motion.div>
                     )}

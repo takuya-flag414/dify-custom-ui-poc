@@ -351,7 +351,160 @@ export const scenarios = {
     ]
   },
 
-
+  // =================================================================
+  // Pattern: JSON Document (Dynamic Pagination)
+  // =================================================================
+  'json_document': {
+    efficient: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "json_document"}\n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "2026年度 事業戦略報告書 (ドラフト)",
+            artifact_type: "json_document",
+            artifact_content: JSON.stringify({
+              meta: {
+                title: "2026年度 事業戦略報告書",
+                subtitle: "〜 次世代への飛躍と持続可能な成長に向けて 〜",
+                author: "戦略企画本部 第一チーム",
+                date: "2026年5月6日"
+              },
+              blocks: [
+                { type: "heading", level: 1, text: "2026年度 事業戦略報告書" },
+                { type: "rich_text", text: "本報告書は、次年度に向けた当社の戦略的優先事項を概説するものです。市場の不確実性が高まる中、データ駆動型の意思決定と機敏なリソース配分が成功の鍵となります。" },
+                { type: "heading", level: 2, text: "1. エグゼクティブサマリー" },
+                { type: "rich_text", text: "昨年度の成長率を維持しつつ、新規事業領域への投資を30%拡大します。また、既存製品のコスト構造を最適化し、営業利益率の向上を目指します。" },
+                { type: "heading", level: 2, text: "2. 主要マーケット動向" },
+                {
+                  "type": "chart",
+                  "chart_type": "bar",
+                  "title": "2026年度 地域別売上予測 (億円)",
+                  "data": [
+                    { "name": "北米", "value": 450 },
+                    { "name": "欧州", "value": 320 },
+                    { "name": "アジア", "value": 580 },
+                    { "name": "その他", "value": 150 }
+                  ]
+                },
+                { type: "rich_text", text: "北米市場においては、クラウドネイティブソリューションへの需要が急増しています。一方、アジア市場では、ローカルプレイヤーとの競争が激化しており、差別化戦略が求められています。" },
+                {
+                  type: "table",
+                  headers: ["市場", "シェア", "成長予測", "主要競合"],
+                  rows: [
+                    ["北米", "25%", "+15%", "Comp A, Comp B"],
+                    ["欧州", "18%", "+5%", "Comp C"],
+                    ["アジア", "30%", "+20%", "Comp D, Comp E"],
+                    ["その他", "7%", "+10%", "N/A"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "3. 2026年度の重点施策" },
+                { type: "list", items: ["**AIプラットフォーム**のフルリニューアル", "**グローバルサプライチェーン**のレジリエンス強化", "**エンジニアリング組織**のダイバーシティ推進"] },
+                { type: "heading", level: 2, text: "4. 財務目標とKPI" },
+                { type: "rich_text", text: "売上高目標は、前年比**120%**の**500億円**を掲げます。\nこれを達成するためのKPIは以下の通りです。" },
+                {
+                  type: "table",
+                  headers: ["KPI項目", "目標値", "担当部門"],
+                  rows: [
+                    ["新規顧客獲得数", "500社", "営業本部"],
+                    ["解約率(Churn Rate)", "2%以下", "カスタマーサクセス"],
+                    ["研究開発投資額", "60億円", "CTO室"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "5. 将来展望とリスク要因" },
+                { type: "rich_text", text: "マクロ経済の変動や為替リスクを注視する必要があります。特に、半導体供給の安定性は、当社のハードウェア部門にとって重要なリスク要因です。さらに、グローバルな規制環境の変化（特にプライバシー保護法案）は、ソフトウェアサービスの設計に大きな影響を与える可能性があります。これらに対して、当社は法務チームと技術チームの連携を強化し、コンプライアンスを競争優位性の源泉に変えていく方針です。" },
+                { type: "heading", level: 2, text: "6. 結論" },
+                { type: "rich_text", text: "2026年度は、当社にとって変革の年となります。全社員が一丸となって、ビジョンの実現に向けて邁進していきましょう。" },
+                {
+                   type: "svg",
+                   content: `<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 80 Q 100 10, 200 80 T 380 80" fill="none" stroke="#007bff" stroke-width="4"/><text x="200" y="95" text-anchor="middle" font-size="12" fill="#666">Growth Trajectory</text></svg>`
+                }
+              ]
+            })
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 4500 } } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "json_document", "thinking": "編集可能なドキュメントですね！内容を構成して作成します。"} \n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "2026年度 事業戦略報告書 (ドラフト)",
+            artifact_type: "json_document",
+            artifact_content: JSON.stringify({
+              meta: {
+                title: "2026年度 事業戦略報告書",
+                subtitle: "〜 次世代への飛躍と持続可能な成長に向けて 〜",
+                author: "戦略企画本部 第一チーム",
+                date: "2026年5月6日"
+              },
+              blocks: [
+                { type: "heading", level: 1, text: "2026年度 事業戦略報告書" },
+                { type: "rich_text", text: "本報告書は、次年度に向けた当社の戦略的優先事項を概説するものです。市場の不確実性が高まる中、データ駆動型の意思決定と機敏なリソース配分が成功の鍵となります。" },
+                { type: "heading", level: 2, text: "1. エグゼクティブサマリー" },
+                { type: "rich_text", text: "昨年度の成長率を維持しつつ、新規事業領域への投資を30%拡大します。また、既存製品のコスト構造を最適化し、営業利益率の向上を目指します。" },
+                { type: "heading", level: 2, text: "2. 主要マーケット動向" },
+                {
+                  "type": "chart",
+                  "chart_type": "bar",
+                  "title": "2026年度 地域別売上予測 (億円)",
+                  "data": [
+                    { "name": "北米", "value": 450 },
+                    { "name": "欧州", "value": 320 },
+                    { "name": "アジア", "value": 580 },
+                    { "name": "その他", "value": 150 }
+                  ]
+                },
+                { type: "rich_text", text: "北米市場においては、クラウドネイティブソリューションへの需要が急増しています。一方、アジア市場では、ローカルプレイヤーとの競争が激化しており、差別化戦略が求められています。" },
+                {
+                  type: "table",
+                  headers: ["市場", "シェア", "成長予測", "主要競合"],
+                  rows: [
+                    ["北米", "25%", "+15%", "Comp A, Comp B"],
+                    ["欧州", "18%", "+5%", "Comp C"],
+                    ["アジア", "30%", "+20%", "Comp D, Comp E"],
+                    ["その他", "7%", "+10%", "N/A"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "3. 2026年度の重点施策" },
+                { type: "list", items: ["AIプラットフォームのフルリニューアル", "グローバルサプライチェーンのレジリエンス強化", "エンジニアリング組織のダイバーシティ推進"] },
+                { type: "heading", level: 2, text: "4. 財務目標とKPI" },
+                { type: "rich_text", text: "売上高目標は、前年比120%の500億円を掲げます。これを達成するためのKPIは以下の通りです。" },
+                {
+                  type: "table",
+                  headers: ["KPI項目", "目標値", "担当部門"],
+                  rows: [
+                    ["新規顧客獲得数", "500社", "営業本部"],
+                    ["解約率(Churn Rate)", "2%以下", "カスタマーサクセス"],
+                    ["研究開発投資額", "60億円", "CTO室"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "5. 将来展望とリスク要因" },
+                { type: "rich_text", text: "マクロ経済の変動や為替リスクを注視する必要があります。特に、半導体供給の安定性は、当社のハードウェア部門にとって重要なリスク要因です。さらに、グローバルな規制環境の変化（特にプライバシー保護法案）は、ソフトウェアサービスの設計に大きな影響を与える可能性があります。これらに対して、当社は法務チームと技術チームの連携を強化し、コンプライアンスを競争優位性の源泉に変えていく方針です。" },
+                { type: "heading", level: 2, text: "6. 結論" },
+                { type: "rich_text", text: "2026年度は、当社にとって変革の年となります。全社員が一丸となって、ビジョンの実現に向けて邁進していきましょう。" },
+                {
+                   type: "svg",
+                   content: `<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 80 Q 100 10, 200 80 T 380 80" fill="none" stroke="#007bff" stroke-width="4"/><text x="200" y="95" text-anchor="middle" font-size="12" fill="#666">Growth Trajectory</text></svg>`
+                }
+              ]
+            })
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 5200 } } }
+    ]
+  },
+  
   // =================================================================
   // Special Pattern: Enterprise Pricing (From Log)
   // =================================================================
@@ -1992,7 +2145,7 @@ h2.section-title {
         [],
         [],
         '営業担当者がMEO（Map Engine Optimization）の価値を正しく理解し、顧客へ自信を持って提案できるよう、論理的な構成でスライドを作成します。MEOの定義、SEOとの比較、Googleビジネスプロフィール（GBP）の重要性、具体的な提案ステップ、FAQ、成功事例という、研修に不可欠な要素を網羅します。各スライドは、フロントエンドでの表示を考慮し、文字数を制限しつつ視覚的に情報を整理します。'
-      ).slice(0, -1) + ',"presentation_title":"営業担当者のためのMEO研修資料","theme":"corporate-modern","slides":[{"id":"slide_1","layout_type":"title_slide","content":{"title":"営業担当者向けMEO研修","subtitle":"顧客の来店を最大化する提案スキルを習得する","author":"営業推進部 研修担当"}},{"id":"slide_2","layout_type":"content_slide","content":{"title":"MEO（マップ検索最適化）とは","body_text":"MEOは「Map Engine Optimization」の略称で、Googleマップでの検索結果を上位に表示させる施策です。","bullet_points":["地域+目的の検索に特化","店舗ビジネスに不可欠な施策","地図枠に表示されるため視認性が高い","スマートフォンの普及で重要性が増大","来店意欲の高いユーザーにリーチ可能"]}},{"id":"slide_3","layout_type":"split_slide","content":{"title":"MEOとSEOの違い","left_column":["対象：地図検索結果","表示：検索結果の上部","期間：比較的短期間で成果","費用：SEOに比べ低コスト"],"right_column":["対象：検索結果全体","表示：広告と地図の下","期間：成果まで半年以上","費用：専門知識と高コストが必要"]}},{"id":"slide_4","layout_type":"content_slide","content":{"title":"Googleビジネスプロフィールの重要性","body_text":"Googleビジネスプロフィール（GBP）は、店舗の「デジタル上の顔」となるプラットフォームです。","bullet_points":["ユーザーの8割が来店前に検索","口コミが信頼性に直結する","写真や動画で視覚的にアピール可能","最新情報をリアルタイムで発信","通話やルート検索へ直接誘導"]}},{"id":"slide_5","layout_type":"content_slide","content":{"title":"具体的な営業提案の5ステップ","bullet_points":["1. 顧客の現在地での順位を確認","2. 競合店舗の運用状況を分析","3. 口コミの返信状況をチェック","4. 運用代行による工数削減を提示","5. 期待できる来店数増加を予測"]}},{"id":"slide_6","layout_type":"content_slide","content":{"title":"現場で役立つFAQ","bullet_points":["Q. 費用対効果は？ → 低コストで来店直結","Q. 悪い口コミが来たら？ → 誠実な返信が信頼を生む","Q. SEOは不要？ → 併用で相乗効果がある","Q. 自分でできる？ → 継続的な運用に工数がかかる","Q. 順位は保証される？ → 施策の継続が上位維持の鍵"]}},{"id":"slide_7","layout_type":"content_slide","content":{"title":"成功事例：飲食店A社の場合","bullet_points":["導入3ヶ月で「地域+ランチ」1位獲得","Googleマップ経由の電話数が200%増","写真の最適化で閲覧数が3倍に","口コミ返信の徹底により平均評価が向上","週末の予約が1.5倍に増加"]}},{"id":"slide_8","layout_type":"quote_slide","content":{"title":"まとめ：MEOは信頼の構築","quote":"検索結果は店舗のデジタルな看板である。看板を磨くことが、最高の顧客体験の第一歩となる。\"}},{"id":"slide_9","layout_type":"content_slide","content":{"title":"次のアクション","bullet_points":["自社ツールのデモ画面を確認","ターゲット顧客のリストアップ","現状の検索順位チェックの練習","提案スクリプトのロープレ実施","事例資料のダウンロード"]}}]}'
+      ).slice(0, -1) + ',"presentation_title":"営業担当者のためのMEO研修資料","theme":"corporate-modern","slides":[{"id":"slide_1","layout_type":"title_slide","content":{"title":"営業担当者向けMEO研修","subtitle":"顧客の来店を最大化する提案スキルを習得する","author":"営業推進部 研修担当"}},{"id":"slide_2","layout_type":"content_slide","content":{"title":"MEO（マップ検索最適化）とは","body_text":"MEOは「Map Engine Optimization」の略称で、Googleマップでの検索結果を上位に表示させる施策です。\\n\\n- 地域+目的の検索に特化\\n- 店舗ビジネスに不可欠な施策\\n- 地図枠に表示されるため視認性が高い\\n- スマートフォンの普及で重要性が増大\\n- 来店意欲の高いユーザーにリーチ可能"}},{"id":"slide_3","layout_type":"split_slide","content":{"title":"MEOとSEOの違い","left_text":"- 対象：地図検索結果\\n- 表示：検索結果の上部\\n- 期間：比較的短期間で成果\\n- 費用：SEOに比べ低コスト","right_text":"- 対象：検索結果全体\\n- 表示：広告と地図の下\\n- 期間：成果まで半年以上\\n- 費用：専門知識と高コストが必要"}},{"id":"slide_4","layout_type":"content_slide","content":{"title":"Googleビジネスプロフィールの重要性","body_text":"Googleビジネスプロフィール（GBP）は、店舗の「デジタル上の顔」となるプラットフォームです。\\n\\n- ユーザーの8割が来店前に検索\\n- 口コミが信頼性に直結する\\n- 写真や動画で視覚的にアピール可能\\n- 最新情報をリアルタイムで発信\\n- 通話やルート検索へ直接誘導"}},{"id":"slide_5","layout_type":"content_slide","content":{"title":"具体的な営業提案の5ステップ","body_text":"1. 顧客の現在地での順位を確認\\n2. 競合店舗の運用状況を分析\\n3. 口コミの返信状況をチェック\\n4. 運用代行による工数削減を提示\\n5. 期待できる来店数増加を予測"}},{"id":"slide_6","layout_type":"content_slide","content":{"title":"現場で役立つFAQ","body_text":"- **Q. 費用対効果は？** → 低コストで来店直結\\n- **Q. 悪い口コミが来たら？** → 誠実な返信が信頼を生む\\n- **Q. SEOは不要？** → 併用で相乗効果がある\\n- **Q. 自分でできる？** → 継続的な運用に工数がかかる\\n- **Q. 順位は保証される？** → 施策の継続が上位維持の鍵"}},{"id":"slide_7","layout_type":"content_slide","content":{"title":"成功事例：飲食店A社の場合","body_text":"- 導入3ヶ月で「地域+ランチ」1位獲得\\n- Googleマップ経由の電話数が200%増\\n- 写真の最適化で閲覧数が3倍に\\n- 口コミ返信の徹底により平均評価が向上\\n- 週末の予約が1.5倍に増加"}},{"id":"slide_11","layout_type":"quote_slide","content":{"title":"まとめ：MEOは信頼の構築","quote":"検索結果は店舗のデジタルな看板である。看板を磨くことが、最高の顧客体験の第一歩となる。"}},{"id":"slide_9","layout_type":"content_slide","content":{"title":"次のアクション","body_text":"- 自社ツールのデモ画面を確認\\n- ターゲット顧客のリストアップ\\n- 現状の検索順位チェックの練習\\n- 提案スクリプトのロープレ実施\\n- 事例資料のダウンロード"}}]}}'
     },
     { event: 'node_finished', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm', status: 'succeeded' } },
     { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 3265, completion_tokens: 1732, total_tokens: 4997 } } }
@@ -2003,22 +2156,250 @@ h2.section-title {
   // =================================================================
   'json_slide_advanced': [
     { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
-    { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', node_type: 'llm', text: '{"thinking":"高度なスライド生成の要求です。","category":"TASK","requires_rag":false,"requires_web":false}' }, status: 'succeeded' },
+    { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', node_type: 'llm', text: '{"thinking":"グローバルDX戦略の高度なスライド生成要求です。","category":"TASK","requires_rag":false,"requires_web":false}' }, status: 'succeeded' },
     { event: 'node_started', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm' } },
-    { event: 'message', answer: '', thinking: 'AI活用業務改善提案のスライドを作成します。アジェンダ、表、棒・折れ線・円グラフ、KPIダッシュボード、統計、タイムライン、プロフィール等の多彩なレイアウトを使用します...' },
-    { 
-      event: 'message', 
+    { event: 'message', answer: '', thinking: '「Global DX Strategy 2026」の包括的な戦略資料を生成します。全14種類のレイアウトと最新の仕様を網羅します...' },
+    {
+      event: 'message',
       answer: createMockJson(
-        'AI活用業務改善提案のスライドを作成しました。アジェンダ、KPIダッシュボード、折れ線グラフなど16枚のデータドリブンな提案資料に仕上げています。',
+        'グローバルDX戦略 2026 の包括的な提案資料を作成しました。全14種類のレイアウトを駆使し、データに基づいた戦略ロードマップを構成しています。',
         [],
-        [],
-        'アジェンダ、表、棒グラフ、折れ線グラフ、円グラフ、統計カード、KPIダッシュボード、タイムライン、画像付きスライド、会社概要など、全レイアウトタイプを駆使した16枚構成です。'
-      ).slice(0, -1) + ',"presentation_title":"AI活用による業務改善提案","theme":"corporate-modern","slides":[{"id":"slide_1","layout_type":"title_slide","content":{"title":"AI活用による業務改善提案","subtitle":"生成AIで実現する次世代の働き方改革","author":"DX推進室"}},{"id":"slide_2","layout_type":"agenda_slide","content":{"title":"本日のアジェンダ","items":[{"number":"01","label":"現状分析","description":"データに基づく業務課題の可視化"},{"number":"02","label":"定量評価","description":"KPIダッシュボードによる現状把握"},{"number":"03","label":"ソリューション","description":"AIチャットボットと自動化施策"},{"number":"04","label":"ロードマップ","description":"4フェーズの段階的導入計画"},{"number":"05","label":"投資対効果","description":"コスト構造と期待ROI"},{"number":"06","label":"推進体制","description":"プロジェクト体制と次のステップ"}]}},{"id":"slide_3","layout_type":"section_slide","content":{"title":"第1章：現状分析","subtitle":"業務課題の可視化とデータに基づく診断"}},{"id":"slide_4","layout_type":"table_slide","content":{"title":"部門別 業務課題の比較","headers":["部門","主な課題","月間工数(h)","影響度","AI適用可能性"],"rows":[["営業部","提案書作成の属人化","120","高","◎"],["総務部","問い合わせ対応の負荷","85","中","◎"],["企画部","市場分析の遅延","60","高","○"],["経理部","請求書処理の手作業","95","中","◎"]]}},{"id":"slide_5","layout_type":"chart_slide","content":{"title":"月別 社内問い合わせ件数の推移","chart_type":"bar","data":[{"label":"1月","value":245},{"label":"2月","value":312},{"label":"3月","value":287},{"label":"4月","value":356},{"label":"5月","value":398},{"label":"6月","value":421},{"label":"7月","value":389},{"label":"8月","value":345}],"body_text":"問い合わせ件数は増加傾向にあり、人的対応の限界に近づいています。"}},{"id":"slide_6","layout_type":"chart_slide","content":{"title":"四半期別売上推移（過去2年間）","chart_type":"line","data":[{"label":"2024 Q1","value":85},{"label":"2024 Q2","value":92},{"label":"2024 Q3","value":88},{"label":"2024 Q4","value":105},{"label":"2025 Q1","value":112},{"label":"2025 Q2","value":128},{"label":"2025 Q3","value":135},{"label":"2025 Q4","value":148}],"body_text":"売上は堅調に成長しており、AI投資の原資は確保されています。"}},{"id":"slide_7","layout_type":"stats_slide","content":{"title":"AI導入による期待効果","stats":[{"value":"40%","label":"工数削減率","description":"定型業務の自動化による"},{"value":"¥2.5M","label":"年間コスト削減","description":"人件費・外注費の最適化"},{"value":"92%","label":"従業員満足度","description":"PoC参加者アンケート結果"},{"value":"3倍","label":"処理速度向上","description":"AIチャットボット応答"}]}},{"id":"slide_8","layout_type":"kpi_dashboard_slide","content":{"title":"2025年度 Q3 KPIダッシュボード","kpis":[{"value":"¥128M","label":"売上高","trend":"up","change":"+12.5%"},{"value":"23.4%","label":"営業利益率","trend":"up","change":"+2.1pt"},{"value":"94.2%","label":"顧客満足度","trend":"flat","change":"±0.3pt"},{"value":"8.2%","label":"離職率","trend":"down","change":"-1.5pt"},{"value":"720件","label":"月間対応件数","trend":"up","change":"+18%"},{"value":"4.2分","label":"平均応答時間","trend":"down","change":"-35%"}]}},{"id":"slide_9","layout_type":"section_slide","content":{"title":"第2章：ソリューション","subtitle":"具体的なAI活用施策と導入アプローチ"}},{"id":"slide_10","layout_type":"image_content_slide","content":{"title":"AIチャットボットの導入イメージ","image_url":"https://placehold.co/800x450/e2e8f0/64748b?text=AI+Chatbot+Dashboard","image_alt":"AIチャットボットのダッシュボード画面","body_text":"社内ナレッジベースと連携したAIチャットボットにより、24時間365日の自動応答を実現します。","bullet_points":["自然言語による質問応答","過去の問い合わせ履歴からの学習","エスカレーション機能付き","多言語対応"]}},{"id":"slide_11","layout_type":"timeline_slide","content":{"title":"導入ロードマップ","events":[{"step":"Phase 1（1-2月目）","description":"要件定義とPoC環境の構築。対象部門の選定と現状ワークフローの詳細分析を実施。"},{"step":"Phase 2（3-4月目）","description":"パイロット導入と効果測定。営業部と総務部の2部門で先行導入し、KPIを定量評価。"},{"step":"Phase 3（5-6月目）","description":"全社展開とトレーニング。フィードバックを反映した最終版を全社に展開し、操作研修を実施。"},{"step":"Phase 4（7月目〜）","description":"運用最適化と機能拡張。利用データに基づく継続的な改善サイクルを確立。"}]}},{"id":"slide_12","layout_type":"split_slide","content":{"title":"導入リスクと対策","left_column":["データセキュリティの懸念","従業員の抵抗感","既存システムとの連携","AIの精度と信頼性"],"right_column":["オンプレミス環境での運用","段階的な導入と成功体験","API連携による統合設計","Human-in-the-loop体制"]}},{"id":"slide_13","layout_type":"chart_slide","content":{"title":"年間予算配分（予定）","chart_type":"pie","data":[{"label":"ライセンス費用","value":35},{"label":"インフラ構築","value":25},{"label":"コンサルティング","value":15},{"label":"トレーニング","value":10},{"label":"運用・保守","value":15}]}},{"id":"slide_14","layout_type":"content_slide","content":{"title":"期待される具体的成果","bullet_points":["提案書作成時間を平均2時間→30分に短縮","社内問い合わせの70%をAIが自動回答","月次レポート作成の完全自動化","顧客対応スピードの50%向上","年間2,500時間の工数削減"]}},{"id":"slide_15","layout_type":"profile_slide","content":{"title":"プロジェクト推進体制","subtitle":"DX推進室 AI導入プロジェクト","entries":[{"label":"プロジェクト名","value":"AI業務改善イニシアチブ 2025"},{"label":"推進責任者","value":"DX推進室 室長 山田太郎"},{"label":"期間","value":"2025年4月〜2026年3月（12ヶ月）"},{"label":"対象部門","value":"営業部・総務部・企画部・経理部"},{"label":"予算規模","value":"年間 ¥15M（ライセンス・構築・運用含む）"},{"label":"外部パートナー","value":"株式会社テクノソリューションズ"}],"footer_text":"「テクノロジーで、もっとクリエイティブな働き方を。」"}},{"id":"slide_16","layout_type":"quote_slide","content":{"title":"最後に","quote":"AIは人を置き換えるものではない。人がより創造的な仕事に集中するための、最強のパートナーである。","author":"DX推進室"}}]}'
+        [
+            { type: 'suggested_question', label: 'ROIの詳細を教えて', icon: 'trending-up', payload: { text: 'ROIの算出根拠を詳しく教えて' } },
+            { type: 'suggested_question', label: '導入スケジュールを調整して', icon: 'calendar', payload: { text: 'ロードマップを3ヶ月短縮した場合の影響は？' } }
+        ],
+        '仕様書の全機能を網羅：自動2カラム化、水平タイムライン、KPIトレンド、高度なテーブル、HTML/Markdownハイブリッド記述をすべて含めた14枚構成です。'
+      ).slice(0, -1) + ',"presentation_title":"Global DX Strategy 2026","theme":"modern-indigo","slides":[' +
+      JSON.stringify({
+          id: "slide_1",
+          layout_type: "title_slide",
+          content: {
+              title: "Global DX Strategy <span style='color: var(--slide-primary)'>2026</span>",
+              subtitle: "Reimagining Corporate Efficiency with **Generative AI**",
+              eyebrow: "STRATEGIC INITIATIVE",
+              author: "DX Strategic Planning Committee",
+              tags: ["AI-First", "2026 Strategy", "Transformation"],
+              logo_text: "CORP DX GROUP",
+              annotations: ["Confidential - Internal Use Only"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_2",
+          layout_type: "agenda_slide",
+          content: {
+              title: "Strategic Agenda",
+              lead_text: "本戦略は以下の柱で構成されます。高度な自動化と人間中心の設計の両立を目指します。",
+              items: [
+                  { label: "Executive Summary", description: "ビジョンと全体目標" },
+                  { label: "Market Intelligence", description: "競合分析と市場動向" },
+                  { label: "Current Performance", description: "KPIによる現状把握" },
+                  { label: "AI Solution Design", description: "次世代アーキテクチャ" },
+                  { label: "Operational Process", description: "業務プロセスの再設計" },
+                  { label: "Roadmap & ROI", description: "導入計画と投資対効果" }
+              ],
+              annotations: ["各フェーズは相互に関連しています"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_3",
+          layout_type: "split_slide",
+          content: {
+              title: "Paradigm Shift: Legacy vs AI-Native",
+              left_title: "Legacy Operations",
+              left_text: "### 現状の課題\n- 属人的な知識の断片化\n- 手作業による膨大な事務処理\n- データのサイロ化による遅延\n- 低付加価値業務へのリソース集中",
+              right_title: "AI-Native Operations",
+              right_text: "### 目指すべき姿\n- **AIによるナレッジの統合**\n- ワークフローの完全自動化\n- リアルタイム・データ分析\n- クリエイティブな業務へのシフト",
+              comparison_icon: "NEXT",
+              annotations: ["Source: Internal DX Audit 2025"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_4",
+          layout_type: "chart_slide",
+          content: {
+              title: "Global AI Adoption Trends",
+              chart_type: "area",
+              layout_variation: "two-column",
+              key_message: "2026年には企業の80%が生成AIを基幹業務に統合すると予測されています。",
+              body_text: "- 市場規模は前年比150%で急拡大\n- エンタープライズ投資が加速\n- 早期導入企業が優位性を確保",
+              data: [
+                  { label: "2023", value: 15 },
+                  { label: "2024", value: 35 },
+                  { label: "2025", value: 65 },
+                  { label: "2026(F)", value: 85 }
+              ],
+              annotations: ["Data Source: World Tech Research 2025"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_5",
+          layout_type: "table_slide",
+          content: {
+              title: "Competitor Benchmarking",
+              headers: ["Competitor", "AI Strategy", "Focus", "Progress", "ROI", "Notes"],
+              rows: [
+                  ["Global A", "Aggressive", "R&D", "◎", "2.5x", "先行投資継続"],
+                  ["Global B", "Balanced", "CS", "○", "1.8x", "満足度向上"],
+                  ["Region C", "Selective", "Sales", "△", "1.2x", "データ整備中"],
+                  ["Startup D", "AI-First", "All", "◎", "4.0x", "完全自動化"],
+                  ["Legacy E", "Late", "None", "×", "-", "検討中"]
+              ],
+              description: "競合他社と比較して、当社は「全社的な統合」のフェーズで優位性を確保する必要があります。",
+              annotations: ["※◎: 非常に進んでいる, ○: 進んでいる, △: 一部導入, ×: 未導入"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_6",
+          layout_type: "section_slide",
+          content: {
+              title: "Performance & Impact",
+              subtitle: "Data-Driven Analysis of Current Status",
+              section_number: "01",
+              annotations: ["Chapter 1 focus on quantitative metrics"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_7",
+          layout_type: "kpi_dashboard_slide",
+          content: {
+              title: "Strategic KPI Dashboard",
+              summary_kpis: [
+                  { label: "Total Cost Reduction", value: "25.4%", unit: "", change: "+5.2%", trend: "up" },
+                  { label: "Process Efficiency", value: "3.5x", unit: "", change: "+1.2", trend: "up" }
+              ],
+              detail_kpis: [
+                  { label: "AI Response Rate", value: "92%", unit: "", change: "+15%", trend: "up" },
+                  { label: "Human Error Rate", value: "0.8%", unit: "", change: "-2.4%", trend: "down" },
+                  { label: "Employee Saving", value: "450", unit: "h/mo", change: "flat", trend: "flat" },
+                  { label: "Customer Satisfaction", value: "4.8", unit: "/5.0", change: "+0.3", trend: "up" }
+              ],
+              body_text: "全ての重要指標において改善傾向にあります。CSATの向上がQ3の焦点となります。",
+              annotations: ["Updated: May 2026", "Source: Finance Sync"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_8",
+          layout_type: "stats_slide",
+          content: {
+              title: "Productivity Gains Highlight",
+              layout_variation: "two-column",
+              stats: [
+                  { value: "70%", label: "Time Saved", description: "Report generation" },
+                  { value: "¥45M", label: "Cost Offset", description: "Annual estimate" }
+              ],
+              body_text: "AI導入により、定型業務の工数が劇的に削減されました。クリエイティブな戦略立案により多くの時間を割くことが可能です。",
+              annotations: ["Based on Q1 2026 Internal Survey"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_9",
+          layout_type: "process_flow_slide",
+          content: {
+              title: "AI Implementation Lifecycle",
+              process_steps: [
+                  { title: "Analysis", description: "ボトルネック特定" },
+                  { title: "Design", description: "ソリューション設計" },
+                  { title: "Build", description: "基盤構築" },
+                  { title: "Pilot", description: "先行導入" },
+                  { title: "Optimize", description: "反映" },
+                  { title: "Scale", description: "展開" }
+              ],
+              key_message: "段階的なアプローチにより、リスクを最小限に抑えつつ効果を最大化します。",
+              annotations: ["Cycle duration: Approx. 6 months"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_10",
+          layout_type: "timeline_slide",
+          content: {
+              title: "Strategic Roadmap 2026",
+              layout_variation: "horizontal",
+              events: [
+                  { label: "Q1", title: "Foundation", description: "インフラとセキュリティの確立" },
+                  { label: "Q2", title: "Expansion", description: "主要3部門へのAI導入" },
+                  { label: "Q3", title: "Integration", description: "既存ERPとのAPI連携" },
+                  { label: "Q4", title: "Evolution", description: "AI主導の意思決定稼働" }
+              ],
+              annotations: ["Dates are subject to PoC results"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_11",
+          layout_type: "image_content_slide",
+          content: {
+              title: "Integrated AI Architecture",
+              layout_variation: "image-right",
+              image_url: "https://placehold.co/800x450/4f46e5/ffffff?text=AI+Architecture",
+              image_caption: "Conceptual Architecture",
+              key_message: "セキュアなプライベートLLMを中心としたプラットフォームを構築します。",
+              body_text: "- **マルチモデル**: 最適なLLMを選択\n- **RAG**: 社内文書をリアルタイム参照\n- **Security**: 情報漏洩を徹底防止",
+              annotations: ["ISO 27001 Certified"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_12",
+          layout_type: "profile_slide",
+          content: {
+              name: "DX Steering Committee",
+              role: "Executive Leadership",
+              bio: "CEO直属の特別チームが推進します。IT、人事、財務のエキスパートが揃っています。",
+              highlights: [
+                  "10+ Years DX Experience",
+                  "Cross-functional Lead",
+                  "AI Ethics Board Member"
+              ],
+              image_url: "https://placehold.co/400x500/6366f1/ffffff?text=Leadership",
+              annotations: ["Support available via Internal Slack"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_13",
+          layout_type: "quote_slide",
+          content: {
+              quote: "The best way to <span style='color: var(--slide-primary)'>predict</span> the future is to <span style='text-decoration: underline'>create</span> it.",
+              author: "Peter Drucker",
+              role: "Management Expert",
+              annotations: ["戦略の核となるマインドセット"]
+          }
+      }) + "," +
+      JSON.stringify({
+          id: "slide_14",
+          layout_type: "content_slide",
+          content: {
+              title: "Conclusion & Next Steps",
+              layout_variation: "two-column",
+              key_message: "2026年、私たちはAIをパートナーとして、これまでにない価値を創造します。",
+              body_text: "AIネイティブ企業への進化。\\n\\n### 次のアクション\n1. 予算委員会の最終承認\n2. 専任チームの組成\n3. ベンダーの最終選定\n4. 社内説明会の実施\\n\\n新しい時代の幕開けを、共に創り上げましょう。",
+              annotations: ["Contact: dx-strategy@example.com"]
+          }
+      }) +
+      ']}'
     },
     { event: 'node_finished', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm', status: 'succeeded' } },
     { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 5200, completion_tokens: 3600, total_tokens: 8800 } } }
   ],
 
+
+  // =================================================================
+  // ★追加: Hybrid Markup Demo (Markdown + HTMLタグ混在)
+  // =================================================================
+  'hybrid_markup_demo': [
+    { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+    { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', node_type: 'llm', text: '{"thinking":"MarkdownとHTMLタグを組み合わせたデモの要求です。","category":"TASK","requires_rag":false,"requires_web":false}' }, status: 'succeeded' },
+    { event: 'node_started', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm' } },
+    { event: 'message', answer: '', thinking: 'タイトルや見出し、本文にMarkdownとHTMLタグを混在させたデモを作成します。' },
+    { 
+      event: 'message', 
+      answer: createMockJson(
+        'MarkdownとHTMLタグを組み合わせたハイブリッド・マークアップのデモを作成しました。タイトルスライドでのタグ無視設定や、コンテンツスライドでの自由なスタイリングをご確認ください。',
+        [],
+        [],
+        'タイトルスライド、セクションスライド、コンテンツスライド、分割スライドのそれぞれで、MarkdownとHTMLがどのようにレンダリングされるかを検証します。'
+      ).slice(0, -1) + ',"presentation_title":"Hybrid <span style=\\"color: #6366f1\\">Markup</span> Demo","theme":"modern-indigo","slides":[{"id":"slide_1","layout_type":"title_slide","content":{"title":"<span style=\\"color: #ef4444\\">Hybrid</span> Markup <br/> & Markdown","subtitle":"Professional presentation with **Modern Indigo** theme","author":"AI Design Specialist"}},{"id":"slide_2","layout_type":"section_slide","content":{"title":"01. <span style=\\"border-bottom: 4px solid var(--slide-primary)\\">Basic</span> Syntax","subtitle":"Markdown list and inline HTML tags"}},{"id":"slide_3","layout_type":"content_slide","content":{"title":"Rich Text Content","key_message":"MarkdownとHTMLを自由に組み合わせ、<span style=\\"text-decoration: underline;\\">表現の限界</span>を突破します。","body_text":"このスライドでは、MarkdownとHTMLを自由に組み合わせることができます。\\n\\n- **太字** や *斜体* などの標準マークアップ\\n- <span style=\\"background: #fef3c7; padding: 0 4px; border-radius: 4px; color: #92400e;\\">ハイライトされたテキスト</span>\\n- <button style=\\"background: var(--slide-primary); color: white; border: none; padding: 4px 12px; border-radius: 20px; font-size: 0.8em;\\">UIパーツの模倣</button>\\n- `code block` やリンクの挿入\\n\\n自由な表現が可能になりました。"}},{"id":"slide_4","layout_type":"split_slide","content":{"title":"Comparison <small>(Alpha vs Beta)</small>","left_text":"### <span style=\\"color: #10b981\\">Advantage</span>\\n\\n- **柔軟性**: タグによる自由な装飾\\n- **一貫性**: Markdownによる構造化\\n- **簡潔さ**: 直感的な編集画面","right_text":"### <span style=\\"color: #ef4444\\">Legacy</span>\\n\\n- <del>配列ベースの管理</del>\\n- <del>限定的な表現力</del>\\n- <del>複雑なデータ構造</del>"}},{"id":"slide_5","layout_type":"quote_slide","content":{"title":"Design Philosophy","quote":"Design is not just what it <span style=\\"font-style: italic; color: var(--slide-primary);\\">looks like</span> and <span style=\\"font-style: italic; color: var(--slide-primary);\\">feels like</span>. Design is how it <span style=\\"text-decoration: underline;\\">works</span>.","author":"Steve Jobs"}}]}}'
+    },
+    { event: 'node_finished', status: 'succeeded' },
+    { event: 'message_end', metadata: { usage: { total_tokens: 3500 } } }
+  ],
 
   // =================================================================
   // ★追加: エラーシミュレーション用シナリオ (mock_error)
@@ -2094,6 +2475,11 @@ export const scenarioSuggestions = {
     'Difyとは何ですか？',
     'gpt-4o-miniとは何ですか？',
     'コストはどの程度かかりますか？'
+  ],
+  'hybrid_markup_demo': [
+    'タイトルを青色にして',
+    'ボタンのようなタグを追加して',
+    'Markdownで箇条書きを書いて'
   ],
   'artifact_demo': [
     'チェックリスト形式で出力してほしい',

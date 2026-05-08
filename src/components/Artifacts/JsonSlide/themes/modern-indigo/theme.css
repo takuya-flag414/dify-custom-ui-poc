@@ -1,0 +1,171 @@
+/* src/components/Artifacts/JsonSlide/themes/modern-indigo/theme.css */
+/* Modern Indigo テーマ専用スタイル: 強化版 */
+
+.presentation-panel[data-theme="modern-indigo"] {
+    /* カラー定義 */
+    --slide-primary: #6366f1;
+    --slide-primary-dark: #4f46e5;
+    --slide-accent: #f59e0b;
+    --slide-heading: #0f172a;
+    --slide-body: #1e293b;
+    --slide-muted: #94a3b8;
+    --slide-border: #e2e8f0;
+    --slide-bg-accent: #f1f5f9;
+    
+    --slide-bg-start: #ffffff;
+    --slide-bg-end: #ffffff;
+    --slide-text: var(--slide-body);
+    --slide-text-muted: var(--slide-muted);
+    
+    --slide-indigo-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --slide-dark-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* 基本レイアウト */
+.presentation-panel[data-theme="modern-indigo"] .json-slide-layout {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    letter-spacing: 0.01em;
+    padding: 5cqi 6cqi;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+/* ヘッダー */
+.presentation-panel[data-theme="modern-indigo"] .indigo-slide-header {
+    margin-bottom: 2.5cqi;
+    border-bottom: 2.5px solid var(--slide-primary);
+    padding-bottom: 1.2cqi;
+    flex-shrink: 0;
+}
+
+.presentation-panel[data-theme="modern-indigo"] .indigo-slide-header h2 {
+    font-size: 2.8cqi;
+    margin: 0;
+    color: var(--slide-heading);
+    font-weight: 700;
+}
+
+/* ボディ領域 */
+.presentation-panel[data-theme="modern-indigo"] .indigo-slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 共通コンポーネント */
+.presentation-panel[data-theme="modern-indigo"] .indigo-panel {
+    background: #f8fafc;
+    border: 1px solid var(--slide-border);
+    border-radius: 8px;
+    padding: 1.6cqi 1.8cqi;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* ポイントボックス (point-box) */
+.presentation-panel[data-theme="modern-indigo"] .indigo-point-box {
+    border: 1.5px solid var(--slide-primary);
+    border-radius: 8px;
+    padding: 1.2cqi 1.8cqi;
+    margin: 1cqi 0;
+    background: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.presentation-panel[data-theme="modern-indigo"] .indigo-point-box-title {
+    font-weight: 700;
+    font-size: 1.4cqi;
+    color: var(--slide-primary);
+    margin-bottom: 0.6cqi;
+    letter-spacing: 0.04em;
+}
+
+/* ハイライトカード (highlight-card) */
+.presentation-panel[data-theme="modern-indigo"] .indigo-highlight-card {
+    background: var(--slide-bg-accent);
+    border-left: 4px solid var(--slide-primary);
+    border-radius: 6px;
+    padding: 1.5cqi 2cqi;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.presentation-panel[data-theme="modern-indigo"] .indigo-card-value {
+    font-size: 3cqi;
+    font-weight: 800;
+    color: var(--slide-primary);
+    line-height: 1.1;
+}
+
+.presentation-panel[data-theme="modern-indigo"] .indigo-card-label {
+    font-size: 1.3cqi;
+    font-weight: 500;
+    color: var(--slide-muted);
+    margin-top: 0.5cqi;
+}
+
+/* ラベルタグ */
+.presentation-panel[data-theme="modern-indigo"] .indigo-label-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 1.1cqi;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.presentation-panel[data-theme="modern-indigo"] .indigo-label-tag.label-positive { background: #d1fae5; color: #065f46; }
+.presentation-panel[data-theme="modern-indigo"] .indigo-label-tag.label-negative { background: #fee2e2; color: #991b1b; }
+.presentation-panel[data-theme="modern-indigo"] .indigo-label-tag.label-neutral  { background: #dbeafe; color: #1e40af; }
+.presentation-panel[data-theme="modern-indigo"] .indigo-label-tag.label-warning  { background: #fef3c7; color: #92400e; }
+
+/* フロー矢印 */
+.presentation-panel[data-theme="modern-indigo"] .indigo-flow-arrow {
+    color: var(--slide-primary);
+    font-size: 2.5cqi;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.5cqi;
+}
+
+/* ダーク背景コンテキスト内での色指定無効化 */
+.indigo-dark-context .text-primary,
+.indigo-dark-context .text-danger,
+.indigo-dark-context .text-success,
+.indigo-dark-context .text-warning,
+.indigo-dark-context .text-muted,
+.indigo-dark-context .bg-highlight {
+    color: inherit !important;
+    background-color: transparent !important;
+    background: none !important;
+    border-color: inherit !important;
+}
+
+/* リストスタイル (Markdown用) */
+.presentation-panel[data-theme="modern-indigo"] .slide-markdown-content ul {
+    list-style-type: disc !important;
+    padding-left: 1.8em !important;
+    margin: 0.5cqi 0 !important;
+}
+
+.presentation-panel[data-theme="modern-indigo"] .slide-markdown-content ol {
+    list-style-type: decimal !important;
+    padding-left: 1.8em !important;
+    margin: 0.5cqi 0 !important;
+}
+
+.presentation-panel[data-theme="modern-indigo"] .slide-markdown-content li {
+    margin-bottom: 0.3cqi !important;
+    display: list-item !important; /* Tailwind等で block になっている場合の上書き */
+}

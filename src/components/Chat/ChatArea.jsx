@@ -12,6 +12,7 @@ import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
 import JsonSlidePanel from '../Artifacts/JsonSlidePanel';
+import JsonDocumentPanel from '../Artifacts/JsonDocumentPanel';
 
 
 const ChatArea = (props) => {
@@ -339,10 +340,11 @@ const ChatArea = (props) => {
         tableContent={tableContent}
       />
 
-      {/* ★追加: json_slideかどうかの判定 */}
+      {/* ★追加: 各ArtifactPanelの表示判定 */}
       {(() => {
         const currentArtifactType = openedArtifact?.type || streamingMessage?.artifact?.artifact_type;
-        const isJsonSlide = currentArtifactType === 'json_slide';
+        const isJsonSlide = currentArtifactType === 'json_slide' || currentArtifactType === 'json_slide_advanced';
+        const isJsonDocument = currentArtifactType === 'json_document';
 
         return (
           <>
@@ -352,8 +354,14 @@ const ChatArea = (props) => {
               artifact={openedArtifact}
               streamingMessage={streamingMessage}
             />
+            <JsonDocumentPanel
+              isOpen={isArtifactOpen && isJsonDocument}
+              onClose={closeArtifact}
+              artifact={openedArtifact}
+              streamingMessage={streamingMessage}
+            />
             <ArtifactPanel
-              isOpen={isArtifactOpen && !isJsonSlide}
+              isOpen={isArtifactOpen && !isJsonSlide && !isJsonDocument}
               onClose={closeArtifact}
               artifact={openedArtifact}
               streamingMessage={streamingMessage}

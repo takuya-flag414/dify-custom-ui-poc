@@ -1,0 +1,19 @@
+/* src/components/Artifacts/JsonSlide/themes/corporate-modern/theme.css */
+/* Corporate Modern テーマ専用スタイル */
+
+.presentation-panel[data-theme="corporate-modern"] {
+    --slide-bg-start: #ffffff;
+    --slide-bg-end: #f8fafc;
+    --slide-text: #334155;
+    --slide-text-muted: #64748b;
+    --slide-accent: #0f172a;
+    --slide-accent-light: #e2e8f0;
+    --slide-bullet-color: #2563eb;
+    --slide-divider: #cbd5e1;
+    --slide-title-gradient-start: #1e293b;
+    --slide-title-gradient-end: #334155;
+}
+
+/* スライド固有のスタイル（必要に応じてここに移動または定義） */
+/* 現在は PresentationPanel.css にあるスタイルが適用されていますが、
+   将来的にはこのファイルに完全にカプセル化することが可能です。 */

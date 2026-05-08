@@ -7,15 +7,16 @@ import './ArtifactCard.css';
  * artifact_type に応じたアイコンとラベルのマッピング
  */
 const ARTIFACT_TYPE_MAP = {
-    html_document: { emoji: '📄', label: 'A4ドキュメント' },
+    html_document: { emoji: '📄', label: '印刷可能なA4ドキュメント' },
+    json_document: { emoji: '📑', label: '編集可能なA4ドキュメント' },
     summary_report: { emoji: '📝', label: '要約・レポート' },
     checklist: { emoji: '✅', label: 'チェックリスト' },
     comparison_table: { emoji: '📊', label: '比較表' },
     faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
     meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
-    html_slide: { emoji: '📽️', label: 'プレゼンスライド' },
-    json_slide: { emoji: '🎯', label: 'プレゼンスライド(JSON)' },
-    // pptx_slide: { emoji: '📊', label: 'PowerPointスライド' },
+    html_slide: { emoji: '📽️', label: '印刷可能なプレゼンスライド' },
+    json_slide: { emoji: '🎯', label: '編集可能なプレゼンスライド' },
+    json_slide_advanced: { emoji: '🎯', label: '編集可能なプレゼンスライド' },
 };
 
 const getTypeInfo = (type) => {

@@ -49,6 +49,41 @@
     pointer-events: auto;
 }
 
+/* --- Edit Mode (Full Screen Modal) --- */
+.artifact-panel.edit-mode {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    /* transform は Framer Motion で管理するためここでは指定しない */
+    
+    /* モーダルの標準サイズ (JsonSlide と統一しつつ、隙間を確保) */
+    width: calc(100vw - 80px) !important;
+    max-width: 1280px !important;
+    height: calc(100vh - 80px) !important;
+    max-height: 880px !important;
+
+    /* 位置固定の解除 */
+    right: auto !important;
+    bottom: auto !important;
+    
+    z-index: 1000 !important;
+
+    /* DESIGN_RULE.md: mat-hud / Intelligent UI */
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(60px) saturate(210%);
+    -webkit-backdrop-filter: blur(60px) saturate(210%);
+    
+    border-radius: 24px; /* Slightly adjusted */
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='dark'] .artifact-panel.edit-mode {
+    background: rgba(25, 25, 25, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+}
+
 [data-theme='dark'] .artifact-panel {
     background: rgba(35, 35, 35, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -265,6 +300,96 @@
     box-shadow: 
         0 0 0 1px #000000,
         0 0 0 4px rgba(10, 132, 255, 0.5);
+}
+
+/* --- PPTX Export Button (Apple Liquid Glass Style) --- */
+.pptx-export-button {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 16px; /* Apple-like pill shape */
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.8); /* Specular Edge Reflection */
+    color: #007AFF; /* System Blue */
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    white-space: nowrap;
+    outline: none;
+}
+
+[data-theme='dark'] .pptx-export-button {
+    background: rgba(45, 45, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 2px 10px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+    color: #0A84FF; /* Dark Mode System Blue */
+}
+
+.pptx-export-button:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 1);
+}
+
+[data-theme='dark'] .pptx-export-button:hover {
+    background: rgba(60, 60, 60, 0.9);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.2);
+}
+
+.pptx-export-button:active {
+    transform: translateY(0) scale(0.96);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='dark'] .pptx-export-button:active {
+    background: rgba(30, 30, 30, 0.8);
+}
+
+.pptx-export-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(1);
+}
+
+.pptx-export-button:focus-visible {
+    box-shadow: 
+        0 0 0 1px #FFFFFF,
+        0 0 0 4px rgba(0, 122, 255, 0.5);
+}
+
+[data-theme='dark'] .pptx-export-button:focus-visible {
+    box-shadow: 
+        0 0 0 1px #000000,
+        0 0 0 4px rgba(10, 132, 255, 0.5);
+}
+
+.export-loading-dot {
+    width: 6px;
+    height: 6px;
+    background-color: currentColor;
+    border-radius: 50%;
+    display: inline-block;
+    animation: export-pulse 0.8s infinite alternate;
+}
+
+@keyframes export-pulse {
+    from { opacity: 0.4; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1.1); }
 }
 
 /* Primary Style (通常時の枠線) */
@@ -1628,6 +1753,7 @@
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     opacity: 0.5;
     pointer-events: none;

@@ -143,6 +143,8 @@ export const ChatServiceAdapter = {
                     scenarioKey = 'html_artifact_demo';
                 } else if (type === 'html_document') {
                     scenarioKey = 'html_a4_document';
+                } else if (type === 'json_document') {
+                    scenarioKey = 'json_document';
                 } else if (type === 'html_slide') {
                     scenarioKey = 'html_slide';
                 } else if (type === 'json_slide' || type === 'json_slide_advanced') {

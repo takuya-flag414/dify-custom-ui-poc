@@ -1,0 +1,295 @@
+/* src/components/Artifacts/JsonDocument/styles/JsonDocument.css */
+
+:root {
+    /* カラーパレット：印刷適性を考慮したコンサバティブな配色 */
+    --doc-bg-canvas: #e0e2e5;
+    --doc-bg-page: #ffffff;
+    --doc-text-main: #1a1a1a;       /* 墨色 */
+    --doc-text-secondary: #4b4b4b;
+    --doc-border-color: #333333;   /* 強い境界線 */
+    --doc-accent-color: #003366;   /* ダークネイビー（知性的） */
+    --doc-heading-color: #000000;
+    
+    /* タイポグラフィ：明朝体とゴシック体の使い分け */
+    --doc-font-serif: "YuMincho", "Yu Mincho", "Hiragino Mincho ProN", "MS PMincho", serif;
+    --doc-font-sans: "YuGothic", "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+
+    /* A4 Dimensions ( scaled for screen, maintaining 1:1.414 ratio ) */
+    --doc-page-width: 820px;
+    --doc-page-min-height: 1160px;
+    --doc-page-padding-top: 30mm;
+    --doc-page-padding-bottom: 30mm;
+    --doc-page-padding-left: 25mm;
+    --doc-page-padding-right: 25mm;
+}
+
+/* Page Container */
+.json-doc-container {
+    background-color: var(--doc-bg-canvas);
+    padding: 60px 20px;
+    height: 100%;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+.json-doc-page {
+    background-color: var(--doc-bg-page);
+    width: 100%;
+    max-width: var(--doc-page-width);
+    margin: 0 auto 50px auto;
+    min-height: var(--doc-page-min-height);
+    padding: 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #d1d1d1;
+    position: relative;
+    color: var(--doc-text-main);
+    font-family: var(--doc-font-serif); /* 本文は明朝体 */
+    line-height: 1.8;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.doc-page-header {
+    padding: 20px var(--doc-page-padding-right) 0 var(--doc-page-padding-left);
+    font-size: 9pt;
+    color: #888;
+    font-family: var(--doc-font-sans);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.doc-page-content {
+    flex: 1;
+    padding: 20px var(--doc-page-padding-right) 20px var(--doc-page-padding-left);
+    display: flex;
+    flex-direction: column;
+}
+
+.doc-page-footer {
+    padding: 0 var(--doc-page-padding-right) 20px var(--doc-page-padding-left);
+    font-size: 9pt;
+    color: #666;
+    font-family: var(--doc-font-sans);
+    display: flex;
+    justify-content: center;
+}
+
+/* Typography Blocks */
+.doc-block-heading-1 {
+    font-family: var(--doc-font-sans);
+    font-size: 20pt;
+    font-weight: 800;
+    margin: 0 0 40px 0;
+    padding-bottom: 16px;
+    border-bottom: 3px solid var(--doc-text-main);
+    color: var(--doc-heading-color);
+    text-align: center;
+}
+
+.doc-block-heading-2 {
+    font-family: var(--doc-font-sans);
+    font-size: 14pt;
+    font-weight: 700;
+    margin: 40px 0 20px 0;
+    color: var(--doc-heading-color);
+    border-bottom: 1px solid var(--doc-text-main);
+    padding-bottom: 4px;
+}
+
+/* H2 の装飾バーを廃止（LaTeX/Wordスタイル） */
+.doc-block-heading-2::before {
+    display: none;
+}
+
+.doc-block-heading-3 {
+    font-family: var(--doc-font-sans);
+    font-size: 11pt;
+    font-weight: 700;
+    margin: 24px 0 12px 0;
+    color: var(--doc-text-main);
+}
+
+.doc-block-rich-text {
+    font-size: 10.5pt;
+    margin-bottom: 18px;
+    color: var(--doc-text-main);
+    text-align: justify; /* 両端揃え */
+    text-indent: 1em;    /* 段落の先頭を1文字分下げる */
+    word-break: break-all;
+}
+
+.doc-block-rich-text strong {
+    font-weight: 700;
+    font-family: var(--doc-font-sans); /* 強調はゴシック */
+}
+
+/* Table Blocks */
+.doc-block-table-wrapper {
+    margin: 24px 0;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+}
+
+.doc-block-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    font-family: var(--doc-font-serif);
+}
+
+.doc-block-table th {
+    background-color: transparent;
+    border-bottom: 1px solid #000;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-family: var(--doc-font-sans);
+}
+
+.doc-block-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.doc-block-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* List Blocks */
+.doc-block-list {
+    margin-bottom: 20px;
+    padding-left: 1.5em; /* インデント */
+}
+
+.doc-block-list.unordered {
+    list-style-type: disc;
+}
+
+.doc-block-list.ordered {
+    list-style-type: decimal;
+}
+
+.doc-block-list li {
+    margin-bottom: 8px;
+    font-size: 10.5pt;
+    padding-left: 0.5em;
+}
+
+/* SVG Blocks */
+.doc-block-svg-container {
+    margin: 32px 0;
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    padding: 0;
+    border: none;
+}
+
+/* TOC Blocks */
+.doc-toc-container {
+    padding: 20px 0;
+    font-family: var(--doc-font-serif);
+}
+
+.doc-toc-container h2 {
+    font-family: var(--doc-font-sans);
+    font-size: 16pt;
+    text-align: center;
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+}
+
+.doc-toc-item {
+    padding: 4px 0;
+    margin-left: 0;
+}
+
+.doc-toc-item:hover {
+    background-color: transparent; /* 印刷物スタイルなのでホバーは控えめ */
+}
+
+.doc-toc-leader {
+    border-bottom: 1px dotted #888;
+}
+
+/* Utils */
+.typing-cursor-inline {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: var(--doc-text-main);
+    margin-left: 2px;
+    animation: blink 1s infinite;
+    vertical-align: middle;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* ダークモード対応：編集中の利便性は維持するが、紙の質感は保つ */
+[data-theme='dark'] .json-doc-page {
+    background-color: #ffffff; /* 紙は常に白 */
+    color: #1a1a1a;
+}
+/* Zoom Controls UI */
+.artifact-zoom-controls {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    padding: 2px 4px;
+    margin-right: 12px;
+}
+
+.zoom-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 14px;
+    color: var(--doc-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+    color: var(--doc-accent-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.zoom-label-btn {
+    padding: 0 10px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 14px;
+    color: var(--doc-text-main);
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 50px;
+}
+
+.zoom-label-btn:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+    color: var(--doc-accent-color);
+}
+
+.artifact-action-divider {
+    width: 1px;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+    margin: 0 8px;
+}

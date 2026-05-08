@@ -1,10 +1,12 @@
 // src/components/Artifacts/JsonSlide/PresentationPanel.jsx
 // JSON Slideのメインコンテナコンポーネント
 // artifact_content (JSON文字列) をパースし、スライドをレンダリングする
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SlideRenderer from './SlideRenderer';
 import SlideNavigation from './SlideNavigation';
+import EditModeModal from './EditModeModal';
+import { PptxExportEngine } from '../../../utils/pptxExportEngine';
 import './PresentationPanel.css';
 
 /**
@@ -27,44 +29,8 @@ const ErrorFallback = ({ error, rawContent }) => (
 /**
  * テーマ名 → CSS変数マッピング
  */
-const THEME_TOKENS = {
-    'corporate-modern': {
-        '--slide-bg-start': '#ffffff',
-        '--slide-bg-end': '#f8fafc',
-        '--slide-text': '#334155',
-        '--slide-text-muted': '#64748b',
-        '--slide-accent': '#0f172a',
-        '--slide-accent-light': '#e2e8f0',
-        '--slide-bullet-color': '#2563eb',
-        '--slide-divider': '#cbd5e1',
-        '--slide-title-gradient-start': '#1e293b',
-        '--slide-title-gradient-end': '#334155',
-    },
-    'creative-dark': {
-        '--slide-bg-start': '#0f0f0f',
-        '--slide-bg-end': '#1a1a1a',
-        '--slide-text': '#f5f5f5',
-        '--slide-text-muted': '#a3a3a3',
-        '--slide-accent': '#a855f7',
-        '--slide-accent-light': 'rgba(168, 85, 247, 0.15)',
-        '--slide-bullet-color': '#a855f7',
-        '--slide-divider': 'rgba(255, 255, 255, 0.08)',
-        '--slide-title-gradient-start': '#a855f7',
-        '--slide-title-gradient-end': '#c084fc',
-    },
-    'minimal-light': {
-        '--slide-bg-start': '#fafafa',
-        '--slide-bg-end': '#f0f0f0',
-        '--slide-text': '#1a1a1a',
-        '--slide-text-muted': '#6b7280',
-        '--slide-accent': '#059669',
-        '--slide-accent-light': 'rgba(5, 150, 105, 0.1)',
-        '--slide-bullet-color': '#059669',
-        '--slide-divider': 'rgba(0, 0, 0, 0.08)',
-        '--slide-title-gradient-start': '#059669',
-        '--slide-title-gradient-end': '#34d399',
-    },
-};
+import { themeRegistry, getAvailableThemeIds } from './config/themeRegistry';
+const defaultThemeId = 'corporate-modern';
 
 /**
  * PresentationPanel - JSON Slideのメインコンテナ
@@ -73,8 +39,25 @@ const THEME_TOKENS = {
  * @param {string} viewMode - 表示モード ('single' | 'list')
  * @param {function} setViewMode - モード変更関数
  */
-const PresentationPanel = ({ content, isGenerating, viewMode = 'single', setViewMode }) => {
+const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'single', setViewMode, onExportStatusChange }, ref) => {
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+    // 編集モード用 State
+    const [slideData, setSlideData] = useState(null);     // 編集中のスライド配列
+    const [currentTheme, setCurrentTheme] = useState(null); // 編集中のテーマ
+    const [editingSlideIndex, setEditingSlideIndex] = useState(0); // 左ペイン選択スライド
+    const [isEditOpen, setIsEditOpen] = useState(false);  // 全画面編集モーダルの開閉
+    const originalSlides = useRef(null); // リセット用: 初期スライド配列を保持
+    const [isExporting, setIsExportingState] = useState(false); // PPTXエクスポート状態
+    const isExportingRef = useRef(false); // 即時参照用
+
+    const setIsExporting = (val) => {
+        setIsExportingState(val);
+        isExportingRef.current = val;
+        if (onExportStatusChange) {
+            onExportStatusChange(val);
+        }
+    };
 
     // JSONパースとバリデーション
     const { presentationData, parseError } = useMemo(() => {
@@ -129,6 +112,101 @@ const PresentationPanel = ({ content, isGenerating, viewMode = 'single', setView
     useEffect(() => {
         setCurrentSlideIndex(0);
     }, [content]);
+
+    // presentationData が確定したら slideData と originalSlides を初期化
+    // ※ ユーザーが既に編集を開始している（slideData が存在する）場合は、外部からの更新で上書きしない
+    useEffect(() => {
+        if (presentationData && !slideData) {
+            setSlideData(presentationData.slides);
+            // 初期テーマの設定：データのthemeが有効ならそれを使用、無ければデフォルト
+            const initialTheme = (presentationData.theme && themeRegistry[presentationData.theme])
+                ? presentationData.theme
+                : defaultThemeId;
+            setCurrentTheme(initialTheme);
+            originalSlides.current = presentationData.slides;
+        }
+    }, [presentationData, slideData]);
+
+    // ===== PPTXエクスポート ハンドラー =====
+    const handleExportPPTX = async () => {
+        const activeThemeName = currentTheme || defaultThemeId;
+        if (activeThemeName !== 'modern-indigo') {
+            alert('PPTXエクスポートは現在「modern-indigo」テーマのみ対応しています。');
+            return;
+        }
+
+        const activeSlidesData = slideData || presentationData.slides;
+        if (!activeSlidesData) return;
+
+        setIsExporting(true);
+        try {
+            const engine = new PptxExportEngine({
+                themeName: activeThemeName,
+                fileName: `${presentationData.presentation_title || 'Presentation'}.pptx`
+            });
+            
+            // 隠しコンテナのレンダリング完了を待つための微小な待機
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            await engine.export(activeSlidesData);
+        } catch (error) {
+            console.error('PPTX Export failed:', error);
+            alert('PPTXエクスポートに失敗しました。\n詳細: ' + error.message);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    // 親コンポーネントに機能を公開
+    useImperativeHandle(ref, () => ({
+        handleExportPPTX,
+        isExporting
+    }), [handleExportPPTX, isExporting]);
+
+    // ===== 編集モード ハンドラー =====
+
+    /** 編集モーダルを開く（現在表示中のスライドで開始） */
+    const handleOpenEdit = useCallback(() => {
+        setEditingSlideIndex(currentSlideIndex);
+        setIsEditOpen(true);
+    }, [currentSlideIndex]);
+
+    /** viewMode が 'edit' になったらモーダルを自動的に開く */
+    useEffect(() => {
+        if (viewMode === 'edit') {
+            handleOpenEdit();
+        }
+    }, [viewMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    /** 編集モーダルを閉じる */
+    const handleCloseEdit = useCallback(() => {
+        setIsEditOpen(false);
+        // 閲覧モードに戻す
+        if (setViewMode) setViewMode('single');
+        // 編集内容を閲覧モードのインデックスに同期
+        setCurrentSlideIndex(editingSlideIndex);
+    }, [editingSlideIndex, setViewMode]);
+
+    /** リセット: originalSlides に戻す */
+    const handleReset = useCallback(() => {
+        if (originalSlides.current) {
+            setSlideData(originalSlides.current);
+            if (presentationData) setCurrentTheme(presentationData.theme);
+        }
+    }, [presentationData]);
+
+    /** 特定スライドの内容を更新 */
+    const handleSlideChange = useCallback((index, updatedSlide) => {
+        setSlideData(prev => {
+            if (!prev) return prev;
+            return prev.map((s, i) => i === index ? updatedSlide : s);
+        });
+    }, []);
+
+    /** テーマを変更 */
+    const handleThemeChange = useCallback((theme) => {
+        setCurrentTheme(theme);
+    }, []);
 
     // ナビゲーションハンドラー
     const handlePrev = useCallback(() => {
@@ -218,21 +296,41 @@ const PresentationPanel = ({ content, isGenerating, viewMode = 'single', setView
         return null;
     }
 
-    const { slides, theme } = presentationData;
-    const themeTokens = THEME_TOKENS[theme] || THEME_TOKENS['corporate-modern'];
-    const currentSlide = slides[currentSlideIndex];
+    // slideData が初期化済みなら編集データを使用、未初期化なら presentationData を使用
+    const activeSlides = slideData || presentationData.slides;
+    const activeTheme = currentTheme || defaultThemeId;
+    const { slides } = presentationData; // ← 閲覧モード（キーボードナビ等）はこちら
+    const currentSlide = activeSlides[currentSlideIndex];
 
     // 一覧表示（ギャラリービュー）
     if (viewMode === 'list') {
         return (
             <div
                 className="presentation-panel"
-                data-theme={theme}
-                style={themeTokens}
+                data-theme={activeTheme}
                 tabIndex={0}
             >
+                {/* ヘッダーエリア */}
+                <div className="panel-header">
+                    <div className="theme-selector">
+                        <label htmlFor="theme-select">Theme</label>
+                        <select
+                            id="theme-select"
+                            className="theme-select-input"
+                            value={activeTheme}
+                            onChange={(e) => handleThemeChange(e.target.value)}
+                        >
+                            {getAvailableThemeIds().map(themeId => (
+                                <option key={themeId} value={themeId}>
+                                    {themeId}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
                 <div className="slide-list-container">
-                    {slides.map((slide, index) => (
+                    {activeSlides.map((slide, index) => (
                         <div 
                             key={index} 
                             className="slide-list-item" 
@@ -245,8 +343,9 @@ const PresentationPanel = ({ content, isGenerating, viewMode = 'single', setView
                             <div className="slide-frame">
                                 <SlideRenderer
                                     slide={slide}
+                                    themeId={activeTheme}
                                     slideIndex={index}
-                                    totalSlides={slides.length}
+                                    totalSlides={activeSlides.length}
                                     isStatic={true}
                                 />
                             </div>
@@ -259,42 +358,105 @@ const PresentationPanel = ({ content, isGenerating, viewMode = 'single', setView
 
     // 単一スライド表示
     return (
-        <div
-            className="presentation-panel"
-            data-theme={theme}
-            style={themeTokens}
-            tabIndex={0}
-        >
-            {/* スライドキャンバス（16:9アスペクト比） */}
-            <div className="slide-canvas">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={currentSlideIndex}
-                        className="slide-frame"
-                        initial={{ opacity: 0, x: 30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -30 }}
-                        transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-                    >
-                        <SlideRenderer
-                            slide={currentSlide}
-                            slideIndex={currentSlideIndex}
-                            totalSlides={slides.length}
-                        />
-                    </motion.div>
-                </AnimatePresence>
+        <>
+            <div
+                className="presentation-panel"
+                data-theme={activeTheme}
+                tabIndex={0}
+            >
+                {/* ヘッダーエリア */}
+                <div className="panel-header">
+                    <div className="theme-selector">
+                        <label htmlFor="theme-select-single">Theme</label>
+                        <select
+                            id="theme-select-single"
+                            className="theme-select-input"
+                            value={activeTheme}
+                            onChange={(e) => handleThemeChange(e.target.value)}
+                        >
+                            {getAvailableThemeIds().map(themeId => (
+                                <option key={themeId} value={themeId}>
+                                    {themeId}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* スライドキャンバス（16:9アスペクト比） */}
+                <div className="slide-canvas">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentSlideIndex}
+                            className="slide-frame"
+                            initial={{ opacity: 0, x: 30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -30 }}
+                            transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                        >
+                            <SlideRenderer
+                                slide={currentSlide}
+                                themeId={activeTheme}
+                                slideIndex={currentSlideIndex}
+                                totalSlides={activeSlides.length}
+                            />
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+
+                {/* ナビゲーション */}
+                <SlideNavigation
+                    currentIndex={currentSlideIndex}
+                    totalSlides={activeSlides.length}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                    onGoTo={handleGoTo}
+                />
             </div>
 
-            {/* ナビゲーション */}
-            <SlideNavigation
-                currentIndex={currentSlideIndex}
-                totalSlides={slides.length}
-                onPrev={handlePrev}
-                onNext={handleNext}
-                onGoTo={handleGoTo}
+            {/* 全画面編集モーダル（createPortal でbody直下にレンダリング） */}
+            <EditModeModal
+                isOpen={isEditOpen}
+                slides={activeSlides}
+                theme={activeTheme}
+                editingSlideIndex={editingSlideIndex}
+                onClose={handleCloseEdit}
+                onReset={handleReset}
+                onSlideChange={handleSlideChange}
+                onSlideSelect={setEditingSlideIndex}
+                onThemeChange={handleThemeChange}
             />
-        </div>
+
+            {/* スナップショット用隠しコンテナ（エクスポート時に利用） */}
+            <div 
+                className="snapshot-hidden-container" 
+                style={{ position: 'absolute', top: '-9999px', left: '-9999px', opacity: 0, pointerEvents: 'none', zIndex: -1000 }}
+                aria-hidden="true"
+            >
+                {activeSlides.map((slide, index) => (
+                    <div 
+                        key={`snapshot-${index}`} 
+                        id={`slide-capture-${index}`}
+                        className="presentation-panel"
+                        data-theme={activeTheme}
+                        style={{ width: '960px', height: '540px', position: 'relative' }}
+                    >
+                        <div className="slide-canvas" style={{ width: '100%', height: '100%', padding: 0, margin: 0, borderRadius: 0, boxShadow: 'none' }}>
+                            <div className="slide-frame" style={{ width: '100%', height: '100%' }}>
+                                <SlideRenderer
+                                    slide={slide}
+                                    themeId={activeTheme}
+                                    slideIndex={index}
+                                    totalSlides={activeSlides.length}
+                                    isStatic={true}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </>
     );
-};
+});
 
 export default PresentationPanel;
