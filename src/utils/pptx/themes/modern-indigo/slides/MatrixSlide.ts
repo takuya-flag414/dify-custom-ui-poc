@@ -47,25 +47,30 @@ export class MatrixSlideRenderer extends BaseRenderer {
     const qW = (this.config.layout.safeW / 2) - 0.6;
     const qH = (mainH / 2) - 0.4;
 
-    const positions = [
-      { x: this.config.layout.baseX + 0.3, y: currentY + 0.4 },          // 0: 左上
-      { x: centerX + 0.3, y: currentY + 0.4, isHighlight: true },      // 1: 右上 (Highlight)
+    // インデックスと描画位置のマッピング
+    // 0:右上, 1:左上, 2:左下, 3:右下
+    const quadrantMap = [
+      { x: centerX + 0.3, y: currentY + 0.4, isHighlight: true },      // 0: 右上 (Highlight)
+      { x: this.config.layout.baseX + 0.3, y: currentY + 0.4 },          // 1: 左上
       { x: this.config.layout.baseX + 0.3, y: centerY + 0.2 },          // 2: 左下
       { x: centerX + 0.3, y: centerY + 0.2 }                            // 3: 右下
     ];
 
     quadrants.slice(0, 4).forEach((q: any, i: number) => {
-      const pos = positions[i];
-      let pY = pos.y;
+      const pos = quadrantMap[i];
+      if (!pos) return;
 
-      // 象限の見出し
+      let pY = pos.y;
       const isHighlight = pos.isHighlight;
+
+      // 象限の見出し (改行バグ回避のため renderTextBlock を使用可能だが、見出しは1行想定なので addText で継続)
       slide.addShape(this.pptx.ShapeType.rect, {
         x: pos.x, y: pY, w: 0.05, h: 0.4,
         fill: { color: isHighlight ? this.config.colors.primary : this.config.colors.border.main }
       });
+      
       const qTitleParts = this.textProcessor.parseRichText(q.label || '', {
-        fontSize: 14, bold: true, color: isHighlight ? this.config.colors.primary : this.config.colors.text.header
+        fontSize: 13, bold: true, color: isHighlight ? this.config.colors.primary : this.config.colors.text.header
       });
       slide.addText(qTitleParts, {
         x: pos.x + 0.15, y: pY, w: qW, h: 0.4,
@@ -73,13 +78,13 @@ export class MatrixSlideRenderer extends BaseRenderer {
       });
       pY += 0.5;
 
-      // 象限のテキスト
-      const qTextParts = this.textProcessor.parseRichText(q.text || '', {
-        fontSize: 12, color: this.config.colors.text.body
-      });
-      slide.addText(qTextParts, {
+      // 象限のテキスト (改行バグ・重なり回避のため renderTextBlock を使用)
+      this.renderTextBlock(slide, q.text || '', {
         x: pos.x + 0.15, y: pY, w: qW, h: qH - 0.5,
-        valign: 'top', margin: 0, lineSpacing: 20
+        fontSize: 10,
+        color: this.config.colors.text.body,
+        lineSpacing: 10 * 1.4,
+        valign: 'top'
       });
     });
 

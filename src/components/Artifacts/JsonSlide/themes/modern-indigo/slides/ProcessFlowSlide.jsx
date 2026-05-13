@@ -34,15 +34,17 @@ const ProcessFlowSlide = ({ content, isStatic = false }) => {
     const hasKey = !!key_message;
     // 複数行、またはテキストブロックが両方ある場合は「高密度」と判定
     const isHighDensity = rowCount > 1 || (hasBody && hasKey);
+    // さらに厳しい条件
+    const isUltraHighDensity = rowCount > 1 && hasBody && hasKey;
 
     // 高密度の場合は余白とフォントサイズを引き締め、オーバーフローを防ぐ
-    const contextMarginBottom = isHighDensity ? '1.5cqi' : '3.5cqi';
-    const gridRowGap = isHighDensity ? '2.5cqi' : '4.5cqi';
-    const keyMsgMarginTop = isHighDensity ? '1.5cqi' : '3cqi';
+    const contextMarginBottom = isUltraHighDensity ? '1cqi' : (isHighDensity ? '1.5cqi' : '3.5cqi');
+    const gridRowGap = isUltraHighDensity ? '1.5cqi' : (isHighDensity ? '2.5cqi' : '4.5cqi');
+    const keyMsgMarginTop = isUltraHighDensity ? '1cqi' : (isHighDensity ? '1.5cqi' : '3cqi');
 
-    const stepPaddingTop = isHighDensity ? '1cqi' : '1.5cqi';
-    const stepTitleSize = isHighDensity ? '1.4cqi' : '1.6cqi';
-    const stepDescSize = isHighDensity ? '1.3cqi' : '1.4cqi';
+    const stepPaddingTop = isUltraHighDensity ? '0.8cqi' : (isHighDensity ? '1cqi' : '1.5cqi');
+    const stepTitleSize = isUltraHighDensity ? '1.3cqi' : (isHighDensity ? '1.4cqi' : '1.6cqi');
+    const stepDescSize = isUltraHighDensity ? '1.2cqi' : (isHighDensity ? '1.3cqi' : '1.4cqi');
 
     return (
         <div className="json-slide-layout indigo-style h-full flex flex-col">

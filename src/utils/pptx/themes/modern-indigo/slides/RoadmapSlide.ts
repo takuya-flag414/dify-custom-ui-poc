@@ -34,24 +34,6 @@ export class RoadmapSlideRenderer extends BaseRenderer {
     // --- 3. ステップ描画 ---
     const stepW = safeW / steps.length;
 
-    // テキスト解析関数 (既存)
-    const processTextToBullets = (text: string, fontSize: number): any[] => {
-      if (!text) return [];
-      const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter(l => l.trim().length > 0);
-      const items: any[] = [];
-      lines.forEach((line: string) => {
-        const trimmed = line.trim();
-        const isBullet = trimmed.startsWith('-') || trimmed.startsWith('*');
-        const cleanLine = isBullet ? trimmed.replace(/^[-*]\s*/, '') : trimmed;
-        const lineParts = this.textProcessor.parseRichText(cleanLine, { color: this.config.colors.text.body, fontSize });
-        if (lineParts.length > 0) {
-          lineParts[0].options = { ...lineParts[0].options, bullet: isBullet ? { code: '2022' } : false, breakLine: true };
-          for (let i = 1; i < lineParts.length; i++) lineParts[i].options = { ...lineParts[i].options, breakLine: false };
-          items.push(...lineParts);
-        }
-      });
-      return items;
-    };
 
     steps.forEach((step: any, i: number) => {
       const stepX = baseX + (i * stepW);
@@ -92,8 +74,8 @@ export class RoadmapSlideRenderer extends BaseRenderer {
       });
       pY += 0.55;
 
-      // 本文 (Description - 箇条書き対応)
-      const bodyItems = processTextToBullets(step.description || '', 10);
+      // 本文 (共通メソッドで改行バグを修正済み)
+      const bodyItems = this.processTextLines(step.description || '', 10);
       slide.addText(bodyItems, {
         x: contentX, y: pY, w: contentW, h: dropLineH - (pY - trackY),
         valign: 'top', margin: 0, lineSpacing: 10 * 1.5

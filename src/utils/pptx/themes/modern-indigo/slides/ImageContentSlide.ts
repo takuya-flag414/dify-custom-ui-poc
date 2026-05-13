@@ -67,35 +67,7 @@ export class ImageContentSlideRenderer extends BaseRenderer {
 
     // --- 5. コンテンツエリア (垂直中央配置の計算) ---
     
-    // Markdown/RichText と 箇条書きを両立する解析関数
-    const processTextToBullets = (text: string, fontSize: number): any[] => {
-      if (!text) return [];
-      const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter(l => l.trim().length > 0);
-      const items: any[] = [];
-      lines.forEach((line: string) => {
-        const trimmed = line.trim();
-        const isBullet = trimmed.startsWith('-') || trimmed.startsWith('*');
-        const cleanLine = isBullet ? trimmed.replace(/^[-*]\s*/, '') : trimmed;
 
-        const lineParts = this.textProcessor.parseRichText(cleanLine, {
-          color: this.config.colors.text.body,
-          fontSize: fontSize
-        });
-
-        if (lineParts.length > 0) {
-          lineParts[0].options = {
-            ...lineParts[0].options,
-            bullet: isBullet ? { code: '2022' } : false, // 箇条書きドット
-            breakLine: true
-          };
-          for (let i = 1; i < lineParts.length; i++) {
-            lineParts[i].options = { ...lineParts[i].options, breakLine: false };
-          }
-          items.push(...lineParts);
-        }
-      });
-      return items;
-    };
 
     // Body Text と Bullet Points を統合して高さを推定
     const bodyLines = body_text ? body_text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter((l: string) => l.trim().length > 0).length : 0;
@@ -115,33 +87,33 @@ export class ImageContentSlideRenderer extends BaseRenderer {
         x: contentX, y: pY, w: 0.05, h: 0.6,
         fill: { color: this.config.colors.primary }
       });
-      const kmParts = this.textProcessor.parseRichText(key_message, {
-        fontSize: 13, bold: true, color: this.config.colors.text.header
-      });
-      slide.addText(kmParts, {
-        x: contentX + 0.15, y: pY, w: colW - 0.2, h: 0.6,
-        valign: 'middle', margin: 0
+      this.renderTextBlock(slide, key_message, {
+        x: contentX + 0.15,
+        y: pY,
+        w: colW - 0.2,
+        h: 0.6,
+        fontSize: 13,
+        color: this.config.colors.text.header,
+        valign: 'middle'
       });
       pY += 0.8;
     }
 
-    // B. Body Text & Bullet Points
-    const allTextItems: any[] = [];
-    if (body_text) {
-      allTextItems.push(...processTextToBullets(body_text, 10));
-    }
-    if (bullet_points && bullet_points.length > 0) {
-      bullet_points.forEach((pt: string) => {
-        // ハイフンがなければ付与して箇条書き処理へ流す
-        const text = pt.trim().startsWith('-') || pt.trim().startsWith('*') ? pt : `- ${pt}`;
-        allTextItems.push(...processTextToBullets(text, 10));
-      });
-    }
+    // B. Body Text & Bullet Points (一括処理 - 改行バグ回避版)
+    const combinedText = [
+      body_text || '',
+      ...(bullet_points || []).map((pt: string) => pt.trim().startsWith('-') || pt.trim().startsWith('*') ? pt : `- ${pt}`)
+    ].filter(t => t.trim().length > 0).join('\n');
 
-    if (allTextItems.length > 0) {
-      slide.addText(allTextItems, {
-        x: contentX, y: pY, w: colW, h: mainH - (pY - currentY),
-        valign: 'top', margin: 0, lineSpacing: 10 * 1.7 
+    if (combinedText) {
+      this.renderTextBlock(slide, combinedText, {
+        x: contentX,
+        y: pY,
+        w: colW,
+        h: mainH - (pY - currentY),
+        fontSize: 10,
+        lineSpacing: 10 * 1.7,
+        valign: 'top'
       });
     }
 

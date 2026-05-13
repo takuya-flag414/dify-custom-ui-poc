@@ -318,6 +318,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
     const [selectionState, setSelectionState] = useState({ text: '', x: 0, y: 0, show: false });
 
     // ★v2.0追加: iframe高さ管理（複数ページ対応）
+    const panelRef = useRef(null);
     const iframeRefs = useRef({});
     const [pageHeights, setPageHeights] = useState({});
 
@@ -1025,14 +1026,13 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
             // mouseup後、ブラウザがselectionを確定するまで少し待つ
             setTimeout(() => {
                 const selection = window.getSelection();
-                if (!selection || selection.isCollapsed) return;
+                if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
 
                 const text = selection.toString().trim();
                 if (text.length === 0) return;
 
-                // 選択範囲が ArtifactPanel 内かチェック
-                const panelEl = document.querySelector('.artifact-body');
-                if (!panelEl || !panelEl.contains(selection.anchorNode)) return;
+                // 選択範囲が現在のパネル内かチェック
+                if (!panelRef.current || !panelRef.current.contains(selection.anchorNode)) return;
 
                 const range = selection.getRangeAt(0);
                 const rect = range.getBoundingClientRect();
@@ -1041,11 +1041,11 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                     setSelectionState({
                         text,
                         x: rect.left + rect.width / 2,
-                        y: rect.bottom + 12, // 選択テキストの下に十分な間隔をあけて配置
+                        y: rect.bottom + window.scrollY + 12, // スクロール分を考慮しつつ配置
                         show: true
                     });
                 }
-            }, 10);
+            }, 50);
         };
 
         // パネル外クリックやselection解除でツールチップを閉じる
@@ -1086,6 +1086,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
         <AnimatePresence>
             {shouldShowPanel && (
                 <motion.div
+                    ref={panelRef}
                     className={`artifact-panel ${isOpen ? 'open' : ''} ${isGeneratingArtifact ? 'ai-generating' : ''}`}
                     initial={{ x: '100%', opacity: 0 }}
                     animate={{ x: isOpen ? 0 : '100%', opacity: isOpen ? 1 : 0 }}
@@ -1465,7 +1466,7 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                                         left: selectionState.x,
                                         top: selectionState.y,
                                         transform: 'translateX(-50%)',
-                                        zIndex: 10000
+                                        zIndex: 999999
                                     }}
                                     onMouseDown={(e) => {
                                         e.preventDefault();

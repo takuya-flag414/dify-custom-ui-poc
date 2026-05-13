@@ -40,51 +40,9 @@ export class ContentSlideRenderer extends BaseRenderer {
       currentY += 0.9;
     }
 
-    // テキスト解析関数 (強化版: ネスト対応)
-    const processTextToBullets = (text: string, fontSize: number): any[] => {
-      if (!text) return [];
-      const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter(l => l.trim().length > 0);
-      const items: any[] = [];
-      
-      lines.forEach((line: string) => {
-        // 1. インデントレベルの判定
-        // 行頭のスペース数、または連続する記号 (-- , ** ) からレベルを推測
-        const leadingSpaces = line.match(/^(\s*)/)?.[1].length || 0;
-        let indentLevel = Math.floor(leadingSpaces / 2);
-        
-        let trimmed = line.trim();
-        // 記号の連続（-- や **）をカウントしてレベルに加算
-        const bulletMatch = trimmed.match(/^([-*]{1,3})\s+(.*)/);
-        let isBullet = false;
-        let content = trimmed;
-        
-        if (bulletMatch) {
-          isBullet = true;
-          indentLevel += (bulletMatch[1].length - 1); // -- ならレベル+1
-          content = bulletMatch[2];
-        }
-        
-        // pptxgenjsの制限 (0-3程度)
-        indentLevel = Math.min(Math.max(indentLevel, 0), 3);
-
-        const lineParts = this.textProcessor.parseRichText(content, { color: this.config.colors.text.body, fontSize });
-        if (lineParts.length > 0) {
-          lineParts[0].options = { 
-            ...lineParts[0].options, 
-            bullet: isBullet ? true : false,
-            indentLevel: isBullet ? indentLevel : undefined,
-            breakLine: true 
-          };
-          for (let i = 1; i < lineParts.length; i++) {
-            lineParts[i].options = { ...lineParts[i].options, breakLine: false };
-          }
-          items.push(...lineParts);
-        }
-      });
-      return items;
-    };
-
     // --- 3. Body Text (Editorial Columns) ---
+    // テキスト解析は BaseRenderer の共通メソッド processTextLines を使用
+    // (リッチテキスト直後の意図しない改行を防ぐ修正済みバージョン)
     if (body_text) {
       const footerY = 5.1;
       const contentH = footerY - currentY - 0.2;
@@ -108,21 +66,18 @@ export class ContentSlideRenderer extends BaseRenderer {
         });
 
         // 左カラム
-        const leftItems = processTextToBullets(leftText, fontSize);
-        slide.addText(leftItems, {
-          x: baseX, y: currentY, w: colW, h: contentH, valign: 'top', margin: 0, lineSpacing
+        this.renderTextBlock(slide, leftText, {
+          x: baseX, y: currentY, w: colW, h: contentH, fontSize, lineSpacing, valign: 'top'
         });
         // 右カラム
-        const rightItems = processTextToBullets(rightText, fontSize);
-        slide.addText(rightItems, {
-          x: baseX + colW + gap, y: currentY, w: colW, h: contentH, valign: 'top', margin: 0, lineSpacing
+        this.renderTextBlock(slide, rightText, {
+          x: baseX + colW + gap, y: currentY, w: colW, h: contentH, fontSize, lineSpacing, valign: 'top'
         });
       } else {
         // 1カラム (幅を90%に絞る)
         const oneColW = safeW * 0.9;
-        const bodyItems = processTextToBullets(body_text, fontSize);
-        slide.addText(bodyItems, {
-          x: baseX, y: currentY, w: oneColW, h: contentH, valign: 'top', margin: 0, lineSpacing
+        this.renderTextBlock(slide, body_text, {
+          x: baseX, y: currentY, w: oneColW, h: contentH, fontSize, lineSpacing, valign: 'top'
         });
       }
     }

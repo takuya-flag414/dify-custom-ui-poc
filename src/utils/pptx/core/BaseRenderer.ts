@@ -101,4 +101,115 @@ export abstract class BaseRenderer {
       };
     });
   }
+
+  /**
+   * テキストブロックをレンダリングする (箇条書き・折り返し・重なり解消版)
+   */
+  protected renderTextBlock(
+    slide: any,
+    text: string,
+    opts: { x: number, y: number, w: number, h: number, fontSize: number, lineSpacing?: number, color?: string, align?: string, valign?: string }
+  ) {
+    if (!text) return 0;
+
+    const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n');
+    let currentY = opts.y;
+    const spacing = opts.lineSpacing || opts.fontSize * 1.5;
+    const lineH = spacing / 72;
+
+    // 行の種類ごとにグループ化して描画する
+    // (PptxGenJS は 1つの addText 内で bullet の有無を切り替えるのが難しいため)
+    let currentGroup: { isBullet: boolean, indentLevel: number, segments: any[] } | null = null;
+
+    const flushGroup = () => {
+      if (!currentGroup || currentGroup.segments.length === 0) return;
+
+      slide.addText(currentGroup.segments, {
+        x: opts.x,
+        y: currentY,
+        w: opts.w,
+        h: opts.h - (currentY - opts.y), // 残りの高さ
+        fontSize: opts.fontSize,
+        color: opts.color || this.config.colors.text.body,
+        align: opts.align || 'left',
+        valign: opts.valign || 'top',
+        bullet: currentGroup.isBullet ? { code: '2022' } : false,
+        indentLevel: currentGroup.indentLevel,
+        lineSpacing: spacing,
+        margin: 0,
+      });
+
+      // 高さの推定 (簡易計算: セグメント内の \n の数 + 概算の折り返し行数)
+      const newlineCount = currentGroup.segments.filter(s => s.text === '\n').length + 1;
+      // 実際には折り返しを正確に取るのは難しいため、少し余裕を持って Y を進める
+      currentY += newlineCount * lineH;
+      currentGroup = null;
+    };
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        flushGroup();
+        currentY += lineH; // 空行
+        return;
+      }
+
+      const bulletMatch = trimmed.match(/^([-*]{1,3})\s+(.*)/);
+      const isBullet = !!bulletMatch;
+      const content = isBullet ? bulletMatch[2] : trimmed;
+      const indentLevel = isBullet ? Math.min(bulletMatch[1].length - 1, 3) : 0;
+
+      // グループの切り替わり判定 (箇条書きの有無やインデントが変わったら別の addText にする)
+      if (currentGroup && (currentGroup.isBullet !== isBullet || currentGroup.indentLevel !== indentLevel)) {
+        flushGroup();
+      }
+
+      if (!currentGroup) {
+        currentGroup = { isBullet, indentLevel, segments: [] };
+      }
+
+      // 同じグループ内の2行目以降なら改行を挿入
+      if (currentGroup.segments.length > 0) {
+        currentGroup.segments.push({ text: '\n' });
+      }
+
+      const segments = this.textProcessor.parseRichText(content, {
+        color: opts.color || this.config.colors.text.body,
+        fontSize: opts.fontSize,
+      });
+
+      currentGroup.segments.push(...segments);
+    });
+
+    flushGroup();
+    return currentY - opts.y;
+  }
+
+  /**
+   * 単一行または単純なテキスト解析用
+   */
+  protected processTextLines(text: string, fontSize: number, opts: { enableIndent?: boolean } = {}): any[] {
+    if (!text) return [];
+    const items: any[] = [];
+    const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter(l => l.trim().length > 0);
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      const bulletMatch = trimmed.match(/^([-*]{1,3})\s+(.*)/);
+      const isBullet = !!bulletMatch;
+      const content = isBullet ? bulletMatch[2] : trimmed;
+      
+      const segments = this.textProcessor.parseRichText(content, { color: this.config.colors.text.body, fontSize });
+
+      segments.forEach((seg: any, i: number) => {
+        seg.options = {
+          ...seg.options,
+          bullet: (i === 0 && isBullet) ? { code: '2022' } : undefined,
+          breakLine: i === 0 && items.length > 0,
+        };
+      });
+      items.push(...segments);
+    });
+    return items;
+  }
 }

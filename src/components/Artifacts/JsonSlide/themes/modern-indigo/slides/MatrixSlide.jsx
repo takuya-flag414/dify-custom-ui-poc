@@ -64,16 +64,24 @@ const MatrixSlide = ({ content, isStatic = false }) => {
 
                         {/* 4象限グリッド (軸と完全に同期) */}
                         <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-                            {quadrants.slice(0, 4).map((q, i) => {
-                                const isHighlight = i === 1; // 右上をハイライト
+                            {[1, 0, 2, 3].map((orderIdx) => {
+                                // orderIdx 0:右上, 1:左上, 2:左下, 3:右下
+                                // quadrants[0]を右上に、[1]を左上に、[2]を左下に、[3]を右下に配置
+                                const q = quadrants[orderIdx];
+                                if (!q) return <div key={orderIdx} />;
+
+                                const isHighlight = orderIdx === 0; // 右上 (Index 0) を常にハイライト
+                                
+                                // grid-cols-2 における描画順は [左上, 右上, 左下, 右下]
+                                // つまり orderIdx が [1, 0, 2, 3] の順で map すれば正しい位置にハマる
                                 return (
                                     <motion.div
-                                        key={i}
+                                        key={orderIdx}
                                         className="flex flex-col"
                                         style={{ padding: '3cqi' }}
                                         initial={!isStatic ? { opacity: 0 } : {}}
                                         animate={{ opacity: 1 }}
-                                        transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
+                                        transition={{ duration: 0.5, delay: 0.2 + (orderIdx * 0.1) }}
                                     >
                                         <h3 style={{
                                             fontSize: '1.6cqi',

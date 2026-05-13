@@ -89,39 +89,10 @@ export class DataInsightSlideRenderer extends BaseRenderer {
     });
     rY += 0.7;
 
-    // Markdown/RichText と 箇条書きを両立する解析関数
-    const processTextToBullets = (text: string, fontSize: number): any[] => {
-      if (!text) return [];
-      const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter(l => l.trim().length > 0);
-      const items: any[] = [];
-      lines.forEach((line: string) => {
-        const trimmed = line.trim();
-        const isBullet = trimmed.startsWith('-') || trimmed.startsWith('*');
-        const cleanLine = isBullet ? trimmed.replace(/^[-*]\s*/, '') : trimmed;
-
-        const lineParts = this.textProcessor.parseRichText(cleanLine, {
-          color: this.config.colors.text.body,
-          fontSize: fontSize
-        });
-
-        if (lineParts.length > 0) {
-          lineParts[0].options = {
-            ...lineParts[0].options,
-            bullet: isBullet ? { code: '2022' } : false,
-            breakLine: true
-          };
-          for (let i = 1; i < lineParts.length; i++) {
-            lineParts[i].options = { ...lineParts[i].options, breakLine: false };
-          }
-          items.push(...lineParts);
-        }
-      });
-      return items;
-    };
-
     // インサイト本文 (箇条書き対応)
+    // テキスト解析は BaseRenderer の共通メソッド processTextLines を使用
     if (insight_text) {
-      const insightBodyItems = processTextToBullets(insight_text, 11);
+      const insightBodyItems = this.processTextLines(insight_text, 11);
       // 行間 lineHeight: 1.7 を再現するため lineSpacing を調整
       slide.addText(insightBodyItems, {
         x: rightX + textPaddingLeft,

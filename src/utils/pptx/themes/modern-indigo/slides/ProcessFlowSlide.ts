@@ -51,37 +51,33 @@ export class ProcessFlowSlideRenderer extends BaseRenderer {
     };
     const cols = getCols(count);
     const rows = Math.ceil(count / cols);
-    const isHighDensity = rows > 1 || (body_text && key_message);
+    const hasBody = !!body_text;
+    const hasKey = !!key_message;
+    
+    // 情報密度の判定
+    const isHighDensity = rows > 1 || (hasBody && hasKey);
+    // さらに厳しい条件（2行以上かつ他の要素も多い場合）
+    const isUltraHighDensity = rows > 1 && hasBody && hasKey;
 
     const gapX = 0.4;
-    const gapY = isHighDensity ? 0.3 : 0.6;
-    const itemW = (safeW - (cols - 1) * gapX) / cols;
-    const itemH = isHighDensity ? 1.2 : 1.6;
+    let gapY = isHighDensity ? 0.3 : 0.6;
+    if (isUltraHighDensity) gapY = 0.2; // さらに詰める
 
-    // テキスト解析関数 (既存)
-    const processTextToBullets = (text: string, fontSize: number): any[] => {
-      if (!text) return [];
-      const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter(l => l.trim().length > 0);
-      const items: any[] = [];
-      lines.forEach((line: string) => {
-        const trimmed = line.trim();
-        const isBullet = trimmed.startsWith('-') || trimmed.startsWith('*');
-        const cleanLine = isBullet ? trimmed.replace(/^[-*]\s*/, '') : trimmed;
-        const lineParts = this.textProcessor.parseRichText(cleanLine, { color: this.config.colors.text.body, fontSize });
-        if (lineParts.length > 0) {
-          lineParts[0].options = { ...lineParts[0].options, bullet: isBullet ? { code: '2022' } : false, breakLine: true };
-          for (let i = 1; i < lineParts.length; i++) lineParts[i].options = { ...lineParts[i].options, breakLine: false };
-          items.push(...lineParts);
-        }
-      });
-      return items;
-    };
+    const itemW = (safeW - (cols - 1) * gapX) / cols;
+    let itemH = isHighDensity ? 1.2 : 1.6;
+    if (isUltraHighDensity) itemH = 1.0; // さらに低くする
+
+
+    let maxGridY = currentY;
 
     activeSteps.forEach((step: any, idx: number) => {
       const cIdx = idx % cols;
       const rIdx = Math.floor(idx / cols);
       const x = baseX + cIdx * (itemW + gapX);
       const y = currentY + rIdx * (itemH + gapY);
+      
+      const bottomY = y + itemH;
+      if (bottomY > maxGridY) maxGridY = bottomY;
 
       // 上部境界線と L字アクセント
       slide.addShape(this.pptx.ShapeType.rect, {
@@ -105,43 +101,58 @@ export class ProcessFlowSlideRenderer extends BaseRenderer {
         fontSize: 9, color: this.config.colors.primaryDark, fontFace: 'Courier New', bold: true,
         margin: 0
       });
-      pY += 0.25;
+      pY += 0.2; // 少し詰める
 
       // ステップ見出し
       const sTitle = step.title || step.label || (typeof step === 'string' ? step : '');
       const titleParts = this.textProcessor.parseRichText(sTitle, {
-        fontSize: isHighDensity ? 12 : 13, bold: true, color: this.config.colors.text.header
+        fontSize: isHighDensity ? 11 : 13, bold: true, color: this.config.colors.text.header
       });
       slide.addText(titleParts, {
-        x: innerX, y: pY, w: innerW, h: 0.4, valign: 'top', margin: 0
+        x: innerX, y: pY, w: innerW, h: 0.35, valign: 'top', margin: 0
       });
-      pY += 0.45;
+      pY += 0.35;
 
-      // 説明文
+      // 説明文 (改行バグ回避版)
       const descText = step.description || step.text || '';
-      const descItems = processTextToBullets(descText, isHighDensity ? 9 : 10);
-      slide.addText(descItems, {
-        x: innerX, y: pY, w: innerW, h: itemH - (pY - y),
-        valign: 'top', margin: 0, lineSpacing: (isHighDensity ? 9 : 10) * 1.5
+      const fs = isHighDensity ? 9 : 10;
+      this.renderTextBlock(slide, descText, {
+        x: innerX,
+        y: pY,
+        w: innerW,
+        h: itemH - (pY - y),
+        fontSize: fs,
+        lineSpacing: fs * 1.3,
+        valign: 'top'
       });
     });
 
     // --- 4. Key Conclusion (key_message) ---
     if (key_message) {
-      const footerY = 5.1;
-      const keyMsgY = footerY - 0.8;
+      // グリッドの下に配置。ただしフッターを侵食しないように制限を設ける
+      const footerY = this.config.layout.footerY;
+      const keyMsgHeight = 0.6;
+      let keyMsgY = maxGridY + 0.3; // グリッドの直後から 0.3インチ空ける
+      
+      // フッター（5.1）の直前（例えば 4.4）までに収まるように、必要なら上に詰める
+      const maxY = footerY - 0.7; 
+      if (keyMsgY > maxY) {
+        keyMsgY = maxY;
+      }
       
       // 左ボーダー付きのメッセージ
       slide.addShape(this.pptx.ShapeType.rect, {
-        x: baseX, y: keyMsgY, w: 0.04, h: 0.6,
+        x: baseX, y: keyMsgY, w: 0.04, h: keyMsgHeight,
         fill: { color: this.config.colors.primaryDark }
       });
-      const keyMsgParts = this.textProcessor.parseRichText(key_message, {
-        fontSize: 13, bold: true, color: this.config.colors.text.header
-      });
-      slide.addText(keyMsgParts, {
-        x: baseX + 0.15, y: keyMsgY, w: safeW - 0.2, h: 0.6,
-        valign: 'middle', margin: 0
+      this.renderTextBlock(slide, key_message, {
+        x: baseX + 0.15,
+        y: keyMsgY,
+        w: safeW - 0.2,
+        h: keyMsgHeight,
+        fontSize: 13,
+        color: this.config.colors.text.header,
+        valign: 'middle'
       });
     }
 

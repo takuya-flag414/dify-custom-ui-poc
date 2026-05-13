@@ -105,7 +105,7 @@ export class TableSlideRenderer extends BaseRenderer {
             text: cellParts,
             options: {
               valign: 'top', align: 'left',
-              margin: [10, 10, 10, 10],
+              margin: [5, 8, 5, 8], // パディングを縮小
               border: [
                 { pt: 0, color: this.config.colors.text.white },
                 { pt: 0, color: this.config.colors.text.white },
@@ -119,21 +119,37 @@ export class TableSlideRenderer extends BaseRenderer {
 
       // テーブルの配置
       const tableRows = [headerRow, ...formattedRows] as any;
-      const tableHeight = Math.min(3.5, tableRows.length * 0.45);
+      // 1行あたりの高さを 0.38インチに圧縮
+      const estimatedTableH = tableRows.length * 0.38;
+      const tableHeight = Math.min(3.2, estimatedTableH);
 
       slide.addTable(tableRows, {
         x: tableX, y: currentY, w: tableW,
-        // 1列目（ラベル列）を少し広めにする比重
+        // 列幅の調整
         colW: headers.length > 1
-          ? [tableW * 0.25, ...Array(headers.length - 1).fill(tableW * 0.75 / (headers.length - 1))]
+          ? [tableW * 0.2, ...Array(headers.length - 1).fill(tableW * 0.8 / (headers.length - 1))]
           : [tableW],
         border: { pt: 0 }
       });
 
       // デフォルトレイアウトで説明文がある場合、テーブルの下に配置
       if (!isTwoColumn && description) {
-        this.ui.renderInsightBox(slide, description, {
-          x: marginX + (safeW * 0.025), y: currentY + tableHeight + 0.3, w: safeW * 0.95, h: 0.8
+        const insightY = Math.min(4.4, currentY + tableHeight + 0.2);
+        
+        // アクセントバー
+        slide.addShape(this.pptx.ShapeType.rect, {
+          x: marginX, y: insightY, w: 0.04, h: 0.3,
+          fill: { color: this.config.colors.primary }
+        });
+
+        this.renderTextBlock(slide, description, {
+          x: marginX + 0.15,
+          y: insightY,
+          w: safeW - 0.15,
+          h: 0.8,
+          fontSize: 10,
+          lineSpacing: 10 * 1.3,
+          valign: 'top'
         });
       }
     }

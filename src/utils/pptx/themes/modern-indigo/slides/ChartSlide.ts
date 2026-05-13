@@ -84,24 +84,6 @@ export class ChartSlideRenderer extends BaseRenderer {
     else if (type === 'pie') pptxChartType = this.pptx.ChartType.pie;
     else if (type === 'doughnut') pptxChartType = this.pptx.ChartType.doughnut;
 
-    // --- 4. テキスト解析関数 ---
-    const processTextToBullets = (text: string, fontSize: number): any[] => {
-      if (!text) return [];
-      const lines = text.replace(/\\n|¥n|<br\s*\/?>/g, '\n').split('\n').filter(l => l.trim().length > 0);
-      const items: any[] = [];
-      lines.forEach((line: string) => {
-        const trimmed = line.trim();
-        const isBullet = trimmed.startsWith('-') || trimmed.startsWith('*');
-        const cleanLine = isBullet ? trimmed.replace(/^[-*]\s*/, '') : trimmed;
-        const lineParts = this.textProcessor.parseRichText(cleanLine, { color: '1E293B', fontSize });
-        if (lineParts.length > 0) {
-          lineParts[0].options = { ...lineParts[0].options, bullet: isBullet ? { code: '2022' } : false, breakLine: true };
-          for (let i = 1; i < lineParts.length; i++) lineParts[i].options = { ...lineParts[i].options, breakLine: false };
-          items.push(...lineParts);
-        }
-      });
-      return items;
-    };
 
     if (isTwoColumn) {
       // --- 左右分割レイアウト (1:2) ---
@@ -123,7 +105,7 @@ export class ChartSlideRenderer extends BaseRenderer {
         ly += 0.45;
       }
       if (body_text) {
-        const bodyItems = processTextToBullets(body_text, 10);
+        const bodyItems = this.processTextLines(body_text, 10);
         // キーメッセージがある場合はインデントを入れる
         const textX = key_message ? leftX + 0.15 : leftX;
         slide.addText(bodyItems, { x: textX, y: ly, w: leftW - (textX - leftX), h: mainH - (ly - currentY), valign: 'top', margin: 0, lineSpacing: 10 * 1.6 });
@@ -165,12 +147,19 @@ export class ChartSlideRenderer extends BaseRenderer {
       }
 
       if (body_text) {
-        // 補足分析テキスト (箇条書き)
-        const bodyItems = processTextToBullets(body_text, 10);
+        // 補足分析テキスト (箇条書き - 改行バグ回避版)
         const textX = key_message ? insightX + 0.15 : insightX;
         // はみ出し防止のため、残りの高さを制限 (フッターの開始位置 5.0 を目安にする)
         const maxBodyH = Math.max(0.6, 5.0 - insightY);
-        slide.addText(bodyItems, { x: textX, y: insightY, w: chartW - (textX - insightX), h: maxBodyH, valign: 'top', lineSpacing: 10 * 1.5 });
+        this.renderTextBlock(slide, body_text, {
+          x: textX,
+          y: insightY,
+          w: chartW - (textX - insightX),
+          h: maxBodyH,
+          fontSize: 10,
+          lineSpacing: 10 * 1.5,
+          valign: 'top'
+        });
       }
     }
 

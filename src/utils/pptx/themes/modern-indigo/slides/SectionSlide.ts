@@ -21,21 +21,21 @@ export class SectionSlideRenderer extends BaseRenderer {
     // --- 1. 定数定義 (JSXのcqiをインチ/PTに変換) ---
     const slideW = 10.0;
     const slideH = 5.625;
-    
+
     // JSX: px-[8cqi] -> 0.8インチ
     const marginX = 0.8;
     const contentW = slideW - (marginX * 2);
 
     // --- 2. テキストスタイルの設定 ---
-    
+
     // Subtext (Monospace): 1.8cqi -> 14pt
     const subFontSize = 14;
     const subFontSpacing = 5.0; // JSX: 0.2em (さらに広め)
     const subFontLines = 1.4;
-    
+
     // Title: 5.4cqi -> 52pt (圧倒的なインパクト)
     const titleFontSize = 52;
-    const titleLineHeight = 1.1; 
+    const titleLineHeight = 1.1;
     const titleLineSpacing = titleFontSize * titleLineHeight;
 
     const titleParts = this.textProcessor.parseRichText(title || 'SECTION TITLE', {
@@ -47,19 +47,19 @@ export class SectionSlideRenderer extends BaseRenderer {
     });
 
     // --- 3. 動的な高さ計算 ---
-    
+
     const hSub = subText ? (subFontSize * subFontLines) / 72 : 0;
     const spacingSubToLine = 0.2; // JSX: 2cqi
     const hLine = 0.01;
     const spacingLineToTitle = 0.3; // JSX: 3cqi
-    
+
     // タイトルの高さ推定
     const charsPerLine = Math.floor(contentW / (titleFontSize / 72 * 0.8)); // CJK混在を考慮
     const estimatedTitleLines = Math.max(1, Math.ceil((title || '').length / charsPerLine));
     const hTitle = (estimatedTitleLines * titleLineSpacing) / 72;
 
     const totalContentH = hSub + (subText ? spacingSubToLine : 0) + hLine + spacingLineToTitle + hTitle;
-    
+
     // 垂直中央配置
     let currentY = (slideH - totalContentH) / 2;
 
@@ -75,7 +75,7 @@ export class SectionSlideRenderer extends BaseRenderer {
         fontSize: subFontSize,
         color: this.config.colors.status.warning, // Accentカラー (オレンジ系など)
         bold: true,
-        fontFace: 'Consolas', 
+        // fontFace: 'Consolas', 
         charSpacing: subFontSpacing,
         align: 'left',
         margin: 0
