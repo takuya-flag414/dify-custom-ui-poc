@@ -34,7 +34,7 @@ export interface AuthContextValue {
     /** ログイン関数 */
     login: (email: string, password: string) => Promise<LoginResult>;
     /** サインアップ関数 */
-    signup: (email: string, password: string, displayName: string, securityInfo?: SecurityInfo) => Promise<{ message: string }>;
+    signup: (email: string, password: string, displayName: string, employeeCode?: string, securityInfo?: SecurityInfo) => Promise<{ message: string }>;
     /** パスワードリセット関数 */
     resetPassword: (email: string) => Promise<void>;
     /** ログアウト関数 */
@@ -118,12 +118,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: string,
         password: string,
         displayName: string,
+        employeeCode: string = '',
         securityInfo: SecurityInfo = {}
     ): Promise<{ message: string }> => {
         try {
             setError(null);
             setIsNewUser(false);
-            const result = await authService.signup(email, password, displayName, securityInfo);
+            const result = await authService.signup(email, password, displayName, employeeCode, securityInfo);
             
             // メール認証待ちのメッセージを表示
             setError(result.message);

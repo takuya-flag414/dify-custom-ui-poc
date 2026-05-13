@@ -346,7 +346,7 @@ exports.getSecureUserProfile = onCall(async (request) => {
         }
 
         // PIIの復号
-        const [name, email, lastName, firstName, dob] = await Promise.all([
+        const [name, email, lastName, firstName, dob, employee_code] = await Promise.all([
             decrypt(data.displayName),
             decrypt(data.email),
             decrypt(data.lastName),
