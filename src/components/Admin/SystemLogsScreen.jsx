@@ -126,7 +126,7 @@ const SystemLogsScreen = () => {
             const logsRef = collection(db, 'audit_logs');
             const cleanupQuery = query(logsRef, where('timestamp', '<', oldTimestamp), limit(100));
             const oldSnap = await getDocs(cleanupQuery);
-            
+
             if (!oldSnap.empty) {
                 setCleaning(true);
                 const batch = writeBatch(db);
@@ -145,7 +145,7 @@ const SystemLogsScreen = () => {
     };
 
     const formatAction = (action) => {
-        switch(action) {
+        switch (action) {
             case 'LOGIN_SUCCESS': return 'ログイン成功';
             case 'LOGIN_FAILED': return 'ログイン失敗';
             case 'LOGOUT': return 'ログアウト';
@@ -177,7 +177,7 @@ const SystemLogsScreen = () => {
                 <h2><Activity size={20} /> システムログ (監査証跡)</h2>
                 {cleaning && <span className="cleaning-badge">古いログをバックグラウンドで整理中...</span>}
             </div>
-            
+
             {error && <div className="admin-error-box">{error}</div>}
 
             <div className="logs-table-wrapper">
@@ -199,7 +199,7 @@ const SystemLogsScreen = () => {
                         <tbody>
                             {logs.map(log => (
                                 <React.Fragment key={log.id}>
-                                    <tr 
+                                    <tr
                                         className={`log-row ${expandedLogId === log.id ? 'expanded' : ''}`}
                                         onClick={() => toggleRow(log.id)}
                                     >
@@ -210,8 +210,8 @@ const SystemLogsScreen = () => {
                                         <td><span className={`action-badge ${log.action || ''}`}>{formatAction(log.action)}</span></td>
                                         <td>{log.email || '-'}</td>
                                         <td className="log-summary">
-                                            {log.details && Object.keys(log.details).length > 0 
-                                                ? JSON.stringify(log.details) 
+                                            {log.details && Object.keys(log.details).length > 0
+                                                ? JSON.stringify(log.details)
                                                 : '-'
                                             }
                                         </td>
@@ -239,7 +239,7 @@ const SystemLogsScreen = () => {
                                                         {log.details && Object.entries(log.details).map(([key, value]) => {
                                                             // すでに表示したものはスキップ
                                                             if (['user_id', 'session_id'].includes(key)) return null;
-                                                            
+
                                                             // 表示ラベルの変換
                                                             let label = key;
                                                             let className = "";
@@ -258,8 +258,8 @@ const SystemLogsScreen = () => {
                                                             else if (key === 'departmentId') label = '部署ID';
 
                                                             // 値が長すぎる場合の処理 (UAなど)
-                                                            const displayValue = (typeof value === 'string' && value.length > 100) 
-                                                                ? value.substring(0, 100) + '...' 
+                                                            const displayValue = (typeof value === 'string' && value.length > 100)
+                                                                ? value.substring(0, 100) + '...'
                                                                 : String(value);
 
                                                             return (

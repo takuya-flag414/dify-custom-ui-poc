@@ -59,6 +59,7 @@
     position: sticky;
     top: 0;
     z-index: 10;
+    white-space: nowrap;
 }
 
 .logs-table td {
@@ -66,20 +67,26 @@
     border-bottom: 1px solid var(--color-border);
     color: var(--color-text-main);
     vertical-align: middle;
+    white-space: nowrap;
 }
 
 .log-time {
     color: var(--color-text-sub);
     font-family: monospace;
+    white-space: nowrap;
 }
 
 .action-badge {
-    display: inline-block;
-    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
     border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
     background: var(--bg-layer-1);
+    white-space: nowrap;
+    min-width: 120px;
 }
 
 .action-badge.LOGIN_SUCCESS { background: rgba(16, 185, 129, 0.1); color: #10b981; }

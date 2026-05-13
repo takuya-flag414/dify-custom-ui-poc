@@ -2,6 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
 import { isStrictFEMode } from '../config/env';
 
 const firebaseConfig = {
@@ -13,7 +14,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-let app: any, auth: any, adminAuth: any, db: any;
+let app: any, auth: any, adminAuth: any, db: any, functions: any;
 
 if (isStrictFEMode) {
   console.info('🔒 [Strict FE Mode] Firebase initialization bypassed. Running entirely offline.');
@@ -21,6 +22,7 @@ if (isStrictFEMode) {
   auth = { currentUser: null };
   adminAuth = { currentUser: null };
   db = {};
+  functions = {};
 } else {
   // Initialize Firebase
   app = initializeApp(firebaseConfig);
@@ -32,7 +34,8 @@ if (isStrictFEMode) {
   auth = getAuth(app);
   adminAuth = getAuth(secondaryApp);
   db = getFirestore(app);
+  functions = getFunctions(app, 'asia-northeast1');
 }
 
-export { app, auth, adminAuth, db };
+export { app, auth, adminAuth, db, functions };
 export default app;

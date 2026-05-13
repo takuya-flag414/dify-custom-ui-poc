@@ -9,6 +9,8 @@ import { mapCitationsFromApi } from '../utils/citationMapper';
 import SecureVaultService from '../services/SecureVaultService';
 // ★追加: エラー解析（ワークフローエラー → IntelligenceError変換用）
 import { analyzeIntelligenceError } from '../utils/errorIntelligence';
+// ★追加: AI利用分析サービス
+import { aiAnalyticsService } from '../services/AiAnalyticsService';
 
 // ★リファクタリング: 分離したモジュールからインポート
 import { DEFAULT_SEARCH_SETTINGS } from './chat/constants';
@@ -90,6 +92,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     const [searchSettings, setSearchSettings] = useState(DEFAULT_SEARCH_SETTINGS);
 
     const searchSettingsRef = useRef(searchSettings);
+    const promptSettingsRef = useRef(promptSettings);
     const creatingConversationIdRef = useRef(null);
     const settingsMapRef = useRef({});
 
@@ -114,6 +117,10 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     useEffect(() => {
         searchSettingsRef.current = searchSettings;
     }, [searchSettings]);
+
+    useEffect(() => {
+        promptSettingsRef.current = promptSettings;
+    }, [promptSettings]);
 
     // ★追加: streamingMessageが変更されたらrefも更新
     useEffect(() => {
@@ -921,6 +928,31 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             tracker.markEnd();
             tracker.logReport(text);
 
+            // ★追加: AI利用分析ログの送信
+            if (capturedUsage) {
+                const totalTime = tracker.end - tracker.start;
+                const ttft = tracker.firstToken ? tracker.firstToken - tracker.start : 0;
+                
+                // 最新の設定をRefから取得
+                const latestPromptSettings = promptSettingsRef.current;
+                const latestSearchSettings = searchSettingsRef.current;
+
+                // 非同期で記録（生成処理をブロックしない）
+                aiAnalyticsService.logAiUsage({
+                    user_id: userId,
+                    email: latestPromptSettings?.email || 'unknown@example.com',
+                    conversation_id: conversationId || creatingConversationIdRef.current || 'unknown',
+                    model: latestPromptSettings?.aiStyle === 'efficient' ? 'gpt-4o-mini' : 'gpt-4o',
+                    architecture: options.artifact ? 'ARTIFACT' : (latestSearchSettings.ragEnabled ? 'RAG' : 'CHAT'),
+                    prompt_tokens: capturedUsage.prompt_tokens || 0,
+                    completion_tokens: capturedUsage.completion_tokens || 0,
+                    total_tokens: capturedUsage.total_tokens || 0,
+                    latency_ms: Math.round(totalTime),
+                    ttft_ms: Math.round(ttft),
+                    total_price_usd: capturedUsage.total_price || 0
+                }).catch(err => console.error('[useChat] Failed to log AI usage:', err));
+            }
+
         } catch (error) {
             addLog(`[Stream Error] ${error.message}`, 'error');
             // ★改修: IntelligenceErrorHandler にエラー + 入力テキスト + ステータスコードを委譲
@@ -1053,7 +1085,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             if (restored.artifact) {
                 options.artifact = restored.artifact;
             }
-        } catch (e) {}
+        } catch (e) { }
 
         await handleSendMessage(textToSend, result.targetUserMessage.files || [], options);
     }, [messages, handleSendMessage, addLog]);

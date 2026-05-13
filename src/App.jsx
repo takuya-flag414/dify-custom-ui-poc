@@ -82,9 +82,9 @@ function App() {
   const backgroundLocation = location.state?.backgroundLocation;
   // RoutesはbackgroundLocationがあればそれを使用（設定画面の裏でチャットを維持）
   const displayLocation = backgroundLocation || location;
-  const currentView = displayLocation.pathname.startsWith('/settings') ? 'settings' 
-                    : displayLocation.pathname.startsWith('/admin') ? 'admin' 
-                    : 'chat';
+  const currentView = displayLocation.pathname.startsWith('/settings') ? 'settings'
+    : displayLocation.pathname.startsWith('/admin') ? 'admin'
+      : 'chat';
   const isSettingsOpen = location.pathname.startsWith('/settings');
 
   // ★追加: テストパネル状態
@@ -260,7 +260,7 @@ function App() {
     apiKey,
     apiUrl,
     settings?.prompt // ★追加: AI回答スタイルとシステムプロンプトを渡す
-      ? { ...settings.prompt, displayName: settings?.profile?.displayName || '' }
+      ? { ...settings.prompt, displayName: settings?.profile?.displayName || '', email: authUser?.email || '' }
       : undefined,
     // ★追加: シールドモード自動移行コールバック
     (convId) => {

@@ -26,7 +26,8 @@ import {
     Timestamp,
     writeBatch
 } from 'firebase/firestore';
-import { auth, adminAuth, db } from '../lib/firebase';
+import { auth, adminAuth, db, functions } from '../lib/firebase';
+import { httpsCallable } from 'firebase/functions';
 import {
     AccountStatus,
     PermissionCode,
@@ -270,13 +271,14 @@ class AuthService {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const firebaseUser = userCredential.user;
 
-            // 2. Firestore からプロファイルを取得
-            let userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-            let userData: any;
+            // 2. サーバー側の関数を呼び出してセキュアにプロファイルを取得（復号されたデータが返る）
+            const getSecureUserProfile = httpsCallable(functions, 'getSecureUserProfile');
+            const result = await getSecureUserProfile();
+            let userData = result.data as any;
 
             if (!firebaseUser.emailVerified) {
                 // メール未認証でも、管理者が作成したアカウントならログインを許可する
-                if (userDoc.exists() && userDoc.data().is_admin_created === true) {
+                if (userData && userData.is_admin_created === true) {
                     console.log('[AuthService] Admin-created user logging in without email verification');
                 } else {
                     await signOut(auth);
@@ -284,7 +286,7 @@ class AuthService {
                 }
             }
 
-            if (!userDoc.exists()) {
+            if (!userData) {
                 // 通常のJIT (SSOなど、想定外の経路で来た場合)
                 console.log('[AuthService] Profile missing. Creating default profile for:', firebaseUser.email);
                 const now = Timestamp.now();
@@ -311,8 +313,6 @@ class AuthService {
                     assigned_at: now
                 });
                 await batch.commit();
-            } else {
-                userData = userDoc.data();
             }
 
             // 3. アカウント状態の検証
@@ -437,6 +437,7 @@ class AuthService {
         email: string,
         password: string,
         displayName: string,
+        employeeCode: string = '',
         securityInfo: Partial<SecurityInfo> = {}
     ): Promise<{ message: string }> {
         const { lastName, firstName, dateOfBirth } = securityInfo;
@@ -471,20 +472,10 @@ class AuthService {
                 userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
             });
 
-            // 3. Firestoreに未認証ベースでプロファイルを作成 (WriteBatch)
-            const now = Timestamp.now();
             const userData = {
-                user_id: firebaseUser.uid,
                 email: normalizedEmail,
-                name: `${lastName || ''} ${firstName || ''}`.trim() || displayName,
-                account_status: 1,
-                created_at: now,
-                updated_at: now,
-                displayName,
-                lastName: lastName || '',
-                firstName: firstName || '',
-                dateOfBirth: dateOfBirth || '',
-                avatarUrl: null,
+                displayName: displayName || `${lastName || ''} ${firstName || ''}`.trim(),
+                employeeCode: employeeCode,
                 preferences: {
                     theme: 'system',
                     aiStyle: 'partner',
@@ -492,14 +483,12 @@ class AuthService {
                 }
             };
 
-            const batch = writeBatch(db);
-            batch.set(doc(db, 'users', firebaseUser.uid), userData);
-            batch.set(doc(collection(db, 'user_roles')), {
-                user_id: firebaseUser.uid,
-                role_id: 'role_general',
-                assigned_at: now
+            // 3. サーバー側の関数を呼び出してセキュアにプロファイルを作成（暗号化して保存）
+            const createSecureUserProfile = httpsCallable(functions, 'createSecureUserProfile');
+            await createSecureUserProfile({
+                userData,
+                securityInfo: { lastName, firstName, dateOfBirth }
             });
-            await batch.commit();
 
             // 4. 強制的にサインアウト（メール認証完了まで待つ）
             await signOut(auth);
@@ -525,7 +514,8 @@ class AuthService {
             } else if (error.code === 'auth/weak-password') {
                 throw new Error('パスワードは6文字以上である必要があります');
             }
-            throw new Error('アカウントの作成に失敗しました');
+            // エラー原因を特定するために、詳細なエラーメッセージを出力する
+            throw new Error(`アカウントの作成に失敗しました: ${error.code || error.message}`);
         }
     }
 
@@ -581,6 +571,7 @@ class AuthService {
         displayName: string,
         roleId: string = 'role_general',
         departmentId: number | null = null,
+        employeeCode: string = '',
         securityInfo: Partial<SecurityInfo> = {}
     ): Promise<{ message: string }> {
         const { lastName, firstName, dateOfBirth } = securityInfo;
@@ -603,37 +594,26 @@ class AuthService {
             // 2. セカンダリアプリ側はすぐにサインアウト
             await signOut(adminAuth);
 
-            // 3. Firestoreにプロファイルを作成し、"is_admin_created: true" を明記する
-            const now = Timestamp.now();
-            const userData = {
-                user_id: firebaseUser.uid,
-                email: normalizedEmail,
-                name: `${lastName || ''} ${firstName || ''}`.trim() || displayName,
-                account_status: 1,
-                created_at: now,
-                updated_at: now,
-                displayName,
-                lastName: lastName || '',
-                firstName: firstName || '',
-                dateOfBirth: dateOfBirth || '',
-                avatarUrl: null,
-                department_id: departmentId,
-                is_admin_created: true, // ★ このフラグによりメール認証がスキップされる
-                preferences: {
-                    theme: 'system',
-                    aiStyle: 'partner',
-                    isOnboardingCompleted: false,
+            // 3. サーバー側の関数を呼び出してセキュアにプロファイルを作成（暗号化して保存）
+            const adminCreateSecureUserProfile = httpsCallable(functions, 'adminCreateSecureUserProfile');
+            await adminCreateSecureUserProfile({
+                targetUid: firebaseUser.uid,
+                roleId,
+                departmentId,
+                employeeCode,
+                userData: {
+                    email: normalizedEmail,
+                    displayName,
+                    lastName: lastName || '',
+                    firstName: firstName || '',
+                    dateOfBirth: dateOfBirth || '',
+                    preferences: {
+                        theme: 'system',
+                        aiStyle: 'partner',
+                        isOnboardingCompleted: false,
+                    }
                 }
-            };
-
-            const batch = writeBatch(db);
-            batch.set(doc(db, 'users', firebaseUser.uid), userData);
-            batch.set(doc(collection(db, 'user_roles')), {
-                user_id: firebaseUser.uid,
-                role_id: roleId,
-                assigned_at: now
             });
-            await batch.commit();
 
             // ログ記録
             this._logAuditAction('ADMIN_CREATED_USER', normalizedEmail, firebaseUser.uid, {
@@ -703,8 +683,9 @@ class AuthService {
                             console.warn('[AuthService] Failed to reload user, proceeding with cached data:', reloadError);
                         }
 
-                        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                        const userData = userDoc.exists() ? userDoc.data() : null;
+                        const getSecureUserProfile = httpsCallable(functions, 'getSecureUserProfile');
+                        const result = await getSecureUserProfile();
+                        const userData = result.data as any;
 
                         if (!firebaseUser.emailVerified) {
                             if (userData && userData.is_admin_created === true) {
@@ -717,8 +698,7 @@ class AuthService {
                             }
                         }
 
-                        if (userDoc.exists()) {
-                            const userData = userDoc.data();
+                        if (userData) {
                             const status = Number(userData.account_status);
                             if (status === 1) {
                                 const profile = await this._toUserProfile(firebaseUser.uid, userData);
@@ -740,13 +720,15 @@ class AuthService {
      */
     async updatePreferences(userId: string, prefs: Partial<UserPreferences>): Promise<UserPreferences> {
         const userRef = doc(db, 'users', userId);
-        const userDoc = await getDoc(userRef);
+        const getSecureUserProfile = httpsCallable(functions, 'getSecureUserProfile');
+        const result = await getSecureUserProfile();
+        const userData = result.data as any;
 
-        if (!userDoc.exists()) {
+        if (!userData) {
             throw new Error('ユーザーが見つかりません');
         }
 
-        const currentPrefs = userDoc.data().preferences || { theme: 'system', aiStyle: 'partner' };
+        const currentPrefs = userData.preferences || { theme: 'system', aiStyle: 'partner' };
         const updatedPrefs: UserPreferences = {
             ...currentPrefs,
             ...prefs,

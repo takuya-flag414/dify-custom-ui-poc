@@ -54,6 +54,7 @@ const SignupModal = ({ onClose }) => {
     // セキュリティ情報（Phase A追加）
     const [lastName, setLastName] = useState('');
     const [firstName, setFirstName] = useState('');
+    const [employeeCode, setEmployeeCode] = useState(''); // ★追加
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false); // ★追加
 
@@ -107,7 +108,7 @@ const SignupModal = ({ onClose }) => {
             setIsSubmitting(true);
             // displayNameは姓+名から自動生成（Onboardingで変更可能）
             const generatedDisplayName = `${lastName} ${firstName}`;
-            await signup(email, password, generatedDisplayName, {
+            await signup(email, password, generatedDisplayName, employeeCode, {
                 lastName,
                 firstName,
                 dateOfBirth,
@@ -120,7 +121,7 @@ const SignupModal = ({ onClose }) => {
             setIsSubmitting(false);
         }
     }, [
-        lastName, firstName, email, password, dateOfBirth,
+        lastName, firstName, email, password, dateOfBirth, employeeCode,
         passwordValidation, signup, clearError, onClose
     ]);
 
@@ -252,6 +253,22 @@ const SignupModal = ({ onClose }) => {
                                 autoComplete="given-name"
                             />
                         </div>
+                    </div>
+
+                    {/* 社員番号 */}
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="signup-employee-code">
+                            社員番号 <span className="form-hint">（任意）</span>
+                        </label>
+                        <input
+                            id="signup-employee-code"
+                            type="text"
+                            className="form-input"
+                            placeholder="例: 123456"
+                            value={employeeCode}
+                            onChange={(e) => setEmployeeCode(e.target.value)}
+                            disabled={isSubmitting}
+                        />
                     </div>
 
                     {/* 生年月日 */}

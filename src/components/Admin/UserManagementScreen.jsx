@@ -9,6 +9,7 @@ const UserManagementScreen = () => {
     displayName: '',
     emailPrefix: '',
     password: '',
+    employeeCode: '',
     roleId: 'role_general'
   });
   
@@ -57,7 +58,8 @@ const UserManagementScreen = () => {
         let displayName = cells[0] || '';
         let emailPrefix = cells[1] || '';
         let rowPassword = cells[2] || '';
-        let roleRaw = cells[3] || 'general';
+        let employeeCode = cells[3] || '';
+        let roleRaw = cells[4] || 'general';
         
         if (!displayName || !emailPrefix) {
             errors.push(`行 ${i + 1}: 氏名またはメールアドレスが空欄です。`);
@@ -78,6 +80,7 @@ const UserManagementScreen = () => {
             displayName,
             emailPrefix,
             password: rowPassword,
+            employeeCode,
             roleId,
             status: 'pending'
         });
@@ -150,6 +153,7 @@ const UserManagementScreen = () => {
                 row.displayName,
                 row.roleId,
                 null,
+                row.employeeCode,
                 {}
             );
             newResults.push({ ...row, fullEmail, status: 'success' });
@@ -167,7 +171,7 @@ const UserManagementScreen = () => {
 
   const downloadTemplate = (e) => {
     e.preventDefault();
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "氏名,メールプレフィックス(yamada等),初期パスワード(空欄で自動生成),権限(general または admin)\n山田 太郎,yamada,,general\nシステム 管理,admin_sys,,admin";
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "氏名,メールプレフィックス(yamada等),初期パスワード(空欄で自動生成),社員番号,権限(general または admin)\n山田 太郎,yamada,,123456,general\nシステム 管理,admin_sys,,654321,admin";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -202,6 +206,7 @@ const UserManagementScreen = () => {
         formData.displayName,
         formData.roleId,
         null, // departmentId
+        formData.employeeCode,
         {}    // securityInfo
       );
 
@@ -231,6 +236,7 @@ const UserManagementScreen = () => {
       displayName: '',
       emailPrefix: '',
       password: '',
+      employeeCode: '',
       roleId: 'role_general'
     });
     setSuccessData(null);
@@ -350,6 +356,19 @@ const UserManagementScreen = () => {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>社員番号</label>
+                <input
+                  type="text"
+                  name="employeeCode"
+                  value={formData.employeeCode}
+                  onChange={handleChange}
+                  placeholder="例: 123456"
+                  className="admin-input"
+                  disabled={loading}
+                />
               </div>
 
               <div className="form-group">
