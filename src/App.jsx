@@ -260,7 +260,7 @@ function App() {
     apiKey,
     apiUrl,
     settings?.prompt // ★追加: AI回答スタイルとシステムプロンプトを渡す
-      ? { ...settings.prompt, displayName: settings?.profile?.displayName || '' }
+      ? { ...settings.prompt, displayName: settings?.profile?.displayName || '', email: authUser?.email || '' }
       : undefined,
     // ★追加: シールドモード自動移行コールバック
     (convId) => {

@@ -60,6 +60,14 @@ service cloud.firestore {
       allow read, delete: if isCompanyUser();
     }
 
+    // 4. AI利用分析ログ
+    match /ai_usage_logs/{docId} {
+      // ログイン済みユーザーなら作成可能
+      allow create: if isCompanyUser() && isVerifiedOrAdminCreated();
+      // 管理者なら全ログの読み取り・削除が可能
+      allow read, delete: if isAdmin();
+    }
+
     // =========================================================
 
     // デフォルトルール（audit_logs以外は isVerifiedOrAdminCreated を満たすことが必須）
