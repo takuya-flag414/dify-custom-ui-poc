@@ -38,7 +38,7 @@ const TitleSlide = ({ content, isStatic = false }) => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                background: 'var(--slide-indigo-gradient)',
                 zIndex: 0
             }} />
 
@@ -62,7 +62,7 @@ const TitleSlide = ({ content, isStatic = false }) => {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: '1.5px solid rgba(255,255,255,0.7)',
+                    border: '1.5px solid var(--slide-border-color, rgba(255,255,255,0.7))',
                     padding: '0.4cqi 1.2cqi',
                     fontSize: '1.1cqi',
                     fontFamily: 'var(--font-heading, sans-serif)',

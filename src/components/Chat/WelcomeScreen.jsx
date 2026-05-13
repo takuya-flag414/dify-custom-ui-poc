@@ -3,11 +3,20 @@
 // ChatInput centered layout
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import './WelcomeScreen.css';
 import { getTimeBasedGreeting } from '../../utils/timeUtils';
 import ChatInput from './ChatInput';
 import { useSeasonalBackground } from '../../hooks/useSeasonalBackground';
+import { 
+    Presentation, 
+    Table, 
+    FileText, 
+    Layout, 
+    MessageSquare, 
+    MoreHorizontal 
+} from 'lucide-react';
+import PromptWizardModal from './Wizard/PromptWizardModal';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,9 +60,24 @@ const WelcomeScreen = ({
     activeArtifact, // ★追加
     setActiveArtifact, // ★追加
     sendKey,
+    // ★追加: Wizard連携
+    restoreText,
+    onRestoreTextConsumed,
+    onWizardComplete,
+    onEnterSlideStudio, // ★追加
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
+    const [activeWizardId, setActiveWizardId] = useState(null);
+
+    // ★追加: チップクリック時のハンドラ
+    const handleChipClick = (id) => {
+        if (id === 'slide_creation' && onEnterSlideStudio) {
+            onEnterSlideStudio();
+        } else {
+            setActiveWizardId(id);
+        }
+    };
 
     // Get the seasonal background CSS class if we are in a special period
     const seasonalClass = useSeasonalBackground();
@@ -115,6 +139,7 @@ const WelcomeScreen = ({
                         className="welcome-hero-input"
                         variants={itemVariants}
                     >
+
                         <ChatInput
                             isLoading={isGenerating}
                             onSendMessage={onSendMessage}
@@ -130,7 +155,19 @@ const WelcomeScreen = ({
                             activeArtifact={activeArtifact} // ★追加
                             setActiveArtifact={setActiveArtifact} // ★追加
                             sendKey={sendKey}
+                            restoreText={restoreText}
+                            onRestoreTextConsumed={onRestoreTextConsumed}
                         />
+
+                        {/* Genspark Style Feature Launcher */}
+                        <div className={`welcome-feature-launcher ${isFaded ? 'faded' : ''}`}>
+                            <button className="feature-launch-button slide" onClick={() => handleChipClick('slide_creation')}>
+                                <div className="feature-icon-wrapper">
+                                    <Presentation size={24} />
+                                </div>
+                                <span className="feature-label">AIスライド</span>
+                            </button>
+                        </div>
 
                         {/* さりげないマニュアルリンク */}
                         <motion.a
@@ -153,10 +190,25 @@ const WelcomeScreen = ({
                         </motion.a>
                     </motion.div>
 
-                    {/* Row 3 (Spacer for symmetry) */}
                     <div className="welcome-grid-spacer" />
                 </div>
             </motion.div>
+
+            {/* ★追加: プロンプトウィザードモーダル */}
+            <AnimatePresence>
+                {activeWizardId && (
+                    <PromptWizardModal
+                        wizardId={activeWizardId}
+                        onClose={() => setActiveWizardId(null)}
+                        onComplete={(prompt, addMenu, context) => {
+                            if (onWizardComplete) {
+                                onWizardComplete(prompt, addMenu, context);
+                            }
+                            setActiveWizardId(null);
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

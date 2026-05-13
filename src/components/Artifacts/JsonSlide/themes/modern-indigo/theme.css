@@ -10,6 +10,7 @@
     --slide-body: #1e293b;
     --slide-muted: #94a3b8;
     --slide-border: #e2e8f0;
+    --slide-border-color: rgba(255, 255, 255, 0.7); /* TitleSlide用 */
     --slide-bg-accent: #f1f5f9;
     
     --slide-bg-start: #ffffff;
@@ -19,6 +20,64 @@
     
     --slide-indigo-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     --slide-dark-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    
+    /* チャート用パレット (デフォルト: Blue/Indigo) */
+    --slide-chart-1: #6366f1;
+    --slide-chart-2: #8b5cf6;
+    --slide-chart-3: #0ea5e9;
+    --slide-chart-4: #38bdf8;
+    --slide-chart-5: #64748b;
+}
+
+/* カラーパレット切り替え */
+.presentation-panel[data-theme="modern-indigo"][data-palette="green"] {
+    --slide-primary: #10b981;
+    --slide-primary-dark: #059669;
+    --slide-indigo-gradient: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --slide-dark-gradient: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+    --slide-chart-1: #10b981;
+    --slide-chart-2: #34d399;
+    --slide-chart-3: #059669;
+    --slide-chart-4: #6ee7b7;
+    --slide-chart-5: #64748b;
+}
+
+.presentation-panel[data-theme="modern-indigo"][data-palette="navy"] {
+    --slide-primary: #1e3a8a;
+    --slide-primary-dark: #1e293b;
+    --slide-indigo-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    --slide-dark-gradient: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
+    --slide-accent: #38bdf8;
+    --slide-chart-1: #1e3a8a;
+    --slide-chart-2: #1e40af;
+    --slide-chart-3: #3b82f6;
+    --slide-chart-4: #60a5fa;
+    --slide-chart-5: #94a3b8;
+}
+
+.presentation-panel[data-theme="modern-indigo"][data-palette="red"] {
+    --slide-primary: #ef4444;
+    --slide-primary-dark: #dc2626;
+    --slide-indigo-gradient: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    --slide-dark-gradient: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    --slide-chart-1: #ef4444;
+    --slide-chart-2: #f87171;
+    --slide-chart-3: #dc2626;
+    --slide-chart-4: #fb7185;
+    --slide-chart-5: #64748b;
+}
+
+.presentation-panel[data-theme="modern-indigo"][data-palette="gray"] {
+    --slide-primary: #4b5563;
+    --slide-primary-dark: #1f2937;
+    --slide-indigo-gradient: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+    --slide-dark-gradient: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    --slide-accent: #10b981;
+    --slide-chart-1: #4b5563;
+    --slide-chart-2: #6b7280;
+    --slide-chart-3: #9ca3af;
+    --slide-chart-4: #d1d5db;
+    --slide-chart-5: #374151;
 }
 
 /* 基本レイアウト */
@@ -168,4 +227,9 @@
 .presentation-panel[data-theme="modern-indigo"] .slide-markdown-content li {
     margin-bottom: 0.3cqi !important;
     display: list-item !important; /* Tailwind等で block になっている場合の上書き */
+    break-inside: avoid-column;
+}
+
+.presentation-panel[data-theme="modern-indigo"] .slide-markdown-content p {
+    break-inside: avoid-column;
 }

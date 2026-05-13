@@ -65,60 +65,7 @@ Insight:
 
 Apple Intelligenceの導入により、macOSのカラーパレットは拡張された。従来のシステムカラーに加え、AIの存在を示唆する「Ethereal Gradients（ اثるようなグラデーション）」が導入され、静的なUIに生命感を与えている。
 
-### **2.1 Apple Intelligence Semantic Gradient**
-
-Apple Intelligenceのブランドを象徴する「Glowing Orb」やUIの縁取り（Border Glow）は、ランダムな虹色ではない。それは特定の4色によって構成される、厳密に定義されたグラデーションシステムである。Deep Researchの結果、これらの色は以下の構成であることが判明している4。
-
-| Color Name | Hex Code (Approx) | Role in Gradient | Emotional Connotation |
-| :---- | :---- | :---- | :---- |
-| **AI Cyan** | \#00FFFF | ベース、広がり | 知性、未来、明晰さ |
-| **AI Magenta** | \#FF00FF | アクセント、深み | 創造性、人間味 |
-| **AI Yellow** | \#FFD60A | ハイライト、エネルギー | 暖かさ、注意喚起 |
-| **AI Blue** | \#007AFF | 締め色、安定 | 信頼、Appleのアイデンティティ |
-
-Reactにおける実装戦略:  
-これらの色は静止画として使用されることはない。常に「流体」として動き続けることがデザインの要件である。CSSの conic-gradient を使用し、それぞれの色を配置した上で、filter: blur() によって境界を溶かし合わせ、さらに animation プロパティで回転させることで、Apple Intelligence特有の「有機的な光」を再現する。
-
-CSS
-
-:root {  
-  \--ai-gradient-cyan: \#00FFFF;  
-  \--ai-gradient-magenta: \#FF00FF;  
-  \--ai-gradient-yellow: \#FFD60A;  
-  \--ai-gradient-blue: \#007AFF;  
-}
-
-.ai-glowing-border {  
-  position: relative;  
-  border-radius: inherit;  
-}
-
-.ai-glowing-border::before {  
-  content: "";  
-  position: absolute;  
-  inset: \-2px; /\* Border width \*/  
-  background: conic-gradient(  
-    from 0deg,  
-    var(--ai-gradient-cyan),  
-    var(--ai-gradient-magenta),  
-    var(--ai-gradient-yellow),  
-    var(--ai-gradient-blue),  
-    var(--ai-gradient-cyan)  
-  );  
-  filter: blur(8px); /\* The glow spread \*/  
-  z-index: \-1;  
-  animation: ai-spin 4s linear infinite;  
-}
-
-@keyframes ai-spin {  
-  from { transform: rotate(0deg); }  
-  to { transform: rotate(360deg); }  
-}
-
-Insight:  
-このグラデーションは、テキストの選択範囲（Proofreading中）や、Writing Toolsパネルの外周など、AIが能動的に機能している場面でのみ使用される。装飾過多を避け、ここぞという場面でのみ使用することが、ユーザーに「機能している」という確信を与えるための鍵となる7。
-
-### **2.2 Semantic System Colors**
+### **2.1 Semantic System Colors**
 
 基本となるUIカラーは、ダークモード対応とアクセシビリティを考慮した「セマンティックトークン」として定義する。FigmaやCSS Variablesにおける命名規則は、色の名前（Red, Blue）ではなく、その役割（Error, Action）に基づくべきである8。
 
@@ -230,18 +177,7 @@ Sequoiaでは、タイトルバーとツールバーが一体化した「Unified
 
 本レポートのハイライトである。Apple IntelligenceのUIは、ユーザーの思考を拡張するツールとして、邪魔にならず、かつ必要な時には明確な存在感を放つよう設計されている。
 
-### **5.1 The "Siri Orb" Animation System**
-
-AIが待機中あるいは処理中であることを示す「Siri Orb」のアニメーションは、画面の枠外から光が溢れ出すような演出が特徴である。これは、AIがデバイスの枠を超えてクラウドやコンテキスト全体と繋がっていることを暗喩している20。
-
-Webでの再現手法:  
-ビデオファイル（mp4/webm）を使用するのが最も手軽だが、解像度の問題やループの不自然さを避けるため、CSSとCanvasを用いたプロシージャルな実装が望ましい。
-
-1. **Mesh Gradient:** 4色（Cyan, Magenta, Yellow, Blue）の大きな円形グラデーション（Blob）を作成する。  
-2. **Organic Motion:** 各Blobを異なる周期と軌道で動かす。これにはCSSの @keyframes で transform: translate(...) scale(...) を組み合わせるか、JavaScriptでPerlin Noiseを用いて座標を計算する手法が有効である23。  
-3. **Edge Masking:** コンテナの端で光が「回り込む」ような表現をするために、mask-image プロパティを使用してアルファマスクを適用する。
-
-### **5.2 Writing Tools Panel Design**
+### **5.1 Writing Tools Panel Design**
 
 テキストを選択した際に現れる「Writing Tools」パネルは、Apple Intelligenceの主要な接点である。このパネルのデザインは、従来のコンテキストメニューとは一線を画している7。
 
@@ -255,33 +191,6 @@ Webでの再現手法:
 React実装における要件:  
 このパネルは、選択されたテキストの近くにフローティング配置する必要がある。Floating UI (旧 Popper.js) などのライブラリを使用し、テキスト選択範囲（Selection Range）の BoundingClientRect を取得して、適切な位置（通常は選択範囲の下または上）に配置するロジックを実装する。
 
-### **5.3 Text Shimmer & Highlighting**
-
-AIがテキストを校正（Proofread）している間、対象のテキストには特別なハイライト処理が施される。
-
-* **Glowing Underline:** テキストの下に、AIグラデーションカラーのラインが引かれ、左から右へと光が走るアニメーション。  
-* **Implementation:** background-image に線形グラデーションを設定し、background-size を 200% にして background-position をアニメーションさせることで、光が流れる効果を作る。
-
-CSS
-
-.ai-proofreading-text {  
-  text-decoration: none;  
-  background-image: linear-gradient(  
-    90deg,   
-    var(--ai-gradient-cyan),   
-    var(--ai-gradient-magenta),   
-    var(--ai-gradient-yellow),   
-    var(--ai-gradient-cyan)  
-  );  
-  background-size: 200% 100%;  
-  background-position: 100% 0;  
-  \-webkit-background-clip: text;  
-  background-clip: text;  
-  color: transparent;  
-  animation: ai-text-shimmer 2s linear infinite;  
-}
-
-ただし、可読性を維持するため、文字色自体を透明にするのではなく、アンダーライン（border-bottom または疑似要素）に対してこのエフェクトを適用するバリエーションも考慮すべきである。
 
 ## ---
 
@@ -425,7 +334,6 @@ CSS
 1 HIG Principles & Anatomy  
 8 Semantic Tokens  
 2 Material Physics & Blur  
-20 AI Animation & Math  
 15 Window Layout & Corners  
 25 Motion Physics  
 11 Typography Strategy  
@@ -440,7 +348,6 @@ CSS
 3. Vibrancy? · Issue \#293 · felixhageloh/uebersicht \- GitHub, 1月 4, 2026にアクセス、 [https://github.com/felixhageloh/uebersicht/issues/293](https://github.com/felixhageloh/uebersicht/issues/293)  
 4. Recreating Apple's Liquid Glass Effect with Pure CSS \- DEV Community, 1月 4, 2026にアクセス、 [https://dev.to/kevinbism/recreating-apples-liquid-glass-effect-with-pure-css-3gpl](https://dev.to/kevinbism/recreating-apples-liquid-glass-effect-with-pure-css-3gpl)  
 5. Apple Graphic Color Scheme \- Palettes \- SchemeColor.com, 1月 4, 2026にアクセス、 [https://www.schemecolor.com/apple-graphic.php](https://www.schemecolor.com/apple-graphic.php)  
-6. How to create Apple Intelligence Effect \- React Native Animated Glow, 1月 4, 2026にアクセス、 [https://reactnativeglow.com/tutorials/apple-intelligence-glow](https://reactnativeglow.com/tutorials/apple-intelligence-glow)  
 7. Use Writing Tools with Apple Intelligence on Mac, 1月 4, 2026にアクセス、 [https://support.apple.com/guide/mac-help/find-the-right-words-with-writing-tools-mchldcd6c260/mac](https://support.apple.com/guide/mac-help/find-the-right-words-with-writing-tools-mchldcd6c260/mac)  
 8. Update 1: Tokens, variables, and styles – Figma Learn \- Help Center, 1月 4, 2026にアクセス、 [https://help.figma.com/hc/en-us/articles/18490793776023-Update-1-Tokens-variables-and-styles](https://help.figma.com/hc/en-us/articles/18490793776023-Update-1-Tokens-variables-and-styles)  
 9. Introduction | Latest \- Backbase Design System, 1月 4, 2026にアクセス、 [https://designsystem.backbase.com/latest/design-tokens/semantic-colors/introduction-K7Gq5Ylx](https://designsystem.backbase.com/latest/design-tokens/semantic-colors/introduction-K7Gq5Ylx)  
@@ -454,10 +361,7 @@ CSS
 17. When will macOS Fix Window Button Spacing? \- Reddit, 1月 4, 2026にアクセス、 [https://www.reddit.com/r/MacOS/comments/1mb0xkq/when\_will\_macos\_fix\_window\_button\_spacing/](https://www.reddit.com/r/MacOS/comments/1mb0xkq/when_will_macos_fix_window_button_spacing/)  
 18. Incorrect padding around window buttons on Mac app \- Supernotes Community, 1月 4, 2026にアクセス、 [https://community.supernotes.app/t/incorrect-padding-around-window-buttons-on-mac-app/3434](https://community.supernotes.app/t/incorrect-padding-around-window-buttons-on-mac-app/3434)  
 19. Default window-padding-x should align with macOS traffic lights \#3174 \- GitHub, 1月 4, 2026にアクセス、 [https://github.com/ghostty-org/ghostty/discussions/3174](https://github.com/ghostty-org/ghostty/discussions/3174)  
-20. Is the the new Siri animation just a looping video file, or is it actually procedural? \- Reddit, 1月 4, 2026にアクセス、 [https://www.reddit.com/r/ios/comments/mdqnzb/is\_the\_the\_new\_siri\_animation\_just\_a\_looping/](https://www.reddit.com/r/ios/comments/mdqnzb/is_the_the_new_siri_animation_just_a_looping/)  
-21. iOS Siri Animation Tutorial | After Effects \- YouTube, 1月 4, 2026にアクセス、 [https://www.youtube.com/watch?v=PZgxMqC079I](https://www.youtube.com/watch?v=PZgxMqC079I)  
 22. How To Use the new Apple Intelligence Writing Tools\!\! \- YouTube, 1月 4, 2026にアクセス、 [https://www.youtube.com/watch?v=hzKA-5Trvuo](https://www.youtube.com/watch?v=hzKA-5Trvuo)  
-23. 10 CSS Blob Effect Examples \- Subframe, 1月 4, 2026にアクセス、 [https://www.subframe.com/tips/css-blob-effect-examples](https://www.subframe.com/tips/css-blob-effect-examples)  
 24. How to use Writing Tools with Apple Intelligence, 1月 4, 2026にアクセス、 [https://support.apple.com/en-us/121582](https://support.apple.com/en-us/121582)  
 25. interpolatingSpring(mass:stiffness:damping:initialVelocity:) \- Apple Developer, 1月 4, 2026にアクセス、 [https://developer.apple.com/documentation/swiftui/animation/interpolatingspring(mass:stiffness:damping:initialvelocity:)](https://developer.apple.com/documentation/swiftui/animation/interpolatingspring\(mass:stiffness:damping:initialvelocity:\))  
 26. Spring | Apple Developer Documentation, 1月 4, 2026にアクセス、 [https://developer.apple.com/documentation/SwiftUI/Spring](https://developer.apple.com/documentation/SwiftUI/Spring)  

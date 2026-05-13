@@ -1,0 +1,79 @@
+{
+    "type": "object",
+    "properties": {
+        "thinking": { "type": "string", "description": "内部推論。全スライドのタイトル案と整合性チェックを含むこと。" },
+        "answer": { "type": "string", "description": "ユーザーへの挨拶と要約。" },
+        "presentation_title": { "type": "string" },
+        "theme": { "type": "string", "enum": ["modern-indigo"], "default": "modern-indigo" },
+        "slides": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string" },
+                    "layout_type": {
+                        "type": "string",
+                        "enum": [
+                            "title_slide", "content_slide", "split_slide", "quote_slide", "section_slide", 
+                            "table_slide", "chart_slide", "stats_slide", "image_content_slide", 
+                            "timeline_slide", "agenda_slide", "profile_slide", "kpi_dashboard_slide", 
+                            "process_flow_slide", "executive_summary_slide", "data_insight_slide", 
+                            "matrix_slide", "strategic_pillar_slide", "multi_point_slide", "roadmap_slide"
+                        ]
+                    },
+                    "content": {
+                        "type": "object",
+                        "properties": {
+                            "title": { "type": "string" },
+                            "subtitle": { "type": "string" },
+                            "eyebrow": { "type": "string" },
+                            "logo_text": { "type": "string" },
+                            "author": { "type": "string" },
+                            "date": { "type": "string" },
+                            "tags": { "type": "array", "items": { "type": "string" } },
+                            "key_message": { "type": "string" },
+                            "body_text": { "type": "string", "description": "content_slide 等で使用。" },
+                            "left_title": { "type": "string", "description": "split_slide の左側見出し。" },
+                            "left_text": { "type": "string", "description": "split_slide の左側本文。" },
+                            "right_title": { "type": "string", "description": "split_slide の右側見出し。" },
+                            "right_text": { "type": "string", "description": "split_slide の右側本文。" },
+                            "left_bullets": { "type": "array", "items": { "type": "string" }, "description": "split_slide の左側箇条書き。" },
+                            "right_bullets": { "type": "array", "items": { "type": "string" }, "description": "split_slide の右側箇条書き。" },
+                            "comparison_icon": { "type": "string", "default": "VS" },
+                            "summary_left": { "type": "object", "properties": { "title": { "type": "string" }, "text": { "type": "string" } } },
+                            "summary_right": { "type": "object", "properties": { "title": { "type": "string" }, "items": { "type": "array", "items": { "type": "string" } } } },
+                            "pillars": { "type": "array", "items": { "type": "object", "properties": { "heading": { "type": "string" }, "text": { "type": "string" } } } },
+                            "foundation": { "type": "string" },
+                            "insight_title": { "type": "string" },
+                            "insight_text": { "type": "string" },
+                            "quadrants": { "type": "array", "items": { "type": "object", "properties": { "label": { "type": "string" }, "text": { "type": "string" } } } },
+                            "x_label": { "type": "string" },
+                            "y_label": { "type": "string" },
+                            "items": { "type": "array", "items": { "type": "object", "properties": { "label": { "type": "string" }, "description": { "type": "string" }, "heading": { "type": "string" }, "text": { "type": "string" }, "icon": { "type": "string" } } } },
+                            "steps": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "label": { "type": "string" }, "description": { "type": "string" }, "title": { "type": "string" } } } },
+                            "events": { "type": "array", "items": { "type": "object", "properties": { "label": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" } } } },
+                            "headers": { "type": "array", "items": { "type": "string" } },
+                            "rows": { "type": "array", "items": { "type": "array", "items": { "type": "string" } } },
+                            "chart_type": { "type": "string", "enum": ["bar", "pie", "line", "area"] },
+                            "data": { "type": "array", "items": { "type": "object", "properties": { "label": { "type": "string" }, "value": { "type": "number" } } } },
+                            "stats": { "type": "array", "items": { "type": "object", "properties": { "value": { "type": "string" }, "label": { "type": "string" } } } },
+                            "quote": { "type": "string" },
+                            "author": { "type": "string" },
+                            "role": { "type": "string" },
+                            "name": { "type": "string" },
+                            "bio": { "type": "string" },
+                            "highlights": { "type": "array", "items": { "type": "string" } },
+                            "image_url": { "type": "string" },
+                            "image_caption": { "type": "string" },
+                            "bullet_points": { "type": "array", "items": { "type": "string" } },
+                            "annotations": { "type": "array", "items": { "type": "string" } }
+                        },
+                        "required": ["title"]
+                    }
+                },
+                "required": ["id", "layout_type", "content"]
+            }
+        }
+    },
+    "required": ["thinking", "answer", "presentation_title", "theme", "slides"]
+}

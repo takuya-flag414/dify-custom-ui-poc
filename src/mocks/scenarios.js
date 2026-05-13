@@ -2156,227 +2156,316 @@ h2.section-title {
   // =================================================================
   'json_slide_advanced': [
     { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
-    { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', node_type: 'llm', text: '{"thinking":"グローバルDX戦略の高度なスライド生成要求です。","category":"TASK","requires_rag":false,"requires_web":false}' }, status: 'succeeded' },
+    { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', node_type: 'llm', text: '{"thinking":"全17種類のスライドタイプを活用した、Project \\"NEO\\" の戦略プレゼンテーションを生成します。","category":"TASK","requires_rag":false,"requires_web":false}' }, status: 'succeeded' },
     { event: 'node_started', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm' } },
-    { event: 'message', answer: '', thinking: '「Global DX Strategy 2026」の包括的な戦略資料を生成します。全14種類のレイアウトと最新の仕様を網羅します...' },
-    {
-      event: 'message',
+    { event: 'message', answer: '', thinking: 'Project NEO の戦略プレゼンテーションを構成しています。全17種類のスライドレイアウトを適用し、視覚的・論理的に高度な資料を作成中...' },
+    { 
+      event: 'message', 
       answer: createMockJson(
-        'グローバルDX戦略 2026 の包括的な提案資料を作成しました。全14種類のレイアウトを駆使し、データに基づいた戦略ロードマップを構成しています。',
+        '全17種類のスライドタイプを活用した、Project "NEO" の戦略プレゼンテーションを生成しました。AIとデータを中核に据えた次世代型ビジネスモデルへの完全移行戦略とロードマップを網羅しています。',
         [],
-        [
-            { type: 'suggested_question', label: 'ROIの詳細を教えて', icon: 'trending-up', payload: { text: 'ROIの算出根拠を詳しく教えて' } },
-            { type: 'suggested_question', label: '導入スケジュールを調整して', icon: 'calendar', payload: { text: 'ロードマップを3ヶ月短縮した場合の影響は？' } }
-        ],
-        '仕様書の全機能を網羅：自動2カラム化、水平タイムライン、KPIトレンド、高度なテーブル、HTML/Markdownハイブリッド記述をすべて含めた14枚構成です。'
-      ).slice(0, -1) + ',"presentation_title":"Global DX Strategy 2026","theme":"modern-indigo","slides":[' +
-      JSON.stringify({
-          id: "slide_1",
-          layout_type: "title_slide",
+        [],
+        'Project "NEO" の全貌を明らかにするため、エグゼクティブ・サマリーからKPIダッシュボードまで、情報の密度と視認性を両立させた17枚の構成案を作成しました。各スライドは「modern-indigo」テーマの特性を最大限に活かし、データの可視化とメッセージの伝達力を高めています。'
+      ).slice(0, -1) + ',"presentation_title":"Project NEO 戦略プレゼンテーション","theme":"modern-indigo","slides":' +
+      JSON.stringify([
+        {
+          id: 'slide_1',
+          layout_type: 'title_slide',
           content: {
-              title: "Global DX Strategy <span style='color: var(--slide-primary)'>2026</span>",
-              subtitle: "Reimagining Corporate Efficiency with **Generative AI**",
-              eyebrow: "STRATEGIC INITIATIVE",
-              author: "DX Strategic Planning Committee",
-              tags: ["AI-First", "2026 Strategy", "Transformation"],
-              logo_text: "CORP DX GROUP",
-              annotations: ["Confidential - Internal Use Only"]
+            logo_text: 'PROJECT NEO',
+            eyebrow: 'CONFIDENTIAL / BOARD MEMBERS ONLY',
+            title: 'Next-Gen Enterprise Transformation 2026',
+            subtitle: 'AIとデータを中核に据えた、次世代型ビジネスモデルへの完全移行戦略とロードマップ',
+            author: '経営企画室 / Chief Digital Officer',
+            date: '2026-06-15',
+            tags: ['#AI-First', '#DataDriven', '#Transformation']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_2",
-          layout_type: "agenda_slide",
+        },
+        {
+          id: 'slide_2',
+          layout_type: 'executive_summary_slide',
           content: {
-              title: "Strategic Agenda",
-              lead_text: "本戦略は以下の柱で構成されます。高度な自動化と人間中心の設計の両立を目指します。",
+            title: 'Executive Summary',
+            summary_left: {
+              title: '現状のディスラプションと課題',
+              text: 'レガシーシステムによる技術的負債が限界に達し、市場競争力が急速に低下しています。手作業に依存した既存オペレーションの延長では、もはや持続的な成長は不可能です。'
+            },
+            summary_right: {
+              title: 'AIファーストへの移行と3つの提言',
               items: [
-                  { label: "Executive Summary", description: "ビジョンと全体目標" },
-                  { label: "Market Intelligence", description: "競合分析と市場動向" },
-                  { label: "Current Performance", description: "KPIによる現状把握" },
-                  { label: "AI Solution Design", description: "次世代アーキテクチャ" },
-                  { label: "Operational Process", description: "業務プロセスの再設計" },
-                  { label: "Roadmap & ROI", description: "導入計画と投資対効果" }
-              ],
-              annotations: ["各フェーズは相互に関連しています"]
+                '全社横断的なデータ統合基盤の構築',
+                'コア業務プロセスの完全自動化',
+                'AIネイティブ人材の育成と組織再編'
+              ]
+            },
+            annotations: ['※2026年Q1時点の社内アセスメントデータに基づく']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_3",
-          layout_type: "split_slide",
+        },
+        {
+          id: 'slide_3',
+          layout_type: 'agenda_slide',
           content: {
-              title: "Paradigm Shift: Legacy vs AI-Native",
-              left_title: "Legacy Operations",
-              left_text: "### 現状の課題\n- 属人的な知識の断片化\n- 手作業による膨大な事務処理\n- データのサイロ化による遅延\n- 低付加価値業務へのリソース集中",
-              right_title: "AI-Native Operations",
-              right_text: "### 目指すべき姿\n- **AIによるナレッジの統合**\n- ワークフローの完全自動化\n- リアルタイム・データ分析\n- クリエイティブな業務へのシフト",
-              comparison_icon: "NEXT",
-              annotations: ["Source: Internal DX Audit 2025"]
+            title: '本日のアジェンダ',
+            lead_text: '本日は以下の流れで、2026年に向けた全社変革の青写真を共有し、最終的な投資承認を図ります。',
+            items: [
+              { label: '01. 市場環境と脅威', description: '生成AIがもたらす破壊的変化' },
+              { label: '02. 当社の現状と課題', description: 'レガシーシステムの限界' },
+              { label: '03. 戦略の核心', description: '3つの重点領域とKSFs' },
+              { label: '04. 実行計画', description: '2026年度のロードマップ' },
+              { label: '05. 投資対効果', description: '期待される財務インパクト' },
+              { label: '06. 承認事項', description: 'Next Stepsとガバナンス体制' }
+            ],
+            annotations: ['※質疑応答はセッションの最後にまとめてお受けします']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_4",
-          layout_type: "chart_slide",
+        },
+        {
+          id: 'slide_section_market',
+          layout_type: 'section_slide',
           content: {
-              title: "Global AI Adoption Trends",
-              chart_type: "area",
-              layout_variation: "two-column",
-              key_message: "2026年には企業の80%が生成AIを基幹業務に統合すると予測されています。",
-              body_text: "- 市場規模は前年比150%で急拡大\n- エンタープライズ投資が加速\n- 早期導入企業が優位性を確保",
-              data: [
-                  { label: "2023", value: 15 },
-                  { label: "2024", value: 35 },
-                  { label: "2025", value: 65 },
-                  { label: "2026(F)", value: 85 }
-              ],
-              annotations: ["Data Source: World Tech Research 2025"]
+            section_number: '01',
+            title: '市場環境と破壊的変化の予兆',
+            subtitle: '生成AIが再定義するエンタープライズ・ソフトウェアの未来と、我々が直面している「静かなる危機」について',
+            annotations: [
+              'CONFIDENTIAL',
+              'Market Analysis Report v2.4'
+            ]
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_5",
-          layout_type: "table_slide",
+        },
+        {
+          id: 'slide_quote_vision',
+          layout_type: 'quote_slide',
           content: {
-              title: "Competitor Benchmarking",
-              headers: ["Competitor", "AI Strategy", "Focus", "Progress", "ROI", "Notes"],
-              rows: [
-                  ["Global A", "Aggressive", "R&D", "◎", "2.5x", "先行投資継続"],
-                  ["Global B", "Balanced", "CS", "○", "1.8x", "満足度向上"],
-                  ["Region C", "Selective", "Sales", "△", "1.2x", "データ整備中"],
-                  ["Startup D", "AI-First", "All", "◎", "4.0x", "完全自動化"],
-                  ["Legacy E", "Late", "None", "×", "-", "検討中"]
-              ],
-              description: "競合他社と比較して、当社は「全社的な統合」のフェーズで優位性を確保する必要があります。",
-              annotations: ["※◎: 非常に進んでいる, ○: 進んでいる, △: 一部導入, ×: 未導入"]
+            quote: '「2026年までに、AIを中核に据えない企業は、**市場の平均的な進化スピードから完全に取り残される**ことになるだろう。これは単なる効率化ではなく、生存戦略である。」',
+            author: 'Dr. Elena Vance',
+            role: 'Chief Strategy Officer, PROJECT NEO',
+            annotations: [
+              '2025年度 戦略発表会での基調講演より抜粋'
+            ]
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_6",
-          layout_type: "section_slide",
+        },
+        {
+          id: 'slide_image_insight',
+          layout_type: 'image_content_slide',
           content: {
-              title: "Performance & Impact",
-              subtitle: "Data-Driven Analysis of Current Status",
-              section_number: "01",
-              annotations: ["Chapter 1 focus on quantitative metrics"]
+            title: 'データ密度の進化と意思決定速度',
+            key_message: '統合データ基盤「NEO-Core」により、意思決定サイクルを従来の**1/10に短縮**',
+            image_url: 'https://images.unsplash.com/photo-1551288049-bbda38a594a8?auto=format&fit=crop&q=80&w=1000',
+            image_caption: '図1: 従来型(左)とNEO-Core(右)における情報伝達のレイテンシ比較',
+            layout_variation: 'image-left',
+            body_text: 'リアルタイム・ストリーミング・アナリティクスの導入により、経営会議での「データ待ち」をゼロにします。これまでのバッチ処理ベースの報告体系から、常時接続型のダッシュボード経営へと移行します。\n\n- 非構造化データの85%を即時構造化\n- 部門間を跨ぐクロスドメイン分析の自動化',
+            annotations: [
+              '※自社プロトタイプによるベンチマーク結果',
+              '出典: NEO Data Engineering Group'
+            ]
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_7",
-          layout_type: "kpi_dashboard_slide",
+        },
+        {
+          id: 'slide_4',
+          layout_type: 'split_slide',
           content: {
-              title: "Strategic KPI Dashboard",
-              summary_kpis: [
-                  { label: "Total Cost Reduction", value: "25.4%", unit: "", change: "+5.2%", trend: "up" },
-                  { label: "Process Efficiency", value: "3.5x", unit: "", change: "+1.2", trend: "up" }
-              ],
-              detail_kpis: [
-                  { label: "AI Response Rate", value: "92%", unit: "", change: "+15%", trend: "up" },
-                  { label: "Human Error Rate", value: "0.8%", unit: "", change: "-2.4%", trend: "down" },
-                  { label: "Employee Saving", value: "450", unit: "h/mo", change: "flat", trend: "flat" },
-                  { label: "Customer Satisfaction", value: "4.8", unit: "/5.0", change: "+0.3", trend: "up" }
-              ],
-              body_text: "全ての重要指標において改善傾向にあります。CSATの向上がQ3の焦点となります。",
-              annotations: ["Updated: May 2026", "Source: Finance Sync"]
+            title: 'Paradigm Shift: レガシーからAIネイティブへ',
+            left_title: 'Legacy Operations',
+            left_text: '手作業と属人化に依存したサイロ型のプロセス\n\n- 各部門で分断されたデータ\n- 高い運用・保守コスト\n- リアクティブな意思決定',
+            right_title: 'AI-Native Operations',
+            right_text: 'データ主導での自律的・プロアクティブなプロセス\n\n- 統合されたシングル・ソース・オブ・トゥルース\n- 自動化されたワークフロー\n- 予測型・AI支援型の意思決定',
+            annotations: ['※業界標準ベンチマークとの比較モデル']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_8",
-          layout_type: "stats_slide",
+        },
+        {
+          id: 'slide_5',
+          layout_type: 'chart_slide',
           content: {
-              title: "Productivity Gains Highlight",
-              layout_variation: "two-column",
-              stats: [
-                  { value: "70%", label: "Time Saved", description: "Report generation" },
-                  { value: "¥45M", label: "Cost Offset", description: "Annual estimate" }
-              ],
-              body_text: "AI導入により、定型業務の工数が劇的に削減されました。クリエイティブな戦略立案により多くの時間を割くことが可能です。",
-              annotations: ["Based on Q1 2026 Internal Survey"]
+            title: 'グローバルにおける生成AI導入率の推移',
+            chart_type: 'area',
+            data: [
+              { label: '2023', value: 12 },
+              { label: '2024', value: 35 },
+              { label: '2025', value: 68 },
+              { label: '2026', value: 89 }
+            ],
+            description: '過去3年間で導入率は急増しており、既に「キャズム」を超え、導入しないことが明確なビジネスリスクとなるフェーズに突入しています。',
+            annotations: ['出典: Global Tech Insight Report 2026予測']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_9",
-          layout_type: "process_flow_slide",
+        },
+        {
+          id: 'slide_6',
+          layout_type: 'data_insight_slide',
           content: {
-              title: "AI Implementation Lifecycle",
-              process_steps: [
-                  { title: "Analysis", description: "ボトルネック特定" },
-                  { title: "Design", description: "ソリューション設計" },
-                  { title: "Build", description: "基盤構築" },
-                  { title: "Pilot", description: "先行導入" },
-                  { title: "Optimize", description: "反映" },
-                  { title: "Scale", description: "展開" }
-              ],
-              key_message: "段階的なアプローチにより、リスクを最小限に抑えつつ効果を最大化します。",
-              annotations: ["Cycle duration: Approx. 6 months"]
+            title: '早期導入企業における利益率の乖離',
+            insight_title: 'The "AI Divide" is Real',
+            insight_text: 'AIを早期導入し、オペレーションに組み込んだ上位20%の企業は、そうでない企業と比較して**営業利益率に15%以上の差**を生み出しています。我々に残された「追いつくための猶予」は多くありません。',
+            annotations: ['※左側プレースホルダーには利益率比較チャートを挿入想定']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_10",
-          layout_type: "timeline_slide",
+        },
+        {
+          id: 'slide_7',
+          layout_type: 'table_slide',
           content: {
-              title: "Strategic Roadmap 2026",
-              layout_variation: "horizontal",
-              events: [
-                  { label: "Q1", title: "Foundation", description: "インフラとセキュリティの確立" },
-                  { label: "Q2", title: "Expansion", description: "主要3部門へのAI導入" },
-                  { label: "Q3", title: "Integration", description: "既存ERPとのAPI連携" },
-                  { label: "Q4", title: "Evolution", description: "AI主導の意思決定稼働" }
-              ],
-              annotations: ["Dates are subject to PoC results"]
+            title: '競合他社ベンチマーキング',
+            description: 'トップランナーであるA社は既にフェーズ3（自律化）に到達しており、当社の遅れは明白です。早急なキャッチアップが求められます。',
+            layout_variation: 'two-column',
+            headers: ['企業', 'AI投資額(推定)', 'DX進捗フェーズ', '主要施策'],
+            rows: [
+              ['競合A社', '¥12.5B', 'フェーズ3 (自律化)', '全社AIアシスタント導入完了'],
+              ['競合B社', '¥8.0B', 'フェーズ2 (部分最適)', 'カスタマーサポートの無人化'],
+              ['当社 (現状)', '¥1.2B', 'フェーズ1 (初期検証)', '一部部門でのPoC実施のみ']
+            ],
+            annotations: ['※投資額は公開情報からの推定値']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_11",
-          layout_type: "image_content_slide",
+        },
+        {
+          id: 'slide_8',
+          layout_type: 'matrix_slide',
           content: {
-              title: "Integrated AI Architecture",
-              layout_variation: "image-right",
-              image_url: "https://placehold.co/800x450/4f46e5/ffffff?text=AI+Architecture",
-              image_caption: "Conceptual Architecture",
-              key_message: "セキュアなプライベートLLMを中心としたプラットフォームを構築します。",
-              body_text: "- **マルチモデル**: 最適なLLMを選択\n- **RAG**: 社内文書をリアルタイム参照\n- **Security**: 情報漏洩を徹底防止",
-              annotations: ["ISO 27001 Certified"]
+            title: 'DX施策の優先順位付け (Impact vs Effort)',
+            x_label: '実現容易性',
+            y_label: 'ビジネスインパクト',
+            quadrants: [
+              { label: 'Major Projects (戦略的投資)', text: '基幹システム刷新\n全社データ基盤構築' },
+              { label: 'Quick Wins (最優先着手)', text: '定型業務のRPA化\nAIヘルプデスク導入' },
+              { label: 'Thankless Tasks (見送り)', text: '個別部門のニッチツール開発' },
+              { label: 'Fill Ins (余力で対応)', text: '社内ポータルの微小改修' }
+            ],
+            annotations: ['※右上の Quick Wins から着手し、早期に成功体験を創出する']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_12",
-          layout_type: "profile_slide",
+        },
+        {
+          id: 'slide_9',
+          layout_type: 'strategic_pillar_slide',
           content: {
-              name: "DX Steering Committee",
-              role: "Executive Leadership",
-              bio: "CEO直属の特別チームが推進します。IT、人事、財務のエキスパートが揃っています。",
-              highlights: [
-                  "10+ Years DX Experience",
-                  "Cross-functional Lead",
-                  "AI Ethics Board Member"
-              ],
-              image_url: "https://placehold.co/400x500/6366f1/ffffff?text=Leadership",
-              annotations: ["Support available via Internal Slack"]
+            title: 'Project NEO: 3つの戦略的重点領域',
+            foundation: '全社統合データ基盤 (Unified Data Lake)',
+            pillars: [
+              { heading: '1. CX変革', text: '顧客接点のパーソナライズと、24時間365日のAI対応による体験価値の向上' },
+              { heading: '2. オペレーション自動化', text: 'バックオフィス業務の完全自動化による、圧倒的なコスト競争力の獲得' },
+              { heading: '3. 新規事業創出', text: '蓄積されたデータを活用した、データマネタイズ型の新規サービスの立ち上げ' }
+            ],
+            annotations: ['※基盤構築をフェーズ1として全社横断で先行実施']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_13",
-          layout_type: "quote_slide",
+        },
+        {
+          id: 'slide_10',
+          layout_type: 'multi_point_slide',
           content: {
-              quote: "The best way to <span style='color: var(--slide-primary)'>predict</span> the future is to <span style='text-decoration: underline'>create</span> it.",
-              author: "Peter Drucker",
-              role: "Management Expert",
-              annotations: ["戦略の核となるマインドセット"]
+            title: '成功に向けた4つの重要成功要因 (KSFs)',
+            subtitle: '戦略を絵に描いた餅にしないための実行条件',
+            items: [
+              { icon: 'star', heading: 'トップのコミットメント', text: '経営陣からの強力なメッセージ発信と、痛みを伴う変革への覚悟' },
+              { icon: 'users', heading: 'アジャイルな推進体制', text: '部門の壁を越えたクロスファンクショナルチームの組成' },
+              { icon: 'briefcase', heading: '十分なリソース確保', text: '聖域なき予算の再配分と、外部専門家の積極的な登用' },
+              { icon: 'trending-up', heading: 'チェンジマネジメント', text: '現場の抵抗感を払拭するための継続的な教育と評価制度の改定' }
+            ],
+            annotations: ['※PMO直轄で各項目の進捗を毎月モニタリング']
           }
-      }) + "," +
-      JSON.stringify({
-          id: "slide_14",
-          layout_type: "content_slide",
+        },
+        {
+          id: 'slide_11',
+          layout_type: 'timeline_slide',
           content: {
-              title: "Conclusion & Next Steps",
-              layout_variation: "two-column",
-              key_message: "2026年、私たちはAIをパートナーとして、これまでにない価値を創造します。",
-              body_text: "AIネイティブ企業への進化。\\n\\n### 次のアクション\n1. 予算委員会の最終承認\n2. 専任チームの組成\n3. ベンダーの最終選定\n4. 社内説明会の実施\\n\\n新しい時代の幕開けを、共に創り上げましょう。",
-              annotations: ["Contact: dx-strategy@example.com"]
+            title: 'Enterprise Architectureの進化の軌跡',
+            events: [
+              { year: '2020', title: 'オンプレミス期', description: 'サイロ化された部門最適のシステム。属人的な運用。' },
+              { year: '2023', title: 'クラウド移行期', description: 'インフラのモダナイゼーション。SaaSの個別導入。' },
+              { year: '2026', title: 'AIネイティブ期 (NEO)', description: 'データ統合とAIによる自律的オペレーションの確立。' }
+            ],
+            annotations: ['※本プロジェクトを通じて、2026年を歴史的なターニングポイントとする']
           }
-      }) +
-      ']}'
+        },
+        {
+          id: 'slide_12',
+          layout_type: 'roadmap_slide',
+          content: {
+            title: 'FY2026 実行ロードマップ',
+            steps: [
+              { date: 'Q1', label: 'アセスメント & 設計', description: '現状業務の棚卸しとデータ基盤の要件定義' },
+              { date: 'Q2', label: 'PoC & 基盤構築', description: '先行3部門での検証とコアシステムの開発' },
+              { date: 'Q3', label: 'パイロット展開', description: '評価指標の測定とオペレーションの修正' },
+              { date: 'Q4', label: '全社ロールアウト', description: '全社展開と継続的改善サイクルの確立' }
+            ],
+            annotations: ['※各四半期末に経営会議にてゲートレビューを実施']
+          }
+        },
+        {
+          id: 'slide_13',
+          layout_type: 'process_flow_slide',
+          content: {
+            title: '各部門における業務自動化のステップ',
+            steps: [
+              { title: '業務の棚卸し', description: '全タスクの可視化と工数算出' },
+              { title: 'AI適用箇所の特定', description: '費用対効果の高いプロセスの選定' },
+              { title: 'フロー再設計', description: 'AIを前提としたBPRの実施' },
+              { title: 'システム実装', description: 'ローコードツールを用いた現場主導の開発' }
+            ],
+            annotations: ['※トップダウンではなく、現場主導での推進を基本プロセスとする']
+          }
+        },
+        {
+          id: 'slide_14',
+          layout_type: 'section_slide',
+          content: {
+            title: 'Performance & Governance',
+            subtitle: '投資対効果の予測とプロジェクト推進体制',
+            section_number: '04',
+            annotations: ['※ここからは財務的な側面とガバナンスを中心に説明します']
+          }
+        },
+        {
+          id: 'slide_15',
+          layout_type: 'stats_slide',
+          content: {
+            title: '3年後の期待されるアウトカム',
+            stats: [
+              { value: '40%', label: '定型業務工数削減', description: 'バックオフィス部門の大幅な効率化' },
+              { value: '¥4.5B', label: 'コスト削減効果', description: 'システム統合とライセンス最適化による年間削減額' },
+              { value: '3x', label: '意思決定スピード', description: 'データドリブン化によるサイクルタイムの短縮' }
+            ],
+            annotations: ['※保守的なシナリオに基づき算出（楽観シナリオは別途提示）']
+          }
+        },
+        {
+          id: 'slide_16',
+          layout_type: 'kpi_dashboard_slide',
+          content: {
+            title: 'Project NEO: KPI Dashboard (Mockup)',
+            summary_kpis: [
+              { label: 'プロジェクトROI', value: '185%', trend: 'up' },
+              { label: 'システム統合率', value: '62%', trend: 'up' }
+            ],
+            detail_kpis: [
+              { label: '現場適応スコア', value: '45/100', trend: 'down' },
+              { label: 'AI起因のエラー率', value: '1.2%', trend: 'down' }
+            ],
+            annotations: ['※導入後はこのダッシュボードにて経営会議でリアルタイム監視予定']
+          }
+        },
+        {
+          id: 'slide_17',
+          layout_type: 'content_slide',
+          content: {
+            title: 'Conclusion & Next Steps',
+            layout_variation: 'two-column',
+            key_message: '本プロジェクトは単なるIT投資ではなく、企業存続をかけた経営戦略です。',
+            body_text: '### 結論\n- AI導入の遅れは、回復困難な競争力格差を生む。\n- 「Project NEO」により、3年で次世代モデルへ移行可能。\n- 投資回収期間は1.5年と極めて高いROIが見込める。\n\n---\n\n### 本日ご承認いただきたい事項\n1. Project NEO の基本方針とロードマップの承認\n2. 専任PMO組織（15名規模）の設立\n3. 第1期（FY26）予算 **25億円** の執行承認',
+            annotations: ['※ご承認後、即日キックオフおよびPMOの立ち上げを実施します']
+          }
+        },
+        {
+          id: 'slide_profile_lead',
+          layout_type: 'profile_slide',
+          content: {
+            name: '佐藤 健太 / Kenta Sato',
+            role: 'VP of Engineering & AI Transformation',
+            bio: '大手ITベンチャーにてAI開発責任者を歴任後、2024年に参画。PROJECT NEOでは、技術基盤の刷新とAI組織への文化醸成を牽引している。\n\n- **専門領域**: 分散システム、LLM Fine-tuning、組織工学\n- **ミッション**: レガシー負債の返済と、AIによる創造性の解放',
+            image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=1000',
+            annotations: [
+              'PROJECT NEO 実行委員会 メンバー'
+            ]
+          }
+        }
+      ], null, 2) + '}'
     },
     { event: 'node_finished', data: { title: 'LLM_JSON_Slide_Generator', node_type: 'llm', status: 'succeeded' } },
-    { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 5200, completion_tokens: 3600, total_tokens: 8800 } } }
+    { event: 'message_end', metadata: { retriever_resources: [], usage: { prompt_tokens: 5800, completion_tokens: 3200, total_tokens: 9000 } } }
   ],
 
 

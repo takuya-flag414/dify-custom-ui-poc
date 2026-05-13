@@ -12,6 +12,13 @@ import StatsSlide from './slides/StatsSlide';
 import ProcessFlowSlide from './slides/ProcessFlowSlide';
 import TimelineSlide from './slides/TimelineSlide';
 import KpiDashboardSlide from './slides/KpiDashboardSlide';
+import ExecutiveSummarySlide from './slides/ExecutiveSummarySlide';
+import DataInsightSlide from './slides/DataInsightSlide';
+import MatrixSlide from './slides/MatrixSlide';
+import StrategicPillarSlide from './slides/StrategicPillarSlide';
+import MultiPointSlide from './slides/MultiPointSlide';
+import RoadmapSlide from './slides/RoadmapSlide';
+
 
 // Common Slides
 import { 
@@ -37,6 +44,13 @@ export const modernIndigoMap = {
     profile_slide: ProfileSlide,
     kpi_dashboard_slide: KpiDashboardSlide,
     process_flow_slide: ProcessFlowSlide,
+    executive_summary_slide: ExecutiveSummarySlide,
+    data_insight_slide: DataInsightSlide,
+    matrix_slide: MatrixSlide,
+    strategic_pillar_slide: StrategicPillarSlide,
+    multi_point_slide: MultiPointSlide,
+    roadmap_slide: RoadmapSlide,
+
 
     // エイリアス (ユーザー指定の揺れを吸収)
     title: TitleSlide,
@@ -53,4 +67,11 @@ export const modernIndigoMap = {
     profile: ProfileSlide,
     kpi_dashboard: KpiDashboardSlide,
     process_flow: ProcessFlowSlide,
+    executive_summary: ExecutiveSummarySlide,
+    data_insight: DataInsightSlide,
+    matrix: MatrixSlide,
+    strategic_pillar: StrategicPillarSlide,
+    multi_point: MultiPointSlide,
+    roadmap: RoadmapSlide,
 };
+

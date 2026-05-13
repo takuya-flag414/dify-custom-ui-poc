@@ -3,288 +3,194 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import SlideMarkdown from '../../../MarkdownRenderer';
 
-/**
- * TimelineSlide - タイムライン / ロードマップスライド
- * 垂直・水平のレイアウト切替、アダプティブ密度調整対応
- */
 const TimelineSlide = ({ content, isStatic = false }) => {
-    const { 
-        title, 
-        items = [], 
-        events = [], 
+    const {
+        title,
+        items = [],
+        events = [],
         annotations = [],
-        layout_variation = 'vertical' 
+        layout_variation = 'vertical'
     } = content || {};
 
-    // データの正規化 (items または events の両方に対応)
+    // データの正規化
     const rawEvents = events.length > 0 ? events : items;
     const activeEvents = Array.isArray(rawEvents) ? rawEvents.map(e => ({
-        label: e.label || e.date || e.year || e.step || '',
+        date: e.date || e.year || e.label || e.step || '',
         title: e.title || e.label || '',
         description: e.description || ''
     })) : [];
 
     const isHorizontal = layout_variation === 'horizontal';
 
+    // 垂直レイアウト (Vertical): ストイックなリスト化
+    const renderVertical = () => (
+        <div className="relative w-full ml-[2cqi] mt-[1.5cqi]">
+            {/* メイントラック (Vertical 1px Line) */}
+            <motion.div
+                className="absolute left-0 top-[1.5cqi] bottom-[1.5cqi] w-[1px]"
+                style={{ backgroundColor: 'var(--slide-border)' }}
+                initial={!isStatic ? { scaleY: 0, transformOrigin: 'top' } : {}}
+                animate={{ scaleY: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+            />
+
+            <div className="flex flex-col gap-[3.5cqi]">
+                {activeEvents.map((event, i) => (
+                    <motion.div
+                        key={i}
+                        className="relative flex flex-col pl-[3.5cqi]"
+                        initial={!isStatic ? { opacity: 0, x: 15 } : {}}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: 0.3 + (i * 0.1) }}
+                    >
+                        {/* 幾何学ノード & Architectural Tick */}
+                        <div className="absolute left-[-2.5px] top-[0.6cqi] w-[6px] h-[6px] bg-[var(--slide-primary)] rounded-sm z-10" />
+                        <div className="absolute left-0 top-[0.6cqi] w-[2cqi] h-[1px] mt-[2.5px]" style={{ backgroundColor: 'var(--slide-border)' }} />
+
+                        {/* Date (時間のインデックス) */}
+                        <div style={{
+                            fontSize: '1.2cqi',
+                            fontWeight: 800,
+                            color: 'var(--slide-primary)',
+                            fontFamily: 'monospace',
+                            letterSpacing: '0.1em',
+                            marginBottom: '0.8cqi'
+                        }}>
+                            {event.date}
+                        </div>
+
+                        {/* 見出し */}
+                        <h3 style={{
+                            fontSize: '1.6cqi',
+                            fontWeight: 800,
+                            color: 'var(--slide-heading)',
+                            marginBottom: '1cqi',
+                            lineHeight: 1.3
+                        }}>
+                            <SlideMarkdown content={event.title} inline />
+                        </h3>
+
+                        {/* 本文 (箱を排除し余白で魅せる) */}
+                        {event.description && (
+                            <div style={{
+                                fontSize: '1.4cqi',
+                                color: 'var(--slide-body)',
+                                lineHeight: 1.6,
+                                paddingLeft: '1.5cqi',
+                                borderLeft: '2px solid #F1F5F9' // 極薄のインデント
+                            }}>
+                                <SlideMarkdown content={event.description} />
+                            </div>
+                        )}
+                    </motion.div>
+                ))}
+            </div>
+        </div>
+    );
+
+    // 水平レイアウト (Horizontal): ドロップラインと左揃えモジュール
+    const renderHorizontal = () => {
+        const gridColumns = activeEvents.length > 0 ? `repeat(${activeEvents.length}, minmax(0, 1fr))` : '1fr';
+
+        return (
+            <div className="relative w-full flex-1 flex flex-col justify-center mt-[1cqi]">
+                {/* メイントラック (Horizontal 1px Line) */}
+                <motion.div
+                    className="absolute top-1/2 left-[1.5cqi] right-[1.5cqi] h-[1px] bg-slate-200 -translate-y-1/2 z-0"
+                    initial={!isStatic ? { scaleX: 0, transformOrigin: 'left' } : {}}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                />
+
+                <div className="relative z-10 w-full h-[85%] flex flex-col">
+                    {/* 上段グリッド (偶数インデックス) */}
+                    <div className="flex-1 grid items-end pb-[2.5cqi]" style={{ gridTemplateColumns: gridColumns }}>
+                        {activeEvents.map((event, i) => (
+                            <div key={`top-${i}`} className="relative px-[1.5cqi]">
+                                {i % 2 === 0 && (
+                                    <motion.div
+                                        className="flex flex-col"
+                                        style={{ borderLeft: '2px solid var(--slide-border)', paddingLeft: '1.2cqi' }}
+                                        initial={!isStatic ? { opacity: 0, y: -10 } : {}}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: 0.3 + (i * 0.1) }}
+                                    >
+                                        {/* ドロップライン(茎)とノード */}
+                                        <div className="absolute left-[1.5cqi] bottom-[-2.5cqi] w-[1px] h-[2.5cqi] bg-slate-200" />
+                                        <div className="absolute left-[1.5cqi] bottom-[-2.5cqi] w-[6px] h-[6px] bg-[var(--slide-primary)] rounded-sm -translate-x-[2.5px] translate-y-[3px] z-10" />
+
+                                        <div style={{ fontSize: '1.2cqi', fontWeight: 800, color: 'var(--slide-primary)', fontFamily: 'monospace', letterSpacing: '0.05em', marginBottom: '0.6cqi' }}>{event.date}</div>
+                                        <h3 style={{ fontSize: '1.5cqi', fontWeight: 800, color: 'var(--slide-heading)', marginBottom: '0.8cqi', lineHeight: 1.3 }}><SlideMarkdown content={event.title} inline /></h3>
+                                        {event.description && <div style={{ fontSize: '1.3cqi', color: 'var(--slide-body)', lineHeight: 1.6 }}><SlideMarkdown content={event.description} /></div>}
+                                    </motion.div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    {/* 下段グリッド (奇数インデックス) */}
+                    <div className="flex-1 grid items-start pt-[2.5cqi]" style={{ gridTemplateColumns: gridColumns }}>
+                        {activeEvents.map((event, i) => (
+                            <div key={`bottom-${i}`} className="relative px-[1.5cqi]">
+                                {i % 2 !== 0 && (
+                                    <motion.div
+                                        className="flex flex-col"
+                                        style={{ borderLeft: '2px solid var(--slide-border)', paddingLeft: '1.2cqi' }}
+                                        initial={!isStatic ? { opacity: 0, y: 10 } : {}}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: 0.3 + (i * 0.1) }}
+                                    >
+                                        {/* ドロップライン(茎)とノード */}
+                                        <div className="absolute left-[1.5cqi] top-[-2.5cqi] w-[1px] h-[2.5cqi] bg-slate-200" />
+                                        <div className="absolute left-[1.5cqi] top-[-2.5cqi] w-[6px] h-[6px] bg-[var(--slide-primary)] rounded-sm -translate-x-[2.5px] -translate-y-[3px] z-10" />
+
+                                        <div style={{ fontSize: '1.2cqi', fontWeight: 800, color: 'var(--slide-primary)', fontFamily: 'monospace', letterSpacing: '0.05em', marginBottom: '0.6cqi' }}>{event.date}</div>
+                                        <h3 style={{ fontSize: '1.5cqi', fontWeight: 800, color: 'var(--slide-heading)', marginBottom: '0.8cqi', lineHeight: 1.3 }}><SlideMarkdown content={event.title} inline /></h3>
+                                        {event.description && <div style={{ fontSize: '1.3cqi', color: 'var(--slide-body)', lineHeight: 1.6 }}><SlideMarkdown content={event.description} /></div>}
+                                    </motion.div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="json-slide-layout indigo-style" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="json-slide-layout indigo-style h-full flex flex-col">
             {/* ヘッダー */}
-            <motion.div 
+            <motion.div
                 className="indigo-slide-header"
-                style={{ flexShrink: 0 }}
-                {...(!isStatic && { initial: { opacity: 0, x: -20 }, animate: { opacity: 1, x: 0 } })}
+                style={{
+                    marginBottom: '1cqi',
+                    borderBottom: '2.5px solid var(--slide-primary)',
+                    paddingBottom: '1.2cqi'
+                }}
+                {...(!isStatic && { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4 } })}
             >
-                <h2 style={{ fontSize: '2.8cqi', margin: 0, color: 'var(--slide-heading)', fontWeight: 700 }}>
-                    <SlideMarkdown content={title || 'タイムライン'} />
+                <h2 style={{ fontSize: '2.6cqi', margin: 0, color: 'var(--slide-heading)', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                    <SlideMarkdown content={title || 'Timeline'} />
                 </h2>
             </motion.div>
 
-            {/* ボディエリア */}
-            <div className="indigo-slide-body" style={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                minHeight: 0,
-                justifyContent: 'flex-start',
-                paddingTop: '0'
-            }}>
-                {(() => {
-                    const count = activeEvents.length;
-                    const aCount = annotations.length;
-                    
-                    // 情報密度の算出 (垂直方向のスペース消費をより厳格に評価)
-                    const verticalDensity = count * 6;
-                    const horizontalDensity = count * 4.5;
-                    const densityScore = (isHorizontal ? horizontalDensity : verticalDensity) + (aCount > 0 ? 3 : 0);
-                    
-                    // スケーリング
-                    const scaleFactor = densityScore > 50 ? 0.75
-                                      : densityScore > 35 ? 0.85
-                                      : densityScore > 22 ? 0.95
-                                      : 1.0;
-
-                    // 垂直レイアウトの描画
-                    const renderVertical = () => (
-                        <div style={{ position: 'relative', paddingLeft: '6cqi', width: '100%' }}>
-                            {/* メインライン */}
-                            <div style={{ 
-                                position: 'absolute', 
-                                left: '6.75cqi', 
-                                top: '1cqi', 
-                                bottom: '1cqi', 
-                                width: '3px', 
-                                background: 'linear-gradient(to bottom, var(--slide-primary), rgba(99, 102, 241, 0.1))',
-                                borderRadius: '3px'
-                            }} />
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: densityScore > 25 ? '1.5cqi' : '2.5cqi' }}>
-                                {activeEvents.map((event, idx) => (
-                                    <motion.div 
-                                        key={idx}
-                                        style={{ display: 'flex', gap: '2.5cqi', alignItems: 'flex-start', position: 'relative' }}
-                                        {...(!isStatic && {
-                                            initial: { opacity: 0, x: 20 },
-                                            animate: { opacity: 1, x: 0 },
-                                            transition: { delay: 0.1 + idx * 0.1 }
-                                        })}
-                                    >
-                                        {/* ノード */}
-                                        <div style={{ 
-                                            width: '1.6cqi', 
-                                            height: '1.6cqi', 
-                                            borderRadius: '50%', 
-                                            background: 'var(--slide-primary)', 
-                                            border: '3.5px solid #ffffff',
-                                            boxShadow: '0 0 10px rgba(99, 102, 241, 0.3)',
-                                            zIndex: 2,
-                                            flexShrink: 0,
-                                            marginTop: '0.8cqi'
-                                        }} />
-                                        
-                                        <div className="indigo-panel" style={{ 
-                                            flex: 1, 
-                                            padding: densityScore > 25 ? '1.5cqi 2cqi' : '2cqi 2.5cqi',
-                                            background: '#ffffff',
-                                            border: '1px solid var(--slide-border)',
-                                            boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-                                            position: 'relative',
-                                            borderRadius: '0.5cqi'
-                                        }}>
-                                            <div style={{ 
-                                                fontWeight: 800, 
-                                                fontSize: '1.6cqi', 
-                                                color: 'var(--slide-primary)', 
-                                                marginBottom: '0.3cqi',
-                                                letterSpacing: '0.05em'
-                                            }}>
-                                                <SlideMarkdown content={event.label} />
-                                            </div>
-                                            <div style={{ 
-                                                fontWeight: 700, 
-                                                fontSize: '2.0cqi', 
-                                                color: 'var(--slide-heading)',
-                                                marginBottom: '0.4cqi'
-                                            }}>
-                                                <SlideMarkdown content={event.title} />
-                                            </div>
-                                            {event.description && (
-                                                <div style={{ 
-                                                    fontSize: '1.5cqi', 
-                                                    color: '#475569', 
-                                                    lineHeight: 1.5,
-                                                    fontWeight: 400 
-                                                }}>
-                                                    <SlideMarkdown content={event.description} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-                    );
-
-                    // 水平レイアウトの描画 (3行構成で重なりを物理的に排除)
-                    const renderHorizontal = () => (
-                        <div style={{ 
-                            position: 'relative', 
-                            width: '100%', 
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'flex-start',
-                            marginTop: '-4cqi',           // タイトルに引き寄せる
-                            minHeight: '40cqi'
-                        }}>
-                            {/* 1. 上段カードエリア */}
-                            <div style={{ 
-                                display: 'flex', 
-                                justifyContent: 'space-around', 
-                                alignItems: 'flex-end',
-                                width: '100%',
-                                flex: 1,
-                                paddingBottom: '2cqi' // 安全領域を短縮
-                            }}>
-                                {activeEvents.map((event, idx) => (
-                                    <div key={idx} style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                                        {idx % 2 === 0 ? (
-                                            <motion.div 
-                                                style={{ 
-                                                    width: '95%', maxWidth: '20cqi', padding: '0.5cqi',
-                                                    textAlign: 'center', background: 'transparent' // 背景・枠線を削除
-                                                }}
-                                                {...(!isStatic && { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { delay: idx * 0.1 } })}
-                                            >
-                                                <div style={{ fontWeight: 800, fontSize: '1.5cqi', color: 'var(--slide-primary)', marginBottom: '0.3cqi' }}>
-                                                    <SlideMarkdown content={event.label} />
-                                                </div>
-                                                <div style={{ fontWeight: 700, fontSize: '1.8cqi', color: 'var(--slide-heading)', marginBottom: '0.4cqi' }}>
-                                                    <SlideMarkdown content={event.title} />
-                                                </div>
-                                                {event.description && (
-                                                    <div style={{ fontSize: '1.4cqi', color: '#475569', lineHeight: 1.4 }}>
-                                                        <SlideMarkdown content={event.description} />
-                                                    </div>
-                                                )}
-                                            </motion.div>
-                                        ) : <div style={{ height: '1px' }} />}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* 2. 中段ライン＆ドットエリア */}
-                            <div style={{ position: 'relative', height: '4px', width: '100%' }}>
-                                {/* メインライン */}
-                                <div style={{ 
-                                    position: 'absolute', left: 0, right: 0, top: '50%', height: '4px',
-                                    background: 'linear-gradient(to right, rgba(99, 102, 241, 0.1), var(--slide-primary), rgba(99, 102, 241, 0.1))',
-                                    transform: 'translateY(-50%)', borderRadius: '4px'
-                                }} />
-                                
-                                <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', height: '100%', position: 'relative', zIndex: 5 }}>
-                                    {activeEvents.map((event, idx) => (
-                                        <div key={idx} style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                                            <motion.div 
-                                                style={{ 
-                                                    width: '2cqi', height: '2cqi', borderRadius: '50%',
-                                                    background: 'var(--slide-primary)', border: '4px solid #ffffff',
-                                                    boxShadow: '0 0 10px rgba(99, 102, 241, 0.4)'
-                                                }}
-                                                {...(!isStatic && { initial: { scale: 0 }, animate: { scale: 1 }, transition: { delay: 0.2 + idx * 0.1 } })}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* 3. 下段カードエリア */}
-                            <div style={{ 
-                                display: 'flex', 
-                                justifyContent: 'space-around', 
-                                alignItems: 'flex-start',
-                                width: '100%',
-                                flex: 1,
-                                paddingTop: '2cqi' // 安全領域を短縮
-                            }}>
-                                {activeEvents.map((event, idx) => (
-                                    <div key={idx} style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                                        {idx % 2 !== 0 ? (
-                                            <motion.div 
-                                                style={{ 
-                                                    width: '95%', maxWidth: '20cqi', padding: '0.5cqi',
-                                                    textAlign: 'center', background: 'transparent' // 背景・枠線を削除
-                                                }}
-                                                {...(!isStatic && { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: idx * 0.1 } })}
-                                            >
-                                                <div style={{ fontWeight: 800, fontSize: '1.5cqi', color: 'var(--slide-primary)', marginBottom: '0.3cqi' }}>
-                                                    <SlideMarkdown content={event.label} />
-                                                </div>
-                                                <div style={{ fontWeight: 700, fontSize: '1.8cqi', color: 'var(--slide-heading)', marginBottom: '0.4cqi' }}>
-                                                    <SlideMarkdown content={event.title} />
-                                                </div>
-                                                {event.description && (
-                                                    <div style={{ fontSize: '1.4cqi', color: '#475569', lineHeight: 1.4 }}>
-                                                        <SlideMarkdown content={event.description} />
-                                                    </div>
-                                                )}
-                                            </motion.div>
-                                        ) : <div style={{ height: '1px' }} />}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    );
-                    return (
-                        <div style={{ 
-                            transform: `scale(${scaleFactor})`, 
-                            transformOrigin: 'top center',
-                            width: '100%',
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'flex-start',
-                            paddingTop: '0'
-                        }}>
-                            {isHorizontal ? renderHorizontal() : renderVertical()}
-                        </div>
-                    );
-                })()}
+            {/* タイムライン・メインエリア */}
+            <div className="flex-1 flex w-full">
+                {isHorizontal ? renderHorizontal() : renderVertical()}
             </div>
 
-            {/* フッター注釈 */}
-            {annotations.length > 0 && (
-                <div style={{ 
-                    fontSize: '1.1cqi', 
-                    color: 'var(--slide-muted, #94a3b8)', 
-                    marginTop: 'auto', 
-                    paddingTop: '1.5cqi', 
-                    borderTop: '1px solid var(--slide-border, #e2e8f0)',
-                    flexShrink: 0
+            {/* 注釈 */}
+            {annotations?.length > 0 && (
+                <div style={{
+                    fontSize: '1.1cqi',
+                    color: 'var(--slide-muted)',
+                    marginTop: '2cqi',
+                    paddingTop: '1cqi',
+                    borderTop: '1px solid var(--slide-border)'
                 }}>
                     {annotations.map((note, idx) => (
                         <React.Fragment key={idx}>
                             <SlideMarkdown content={note} inline />
-                            {idx < annotations.length - 1 && <span style={{ margin: '0 1cqi', opacity: 0.5 }}>|</span>}
+                            {idx < annotations.length - 1 && <span style={{ margin: '0 0.8cqi', opacity: 0.5 }}>|</span>}
                         </React.Fragment>
                     ))}
                 </div>

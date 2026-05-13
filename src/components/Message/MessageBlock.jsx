@@ -471,8 +471,8 @@ const MessageBlock = ({
                                         <InlineErrorCard error={workflowError} />
                                     )}
 
-                                    {/* ★変更: Artifactカードを本文の上に表示。ただしストリーミング完了時かつ、タイトル/タイプが確定した場合のみ表示する */}
-                                    {isAi && artifact && artifact.artifact_title && artifact.artifact_title !== 'Untitled' && (artifact.artifact_type || artifact.type) && (!isStreaming || isTypewriterComplete) && (
+                                    {/* ★変更: Artifactカードを本文の上に表示。タイトル/タイプが確定した時点で即座に表示する */}
+                                    {isAi && artifact && artifact.artifact_title && artifact.artifact_title !== 'Untitled' && (artifact.artifact_type || artifact.type) && (
                                         <div style={{ marginBottom: isTextEmpty ? '0' : '16px' }}>
                                             <ArtifactCard
                                                 title={artifact.artifact_title || artifact.label}
@@ -484,7 +484,8 @@ const MessageBlock = ({
                                                     label: artifact.artifact_title || artifact.label,
                                                     title: artifact.artifact_title || artifact.label,
                                                     content: artifact.artifact_content,
-                                                    citations: artifact.citations || citations || []
+                                                    citations: artifact.citations || citations || [],
+                                                    messageId: uniqueMessageId // ★追加: メッセージIDを紐付け
                                                 }) : undefined}
                                             />
                                         </div>

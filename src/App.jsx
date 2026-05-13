@@ -345,12 +345,14 @@ function App() {
   // artifact_contentの受信を検知したら、ユーザーがリアルタイム表示を確認できるようにする
   const hasOpenedForStreamingRef = useRef(false);
   useEffect(() => {
-    if (isGenerating && streamingMessage?.artifact?.artifact_content && !hasOpenedForStreamingRef.current) {
-      // ストリーミング中にartifact_contentが初めて検出された時点でパネルを開く
+    const art = streamingMessage?.artifact;
+    // タイトルが確定し、かつ 'Untitled' でない場合に即座に開く
+    if (isGenerating && art?.artifact_title && art.artifact_title !== 'Untitled' && (art.artifact_type || art.type) && !hasOpenedForStreamingRef.current) {
+      // ストリーミング中にメタデータが確定した時点でパネルを開く
       hasOpenedForStreamingRef.current = true;
       openArtifact({
-        title: streamingMessage.artifact.artifact_title || 'Generating...',
-        type: streamingMessage.artifact.artifact_type || 'summary_report',
+        title: art.artifact_title,
+        type: art.artifact_type || art.type,
         content: '', // ストリーミング中はstreamingMessage.artifactから表示されるため空でOK
       });
     }
@@ -358,7 +360,7 @@ function App() {
       // 生成完了後にフラグをリセット
       hasOpenedForStreamingRef.current = false;
     }
-  }, [isGenerating, streamingMessage?.artifact?.artifact_content]);
+  }, [isGenerating, streamingMessage?.artifact?.artifact_title, streamingMessage?.artifact?.artifact_type, streamingMessage?.artifact?.type]);
 
   // ★追加: Artifactレスポンス自動展開
   // メッセージ完了時、最新AIメッセージにartifactが存在したら最終データでArtifactPanelを更新

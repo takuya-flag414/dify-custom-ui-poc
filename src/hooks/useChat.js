@@ -222,7 +222,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             return;
         }
 
-        const currentSettings = searchSettingsRef.current;
+        const currentSettings = options.searchSettings || searchSettingsRef.current;
         if (conversationId && onConversationUpdated) {
             onConversationUpdated(conversationId);
         }

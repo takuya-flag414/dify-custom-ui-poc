@@ -733,6 +733,151 @@ const SlideFormEditor = ({ slide, globalTheme, onSlideChange, onThemeChange }) =
                     </>
                 );
 
+            // ---- データインサイトスライド ----
+            case 'data_insight_slide':
+                return (
+                    <>
+                        <TextInput label="タイトル" value={content.title} onChange={v => updateContent('title', v)} required />
+                        <SectionDivider title="インサイト情報" />
+                        <TextInput label="インサイト見出し" value={content.insight_title} onChange={v => updateContent('insight_title', v)} placeholder="例: The AI Divide is Real" />
+                        <TextareaInput label="インサイト本文" value={content.insight_text} onChange={v => updateContent('insight_text', v)} rows={4} />
+                        
+                        <SectionDivider title="注釈 (フッター)" />
+                        <TextareaInput 
+                            label="注釈テキスト" 
+                            value={Array.isArray(content.annotations) ? content.annotations.join('\n') : content.annotations} 
+                            onChange={v => updateContent('annotations', v.split('\n'))} 
+                            rows={2}
+                        />
+                    </>
+                );
+
+            // ---- エグゼクティブサマリースライド ----
+            case 'executive_summary_slide':
+                return (
+                    <>
+                        <TextInput label="タイトル" value={content.title} onChange={v => updateContent('title', v)} required />
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div>
+                                <SectionDivider title="左側（現状・課題）" />
+                                <TextInput label="セクション見出し" value={content.summary_left?.title} onChange={v => updateContent('summary_left', { ...content.summary_left, title: v })} placeholder="例: 現状と課題" />
+                                <TextareaInput label="概要テキスト" value={content.summary_left?.text} onChange={v => updateContent('summary_left', { ...content.summary_left, text: v })} rows={5} />
+                            </div>
+                            <div>
+                                <SectionDivider title="右側（結論・提言）" />
+                                <TextInput label="セクション見出し" value={content.summary_right?.title} onChange={v => updateContent('summary_right', { ...content.summary_right, title: v })} placeholder="例: 主要な提言" />
+                                <TextareaInput 
+                                    label="提言リスト（1行1項目）" 
+                                    value={Array.isArray(content.summary_right?.items) ? content.summary_right.items.join('\n') : ''} 
+                                    onChange={v => updateContent('summary_right', { ...content.summary_right, items: v.split('\n').filter(s => s.trim()) })} 
+                                    rows={5} 
+                                    placeholder="項目1&#10;項目2"
+                                />
+                            </div>
+                        </div>
+
+                        <SectionDivider title="注釈 (フッター)" />
+                        <TextareaInput 
+                            label="注釈テキスト" 
+                            value={Array.isArray(content.annotations) ? content.annotations.join('\n') : content.annotations} 
+                            onChange={v => updateContent('annotations', v.split('\n'))} 
+                            rows={2}
+                        />
+                    </>
+                );
+
+            // ---- マトリックススライド ----
+            case 'matrix_slide':
+                return (
+                    <>
+                        <TextInput label="タイトル" value={content.title} onChange={v => updateContent('title', v)} required />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                            <TextInput label="X軸ラベル" value={content.x_label} onChange={v => updateContent('x_label', v)} placeholder="例: 実現容易性" />
+                            <TextInput label="Y軸ラベル" value={content.y_label} onChange={v => updateContent('y_label', v)} placeholder="例: ビジネスインパクト" />
+                        </div>
+                        
+                        <SectionDivider title="象限データ (4つまで)" />
+                        <ItemListEditor
+                            label="象限リスト"
+                            items={content.quadrants}
+                            onChange={v => updateContent('quadrants', v)}
+                            fields={[
+                                { key: 'label', label: '見出し', placeholder: '例: Quick Wins' },
+                                { key: 'text', label: '内容', type: 'textarea', placeholder: '具体的な項目...' },
+                            ]}
+                        />
+
+                        <SectionDivider title="注釈 (フッター)" />
+                        <TextareaInput 
+                            label="注釈テキスト" 
+                            value={Array.isArray(content.annotations) ? content.annotations.join('\n') : content.annotations} 
+                            onChange={v => updateContent('annotations', v.split('\n'))} 
+                            rows={2}
+                        />
+                    </>
+                );
+
+            // ---- マルチポイントスライド ----
+            case 'multi_point_slide':
+                return (
+                    <>
+                        <TextInput label="タイトル" value={content.title} onChange={v => updateContent('title', v)} required />
+                        <TextInput label="サブタイトル" value={content.subtitle} onChange={v => updateContent('subtitle', v)} />
+                        
+                        <SectionDivider title="ポイント項目" />
+                        <ItemListEditor
+                            label="項目リスト"
+                            items={content.items}
+                            onChange={v => updateContent('items', v)}
+                            fields={[
+                                { key: 'icon', label: 'アイコン/番号', placeholder: '例: star' },
+                                { key: 'heading', label: '見出し', placeholder: '例: トップのコミットメント' },
+                                { key: 'text', label: '詳細内容', type: 'textarea', placeholder: '説明文...' },
+                            ]}
+                        />
+
+                        <SectionDivider title="注釈 (フッター)" />
+                        <TextareaInput 
+                            label="注釈テキスト" 
+                            value={Array.isArray(content.annotations) ? content.annotations.join('\n') : content.annotations} 
+                            onChange={v => updateContent('annotations', v.split('\n'))} 
+                            rows={2}
+                        />
+                    </>
+                );
+
+            // ---- ロードマップスライド ----
+            case 'roadmap_slide':
+                return (
+                    <>
+                        <TextInput label="タイトル" value={content.title} onChange={v => updateContent('title', v)} required />
+                        
+                        <SectionDivider title="ステップ項目" />
+                        <ItemListEditor 
+                            label="ロードマップステップ" 
+                            items={(content.steps || content.events || []).map(e => ({
+                                ...e,
+                                date: e.date || e.year || e.label || ''
+                            }))} 
+                            onChange={v => updateContent('steps', v)} 
+                            fields={[
+                                { key: 'date', label: '時期', placeholder: '例: Q1' },
+                                { key: 'label', label: 'ステップ名', placeholder: '例: 設計 & 開発' },
+                                { key: 'description', label: '詳細説明', type: 'textarea', placeholder: '具体的な内容...' },
+                            ]}
+                        />
+
+                        <SectionDivider title="注釈 (フッター)" />
+                        <TextareaInput 
+                            label="注釈テキスト" 
+                            value={Array.isArray(content.annotations) ? content.annotations.join('\n') : content.annotations} 
+                            onChange={v => updateContent('annotations', v.split('\n'))} 
+                            rows={2}
+                        />
+                    </>
+                );
+
             // ---- 画像+コンテンツスライド ----
             case 'image_content_slide':
                 return (
@@ -757,6 +902,34 @@ const SlideFormEditor = ({ slide, globalTheme, onSlideChange, onThemeChange }) =
 
                         <SectionDivider title="テキストコンテンツ" />
                         <TextareaInput label="本文（箇条書き可）" value={content.body_text} onChange={v => updateContent('body_text', v)} rows={6} />
+
+                        <SectionDivider title="注釈 (フッター)" />
+                        <TextareaInput 
+                            label="注釈テキスト" 
+                            value={Array.isArray(content.annotations) ? content.annotations.join('\n') : content.annotations} 
+                            onChange={v => updateContent('annotations', v.split('\n'))} 
+                            rows={2}
+                        />
+                    </>
+                );
+
+            // ---- ストラテジックピラースライド ----
+            case 'strategic_pillar_slide':
+                return (
+                    <>
+                        <TextInput label="タイトル" value={content.title} onChange={v => updateContent('title', v)} required />
+                        <TextInput label="基盤 (Foundation)" value={content.foundation} onChange={v => updateContent('foundation', v)} placeholder="全体を支える基盤テキスト" />
+                        
+                        <SectionDivider title="柱 (Pillars - 最大3つ)" />
+                        <ItemListEditor
+                            label="戦略の柱"
+                            items={content.pillars}
+                            onChange={v => updateContent('pillars', v)}
+                            fields={[
+                                { key: 'heading', label: '見出し', placeholder: '例: 1. CX変革' },
+                                { key: 'text', label: '内容', type: 'textarea', placeholder: '詳細説明...' },
+                            ]}
+                        />
 
                         <SectionDivider title="注釈 (フッター)" />
                         <TextareaInput 

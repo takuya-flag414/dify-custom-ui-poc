@@ -73,6 +73,7 @@ const buildMessagesFromApi = (chronologicalMessages) => {
   const newMessages = [];
   const restoredFiles = [];
   const seenFileIds = new Set();
+  let restoredSettings = null; // ★追加: 検索設定の復元用
 
   for (const item of chronologicalMessages) {
     const timestamp = item.created_at ? new Date(item.created_at * 1000).toISOString() : new Date().toISOString();
@@ -102,6 +103,22 @@ const buildMessagesFromApi = (chronologicalMessages) => {
         timestamp: timestamp,
         files: msgFiles
       });
+
+      // ★追加: ユーザーメッセージのJSONから設定を復元
+      try {
+        const parsed = JSON.parse(item.query);
+        if (parsed.knowledge_context) {
+          const kc = parsed.knowledge_context;
+          restoredSettings = {
+            webEnabled: kc.web_search_enabled || false,
+            ragEnabled: kc.domain_context === 'knowledge',
+            selectedStoreId: (kc.selected_store_ids && kc.selected_store_ids.length > 0) ? kc.selected_store_ids[0] : null,
+            domainFilters: kc.domain_filter || []
+          };
+        }
+      } catch (e) {
+        // パースエラーは無視
+      }
     }
 
     // AIメッセージ
@@ -155,7 +172,7 @@ const buildMessagesFromApi = (chronologicalMessages) => {
     }
   }
 
-  return { messages: newMessages, restoredFiles };
+  return { messages: newMessages, restoredFiles, restoredSettings };
 };
 
 /**
@@ -241,16 +258,19 @@ export const loadChatHistory = async ({
       const historyData = await fetchMessagesApi(conversationId, userId, apiUrl, apiKey);
       const chronologicalMessages = (historyData.data || []).sort((a, b) => a.created_at - b.created_at);
 
-      const { messages: newMessages, restoredFiles } = buildMessagesFromApi(chronologicalMessages);
+      const { messages: newMessages, restoredFiles, restoredSettings } = buildMessagesFromApi(chronologicalMessages);
 
       if (restoredFiles.length > 0) {
         addLog(`[History] Restored ${restoredFiles.length} files from history.`, 'info');
       }
 
+      // ★変更: メッセージから抽出された設定があればそれを優先し、なければキャッシュ(savedSettings)を使用
+      const finalSettings = restoredSettings || savedSettings;
+
       return {
         messages: newMessages,
         sessionFiles: restoredFiles,
-        searchSettings: savedSettings,
+        searchSettings: finalSettings,
         error: null,
         shouldSkip: false
       };

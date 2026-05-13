@@ -1,5 +1,5 @@
-// src/components/Chat/ChatArea.jsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import '../../App.css';
 import './ChatArea.css';
 import { extractPlainText } from '../../utils/messageSerializer';
@@ -8,6 +8,7 @@ import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
 import HistorySkeleton from './HistorySkeleton';
 import WelcomeScreen from './WelcomeScreen';
+import AiSlideStudio from './AiSlideStudio'; // ★追加
 import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
@@ -48,8 +49,11 @@ const ChatArea = (props) => {
     isShieldActive = false,  // ★追加: シールドモード状態
   } = props;
 
+  // ★追加: 表示モード管理
+  const [viewMode, setViewMode] = useState('welcome');
+
   // ★追加: 自動スクロール有効状態管理
-  const [autoScrollEnabled, setAutoScrollEnabled] = React.useState(true);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
 
   // ★追加: Contextual Quote (文脈引用) の状態管理
   const [quoteContext, setQuoteContext] = useState(null);
@@ -61,9 +65,14 @@ const ChatArea = (props) => {
   // ★追加: Artifactの状態管理をChatAreaに持ち上げ（WelcomeScreenからの遷移で消滅しないようにするため）
   const [activeArtifact, setActiveArtifact] = useState(null);
 
+  // ★追加: Wizardからのプロンプト注入用
+  const [wizardText, setWizardText] = useState(null);
+
+  // ★修正: 履歴ロード完了時に viewMode を決定するロジックを下の useEffect に統合したため、ここは削除
+
   // ★変更: 履歴ロード完了時に、直前のユーザーメッセージからArtifact状態を復元する
-  const prevIsHistoryLoading = React.useRef(isHistoryLoading);
-  React.useEffect(() => {
+  const prevIsHistoryLoading = useRef(isHistoryLoading);
+  useEffect(() => {
     if (prevIsHistoryLoading.current && !isHistoryLoading) {
       // ロード完了時
       let restoredArtifact = null;
@@ -85,17 +94,25 @@ const ChatArea = (props) => {
               restoredArtifact = { type, label: ARTIFACT_LABELS[type] || type };
             }
           } catch (e) {
-            // JSONパースエラー時は無視（通常のプレーンテキスト等の場合）
+            // JSONパースエラー時は無視
           }
         }
       }
       setActiveArtifact(restoredArtifact);
+      
+      // ★追加: 履歴ロード完了時に viewMode を確定させる (useEffectのタイミングによるチラつき防止)
+      if (viewMode !== 'ai_slide_studio') {
+        const nextView = messages.length === 0 ? 'welcome' : 'chat';
+        if (viewMode !== nextView) {
+          setViewMode(nextView);
+        }
+      }
     } else if (isHistoryLoading && !prevIsHistoryLoading.current) {
       // ロード開始時
       setActiveArtifact(null);
     }
     prevIsHistoryLoading.current = isHistoryLoading;
-  }, [isHistoryLoading, messages]);
+  }, [isHistoryLoading, messages.length, viewMode]);
 
   const handleOpenTableModal = useCallback((content) => {
     setTableContent(content);
@@ -103,12 +120,9 @@ const ChatArea = (props) => {
   }, []);
 
   // 初期化時にpropsの値をセット
-  React.useEffect(() => {
+  useEffect(() => {
     setAutoScrollEnabled(autoScroll);
   }, [autoScroll]);
-
-  // 初期状態: メッセージ0件 かつ 履歴ロード中でない
-  const isInitialState = messages.length === 0 && !isHistoryLoading;
 
   // ★追加: メッセージ送信時に自動スクロールを強制的にONに戻す共通ハンドラ
   const handleSendMessageInternal = useCallback((text, attachments = [], options = {}) => {
@@ -242,125 +256,184 @@ const ChatArea = (props) => {
     setAutoScrollEnabled(true);
   };
 
-  return (
-    <div className={`chat-area${isInitialState ? ' chat-area-initial' : ''} ${isArtifactOpen ? 'artifact-open' : ''}`}>
-      {isHistoryLoading ? (
-        <>
-          <HistorySkeleton userName={userName} />
-          <div className="bottom-controls-wrapper">
-            <ChatInput
-              isLoading={true}
-              isHistoryLoading={true}
-              onSendMessage={() => { }}
-              isCentered={false}
-              activeContextFiles={activeContextFiles}
-              setActiveContextFiles={setActiveContextFiles}
-              searchSettings={searchSettings}
-              setSearchSettings={setSearchSettings}
-              mockMode={mockMode}
-              backendBApiKey={backendBApiKey}
-              backendBApiUrl={backendBApiUrl}
-              sendKey={sendKey}
-            />
-          </div>
-        </>
-      ) : isInitialState ? (
-        <WelcomeScreen
-          userName={userName}
-          onSendMessage={handleSendMessageInternal}
-          onStartTutorial={onStartTutorial}
-          isGenerating={isGenerating}
-          activeContextFiles={activeContextFiles}
-          setActiveContextFiles={setActiveContextFiles}
-          searchSettings={searchSettings}
-          setSearchSettings={setSearchSettings}
-          onOpenConfig={onOpenConfig}
-          mockMode={mockMode}
-          backendBApiKey={backendBApiKey}
-          backendBApiUrl={backendBApiUrl}
-          activeArtifact={activeArtifact} // ★追加
-          setActiveArtifact={setActiveArtifact} // ★追加
-          sendKey={sendKey}
-        />
-      ) : (
-        <>
-          <ChatHistory
-            messages={messages}
-            streamingMessage={streamingMessage}
-            onSuggestionClick={handleSuggestionClick}
-            onSmartActionSelect={handleSmartActionSelect}
-            isLoading={isGenerating}
-            onSendMessage={handleSendMessageInternal}
-            onOpenConfig={onOpenConfig}
-            onOpenArtifact={onOpenArtifact}
-            userName={userName}
-            onEdit={handleEdit}
-            onRegenerate={handleRegenerate}
-            autoScroll={autoScrollEnabled} // ★変更: stateを渡す
-            onAutoScrollChange={setAutoScrollEnabled} // ★追加: state更新関数を渡す
-            onOpenTableModal={handleOpenTableModal} // ★追加: Table Modalを開くハンドラ
-            onQuote={(text) => setQuoteContext(text)} // ★追加: 引用用ハンドラ
-          />
-          <div className="bottom-controls-wrapper">
-            {/* ★追加: ScrollToBottomButton */}
-            <ScrollToBottomButton
-              visible={!autoScrollEnabled}
-              onClick={handleScrollToBottom}
-            />
-            <ChatInput
-              isLoading={isGenerating}
-              onSendMessage={handleSendMessageInternal}
-              isCentered={false}
-              activeContextFiles={activeContextFiles}
-              setActiveContextFiles={setActiveContextFiles}
-              searchSettings={searchSettings}
-              setSearchSettings={setSearchSettings}
-              isStreaming={isGenerating && !!streamingMessage}
-              onStop={stopGeneration}
-              mockMode={mockMode}
-              backendBApiKey={backendBApiKey}
-              backendBApiUrl={backendBApiUrl}
-              quote={quoteContext} // ★追加: 引用テキスト
-              onRemoveQuote={() => setQuoteContext(null)} // ★追加: 引用クリアハンドラ
-              activeArtifact={activeArtifact} // ★追加
-              setActiveArtifact={setActiveArtifact} // ★追加
-              sendKey={sendKey}
-              restoreText={restoreText}
-              onRestoreTextConsumed={onRestoreTextConsumed}
-              isShieldActive={isShieldActive}
-            />
-          </div>
-        </>
-      )}
+  // ★追加: Wizard完了時の処理
+  const handleWizardComplete = useCallback((prompt, addMenu, context) => {
+    setWizardText(prompt);
+    
+    if (addMenu) {
+      // idとlabelの簡易マッピング（必要に応じて拡張）
+      const labels = {
+        'json_slide': 'プレゼンスライド'
+      };
+      setActiveArtifact({ type: addMenu, label: labels[addMenu] || addMenu });
+    }
+    
+    if (context) {
+      setSearchSettings(prev => ({ ...prev, ...context }));
+    }
+  }, [setActiveArtifact, setSearchSettings]);
 
-      {/* ★追加: Table Fullscreen ModalをChatAreaのルートレベルでレンダリング */}
+  // ★追加: 外部から注入したテキストが消費された時のハンドラ
+  const handleRestoreTextConsumed = useCallback(() => {
+    if (wizardText) {
+      setWizardText(null);
+    }
+    if (onRestoreTextConsumed) {
+      onRestoreTextConsumed();
+    }
+  }, [wizardText, onRestoreTextConsumed]);
+
+  // DESIGN_RULE.md に基づく Spring パラメータ
+  const transitionProps = {
+    initial: { opacity: 0, scale: 0.98, filter: 'blur(10px)' },
+    animate: { opacity: 1, scale: 1, filter: 'blur(0px)' },
+    exit: { opacity: 0, scale: 1.02, filter: 'blur(10px)' },
+    transition: { type: 'spring', stiffness: 250, damping: 25, mass: 1 }
+  };
+
+  return (
+    <div className={`chat-area${viewMode === 'welcome' ? ' chat-area-initial' : ''} ${isArtifactOpen ? 'artifact-open' : ''}`}>
+      <AnimatePresence mode="wait">
+        {viewMode === 'ai_slide_studio' ? (
+          <motion.div key="studio" {...transitionProps} className="chat-view-container">
+            <AiSlideStudio 
+              onBack={() => setViewMode('welcome')} 
+              mockMode={mockMode}
+              backendBApiKey={backendBApiKey}
+              backendBApiUrl={backendBApiUrl}
+              onGenerate={(promptText, files, options) => {
+                setViewMode('chat');
+                
+                // ★追加: スタジオでの設定をアプリ全体の検索設定に同期させる
+                if (options?.searchSettings) {
+                  setSearchSettings(options.searchSettings);
+                }
+
+                // ★追加: 生成開始と同時にスライドパネルを準備
+                setActiveArtifact({ type: 'json_slide', label: 'プレゼンスライド' });
+                // ★追加: artifactオプションおよびChatInputからのoptionsをマージして送信
+                handleSendMessageInternal(promptText, files || [], { 
+                  ...(options || {}),
+                  artifact: { requested: true, type: 'json_slide', label: 'プレゼンスライド' } 
+                });
+              }}
+            />
+          </motion.div>
+        ) : (viewMode === 'welcome' && !isHistoryLoading) ? (
+          <motion.div key="welcome" {...transitionProps} className="chat-view-container">
+            <WelcomeScreen
+              userName={userName}
+              onSendMessage={handleSendMessageInternal}
+              onStartTutorial={onStartTutorial}
+              isGenerating={isGenerating}
+              activeContextFiles={activeContextFiles}
+              setActiveContextFiles={setActiveContextFiles}
+              searchSettings={searchSettings}
+              setSearchSettings={setSearchSettings}
+              onOpenConfig={onOpenConfig}
+              mockMode={mockMode}
+              backendBApiKey={backendBApiKey}
+              backendBApiUrl={backendBApiUrl}
+              activeArtifact={activeArtifact}
+              setActiveArtifact={setActiveArtifact}
+              sendKey={sendKey}
+              restoreText={restoreText || wizardText}
+              onRestoreTextConsumed={handleRestoreTextConsumed}
+              onWizardComplete={handleWizardComplete}
+              onEnterSlideStudio={() => setViewMode('ai_slide_studio')}
+            />
+          </motion.div>
+        ) : (
+          /* Loading or Chat view - Integrated into one container to prevent double animation */
+          <motion.div key="chat-main" {...transitionProps} className="chat-view-container">
+            {isHistoryLoading ? (
+              <HistorySkeleton userName={userName} />
+            ) : (
+              <ChatHistory
+                messages={messages}
+                streamingMessage={streamingMessage}
+                onSuggestionClick={handleSuggestionClick}
+                onSmartActionSelect={handleSmartActionSelect}
+                isLoading={isGenerating}
+                onSendMessage={handleSendMessageInternal}
+                onOpenConfig={onOpenConfig}
+                onOpenArtifact={onOpenArtifact}
+                userName={userName}
+                onEdit={handleEdit}
+                onRegenerate={handleRegenerate}
+                autoScroll={autoScrollEnabled}
+                onAutoScrollChange={setAutoScrollEnabled}
+                onOpenTableModal={handleOpenTableModal}
+                onQuote={(text) => setQuoteContext(text)}
+              />
+            )}
+            <div className="bottom-controls-wrapper">
+              <ScrollToBottomButton
+                visible={!autoScrollEnabled}
+                onClick={handleScrollToBottom}
+              />
+              <ChatInput
+                isLoading={isHistoryLoading || isGenerating}
+                isHistoryLoading={isHistoryLoading}
+                onSendMessage={handleSendMessageInternal}
+                isCentered={false}
+                activeContextFiles={activeContextFiles}
+                setActiveContextFiles={setActiveContextFiles}
+                searchSettings={searchSettings}
+                setSearchSettings={setSearchSettings}
+                isStreaming={isGenerating && !!streamingMessage}
+                onStop={stopGeneration}
+                mockMode={mockMode}
+                backendBApiKey={backendBApiKey}
+                backendBApiUrl={backendBApiUrl}
+                quote={quoteContext}
+                onRemoveQuote={() => setQuoteContext(null)}
+                activeArtifact={activeArtifact}
+                setActiveArtifact={setActiveArtifact}
+                sendKey={sendKey}
+                restoreText={restoreText || wizardText}
+                onRestoreTextConsumed={handleRestoreTextConsumed}
+                isShieldActive={isShieldActive}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <TableModal
         isOpen={isTableModalOpen}
         onClose={() => setIsTableModalOpen(false)}
         tableContent={tableContent}
       />
 
-      {/* ★追加: 各ArtifactPanelの表示判定 */}
       {(() => {
         const currentArtifactType = openedArtifact?.type || streamingMessage?.artifact?.artifact_type;
         const isJsonSlide = currentArtifactType === 'json_slide' || currentArtifactType === 'json_slide_advanced';
         const isJsonDocument = currentArtifactType === 'json_document';
 
+        // ★追加: Artifactを識別するためのキー。切り替え時に再マウントを強制する
+        const artifactKey = openedArtifact 
+          ? `${openedArtifact.messageId || 'fixed'}-${openedArtifact.type}-${openedArtifact.title}`
+          : (streamingMessage ? `streaming-${streamingMessage.id || streamingMessage.messageId}` : 'idle');
+
         return (
           <>
             <JsonSlidePanel
+              key={`json-slide-${artifactKey}`}
               isOpen={isArtifactOpen && isJsonSlide}
               onClose={closeArtifact}
               artifact={openedArtifact}
               streamingMessage={streamingMessage}
             />
             <JsonDocumentPanel
+              key={`json-doc-${artifactKey}`}
               isOpen={isArtifactOpen && isJsonDocument}
               onClose={closeArtifact}
               artifact={openedArtifact}
               streamingMessage={streamingMessage}
             />
             <ArtifactPanel
+              key={`generic-art-${artifactKey}`}
               isOpen={isArtifactOpen && !isJsonSlide && !isJsonDocument}
               onClose={closeArtifact}
               artifact={openedArtifact}

@@ -3,235 +3,174 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import SlideMarkdown from '../../../MarkdownRenderer';
 
-/**
- * StatsSlide - 実績値ハイライトスライド
- * 少数の大きな数字を強調するためのプロフェッショナルデザイン
- */
 const StatsSlide = ({ content, isStatic = false }) => {
-    const { 
-        title, 
-        stats = [], 
-        description, 
+    const {
+        title,
+        stats = [],
+        description,
         body_text,
         annotations = [],
-        layout_variation = 'default' 
+        layout_variation = 'default'
     } = content || {};
 
     const activeStats = Array.isArray(stats) ? stats : [];
     const mainText = body_text || description;
+    const isTwoColumn = layout_variation === 'two-column';
+
+    // 要素数に応じたグリッド列数の計算
+    let cols = 3;
+    if (activeStats.length === 1) cols = 1;
+    if (activeStats.length === 2 || activeStats.length === 4) cols = 2;
+
+    const gridClass = cols === 1 ? 'grid-cols-1' : cols === 2 ? 'grid-cols-2' : 'grid-cols-3';
+
+    // 個別の指標モジュール
+    const StatItem = ({ stat, index }) => {
+        // グリッドの左端ではない要素にのみ、1pxの左ディバイダーを引く
+        const hasLeftBorder = cols > 1 && (index % cols !== 0);
+
+        return (
+            <motion.div
+                className="flex flex-col relative"
+                style={{
+                    paddingLeft: hasLeftBorder ? '3cqi' : '1cqi',
+                    borderLeft: hasLeftBorder ? '1px solid #E2E8F0' : '1px solid transparent'
+                }}
+                initial={!isStatic ? { opacity: 0, x: 15 } : {}}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 + (index * 0.1) }}
+            >
+                {/* ラベルと Architectural Tick (視線のアンカー) */}
+                <div className="flex items-center gap-[1cqi] mb-[1cqi]">
+                    <div style={{ width: '4px', height: '1.6cqi', backgroundColor: 'var(--slide-primary)' }} />
+                    <span style={{
+                        fontSize: '1.2cqi',
+                        color: '#64748B',
+                        fontWeight: 800,
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase'
+                    }}>
+                        <SlideMarkdown content={stat.label} inline />
+                    </span>
+                </div>
+
+                {/* 巨大なバリュー（数値） */}
+                <div style={{
+                    fontSize: activeStats.length > 2 ? '4.5cqi' : '5.5cqi', // 要素数でサイズを微調整
+                    fontWeight: 900,
+                    color: 'var(--slide-heading)',
+                    lineHeight: 1.1,
+                    marginBottom: '1.5cqi',
+                    letterSpacing: '-0.02em'
+                }}>
+                    <SlideMarkdown content={stat.value} inline />
+                </div>
+
+                {/* 補足説明 */}
+                {stat.description && (
+                    <div style={{
+                        fontSize: '1.4cqi',
+                        color: 'var(--slide-body)',
+                        lineHeight: 1.6,
+                        paddingLeft: '0.5cqi' // 少しだけ内側に入れて数字を際立たせる
+                    }}>
+                        <SlideMarkdown content={stat.description} />
+                    </div>
+                )}
+            </motion.div>
+        );
+    };
 
     return (
-        <div className="json-slide-layout indigo-style" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="json-slide-layout indigo-style h-full flex flex-col">
             {/* ヘッダー */}
-            <motion.div 
+            <motion.div
                 className="indigo-slide-header"
-                style={{ flexShrink: 0 }}
-                {...(!isStatic && { initial: { opacity: 0, x: -20 }, animate: { opacity: 1, x: 0 } })}
+                style={{
+                    marginBottom: '2.5cqi',
+                    borderBottom: '2.5px solid var(--slide-primary)',
+                    paddingBottom: '1.2cqi'
+                }}
+                {...(!isStatic && { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4 } })}
             >
-                <h2 style={{ fontSize: '2.8cqi', margin: 0, color: 'var(--slide-heading)', fontWeight: 700 }}>
-                    <SlideMarkdown content={title || '主要実績'} />
+                <h2 style={{ fontSize: '2.6cqi', margin: 0, color: 'var(--slide-heading)', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                    <SlideMarkdown content={title || 'Key Metrics'} />
                 </h2>
             </motion.div>
 
-            {/* ボディエリア */}
-            <div className="indigo-slide-body" style={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                minHeight: 0,
-                justifyContent: 'flex-start', // 上詰めを基本に
-                paddingTop: '1cqi' 
-            }}>
-                {(() => {
-                    const count = activeStats.length;
-                    const aCount = annotations.length;
-                    const isSplit = layout_variation === 'two-column';
-                    
-                    // 情報密度のスコア化（垂直方向の溢れをより厳格に評価）
-                    const densityScore = (count * (isSplit ? 4.5 : 3.5)) + (mainText ? 4 : 0) + (aCount > 0 ? 1.5 : 0);
-                    
-                    // 動的な設定値
-                    const isLowDensity = count <= 2 && !isSplit;
-                    const isHighDensity = count >= 4 || (isSplit && count >= 3);
-
-                    // スケーリング（見切れ防止のため感度を向上）
-                    const scaleFactor = densityScore > 22 ? 0.68
-                                      : densityScore > 16 ? 0.78
-                                      : densityScore > 10 ? 0.88
-                                      : 1.0;
-                    
-                    // グリッド設定
-                    let gridCols = '1fr';
-                    if (!isSplit) {
-                        gridCols = count === 1 ? '1fr' : count === 2 ? '1fr 1fr' : count === 4 ? '1fr 1fr' : 'repeat(auto-fit, minmax(22cqi, 1fr))';
-                    } else {
-                        gridCols = count >= 3 ? '1fr 1fr' : '1fr';
-                    }
-
-                    const gridGap = isLowDensity ? '5cqi' : isHighDensity ? '1.2cqi' : '2.5cqi';
-                    
-                    // カード個別設定
-                    const cardPadding = isLowDensity ? '5cqi 4cqi' : isHighDensity ? '1.5cqi 1.2cqi' : '2.5cqi 2cqi';
-                    const valueSize = isLowDensity ? '7.5cqi' : isHighDensity ? '3.5cqi' : '5cqi';
-                    const labelSize = isLowDensity ? '2.4cqi' : '1.4cqi';
-
-                    const StatsGrid = () => (
-                        <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: gridCols,
-                            gap: gridGap,
-                            width: '100%'
-                        }}>
-                            {activeStats.map((stat, idx) => {
-                                const subtext = stat.subtext || stat.description;
-                                return (
-                                    <motion.div 
-                                        key={idx}
-                                        className="indigo-highlight-card"
-                                        style={{ 
-                                            textAlign: 'center', 
-                                            padding: cardPadding,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            background: 'linear-gradient(135deg, #ffffff 0%, rgba(99, 102, 241, 0.05) 100%)',
-                                            border: '1px solid var(--slide-border)',
-                                            position: 'relative',
-                                            overflow: 'hidden',
-                                            minHeight: isLowDensity ? '22cqi' : isHighDensity ? '12cqi' : '16cqi'
-                                        }}
-                                        {...(!isStatic && {
-                                            initial: { opacity: 0, scale: 0.9 },
-                                            animate: { opacity: 1, scale: 1 },
-                                            transition: { delay: 0.1 + idx * 0.1 }
-                                        })}
-                                    >
-                                        {/* 装飾用サークル背景 */}
-                                        <div style={{ 
-                                            position: 'absolute', 
-                                            top: '-10%', 
-                                            right: '-10%', 
-                                            width: '35%', 
-                                            height: '35%', 
-                                            background: 'rgba(99, 102, 241, 0.04)', 
-                                            borderRadius: '50%',
-                                            zIndex: 0
-                                        }} />
-
-                                        <div style={{ position: 'relative', zIndex: 1 }}>
-                                            <div style={{ 
-                                                fontSize: valueSize, 
-                                                fontWeight: 800, 
-                                                color: 'var(--slide-primary)',
-                                                lineHeight: 1,
-                                                marginBottom: '0.6cqi',
-                                                letterSpacing: '-0.02em'
-                                            }}>
-                                                {stat.value}
-                                                {stat.unit && <span style={{ fontSize: '0.45em', marginLeft: '0.2em', fontWeight: 600, color: 'var(--slide-muted)' }}>{stat.unit}</span>}
-                                            </div>
-                                            <div style={{ 
-                                                fontSize: labelSize, 
-                                                fontWeight: 700, 
-                                                color: 'var(--slide-heading)',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.06em'
-                                            }}>
-                                                <SlideMarkdown content={stat.label} />
-                                            </div>
-                                            {subtext && (
-                                                <div style={{ 
-                                                    fontSize: isLowDensity ? '1.4cqi' : '1.1cqi', 
-                                                    color: 'var(--slide-muted)', 
-                                                    marginTop: '0.8cqi',
-                                                    fontWeight: 500,
-                                                    lineHeight: 1.4
-                                                }}>
-                                                    <SlideMarkdown content={subtext} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    );
-
-                    return (
-                        <div style={{ 
-                            transform: `scale(${scaleFactor})`, 
-                            transformOrigin: 'top center', // 起点を上部に
-                            width: '100%',
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            gap: gridGap,
-                            justifyContent: isLowDensity ? 'center' : 'flex-start',
-                            marginTop: isLowDensity ? 'auto' : '0',
-                            marginBottom: isLowDensity ? 'auto' : '0'
-                        }}>
-                            {isSplit ? (
-                                <div style={{ display: 'flex', gap: '4cqi', alignItems: 'center' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <motion.div 
-                                            className="indigo-point-box" 
-                                            style={{ padding: '2.5cqi 3cqi', borderLeft: '6px solid var(--slide-primary)' }}
-                                            {...(!isStatic && { initial: { opacity: 0, x: -20 }, animate: { opacity: 1, x: 0 }, transition: { delay: 0.2 } })}
-                                        >
-                                            <div style={{ fontSize: '1.7cqi', margin: 0, color: '#475569', fontWeight: 500, lineHeight: 1.6 }}>
-                                                <SlideMarkdown content={mainText} />
-                                            </div>
-                                        </motion.div>
+            {/* メインレイアウト */}
+            <div className="flex-1 flex mt-[1cqi]">
+                {isTwoColumn ? (
+                    // 2カラム (左：示唆 / 右：指標グリッド)
+                    <div className="w-full flex items-center gap-[4cqi]">
+                        {mainText && (
+                            <div className="flex-[4] flex flex-col pr-[2cqi]">
+                                <h3 style={{ fontSize: '1.2cqi', color: '#94A3B8', fontWeight: 800, letterSpacing: '0.1em', marginBottom: '1.5cqi', textTransform: 'uppercase' }}>
+                                    Key Takeaway
+                                </h3>
+                                <motion.div
+                                    style={{ borderLeft: '4px solid var(--slide-primary)', paddingLeft: '1.5cqi' }}
+                                    initial={!isStatic ? { opacity: 0, x: -15 } : {}}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.2 }}
+                                >
+                                    <div style={{ fontSize: '1.5cqi', color: 'var(--slide-body)', lineHeight: 1.7, fontWeight: 500 }}>
+                                        <SlideMarkdown content={mainText} />
                                     </div>
-                                    <div style={{ flex: 1.4 }}>
-                                        <StatsGrid />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div style={{ 
-                                    display: 'flex', 
-                                    flexDirection: 'column',
-                                    gap: gridGap,
-                                    alignItems: 'center'
-                                }}>
-                                    <StatsGrid />
-                                    {mainText && (
-                                        <motion.div 
-                                            className="indigo-point-box" 
-                                            style={{ 
-                                                width: '100%',
-                                                marginTop: isLowDensity ? '2cqi' : '1cqi', 
-                                                padding: isLowDensity ? '2.5cqi 4cqi' : '1.5cqi 2.5cqi',
-                                                textAlign: 'center'
-                                            }}
-                                            {...(!isStatic && { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.5 } })}
-                                        >
-                                            <div style={{ fontSize: isLowDensity ? '2cqi' : '1.6cqi', margin: 0, color: '#475569', fontWeight: 500, lineHeight: 1.5 }}>
-                                                <SlideMarkdown content={mainText} />
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </div>
-                            )}
+                                </motion.div>
+                            </div>
+                        )}
+
+                        {/* 中央ディバイダー */}
+                        <div className="w-[1px] h-[80%] bg-slate-200" />
+
+                        <div className="flex-[7] flex flex-col justify-center pl-[2cqi]">
+                            <div className={`grid ${gridClass} gap-y-[5cqi] gap-x-[1cqi]`}>
+                                {activeStats.map((stat, i) => <StatItem key={i} stat={stat} index={i} />)}
+                            </div>
                         </div>
-                    );
-                })()}
+                    </div>
+                ) : (
+                    // 1カラム (上：指標グリッド / 下：示唆)
+                    <div className="w-full flex flex-col justify-center gap-[6cqi]">
+                        <div className="w-full">
+                            <div className={`grid ${gridClass} gap-y-[5cqi] gap-x-[1cqi]`}>
+                                {activeStats.map((stat, i) => <StatItem key={i} stat={stat} index={i} />)}
+                            </div>
+                        </div>
+                        {mainText && (
+                            <motion.div
+                                className="w-[90%] mx-auto"
+                                style={{
+                                    borderLeft: '4px solid var(--slide-primary)',
+                                    paddingLeft: '2cqi'
+                                }}
+                                initial={!isStatic ? { opacity: 0, y: 15 } : {}}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.4 }}
+                            >
+                                <div style={{ fontSize: '1.5cqi', color: 'var(--slide-body)', lineHeight: 1.7, fontWeight: 500 }}>
+                                    <SlideMarkdown content={mainText} />
+                                </div>
+                            </motion.div>
+                        )}
+                    </div>
+                )}
             </div>
 
-            {/* フッター注釈 */}
-            {annotations.length > 0 && (
-                <div style={{ 
-                    fontSize: '1.1cqi', 
-                    color: 'var(--slide-muted, #94a3b8)', 
-                    marginTop: '2cqi', 
-                    paddingTop: '1cqi', 
-                    borderTop: '1px solid var(--slide-border, #e2e8f0)',
-                    flexShrink: 0
+            {/* 注釈 */}
+            {annotations?.length > 0 && (
+                <div style={{
+                    fontSize: '1.1cqi',
+                    color: '#64748B',
+                    marginTop: 'auto',
+                    paddingTop: '1cqi',
+                    borderTop: '1px solid #E2E8F0'
                 }}>
                     {annotations.map((note, idx) => (
                         <React.Fragment key={idx}>
                             <SlideMarkdown content={note} inline />
-                            {idx < annotations.length - 1 && <span style={{ margin: '0 1cqi', opacity: 0.5 }}>|</span>}
+                            {idx < annotations.length - 1 && <span style={{ margin: '0 0.8cqi', opacity: 0.5 }}>|</span>}
                         </React.Fragment>
                     ))}
                 </div>

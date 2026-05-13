@@ -43,6 +43,8 @@ const defaultThemeId = 'corporate-modern';
  */
 const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'single', setViewMode, onExportStatusChange }, ref) => {
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+    const [currentPalette, setCurrentPalette] = useState('blue'); // 追加: パレット状態
+    const [showPaletteOptions, setShowPaletteOptions] = useState(false); // 追加: パレット選択肢の表示状態
 
     // 編集モード用 State
     const [slideData, setSlideData] = useState(null);     // 編集中のスライド配列
@@ -94,6 +96,7 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                 presentationData: {
                     presentation_title: parsed.presentation_title || 'Untitled Presentation',
                     theme: parsed.theme || 'corporate-modern',
+                    palette: parsed.palette || 'blue', // 追加
                     slides: validatedSlides,
                 },
                 parseError: null,
@@ -110,29 +113,38 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
         }
     }, [presentationData, currentSlideIndex]);
 
-    // コンテンツが変更されたらスライドを先頭にリセット
+    // コンテンツが変更されたらスライドを先頭にリセット、および編集状態をクリア
     useEffect(() => {
         setCurrentSlideIndex(0);
+        setSlideData(null);    // 編集データをクリアして再初期化を促す
+        setCurrentTheme(null); // テーマもリセット
     }, [content]);
 
     // presentationData が確定したら slideData と originalSlides を初期化
-    // ※ ユーザーが既に編集を開始している（slideData が存在する）場合は、外部からの更新で上書きしない
+    // ※ ストリーミング中 (isGenerating) は常に最新のデータを反映させる
+    // ※ 完了後は、ユーザーが編集を開始していない（slideData が null）場合のみ初期化する
     useEffect(() => {
-        if (presentationData && !slideData) {
+        if (presentationData && (!slideData || isGenerating)) {
             setSlideData(presentationData.slides);
-            // 初期テーマの設定：データのthemeが有効ならそれを使用、無ければデフォルト
+            
+            // 初期テーマの設定
             let initialTheme = (presentationData.theme && themeRegistry[presentationData.theme])
                 ? presentationData.theme
                 : defaultThemeId;
             
-            // DEVモードでない場合は強制的に modern-indigo
             if (!IS_DEV_MODE) {
                 initialTheme = 'modern-indigo';
             }
-            setCurrentTheme(initialTheme);
+            
+            // テーマが未設定（リセット直後など）の場合のみ設定
+            if (!currentTheme || isGenerating) {
+                setCurrentTheme(initialTheme);
+                setCurrentPalette(presentationData.palette || 'blue');
+            }
+            
             originalSlides.current = presentationData.slides;
         }
-    }, [presentationData, slideData]);
+    }, [presentationData, slideData, isGenerating]);
 
     // ===== PPTXエクスポート ハンドラー =====
     const handleExportPPTX = async () => {
@@ -149,6 +161,7 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
         try {
             const engine = new PptxExportEngine({
                 themeName: activeThemeName,
+                palette: currentPalette,
                 fileName: `${presentationData.presentation_title || 'Presentation'}.pptx`
             });
             
@@ -314,6 +327,7 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
             <div
                 className="presentation-panel"
                 data-theme={activeTheme}
+                data-palette={currentPalette}
                 tabIndex={0}
             >
                 {/* ヘッダーエリア */}
@@ -370,11 +384,12 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
             <div
                 className="presentation-panel"
                 data-theme={activeTheme}
+                data-palette={currentPalette}
                 tabIndex={0}
             >
-                {/* ヘッダーエリア */}
-                {IS_DEV_MODE && (
-                    <div className="panel-header">
+                <div className="panel-header">
+                    {/* テーマセレクター (DEVモードのみ) */}
+                    {IS_DEV_MODE && (
                         <div className="theme-selector">
                             <label htmlFor="theme-select-single">Theme</label>
                             <select
@@ -390,8 +405,52 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                                 ))}
                             </select>
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {/* カラーパレットセレクター (modern-indigo専用) */}
+                    {activeTheme === 'modern-indigo' && (
+                        <div className="palette-selector-container">
+                            <button
+                                className={`palette-toggle-btn ${showPaletteOptions ? 'active' : ''}`}
+                                onClick={() => setShowPaletteOptions(!showPaletteOptions)}
+                                title="Color Palette"
+                            >
+                                <span className={`color-swatch-preview ${currentPalette}`}></span>
+                                <span className="toggle-label">
+                                    {currentPalette.charAt(0).toUpperCase() + currentPalette.slice(1)}
+                                </span>
+                                <span className="toggle-icon">{showPaletteOptions ? '✕' : '▼'}</span>
+                            </button>
+
+                            {showPaletteOptions && (
+                                <motion.div 
+                                    className="palette-dropdown"
+                                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <div className="palette-options">
+                                        {['blue', 'green', 'navy', 'red', 'gray'].map(p => (
+                                            <button
+                                                key={p}
+                                                className={`palette-btn ${currentPalette === p ? 'active' : ''}`}
+                                                onClick={() => {
+                                                    setCurrentPalette(p);
+                                                    // ワンクッション後の使い勝手を考え、選択時に閉じないようにするか検討
+                                                    // ここでは閉じずに確認できるようにする
+                                                }}
+                                                title={`${p.charAt(0).toUpperCase() + p.slice(1)} Palette`}
+                                            >
+                                                <span className={`color-swatch ${p}`}></span>
+                                                <span className="palette-label">{p.charAt(0).toUpperCase() + p.slice(1)}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 {/* スライドキャンバス（16:9アスペクト比） */}
                 <div className="slide-canvas">
@@ -449,6 +508,7 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                         id={`slide-capture-${index}`}
                         className="presentation-panel"
                         data-theme={activeTheme}
+                        data-palette={currentPalette} // 現在のパレットを反映
                         style={{ width: '960px', height: '540px', position: 'relative' }}
                     >
                         <div className="slide-canvas" style={{ width: '100%', height: '100%', padding: 0, margin: 0, borderRadius: 0, boxShadow: 'none' }}>

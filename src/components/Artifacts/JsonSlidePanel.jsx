@@ -36,13 +36,7 @@ const PencilIcon = () => (
     </svg>
 );
 
-const MonitorIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-        <line x1="8" y1="21" x2="16" y2="21"></line>
-        <line x1="12" y1="17" x2="12" y2="21"></line>
-    </svg>
-);
+
 
 const DownloadIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -65,18 +59,7 @@ const JsonSlidePanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
     const presentationRef = useRef(null);
     const presentationApiRef = useRef(null);
 
-    const handleFullscreen = async () => {
-        if (!presentationRef.current) return;
-        try {
-            if (document.fullscreenElement) {
-                await document.exitFullscreen();
-            } else {
-                await presentationRef.current.requestFullscreen();
-            }
-        } catch (err) {
-            console.error(`Error attempting to enable fullscreen: ${err.message}`);
-        }
-    };
+
 
     const handleExport = () => {
         if (presentationApiRef.current) {
@@ -149,14 +132,7 @@ const JsonSlidePanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                                 <span style={{ fontSize: '13px' }}>編集</span>
                             </button>
 
-                            <button 
-                                className="artifact-action-btn"
-                                onClick={handleFullscreen} 
-                                title="スライドショー（全画面表示）"
-                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '6px', color: 'var(--color-text-secondary)', borderRadius: '6px' }}
-                            >
-                                <MonitorIcon />
-                            </button>
+
 
                             <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)', margin: '0 8px' }} />
 

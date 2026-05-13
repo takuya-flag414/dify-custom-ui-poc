@@ -41,6 +41,7 @@ const ChatInput = ({
   restoreText = null,
   onRestoreTextConsumed,
   isShieldActive = false, // ★追加: シールドモード状態
+  placeholder: customPlaceholder, // ★追加: 外部からプレースホルダーを指定可能に
 }) => {
   const [text, setText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -277,7 +278,7 @@ const ChatInput = ({
     }
   }, [isLoading, addFiles]);
 
-  const placeholder = isHistoryLoading ? "履歴を読み込んでいます..." : isLoading ? "思考中..." : "AIに相談...";
+  const placeholder = customPlaceholder || (isHistoryLoading ? "履歴を読み込んでいます..." : isLoading ? "思考中..." : "AIに相談...");
   const hasFiles = selectedFiles.length > 0;
   const canSend = (text.trim().length > 0 || hasFiles) && !isLoading;
 

@@ -9,194 +9,149 @@ import SlideMarkdown from '../../../MarkdownRenderer';
  * 左右のセクションをセンターディバイダーで対比させるプロフェッショナルデザイン
  */
 const SplitSlide = ({ content, isStatic = false }) => {
-    const { 
-        title, 
-        left_title, left_label,
-        left_text, left_body,
-        left_bullets = [], left_column = [],
-        right_title, right_label,
-        right_text, right_body,
-        right_bullets = [], right_column = [],
+    const {
+        title,
+        left_title, left_label, left_text, left_body, left_bullets = [], left_column = [],
+        right_title, right_label, right_text, right_body, right_bullets = [], right_column = [],
         comparison_icon = 'VS',
-        annotations = [] 
+        annotations = []
     } = content || {};
 
-    // データの読み替え（互換性維持）
-    const lTitle = left_title || left_label || '現状';
+    const lTitle = left_title || left_label || '現状 / 課題';
     const lText = left_text || left_body;
     const lBullets = Array.isArray(left_bullets) && left_bullets.length > 0 ? left_bullets : (Array.isArray(left_column) ? left_column : []);
 
-    const rTitle = right_title || right_label || '理想';
+    const rTitle = right_title || right_label || '理想 / 解決策';
     const rText = right_text || right_body;
     const rBullets = Array.isArray(right_bullets) && right_bullets.length > 0 ? right_bullets : (Array.isArray(right_column) ? right_column : []);
 
+    // リストのレンダリング（左右でデザインを分ける）
+    const renderList = (items, isRight) => {
+        if (!items || items.length === 0) return null;
+        return (
+            <ul className="flex flex-col gap-[1.2cqi] mt-[1.5cqi]">
+                {items.map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-[1cqi]" style={{ fontSize: '1.4cqi', lineHeight: 1.6, color: 'var(--slide-body)' }}>
+                        <span style={{
+                            marginTop: '0.2cqi',
+                            // 左は静的なダッシュ、右は動的なブランドカラーの矢印
+                            color: isRight ? 'var(--slide-primary)' : 'var(--slide-muted)',
+                            fontSize: isRight ? '1.2cqi' : '1.4cqi',
+                            fontWeight: isRight ? '900' : 'bold',
+                            fontFamily: 'monospace'
+                        }}>
+                            {isRight ? '▶' : '—'}
+                        </span>
+                        <span><SlideMarkdown content={item} inline /></span>
+                    </li>
+                ))}
+            </ul>
+        );
+    };
+
     return (
-        <div className="json-slide-layout indigo-style" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="json-slide-layout indigo-style h-full flex flex-col">
             {/* ヘッダー */}
-            <motion.div 
+            <motion.div
                 className="indigo-slide-header"
-                style={{ flexShrink: 0 }}
-                {...(!isStatic && { initial: { opacity: 0, x: -20 }, animate: { opacity: 1, x: 0 } })}
+                style={{
+                    marginBottom: '2cqi',
+                    borderBottom: '2.5px solid var(--slide-primary)',
+                    paddingBottom: '1.2cqi'
+                }}
+                {...(!isStatic && { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4 } })}
             >
-                <h2 style={{ fontSize: '2.8cqi', margin: 0, color: 'var(--slide-heading)', fontWeight: 700 }}>
-                    <SlideMarkdown content={title || '比較・分析'} />
+                <h2 style={{ fontSize: '2.6cqi', margin: 0, color: 'var(--slide-heading)', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                    <SlideMarkdown content={title || 'Comparison'} />
                 </h2>
             </motion.div>
 
-            {/* ボディエリア */}
-            <div className="indigo-slide-body" style={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                minHeight: 0,
-                justifyContent: 'flex-start',
-                paddingTop: '0'
-            }}>
-                {(() => {
-                    // 情報密度の算出（Markdownの行数をカウント）
-                    const lLines = lText ? lText.split('\n').length : 0;
-                    const rLines = rText ? rText.split('\n').length : 0;
-                    const lineCount = lLines + rLines;
-                    const textLength = (lText?.length || 0) + (rText?.length || 0);
-                    const densityScore = (lineCount * 3) + (textLength / 20) + (annotations.length > 0 ? 2 : 0);
-                    
-                    // スケーリング
-                    const scaleFactor = densityScore > 50 ? 0.75
-                                      : densityScore > 35 ? 0.85
-                                      : densityScore > 20 ? 0.95
-                                      : 1.0;
+            {/* 二項対立のメインレイアウト (Analytical Dichotomy) */}
+            <div className="flex-1 relative flex items-stretch mt-[1cqi]">
 
-                    const cardPadding = densityScore > 25 ? '2cqi 2.5cqi' : '3cqi 4cqi';
-                    const listGap = densityScore > 25 ? '0.8cqi' : '1.2cqi';
-
-                    const renderColumn = (cTitle, cText, isHighlight = false) => (
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.8cqi' }}>
-                            <h3 style={{ 
-                                fontSize: '2.2cqi', 
-                                color: isHighlight ? 'var(--slide-primary)' : 'var(--slide-heading)', 
-                                fontWeight: 800,
-                                margin: 0,
-                                textAlign: 'center',
-                                lineHeight: 1.4,
-                                paddingTop: '0.8cqi',
-                                letterSpacing: '0.05em'
-                            }}>
-                                <SlideMarkdown content={cTitle} />
-                            </h3>
-                            <div className="indigo-panel" style={{ 
-                                flex: 1,
-                                padding: cardPadding,
-                                background: isHighlight ? 'linear-gradient(135deg, #ffffff 0%, rgba(99, 102, 241, 0.05) 100%)' : '#ffffff',
-                                border: isHighlight ? '2px solid var(--slide-primary)' : '1px solid var(--slide-border)',
-                                borderTop: isHighlight ? '6px solid var(--slide-primary)' : '1px solid var(--slide-border)',
-                                boxShadow: isHighlight ? '0 10px 25px rgba(99, 102, 241, 0.1)' : '0 4px 15px rgba(0,0,0,0.03)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                borderRadius: '0.5cqi'
-                            }}>
-                                {cText && (
-                                    <div style={{ 
-                                        fontSize: '1.8cqi', 
-                                        color: '#334155', 
-                                        lineHeight: 1.6, 
-                                        margin: 0,
-                                        fontWeight: 500
-                                    }}>
-                                        <SlideMarkdown content={cText} />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-
-                    return (
-                        <div style={{ 
-                            transform: `scale(${scaleFactor})`, 
-                            transformOrigin: 'top center',
-                            width: '100%',
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'flex-start', // 中央から上寄せに変更
-                            marginTop: '0'           // ネガティブマージンを廃止して見切れを防止
+                {/* 中央ディバイダーとバッジ */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-slate-200 -translate-x-1/2 z-0" />
+                {comparison_icon && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 bg-white px-[1.5cqi] py-[0.6cqi] rounded-full border border-slate-200 shadow-sm flex items-center justify-center">
+                        <span style={{
+                            fontSize: '0.9cqi',
+                            color: '#64748B',
+                            fontWeight: 800,
+                            letterSpacing: '0.2em',
+                            textTransform: 'uppercase',
+                            lineHeight: 1
                         }}>
-                            <div style={{ 
-                                display: 'flex', 
-                                gap: '4cqi', 
-                                flex: 1, 
-                                alignItems: 'stretch',
-                                position: 'relative'
-                            }}>
-                                {/* 左カラム */}
-                                <motion.div 
-                                    style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-                                    {...(!isStatic && { initial: { opacity: 0, x: -30 }, animate: { opacity: 1, x: 0 }, transition: { delay: 0.2 } })}
-                                >
-                                    {renderColumn(lTitle, lText, false)}
-                                </motion.div>
+                            {comparison_icon}
+                        </span>
+                    </div>
+                )}
 
-                                {/* センターディバイダー */}
-                                <div style={{ 
-                                    position: 'absolute',
-                                    left: '50%',
-                                    top: '15%',
-                                    bottom: '5%',
-                                    width: '1px',
-                                    background: 'linear-gradient(to bottom, transparent, var(--slide-border), transparent)',
-                                    transform: 'translateX(-50%)',
-                                    zIndex: 5,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <motion.div 
-                                        style={{ 
-                                            background: 'var(--slide-primary)',
-                                            color: '#ffffff',
-                                            padding: '0.8cqi 1.2cqi',
-                                            borderRadius: '2cqi',
-                                            fontSize: '1.4cqi',
-                                            fontWeight: 900,
-                                            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
-                                            zIndex: 10
-                                        }}
-                                        {...(!isStatic && { 
-                                            initial: { scale: 0, opacity: 0 }, 
-                                            animate: { scale: 1, opacity: 1 }, 
-                                            transition: { delay: 0.6, type: 'spring', damping: 12 } 
-                                        })}
-                                    >
-                                        <SlideMarkdown content={comparison_icon} />
-                                    </motion.div>
-                                </div>
-
-                                {/* 右カラム */}
-                                <motion.div 
-                                    style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-                                    {...(!isStatic && { initial: { opacity: 0, x: 30 }, animate: { opacity: 1, x: 0 }, transition: { delay: 0.4 } })}
-                                >
-                                    {renderColumn(rTitle, rText, true)}
-                                </motion.div>
-                            </div>
+                {/* 左カラム (静的・現状) */}
+                <motion.div
+                    className="flex-1 pr-[6cqi] flex flex-col pt-[1cqi]"
+                    initial={!isStatic ? { opacity: 0, x: -15 } : {}}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    <h3 style={{
+                        fontSize: '1.6cqi',
+                        fontWeight: 700,
+                        color: '#64748B', // slate-500 (控えめな色)
+                        marginBottom: '1.5cqi',
+                        letterSpacing: '0.05em'
+                    }}>
+                        <SlideMarkdown content={lTitle} inline />
+                    </h3>
+                    {lText && (
+                        <div style={{ fontSize: '1.4cqi', color: 'var(--slide-body)', lineHeight: 1.7 }}>
+                            <SlideMarkdown content={lText} />
                         </div>
-                    );
-                })()}
+                    )}
+                    {renderList(lBullets, false)}
+                </motion.div>
+
+                {/* 右カラム (動的・理想/解決策) */}
+                <motion.div
+                    className="flex-1 pl-[6cqi] flex flex-col pt-[1cqi]"
+                    initial={!isStatic ? { opacity: 0, x: 15 } : {}}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                    <h3 style={{
+                        fontSize: '1.6cqi',
+                        fontWeight: 800,
+                        color: 'var(--slide-heading)',
+                        marginBottom: '1.5cqi',
+                        borderLeft: '4px solid var(--slide-primary)', // Indigoのアクセント
+                        paddingLeft: '1.2cqi',
+                        lineHeight: 1.2
+                    }}>
+                        <SlideMarkdown content={rTitle} inline />
+                    </h3>
+                    {rText && (
+                        <div style={{ fontSize: '1.4cqi', color: 'var(--slide-body)', lineHeight: 1.7, paddingLeft: '1.6cqi' }}>
+                            <SlideMarkdown content={rText} />
+                        </div>
+                    )}
+                    <div style={{ paddingLeft: '1.6cqi' }}>
+                        {renderList(rBullets, true)}
+                    </div>
+                </motion.div>
             </div>
 
-            {/* フッター注釈 */}
-            {annotations.length > 0 && (
-                <div style={{ 
-                    fontSize: '1.1cqi', 
-                    color: 'var(--slide-muted, #94a3b8)', 
-                    marginTop: 'auto', 
-                    paddingTop: '1.5cqi', 
-                    borderTop: '1px solid var(--slide-border, #e2e8f0)',
-                    flexShrink: 0
+            {/* 注釈 */}
+            {annotations?.length > 0 && (
+                <div style={{
+                    fontSize: '1.1cqi',
+                    color: '#64748B',
+                    marginTop: '2cqi',
+                    paddingTop: '1cqi',
+                    borderTop: '1px solid var(--slide-border)'
                 }}>
                     {annotations.map((note, idx) => (
                         <React.Fragment key={idx}>
                             <SlideMarkdown content={note} inline />
-                            {idx < annotations.length - 1 && <span style={{ margin: '0 1cqi', opacity: 0.5 }}>|</span>}
+                            {idx < annotations.length - 1 && <span style={{ margin: '0 0.8cqi', opacity: 0.5 }}>|</span>}
                         </React.Fragment>
                     ))}
                 </div>

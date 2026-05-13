@@ -102,8 +102,10 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
     }, [isOpen, isEditMode]);
 
     // 初期化 & 同期
+    // ※ 生成中 (isGeneratingArtifact) は常に最新のデータを反映させる
+    // ※ 完了後は、データが未初期化の場合のみ外部からの入力を受け入れる
     useEffect(() => {
-        if (rawContent) {
+        if (rawContent && (localBlocks.length === 0 || isGeneratingArtifact)) {
             let content = { blocks: [], meta: {} };
             if (typeof rawContent === 'string') {
                 try {
@@ -117,7 +119,7 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
             setLocalBlocks(content.blocks || []);
             setLocalMeta(content.meta || null);
         }
-    }, [rawContent]);
+    }, [rawContent, isGeneratingArtifact]);
 
     // ブロック更新
     const handleUpdateBlock = (index, updatedBlock) => {
