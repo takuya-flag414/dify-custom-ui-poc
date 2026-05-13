@@ -437,6 +437,7 @@ class AuthService {
         email: string,
         password: string,
         displayName: string,
+        employeeCode: string = '',
         securityInfo: Partial<SecurityInfo> = {}
     ): Promise<{ message: string }> {
         const { lastName, firstName, dateOfBirth } = securityInfo;
@@ -474,6 +475,7 @@ class AuthService {
             const userData = {
                 email: normalizedEmail,
                 displayName: displayName || `${lastName || ''} ${firstName || ''}`.trim(),
+                employeeCode: employeeCode,
                 preferences: {
                     theme: 'system',
                     aiStyle: 'partner',
@@ -569,6 +571,7 @@ class AuthService {
         displayName: string,
         roleId: string = 'role_general',
         departmentId: number | null = null,
+        employeeCode: string = '',
         securityInfo: Partial<SecurityInfo> = {}
     ): Promise<{ message: string }> {
         const { lastName, firstName, dateOfBirth } = securityInfo;
@@ -591,37 +594,26 @@ class AuthService {
             // 2. セカンダリアプリ側はすぐにサインアウト
             await signOut(adminAuth);
 
-            // 3. Firestoreにプロファイルを作成し、"is_admin_created: true" を明記する
-            const now = Timestamp.now();
-            const userData = {
-                user_id: firebaseUser.uid,
-                email: normalizedEmail,
-                name: `${lastName || ''} ${firstName || ''}`.trim() || displayName,
-                account_status: 1,
-                created_at: now,
-                updated_at: now,
-                displayName,
-                lastName: lastName || '',
-                firstName: firstName || '',
-                dateOfBirth: dateOfBirth || '',
-                avatarUrl: null,
-                department_id: departmentId,
-                is_admin_created: true, // ★ このフラグによりメール認証がスキップされる
-                preferences: {
-                    theme: 'system',
-                    aiStyle: 'partner',
-                    isOnboardingCompleted: false,
+            // 3. サーバー側の関数を呼び出してセキュアにプロファイルを作成（暗号化して保存）
+            const adminCreateSecureUserProfile = httpsCallable(functions, 'adminCreateSecureUserProfile');
+            await adminCreateSecureUserProfile({
+                targetUid: firebaseUser.uid,
+                roleId,
+                departmentId,
+                employeeCode,
+                userData: {
+                    email: normalizedEmail,
+                    displayName,
+                    lastName: lastName || '',
+                    firstName: firstName || '',
+                    dateOfBirth: dateOfBirth || '',
+                    preferences: {
+                        theme: 'system',
+                        aiStyle: 'partner',
+                        isOnboardingCompleted: false,
+                    }
                 }
-            };
-
-            const batch = writeBatch(db);
-            batch.set(doc(db, 'users', firebaseUser.uid), userData);
-            batch.set(doc(collection(db, 'user_roles')), {
-                user_id: firebaseUser.uid,
-                role_id: roleId,
-                assigned_at: now
             });
-            await batch.commit();
 
             // ログ記録
             this._logAuditAction('ADMIN_CREATED_USER', normalizedEmail, firebaseUser.uid, {
