@@ -34,11 +34,12 @@ export interface AuthContextValue {
     /** ログイン関数 */
     login: (email: string, password: string) => Promise<LoginResult>;
     /** サインアップ関数 */
-    signup: (email: string, password: string, displayName: string, employeeCode?: string, securityInfo?: SecurityInfo) => Promise<{ message: string }>;
+    signup: (email: string, password: string, displayName: string, employeeCode?: string, departmentId?: number | null, securityInfo?: SecurityInfo) => Promise<{ message: string }>;
     /** パスワードリセット関数 */
-    resetPassword: (email: string) => Promise<void>;
     /** ログアウト関数 */
     logout: () => Promise<void>;
+    /** 初回パスワード変更関数 */
+    updateInitialPassword: (newPassword: string) => Promise<void>;
     /** アカウント削除関数 */
     deleteAccount: () => Promise<void>;
     /** エラークリア関数 */
@@ -119,12 +120,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password: string,
         displayName: string,
         employeeCode: string = '',
+        departmentId: number | null = null,
         securityInfo: SecurityInfo = {}
     ): Promise<{ message: string }> => {
         try {
             setError(null);
             setIsNewUser(false);
-            const result = await authService.signup(email, password, displayName, employeeCode, securityInfo);
+            const result = await authService.signup(email, password, displayName, employeeCode, departmentId, securityInfo);
             
             // メール認証待ちのメッセージを表示
             setError(result.message);
@@ -166,6 +168,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('[AuthContext] Logout successful');
         } catch (err) {
             console.error('[AuthContext] Logout failed:', err);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            setError(errorMessage);
+            throw err;
+        }
+    }, []);
+
+    /**
+     * 初回パスワード変更
+     */
+    const updateInitialPassword = useCallback(async (newPassword: string): Promise<void> => {
+        try {
+            setError(null);
+            await authService.updateInitialPassword(newPassword);
+            
+            // パスワード変更後、ローカルのユーザー状態を更新（フラグを落とす）
+            setUser(prevUser => {
+                if (!prevUser) return null;
+                return { ...prevUser, requirePasswordChange: false };
+            });
+            console.log('[AuthContext] Initial password updated successfully');
+        } catch (err) {
+            console.error('[AuthContext] Update initial password failed:', err);
             const errorMessage = err instanceof Error ? err.message : String(err);
             setError(errorMessage);
             throw err;
@@ -241,11 +265,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         signup,
         resetPassword,
         logout,
+        updateInitialPassword,
         clearError,
         hasPermission,
         getUserRoles,
         switchRole,
-    }), [user, isLoading, error, isNewUser, login, signup, resetPassword, logout, clearError, hasPermission, getUserRoles, switchRole]);
+    }), [user, isLoading, error, isNewUser, login, signup, resetPassword, logout, updateInitialPassword, clearError, hasPermission, getUserRoles, switchRole]);
 
     return (
         <AuthContext.Provider value={contextValue}>

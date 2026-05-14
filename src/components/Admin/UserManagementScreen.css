@@ -433,3 +433,18 @@
 .download-link:hover {
   text-decoration: underline;
 }
+
+.domain-suffix {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-surface-hover);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  height: 42px;
+  box-sizing: border-box;
+}

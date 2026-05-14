@@ -126,6 +126,7 @@ export interface MockUser {
     securityAnswer?: string;
     failedLoginAttempts?: number;
     lockedUntil?: string | null;
+    require_password_change?: boolean; // モック用：初回パスワード変更フラグ
 }
 
 /**
@@ -218,12 +219,11 @@ export const MOCK_ROLE_PERMISSIONS: RolePermission[] = [
  * 組織階層テーブル (departments)
  */
 export const MOCK_DEPARTMENTS: Department[] = [
-    { id: 1, name: '本社', parent_id: null, org_path: '1' },
-    { id: 2, name: '営業部', parent_id: 1, org_path: '1.2' },
-    { id: 3, name: '開発部', parent_id: 1, org_path: '1.3' },
-    { id: 4, name: '第一営業課', parent_id: 2, org_path: '1.2.4' },
-    { id: 5, name: '第二営業課', parent_id: 2, org_path: '1.2.5' },
-    { id: 6, name: '情報システム部', parent_id: 1, org_path: '1.6' },
+    { id: 1, name: '商品企画部', parent_id: null, org_path: '1' },
+    { id: 2, name: '営業部', parent_id: null, org_path: '2' },
+    { id: 3, name: 'クリエイティブマーケティング部', parent_id: null, org_path: '3' },
+    { id: 4, name: 'その他', parent_id: null, org_path: '4' },
+    { id: 5, name: 'カスタマーリレーション部', parent_id: null, org_path: '5' },
 ];
 
 /**

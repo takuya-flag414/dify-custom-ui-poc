@@ -5,7 +5,9 @@ service cloud.firestore {
 
     // 共通関数：正しいドメインのユーザーか
     function isCompanyUser() {
-      return request.auth != null && request.auth.token.email.matches('.*@iflag\\.co\\.jp');
+      return request.auth != null && 
+             (request.auth.token.email.matches('.*@iflag\\.co\\.jp') || 
+              request.auth.token.email.matches('.*@epark\\.co\\.jp'));
     }
 
     // 共通関数：システム管理者かどうか（自身のプロフィールデータのroleで判定）
@@ -59,7 +61,6 @@ service cloud.firestore {
       // 　フロントエンド側のUIガードと併用して安全性を担保します）
       allow read, delete: if isCompanyUser();
     }
-
     // 4. AI利用分析ログ
     match /ai_usage_logs/{docId} {
       // ログイン済みユーザーなら作成可能

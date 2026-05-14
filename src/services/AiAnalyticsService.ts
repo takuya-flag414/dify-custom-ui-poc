@@ -1,5 +1,5 @@
-// src/services/AiAnalyticsService.ts
-import { db } from '../lib/firebase';
+import { db, functions } from '../lib/firebase';
+import { httpsCallable } from 'firebase/functions';
 import { 
     collection, 
     addDoc, 
@@ -10,6 +10,8 @@ import {
     Timestamp,
     serverTimestamp 
 } from 'firebase/firestore';
+import { isStrictFEMode } from '../config/env';
+import { MOCK_DEPARTMENTS, MOCK_USERS } from '../mocks/mockUsers';
 
 /**
  * AI利用ログのインターフェース
@@ -146,6 +148,36 @@ class AiAnalyticsService {
         } catch (error) {
             console.error('[AiAnalyticsService] Failed to fetch AI usage stats:', error);
             return [];
+        }
+    }
+
+    /**
+     * 分析に必要なユーザー・部署マッピングを取得する
+     */
+    async getAnalysisMappings() {
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Using mock mappings...');
+            const userMap: Record<string, { name: string, departmentId: any }> = {};
+            MOCK_USERS.forEach(u => {
+                userMap[u.user_id] = {
+                    name: u.name,
+                    departmentId: u.department_id || null
+                };
+            });
+            const deptMap: Record<string, string> = {};
+            MOCK_DEPARTMENTS.forEach(d => {
+                deptMap[d.id.toString()] = d.name;
+            });
+            return { userMap, deptMap };
+        }
+
+        try {
+            const getDecryptedUserMappings = httpsCallable(functions, 'getDecryptedUserMappings');
+            const result = await getDecryptedUserMappings();
+            return result.data as { userMap: any, deptMap: any };
+        } catch (error) {
+            console.error('[AiAnalyticsService] Failed to fetch secure mappings:', error);
+            return { userMap: {}, deptMap: {} };
         }
     }
 }

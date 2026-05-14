@@ -1,9 +1,10 @@
 /**
  * Cloud Functions for Firebase: Audit Log Bridge
+ * Last Updated: 2026-05-14T14:48:00
  */
 
 const { setGlobalOptions } = require("firebase-functions/v2");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
 // v2 のインポートを整理
 const { beforeUserSignedIn } = require("firebase-functions/v2/identity");
 const functionsV1 = require("firebase-functions/v1");
@@ -98,6 +99,30 @@ exports.onUserDeleted = functionsV1.region('asia-northeast1').auth.user().onDele
     return null;
 });
 
+// 4. Firestoreのユーザープロファイル削除を検知して関連データをクリーンアップ (user_roles等)
+exports.onUserDocumentDeleted = onDocumentDeleted("users/{uid}", async (event) => {
+    const uid = event.params.uid;
+    const db = getFirestore();
+    
+    logger.info(`Firestore Trigger: User document deleted for ${uid}. Cleaning up roles...`);
+    
+    try {
+        // user_rolesコレクションから対象ユーザーのロールを削除
+        const rolesQuery = await db.collection('user_roles').where('user_id', '==', uid).get();
+        if (!rolesQuery.empty) {
+            const batch = db.batch();
+            rolesQuery.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            logger.info(`Firestore: Deleted ${rolesQuery.size} user_roles for ${uid}`);
+        }
+    } catch (error) {
+        logger.error(`Error cleaning up roles for deleted user doc ${uid}:`, error);
+    }
+    return null;
+});
+
 // 3. サインイン直前の割り込み（認証完了の検知 - v2）
 // ※GCPコンソールでIAM権限（Cloud Run Invoker）を付与してから、Firebaseコンソールで紐付けること
 exports.beforeSignIn = beforeUserSignedIn(async (event) => {
@@ -188,6 +213,7 @@ exports.createSecureUserProfile = onCall(async (request) => {
             firstName: encryptedFirstName,
             dateOfBirth: encryptedDob,
             employee_code: encryptedEmployeeCode,
+            department_id: userData.departmentId || null,
             account_status: 1,
             email_verified: false,
             role: 'user', // Security rules 用
@@ -269,10 +295,12 @@ exports.adminCreateSecureUserProfile = onCall(async (request) => {
             firstName: encryptedFirstName,
             dateOfBirth: encryptedDob,
             employee_code: encryptedEmployeeCode,
+            department_id: departmentId || null,
             account_status: 1,
             email_verified: false,
             role: roleId === 'role_admin' ? 'admin' : 'user', // Security rules 用
             is_admin_created: true, // 管理者作成フラグ
+            require_password_change: true, // 初回ログイン時のパスワード変更要求フラグ
             is_encrypted: true,
             created_at: now,
             updated_at: now,
@@ -369,5 +397,100 @@ exports.getSecureUserProfile = onCall(async (request) => {
         logger.error(`Secure Profile Retrieval Failed for ${uid}:`, error);
         // デバッグのためにエラーメッセージを詳細化（本番では汎用メッセージに戻すのが望ましい）
         throw new HttpsError("internal", `プロファイルの取得に失敗しました: ${error.message || 'Unknown Error'}`);
+    }
+});
+
+/**
+ * 初回パスワード変更要求フラグのクリア (Callable Function)
+ */
+exports.clearRequirePasswordChange = onCall(async (request) => {
+    logger.info("Function clearRequirePasswordChange started", { uid: request.auth?.uid });
+    
+    if (!request.auth) {
+        throw new HttpsError("unauthenticated", "ログインが必要です");
+    }
+
+    const uid = request.auth.uid;
+    const db = getFirestore();
+
+    try {
+        await db.collection('users').doc(uid).update({
+            require_password_change: false,
+            updated_at: Timestamp.now()
+        });
+        
+        logger.info(`Cleared require_password_change flag for user ${uid}`);
+        return { success: true };
+    } catch (error) {
+        logger.error(`Failed to clear require_password_change for ${uid}:`, error);
+        throw new HttpsError("internal", "フラグの更新に失敗しました");
+    }
+});
+
+/**
+ * 全ユーザーのID、名前、部署IDを復号して取得する (管理者用分析マッピング)
+ */
+exports.getDecryptedUserMappings = onCall(async (request) => {
+    logger.info("Function getDecryptedUserMappings started", { adminUid: request.auth?.uid });
+    
+    if (!request.auth) {
+        throw new HttpsError("unauthenticated", "ログインが必要です");
+    }
+
+    const adminUid = request.auth.uid;
+    const db = getFirestore();
+
+    try {
+        // 1. 管理者権限チェック
+        const adminRolesQuery = await db.collection('user_roles')
+            .where('user_id', '==', adminUid)
+            .where('role_id', '==', 'role_admin')
+            .get();
+
+        if (adminRolesQuery.empty) {
+            logger.warn(`Permission Denied: User ${adminUid} attempted to fetch all user mappings.`);
+            throw new HttpsError("permission-denied", "管理者権限が必要です");
+        }
+
+        // 2. ユーザー一覧を取得
+        const usersSnap = await db.collection('users').get();
+        const userMap = {};
+
+        // 名前を復号化しながらマッピングを作成
+        const decryptPromises = usersSnap.docs.map(async (doc) => {
+            const data = doc.data();
+            let name = "Unknown";
+            
+            try {
+                if (data.is_encrypted && data.displayName) {
+                    name = await decrypt(data.displayName);
+                } else {
+                    name = data.displayName || data.name || "Unknown";
+                }
+            } catch (e) {
+                logger.error(`Decryption failed for user ${doc.id}:`, e);
+                name = "Decryption Error";
+            }
+
+            userMap[doc.id] = {
+                name: name,
+                departmentId: data.department_id || null
+            };
+        });
+
+        await Promise.all(decryptPromises);
+
+        // 3. 部署一覧も取得して返す
+        const deptsSnap = await db.collection('departments').get();
+        const deptMap = {};
+        deptsSnap.forEach(doc => {
+            deptMap[doc.id] = doc.data().name;
+        });
+
+        return { userMap, deptMap };
+    } catch (error) {
+        if (error instanceof HttpsError) throw error;
+        logger.error(`getDecryptedUserMappings Failed:`, error);
+        throw new HttpsError("internal", `マッピングの取得に失敗しました: ${error.message}`);
     }
 });

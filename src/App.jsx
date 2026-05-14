@@ -44,6 +44,7 @@ import { FEATURE_FLAGS } from './config/featureFlags';
 // Phase A: 認証機能
 import { useAuth } from './context/AuthContext';
 import LoginScreen from './components/Auth/LoginScreen';
+import ForcePasswordChangeScreen from './components/Auth/ForcePasswordChangeScreen';
 import AdminDashboard from './components/Admin/AdminDashboard';
 
 import { DEFAULT_MOCK_MODE, SHOW_HEADER } from './config/env';
@@ -519,6 +520,15 @@ function App() {
     return (
       <AnimatePresence mode="wait">
         <LoginScreen key="login" />
+      </AnimatePresence>
+    );
+  }
+
+  // ★ Phase A: 管理者作成アカウントの初回パスワード変更要求
+  if (isAuthenticated && authUser?.requirePasswordChange) {
+    return (
+      <AnimatePresence mode="wait">
+        <ForcePasswordChangeScreen key="force-pw" />
       </AnimatePresence>
     );
   }

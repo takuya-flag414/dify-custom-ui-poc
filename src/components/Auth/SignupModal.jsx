@@ -5,6 +5,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { MOCK_DEPARTMENTS } from '../../mocks/mockUsers';
 import './Auth.css';
 
 /**
@@ -55,6 +56,7 @@ const SignupModal = ({ onClose }) => {
     const [lastName, setLastName] = useState('');
     const [firstName, setFirstName] = useState('');
     const [employeeCode, setEmployeeCode] = useState(''); // ★追加
+    const [departmentId, setDepartmentId] = useState(''); // ★追加
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false); // ★追加
 
@@ -108,7 +110,8 @@ const SignupModal = ({ onClose }) => {
             setIsSubmitting(true);
             // displayNameは姓+名から自動生成（Onboardingで変更可能）
             const generatedDisplayName = `${lastName} ${firstName}`;
-            await signup(email, password, generatedDisplayName, employeeCode, {
+            const deptIdNum = departmentId ? parseInt(departmentId, 10) : null;
+            await signup(email, password, generatedDisplayName, employeeCode, deptIdNum, {
                 lastName,
                 firstName,
                 dateOfBirth,
@@ -287,6 +290,27 @@ const SignupModal = ({ onClose }) => {
                         />
                         <span className="form-hint">本人確認に使用されます</span>
                     </div>
+<div className="form-group">
+                        <label className="form-label" htmlFor="signup-department">
+                            部署 <span className="form-required">*</span>
+                        </label>
+                        <select
+                            id="signup-department"
+                            className="form-input"
+                            value={departmentId}
+                            onChange={(e) => setDepartmentId(e.target.value)}
+                            disabled={isSubmitting}
+                            required
+                        >
+                            <option value="">部署を選択してください</option>
+                            {MOCK_DEPARTMENTS.map(dept => (
+                                <option key={dept.id} value={dept.id}>
+                                    {dept.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
 
                     {/* メールアドレス */}
                     <div className="form-group">
