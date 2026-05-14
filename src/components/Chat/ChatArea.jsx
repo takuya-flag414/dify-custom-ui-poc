@@ -102,7 +102,8 @@ const ChatArea = (props) => {
       
       // ★追加: 履歴ロード完了時に viewMode を確定させる (useEffectのタイミングによるチラつき防止)
       if (viewMode !== 'ai_slide_studio') {
-        const nextView = messages.length === 0 ? 'welcome' : 'chat';
+        // ★修正: メッセージが0件でも conversationId がある場合は chat ビューにする
+        const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
         if (viewMode !== nextView) {
           setViewMode(nextView);
         }
@@ -112,7 +113,7 @@ const ChatArea = (props) => {
       setActiveArtifact(null);
     }
     prevIsHistoryLoading.current = isHistoryLoading;
-  }, [isHistoryLoading, messages.length, viewMode]);
+  }, [isHistoryLoading, messages.length, viewMode, props.conversationId]);
 
   const handleOpenTableModal = useCallback((content) => {
     setTableContent(content);
@@ -127,6 +128,7 @@ const ChatArea = (props) => {
   // ★追加: メッセージ送信時に自動スクロールを強制的にONに戻す共通ハンドラ
   const handleSendMessageInternal = useCallback((text, attachments = [], options = {}) => {
     setAutoScrollEnabled(true);
+    setViewMode('chat'); // ★追加: メッセージ送信時は必ずチャットビューにする
     onSendMessage(text, attachments, options);
   }, [onSendMessage]);
 

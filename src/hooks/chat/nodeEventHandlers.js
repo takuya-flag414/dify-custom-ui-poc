@@ -305,13 +305,20 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
 
         // --- Thinkingの表示制御 (ガードロジック) ---
         let finalThinking = parsedJson.thinking || '';
-        if (title === 'LLM_Intent_Analysis_RAG') {
-            if (parsedJson.requires_rag === false) finalThinking = '';
-        } else if (title === 'LLM_Intent_Analysis_Web') {
-            if (parsedJson.requires_web === false) finalThinking = '';
-        } else if (title === 'LLM_Intent_Analysis_Hybrid') {
-            // 両方falseのときのみ非表示
-            if (parsedJson.requires_rag === false && parsedJson.requires_web === false) finalThinking = '';
+        const lowerTitle = (title || '').toLowerCase();
+        
+        // LLMの出力揺らぎ対策: booleanのfalseと文字列の"false"の両方に対応
+        const isRagFalse = String(parsedJson.requires_rag).toLowerCase() === 'false';
+        const isWebFalse = String(parsedJson.requires_web).toLowerCase() === 'false';
+        
+        if (lowerTitle.includes('rag')) {
+            if (isRagFalse) finalThinking = '';
+        } else if (lowerTitle.includes('web')) {
+            if (isWebFalse) finalThinking = '';
+        } else {
+            // Hybrid や 汎用(LLM_Intent_Analysis) などの場合
+            // RAGもWebも不要(false)な場合のみThinkingを非表示にする
+            if (isRagFalse && isWebFalse) finalThinking = '';
         }
 
         return {
@@ -352,12 +359,16 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
         }
 
         // --- Thinkingの表示制御 (ガードロジック - フォールバック用) ---
-        if (title === 'LLM_Intent_Analysis_RAG') {
-            if (fallbackRequiresRag === false) fallbackThinking = '';
-        } else if (title === 'LLM_Intent_Analysis_Web') {
-            if (fallbackRequiresWeb === false) fallbackThinking = '';
-        } else if (title === 'LLM_Intent_Analysis_Hybrid') {
-            if (fallbackRequiresRag === false && fallbackRequiresWeb === false) fallbackThinking = '';
+        const fbLowerTitle = (title || '').toLowerCase();
+        const fbIsRagFalse = String(fallbackRequiresRag).toLowerCase() === 'false';
+        const fbIsWebFalse = String(fallbackRequiresWeb).toLowerCase() === 'false';
+
+        if (fbLowerTitle.includes('rag')) {
+            if (fbIsRagFalse) fallbackThinking = '';
+        } else if (fbLowerTitle.includes('web')) {
+            if (fbIsWebFalse) fallbackThinking = '';
+        } else {
+            if (fbIsRagFalse && fbIsWebFalse) fallbackThinking = '';
         }
 
         // フォールバックからも session_title を抽出
