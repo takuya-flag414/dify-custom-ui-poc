@@ -232,10 +232,12 @@ export const ChatServiceAdapter = {
         // --- 2. Real API / BE Mock Mode ---
         const domainFilterString = searchSettings?.domainFilters?.join(', ') || '';
         const now = new Date();
-        const currentTimeStr = now.toLocaleString('ja-JP', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            weekday: 'long', hour: '2-digit', minute: '2-digit'
-        });
+        const currentTimeStr = now.getFullYear().toString() +
+            (now.getMonth() + 1).toString().padStart(2, '0') +
+            now.getDate().toString().padStart(2, '0') +
+            now.getHours().toString().padStart(2, '0') +
+            now.getMinutes().toString().padStart(2, '0') +
+            now.getSeconds().toString().padStart(2, '0');
 
         const requestBody: ChatMessagePayload = {
             inputs: {
