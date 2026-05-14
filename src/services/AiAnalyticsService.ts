@@ -120,16 +120,38 @@ class AiAnalyticsService {
 
     /**
      * 分析用統計データを取得する（管理者用）
-     * @param days 取得対象期間（日数）
+     * @param range 取得対象期間（日数数値 または 'YYYY-MM' 形式の文字列）
      */
-    async getAiUsageStats(days: number = 30) {
+    async getAiUsageStats(range: number | string = 30) {
         try {
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - days);
+            let startTimestamp: Timestamp;
+            let endTimestamp: Timestamp | null = null;
+
+            if (typeof range === 'string' && range.includes('-')) {
+                // "YYYY-MM" 形式の場合
+                const [year, month] = range.split('-').map(Number);
+                const startDate = new Date(year, month - 1, 1, 0, 0, 0);
+                const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+                startTimestamp = Timestamp.fromDate(startDate);
+                endTimestamp = Timestamp.fromDate(endDate);
+            } else {
+                // 従来の日数（数値）指定の場合
+                const days = typeof range === 'number' ? range : parseInt(range as string) || 30;
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                startTimestamp = Timestamp.fromDate(cutoffDate);
+            }
             
+            const constraints = [
+                where('timestamp', '>=', startTimestamp)
+            ];
+            if (endTimestamp) {
+                constraints.push(where('timestamp', '<=', endTimestamp));
+            }
+
             const q = query(
                 collection(db, 'ai_usage_logs'),
-                where('timestamp', '>=', Timestamp.fromDate(cutoffDate)),
+                ...constraints,
                 orderBy('timestamp', 'desc')
             );
             

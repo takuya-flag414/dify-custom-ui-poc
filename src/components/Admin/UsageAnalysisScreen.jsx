@@ -17,6 +17,23 @@ const UsageAnalysisScreen = () => {
   const [analysisTarget, setAnalysisTarget] = useState('all'); // 'all', 'none', or deptId
   const [mappings, setMappings] = useState({ userMap: {}, deptMap: {} });
   const [activeTokenKey, setActiveTokenKey] = useState(null); // トークン詳細表示中の行キー
+  
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [pickerYear, setPickerYear] = useState(new Date().getFullYear());
+  
+  // 選択中の年月 (初期値: 今月)
+  const [currentYearMonth, setCurrentYearMonth] = useState(() => {
+    const d = new Date();
+    return { year: d.getFullYear(), month: d.getMonth() + 1 };
+  });
+
+  const [exportOptions, setExportOptions] = useState({
+    type: 'user', // 'user', 'dept', 'specific_dept', 'raw'
+    specificDeptId: '',
+    range: 30, // days or 'YYYY-MM'
+    selectedMonth: new Date().toISOString().slice(0, 7) // 'YYYY-MM'
+  });
 
   // マッピングデータの取得 (ユーザー名・部署名)
   useEffect(() => {
@@ -38,12 +55,11 @@ const UsageAnalysisScreen = () => {
   // 表示単位が変更されたら取得期間を調整し、フィルタをリセット
   useEffect(() => {
     setSelectedPeriod(null);
-    if (viewType === 'daily') {
-      setTimeRange(30);
-    } else if (viewType === 'monthly') {
-      setTimeRange(365);
-    }
-  }, [viewType]);
+    // viewType は 'specific_month' 固定で運用するようにシンプル化
+    setViewType('specific_month');
+    const monthStr = `${currentYearMonth.year}-${currentYearMonth.month.toString().padStart(2, '0')}`;
+    setTimeRange(monthStr);
+  }, [currentYearMonth]);
 
   const fetchStats = async () => {
     setIsLoading(true);
@@ -57,6 +73,154 @@ const UsageAnalysisScreen = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const executeExport = (type, dataToExport) => {
+    let csvContent = "\uFEFF"; // BOM
+    let fileName = "";
+    const userMap = mappings?.userMap || {};
+    const deptMap = mappings?.deptMap || {};
+
+    // フィルターの適用
+    let filtered = dataToExport;
+    if (type === 'specific_dept' && exportOptions.specificDeptId) {
+      filtered = dataToExport.filter(log => {
+        const profile = userMap[log.user_id];
+        return profile?.departmentId?.toString() === exportOptions.specificDeptId;
+      });
+    }
+
+    if (type === 'user' || type === 'specific_dept') {
+      const label = type === 'specific_dept' ? `dept_${exportOptions.specificDeptId}` : 'user';
+      fileName = `ai_usage_${label}_${new Date().toISOString().slice(0,10)}.csv`;
+      csvContent += "ユーザーID,氏名,部署,利用回数,入力トークン,出力トークン,総トークン,推定コスト(円)\n";
+      
+      const userStats = {};
+      filtered.forEach(log => {
+        if (!userStats[log.user_id]) {
+          const profile = userMap[log.user_id];
+          userStats[log.user_id] = {
+            name: profile?.name || 'Unknown',
+            dept: profile?.departmentId ? (deptMap[profile.departmentId] || 'Unknown') : '未設定',
+            count: 0,
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            tokens: 0,
+            cost: 0
+          };
+        }
+        userStats[log.user_id].count++;
+        userStats[log.user_id].prompt_tokens += (log.prompt_tokens || 0);
+        userStats[log.user_id].completion_tokens += (log.completion_tokens || 0);
+        userStats[log.user_id].tokens += (log.total_tokens || 0);
+        userStats[log.user_id].cost += (log.estimated_cost_jpy || 0);
+      });
+
+      Object.entries(userStats).forEach(([uid, s]) => {
+        csvContent += `"${uid}","${s.name}","${s.dept}",${s.count},${s.prompt_tokens},${s.completion_tokens},${s.tokens},${s.cost.toFixed(2)}\n`;
+      });
+
+    } else if (type === 'dept') {
+      fileName = `ai_usage_by_dept_${new Date().toISOString().slice(0,10)}.csv`;
+      csvContent += "部署ID,部署名,利用回数,入力トークン,出力トークン,総トークン,推定コスト(円),ユニークユーザー数\n";
+
+      const deptStats = {};
+      filtered.forEach(log => {
+        const profile = userMap[log.user_id];
+        const dId = profile?.departmentId || 'none';
+        if (!deptStats[dId]) {
+          deptStats[dId] = {
+            name: dId === 'none' ? '未設定' : (deptMap[dId] || 'Unknown'),
+            count: 0,
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            tokens: 0,
+            cost: 0,
+            users: new Set()
+          };
+        }
+        deptStats[dId].count++;
+        deptStats[dId].prompt_tokens += (log.prompt_tokens || 0);
+        deptStats[dId].completion_tokens += (log.completion_tokens || 0);
+        deptStats[dId].tokens += (log.total_tokens || 0);
+        deptStats[dId].cost += (log.estimated_cost_jpy || 0);
+        deptStats[dId].users.add(log.user_id);
+      });
+
+      Object.entries(deptStats).forEach(([id, s]) => {
+        csvContent += `"${id}","${s.name}",${s.count},${s.prompt_tokens},${s.completion_tokens},${s.tokens},${s.cost.toFixed(2)},${s.users.size}\n`;
+      });
+    } else if (type === 'raw') {
+      fileName = `ai_usage_details_${new Date().toISOString().slice(0,10)}.csv`;
+      csvContent += "日時,ユーザーID,氏名,部署,モデル,入力トークン,出力トークン,総トークン,推定コスト(円)\n";
+      
+      filtered.forEach(log => {
+        try {
+          const profile = userMap[log.user_id];
+          const name = profile?.name || 'Unknown';
+          const dept = profile?.departmentId ? (deptMap[profile.departmentId] || 'Unknown') : '未設定';
+          
+          let dateStr = '';
+          if (log.timestamp) {
+            const d = log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+            dateStr = d.toLocaleString('ja-JP');
+          }
+
+          csvContent += `"${dateStr}","${log.user_id}","${name}","${dept}","${log.model || ''}",${log.prompt_tokens || 0},${log.completion_tokens || 0},${log.total_tokens || 0},${(log.estimated_cost_jpy || 0).toFixed(2)}\n`;
+        } catch (err) {
+          console.error('Row export error:', err);
+        }
+      });
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShowExportModal(false);
+  };
+
+  const handleRunExport = async () => {
+    let rangeValue = exportOptions.range;
+    if (rangeValue === 'custom_month') {
+      rangeValue = exportOptions.selectedMonth; // 'YYYY-MM'
+    }
+
+    if (rangeValue !== timeRange || typeof rangeValue === 'string') {
+      setIsLoading(true);
+      try {
+        const data = await aiAnalyticsService.getAiUsageStats(rangeValue);
+        executeExport(exportOptions.type, data);
+      } catch (err) {
+        setError('エクスポート用のデータ取得に失敗しました');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      executeExport(exportOptions.type, logs);
+    }
+  };
+
+  const handleMonthSelect = (m) => {
+    setCurrentYearMonth({ year: pickerYear, month: m });
+    setShowMonthPicker(false);
+  };
+
+  const navigateMonth = (direction) => {
+    let { year, month } = currentYearMonth;
+    month += direction;
+    if (month > 12) { year++; month = 1; }
+    if (month < 1) { year--; month = 12; }
+    setCurrentYearMonth({ year, month });
+  };
+
+  const getMonthName = (m) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[m - 1];
   };
 
   useEffect(() => {
@@ -82,12 +246,22 @@ const UsageAnalysisScreen = () => {
     const map = new Map();
     const now = new Date();
 
-    if (viewType === 'daily') {
-      for (let i = timeRange - 1; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
-        map.set(dateStr, { date: dateStr, cost: 0, tokens: 0, prompt_tokens: 0, completion_tokens: 0, count: 0 });
+    if (viewType === 'daily' || viewType === 'specific_month') {
+      if (viewType === 'specific_month' && typeof timeRange === 'string') {
+        const [year, month] = timeRange.split('-').map(Number);
+        const lastDay = new Date(year, month, 0).getDate();
+        for (let i = 1; i <= lastDay; i++) {
+          const dateStr = `${month}/${i}`;
+          map.set(dateStr, { date: dateStr, cost: 0, tokens: 0, prompt_tokens: 0, completion_tokens: 0, count: 0 });
+        }
+      } else {
+        const days = Number(timeRange) || 30;
+        for (let i = days - 1; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
+          map.set(dateStr, { date: dateStr, cost: 0, tokens: 0, prompt_tokens: 0, completion_tokens: 0, count: 0 });
+        }
       }
     } else if (viewType === 'monthly') {
       for (let i = 11; i >= 0; i--) {
@@ -100,7 +274,7 @@ const UsageAnalysisScreen = () => {
     targetFilteredLogs.forEach(log => {
       const d = new Date(log.timestamp);
       let dateStr = '';
-      if (viewType === 'daily') {
+      if (viewType === 'daily' || viewType === 'specific_month') {
         dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
       } else if (viewType === 'monthly') {
         dateStr = `${d.getFullYear()}/${d.getMonth() + 1}`;
@@ -126,7 +300,7 @@ const UsageAnalysisScreen = () => {
     return targetFilteredLogs.filter(log => {
       const d = new Date(log.timestamp);
       let dateStr = '';
-      if (viewType === 'daily') {
+      if (viewType === 'daily' || viewType === 'specific_month') {
         dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
       } else if (viewType === 'monthly') {
         dateStr = `${d.getFullYear()}/${d.getMonth() + 1}`;
@@ -270,21 +444,57 @@ const UsageAnalysisScreen = () => {
             </button>
           )}
           <div className="view-selector">
-            <span className="selector-label">表示単位:</span>
-            <select className="view-select" value={viewType} onChange={(e) => setViewType(e.target.value)}>
-              <option value="daily">日別 (過去30日)</option>
-              <option value="monthly">月別 (過去12ヶ月)</option>
-            </select>
-          </div>
-          <div className="view-selector">
             <span className="selector-label">分析対象:</span>
             <select className="view-select" value={analysisTarget} onChange={(e) => setAnalysisTarget(e.target.value)}>
               <option value="all">会社全体</option>
               {deptList.map(dept => (
                 <option key={dept.id} value={dept.id}>{dept.name}</option>
               ))}
-              <option value="none">所属なし</option>
             </select>
+          </div>
+
+          {/* 画像ベースの月セレクター */}
+          <div className="month-picker-container">
+            <div className="month-nav-btn-group">
+              <button className="nav-arrow-btn" onClick={() => navigateMonth(-1)}>
+                <Icons.ChevronLeft size={16} />
+              </button>
+              
+              <div className="month-picker-trigger" onClick={() => {
+                setPickerYear(currentYearMonth.year);
+                setShowMonthPicker(!showMonthPicker);
+              }}>
+                {getMonthName(currentYearMonth.month)} {currentYearMonth.year}
+              </div>
+
+              <button className="nav-arrow-btn" onClick={() => navigateMonth(1)}>
+                <Icons.ChevronRight size={16} />
+              </button>
+            </div>
+
+            {showMonthPicker && (
+              <>
+                <div className="popover-backdrop" onClick={() => setShowMonthPicker(false)} />
+                <div className="month-picker-popover">
+                  <div className="popover-header">
+                    <button onClick={() => setPickerYear(pickerYear - 1)}><Icons.ChevronLeft size={16} /></button>
+                    <span className="year-display">{pickerYear}</span>
+                    <button onClick={() => setPickerYear(pickerYear + 1)}><Icons.ChevronRight size={16} /></button>
+                  </div>
+                  <div className="month-grid">
+                    {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
+                      <button 
+                        key={m}
+                        className={`month-cell ${currentYearMonth.year === pickerYear && currentYearMonth.month === m ? 'selected' : ''}`}
+                        onClick={() => handleMonthSelect(m)}
+                      >
+                        {getMonthName(m)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -296,7 +506,108 @@ const UsageAnalysisScreen = () => {
         </div>
       )}
 
-      {/* 概要カード */}
+      {/* 概要カードヘッダー */}
+      <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <h3 className="section-title" style={{ margin: 0 }}>
+          <Icons.Activity size={20} /> 利用統計
+        </h3>
+        <div className="export-dropdown">
+          <button 
+            className="export-btn"
+            onClick={() => setShowExportModal(true)}
+          >
+            <Icons.Download size={14} /> データ出力
+          </button>
+        </div>
+      </div>
+
+      {/* エクスポートモーダル */}
+      {showExportModal && (
+        <div className="modal-overlay">
+          <div className="modal-content export-modal">
+            <div className="modal-header">
+              <h3><Icons.Download size={20} /> データエクスポート</h3>
+              <button className="close-btn" onClick={() => setShowExportModal(false)}>
+                <Icons.X size={20} />
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="export-option-group">
+                <label className="option-label">Data Type (出力の種類)</label>
+                <div className="option-select-wrapper">
+                  <select 
+                    value={exportOptions.type} 
+                    onChange={(e) => setExportOptions({...exportOptions, type: e.target.value})}
+                    className="admin-select"
+                  >
+                    <option value="user">ユーザー別集計</option>
+                    <option value="dept">部署別集計 (全体)</option>
+                    <option value="specific_dept">特定の部署を指定</option>
+                    <option value="raw">詳細ログ出力 (全件)</option>
+                  </select>
+                </div>
+                
+                {exportOptions.type === 'specific_dept' && (
+                  <div className="sub-option-select" style={{ marginTop: '12px' }}>
+                    <select 
+                      value={exportOptions.specificDeptId} 
+                      onChange={(e) => setExportOptions({...exportOptions, specificDeptId: e.target.value})}
+                      className="admin-select"
+                    >
+                      <option value="">部署を選択してください</option>
+                      {deptList.map(dept => (
+                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <div className="export-option-group">
+                <label className="option-label">Data Range (期間)</label>
+                <div className="option-select-wrapper">
+                  <select 
+                    value={exportOptions.range} 
+                    onChange={(e) => setExportOptions({...exportOptions, range: e.target.value === 'custom_month' ? 'custom_month' : parseInt(e.target.value)})}
+                    className="admin-select"
+                  >
+                    <option value={7}>直近 7日間</option>
+                    <option value={30}>直近 30日間</option>
+                    <option value={90}>直近 90日間</option>
+                    <option value={365}>過去 12ヶ月 (1年間)</option>
+                    <option value="custom_month">特定の月を指定</option>
+                  </select>
+                </div>
+
+                {exportOptions.range === 'custom_month' && (
+                  <div className="sub-option-select" style={{ marginTop: '12px' }}>
+                    <input 
+                      type="month" 
+                      value={exportOptions.selectedMonth}
+                      onChange={(e) => setExportOptions({...exportOptions, selectedMonth: e.target.value})}
+                      className="admin-select"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="export-hint">
+                <Icons.Info size={14} />
+                <span>選択した条件で集計を行い、CSVファイルを生成します。</span>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="cancel-btn" onClick={() => setShowExportModal(false)}>キャンセル</button>
+              <button className="run-export-btn" onClick={handleRunExport} disabled={isLoading}>
+                {isLoading ? <Icons.RefreshCw className="spinner" size={16} /> : <Icons.Download size={16} />}
+                ダウンロード実行
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="stats-grid">
         <div className="stat-card">
           <span className="stat-label">期間内合計コスト</span>

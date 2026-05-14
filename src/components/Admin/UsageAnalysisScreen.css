@@ -32,6 +32,7 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin: 0;
+  white-space: nowrap;
 }
 
 .header-controls {
@@ -60,73 +61,156 @@
   border-color: var(--accent-primary);
 }
 
-.view-selector {
+/* Month Picker (Image Based) */
+.month-picker-container {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: var(--bg-secondary);
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
 }
 
-.filter-badge {
-  font-size: 0.75rem;
-  background: var(--accent-primary);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  margin-left: 8px;
-  font-weight: 500;
-  animation: slideIn 0.3s ease-out;
+.month-nav-btn-group {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 99px;
+  padding: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-.chart-hint {
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
-  margin-top: 12px;
-  text-align: center;
-  font-style: italic;
-}
-
-.no-data-hint {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  background: var(--bg-tertiary);
-  padding: 12px 24px;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-}
-
-
-.selector-label {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.view-select {
+.nav-arrow-btn {
   background: transparent;
   border: none;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  font-weight: 600;
+  color: #64748b;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  outline: none;
-  padding: 2px 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
 }
 
-.view-select option {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+.nav-arrow-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
-@keyframes fadeIn {
+.month-picker-trigger {
+  padding: 0 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  user-select: none;
+  min-width: 100px;
+  text-align: center;
+}
+
+.month-picker-popover {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 20px;
+  padding: 20px;
+  width: 280px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  z-index: 3000;
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popover-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2500;
+  background: transparent;
+}
+
+.popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 8px;
+}
+
+.year-display {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.popover-header button {
+  background: #f1f5f9;
+  border: none;
+  color: #64748b;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.popover-header button:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.month-cell {
+  background: transparent;
+  border: none;
+  padding: 12px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.month-cell:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.month-cell.selected {
+  background: #1e293b; /* 画像通りの濃い色 */
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+[data-theme='dark'] .month-nav-btn-group,
+[data-theme='dark'] .month-picker-popover {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .month-picker-trigger,
+[data-theme='dark'] .year-display {
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .month-cell.selected {
+  background: #3b82f6; /* ダークモード時は青で見やすく */
+}
+
+@keyframes modalSlideUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
@@ -403,4 +487,237 @@
   .chart-box.full-width {
     grid-column: span 1;
   }
+}
+
+/* Export Button */
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+  filter: brightness(1.1);
+}
+
+/* Modal Overlay - Bright & Airy */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.4); /* 明るいオーバーレイ */
+  backdrop-filter: blur(12px) saturate(180%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content.export-modal {
+  background: #ffffff; /* 純白 */
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(99, 102, 241, 0.1);
+  overflow: hidden;
+  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 28px 32px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to right, #f8faff, #ffffff);
+}
+
+.modal-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.close-btn {
+  background: #f1f5f9;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 32px;
+}
+
+.export-option-group {
+  margin-bottom: 28px;
+}
+
+.option-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.export-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #f0f4ff;
+  padding: 16px;
+  border-radius: 12px;
+  color: #4338ca;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.modal-footer {
+  padding: 24px 32px;
+  background: #f8fafc;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.cancel-btn {
+  padding: 12px 24px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.run-export-btn {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+}
+
+/* ダークモード時の微調整（必要に応じて） */
+[data-theme='dark'] .modal-overlay {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+[data-theme='dark'] .modal-content.export-modal {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .modal-header h3,
+[data-theme='dark'] .option-label {
+  color: #f1f5f9;
+}
+
+/* Modal Specific Inputs */
+.export-modal .admin-select {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  padding: 12px 16px;
+  height: auto;
+  font-weight: 500;
+}
+
+.export-modal .admin-select:focus {
+  border-color: #6366f1;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+[data-theme='dark'] .export-modal .admin-select {
+  background: #334155;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.export-menu button {
+  width: 100%;
+  padding: 14px 18px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-menu button:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+  padding-left: 22px;
+}
+
+.export-menu button:not(:last-child) {
+  border-bottom: 1px solid var(--border-subtle);
 }
