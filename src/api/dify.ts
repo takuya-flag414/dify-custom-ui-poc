@@ -131,19 +131,23 @@ export const uploadFile = async (
  * @param apiUrl - APIのベースURL
  * @param apiKey - APIキー
  * @param limit - 取得件数
+ * @param lastId - (Optional) 現在のページの最後の記録のID
  */
 export const fetchConversationsApi = async (
     user: string,
     apiUrl: string,
     apiKey: string,
-    limit: number = 20
+    limit: number = 20,
+    lastId?: string
 ): Promise<ConversationsResponse> => {
-    const response = await fetch(
-        `${apiUrl}/conversations?user=${user}&limit=${limit}`,
-        {
-            headers: { Authorization: `Bearer ${apiKey}` },
-        }
-    );
+    let url = `${apiUrl}/conversations?user=${user}&limit=${limit}`;
+    if (lastId) {
+        url += `&last_id=${lastId}`;
+    }
+
+    const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+    });
     if (!response.ok) {
         const errData = await response.json();
         throw new Error(`Failed to fetch conversations: ${errData.message || response.status}`);

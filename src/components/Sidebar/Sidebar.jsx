@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon, Users as UsersIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon, Users as UsersIcon, Clock as HistoryIcon, MoreHorizontal } from 'lucide-react';
 import DeletePopover from './DeletePopover';
 import ContextMenu from './ContextMenu';
 import { groupConversationsByDate } from '../../utils/dateUtils';
@@ -69,13 +69,7 @@ const SidebarToggleIcon = ({ isCollapsed }) => (
   </svg>
 );
 
-const MoreIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="19" cy="12" r="1" />
-    <circle cx="5" cy="12" r="1" />
-  </svg>
-);
+
 
 // --- Animation Config (DESIGN_RULE.md v3.0) ---
 // Mass & Friction based Physics
@@ -183,7 +177,9 @@ const Sidebar = ({
   // ★ URLルーティング: navigate/location を使用
   const navigate = useNavigate();
   const location = useLocation();
-  const currentView = location.pathname.startsWith('/settings') ? 'settings' : 'chat';
+  const currentView = location.pathname.startsWith('/settings') ? 'settings' 
+    : location.pathname.startsWith('/history') ? 'history'
+    : 'chat';
 
   const [menuConfig, setMenuConfig] = useState({ isOpen: false, targetConv: null, anchorRect: null });
   const [deletePopoverConfig, setDeletePopoverConfig] = useState({ isOpen: false, targetConv: null, anchorRect: null });
@@ -303,6 +299,34 @@ const Sidebar = ({
           )}
         </div>
 
+        {/* 3. Navigation - "System Links" */}
+        <div className="sidebar-nav-section">
+          <button
+            className={`footer-btn history-btn ${currentView === 'history' ? 'active' : ''}`}
+            onClick={() => navigate('/history')}
+            title="すべての履歴"
+          >
+            <motion.div layout className="footer-icon-anchor">
+              <HistoryIcon size={18} strokeWidth={2} />
+            </motion.div>
+
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10, width: 0 }}
+                  animate={{ opacity: 1, x: 0, width: 'auto' }}
+                  exit={{ opacity: 0, x: -10, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="footer-label"
+                  style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                >
+                  すべての履歴
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </div>
+
         {/* 3. Scrollable List - "Clean Glass" */}
         <div className="sidebar-scroll-area scrollbar-overlay">
           <AnimatePresence mode='popLayout'>
@@ -354,7 +378,7 @@ const Sidebar = ({
                           {!isRenaming && (
                             <div className="item-actions">
                               <button className="action-btn" onClick={(e) => handleMenuOpen(e, conv)}>
-                                <MoreIcon />
+                                <MoreHorizontal size={16} />
                               </button>
                             </div>
                           )}

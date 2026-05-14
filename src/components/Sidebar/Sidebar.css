@@ -121,34 +121,40 @@
   height: 40px;
   padding: 0 12px;
   border-radius: 10px;
-  /* Thin border for depth */
   border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: var(--color-bg-surface);
-  color: var(--color-text-main);
+  background-color: var(--color-bg-surface, #ffffff);
+  color: var(--color-text-main, #1d1d1f);
   cursor: pointer;
   overflow: hidden;
-  /* Shadow handled by Framer Motion */
+  transition: all 0.2s ease;
 }
 
 [data-theme='dark'] .hero-new-chat-btn {
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
 }
 
-/* Simple Hover Glow (no rainbow) */
+/* Hover Glow */
 .hero-new-chat-btn:hover {
   box-shadow: 0 4px 16px rgba(0, 122, 255, 0.15);
-  border-color: rgba(0, 122, 255, 0.3);
+  border-color: rgba(0, 122, 255, 0.4);
 }
 
 [data-theme='dark'] .hero-new-chat-btn:hover {
-  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.2);
-  border-color: rgba(10, 132, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 20px rgba(10, 132, 255, 0.25);
+  border-color: rgba(10, 132, 255, 0.5);
 }
 
 .hero-new-chat-btn.active {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  background-color: var(--color-primary-bg);
+}
+
+[data-theme='dark'] .hero-new-chat-btn.active {
+  background-color: rgba(10, 132, 255, 0.2);
+  border-color: #0A84FF;
 }
 
 .hero-icon {
@@ -158,8 +164,12 @@
   align-items: center;
   justify-content: center;
   margin-right: 10px;
-  color: var(--color-primary);
+  color: var(--color-primary, #007AFF);
   flex-shrink: 0;
+}
+
+[data-theme='dark'] .hero-icon {
+  color: #0A84FF;
 }
 
 .hero-text {
@@ -167,7 +177,6 @@
   z-index: 1;
   flex: 1;
   font-size: 13px;
-  /* Design Rule: UI uses 13px */
   font-weight: 600;
   text-align: left;
   white-space: nowrap;
@@ -190,15 +199,48 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background-color: var(--color-primary-bg);
-  color: var(--color-primary);
+  background-color: var(--color-primary-bg, rgba(0, 122, 255, 0.1));
+  color: var(--color-primary, #007AFF);
   border: 1px solid transparent;
   cursor: pointer;
   flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 [data-theme='dark'] .zen-new-chat-btn {
+  background-color: rgba(10, 132, 255, 0.15);
+  color: #0A84FF;
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zen-new-chat-btn:hover {
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+[data-theme='dark'] .zen-new-chat-btn:hover {
+  background-color: #0A84FF;
+  color: #FFFFFF;
+  box-shadow: 0 0 15px rgba(10, 132, 255, 0.3);
+}
+
+/* --- 3. Navigation Section (Upper) --- */
+.sidebar-nav-section {
+  padding: 0 14px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar.collapsed .sidebar-nav-section {
+  padding: 4px 0 12px 0;
+  align-items: center;
+}
+
+.history-btn.active {
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 /* --- 3. Scrollable List --- */
@@ -332,34 +374,33 @@
   display: flex;
   align-items: center;
   margin-left: 4px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* 親要素ホバー時にアクションを表示 */
+.conversation-item:hover .item-actions,
+.conversation-item.active .item-actions {
+  opacity: 1;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   border: none;
   background: transparent;
   color: currentColor;
-  /* Inherit form parent (White when active) */
   cursor: pointer;
-  opacity: 0.6;
-}
-
-.conversation-item:hover .action-btn {
-  opacity: 0.8;
-}
-
-.conversation-item.active .action-btn {
-  opacity: 0.9;
+  transition: background 0.2s;
 }
 
 .action-btn:hover {
   background-color: rgba(0, 0, 0, 0.1);
-  opacity: 1 !important;
 }
 
 .conversation-item.active .action-btn:hover {

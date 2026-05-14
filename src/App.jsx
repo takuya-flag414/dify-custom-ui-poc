@@ -12,6 +12,7 @@ import Header from './components/Layout/Header';
 import ToolsGallery from './components/Tools/ToolsGallery';
 import SettingsArea from './components/Settings/SettingsArea';
 import ChatView from './routes/ChatView';
+import HistoryView from './routes/HistoryView';
 import SettingsOverlay from './routes/SettingsOverlay';
 import ApiConfigModal from './components/Shared/ApiConfigModal';
 import InspectorPanel from './components/Inspector/InspectorPanel';
@@ -84,7 +85,8 @@ function App() {
   const displayLocation = backgroundLocation || location;
   const currentView = displayLocation.pathname.startsWith('/settings') ? 'settings'
     : displayLocation.pathname.startsWith('/admin') ? 'admin'
-      : 'chat';
+      : displayLocation.pathname.startsWith('/history') ? 'history'
+        : 'chat';
   const isSettingsOpen = location.pathname.startsWith('/settings');
 
   // ★追加: テストパネル状態
@@ -676,6 +678,12 @@ function App() {
                             restoreText={pendingRestoreText}
                             onRestoreTextConsumed={() => setPendingRestoreText(null)}
                             isShieldActive={shieldMode.isCurrentShieldActive}
+                          />
+                        } />
+                        <Route path="/history" element={
+                          <HistoryView 
+                            handleDeleteConversation={handleDeleteConversation}
+                            handleRenameConversation={handleRenameConversation}
                           />
                         } />
                         <Route path="/admin/users" element={
