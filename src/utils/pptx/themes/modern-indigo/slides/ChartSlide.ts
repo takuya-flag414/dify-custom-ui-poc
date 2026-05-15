@@ -19,7 +19,11 @@ export class ChartSlideRenderer extends BaseRenderer {
     currentY += 0.3;
 
     const isTwoColumn = layout_variation === 'left-desc' || layout_variation === 'two-column';
-    const mainH = 3.6;
+    
+    // --- 空間配分アルゴリズムによる全体高さの計算 ---
+    const SAFE_BOTTOM = 5.0;
+    const AVAILABLE_H = SAFE_BOTTOM - currentY;
+    const mainH = Math.max(3.0, AVAILABLE_H);
 
     // --- 2. データの準備 ---
     const chartData = (Array.isArray(rawData) ? rawData : []).map(item => ({
@@ -122,10 +126,12 @@ export class ChartSlideRenderer extends BaseRenderer {
       slide.addChart(pptxChartType, pptxChartData, chartOpts);
     } else {
       // --- 上下レイアウト ---
-      // コンテンツの有無でグラフの高さを動的に調整 (はみ出し防止)
-      let chartH = 2.8;
-      if (key_message && body_text) chartH = 2.0;
-      else if (key_message || body_text) chartH = 2.4;
+      // コンテンツが必要とする高さを概算し、残りの高さをすべてグラフに割り当てる
+      let textRequiredH = 0;
+      if (key_message) textRequiredH += 0.4; // key_message の高さ + マージン
+      if (body_text) textRequiredH += 0.8;   // body_text 用の最大想定高さ
+      
+      const chartH = Math.max(2.0, AVAILABLE_H - textRequiredH - 0.2);
 
       const chartW = this.config.layout.safeW;
       

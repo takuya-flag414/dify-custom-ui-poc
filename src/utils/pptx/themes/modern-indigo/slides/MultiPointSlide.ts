@@ -58,17 +58,29 @@ export class MultiPointSlideRenderer extends BaseRenderer {
     const gapY = 0.25; // 行間を詰めて一体感を出す
     const cols = this.calculateColumns(gridW, numCols, gapX, startX);
     
-    // アイテムあたりの基本高さとグリッド全体の高さ計算
+    // --- 4. 空間配分アルゴリズムによる高さ計算 ---
+    const SAFE_BOTTOM = 5.0;
+    const availableH = SAFE_BOTTOM - currentY;
     const numRows = Math.ceil(count / numCols);
-    const itemH = numRows > 1 ? 1.4 : 2.5;
-    const totalGridH = (numRows * itemH) + ((numRows - 1) * gapY);
+    
+    // 行間に必要なスペースを引いた実質利用可能な高さ
+    const totalGapsH = Math.max(0, (numRows - 1) * gapY);
+    const availableForItems = availableH - totalGapsH;
+    
+    // 1アイテムあたりの最大許容高さ（上限2.5として間延びを防止）
+    let itemH = numRows > 0 ? Math.min(availableForItems / numRows, 2.5) : 0;
+    
+    // 圧縮モードの判定（高さが1.2未満ならフォントを縮小）
+    const isCompressed = itemH < 1.2;
+    const headerFontSize = isCompressed ? 10 : 12;
+    const bodyFontSize = isCompressed ? 9 : 10;
+    const lineSpacing = isCompressed ? bodyFontSize * 1.4 : bodyFontSize * 1.6;
 
-    // 垂直方向の中央配置計算
-    const footerY = 5.1;
-    const availableH = footerY - currentY;
+    const totalGridH = (numRows * itemH) + totalGapsH;
+    
+    // 垂直方向の中央配置計算（余裕がある場合のみ）
     if (availableH > totalGridH) {
-      // 最低でも0.3の余白を確保しつつ、中央に配置
-      const offsetY = Math.max(0.3, (availableH - totalGridH) / 2);
+      const offsetY = Math.max(0.2, (availableH - totalGridH) / 2);
       currentY += offsetY;
     }
 
@@ -96,19 +108,19 @@ export class MultiPointSlideRenderer extends BaseRenderer {
       // ヘッダー (Index/Icon + Heading)
       const label = item.icon || String(i + 1).padStart(2, '0');
       const headerParts = [
-        { text: label, options: { color: this.config.colors.primaryDark, bold: true, fontSize: 10, fontFace: 'Courier New' } },
-        { text: '  ' + (item.heading || `Point ${i + 1}`), options: { color: this.config.colors.text.header, bold: true, fontSize: 12 } }
+        { text: label, options: { color: this.config.colors.primaryDark, bold: true, fontSize: headerFontSize - 2, fontFace: 'Courier New' } },
+        { text: '  ' + (item.heading || `Point ${i + 1}`), options: { color: this.config.colors.text.header, bold: true, fontSize: headerFontSize } }
       ];
       slide.addText(headerParts, {
         x: contentX, y: pY, w: contentW, h: 0.4, valign: 'top', margin: 0
       });
       pY += 0.45;
 
-      // 本文 (共通メソッドで改行バグを修正済み)
-      const bodyItems = this.processTextLines(item.text || '', 10);
+      // 本文
+      const bodyItems = this.processTextLines(item.text || '', bodyFontSize);
       slide.addText(bodyItems, {
-        x: contentX, y: pY, w: contentW, h: itemH - (pY - itemY) - 0.1,
-        valign: 'top', margin: 0, lineSpacing: 10 * 1.6
+        x: contentX, y: pY, w: contentW, h: itemH - (pY - itemY) - 0.05,
+        valign: 'top', margin: 0, lineSpacing: lineSpacing
       });
     });
 

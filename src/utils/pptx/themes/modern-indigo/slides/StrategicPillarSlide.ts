@@ -31,7 +31,15 @@ export class StrategicPillarSlideRenderer extends BaseRenderer {
     // --- 3. 柱 (Pillars Grid) ---
     const baseX = this.config.layout.baseX;
     const safeW = this.config.layout.safeW;
-    const pillarH = 2.6; // フッターとはみ出さないように高さを圧縮
+    
+    // 空間配分アルゴリズムによる高さ計算
+    const SAFE_BOTTOM = 5.0;
+    const availableH = SAFE_BOTTOM - currentY;
+    const foundationH = 0.6;
+    const foundationMargin = 0.05;
+    
+    // 土台の高さを差し引いた残りをすべて柱の高さに割り当てる
+    const pillarH = Math.max(2.0, availableH - foundationH - foundationMargin);
 
     const cols = this.calculateColumns(safeW, 3, 0);
 
@@ -84,8 +92,7 @@ export class StrategicPillarSlideRenderer extends BaseRenderer {
     currentY += pillarH;
 
     // --- 4. 土台 (Foundation) ---
-    const foundationY = currentY + 0.05;
-    const foundationH = 0.6;
+    const foundationY = currentY + foundationMargin;
 
     // 土台背景
     slide.addShape(this.pptx.ShapeType.rect, {

@@ -40,57 +40,73 @@ export class AgendaSlideRenderer extends BaseRenderer {
     const colW = (maxSafeW - (isTwoColumn ? gap : 0)) / cols;
 
     const colY = new Array(cols).fill(currentY);
-    const half = Math.ceil(activeItems.length / 2);
+    const itemsPerCol = Math.ceil(activeItems.length / cols);
+    
+    // --- 空間配分アルゴリズムによる高さ計算 ---
+    const SAFE_BOTTOM = 5.0;
+    const availableH = SAFE_BOTTOM - currentY;
+    const gapY = 0.2;
+    const totalGapsH = Math.max(0, (itemsPerCol - 1) * gapY);
+    
+    // 1項目あたりの利用可能な高さを計算（間延びを防ぐため上限0.8）
+    const calculatedItemH = itemsPerCol > 0 ? (availableH - totalGapsH) / itemsPerCol : 0.8;
+    const itemH = Math.min(calculatedItemH, 0.8);
+    
+    // 圧縮モードの判定
+    const isCompressed = itemH < 0.5;
+    const indexFontSize = isCompressed ? 10 : 12;
+    const titleFontSize = isCompressed ? 12 : 15;
+    const descFontSize = isCompressed ? 9 : 11;
 
     activeItems.forEach((item: any, i: number) => {
-      const col = isTwoColumn ? (i < half ? 0 : 1) : 0;
+      const col = isTwoColumn ? (i < itemsPerCol ? 0 : 1) : 0;
       const x = this.config.layout.baseX + (col * (colW + gap));
       const y = colY[col];
 
       const itemTitle = item.title || item.label || '';
       const subText = item.description || item.subtitle || item.text;
 
-      // アイテムの高さを縮小計算
-      const titleH = 0.25;
-      const subH = subText ? 0.3 : 0;
+      // 各要素の高さを可変にする
+      const titleH = isCompressed ? 0.2 : 0.25;
+      const subH = subText ? (itemH - titleH - 0.05) : 0;
       const textGap = subText ? 0.05 : 0;
-      const lineH = Math.max(0.35, titleH + textGap + subH);
+      const lineH = itemH;
 
-      // インデックス (幅 w を 0.5 に広げて改行を防ぐ)
+      // インデックス
       slide.addText(String(i + 1).padStart(2, '0'), {
-        x: x, y: y, w: 0.5, h: 0.25,
-        fontSize: 12, color: this.config.colors.primary,
+        x: x, y: y, w: 0.5, h: titleH,
+        fontSize: indexFontSize, color: this.config.colors.primary,
         bold: true, fontFace: 'Courier New', charSpacing: 1
       });
 
-      // 垂直セパレーター (インデックス幅に合わせて x 座標を右へ 0.1 ずらす)
+      // 垂直セパレーター
       slide.addShape(this.pptx.ShapeType.rect, {
         x: x + 0.5, y: y, w: 0.01, h: lineH,
         fill: { color: this.config.colors.border.light }
       });
 
-      // タイトル (セパレーターに合わせて開始位置 x を右へずらし、幅を調整)
+      // タイトル
       const titleParts = this.textProcessor.parseRichText(itemTitle, {
-        fontSize: 15, bold: true, color: this.config.colors.text.header
+        fontSize: titleFontSize, bold: true, color: this.config.colors.text.header
       });
       slide.addText(titleParts, {
         x: x + 0.65, y: y, w: colW - 0.65, h: titleH,
         valign: 'top', margin: 0
       });
 
-      // サブテキスト (タイトルと同じく開始位置と幅を調整)
+      // サブテキスト
       if (subText) {
         const subParts = this.textProcessor.parseRichText(subText, {
-          fontSize: 11, color: this.config.colors.text.body
+          fontSize: descFontSize, color: this.config.colors.text.body
         });
         slide.addText(subParts, {
           x: x + 0.65, y: y + titleH + textGap, w: colW - 0.65, h: subH,
-          valign: 'top', margin: 0, lineSpacing: 16
+          valign: 'top', margin: 0, lineSpacing: descFontSize * 1.4
         });
       }
 
       // 次のアイテムのためのY座標更新
-      colY[col] = y + lineH + 0.25;
+      colY[col] = y + itemH + gapY;
     });
 
     // 2カラム時の全体中央ディバイダーを描画

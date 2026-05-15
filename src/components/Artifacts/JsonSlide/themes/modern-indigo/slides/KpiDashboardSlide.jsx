@@ -23,25 +23,32 @@ const KpiDashboardSlide = ({ content, isStatic = false }) => {
         activeDetails = kpis.slice(2, 8);
     }
 
-    // トレンドシグナルのスタイル計算（バッジではなくソリッドなテキストカラーとして表現）
+    // トレンドシグナルのスタイル計算（セマンティックな評価バッジとして表現）
     const getTrendStyle = (trend, status) => {
-        let color = '#64748B'; // flat (slate-500)
+        let bg = '#F1F5F9'; // default slate-100
+        let text = '#64748B'; // slate-500
         let icon = '▶';
 
         if (trend === 'up') icon = '▲';
         if (trend === 'down') icon = '▼';
 
-        // statusが明示されている場合はそれを優先（downでも良い指標があるため）
-        if (status === 'good') color = '#059669'; // emerald-600
-        else if (status === 'warning') color = '#D97706'; // amber-600
-        else if (status === 'bad') color = '#E11D48'; // rose-600
-        else {
-            // fallback
-            if (trend === 'up') color = '#059669';
-            if (trend === 'down') color = '#E11D48';
+        // statusが明示されている場合はそれを優先
+        if (status === 'good') {
+            bg = '#10B981'; // emerald-500
+            text = '#FFFFFF';
+        } else if (status === 'warning') {
+            bg = '#F59E0B'; // amber-500
+            text = '#FFFFFF';
+        } else if (status === 'bad') {
+            bg = '#F43F5E'; // rose-500
+            text = '#FFFFFF';
+        } else {
+            // fallback (statusがない場合のみ)
+            if (trend === 'up') { bg = '#10B981'; text = '#FFFFFF'; }
+            if (trend === 'down') { bg = '#F43F5E'; text = '#FFFFFF'; }
         }
 
-        return { color, icon };
+        return { bg, text, icon };
     };
 
     return (
@@ -68,7 +75,7 @@ const KpiDashboardSlide = ({ content, isStatic = false }) => {
                 {activeSummary.length > 0 && (
                     <div className="flex w-full mb-[3.5cqi]">
                         {activeSummary.map((kpi, idx) => {
-                            const { color, icon } = getTrendStyle(kpi.trend, kpi.status);
+                            const { bg, text, icon } = getTrendStyle(kpi.trend, kpi.status);
                             const hasLeftBorder = idx !== 0;
 
                             return (
@@ -97,10 +104,21 @@ const KpiDashboardSlide = ({ content, isStatic = false }) => {
                                             <SlideMarkdown content={kpi.value} inline />
                                         </span>
                                         {kpi.change && (
-                                            <span style={{ fontSize: '1.6cqi', fontWeight: 800, color, display: 'flex', alignItems: 'center', gap: '0.3cqi' }}>
-                                                <span>{icon}</span>
+                                            <div style={{
+                                                fontSize: '1.2cqi',
+                                                fontWeight: 800,
+                                                backgroundColor: bg,
+                                                color: text,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.4cqi',
+                                                padding: '0.2cqi 0.8cqi',
+                                                borderRadius: '2cqi',
+                                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                            }}>
+                                                <span style={{ fontSize: '1cqi' }}>{icon}</span>
                                                 <SlideMarkdown content={String(kpi.change)} inline />
-                                            </span>
+                                            </div>
                                         )}
                                     </div>
                                 </motion.div>
@@ -123,7 +141,7 @@ const KpiDashboardSlide = ({ content, isStatic = false }) => {
                 {activeDetails.length > 0 && (
                     <div className="w-full grid grid-cols-4 gap-y-[4cqi]">
                         {activeDetails.map((kpi, idx) => {
-                            const { color, icon } = getTrendStyle(kpi.trend, kpi.status);
+                            const { bg, text, icon } = getTrendStyle(kpi.trend, kpi.status);
                             // 4列グリッドのため、右端（index 3, 7, 11...）以外に縦線を引く
                             const hasRightBorder = (idx + 1) % 4 !== 0;
 
@@ -149,10 +167,20 @@ const KpiDashboardSlide = ({ content, isStatic = false }) => {
                                             <SlideMarkdown content={kpi.value} inline />
                                         </span>
                                         {kpi.change && (
-                                            <span style={{ fontSize: '1.2cqi', fontWeight: 800, color, display: 'flex', alignItems: 'center', gap: '0.2cqi' }}>
-                                                <span>{icon}</span>
+                                            <div style={{
+                                                fontSize: '1cqi',
+                                                fontWeight: 800,
+                                                backgroundColor: bg,
+                                                color: text,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.3cqi',
+                                                padding: '0.1cqi 0.6cqi',
+                                                borderRadius: '2cqi'
+                                            }}>
+                                                <span style={{ fontSize: '0.8cqi' }}>{icon}</span>
                                                 <SlideMarkdown content={String(kpi.change)} inline />
-                                            </span>
+                                            </div>
                                         )}
                                     </div>
                                 </motion.div>

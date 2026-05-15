@@ -40,9 +40,8 @@ export class ProcessFlowSlideRenderer extends BaseRenderer {
       currentY += 0.7;
     }
 
-    // --- 3. Process Flow Grid ---
+    // --- 3. 空間配分アルゴリズムによるプロセス配置計算 ---
     const count = activeSteps.length;
-    // JSXの getGridColumns ロジック
     const getCols = (n: number) => {
       if (n === 1) return 1;
       if (n === 2 || n === 4) return 2;
@@ -51,22 +50,29 @@ export class ProcessFlowSlideRenderer extends BaseRenderer {
     };
     const cols = getCols(count);
     const rows = Math.ceil(count / cols);
-    const hasBody = !!body_text;
     const hasKey = !!key_message;
     
-    // 情報密度の判定
-    const isHighDensity = rows > 1 || (hasBody && hasKey);
-    // さらに厳しい条件（2行以上かつ他の要素も多い場合）
-    const isUltraHighDensity = rows > 1 && hasBody && hasKey;
-
+    const SAFE_BOTTOM = 5.0;
+    const AVAILABLE_H = SAFE_BOTTOM - currentY;
+    
+    // key_message用の空間を先に確保
+    const keyMsgH = hasKey ? 0.6 : 0;
+    const keyMsgMargin = hasKey ? 0.3 : 0;
+    
+    // グリッドが使える残りの高さ
+    const availableGridH = AVAILABLE_H - keyMsgH - keyMsgMargin;
     const gapX = 0.4;
-    let gapY = isHighDensity ? 0.3 : 0.6;
-    if (isUltraHighDensity) gapY = 0.2; // さらに詰める
-
+    const gapY = 0.3; // 行間は固定
+    const totalGapsH = Math.max(0, (rows - 1) * gapY);
+    
+    // 1アイテムあたりの最大高さを算出（上限1.8）
+    let itemH = rows > 0 ? Math.min((availableGridH - totalGapsH) / rows, 1.8) : 0;
+    
+    // 圧縮判定
+    const isCompressed = itemH < 1.1;
+    const titleFontSize = isCompressed ? 11 : 13;
+    const descFontSize = isCompressed ? 9 : 10;
     const itemW = (safeW - (cols - 1) * gapX) / cols;
-    let itemH = isHighDensity ? 1.2 : 1.6;
-    if (isUltraHighDensity) itemH = 1.0; // さらに低くする
-
 
     let maxGridY = currentY;
 
@@ -106,7 +112,7 @@ export class ProcessFlowSlideRenderer extends BaseRenderer {
       // ステップ見出し
       const sTitle = step.title || step.label || (typeof step === 'string' ? step : '');
       const titleParts = this.textProcessor.parseRichText(sTitle, {
-        fontSize: isHighDensity ? 11 : 13, bold: true, color: this.config.colors.text.header
+        fontSize: titleFontSize, bold: true, color: this.config.colors.text.header
       });
       slide.addText(titleParts, {
         x: innerX, y: pY, w: innerW, h: 0.35, valign: 'top', margin: 0
@@ -115,30 +121,22 @@ export class ProcessFlowSlideRenderer extends BaseRenderer {
 
       // 説明文 (改行バグ回避版)
       const descText = step.description || step.text || '';
-      const fs = isHighDensity ? 9 : 10;
       this.renderTextBlock(slide, descText, {
         x: innerX,
         y: pY,
         w: innerW,
-        h: itemH - (pY - y),
-        fontSize: fs,
-        lineSpacing: fs * 1.3,
+        h: itemH - (pY - y) - 0.05,
+        fontSize: descFontSize,
+        lineSpacing: descFontSize * 1.3,
         valign: 'top'
       });
     });
 
     // --- 4. Key Conclusion (key_message) ---
     if (key_message) {
-      // グリッドの下に配置。ただしフッターを侵食しないように制限を設ける
-      const footerY = this.config.layout.footerY;
+      // グリッドの下に配置
       const keyMsgHeight = 0.6;
-      let keyMsgY = maxGridY + 0.3; // グリッドの直後から 0.3インチ空ける
-      
-      // フッター（5.1）の直前（例えば 4.4）までに収まるように、必要なら上に詰める
-      const maxY = footerY - 0.7; 
-      if (keyMsgY > maxY) {
-        keyMsgY = maxY;
-      }
+      let keyMsgY = maxGridY + 0.3; 
       
       // 左ボーダー付きのメッセージ
       slide.addShape(this.pptx.ShapeType.rect, {

@@ -119,9 +119,9 @@ export class TableSlideRenderer extends BaseRenderer {
 
       // テーブルの配置
       const tableRows = [headerRow, ...formattedRows] as any;
-      // 1行あたりの高さを 0.38インチに圧縮
-      const estimatedTableH = tableRows.length * 0.38;
-      const tableHeight = Math.min(3.2, estimatedTableH);
+      // 1行あたりの高さを 0.4インチに調整（パディング分を考慮）
+      const estimatedTableH = tableRows.length * 0.4;
+      const tableHeight = Math.min(3.5, estimatedTableH);
 
       slide.addTable(tableRows, {
         x: tableX, y: currentY, w: tableW,
@@ -132,9 +132,9 @@ export class TableSlideRenderer extends BaseRenderer {
         border: { pt: 0 }
       });
 
-      // デフォルトレイアウトで説明文がある場合、テーブルの下に配置
+      // デフォルトレイアウトで説明文がある場合、テーブルの下に配置（マージンを 0.5 に拡大）
       if (!isTwoColumn && description) {
-        const insightY = Math.min(4.4, currentY + tableHeight + 0.2);
+        const insightY = Math.min(4.6, currentY + tableHeight + 0.5);
         
         // アクセントバー
         slide.addShape(this.pptx.ShapeType.rect, {

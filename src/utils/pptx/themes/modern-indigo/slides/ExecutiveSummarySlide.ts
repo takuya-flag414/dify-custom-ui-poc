@@ -12,8 +12,10 @@ export class ExecutiveSummarySlideRenderer extends BaseRenderer {
     let currentY = this.ui.renderSlideHeader(slide, content.title || 'Executive Summary');
     currentY += 0.3;
 
-    // 高さをフッター(5.1)に干渉しないように 3.8 -> 3.4 に縮小
-    const mainH = 3.4;
+    // --- 空間配分アルゴリズムによる高さ計算 ---
+    const SAFE_BOTTOM = 5.0;
+    const AVAILABLE_H = SAFE_BOTTOM - currentY;
+    const mainH = AVAILABLE_H; // 利用可能な高さをフルに使う
     const splitX = this.config.layout.baseX + (this.config.layout.safeW * 0.4166);
     const gap = 0.5;
 
@@ -75,9 +77,22 @@ export class ExecutiveSummarySlideRenderer extends BaseRenderer {
     });
 
     const items = sRight.items || [];
-    // 3つのアイテムがフッター領域に被らないよう高さと間隔を縮小
-    const itemH = 0.8;
+    
+    // アイテムの高さと間隔の自動計算
+    const numItems = items.length;
     const itemGap = 0.2;
+    const totalGaps = Math.max(0, (numItems - 1) * itemGap);
+    const availableRightH = mainH - 0.5; // タイトル(0.4)と余白(0.1)を引いた残り
+    
+    // 1アイテムの高さ（上限1.2）
+    const itemH = numItems > 0 ? Math.min((availableRightH - totalGaps) / numItems, 1.2) : 0;
+    
+    // 圧縮モード判定
+    const isCompressed = itemH < 0.7;
+    const itemFontSize = isCompressed ? 12 : 15;
+    const numberFontSize = isCompressed ? 36 : 48;
+    const numberXOffset = isCompressed ? 0.8 : 1.0;
+    
     let itemY = currentY + 0.5;
 
     items.forEach((item: string, i: number) => {
@@ -96,8 +111,8 @@ export class ExecutiveSummarySlideRenderer extends BaseRenderer {
 
       // 透かし数字 (高さ変更に伴いフォントサイズとY位置を微調整)
       slide.addText(String(i + 1).padStart(2, '0'), {
-        x: rightX + rightW - 1.0, y: itemY + 0.15, w: 1.0, h: itemH,
-        fontSize: 48, color: this.config.colors.bg.highlight, bold: true, italic: true, align: 'right', valign: 'bottom',
+        x: rightX + rightW - numberXOffset, y: itemY + 0.1, w: numberXOffset, h: itemH,
+        fontSize: numberFontSize, color: this.config.colors.bg.highlight, bold: true, italic: true, align: 'right', valign: 'bottom',
         margin: 0
       });
 
@@ -110,11 +125,11 @@ export class ExecutiveSummarySlideRenderer extends BaseRenderer {
 
       // テキスト
       const iTextParts = this.textProcessor.parseRichText(item, {
-        fontSize: 15, color: this.config.colors.text.header, bold: true
+        fontSize: itemFontSize, color: this.config.colors.text.header, bold: true
       });
       slide.addText(iTextParts, {
         x: rightX + 0.8, y: itemY, w: rightW - 1.2, h: itemH,
-        valign: 'middle', margin: 0, lineSpacing: 22
+        valign: 'middle', margin: 0, lineSpacing: itemFontSize * 1.5
       });
 
       itemY += itemH + itemGap;
