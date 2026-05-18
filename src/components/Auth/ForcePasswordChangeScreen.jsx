@@ -64,6 +64,10 @@ const ForcePasswordChangeScreen = () => {
                         セキュリティ保護のため、システムを利用する前に
                         新しいパスワードを設定してください。
                     </p>
+                    <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04', borderRadius: '8px', fontSize: '0.85rem', textAlign: 'left', border: '1px solid rgba(234, 179, 8, 0.2)', lineHeight: '1.5' }}>
+                        <strong>⚠️ パスワードの保管について</strong><br/>
+                        ここで設定したパスワードは次回以降のログインで必要となります。忘れないように必ず安全な場所に保存してください。
+                    </div>
                 </div>
 
                 <AnimatePresence mode="wait">

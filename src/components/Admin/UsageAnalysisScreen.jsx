@@ -791,8 +791,14 @@ const UsageAnalysisScreen = () => {
                         onClick={() => setActiveTokenKey(activeTokenKey === item.id ? null : item.id)}
                         style={{ cursor: 'pointer', padding: '4px 0' }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', fontWeight: 600 }}>
-                          {item.tokens.toLocaleString()}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', fontWeight: 600 }}>
+                          {activeTokenKey === item.id && (
+                            <div className="token-mini-breakdown" style={{ marginTop: 0, gap: '8px' }}>
+                              <span className="token-label-in">In: {item.prompt_tokens.toLocaleString()}</span>
+                              <span className="token-label-out">Out: {item.completion_tokens.toLocaleString()}</span>
+                            </div>
+                          )}
+                          <span style={{ minWidth: '60px', textAlign: 'right' }}>{item.tokens.toLocaleString()}</span>
                           <Icons.ChevronDown 
                             size={12} 
                             style={{ 
@@ -802,13 +808,6 @@ const UsageAnalysisScreen = () => {
                             }} 
                           />
                         </div>
-                        
-                        {activeTokenKey === item.id && (
-                          <div className="token-mini-breakdown">
-                            <span className="token-label-in">In: {item.prompt_tokens.toLocaleString()}</span>
-                            <span className="token-label-out">Out: {item.completion_tokens.toLocaleString()}</span>
-                          </div>
-                        )}
                       </div>
                     </td>
                   </tr>

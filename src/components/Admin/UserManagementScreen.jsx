@@ -269,32 +269,6 @@ const UserManagementScreen = () => {
 
       <div className="admin-content-grid">
         <div className="admin-card">
-          {/* 共通ドメイン設定 */}
-          <div style={{ 
-            marginBottom: '24px', 
-            padding: '16px', 
-            background: 'var(--bg-tertiary)', 
-            borderRadius: '12px', 
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>作成対象ドメイン:</span>
-            <select
-              value={selectedDomain}
-              onChange={(e) => setSelectedDomain(e.target.value)}
-              className="admin-select"
-              style={{ width: 'auto', minWidth: '160px', margin: 0 }}
-              disabled={loading || bulkStatus === 'processing'}
-            >
-              {allowedDomains.map(d => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>※CSV一括作成時もこのドメインが適用されます</span>
-          </div>
-
           {activeTab === 'single' ? (
             <>
               <h2>アカウント発行</h2>
@@ -363,7 +337,17 @@ const UserManagementScreen = () => {
                     className="admin-input"
                     disabled={loading}
                   />
-                  <span className="domain-suffix">{selectedDomain}</span>
+                  <select
+                    value={selectedDomain}
+                    onChange={(e) => setSelectedDomain(e.target.value)}
+                    className="admin-select"
+                    style={{ width: 'auto', margin: 0 }}
+                    disabled={loading}
+                  >
+                    {allowedDomains.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -446,6 +430,52 @@ const UserManagementScreen = () => {
             // Bulk Tab Content
             <div>
               <h2>CSVで一括作成</h2>
+
+              <div style={{ 
+                marginBottom: '24px', 
+                padding: '16px', 
+                background: 'var(--bg-tertiary)', 
+                borderRadius: '12px', 
+                border: '1px solid var(--border-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>作成対象ドメイン:</span>
+                <select
+                  value={selectedDomain}
+                  onChange={(e) => setSelectedDomain(e.target.value)}
+                  className="admin-select"
+                  style={{ width: 'auto', minWidth: '160px', margin: 0 }}
+                  disabled={bulkStatus === 'processing'}
+                >
+                  {allowedDomains.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>※CSVの全ユーザーにこのドメインが適用されます</span>
+              </div>
+
+              <div style={{
+                marginBottom: '24px',
+                padding: '12px 16px',
+                background: 'rgba(234, 179, 8, 0.1)',
+                border: '1px solid rgba(234, 179, 8, 0.2)',
+                borderRadius: '8px',
+                color: '#ca8a04',
+                fontSize: '0.85rem',
+                lineHeight: '1.5',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px'
+              }}>
+                <AlertCircle size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+                <div>
+                  <strong>⚠️ 一括作成時の注意</strong><br/>
+                  DBの仕様により、プロジェクトを不正使用から保護するために同一のIPアドレスから1時間あたりの最大のアカウント申込数が200となっていることに注意してください。
+                </div>
+              </div>
+
               {bulkStatus === 'idle' && (
                 <>
                   <a href="#" className="download-link" onClick={downloadTemplate}>
