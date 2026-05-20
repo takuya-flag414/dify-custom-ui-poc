@@ -1,24 +1,28 @@
 /* src/components/Artifacts/JsonDocument/styles/JsonDocument.css */
 
 :root {
-    /* カラーパレット：印刷適性を考慮したコンサバティブな配色 */
+    /* カラーパレット：A4ビジネス文書サンプル (sample_a4_document_01.html) 準拠 */
     --doc-bg-canvas: #e0e2e5;
     --doc-bg-page: #ffffff;
-    --doc-text-main: #1a1a1a;       /* 墨色 */
-    --doc-text-secondary: #4b4b4b;
-    --doc-border-color: #333333;   /* 強い境界線 */
-    --doc-accent-color: #003366;   /* ダークネイビー（知性的） */
+    --doc-text-main: #000000;       /* 本文はしっかりとした黒 */
+    --doc-text-secondary: #555555; /* サブテキスト */
+    
+    --doc-primary-color: #1e3a8a;  /* ネイビー */
+    --doc-accent-color: #8b0000;   /* 深い赤 */
+    --doc-border-color: #b0b8c1;   /* グレーの罫線 */
+    --doc-bg-accent: #f8fafc;      /* 薄いグレーブルー（テーブルヘッダー・メタ用） */
     --doc-heading-color: #000000;
     
     /* タイポグラフィ：明朝体とゴシック体の使い分け */
-    --doc-font-serif: "YuMincho", "Yu Mincho", "Hiragino Mincho ProN", "MS PMincho", serif;
-    --doc-font-sans: "YuGothic", "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+    --doc-font-serif: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "MS PMincho", serif;
+    --doc-font-sans: "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", sans-serif;
+    --doc-font-mono: "Courier New", "Osaka-Mono", monospace;
 
-    /* A4 Dimensions ( scaled for screen, maintaining 1:1.414 ratio ) */
+    /* A4 Dimensions ( 縦横比 1:1.414 を維持し、画面向けにスケール ) */
     --doc-page-width: 820px;
     --doc-page-min-height: 1160px;
-    --doc-page-padding-top: 30mm;
-    --doc-page-padding-bottom: 30mm;
+    --doc-page-padding-top: 25mm;
+    --doc-page-padding-bottom: 25mm;
     --doc-page-padding-left: 25mm;
     --doc-page-padding-right: 25mm;
 }
@@ -44,10 +48,12 @@
     position: relative;
     color: var(--doc-text-main);
     font-family: var(--doc-font-serif); /* 本文は明朝体 */
-    line-height: 1.8;
+    line-height: 1.6;
+    letter-spacing: 0.02em;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    border-top: 8px solid var(--doc-primary-color); /* 天の太いプライマリ線 */
 }
 
 .doc-page-header {
@@ -80,86 +86,85 @@
     font-family: var(--doc-font-sans);
     font-size: 20pt;
     font-weight: 800;
-    margin: 0 0 40px 0;
-    padding-bottom: 16px;
-    border-bottom: 3px solid var(--doc-text-main);
+    margin: 0 0 10pt 0;
+    padding-bottom: 12px;
     color: var(--doc-heading-color);
-    text-align: center;
+    text-align: left;
 }
 
 .doc-block-heading-2 {
     font-family: var(--doc-font-sans);
     font-size: 14pt;
     font-weight: 700;
-    margin: 40px 0 20px 0;
+    margin: 30px 0 15px 0;
     color: var(--doc-heading-color);
-    border-bottom: 1px solid var(--doc-text-main);
-    padding-bottom: 4px;
-}
-
-/* H2 の装飾バーを廃止（LaTeX/Wordスタイル） */
-.doc-block-heading-2::before {
-    display: none;
+    border-bottom: 1.5px solid var(--doc-primary-color); /* H2の下線装飾 */
+    padding-bottom: 3pt;
+    break-before: avoid;
+    break-after: avoid;
 }
 
 .doc-block-heading-3 {
     font-family: var(--doc-font-sans);
-    font-size: 11pt;
+    font-size: 11.5pt;
     font-weight: 700;
-    margin: 24px 0 12px 0;
-    color: var(--doc-text-main);
+    margin: 20px 0 10px 0;
+    color: var(--doc-heading-color);
+    break-before: avoid;
+    break-after: avoid;
 }
 
 .doc-block-rich-text {
     font-size: 10.5pt;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     color: var(--doc-text-main);
     text-align: justify; /* 両端揃え */
-    text-indent: 1em;    /* 段落の先頭を1文字分下げる */
+    text-indent: 1em;    /* 段落の先頭を1文字分下げる（一字下げ） */
     word-break: break-all;
+    line-height: 1.6;
 }
 
 .doc-block-rich-text strong {
     font-weight: 700;
-    font-family: var(--doc-font-sans); /* 強調はゴシック */
+    font-family: var(--doc-font-sans); /* 強調はゴシック体 */
+}
+
+/* 一字下げを行わない段落（お知らせボックス内などで使用） */
+.doc-block-rich-text .no-indent {
+    text-indent: 0;
 }
 
 /* Table Blocks */
 .doc-block-table-wrapper {
-    margin: 24px 0;
-    border-top: 2px solid #000;
-    border-bottom: 2px solid #000;
+    margin: 15px 0;
 }
 
 .doc-block-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 10pt;
+    font-size: 10.5pt;
     font-family: var(--doc-font-serif);
 }
 
-.doc-block-table th {
-    background-color: transparent;
-    border-bottom: 1px solid #000;
-    padding: 10px 12px;
-    text-align: left;
-    font-weight: 700;
-    font-family: var(--doc-font-sans);
-}
-
+.doc-block-table th,
 .doc-block-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #eee;
+    border: 1px solid var(--doc-border-color); /* すべての格子に細い枠線を引く */
+    padding: 6pt 10pt;
+    vertical-align: top;
+    word-break: break-word;
 }
 
-.doc-block-table tr:last-child td {
-    border-bottom: none;
+.doc-block-table th {
+    background-color: var(--doc-bg-accent); /* テーブルヘッダーの背景色 */
+    font-family: var(--doc-font-sans);
+    color: var(--doc-heading-color);
+    font-weight: 700;
 }
 
 /* List Blocks */
 .doc-block-list {
-    margin-bottom: 20px;
-    padding-left: 1.5em; /* インデント */
+    margin: 6pt 0 12pt 0;
+    padding-left: 18pt;
 }
 
 .doc-block-list.unordered {
@@ -171,14 +176,14 @@
 }
 
 .doc-block-list li {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: 10.5pt;
-    padding-left: 0.5em;
+    line-height: 1.6;
 }
 
 /* SVG Blocks */
 .doc-block-svg-container {
-    margin: 32px 0;
+    margin: 20px 0;
     display: flex;
     justify-content: center;
     background-color: transparent;
@@ -196,21 +201,234 @@
     font-family: var(--doc-font-sans);
     font-size: 16pt;
     text-align: center;
-    border-bottom: 1px solid #000;
+    border-bottom: 1.5px solid var(--doc-primary-color);
     padding-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .doc-toc-item {
-    padding: 4px 0;
+    padding: 6px 0;
     margin-left: 0;
+    font-size: 11pt;
 }
 
 .doc-toc-item:hover {
-    background-color: transparent; /* 印刷物スタイルなのでホバーは控えめ */
+    background-color: transparent;
 }
 
 .doc-toc-leader {
     border-bottom: 1px dotted #888;
+}
+
+/* お知らせ・装飾ボックス */
+.notice-box {
+    border: 1.5pt solid var(--doc-text-main);
+    padding: 8pt 14pt;
+    margin: 12px 0;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    background: #ffffff;
+}
+
+.notice-box-title {
+    font-family: var(--doc-font-sans);
+    font-size: 9pt;
+    font-weight: bold;
+    color: var(--doc-text-main);
+    text-align: center;
+    border-bottom: 0.5pt solid var(--doc-border-color);
+    margin-bottom: 6pt;
+    padding-bottom: 3pt;
+    letter-spacing: 0.1em;
+}
+
+.notice-dash {
+    border: 1pt dashed var(--doc-text-main);
+    padding: 7pt 14pt;
+    margin: 12px 0;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    background: #ffffff;
+}
+
+.notice-dash-title {
+    font-family: var(--doc-font-sans);
+    font-size: 9pt;
+    font-weight: bold;
+    color: var(--doc-text-main);
+    margin-bottom: 4pt;
+    letter-spacing: 0.05em;
+}
+
+.notice-side {
+    border-left: 3pt solid var(--doc-primary-color);
+    padding: 3pt 0 3pt 12pt;
+    margin: 10px 0;
+    font-size: 10.5pt;
+    line-height: 1.6;
+}
+
+.notice-side-title {
+    font-family: var(--doc-font-sans);
+    font-size: 9pt;
+    font-weight: bold;
+    color: var(--doc-text-main);
+    margin-bottom: 3pt;
+}
+
+/* 強調インラインスパン */
+.text-emphasis {
+    font-weight: bold;
+    color: var(--doc-accent-color); /* 強調はアクセントカラー(ダークレッド) */
+}
+
+.text-underline {
+    font-weight: bold;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* 表紙ページ専用の余白（パディング0）と上部青線の排除 */
+.json-doc-page.cover-page {
+    border-top: none;
+}
+
+.doc-page-content-cover {
+    flex: 1;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 表紙の高さ潰れを防ぐため、コンバーターとラッパーを縦いっぱいに広げる */
+.doc-page-content-cover > .editable-block-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.doc-page-content-cover [id^="json-doc-block-"] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 表紙 (Cover Page) スタイル */
+.doc-cover {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    color: #1a1a1a;
+    box-sizing: border-box;
+}
+
+.cover-inner {
+    padding: 22mm 22mm 22mm 22mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+    box-sizing: border-box;
+}
+
+.cover-org {
+    font-family: var(--doc-font-sans);
+    font-size: 9pt;
+    letter-spacing: 0.2em;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.cover-header {
+    text-align: right;
+}
+
+.cover-title-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10mm 0;
+}
+
+.cover-title-top-border {
+    width: 100%;
+    border-bottom: 1px solid #b0b8c1;
+    margin-bottom: 8mm;
+}
+
+.cover-meta-badge {
+    font-family: var(--doc-font-sans);
+    font-size: 11pt;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    color: var(--doc-primary-color);
+    margin-bottom: 6mm;
+    text-transform: uppercase;
+}
+
+.cover-title {
+    font-family: var(--doc-font-sans);
+    font-size: 28pt;
+    font-weight: bold;
+    line-height: 1.4;
+    color: #1a1a1a;
+    margin: 0 0 6mm 0;
+}
+
+.cover-subtitle {
+    font-family: var(--doc-font-sans);
+    font-size: 12pt;
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.cover-title-bottom-border {
+    width: 100%;
+    border-top: 3px solid var(--doc-primary-color);
+    margin-top: 8mm;
+}
+
+.cover-footer-block {
+    margin: 0 auto;
+    width: 250px;
+    display: flex;
+    justify-content: center;
+}
+
+.cover-meta-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cover-meta-table th, 
+.cover-meta-table td {
+    padding: 4pt 0;
+    font-size: 9pt;
+    border: none;
+    background: transparent;
+    font-family: var(--doc-font-sans);
+}
+
+.cover-meta-table th {
+    width: 45%;
+    color: #888;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 4px;
+}
+
+.cover-meta-table td {
+    color: #1a1a1a;
+    text-align: left;
 }
 
 /* Utils */
@@ -293,3 +511,128 @@
     background-color: rgba(0, 0, 0, 0.1);
     margin: 0 8px;
 }
+
+/* ページ番号（フッター）スタイル */
+.doc-page-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 12px;
+    margin-top: auto; /* コンテンツの下端に押し下げます */
+}
+
+.doc-page-number {
+    font-family: var(--doc-font-sans);
+    font-size: 9.5pt;
+    color: #666666;
+    letter-spacing: 0.05em;
+}
+
+/* Business Letter Styles */
+.doc-letter-header {
+    width: 100%;
+    margin-bottom: 20pt;
+    font-family: var(--doc-font-sans);
+}
+
+.letter-meta-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-bottom: 10pt;
+    font-size: 9.5pt;
+    color: #333;
+    line-height: 1.5;
+}
+
+.letter-ref-no, .letter-date {
+    font-family: var(--doc-font-sans);
+}
+
+.letter-recipient-row {
+    text-align: left;
+    margin-bottom: 16pt;
+    width: 100%;
+}
+
+.letter-sender-row {
+    text-align: right;
+    margin-bottom: 24pt;
+    width: 100%;
+}
+
+.recipient-block {
+    display: inline-block;
+    text-align: left;
+    font-size: 10pt;
+    color: #1a1a1a;
+    line-height: 1.6;
+}
+
+.sender-block {
+    display: inline-block;
+    text-align: right;
+    font-size: 10pt;
+    color: #1a1a1a;
+    line-height: 1.6;
+}
+
+.recipient-name {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-top: 6pt;
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 2px;
+    display: inline-block;
+}
+
+.sender-company {
+    font-weight: bold;
+    margin-top: 4pt;
+}
+
+.letter-title-container {
+    text-align: center;
+    margin: 24pt 0 16pt 0;
+    position: relative;
+    padding: 6pt 0;
+}
+
+.letter-title {
+    font-family: var(--doc-font-sans);
+    font-size: 15pt;
+    font-weight: bold;
+    color: #1a1a1a;
+    display: inline-block;
+    letter-spacing: 0.05em;
+    padding: 0 16pt 6px 16pt;
+    border-bottom: 2px solid #1a1a1a;
+}
+
+/* Business Letter Color & Layout Overrides */
+.json-doc-page.letter-page {
+    border-top: none; /* 上部の太い青線を完全に排除 */
+}
+
+/* ビジネスレター全体のコンテンツ領域の余白を上下左右 25mm に統一 */
+.letter-page .doc-page-content {
+    padding: var(--doc-page-padding-top) var(--doc-page-padding-right) var(--doc-page-padding-bottom) var(--doc-page-padding-left);
+}
+
+/* ビジネスレター内のH2見出しの下線を黒に変更 */
+.letter-page .doc-block-heading-2 {
+    border-bottom: 1.5px solid #1a1a1a;
+}
+
+/* ビジネスレター内のお知らせサイドボックスの左ボーダーを黒に変更 */
+.letter-page .notice-side {
+    border-left: 3pt solid #1a1a1a;
+}
+
+/* ビジネスレター内のテーブルヘッダーの背景とボーダーをグレー/黒に */
+.letter-page .doc-block-table th {
+    background-color: #f3f4f6; /* 薄いニュートラルグレー */
+    border-bottom: 1.5px solid #1a1a1a;
+}
+
+

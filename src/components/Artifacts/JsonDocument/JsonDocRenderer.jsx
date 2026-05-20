@@ -40,29 +40,39 @@ const JsonDocRenderer = ({
                     blockOffset += pages[i].length;
                 }
 
-                // ページ番号の制御: index 0 (表紙), index 1 (目次) は非表示
-                const isMainContent = index >= 2;
-                const isFirstMainPage = index === 2; // 本文1ページ目
-                const displayPageNumber = isMainContent ? index - 1 : 0;
-                const displayTotalPages = Math.max(0, pages.length - 2);
+                // ページ番号の制御:
+                // 通常: index 0 (表紙), index 1 (目次) は非表示
+                // レター: 1ページ目 (index 0) は非表示、2ページ目 (index >= 1) から開始
+                const isLetter = meta?.template === 'letter';
+                const isMainContent = isLetter ? index >= 1 : index >= 2;
+                const displayPageNumber = isLetter 
+                    ? (index + 1) 
+                    : (isMainContent ? index - 1 : 0);
+                const displayTotalPages = isLetter 
+                    ? pages.length 
+                    : Math.max(0, pages.length - 2);
+                const showPageNo = isLetter ? (index >= 1) : isMainContent;
 
                 return (
                     <DocPage 
                         key={index} 
                         pageNumber={displayPageNumber} 
                         totalPages={displayTotalPages}
-                        showPageNumber={isMainContent}
+                        showPageNumber={showPageNo}
                         title={isMainContent ? title : null}
+                        isCover={!isLetter && index === 0}
+                        isLetter={isLetter}
                     >
                         <JsonDocParser 
                             blocks={pageBlocks} 
+                            pageIndex={index}
                             isEditMode={isEditMode}
                             onBlockClick={(idx) => {
-                                // [Cover(0), TOC(1), FilteredBlock0(2), FilteredBlock1(3)...]
                                 const globalIdx = idx + blockOffset;
-                                if (globalIdx < 2) return; 
+                                const headerCount = isLetter ? 1 : 2;
+                                if (globalIdx < headerCount) return; 
                                 
-                                const targetBlock = filteredBlocks[globalIdx - 2];
+                                const targetBlock = filteredBlocks[globalIdx - headerCount];
                                 const originalIdx = blocks.indexOf(targetBlock);
                                 if (originalIdx !== -1) {
                                     onBlockClick(originalIdx);
@@ -76,7 +86,8 @@ const JsonDocRenderer = ({
                                 const filteredIdx = filteredBlocks.indexOf(selectedBlock);
                                 if (filteredIdx === -1) return null;
 
-                                const targetIdxInFull = filteredIdx + 2;
+                                const headerCount = isLetter ? 1 : 2;
+                                const targetIdxInFull = filteredIdx + headerCount;
                                 const localIdx = targetIdxInFull - blockOffset;
                                 return (localIdx >= 0 && localIdx < pageBlocks.length) ? localIdx : null;
                             })()}

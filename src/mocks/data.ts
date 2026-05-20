@@ -1,4 +1,5 @@
 // src/mocks/data.ts
+import { scenarios } from './scenarios';
 
 /**
  * FEモード検証用のモックデータ定義 (全8パターン網羅版)
@@ -118,6 +119,82 @@ export const MOCK_SMART_ACTIONS: SmartAction[] = [
     }
 ];
 
+/**
+ * scenarios.js 内 of json_slide_advanced シナリオから、
+ * スライド設計書全体の完全な JSON 文字列を動的に抽出して同期する
+ */
+const getAdvancedSlideContent = (): string => {
+    try {
+        const scenario = (scenarios as any)['json_slide_advanced'];
+        if (Array.isArray(scenario)) {
+            // event: 'message' で answer (JSON文字列) を持っているステップを検索
+            const msgStep = scenario.find(step => step.event === 'message' && step.answer);
+            if (msgStep && typeof msgStep.answer === 'string') {
+                return msgStep.answer;
+            }
+        }
+    } catch (e) {
+        console.error('Failed to extract advanced slide content dynamically:', e);
+    }
+    return '';
+};
+
+/**
+ * scenarios.js 内の json_document シナリオから、
+ * ドキュメントの内容を動的に抽出して同期する
+ */
+const getJsonDocumentArtifact = () => {
+    try {
+        const scenario = (scenarios as any)['json_document'];
+        const steps = scenario?.partner || scenario?.efficient;
+        if (Array.isArray(steps)) {
+            const msgStep = steps.find(step => step.event === 'message' && step.answer);
+            if (msgStep && typeof msgStep.answer === 'string') {
+                const parsed = JSON.parse(msgStep.answer);
+                if (parsed.artifact) {
+                    return {
+                        artifact_title: parsed.artifact.artifact_title,
+                        artifact_type: parsed.artifact.artifact_type,
+                        artifact_content: parsed.artifact.artifact_content,
+                        citations: []
+                    };
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Failed to extract json document content dynamically:', e);
+    }
+    return null;
+};
+
+/**
+ * scenarios.js 内の json_document_letter シナリオから、
+ * レタードキュメントの内容を動的に抽出して同期する
+ */
+const getJsonDocumentLetterArtifact = () => {
+    try {
+        const scenario = (scenarios as any)['json_document_letter'];
+        const steps = scenario?.partner || scenario?.efficient;
+        if (Array.isArray(steps)) {
+            const msgStep = steps.find(step => step.event === 'message' && step.answer);
+            if (msgStep && typeof msgStep.answer === 'string') {
+                const parsed = JSON.parse(msgStep.answer);
+                if (parsed.artifact) {
+                    return {
+                        artifact_title: parsed.artifact.artifact_title,
+                        artifact_type: parsed.artifact.artifact_type,
+                        artifact_content: parsed.artifact.artifact_content,
+                        citations: []
+                    };
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Failed to extract json letter document content dynamically:', e);
+    }
+    return null;
+};
+
 // サイドバー用の会話リスト
 export const mockConversations: ConversationItem[] = [
     { id: 'mock_1', name: '🤖 AI Assistant Demo' },
@@ -128,6 +205,9 @@ export const mockConversations: ConversationItem[] = [
     { id: 'mock_6', name: '📦 Artifacts Demo' },
     { id: 'mock_7', name: '📄 HTML Artifact Demo' },
     { id: 'mock_8', name: '📊 Slide Artifact Demo' },
+    { id: 'mock_9', name: '✨ 組織図・構成図スライド (Parity)' },
+    { id: 'mock_10', name: '📄 事業戦略報告書 (JSON Doc)' },
+    { id: 'mock_11', name: '✉️ 警告通知書 (JSON Letter)' },
 ];
 
 // 会話履歴データ (サイドバーのIDとキーを一致させる)
@@ -337,6 +417,75 @@ export const mockMessages: Record<string, MockMessage[]> = {
                     { id: 'cite_1', type: 'rag', source: '中期経営計画_骨子.docx', url: null }
                 ]
             },
+            suggestions: [],
+            isStreaming: false,
+            traceMode: 'knowledge',
+            thoughtProcess: []
+        }
+    ],
+
+    'mock_9': [
+        {
+            id: 'msg_9_1',
+            role: 'user',
+            text: 'プロジェクト体制図とシステム構成図を高度なスライドで生成して。',
+            timestamp: '2026-05-18T13:58:00Z',
+            files: []
+        },
+        {
+            id: 'msg_9_2',
+            role: 'ai',
+            text: 'エンタープライズDX推進体制の組織図とシステム構成図スライドを作成しました！✨ 右側のパネルで、高密度で直角配線された美しいフラット・モダンデザインのスライド群をご確認いただけます。PowerPoint (pptx) へのエクスポートも完璧に同期・最適化されています。',
+            rawContent: '',
+            citations: [],
+            artifact: {
+                artifact_title: 'DX推進プロジェクト設計書',
+                artifact_type: 'json_slide_advanced',
+                artifact_content: getAdvancedSlideContent(),
+                citations: []
+            },
+            suggestions: [],
+            isStreaming: false,
+            traceMode: 'knowledge',
+            thoughtProcess: []
+        }
+    ],
+    'mock_10': [
+        {
+            id: 'msg_10_1',
+            role: 'user',
+            text: '2026年度の事業戦略報告書をドラフトで作成してください。編集可能なドキュメント形式が良いです。',
+            timestamp: '2026-05-19T19:00:00Z',
+            files: []
+        },
+        {
+            id: 'msg_10_2',
+            role: 'ai',
+            text: '2026年度の事業戦略報告書（ドラフト）を作成しました！📄 右側のドキュメントパネルで内容の確認や編集が可能です。',
+            rawContent: '',
+            citations: [],
+            artifact: getJsonDocumentArtifact(),
+            suggestions: [],
+            isStreaming: false,
+            traceMode: 'knowledge',
+            thoughtProcess: []
+        }
+    ],
+    'mock_11': [
+        {
+            id: 'msg_11_1',
+            role: 'user',
+            text: '商標権侵害についての警告通知書を作成してください。1ページ目から直接宛名や差出人が入るビジネスレター形式でお願いします。',
+            timestamp: '2026-05-19T20:00:00Z',
+            files: []
+        },
+        {
+            id: 'msg_11_2',
+            role: 'ai',
+            text: '商標権侵害に関する警告通知書（ドラフト）を作成しました！✉️ 右側のドキュメントパネルでレター形式のレイアウトをご確認いただけます。Word出力（.docx）もレター形式に対応しています。',
+            rawContent: '',
+            citations: [],
+            artifact: getJsonDocumentLetterArtifact(),
             suggestions: [],
             isStreaming: false,
             traceMode: 'knowledge',

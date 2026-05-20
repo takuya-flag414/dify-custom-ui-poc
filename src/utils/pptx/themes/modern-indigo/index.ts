@@ -20,6 +20,9 @@ import { MultiPointSlideRenderer } from './slides/MultiPointSlide';
 import { ExecutiveSummarySlideRenderer } from './slides/ExecutiveSummarySlide';
 import { DataInsightSlideRenderer } from './slides/DataInsightSlide';
 import { MatrixSlideRenderer } from './slides/MatrixSlide';
+import { SwimlaneSlideRenderer } from './slides/SwimlaneSlide';
+import { SystemArchitectureSlideRenderer } from './slides/SystemArchitectureSlide';
+import { OrgChartSlideRenderer } from './slides/OrgChartSlide';
 
 const registry = new RendererRegistry();
 
@@ -48,6 +51,9 @@ registerSet(['multi_point', 'multi_point_slide', 'multipointslide'], MultiPointS
 registerSet(['executive_summary', 'executive_summary_slide', 'executivesummaryslide'], ExecutiveSummarySlideRenderer);
 registerSet(['data_insight', 'data_insight_slide', 'datainsightslide'], DataInsightSlideRenderer);
 registerSet(['matrix', 'matrix_slide', 'matrixslide'], MatrixSlideRenderer);
+registerSet(['swimlane', 'swimlane_slide', 'swimlaneslide'], SwimlaneSlideRenderer);
+registerSet(['system_architecture', 'system_architecture_slide', 'systemarchitectureslide'], SystemArchitectureSlideRenderer);
+registerSet(['org_chart', 'org_chart_slide', 'orgchartslide'], OrgChartSlideRenderer);
 
 // グローバルレジストリに登録
 globalThemeRegistry.registerTheme('modern-indigo', getModernIndigoConfig, registry);

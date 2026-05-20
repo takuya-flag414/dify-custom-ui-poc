@@ -1,0 +1,44 @@
+import { Paragraph, TextRun, Tab, HeadingLevel, TabStopType } from 'docx';
+
+/**
+ * 目次ブロックをWordのドットリーダー付き右揃え段落に変換する
+ */
+export function renderTOC(block: any): Paragraph[] {
+  const entries = block.entries || [];
+  const paragraphs: Paragraph[] = [
+    new Paragraph({
+      text: '目次',
+      heading: HeadingLevel.HEADING_1,
+      spacing: { before: 240, after: 240 },
+    }),
+  ];
+
+  entries.forEach((entry: any) => {
+    // 見出しレベルに応じた字下げ（左インデント）を設定 (H1: 0, H2: 360, H3: 720)
+    const indentLeft = Math.max(0, (entry.level - 1) * 360);
+
+    paragraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: entry.text || '' }),
+          new TextRun({
+            children: [new Tab()], // ドットリーダーのためのタブ文字
+          }),
+          new TextRun({ text: String(entry.page || 1) }),
+        ],
+        // 右端（7200 dxa = 約12.7cm）にタブストップを設定し、ドットリーダーを指定
+        tabStops: [
+          {
+            type: TabStopType.RIGHT,
+            position: 7200,
+            leader: 'dot' as any,
+          },
+        ],
+        indent: { left: indentLeft },
+        spacing: { before: 100, after: 100 },
+      })
+    );
+  });
+
+  return paragraphs;
+}

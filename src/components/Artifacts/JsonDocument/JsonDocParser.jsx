@@ -7,6 +7,7 @@ import DocList from './blocks/DocList';
 import DocChart from './blocks/DocChart';
 import DocTOC from './blocks/DocTOC';
 import DocCover from './blocks/DocCover';
+import DocLetterHeader from './blocks/DocLetterHeader';
 import EditableBlockWrapper from './components/EditableBlockWrapper';
 
 const BLOCK_COMPONENTS = {
@@ -18,6 +19,7 @@ const BLOCK_COMPONENTS = {
     chart: DocChart,
     toc: DocTOC,
     cover: DocCover,
+    letter_header: DocLetterHeader,
 };
 
 /**
@@ -26,6 +28,7 @@ const BLOCK_COMPONENTS = {
  */
 const JsonDocParser = ({ 
     blocks = [], 
+    pageIndex,
     isEditMode = false, 
     selectedBlockIndex = null, 
     onBlockClick = () => {} 
@@ -37,6 +40,10 @@ const JsonDocParser = ({
     return (
         <>
             {blocks.map((block, index) => {
+                if (block.type === 'page_break') {
+                    return null; // 改ページブロックはUI上表示しない
+                }
+
                 const Component = BLOCK_COMPONENTS[block.type];
                 if (!Component) {
                     console.warn(`Unknown block type: ${block.type}`, block);
@@ -50,7 +57,9 @@ const JsonDocParser = ({
                         isSelected={selectedBlockIndex === index}
                         onClick={() => onBlockClick(index)}
                     >
-                        <Component block={block} />
+                        <div id={`json-doc-block-${pageIndex}-${index}`}>
+                            <Component block={block} />
+                        </div>
                     </EditableBlockWrapper>
                 );
             })}

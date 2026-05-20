@@ -18,6 +18,9 @@ import MatrixSlide from './slides/MatrixSlide';
 import StrategicPillarSlide from './slides/StrategicPillarSlide';
 import MultiPointSlide from './slides/MultiPointSlide';
 import RoadmapSlide from './slides/RoadmapSlide';
+import SwimlaneSlide from './slides/SwimlaneSlide';
+import SystemArchitectureSlide from './slides/SystemArchitectureSlide';
+import { OrgChartSlide } from './slides/OrgChartSlide';
 
 
 // Common Slides
@@ -50,6 +53,9 @@ export const modernIndigoMap = {
     strategic_pillar_slide: StrategicPillarSlide,
     multi_point_slide: MultiPointSlide,
     roadmap_slide: RoadmapSlide,
+    swimlane_slide: SwimlaneSlide,
+    system_architecture_slide: SystemArchitectureSlide,
+    org_chart_slide: OrgChartSlide,
 
 
     // エイリアス (ユーザー指定の揺れを吸収)
@@ -73,5 +79,8 @@ export const modernIndigoMap = {
     strategic_pillar: StrategicPillarSlide,
     multi_point: MultiPointSlide,
     roadmap: RoadmapSlide,
+    swimlane: SwimlaneSlide,
+    system_architecture: SystemArchitectureSlide,
+    org_chart: OrgChartSlide,
 };
 

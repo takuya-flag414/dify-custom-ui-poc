@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JsonDocRenderer from './JsonDocument/JsonDocRenderer';
 import JsonDocFormEditor from './JsonDocument/JsonDocFormEditor';
+import usePagination from './JsonDocument/utils/usePagination';
+import { DocxExportEngine } from '../../utils/docx/engine';
 import './ArtifactPanel.css';
 import './JsonDocument/styles/JsonDocument.css';
 import './JsonDocument/styles/JsonDocEditor.css';
@@ -63,6 +65,14 @@ const FitIcon = () => (
     </svg>
 );
 
+const DownloadIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+);
+
 /**
  * JsonDocumentPanel
  * 構造化されたJSONデータに基づき、A4ドキュメントを表示・編集するパネルです。
@@ -76,7 +86,24 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
     const [localBlocks, setLocalBlocks] = useState([]);
     const [localMeta, setLocalMeta] = useState(null);
     const [scale, setScale] = useState(1.0);
+    const [isExportingWord, setIsExportingWord] = useState(false);
     const containerRef = React.useRef(null);
+
+    const { pages } = usePagination(localBlocks, localMeta);
+
+    const handleDownloadDocx = async () => {
+        if (!pages || pages.length === 0) return;
+        try {
+            setIsExportingWord(true);
+            const engine = new DocxExportEngine();
+            await engine.export(pages, displayTitle, localMeta);
+        } catch (err) {
+            console.error('Word export failed:', err);
+            alert('Wordエクスポートに失敗しました。');
+        } finally {
+            setIsExportingWord(false);
+        }
+    };
 
     const streamingArtifact = isGeneratingArtifact ? streamingMessage.artifact : null;
     const rawContent = streamingArtifact?.artifact_content || artifact?.content;
@@ -192,6 +219,15 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
                                 <button className="zoom-btn" onClick={handleAutoFit} title="自動フィット" style={{ marginLeft: '4px' }}><FitIcon /></button>
                             </div>
                             <div className="artifact-action-divider"></div>
+                            <button 
+                                className="artifact-action-btn primary"
+                                onClick={handleDownloadDocx}
+                                disabled={isExportingWord || isGeneratingArtifact}
+                                title="Word (.docx) としてダウンロード"
+                            >
+                                <DownloadIcon />
+                                <span>{isExportingWord ? 'Word出力中...' : 'Word出力'}</span>
+                            </button>
                             <button 
                                 className={`artifact-action-btn ${isEditMode ? 'active' : ''}`}
                                 onClick={() => setIsEditMode(!isEditMode)}

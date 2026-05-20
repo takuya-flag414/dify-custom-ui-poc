@@ -363,63 +363,106 @@ export const scenarios = {
         event: 'message',
         answer: JSON.stringify({
           artifact: {
-            artifact_title: "2026年度 事業戦略報告書 (ドラフト)",
+            artifact_title: "2026年3月 月次報告書 (ドラフト)",
             artifact_type: "json_document",
             artifact_content: JSON.stringify({
               meta: {
-                title: "2026年度 事業戦略報告書",
-                subtitle: "〜 次世代への飛躍と持続可能な成長に向けて 〜",
-                author: "戦略企画本部 第一チーム",
-                date: "2026年5月6日"
+                title: "2026年3月 月次報告書",
+                subtitle: "営業・製造・管理部門の主要実績、課題、および翌月対応方針を整理した社内向けサンプル文書",
+                author: "経営企画部　業務改善室",
+                date: "2026年3月31日",
+                org: "SEIHOKU INDUSTRIES",
+                label: "MONTHLY REPORT",
+                year: "2026"
               },
               blocks: [
-                { type: "heading", level: 1, text: "2026年度 事業戦略報告書" },
-                { type: "rich_text", text: "本報告書は、次年度に向けた当社の戦略的優先事項を概説するものです。市場の不確実性が高まる中、データ駆動型の意思決定と機敏なリソース配分が成功の鍵となります。" },
-                { type: "heading", level: 2, text: "1. エグゼクティブサマリー" },
-                { type: "rich_text", text: "昨年度の成長率を維持しつつ、新規事業領域への投資を30%拡大します。また、既存製品のコスト構造を最適化し、営業利益率の向上を目指します。" },
-                { type: "heading", level: 2, text: "2. 主要マーケット動向" },
-                {
-                  "type": "chart",
-                  "chart_type": "bar",
-                  "title": "2026年度 地域別売上予測 (億円)",
-                  "data": [
-                    { "name": "北米", "value": 450 },
-                    { "name": "欧州", "value": 320 },
-                    { "name": "アジア", "value": 580 },
-                    { "name": "その他", "value": 150 }
-                  ]
-                },
-                { type: "rich_text", text: "北米市場においては、クラウドネイティブソリューションへの需要が急増しています。一方、アジア市場では、ローカルプレイヤーとの競争が激化しており、差別化戦略が求められています。" },
+                { type: "heading", level: 1, text: "1. 月次サマリー" },
                 {
                   type: "table",
-                  headers: ["市場", "シェア", "成長予測", "主要競合"],
+                  headers: ["項目", "内容"],
                   rows: [
-                    ["北米", "25%", "+15%", "Comp A, Comp B"],
-                    ["欧州", "18%", "+5%", "Comp C"],
-                    ["アジア", "30%", "+20%", "Comp D, Comp E"],
-                    ["その他", "7%", "+10%", "N/A"]
+                    ["対象期間", "2026年3月1日〜2026年3月31日"],
+                    ["対象組織", "営業部、製造部、管理部"],
+                    ["報告責任者", "経営企画部長　山田 恒一"]
                   ]
                 },
-                { type: "heading", level: 2, text: "3. 2026年度の重点施策" },
-                { type: "list", items: ["**AIプラットフォーム**のフルリニューアル", "**グローバルサプライチェーン**のレジリエンス強化", "**エンジニアリング組織**のダイバーシティ推進"] },
-                { type: "heading", level: 2, text: "4. 財務目標とKPI" },
-                { type: "rich_text", text: "売上高目標は、前年比**120%**の**500億円**を掲げます。\nこれを達成するためのKPIは以下の通りです。" },
+                { type: "heading", level: 2, text: "総括" },
+                { type: "rich_text", text: "当月は主力製品の受注増加により、全社売上高は計画を上回って推移した。とくに法人向け大型案件の前倒し計上が寄与し、営業利益も月次計画を超過した。" },
+                { type: "rich_text", text: "一方、製造部門では一部資材の納入遅延が発生しており、翌月初旬の出荷計画には一定の注意必要である。管理部門では請求処理の標準化が進み、月末締め作業時間は前月比で短縮した。" },
+                {
+                  type: "rich_text",
+                  variant: "notice-box",
+                  title: "重要事項",
+                  text: "4月第1週の出荷量増加に備え、製造部と物流委託先との事前調整を3月末までに完了させる必要がある。"
+                },
+                { type: "heading", level: 2, text: "主要KPI" },
                 {
                   type: "table",
-                  headers: ["KPI項目", "目標値", "担当部門"],
+                  headers: ["指標", "実績", "計画", "前月", "差異"],
                   rows: [
-                    ["新規顧客獲得数", "500社", "営業本部"],
-                    ["解約率(Churn Rate)", "2%以下", "カスタマーサクセス"],
-                    ["研究開発投資額", "60億円", "CTO室"]
+                    ["売上高", "128,400千円", "120,000千円", "116,200千円", "*+8,400千円*"],
+                    ["営業利益", "18,900千円", "16,500千円", "15,100千円", "*+2,400千円*"],
+                    ["粗利率", "32.4%", "30.0%", "29.8%", "*+2.4pt*"],
+                    ["新規案件数", "27件", "24件", "21件", "*+3件*"],
+                    ["納期遵守率", "94.2%", "96.0%", "95.1%", "*-1.8pt*"],
+                    ["経費執行率", "97.5%", "100.0%", "93.8%", "*-2.5pt*"]
                   ]
                 },
-                { type: "heading", level: 2, text: "5. 将来展望とリスク要因" },
-                { type: "rich_text", text: "マクロ経済の変動や為替リスクを注視する必要があります。特に、半導体供給の安定性は、当社のハードウェア部門にとって重要なリスク要因です。さらに、グローバルな規制環境の変化（特にプライバシー保護法案）は、ソフトウェアサービスの設計に大きな影響を与える可能性があります。これらに対して、当社は法務チームと技術チームの連携を強化し、コンプライアンスを競争優位性の源泉に変えていく方針です。" },
-                { type: "heading", level: 2, text: "6. 結論" },
-                { type: "rich_text", text: "2026年度は、当社にとって変革の年となります。全社員が一丸となって、ビジョンの実現に向けて邁進していきましょう。" },
                 {
-                   type: "svg",
-                   content: `<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 80 Q 100 10, 200 80 T 380 80" fill="none" stroke="#007bff" stroke-width="4"/><text x="200" y="95" text-anchor="middle" font-size="12" fill="#666">Growth Trajectory</text></svg>`
+                  type: "rich_text",
+                  variant: "notice-side",
+                  title: "補足",
+                  text: "本サンプルに記載の数値は説明用の架空値であり、実在の企業・組織とは関係しない。"
+                },
+                { type: "heading", level: 1, text: "2. 実績詳細" },
+                { type: "heading", level: 2, text: "部門別概況" },
+                {
+                  type: "table",
+                  headers: ["部門", "主要実績", "評価", "課題"],
+                  rows: [
+                    ["営業部", "既存顧客向け追加受注14件、新規顧客契約5件を獲得。大型案件2件を当月内に成約。", "*好調*", "案件増加に対し提案書レビュー工数が逼迫している。"],
+                    ["製造部", "月間生産量は計画比101.8%で着地。歩留まり率は前月比0.9pt改善。", "概ね順調", "副資材の調達遅延により一部品目の仕掛在庫が滞留した。"],
+                    ["管理部", "請求処理の定型化により月末処理時間を12.5%削減。稟議回付の平均日数も短縮。", "*改善*", "人事評価資料の収集に部門間ばらつきがある。"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "収益内訳" },
+                {
+                  type: "table",
+                  headers: ["区分", "売上高", "構成比", "前月比", "コメント"],
+                  rows: [
+                    ["既存顧客", "82,600千円", "64.3%", "108.7%", "更新案件および追加導入案件が堅調に推移した。"],
+                    ["新規顧客", "29,800千円", "23.2%", "121.4%", "展示会経由の案件が売上計上につながった。"],
+                    ["保守・サポート", "16,000千円", "12.5%", "102.1%", "契約更新率が高く、安定した収益源となっている。"]
+                  ]
+                },
+                { type: "heading", level: 1, text: "3. 課題と翌月対応" },
+                { type: "heading", level: 2, text: "主要課題" },
+                {
+                  type: "list",
+                  items: [
+                    "副資材の納入遅延により、一部製品の出荷計画に余裕がなくなっている。",
+                    "案件増加に伴い、営業提案資料のレビュー待ち時間が伸びている。",
+                    "問い合わせの集中時間帯において、初動対応品質にばらつきが見られる。"
+                  ]
+                },
+                { type: "heading", level: 2, text: "翌月アクション" },
+                {
+                  type: "table",
+                  headers: ["施策", "担当", "期限", "期待効果"],
+                  rows: [
+                    ["代替調達先の追加選定と安全在庫水準の見直し", "製造部 調達課", "2026年4月10日", "納期遅延リスクの低減"],
+                    ["提案書テンプレートの統一およびレビュー承認フローの簡素化", "営業部 営業推進課", "2026年4月15日", "案件処理速度の向上"],
+                    ["問い合わせ一次受付の当番制導入", "管理部 業務支援課", "2026年4月1日", "初動応答の平準化"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "所見" },
+                { type: "rich_text", text: "全体としては売上・利益の両面で計画を上回っており、当月の業績は良好であった。今後は成長局面で顕在化しやすい処理負荷の増加に対し、部門横断で標準化を進めることが重要である。" },
+                { type: "rich_text", text: "とくに*納期遵守率の回復*と_問い合わせ初動の安定化_は、翌月の重点管理項目として継続的にモニタリングする必要がある。" },
+                {
+                  type: "rich_text",
+                  variant: "notice-box",
+                  title: "承認依頼",
+                  text: "上記アクションのうち、調達先追加に関する予備費使用について、4月第1営業日までに部門長承認を取得したい。"
                 }
               ]
             })
@@ -437,63 +480,106 @@ export const scenarios = {
         event: 'message',
         answer: JSON.stringify({
           artifact: {
-            artifact_title: "2026年度 事業戦略報告書 (ドラフト)",
+            artifact_title: "2026年3月 月次報告書 (ドラフト)",
             artifact_type: "json_document",
             artifact_content: JSON.stringify({
               meta: {
-                title: "2026年度 事業戦略報告書",
-                subtitle: "〜 次世代への飛躍と持続可能な成長に向けて 〜",
-                author: "戦略企画本部 第一チーム",
-                date: "2026年5月6日"
+                title: "2026年3月 月次報告書",
+                subtitle: "営業・製造・管理部門の主要実績、課題、および翌月対応方針を整理した社内向けサンプル文書",
+                author: "経営企画部　業務改善室",
+                date: "2026年3月31日",
+                org: "SEIHOKU INDUSTRIES",
+                label: "MONTHLY REPORT",
+                year: "2026"
               },
               blocks: [
-                { type: "heading", level: 1, text: "2026年度 事業戦略報告書" },
-                { type: "rich_text", text: "本報告書は、次年度に向けた当社の戦略的優先事項を概説するものです。市場の不確実性が高まる中、データ駆動型の意思決定と機敏なリソース配分が成功の鍵となります。" },
-                { type: "heading", level: 2, text: "1. エグゼクティブサマリー" },
-                { type: "rich_text", text: "昨年度の成長率を維持しつつ、新規事業領域への投資を30%拡大します。また、既存製品のコスト構造を最適化し、営業利益率の向上を目指します。" },
-                { type: "heading", level: 2, text: "2. 主要マーケット動向" },
-                {
-                  "type": "chart",
-                  "chart_type": "bar",
-                  "title": "2026年度 地域別売上予測 (億円)",
-                  "data": [
-                    { "name": "北米", "value": 450 },
-                    { "name": "欧州", "value": 320 },
-                    { "name": "アジア", "value": 580 },
-                    { "name": "その他", "value": 150 }
-                  ]
-                },
-                { type: "rich_text", text: "北米市場においては、クラウドネイティブソリューションへの需要が急増しています。一方、アジア市場では、ローカルプレイヤーとの競争が激化しており、差別化戦略が求められています。" },
+                { type: "heading", level: 1, text: "1. 月次サマリー" },
                 {
                   type: "table",
-                  headers: ["市場", "シェア", "成長予測", "主要競合"],
+                  headers: ["項目", "内容"],
                   rows: [
-                    ["北米", "25%", "+15%", "Comp A, Comp B"],
-                    ["欧州", "18%", "+5%", "Comp C"],
-                    ["アジア", "30%", "+20%", "Comp D, Comp E"],
-                    ["その他", "7%", "+10%", "N/A"]
+                    ["対象期間", "2026年3月1日〜2026年3月31日"],
+                    ["対象組織", "営業部、製造部、管理部"],
+                    ["報告責任者", "経営企画部長　山田 恒一"]
                   ]
                 },
-                { type: "heading", level: 2, text: "3. 2026年度の重点施策" },
-                { type: "list", items: ["AIプラットフォームのフルリニューアル", "グローバルサプライチェーンのレジリエンス強化", "エンジニアリング組織のダイバーシティ推進"] },
-                { type: "heading", level: 2, text: "4. 財務目標とKPI" },
-                { type: "rich_text", text: "売上高目標は、前年比120%の500億円を掲げます。これを達成するためのKPIは以下の通りです。" },
+                { type: "heading", level: 2, text: "総括" },
+                { type: "rich_text", text: "当月は主力製品 of 受注増加により、全社売上高は計画を上回って推移した。とくに法人向け大型案件の前倒し計上が寄与し、営業利益も月次計画を超過した。" },
+                { type: "rich_text", text: "一方、製造部門では一部資材の納入遅延が発生しており、翌月初旬の出荷計画には一定の注意が必要である。管理部門では請求処理の標準化が進み、月末締め作業時間は前月比で短縮した。" },
+                {
+                  type: "rich_text",
+                  variant: "notice-box",
+                  title: "重要事項",
+                  text: "4月第1週の出荷量増加に備え、製造部と物流委託先との事前調整を3月末までに完了させる必要がある。"
+                },
+                { type: "heading", level: 2, text: "主要KPI" },
                 {
                   type: "table",
-                  headers: ["KPI項目", "目標値", "担当部門"],
+                  headers: ["指標", "実績", "計画", "前月", "差異"],
                   rows: [
-                    ["新規顧客獲得数", "500社", "営業本部"],
-                    ["解約率(Churn Rate)", "2%以下", "カスタマーサクセス"],
-                    ["研究開発投資額", "60億円", "CTO室"]
+                    ["売上高", "128,400千円", "120,000千円", "116,200千円", "*+8,400千円*"],
+                    ["営業利益", "18,900千円", "16,500千円", "15,100千円", "*+2,400千円*"],
+                    ["粗利率", "32.4%", "30.0%", "29.8%", "*+2.4pt*"],
+                    ["新規案件数", "27件", "24件", "21件", "*+3件*"],
+                    ["納期遵守率", "94.2%", "96.0%", "95.1%", "*-1.8pt*"],
+                    ["経費執行率", "97.5%", "100.0%", "93.8%", "*-2.5pt*"]
                   ]
                 },
-                { type: "heading", level: 2, text: "5. 将来展望とリスク要因" },
-                { type: "rich_text", text: "マクロ経済の変動や為替リスクを注視する必要があります。特に、半導体供給の安定性は、当社のハードウェア部門にとって重要なリスク要因です。さらに、グローバルな規制環境の変化（特にプライバシー保護法案）は、ソフトウェアサービスの設計に大きな影響を与える可能性があります。これらに対して、当社は法務チームと技術チームの連携を強化し、コンプライアンスを競争優位性の源泉に変えていく方針です。" },
-                { type: "heading", level: 2, text: "6. 結論" },
-                { type: "rich_text", text: "2026年度は、当社にとって変革の年となります。全社員が一丸となって、ビジョンの実現に向けて邁進していきましょう。" },
                 {
-                   type: "svg",
-                   content: `<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 80 Q 100 10, 200 80 T 380 80" fill="none" stroke="#007bff" stroke-width="4"/><text x="200" y="95" text-anchor="middle" font-size="12" fill="#666">Growth Trajectory</text></svg>`
+                  type: "rich_text",
+                  variant: "notice-side",
+                  title: "補足",
+                  text: "本サンプルに記載の数値は説明用の架空値であり、実在の企業・組織とは関係しない。"
+                },
+                { type: "heading", level: 1, text: "2. 実績詳細" },
+                { type: "heading", level: 2, text: "部門別概況" },
+                {
+                  type: "table",
+                  headers: ["部門", "主要実績", "評価", "課題"],
+                  rows: [
+                    ["営業部", "既存顧客向け追加受注14件、新規顧客契約5件を獲得。大型案件2件を当月内に成約。", "*好調*", "案件増加に対し提案書レビュー工数が逼迫している。"],
+                    ["製造部", "月間生産量は計画比101.8%で着地。歩留まり率は前月比0.9pt改善。", "概ね順調", "副資材の調達遅延により一部品目の仕掛在庫が滞留した。"],
+                    ["管理部", "請求処理の定型化により月末処理時間を12.5%削減。稟議回付の平均日数も短縮。", "*改善*", "人事評価資料の収集に部門間ばらつきがある。"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "収益内訳" },
+                {
+                  type: "table",
+                  headers: ["区分", "売上高", "構成比", "前月比", "コメント"],
+                  rows: [
+                    ["既存顧客", "82,600千円", "64.3%", "108.7%", "更新案件および追加導入案件が堅調に推移した。"],
+                    ["新規顧客", "29,800千円", "23.2%", "121.4%", "展示会経由の案件が売上計上につながった。"],
+                    ["保守・サポート", "16,000千円", "12.5%", "102.1%", "契約更新率が高く、安定した収益源となっている。"]
+                  ]
+                },
+                { type: "heading", level: 1, text: "3. 課題と翌月対応" },
+                { type: "heading", level: 2, text: "主要課題" },
+                {
+                  type: "list",
+                  items: [
+                    "副資材の納入遅延により、一部製品 of 出荷計画に余裕がなくなっている。",
+                    "案件増加に伴い、営業提案資料のレビュー待ち時間が伸びている。",
+                    "問い合わせの集中時間帯において、初動対応品質にばらつきが見られる。"
+                  ]
+                },
+                { type: "heading", level: 2, text: "翌月アクション" },
+                {
+                  type: "table",
+                  headers: ["施策", "担当", "期限", "期待効果"],
+                  rows: [
+                    ["代替調達先の追加選定と安全在庫水準の見直し", "製造部 調達課", "2026年4月10日", "納期遅延リスクの低減"],
+                    ["提案書テンプレートの統一およびレビュー承認フローの簡素化", "営業部 営業推進課", "2026年4月15日", "案件処理速度の向上"],
+                    ["問い合わせ一次受付の当番制導入", "管理部 業務支援課", "2026年4月1日", "初動応答の平準化"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "所見" },
+                { type: "rich_text", text: "全体としては売上・利益の両面で計画を上回っており、当月の業績は良好であった。今後は成長局面で顕在化しやすい処理負荷の増加に対し、部門横断で標準化を進めることが重要である。" },
+                { type: "rich_text", text: "とくに*納期遵守率の回復*と_問い合わせ初動の安定化_は、翌月の重点管理項目として継続的にモニタリングする必要がある。" },
+                {
+                  type: "rich_text",
+                  variant: "notice-box",
+                  title: "承認依頼",
+                  text: "上記アクションのうち、調達先追加に関する予備費使用について、4月第1営業日までに部門長承認を取得したい。"
                 }
               ]
             })
@@ -504,10 +590,216 @@ export const scenarios = {
       { event: 'message_end', metadata: { usage: { total_tokens: 5200 } } }
     ]
   },
-  
-  // =================================================================
-  // Special Pattern: Enterprise Pricing (From Log)
-  // =================================================================
+  'json_document_letter': {
+    efficient: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "json_document"}\n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "商標権侵害に関する警告通知 (ドラフト)",
+            artifact_type: "json_document",
+            artifact_content: JSON.stringify({
+              meta: {
+                template: "letter",
+                title: "商標権侵害に関する警告通知",
+                date: "2026年3月26日",
+                refNo: "TM-2026-03-01",
+                recipient: {
+                  postal: "〒100-0000",
+                  address: "東京都千代田区丸の内一丁目1番1号",
+                  company: "株式会社ネクストブリッジ",
+                  name: "代表取締役　山田 太郎　様"
+                },
+                sender: {
+                  postal: "〒150-0000",
+                  address: "東京都渋谷区桜丘町2番2号",
+                  company: "アルファリンク株式会社",
+                  department: "法務・知的財産室"
+                }
+              },
+              blocks: [
+                {
+                  type: "rich_text",
+                  variant: "notice-side",
+                  title: "サンプル文面",
+                  text: "本書は表示確認用の架空サンプルです。実際の送付に用いる場合は、事実関係、登録商標の範囲および送付方法を別途確認してください。"
+                },
+                {
+                  type: "rich_text",
+                  text: "当社は、「ALPHA LINK」の表示について日本国内における商標権を管理する権利者又は正当な権限を有する者です。貴社のウェブサイト、広告表示および営業資料において、当該表示又はこれに類似する表示が継続的に使用されていることを確認いたしました。"
+                },
+                {
+                  type: "rich_text",
+                  text: "当社は、上記使用態様が当社の商標権を侵害し、又は少なくとも取引者・需要者に出所の混同を生じさせるおそれが高いものと判断しております。つきましては、下記のとおり正式に通知し、速やかな是正を求めます。"
+                },
+                { type: "heading", level: 2, text: "1．通知の趣旨" },
+                {
+                  type: "rich_text",
+                  text: "貴社が現在使用している「ALFA LINK」「ALPHALINK」等の表示は、外観、称呼又は観念のいずれかにおいて当社管理商標と類似し、当社商品又はサービスとの関連を誤認させる可能性があります。"
+                },
+                {
+                  type: "table",
+                  headers: ["項目", "内容"],
+                  rows: [
+                    ["対象表示", "「ALFA LINK」「ALPHALINK」その他これらに類似する表示"],
+                    ["確認媒体", "コーポレートサイト、サービス紹介ページ、オンライン広告、営業提案資料"],
+                    ["問題点", "当社管理商標と近似した表示を、同種又は関連性の高いサービス表示として使用している点"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "2．要求事項" },
+                {
+                  type: "rich_text",
+                  text: "貴社に対し、下記各事項を速やかに実施のうえ、その結果を書面又は電子メールによりご回答くださるよう求めます。"
+                },
+                {
+                  type: "rich_text",
+                  variant: "notice-box",
+                  title: "重要事項",
+                  text: "本通知到達後10営業日以内に、対象表示の使用停止状況、修正完了日および再発防止方針をご回答ください。"
+                },
+                {
+                  type: "list",
+                  items: [
+                    "当社管理商標と類似する表示の使用を直ちに中止すること。",
+                    "ウェブサイト、広告、営業資料、SNS投稿その他の媒体から対象表示を削除又は修正すること。",
+                    "既に配布済みの資料又は掲載中媒体について、回収、差替え又は非公開化の対応方針を明示すること。",
+                    "今後同種表示を使用しない旨、および社内確認体制を整備する旨を書面で回答すること。"
+                  ]
+                },
+                { type: "heading", level: 2, text: "3．所見と今後の対応" },
+                {
+                  type: "rich_text",
+                  text: "万一、上記期限までに誠意あるご回答又は是正措置が確認できない場合には、当社は差止請求、損害賠償請求その他必要と判断する法的措置を検討いたします。"
+                },
+                {
+                  type: "table",
+                  headers: ["連絡先項目", "内容"],
+                  rows: [
+                    ["担当窓口", "法務・知的財産室"],
+                    ["メール", "legal@example.co.jp"],
+                    ["電話", "03-1234-5678"]
+                  ]
+                },
+                {
+                  type: "rich_text",
+                  text: "以上"
+                }
+              ]
+            })
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 5000 } } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "json_document"}\n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "商標権侵害に関する警告通知 (ドラフト)",
+            artifact_type: "json_document",
+            artifact_content: JSON.stringify({
+              meta: {
+                template: "letter",
+                title: "商標権侵害に関する警告通知",
+                date: "2026年3月26日",
+                refNo: "TM-2026-03-01",
+                recipient: {
+                  postal: "〒100-0000",
+                  address: "東京都千代田区丸の内一丁目1番1号",
+                  company: "株式会社ネクストブリッジ",
+                  name: "代表取締役　山田 太郎　様"
+                },
+                sender: {
+                  postal: "〒150-0000",
+                  address: "東京都渋谷区桜丘町2番2号",
+                  company: "アルファリンク株式会社",
+                  department: "法務・知的財産室"
+                }
+              },
+              blocks: [
+                {
+                  type: "rich_text",
+                  variant: "notice-side",
+                  title: "サンプル文面",
+                  text: "本書は表示確認用の架空サンプルです。実際の送付に用いる場合は、事実関係、登録商標の範囲および送付方法を別途確認してください。"
+                },
+                {
+                  type: "rich_text",
+                  text: "当社は、「ALPHA LINK」の表示について日本国内における商標権を管理する権利者又は正当な権限を有する者です。貴社のウェブサイト、広告表示および営業資料において、当該表示又はこれに類似する表示が継続的に使用されていることを確認いたしました。"
+                },
+                {
+                  type: "rich_text",
+                  text: "当社は、上記使用態様が当社の商標権を侵害し、又は少なくとも取引者・需要者に出所の混同を生じさせるおそれが高いものと判断しております。つきましては、下記のとおり正式に通知し、速やかな是正を求めます。"
+                },
+                { type: "heading", level: 2, text: "1．通知の趣旨" },
+                {
+                  type: "rich_text",
+                  text: "貴社が現在使用している「ALFA LINK」「ALPHALINK」等の表示は、外観、称呼又は観念 of いずれかにおいて当社管理商標と類似し、当社商品又はサービスとの関連を誤認させる可能性があります。"
+                },
+                {
+                  type: "table",
+                  headers: ["項目", "内容"],
+                  rows: [
+                    ["対象表示", "「ALFA LINK」「ALPHALINK」その他これらに類似する表示"],
+                    ["確認媒体", "コーポレートサイト、サービス紹介ページ、オンライン広告、営業提案資料"],
+                    ["問題点", "当社管理商標と近似した表示を、同種又は関連性の高いサービス表示として使用している点"]
+                  ]
+                },
+                { type: "heading", level: 2, text: "2．要求事項" },
+                {
+                  type: "rich_text",
+                  text: "貴社に対し、下記各事項を速やかに実施のうえ、その結果を書面又は電子メールによりご回答くださるよう求めます。"
+                },
+                {
+                  type: "rich_text",
+                  variant: "notice-box",
+                  title: "重要事項",
+                  text: "本通知到達後10営業日以内に、対象表示の使用停止状況、修正完了日および再発防止方針をご回答ください。"
+                },
+                {
+                  type: "list",
+                  items: [
+                    "当社管理商標と類似する表示の使用を直ちに中止すること。",
+                    "ウェブサイト、広告、営業資料、SNS投稿その他の媒体から対象表示を削除又は修正すること。",
+                    "既に配布済みの資料又は掲載中媒体について、回収、差替え又は非公開化の対応方針を明示すること。",
+                    "今後同種表示を使用しない旨、および社内確認体制を整備する旨を書面で回答すること。"
+                  ]
+                },
+                { type: "heading", level: 2, text: "3．所見と今後の対応" },
+                {
+                  type: "rich_text",
+                  text: "万一、上記期限までに誠意あるご回答又は是正措置が確認できない場合には、当社は差止請求、損害賠償請求その他必要と判断する法的措置を検討いたします。"
+                },
+                {
+                  type: "table",
+                  headers: ["連絡先項目", "内容"],
+                  rows: [
+                    ["担当窓口", "法務・知的財産室"],
+                    ["メール", "legal@example.co.jp"],
+                    ["電話", "03-1234-5678"]
+                  ]
+                },
+                {
+                  type: "rich_text",
+                  text: "以上"
+                }
+              ]
+            })
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 5200 } } }
+    ]
+  },
   'rag_only_pricing': {
     efficient: [], // Not implemented for this specific log replication
     partner: [
@@ -2459,6 +2751,116 @@ h2.section-title {
             image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=1000',
             annotations: [
               'PROJECT NEO 実行委員会 メンバー'
+            ]
+          }
+        },
+        {
+          id: 'slide_swimlane_checkout',
+          layout_type: 'swimlane_slide',
+          content: {
+            title: "Enterprise E2E Checkout, Payment, Inventory & Notification Flow",
+            lanes: [
+              { id: "customer", label: "Customer (Client)", type: "client" },
+              { id: "frontend", label: "Frontend App (React)", type: "frontend" },
+              { id: "api", label: "API Gateway (Go)", type: "gateway" },
+              { id: "auth", label: "Auth Service (OAuth2)", type: "gateway" },
+              { id: "order", label: "Order Service (Java)", type: "service" },
+              { id: "payment", label: "Payment Service (Go)", type: "service" },
+              { id: "stripe", label: "Stripe API Gateway", type: "external" },
+              { id: "inventory", label: "Inventory Service (Python)", type: "service" },
+              { id: "notify", label: "Notification Service", type: "service" },
+              { id: "db", label: "Database Cluster (PG)", type: "database" }
+            ],
+            phases: [
+              { name: "Auth & Order Init", color: "blue", start_step: 1, end_step: 8 },
+              { name: "Stripe Checkout Session", color: "indigo", start_step: 9, end_step: 12 },
+              { name: "Backend Sync & Commit", color: "emerald", start_step: 13, end_step: 17 },
+              { name: "Notification & Complete", color: "gold", start_step: 18, end_step: 20 }
+            ],
+            steps: [
+              { lane: "customer", title: "Click Buy Now", description: "Select items & checkout", flow_to: "frontend" },
+              { lane: "frontend", title: "Checkout Init", payload: "{ items: [{ id: 'prod_1', qty: 2 }] }", flow_to: "api" },
+              { lane: "api", title: "Token Validation", payload: "Authorization: Bearer jwt_123", flow_to: "auth" },
+              { lane: "auth", title: "JWT Verified", payload: "{ active: true, scope: 'write:orders' }", flow_to: "api" },
+              { lane: "api", title: "Create Order", payload: "POST /api/v1/orders", flow_to: "order" },
+              { lane: "order", title: "Insert Pending Order", payload: "INSERT INTO orders (status) VALUES ('pending')", flow_to: "db", flow_color: "purple" },
+              { lane: "db", title: "Order Record Created", payload: "INSERT 0 1 { orderId: 'ord_999' }", flow_to: "order", flow_color: "purple" },
+              { lane: "order", title: "Init Payment Session", payload: "{ orderId: 'ord_999', total: 5000 }", flow_to: "payment" },
+              { lane: "payment", title: "Create Stripe Session", payload: "POST /v1/checkout/sessions", flow_to: "stripe", flow_color: "blue" },
+              { lane: "stripe", title: "Session Created", payload: "{ session_id: 'cs_live_...', url: 'stripe.com/...' }", flow_to: "payment", flow_color: "blue" },
+              { lane: "payment", title: "Return Redirect URL", payload: "{ redirectUrl: 'stripe.com/...' }", flow_to: "frontend", flow_color: "blue" },
+              { lane: "frontend", title: "Redirect to Stripe", description: "Customer redirected to card page", flow_to: "stripe", flow_color: "blue" },
+              { lane: "stripe", title: "Webhook: Completed", payload: "{ type: 'payment_intent.succeeded' }", flow_to: "payment", flow_style: "dashed", flow_color: "blue" },
+              { lane: "payment", title: "Update Order Paid", payload: "UPDATE orders SET status = 'paid'", flow_to: "db", flow_color: "purple" },
+              { lane: "db", title: "Tx Committed", payload: "COMMIT TRANSACTION", flow_to: "payment", flow_style: "dashed", flow_color: "purple" },
+              { lane: "payment", title: "Deduct Stock", payload: "POST /api/v1/stock/deduct { qty: 2 }", flow_to: "inventory", flow_color: "green" },
+              { lane: "inventory", title: "Stock Allocation", payload: "UPDATE stocks SET qty = qty - 2", flow_to: "db", flow_style: "dashed", flow_color: "purple" },
+              { lane: "payment", title: "Publish Completed Event", payload: "PUBLISH order.paid { email: 'usr@ex.com' }", flow_to: "notify", flow_style: "dashed", flow_color: "green" },
+              { lane: "notify", title: "Send Invoices", payload: "SMTP 250 OK (Sent email & Slack alert)", flow_to: "frontend", flow_style: "dashed", flow_color: "green" },
+              { lane: "frontend", title: "Render Success", description: "Display confirmation screen & confetti", flow_to: "customer" }
+            ],
+            annotations: [
+              "※ SCA (認証要件) 強化のため、3D-Secure 認証失敗時は Stripe Gateway 側でセッションがキャンセルされます。",
+              "※ 在庫引当 (Inventory Service) 失敗時は、自動補償トランザクション (Sagaパターン) により決済返金処理が走ります。",
+              "※ メール送信失敗時はメッセージキュー (RabbitMQ) により指数バックオフ再試行 (最大5回) が実施されます。"
+            ]
+          }
+        },
+        {
+          id: 'slide_system_architecture_auth',
+          layout_type: 'system_architecture_slide',
+          content: {
+            title: 'Microservices Auth & Payment Architecture',
+            tiers: [
+              { id: 'client_tier', label: 'Client Tier', color: 'blue' },
+              { id: 'gateway_tier', label: 'Gateway Tier', color: 'indigo' },
+              { id: 'service_tier', label: 'Service Tier', color: 'emerald' },
+              { id: 'data_tier', label: 'Data Tier', color: 'purple' }
+            ],
+            nodes: [
+              { id: 'spa', tier: 'client_tier', type: 'frontend', label: 'React SPA Client' },
+              { id: 'mobile', tier: 'client_tier', type: 'client', label: 'iOS/Android App' },
+              { id: 'gw', tier: 'gateway_tier', type: 'gateway', label: 'Kong API Gateway' },
+              { id: 'auth_srv', tier: 'service_tier', type: 'service', label: 'OAuth2 Auth Service' },
+              { id: 'pay_srv', tier: 'service_tier', type: 'service', label: 'Stripe Payment Service' },
+              { id: 'ext_stripe', tier: 'service_tier', type: 'external', label: 'Stripe API' },
+              { id: 'user_db', tier: 'data_tier', type: 'database', label: 'User Postgres DB' },
+              { id: 'pay_db', tier: 'data_tier', type: 'database', label: 'Payment MongoDB Cluster' }
+            ],
+            connections: [
+              { from: 'spa', to: 'gw', color: 'blue', style: 'solid', label: 'HTTPS' },
+              { from: 'mobile', to: 'gw', color: 'blue', style: 'solid', label: 'HTTPS' },
+              { from: 'gw', to: 'auth_srv', color: 'indigo', style: 'solid', label: 'gRPC' },
+              { from: 'gw', to: 'pay_srv', color: 'indigo', style: 'solid', label: 'gRPC' },
+              { from: 'auth_srv', to: 'user_db', color: 'purple', style: 'solid', label: 'SQL' },
+              { from: 'pay_srv', to: 'pay_db', color: 'purple', style: 'solid', label: 'NoSQL' },
+              { from: 'pay_srv', to: 'ext_stripe', color: 'green', style: 'dashed', label: 'REST API' }
+            ],
+            annotations: [
+              '※ クライアントからのすべてのHTTPSリクエストは Kong Gateway で一元的にトークン検証されます。',
+              '※ データストア層はトランザクション整合性のため論理分割されています。'
+            ]
+          }
+        },
+        {
+          id: 'slide_org_chart_neo',
+          layout_type: 'org_chart_slide',
+          content: {
+            title: 'エンタープライズDX推進体制 (縦5階層・限界耐久テスト)',
+            members: [
+              { id: 'cdo', role: '全体統括 (CDO / Sponsor)', name: '佐藤 健太', level: 'top' },
+              { id: 'pmo', role: 'PMO事務局 (PMO)', name: '鈴木 一郎', level: 'middle', parent: 'cdo' },
+              { id: 'dx_hq', role: 'DX推進本部 (HQ Lead)', name: '高橋 二郎', level: 'middle', parent: 'cdo' },
+              { id: 'arch_board', role: '技術統括委員会 (Arch Board)', name: '田中 順子', level: 'middle', parent: 'dx_hq' },
+              { id: 'biz_lead', role: 'ビジネス企画推進 (Biz Lead)', name: '渡辺 健', level: 'middle', parent: 'dx_hq' },
+              { id: 'app_dev', role: '開発第一部 (App Dev)', name: '第一開発チーム', level: 'member', parent: 'arch_board' },
+              { id: 'security_audit', role: 'セキュリティ監査 (Sec Audit)', name: '監査第一チーム', level: 'member', parent: 'arch_board' },
+              { id: 'infra_platform', role: 'インフラ基盤 (Infra Ops)', name: 'プラットフォームチーム', level: 'member', parent: 'app_dev' },
+              { id: 'sre_team', role: '自動化運用 (SRE Team)', name: '自動化推進チーム', level: 'member', parent: 'app_dev' }
+            ],
+            annotations: [
+              '※ SRE・プラットフォームチームは、App Devの直属としてクラウドネイティブインフラの自律運用を担当します。',
+              '※ 技術推進方針はArch Boardで決定され、PMOへ進捗が週次集約されます。'
             ]
           }
         }
