@@ -68,6 +68,11 @@ const ChatView = ({
     restoreText,              // ★追加: 復元テキスト
     onRestoreTextConsumed,    // ★追加: 復元完了コールバック
     isShieldActive,           // ★追加: シールドモード状態
+    // ★追加: エラーインテリジェンスのステート
+    activeError,
+    retryCountdown,
+    isRetrying,
+    retryCount,
 }) => {
     const { conversationId: urlConversationId } = useParams();
     const navigate = useNavigate();
@@ -166,6 +171,11 @@ const ChatView = ({
                 restoreText={restoreText}
                 onRestoreTextConsumed={onRestoreTextConsumed}
                 isShieldActive={isShieldActive}
+                // ★追加: リトライステータスの伝播
+                activeError={activeError}
+                retryCountdown={retryCountdown}
+                isRetrying={isRetrying}
+                retryCount={retryCount}
             />
         </motion.div>
     );

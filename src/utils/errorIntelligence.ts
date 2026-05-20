@@ -57,6 +57,7 @@ export interface IntelligenceError {
     icon: ErrorIcon;
     statusCode?: number;          // HTTPステータスコード
     rawErrorMessage?: string;     // 生のエラーメッセージ（詳細表示用）
+    isWorkflowError?: boolean;    // ★追加: ワークフローエラー由来フラグ
 }
 
 /**

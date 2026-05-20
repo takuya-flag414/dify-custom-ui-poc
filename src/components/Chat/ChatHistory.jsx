@@ -32,6 +32,11 @@ const ChatHistory = ({
   onAutoScrollChange, // ★追加
   onOpenTableModal, // ★追加: Table Modalを開くハンドラ
   onQuote, // ★追加: 引用用ハンドラ
+  // ★追加: エラーインテリジェンスのステート
+  activeError = null,
+  retryCountdown = 0,
+  isRetrying = false,
+  retryCount = 0,
   ...rest
 }) => {
   const messagesEndRef = useRef(null);
@@ -182,6 +187,10 @@ const ChatHistory = ({
               lastUserMessage = msg;
             }
 
+            // ★追加: このメッセージがアクティブなエラーに対応するかどうか判定
+            // 通常、最後のAIメッセージでワークフローエラーがある場合にのみリトライ状態を渡す
+            const isActiveErrorMsg = isLastAi && activeError?.isWorkflowError;
+
             return (
               <MessageBlock
                 key={msg.id}
@@ -197,6 +206,10 @@ const ChatHistory = ({
                 isLastAiMessage={isLastAi}
                 onOpenTableModal={onOpenTableModal}
                 onQuote={onQuote} // ★追加: 引用用ハンドラ
+                // ★追加: リトライ情報の伝搬
+                retryCountdown={isActiveErrorMsg ? retryCountdown : 0}
+                isRetrying={isActiveErrorMsg ? isRetrying : false}
+                retryCount={isActiveErrorMsg ? retryCount : 0}
               />
             );
           });

@@ -47,6 +47,11 @@ const ChatArea = (props) => {
     restoreText = null,
     onRestoreTextConsumed,
     isShieldActive = false,  // ★追加: シールドモード状態
+    // ★追加: エラーインテリジェンスのステート
+    activeError = null,
+    retryCountdown = 0,
+    isRetrying = false,
+    retryCount = 0,
   } = props;
 
   // ★追加: 表示モード管理
@@ -367,6 +372,11 @@ const ChatArea = (props) => {
                 onAutoScrollChange={setAutoScrollEnabled}
                 onOpenTableModal={handleOpenTableModal}
                 onQuote={(text) => setQuoteContext(text)}
+                // ★追加: リトライステータスの伝播
+                activeError={activeError}
+                retryCountdown={retryCountdown}
+                isRetrying={isRetrying}
+                retryCount={retryCount}
               />
             )}
             <div className="bottom-controls-wrapper">

@@ -23,6 +23,7 @@ interface UseErrorIntelligenceReturn {
         options?: {
             inputText?: string;
             statusCode?: number;
+            isWorkflowError?: boolean; // ★追加
         }
     ) => void;
     /** エラーカードを閉じる */
@@ -147,12 +148,17 @@ export function useErrorIntelligence(): UseErrorIntelligenceReturn {
         options?: {
             inputText?: string;
             statusCode?: number;
+            isWorkflowError?: boolean; // ★追加
         }
     ) => {
         clearTimers();
 
         const analyzed = analyzeIntelligenceError(raw, options?.statusCode);
-        setActiveError(analyzed);
+        const errorWithFlags = {
+            ...analyzed,
+            isWorkflowError: options?.isWorkflowError || false
+        };
+        setActiveError(errorWithFlags);
         setShakeKey(prev => prev + 1); // Shake トリガー
 
         onRetryCallbackRef.current = onRetry || null;
@@ -163,7 +169,7 @@ export function useErrorIntelligence(): UseErrorIntelligenceReturn {
         }
 
         // ★追加: retryStrategyに基づく分岐
-        switch (analyzed.retryStrategy) {
+        switch (errorWithFlags.retryStrategy) {
             case 'immediate-restore':
                 // 即時復元: テキストを即座に復元
                 if (savedInputTextRef.current) {
@@ -173,7 +179,7 @@ export function useErrorIntelligence(): UseErrorIntelligenceReturn {
 
             case 'auto-retry':
                 // 自動再送信: リトライ中はテキスト復元せず、失敗時に復元
-                scheduleAutoRetry(analyzed, retryCount);
+                scheduleAutoRetry(errorWithFlags, retryCount);
                 break;
 
             case 'no-retry':

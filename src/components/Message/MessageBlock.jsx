@@ -80,7 +80,11 @@ const MessageBlock = ({
     onRegenerate,
     isLastAiMessage = false,  // 再送信ボタンを表示するかどうかの制御
     onOpenTableModal, // ★追加: Table Modalを開くハンドラ
-    onQuote // ★追加: 引用ハンドラ
+    onQuote, // ★追加: 引用ハンドラ
+    // ★追加: リトライ情報のProps
+    retryCountdown = 0,
+    isRetrying = false,
+    retryCount = 0,
 }) => {
     const {
         role,
@@ -468,7 +472,12 @@ const MessageBlock = ({
 
                                     {/* ★改修: ワークフローエラーをInlineErrorCardで表示 */}
                                     {isAi && hasWorkflowError && workflowError && (
-                                        <InlineErrorCard error={workflowError} />
+                                        <InlineErrorCard 
+                                            error={workflowError}
+                                            retryCountdown={retryCountdown}
+                                            isRetrying={isRetrying}
+                                            retryCount={retryCount}
+                                        />
                                     )}
 
                                     {/* ★変更: Artifactカードを本文の上に表示。タイトル/タイプが確定した時点で即座に表示する */}
@@ -653,7 +662,10 @@ const arePropsEqual = (prev, next) => {
             && prev.onRegenerate === next.onRegenerate
             && prev.isLastAiMessage === next.isLastAiMessage
             && prev.onOpenTableModal === next.onOpenTableModal
-            && prev.onQuote === next.onQuote;
+            && prev.onQuote === next.onQuote
+            && prev.retryCountdown === next.retryCountdown
+            && prev.isRetrying === next.isRetrying
+            && prev.retryCount === next.retryCount;
     }
 
     // 2. 参照が違う場合（ストリーミング中の更新など）、必要なフィールドだけ浅く比較

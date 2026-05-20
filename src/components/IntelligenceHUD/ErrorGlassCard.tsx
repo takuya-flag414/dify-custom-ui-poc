@@ -248,7 +248,7 @@ const ErrorGlassCard: React.FC<ErrorGlassCardProps> = ({
     return (
         <div className="error-hud-overlay">
             <AnimatePresence mode="wait">
-                {error && (
+                {error && !error.isWorkflowError && (
                     <motion.div
                         key="error-glass-card"
                         className="error-glass-card"
