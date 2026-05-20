@@ -19,12 +19,26 @@ import './AiSlideStudio.css';
 
 const AiSlideStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backendBApiUrl }) => {
     const [mode, setMode] = useState('ロジカル'); // ★初期値を新しい日本語名に変更
-    const [volume, setVolume] = useState('10枚程度 (標準)');
+    // ★ボリューム指定タイプ: 'fuzzy' (ざっくり) | 'strict' (厳格)
+    const [volumeType, setVolumeType] = useState('fuzzy');
+    const [fuzzyVolume, setFuzzyVolume] = useState('10枚程度 (標準)');
+    const [strictVolume, setStrictVolume] = useState(10);
     const [theme, setTheme] = useState('modern-indigo');
     const [target, setTarget] = useState('顧客・クライアント');
     const [customTarget, setCustomTarget] = useState('');
     const [selectedConstraints, setSelectedConstraints] = useState([]);
     const [customConstraints, setCustomConstraints] = useState('');
+    
+    // ★ユーザー手動設定の除外スライド
+    const [manualExcludeTitle, setManualExcludeTitle] = useState(false);
+    const [manualExcludeAgenda, setManualExcludeAgenda] = useState(false);
+    const [manualExcludeEnding, setManualExcludeEnding] = useState(false);
+
+    // ★1〜2枚指定時の強制除外判定 (UIとプロンプト用)
+    const isStrictLowVolume = volumeType === 'strict' && strictVolume <= 2;
+    const excludeTitle = isStrictLowVolume ? true : manualExcludeTitle;
+    const excludeAgenda = isStrictLowVolume ? true : manualExcludeAgenda;
+    const excludeEnding = isStrictLowVolume ? true : manualExcludeEnding;
     
     // ChatInput用の状態
     const [searchSettings, setSearchSettings] = useState({
@@ -100,6 +114,31 @@ const AiSlideStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backendBA
 
         const currentMode = modesConfig[mode];
 
+        // ★追加: ボリューム指定タイプに応じたプロンプト指示の動的変更
+        const volumeText = volumeType === 'fuzzy'
+            ? `${fuzzyVolume}`
+            : `目標枚数: ${strictVolume} 枚（極力この枚数に近づけてください）`;
+
+        const volumeInstruction = volumeType === 'fuzzy'
+            ? `・スライド全体の構成ボリュームは「${fuzzyVolume}」を目安にしてください。内容の論理性やバランスに応じて、AIが最適な枚数に微調整して構いません。`
+            : `・【目標】生成するプレゼンテーションスライドの総数は、極力【${strictVolume}枚】前後になるように構成してください。
+・構成テーマのボリュームに応じて、可能な限りこの指定枚数に近づくようスライドの分割やまとめ方を調整してください。`;
+
+        // ★追加: スライド構成の除外指示の組み立て
+        const exclusions = [];
+        if (excludeTitle) {
+            exclusions.push('・【表紙不要】1枚目のタイトル（表紙）スライドは作成せず、直接コンテンツ本編スライドから開始してください。');
+        }
+        if (excludeAgenda) {
+            exclusions.push('・【目次不要】アジェンダや目次、全体の流れを説明するスライドは作成しないでください。');
+        }
+        if (excludeEnding) {
+            exclusions.push('・【終了スライド不要】「ご清聴ありがとうございました」や「Q&A」等の締めくくりのスライドは作成しないでください。');
+        }
+        const exclusionsText = exclusions.length > 0
+            ? `\n# スライド構成の除外指示\n${exclusions.join('\n')}`
+            : '';
+
         // プロンプトを組み立てる
         const finalPrompt = `
 # 指示
@@ -111,12 +150,14 @@ const AiSlideStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backendBA
 ・スタイル方針: ${mode}
 ・具体的指示: ${currentMode.instruction}
 ・ターゲット: ${target === 'その他' ? customTarget : target}
-・想定ボリューム: ${volume}
+・想定ボリューム: ${volumeText}
 ・適用デザインテーマ: ${theme}
 
 # 制約事項
 ${selectedConstraints.map(c => `・${c}`).join('\n')}
 ${customConstraints ? `・${customConstraints}` : ''}
+${volumeInstruction}
+${exclusionsText}
 ・各スライドの「タイトル」と「内容の要点（3-5点）」を箇条書きで明記してください。
 ・スライドの流れ（ストーリーライン）が論理的であることを確認してください。
 ・最終的にスライドとしてレンダリングするため、構造化された情報を出力してください。
@@ -194,20 +235,91 @@ ${customConstraints ? `・${customConstraints}` : ''}
                     ))}
                 </div>
 
-                {/* Options Chips */}
+                {/* Options Chips & Input */}
                 <div className="ai-slide-options-group">
                     <div className="ai-slide-options-label">ボリューム</div>
-                    <div className="ai-slide-chips-row">
-                        {volumes.map(v => (
-                            <button 
-                                key={v} 
-                                className={`ai-slide-option-chip ${volume === v ? 'active' : ''}`}
-                                onClick={() => setVolume(v)}
-                            >
-                                {v}
-                            </button>
-                        ))}
+                    
+                    {/* ボリューム指定方式の切り替えトグル */}
+                    <div className="ai-slide-volume-toggle-group">
+                        <button 
+                            className={`ai-slide-volume-toggle-btn ${volumeType === 'fuzzy' ? 'active' : ''}`}
+                            onClick={() => setVolumeType('fuzzy')}
+                        >
+                            ざっくり指定
+                        </button>
+                        <button 
+                            className={`ai-slide-volume-toggle-btn ${volumeType === 'strict' ? 'active' : ''}`}
+                            onClick={() => setVolumeType('strict')}
+                        >
+                            目標枚数を数値で指定
+                        </button>
                     </div>
+
+                    <AnimatePresence mode="wait">
+                        {volumeType === 'fuzzy' ? (
+                            <motion.div 
+                                key="fuzzy-selector"
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -5 }}
+                                transition={{ duration: 0.2 }}
+                                className="ai-slide-chips-row"
+                            >
+                                {volumes.map(v => (
+                                    <button 
+                                        key={v} 
+                                        className={`ai-slide-option-chip ${fuzzyVolume === v ? 'active' : ''}`}
+                                        onClick={() => setFuzzyVolume(v)}
+                                    >
+                                        {v}
+                                    </button>
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <motion.div 
+                                key="strict-selector"
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -5 }}
+                                transition={{ duration: 0.2 }}
+                                className="ai-slide-strict-row"
+                            >
+                                <span className="ai-slide-strict-label">作成するスライドの枚数:</span>
+                                <div className="ai-slide-number-stepper">
+                                    <button 
+                                        type="button"
+                                        className="stepper-btn"
+                                        onClick={() => setStrictVolume(prev => Math.max(1, prev - 1))}
+                                        disabled={strictVolume <= 1}
+                                    >
+                                        -
+                                    </button>
+                                    <input 
+                                        type="number"
+                                        className="stepper-input"
+                                        min="1"
+                                        max="30"
+                                        value={strictVolume}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value, 10);
+                                            if (!isNaN(val)) {
+                                                setStrictVolume(Math.min(30, Math.max(1, val)));
+                                            }
+                                        }}
+                                    />
+                                    <button 
+                                        type="button"
+                                        className="stepper-btn"
+                                        onClick={() => setStrictVolume(prev => Math.min(30, prev + 1))}
+                                        disabled={strictVolume >= 30}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <span className="ai-slide-strict-unit">枚</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
 
@@ -242,7 +354,54 @@ ${customConstraints ? `・${customConstraints}` : ''}
                                     value={customTarget}
                                     onChange={(e) => setCustomTarget(e.target.value)}
                                     autoFocus
+                                
                                 />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* ★追加: 除外スライドオプション */}
+                <div className="ai-slide-options-group">
+                    <div className="ai-slide-options-label">含めないスライド（除外設定）</div>
+                    <div className="ai-slide-chips-row">
+                        <button 
+                            className={`ai-slide-option-chip exclude-chip ${excludeTitle ? 'active' : ''}`}
+                            onClick={() => setManualExcludeTitle(!manualExcludeTitle)}
+                            disabled={isStrictLowVolume}
+                            title={isStrictLowVolume ? "1〜2枚の目標指定時は自動的に表紙が除外されます" : ""}
+                        >
+                            表紙 (タイトル) 不要 {isStrictLowVolume && " (必須)"}
+                        </button>
+                        <button 
+                            className={`ai-slide-option-chip exclude-chip ${excludeAgenda ? 'active' : ''}`}
+                            onClick={() => setManualExcludeAgenda(!manualExcludeAgenda)}
+                            disabled={isStrictLowVolume}
+                            title={isStrictLowVolume ? "1〜2枚の目標指定時は自動的にアジェンダが除外されます" : ""}
+                        >
+                            アジェンダ (目次) 不要 {isStrictLowVolume && " (必須)"}
+                        </button>
+                        <button 
+                            className={`ai-slide-option-chip exclude-chip ${excludeEnding ? 'active' : ''}`}
+                            onClick={() => setManualExcludeEnding(!manualExcludeEnding)}
+                            disabled={isStrictLowVolume}
+                            title={isStrictLowVolume ? "1〜2枚の目標指定時は自動的に終了スライドが除外されます" : ""}
+                        >
+                            終了・Q&A不要 {isStrictLowVolume && " (必須)"}
+                        </button>
+                    </div>
+
+                    {/* ★追加: ロック時のフレンドリーな理由説明 */}
+                    <AnimatePresence>
+                        {isStrictLowVolume && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                className="ai-slide-options-notice"
+                                style={{ overflow: 'hidden' }}
+                            >
+                                💡 目標スライド数が 1〜2 枚の場合、本編スライドの内容を十分に確保するため、表紙やアジェンダ（目次）などのスライドは自動的に除外（不要にロック）されます。
                             </motion.div>
                         )}
                     </AnimatePresence>
