@@ -41,6 +41,7 @@ import TutorialOverlay from './components/Tutorial/TutorialOverlay';
 import { useOnboarding } from './hooks/useOnboarding';
 import OnboardingScreen from './components/Onboarding/OnboardingScreen';
 import { FEATURE_FLAGS } from './config/featureFlags';
+import { detectMermaidType, getMermaidLabel } from './utils/mermaidHelper'; // ★追加: Mermaid自動展開用のユーティリティ
 
 // Phase A: 認証機能
 import { useAuth } from './context/AuthContext';
@@ -346,6 +347,48 @@ function App() {
       hasOpenedForStreamingRef.current = false;
     }
   }, [isGenerating, streamingMessage?.artifact?.artifact_title, streamingMessage?.artifact?.artifact_type, streamingMessage?.artifact?.type]);
+
+  // ★追加: ストリーミング中にMermaidコードブロックの受信完了を検知した時点で自動的にパネルを開く
+  const hasOpenedMermaidRef = useRef({});
+  useEffect(() => {
+    if (!isGenerating || !streamingMessage?.text) {
+      if (!isGenerating) {
+        // 生成完了後にフラグをリセット
+        hasOpenedMermaidRef.current = {};
+      }
+      return;
+    }
+
+    const messageId = streamingMessage.id || streamingMessage.messageId || 'streaming';
+    if (hasOpenedMermaidRef.current[messageId]) {
+      return;
+    }
+
+    const text = streamingMessage.text;
+    // 閉じられた ```mermaid ... ``` または ```mermaid:ファイル名 ... ``` が存在するかチェック
+    const mermaidRegex = /```mermaid(?::([^\s]+))?\s+([\s\S]*?)```/;
+    const match = text.match(mermaidRegex);
+
+    if (match) {
+      const fileName = match[1] || '';
+      const codeContent = match[2].trim();
+      const subType = detectMermaidType(codeContent);
+      const friendlyLabel = getMermaidLabel(subType);
+
+      // 自動オープン実行済みフラグを設定
+      hasOpenedMermaidRef.current[messageId] = true;
+
+      // パネルを自動展開
+      openArtifact({
+        title: friendlyLabel,
+        type: `mermaid_${subType}`,
+        content: codeContent,
+        fileName: fileName, // ファイル名情報を渡す
+      });
+
+      addLog(`[Mermaid Auto Open] Mermaidブロックの受信完了を検知したため、自動的にパネルを開きました: ${friendlyLabel}`, 'info');
+    }
+  }, [isGenerating, streamingMessage?.text, streamingMessage?.id, streamingMessage?.messageId]);
 
   // ★追加: Artifactレスポンス自動展開
   // メッセージ完了時、最新AIメッセージにartifactが存在したら最終データでArtifactPanelを更新

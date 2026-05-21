@@ -266,6 +266,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             } catch (e) {
                 addLog(`[Upload Error] ${e.message}`, 'error');
                 setIsGenerating(false);
+                // ★エラーインテリジェンスにエラーを登録してHUDを表示
+                setLastError({
+                    raw: e,
+                    inputText: text,
+                    isWorkflowError: false
+                });
                 return;
             }
         }

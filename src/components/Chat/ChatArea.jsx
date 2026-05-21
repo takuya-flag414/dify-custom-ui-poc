@@ -14,6 +14,8 @@ import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
 import JsonSlidePanel from '../Artifacts/JsonSlidePanel';
 import JsonDocumentPanel from '../Artifacts/JsonDocumentPanel';
+import MermaidPanel from '../Artifacts/MermaidPanel'; // ★追加: Mermaid専用パネルのインポート
+
 
 
 const ChatArea = (props) => {
@@ -129,6 +131,18 @@ const ChatArea = (props) => {
   useEffect(() => {
     setAutoScrollEnabled(autoScroll);
   }, [autoScroll]);
+
+  // ★追加: エラーや会話リセットにより、メッセージも会話IDもない状態（かつ生成中でない）になった場合、
+  // 自動的に viewMode を 'welcome' に戻すことで画面崩れを防ぐ
+  useEffect(() => {
+    if (isHistoryLoading) return;
+    if (viewMode === 'ai_slide_studio') return;
+
+    const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
+    if (viewMode !== nextView && !isGenerating) {
+      setViewMode(nextView);
+    }
+  }, [messages.length, props.conversationId, isHistoryLoading, viewMode, isGenerating]);
 
   // ★追加: メッセージ送信時に自動スクロールを強制的にONに戻す共通ハンドラ
   const handleSendMessageInternal = useCallback((text, attachments = [], options = {}) => {
@@ -422,6 +436,7 @@ const ChatArea = (props) => {
         const currentArtifactType = openedArtifact?.type || streamingMessage?.artifact?.artifact_type;
         const isJsonSlide = currentArtifactType === 'json_slide' || currentArtifactType === 'json_slide_advanced';
         const isJsonDocument = currentArtifactType === 'json_document';
+        const isMermaid = currentArtifactType && currentArtifactType.startsWith('mermaid'); // ★追加: Mermaid判定
 
         // ★追加: Artifactを識別するためのキー。切り替え時に再マウントを強制する
         const artifactKey = openedArtifact 
@@ -444,9 +459,17 @@ const ChatArea = (props) => {
               artifact={openedArtifact}
               streamingMessage={streamingMessage}
             />
+            <MermaidPanel
+              key={`mermaid-${artifactKey}`}
+              isOpen={isArtifactOpen && isMermaid}
+              onClose={closeArtifact}
+              artifact={openedArtifact}
+              streamingMessage={streamingMessage}
+              onSendMessage={handleSendMessageInternal}
+            />
             <ArtifactPanel
               key={`generic-art-${artifactKey}`}
-              isOpen={isArtifactOpen && !isJsonSlide && !isJsonDocument}
+              isOpen={isArtifactOpen && !isJsonSlide && !isJsonDocument && !isMermaid}
               onClose={closeArtifact}
               artifact={openedArtifact}
               streamingMessage={streamingMessage}

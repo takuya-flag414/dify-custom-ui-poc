@@ -1,0 +1,176 @@
+/* src/components/Artifacts/MermaidPanel.css */
+
+/* Mermaidダイアグラム専用パネルのボディ領域 */
+.mermaid-panel-body {
+    flex-grow: 1;
+    overflow: auto;
+    padding: 32px 0;
+    /* 背景色を常に白に固定し、文字色もライトモードに固定 */
+    background-color: #ffffff !important;
+    color: oklch(20% 0 0) !important;
+    
+    /* 内部要素向けのCSS変数をライトモード値にロック */
+    --bg-base: oklch(99% 0 0);
+    --bg-layer-1: oklch(98% 0 0);
+    --bg-layer-2: oklch(100% 0 0);
+    --color-text-main: oklch(20% 0 0);
+    --color-text-sub: oklch(55% 0 0);
+    --color-text-muted: oklch(55% 0 0);
+    --color-border: oklch(92% 0 0);
+    --color-border-strong: oklch(88% 0 0);
+}
+
+/* Mermaidの直接描画エリア：白い用紙や枠線、影を一切排除 */
+.mermaid-panel-content {
+    width: 100%;
+    max-width: 960px; /* ダイアグラムが綺麗に収まる最大幅 */
+    margin: 32px auto 64px auto;
+    background-color: transparent !important; /* 背景透過 */
+    box-shadow: none !important;              /* 紙のようなシャドウを排除 */
+    border: none !important;                  /* 枠線なし */
+    border-radius: 0 !important;
+    padding: 0 24px !important;               /* 左右に最小限の余白を設定 */
+    display: flex;
+    justify-content: center;
+}
+
+/* ダークモード対応 */
+[data-theme='dark'] .mermaid-panel-content {
+    background-color: transparent !important;
+}
+
+/* --- エラー表示パネル --- */
+.mermaid-error-panel {
+    max-width: 680px;
+    margin: 40px auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: mermaidFadeIn 0.3s ease-out;
+}
+
+@keyframes mermaidFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* エラー警告バナー */
+.mermaid-error-banner {
+    /* OKLCHのエラーセマンティックカラーからカラーミックスで透過色を生成 (DESIGN_RULE.mdに準拠) */
+    background-color: color-mix(in oklch, var(--color-error) 8%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-error) 25%, transparent);
+    border-radius: var(--radius-lg, 12px);
+    padding: 20px;
+    color: var(--color-error);
+}
+
+.mermaid-error-title {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: var(--font-semibold, 600);
+    display: flex;
+    align-items: center;
+    color: var(--color-error);
+}
+
+.mermaid-error-desc {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-sub, #6b7280);
+}
+
+[data-theme='dark'] .mermaid-panel-body .mermaid-error-desc {
+    color: oklch(55% 0 0) !important;
+}
+
+/* エラー詳細ログ */
+.mermaid-error-details {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: var(--radius-md, 8px);
+    padding: 14px;
+    font-family: var(--font-mono, 'Fira Code', monospace);
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+    color: var(--color-error);
+    border-left: 3px solid var(--color-error);
+}
+
+[data-theme='dark'] .mermaid-panel-body .mermaid-error-details {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: var(--color-error) !important;
+}
+
+/* ボタン配置と「AIに修正を依頼する」ボタン */
+.mermaid-error-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.mermaid-fix-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: var(--color-primary);
+    color: var(--color-text-white, #ffffff);
+    border: none;
+    border-radius: var(--radius-lg, 12px);
+    font-size: 14px;
+    font-weight: var(--font-semibold, 600);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.03));
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mermaid-fix-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md, 0 4px 8px -2px rgba(0, 0, 0, 0.08));
+    background-color: var(--color-primary-hover);
+}
+
+.mermaid-fix-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.03));
+    background-color: var(--color-primary-active);
+}
+
+.mermaid-fix-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ring-focus, 0 0 0 3px oklch(60% 0.2 250 / 0.4));
+}
+
+/* 対象ソースコードの表示セクション */
+.mermaid-error-code-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mermaid-error-code-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted, #6b7280);
+}
+
+.mermaid-error-code-block {
+    background-color: var(--color-bg-secondary, #f3f4f6);
+    color: var(--color-text, #1f2937);
+    padding: 16px;
+    border-radius: 8px;
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    margin: 0;
+    border: 1px solid var(--color-border, #e5e7eb);
+}
+
+[data-theme='dark'] .mermaid-panel-body .mermaid-error-code-block {
+    background-color: #f3f4f6 !important;
+    border-color: #e5e7eb !important;
+    color: #1f2937 !important;
+}

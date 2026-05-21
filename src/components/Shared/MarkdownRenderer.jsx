@@ -10,6 +10,8 @@ import SecureVaultService, { TOKEN_PATTERN } from '../../services/SecureVaultSer
 import RestoredToken from '../Message/RestoredToken';
 import { CitationBadge } from '../Chat/CitationBadge';
 import { groupCitationsByCategory } from '../../utils/citationFormatter';
+import ArtifactCard from '../Artifacts/ArtifactCard';
+import { detectMermaidType, getMermaidLabel } from '../../utils/mermaidHelper';
 
 // --- Helper: Inline Citation Renderer ---
 // (renderWithInlineCitations, LoggedElement, CodeBlock は変更なしのため省略。元のコードを維持してください)
@@ -129,10 +131,27 @@ const LoggedElement = ({ as: Component, logTag, content, logFunction, children, 
   return <Component {...props}>{children}</Component>;
 };
 
-const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
+const CodeBlock = ({ inline, className, children, logFunction, onOpenArtifact, ...props }) => {
   const [isCopied, setIsCopied] = useState(false);
-  const match = /language-(\w+)/.exec(className || '');
-  const lang = match ? match[1] : (inline ? '' : 'text');
+  
+  // クラス名から言語名とファイル名を抽出する（例: language-mermaid:filename.mmd）
+  const classNameStr = className || '';
+  const match = /language-([^ \t\r\n\v\f]+)/.exec(classNameStr);
+  const fullLang = match ? match[1] : '';
+  
+  let lang = inline ? '' : 'text';
+  let fileName = '';
+  
+  if (fullLang) {
+    if (fullLang.includes(':')) {
+      const parts = fullLang.split(':');
+      lang = parts[0];
+      fileName = parts[1];
+    } else {
+      lang = fullLang;
+    }
+  }
+
   const codeText = String(children).replace(/\n$/, '');
 
   useEffect(() => {
@@ -140,6 +159,30 @@ const CodeBlock = ({ inline, className, children, logFunction, ...props }) => {
       logFunction(inline ? 'code-inline' : 'code-block', codeText);
     }
   }, [inline, codeText, logFunction]);
+
+  // Mermaidのコードブロックである場合は、通常のコードブロックではなくArtifactCardを表示
+  if (lang === 'mermaid' && !inline) {
+    const subType = detectMermaidType(codeText);
+    const friendlyLabel = getMermaidLabel(subType);
+    return (
+      <ArtifactCard
+        title={friendlyLabel}
+        type={`mermaid_${subType}`}
+        content={codeText}
+        fileName={fileName} // ファイル名をPropsとして渡す
+        onClick={() => {
+          if (onOpenArtifact) {
+            onOpenArtifact({
+              title: friendlyLabel,
+              type: `mermaid_${subType}`,
+              content: codeText,
+              fileName: fileName // 開く際のアクション情報にも含める
+            });
+          }
+        }}
+      />
+    );
+  }
 
   if (inline) {
     return (
@@ -398,6 +441,7 @@ const MarkdownRenderer = ({
                   inline={inline}
                   className={className}
                   logFunction={logMarkdownRender}
+                  onOpenArtifact={onOpenArtifact}
                   {...props}
                 >
                   {cleanChildren(children)}

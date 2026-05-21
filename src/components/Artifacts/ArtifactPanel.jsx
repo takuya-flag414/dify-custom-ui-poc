@@ -10,6 +10,7 @@ import { sanitizeArtifactHtml } from '../../utils/sanitizeArtifactHtml';
 // import html2pdf from 'html2pdf.js';
 import './ArtifactPanel.css';
 
+
 const CloseIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -212,6 +213,18 @@ const ARTIFACT_TYPE_MAP = {
     html_slide: { emoji: '📽️', label: '印刷可能なプレゼンスライド' },
     json_slide: { emoji: '🎯', label: '編集可能なプレゼンスライド' },
     json_slide_advanced: { emoji: '🎯', label: '編集可能なプレゼンスライド' },
+    mermaid_flowchart: { emoji: '📊', label: '業務フロー図' },
+    mermaid_sequence: { emoji: '🔄', label: 'シーケンス連携図' },
+    mermaid_class: { emoji: '🏗️', label: '構造設計図' },
+    mermaid_state: { emoji: '⚙️', label: '状態遷移図' },
+    mermaid_er: { emoji: '🗄️', label: 'データベース設計図' },
+    mermaid_gantt: { emoji: '📅', label: 'プロジェクト工程表' },
+    mermaid_pie: { emoji: '🍕', label: '割合グラフ' },
+    mermaid_journey: { emoji: '🗺️', label: 'カスタマージャーニー' },
+    mermaid_git: { emoji: '🌿', label: '履歴管理図' },
+    mermaid_mindmap: { emoji: '🧠', label: 'アイデア整理図' },
+    mermaid_timeline: { emoji: '⏳', label: 'タイムライン表' },
+    mermaid_generic: { emoji: '📊', label: '構成図' },
 };
 
 const getTypeBadge = (type) => {
