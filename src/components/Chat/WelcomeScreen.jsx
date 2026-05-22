@@ -14,7 +14,8 @@ import {
     FileText, 
     Layout, 
     MessageSquare, 
-    MoreHorizontal 
+    MoreHorizontal,
+    GitBranch
 } from 'lucide-react';
 import PromptWizardModal from './Wizard/PromptWizardModal';
 
@@ -65,6 +66,7 @@ const WelcomeScreen = ({
     onRestoreTextConsumed,
     onWizardComplete,
     onEnterSlideStudio, // ★追加
+    onEnterMermaidStudio, // ★追加
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
@@ -74,6 +76,8 @@ const WelcomeScreen = ({
     const handleChipClick = (id) => {
         if (id === 'slide_creation' && onEnterSlideStudio) {
             onEnterSlideStudio();
+        } else if (id === 'mermaid_studio' && onEnterMermaidStudio) {
+            onEnterMermaidStudio();
         } else {
             setActiveWizardId(id);
         }
@@ -166,6 +170,12 @@ const WelcomeScreen = ({
                                     <Presentation size={24} />
                                 </div>
                                 <span className="feature-label">AIスライド</span>
+                            </button>
+                            <button className="feature-launch-button mermaid" onClick={() => handleChipClick('mermaid_studio')}>
+                                <div className="feature-icon-wrapper">
+                                    <GitBranch size={24} />
+                                </div>
+                                <span className="feature-label">AI思考・業務整理</span>
                             </button>
                         </div>
 

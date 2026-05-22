@@ -9,6 +9,7 @@ import ChatInput from './ChatInput';
 import HistorySkeleton from './HistorySkeleton';
 import WelcomeScreen from './WelcomeScreen';
 import AiSlideStudio from './AiSlideStudio'; // ★追加
+import AiMermaidStudio from './AiMermaidStudio'; // ★追加
 import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
@@ -136,7 +137,7 @@ const ChatArea = (props) => {
   // 自動的に viewMode を 'welcome' に戻すことで画面崩れを防ぐ
   useEffect(() => {
     if (isHistoryLoading) return;
-    if (viewMode === 'ai_slide_studio') return;
+    if (viewMode === 'ai_slide_studio' || viewMode === 'ai_mermaid_studio') return;
 
     const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
     if (viewMode !== nextView && !isGenerating) {
@@ -340,6 +341,27 @@ const ChatArea = (props) => {
               }}
             />
           </motion.div>
+        ) : viewMode === 'ai_mermaid_studio' ? (
+          <motion.div key="mermaid_studio" {...transitionProps} className="chat-view-container">
+            <AiMermaidStudio 
+              onBack={() => setViewMode('welcome')} 
+              mockMode={mockMode}
+              backendBApiKey={backendBApiKey}
+              backendBApiUrl={backendBApiUrl}
+              onGenerate={(promptText, files, options) => {
+                setViewMode('chat');
+                
+                if (options?.searchSettings) {
+                  setSearchSettings(options.searchSettings);
+                }
+
+                // 通常のチャットメッセージとして送信（is_artifactをtrueにしない）
+                handleSendMessageInternal(promptText, files || [], { 
+                  ...(options || {})
+                });
+              }}
+            />
+          </motion.div>
         ) : (viewMode === 'welcome' && !isHistoryLoading) ? (
           <motion.div key="welcome" {...transitionProps} className="chat-view-container">
             <WelcomeScreen
@@ -362,6 +384,7 @@ const ChatArea = (props) => {
               onRestoreTextConsumed={handleRestoreTextConsumed}
               onWizardComplete={handleWizardComplete}
               onEnterSlideStudio={() => setViewMode('ai_slide_studio')}
+              onEnterMermaidStudio={() => setViewMode('ai_mermaid_studio')}
             />
           </motion.div>
         ) : (

@@ -176,6 +176,8 @@
   gap: 40px; /* セクション間のゆとり */
   opacity: 0.95;
   transition: opacity 0.3s ease;
+  position: relative;
+  z-index: 20; /* ChatInputのz-index 10より上にする */
 }
 
 .studio-tuning-panel:hover {
@@ -857,5 +859,78 @@
   border-color: rgba(255, 159, 10, 0.18);
 }
 
+/* === Mermaid Hover Preview === */
+.mermaid-hover-preview {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 12px;
+  width: 380px;
+  max-height: 320px;
+  background: rgba(255, 255, 255, 0.95); /* 透過度を低く（0.75 -> 0.95） */
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.12),
+    0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+  border-radius: 16px;
+  padding: 16px;
+  z-index: 999; /* 最前面に表示されるように z-index を 100 から 999 に強化 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none; /* マウスイベントを透過させてボタンクリックを妨げない */
+  cursor: default;
+}
 
+[data-theme='dark'] .mermaid-hover-preview {
+  background: rgba(30, 30, 30, 0.95); /* 透過度を低く（0.75 -> 0.95） */
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+}
+
+.hover-preview-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-bottom: 6px;
+}
+
+[data-theme='dark'] .hover-preview-header {
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.hover-preview-body {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto; /* はみ出る場合はスクロール可能に */
+  min-height: 180px;
+  background: var(--bg-primary, #ffffff);
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+[data-theme='dark'] .hover-preview-body {
+  background: #1e1e1e;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ポップアップ内のMermaid図を縮小してフィットさせる */
+.hover-preview-body svg {
+  max-width: 100% !important;
+  max-height: 240px !important;
+  height: auto !important;
+}
 

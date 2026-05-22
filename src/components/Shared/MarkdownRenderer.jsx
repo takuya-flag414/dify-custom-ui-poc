@@ -152,7 +152,10 @@ const CodeBlock = ({ inline, className, children, logFunction, onOpenArtifact, .
     }
   }
 
-  const codeText = String(children).replace(/\n$/, '');
+  let codeText = String(children).replace(/\n$/, '');
+  
+  // Vaultからサニタイズされた文字列を平文に復元
+  codeText = SecureVaultService.restore(codeText);
 
   useEffect(() => {
     if (logFunction) {

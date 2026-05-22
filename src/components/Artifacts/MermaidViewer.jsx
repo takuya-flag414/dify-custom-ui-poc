@@ -1,6 +1,7 @@
 // src/components/Artifacts/MermaidViewer.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
+import DOMPurify from 'dompurify';
 
 // ビジネスシーン向けのプロフェッショナルなテーマでMermaidを初期化する関数
 const initializeMermaid = (currentTheme) => {
@@ -80,7 +81,7 @@ const initializeMermaid = (currentTheme) => {
         theme: 'base',
         themeVariables,
         themeCSS,
-        securityLevel: 'loose',
+        securityLevel: 'strict',
         suppressErrorRendering: true, // エラー発生時の自動DOM描画（爆弾マークなど）を抑制する
         flowchart: { useMaxWidth: false },
         sequence: { useMaxWidth: false },
@@ -147,8 +148,58 @@ const MermaidViewer = ({ chartCode, onError }) => {
                 
                 // mermaid.render は非同期関数です
                 const { svg: renderedSvg } = await mermaid.render(id, chartCode);
+
+                // XSS対策のため、生成されたSVGをDOMPurifyでサニタイズする
+                // ※ USE_PROFILES: { svg: true } だけでは Mermaid が生成する
+                //   <text>, <tspan>, <foreignObject> などのラベル要素が削除されてしまい
+                //   ノードの見出しが消えるため、必要なタグ・属性を明示的に許可する
+                const cleanSvg = DOMPurify.sanitize(renderedSvg, {
+                    USE_PROFILES: { svg: true, svgFilters: true },
+                    // フローチャートのラベル・タイムライン等で使われる foreignObject を許可
+                    ADD_TAGS: ['foreignObject'],
+                    // テキスト配置・変換行列・viewBox 等の描画属性を保持
+                    ADD_ATTR: [
+                        'requiredFeatures',
+                        'viewBox',
+                        'transform',
+                        'dy',
+                        'dx',
+                        'text-anchor',
+                        'dominant-baseline',
+                        'alignment-baseline',
+                        'font-size',
+                        'font-weight',
+                        'font-family',
+                        'fill',
+                        'stroke',
+                        'stroke-width',
+                        'marker-end',
+                        'marker-start',
+                        'markerWidth',
+                        'markerHeight',
+                        'orient',
+                        'refX',
+                        'refY',
+                        'xmlns',
+                        'xmlns:xlink',
+                        'xlink:href',
+                        'x',
+                        'y',
+                        'width',
+                        'height',
+                        'rx',
+                        'ry',
+                        'cx',
+                        'cy',
+                        'r',
+                        'd',
+                        'points',
+                        'class',
+                    ],
+                });
+
                 if (isMounted) {
-                    setSvg(renderedSvg);
+                    setSvg(cleanSvg);
                 }
             } catch (err) {
                 // パースエラーの場合はエラー状態にし、フォールバック表示を行います

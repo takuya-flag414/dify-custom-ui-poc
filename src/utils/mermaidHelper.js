@@ -25,6 +25,9 @@ export const detectMermaidType = (codeText) => {
     if (firstWord === 'gitGraph') return 'git';
     if (firstWord === 'mindmap') return 'mindmap';
     if (firstWord === 'timeline') return 'timeline';
+    if (firstWord === 'requirementDiagram') return 'requirement';
+    if (firstWord.startsWith('C4')) return 'c4';
+    if (firstWord === 'architecture-beta') return 'architecture';
     
     return 'generic';
 };
@@ -44,6 +47,9 @@ export const MERMAID_DIAGRAM_MAP = {
     git: { emoji: '🌿', label: '履歴管理図' },
     mindmap: { emoji: '🧠', label: 'アイデア整理図' },
     timeline: { emoji: '⏳', label: 'タイムライン表' },
+    requirement: { emoji: '📋', label: '要件定義図' },
+    c4: { emoji: '🏢', label: 'C4モデル設計図' },
+    architecture: { emoji: '☁️', label: 'アーキテクチャ構成図' },
     generic: { emoji: '📊', label: '構成図' }
 };
 
