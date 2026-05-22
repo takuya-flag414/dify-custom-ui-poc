@@ -10,6 +10,7 @@ import HistorySkeleton from './HistorySkeleton';
 import WelcomeScreen from './WelcomeScreen';
 import AiSlideStudio from './AiSlideStudio'; // ★追加
 import AiMermaidStudio from './AiMermaidStudio'; // ★追加
+import AiDocumentStudio from './AiDocumentStudio'; // ★追加
 import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
@@ -137,7 +138,7 @@ const ChatArea = (props) => {
   // 自動的に viewMode を 'welcome' に戻すことで画面崩れを防ぐ
   useEffect(() => {
     if (isHistoryLoading) return;
-    if (viewMode === 'ai_slide_studio' || viewMode === 'ai_mermaid_studio') return;
+    if (viewMode === 'ai_slide_studio' || viewMode === 'ai_mermaid_studio' || viewMode === 'ai_document_studio') return;
 
     const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
     if (viewMode !== nextView && !isGenerating) {
@@ -323,6 +324,7 @@ const ChatArea = (props) => {
               mockMode={mockMode}
               backendBApiKey={backendBApiKey}
               backendBApiUrl={backendBApiUrl}
+              sendKey={sendKey}
               onGenerate={(promptText, files, options) => {
                 setViewMode('chat');
                 
@@ -348,6 +350,7 @@ const ChatArea = (props) => {
               mockMode={mockMode}
               backendBApiKey={backendBApiKey}
               backendBApiUrl={backendBApiUrl}
+              sendKey={sendKey}
               onGenerate={(promptText, files, options) => {
                 setViewMode('chat');
                 
@@ -358,6 +361,30 @@ const ChatArea = (props) => {
                 // 通常のチャットメッセージとして送信（is_artifactをtrueにしない）
                 handleSendMessageInternal(promptText, files || [], { 
                   ...(options || {})
+                });
+              }}
+            />
+          </motion.div>
+        ) : viewMode === 'ai_document_studio' ? (
+          <motion.div key="document_studio" {...transitionProps} className="chat-view-container">
+            <AiDocumentStudio 
+              onBack={() => setViewMode('welcome')} 
+              mockMode={mockMode}
+              backendBApiKey={backendBApiKey}
+              backendBApiUrl={backendBApiUrl}
+              sendKey={sendKey}
+              onGenerate={(promptText, files, options) => {
+                setViewMode('chat');
+                
+                if (options?.searchSettings) {
+                  setSearchSettings(options.searchSettings);
+                }
+
+                // ★追加: 生成開始と同時にドキュメントパネルを準備
+                setActiveArtifact({ type: 'json_document', label: 'AIドキュメント' });
+                handleSendMessageInternal(promptText, files || [], { 
+                  ...(options || {}),
+                  artifact: { requested: true, type: 'json_document', label: 'AIドキュメント' } 
                 });
               }}
             />
@@ -384,6 +411,7 @@ const ChatArea = (props) => {
               onRestoreTextConsumed={handleRestoreTextConsumed}
               onWizardComplete={handleWizardComplete}
               onEnterSlideStudio={() => setViewMode('ai_slide_studio')}
+              onEnterDocumentStudio={() => setViewMode('ai_document_studio')}
               onEnterMermaidStudio={() => setViewMode('ai_mermaid_studio')}
             />
           </motion.div>

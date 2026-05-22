@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import './AiSlideStudio.css';
 
-const AiSlideStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backendBApiUrl }) => {
+const AiSlideStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backendBApiUrl, sendKey = 'enter' }) => {
     const [mode, setMode] = useState('ロジカル'); // ★初期値を新しい日本語名に変更
     // ★ボリューム指定タイプ: 'fuzzy' (ざっくり) | 'strict' (厳格)
     const [volumeType, setVolumeType] = useState('fuzzy');
@@ -213,6 +213,7 @@ ${exclusionsText}
                         mockMode={mockMode}
                         backendBApiKey={backendBApiKey}
                         backendBApiUrl={backendBApiUrl}
+                        sendKey={sendKey}
                     />
                 </div>
 

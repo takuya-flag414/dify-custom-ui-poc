@@ -5,7 +5,7 @@ import PrivacyShieldButton from '../PrivacyShieldButton';
 
 const ARTIFACT_TYPE_MAP = {
     html_document: { emoji: '📄', label: '印刷可能なA4ドキュメント' },
-    json_document: { emoji: '📑', label: '編集可能なA4ドキュメント' },
+    json_document: { emoji: '📑', label: 'Wordドキュメント' },
     summary_report: { emoji: '📝', label: '要約・レポート' },
     checklist: { emoji: '✅', label: 'チェックリスト' },
     comparison_table: { emoji: '📊', label: '比較表' },

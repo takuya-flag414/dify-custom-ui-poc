@@ -66,6 +66,7 @@ const WelcomeScreen = ({
     onRestoreTextConsumed,
     onWizardComplete,
     onEnterSlideStudio, // ★追加
+    onEnterDocumentStudio, // ★追加
     onEnterMermaidStudio, // ★追加
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
@@ -76,6 +77,8 @@ const WelcomeScreen = ({
     const handleChipClick = (id) => {
         if (id === 'slide_creation' && onEnterSlideStudio) {
             onEnterSlideStudio();
+        } else if (id === 'document_studio' && onEnterDocumentStudio) {
+            onEnterDocumentStudio();
         } else if (id === 'mermaid_studio' && onEnterMermaidStudio) {
             onEnterMermaidStudio();
         } else {
@@ -170,6 +173,12 @@ const WelcomeScreen = ({
                                     <Presentation size={24} />
                                 </div>
                                 <span className="feature-label">AIスライド</span>
+                            </button>
+                            <button className="feature-launch-button document" onClick={() => handleChipClick('document_studio')}>
+                                <div className="feature-icon-wrapper">
+                                    <FileText size={24} />
+                                </div>
+                                <span className="feature-label">AIドキュメント</span>
                             </button>
                             <button className="feature-launch-button mermaid" onClick={() => handleChipClick('mermaid_studio')}>
                                 <div className="feature-icon-wrapper">

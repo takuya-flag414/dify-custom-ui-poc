@@ -11,6 +11,11 @@ export function renderHeading(block: any, meta?: any): Paragraph[] {
     // Wordの組み込み見出しスタイルの強制適用を避けるため、カスタム段落として構成
     const fontSize = block.level === 2 ? 24 : 20; // 12pt (size:24) または 10pt (size:20)
 
+    // レター用見出し2（H2）の下に段落幅の下線を引く（UIの再現）
+    const border = block.level === 2 ? {
+      bottom: { style: BorderStyle.SINGLE, size: 12, color: '1A1A1A' } // 1.5ptの黒線
+    } : undefined;
+
     return [
       new Paragraph({
         children: [
@@ -19,12 +24,9 @@ export function renderHeading(block: any, meta?: any): Paragraph[] {
             bold: true,
             size: fontSize,
             color: '1A1A1A', // 黒
-            underline: {
-              type: UnderlineType.SINGLE,
-              color: '1A1A1A', // 文字幅のみのぴったり沿った下線
-            },
           }),
         ],
+        border: border,
         spacing: {
           before: 240, // 段落前の余白 (12pt)
           after: 120,  // 段落後の余白 (6pt)
@@ -34,7 +36,7 @@ export function renderHeading(block: any, meta?: any): Paragraph[] {
     ];
   }
 
-  // レポートの場合：組み込みスタイルを使いつつ、デザインを統一
+  // レポートの場合：Document側で定義したグローバルスタイル（Heading1, Heading2等）を使用
   const levelMap = {
     1: HeadingLevel.HEADING_1,
     2: HeadingLevel.HEADING_2,
@@ -46,21 +48,10 @@ export function renderHeading(block: any, meta?: any): Paragraph[] {
 
   const headingLevel = levelMap[block.level] || HeadingLevel.HEADING_2;
 
-  // レポート用見出し2の下に境界線を引く
-  const border = block.level === 2 ? {
-    bottom: { style: BorderStyle.SINGLE, size: 8, color: '003366' }
-  } : undefined;
-
   return [
     new Paragraph({
       text: block.text || '',
       heading: headingLevel,
-      border: border,
-      spacing: {
-        before: 240,
-        after: 120,
-      },
-      keepNext: true,
     }),
   ];
 }

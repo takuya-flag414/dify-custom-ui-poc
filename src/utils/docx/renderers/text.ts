@@ -4,31 +4,44 @@ import { Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, WidthType,
  * 簡易的な太字 (**) および <strong> タグのパースを行い、TextRun of 配列に変換する
  * 分割方式を採用し、正規表現ループのバグを排除した堅牢な実装
  */
-function parseRichText(text: string): TextRun[] {
+export function parseRichText(text: string): TextRun[] {
   if (!text) return [];
 
-  // <strong> タグをマークダウンの ** に統一
+  // 1. LLMのエスケープ改行 "\\n" を実際の "\n" に置換
+  // 2. <strong> タグをマークダウンの ** に統一
   let normalized = text
+    .replace(/\\n/g, '\n')
     .replace(/<strong>/g, '**')
     .replace(/<\/strong>/g, '**');
 
   // その他のHTMLタグ（あれば）を除去
   normalized = normalized.replace(/<[^>]+>/g, '');
 
-  const parts = normalized.split('**');
   const runs: TextRun[] = [];
+  const lines = normalized.split('\n');
 
-  parts.forEach((part, index) => {
-    if (!part) return;
-    
-    // 奇数インデックス（1, 3, 5...）は ** で囲まれていた太字部分
-    const isBold = index % 2 === 1;
-    runs.push(
-      new TextRun({
-        text: part,
-        bold: isBold,
-      })
-    );
+  lines.forEach((line, lineIndex) => {
+    // 2行目以降は段落内の改行(break)を挿入
+    if (lineIndex > 0) {
+      runs.push(new TextRun({ break: 1 }));
+    }
+
+    if (!line) return;
+
+    const parts = line.split('**');
+    parts.forEach((part, index) => {
+      if (!part) return;
+      
+      // 奇数インデックス（1, 3, 5...）は ** で囲まれていた太字部分
+      const isBold = index % 2 === 1;
+      runs.push(
+        new TextRun({
+          text: part,
+          bold: isBold,
+          font: isBold ? { ascii: 'Yu Gothic', eastAsia: '游ゴシック' } : undefined,
+        })
+      );
+    });
   });
 
   if (runs.length === 0) {
@@ -46,8 +59,9 @@ export function renderRichText(block: any, meta?: any): (Paragraph | Table)[] {
   const isLetter = meta?.template === 'letter';
   const titleText = block.title || ''; // ブロックに直接定義されているタイトルプロパティを取得
 
-  // バリアント（お知らせ、警告、成功など）のスタイリング再現
-  if (block.variant && block.variant !== 'default') {
+  // バリアント（お知らせボックスなど）のスタイリング再現
+  const validVariants = ['notice-box', 'notice-dash', 'notice-side'];
+  if (block.variant && validVariants.includes(block.variant)) {
     let borderColor = '0066CC'; // info: 青
     let bgColor = 'F0F8FF';
 
@@ -139,14 +153,24 @@ export function renderRichText(block: any, meta?: any): (Paragraph | Table)[] {
   }
 
   // 通常の段落
+  const paragraphs: (Paragraph | Table)[] = [];
+  
+  if (titleText) {
+    paragraphs.push(
+      new Paragraph({
+        children: [new TextRun({ text: titleText, bold: true })],
+        spacing: { before: 120, after: 60 },
+      })
+    );
+  }
+
   const runs = parseRichText(textContent);
-  return [
+  paragraphs.push(
     new Paragraph({
       children: runs,
-      spacing: {
-        before: 120,
-        after: 120,
-      },
-    }),
-  ];
+      spacing: { before: 120, after: 120 },
+    })
+  );
+
+  return paragraphs;
 }

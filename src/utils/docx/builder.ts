@@ -1,4 +1,4 @@
-import { Document, Paragraph, PageBreak } from 'docx';
+import { Document, Paragraph, PageBreak, BorderStyle } from 'docx';
 import { dispatchRenderer } from './renderers/index';
 
 /**
@@ -48,6 +48,78 @@ export class DocxBuilder {
     return new Document({
       creator: 'Dify Custom UI',
       title: title,
+      styles: {
+        paragraphStyles: [
+          {
+            id: 'Heading1',
+            name: 'Heading 1',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: {
+              font: { ascii: 'Yu Gothic', eastAsia: '游ゴシック' },
+              size: 40, // 20pt
+              bold: true,
+              color: '000000',
+            },
+            paragraph: {
+              spacing: { before: 360, after: 180 },
+              keepNext: true,
+            },
+          },
+          {
+            id: 'Heading2',
+            name: 'Heading 2',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: {
+              font: { ascii: 'Yu Gothic', eastAsia: '游ゴシック' },
+              size: 28, // 14pt
+              bold: true,
+              color: '000000',
+            },
+            paragraph: {
+              spacing: { before: 480, after: 240 },
+              keepNext: true,
+              border: {
+                bottom: { style: BorderStyle.SINGLE, size: 12, color: '1E3A8A' }, // 1.5ptの下線
+              },
+            },
+          },
+          {
+            id: 'Heading3',
+            name: 'Heading 3',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: {
+              font: { ascii: 'Yu Gothic', eastAsia: '游ゴシック' },
+              size: 23, // 11.5pt
+              bold: true,
+              color: '000000',
+            },
+            paragraph: {
+              spacing: { before: 320, after: 160 },
+              keepNext: true,
+            },
+          },
+          {
+            id: 'Normal',
+            name: 'Normal',
+            quickFormat: true,
+            run: {
+              font: { ascii: 'Yu Mincho', eastAsia: '游明朝' }, // 本文は明朝体
+              size: 21, // 10.5pt
+              color: '1A1A1A',
+            },
+            paragraph: {
+              lineSpacing: { line: 384 }, // 1.6倍
+              spacing: { after: 120 },
+            },
+          },
+        ],
+      },
       sections: [
         {
           properties: {

@@ -1,4 +1,5 @@
 import { Table, TableRow, TableCell, Paragraph, TextRun, WidthType, BorderStyle } from 'docx';
+import { parseRichText } from './text';
 
 /**
  * 表ブロックをWordのネイティブテーブル要素に変換する
@@ -21,10 +22,14 @@ export function renderTable(block: any): Table[] {
       return new TableCell({
         children: [
           new Paragraph({
-            children: [new TextRun({ text: cellText, bold: true })],
+            children: parseRichText(cellText).map(run => {
+              run.bold = true;
+              run.font = { ascii: 'Yu Gothic', eastAsia: '游ゴシック' }; // ヘッダーはゴシック体
+              return run;
+            }),
           }),
         ],
-        shading: { fill: 'F2F2F2' }, // ヘッダー背景色（薄いグレー）
+        shading: { fill: 'F8FAFC' }, // ヘッダー背景色（薄いグレーブルー）
         margins: { top: 100, bottom: 100, left: 150, right: 150 },
       });
     });
@@ -58,7 +63,7 @@ export function renderTable(block: any): Table[] {
       return new TableCell({
         children: [
           new Paragraph({
-            children: [new TextRun({ text: cellText })],
+            children: parseRichText(cellText),
           }),
         ],
         margins: { top: 100, bottom: 100, left: 150, right: 150 },
@@ -81,14 +86,14 @@ export function renderTable(block: any): Table[] {
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: tableRows,
-      // 表の境界線（細いグレーの罫線）
+      // 表の境界線（グレーの罫線 #B0B8C1 に統一）
       borders: {
-        top: { style: BorderStyle.SINGLE, size: 4, color: 'D3D3D3' },
-        bottom: { style: BorderStyle.SINGLE, size: 4, color: 'D3D3D3' },
-        left: { style: BorderStyle.SINGLE, size: 4, color: 'D3D3D3' },
-        right: { style: BorderStyle.SINGLE, size: 4, color: 'D3D3D3' },
-        insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: 'E0E0E0' },
-        insideVertical: { style: BorderStyle.SINGLE, size: 4, color: 'E0E0E0' },
+        top: { style: BorderStyle.SINGLE, size: 4, color: 'B0B8C1' },
+        bottom: { style: BorderStyle.SINGLE, size: 4, color: 'B0B8C1' },
+        left: { style: BorderStyle.SINGLE, size: 4, color: 'B0B8C1' },
+        right: { style: BorderStyle.SINGLE, size: 4, color: 'B0B8C1' },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: 'B0B8C1' },
+        insideVertical: { style: BorderStyle.SINGLE, size: 4, color: 'B0B8C1' },
       },
     }),
   ];

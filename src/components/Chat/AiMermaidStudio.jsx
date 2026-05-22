@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import './AiSlideStudio.css'; // スタイルはAiSlideStudioを流用・拡張
 
-const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backendBApiUrl }) => {
+const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backendBApiUrl, sendKey = 'enter' }) => {
     const [diagramType, setDiagramType] = useState('おまかせ');
     const [hoveredDiagramType, setHoveredDiagramType] = useState(null);
 
@@ -379,6 +379,7 @@ ${text}
                         mockMode={mockMode}
                         backendBApiKey={backendBApiKey}
                         backendBApiUrl={backendBApiUrl}
+                        sendKey={sendKey}
                     />
                 </div>
 

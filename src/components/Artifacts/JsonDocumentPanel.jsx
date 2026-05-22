@@ -4,6 +4,7 @@ import JsonDocRenderer from './JsonDocument/JsonDocRenderer';
 import JsonDocFormEditor from './JsonDocument/JsonDocFormEditor';
 import usePagination from './JsonDocument/utils/usePagination';
 import { DocxExportEngine } from '../../utils/docx/engine';
+import GeneratingAnimation from './GeneratingArtifact';
 import './ArtifactPanel.css';
 import './JsonDocument/styles/JsonDocument.css';
 import './JsonDocument/styles/JsonDocEditor.css';
@@ -107,7 +108,7 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
 
     const streamingArtifact = isGeneratingArtifact ? streamingMessage.artifact : null;
     const rawContent = streamingArtifact?.artifact_content || artifact?.content;
-    const displayTitle = streamingArtifact?.artifact_title || artifact?.title || artifact?.label || 'A4ドキュメント';
+    const displayTitle = streamingArtifact?.artifact_title || artifact?.title || artifact?.label || 'Wordドキュメント';
 
     // ズーム制御
     const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 2.0));
@@ -207,7 +208,7 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
                                     {displayTitle}
                                     {isGeneratingArtifact && <span className="typing-cursor"></span>}
                                 </span>
-                                <span className="artifact-type-badge-panel">📑 A4ドキュメント(JSON)</span>
+                                <span className="artifact-type-badge-panel">📑 Wordドキュメント</span>
                             </div>
                         </div>
 
@@ -253,23 +254,33 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
                                 padding: isEditMode ? '40px 40px 100px' : '32px 0' 
                             }}
                         >
-                            <div style={{ 
-                                width: '100%', 
-                                maxWidth: 'none', // ズーム時は制限解除
-                                transform: `scale(${scale})`,
-                                transformOrigin: 'top center',
-                                transition: 'transform 0.2s ease-out'
-                            }}>
-                                <JsonDocRenderer 
-                                    blocks={localBlocks} 
-                                    meta={localMeta}
-                                    title={displayTitle}
-                                    isGenerating={isGeneratingArtifact}
-                                    isEditMode={isEditMode}
-                                    selectedBlockIndex={selectedBlockIndex}
-                                    onBlockClick={setSelectedBlockIndex}
-                                />
-                            </div>
+                            {isGeneratingArtifact && localBlocks.length === 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                                    <GeneratingAnimation style={{ width: '256px', height: 'auto', opacity: 0.8 }} />
+                                    <div style={{ marginTop: '32px', color: '#6b7280', fontWeight: 500, letterSpacing: '0.1em', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <span className="export-loading-dot" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#007aff', animation: 'pulse 1.5s infinite' }}></span>
+                                        ドキュメントを構成中...
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{ 
+                                    width: '100%', 
+                                    maxWidth: 'none', // ズーム時は制限解除
+                                    transform: `scale(${scale})`,
+                                    transformOrigin: 'top center',
+                                    transition: 'transform 0.2s ease-out'
+                                }}>
+                                    <JsonDocRenderer 
+                                        blocks={localBlocks} 
+                                        meta={localMeta}
+                                        title={displayTitle}
+                                        isGenerating={isGeneratingArtifact}
+                                        isEditMode={isEditMode}
+                                        selectedBlockIndex={selectedBlockIndex}
+                                        onBlockClick={setSelectedBlockIndex}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         {isEditMode && (

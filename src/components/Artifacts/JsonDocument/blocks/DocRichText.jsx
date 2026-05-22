@@ -6,8 +6,11 @@ import React from 'react';
 export const renderRichText = (text) => {
     if (!text || typeof text !== 'string') return text;
     
+    // LLM特有のエスケープされた改行文字列 "\\n" を実際の改行文字に置換
+    const normalizedText = text.replace(/\\n/g, '\n');
+    
     // 改行で分割
-    return text.split('\n').map((line, i) => (
+    return normalizedText.split('\n').map((line, i) => (
         <React.Fragment key={i}>
             {/* 太字 (**)、強調 (*)、下線 (_) の簡易パース */}
             {line.split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|_.*?_)/g).map((part, j) => {
@@ -23,7 +26,7 @@ export const renderRichText = (text) => {
                 }
                 return part;
             })}
-            {i < text.split('\n').length - 1 && <br />}
+            {i < normalizedText.split('\n').length - 1 && <br />}
         </React.Fragment>
     ));
 };
@@ -61,6 +64,7 @@ const DocRichText = ({ block }) => {
 
     return (
         <div className="doc-block-rich-text">
+            {title && <div className="doc-rich-text-fallback-title" style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--color-text-primary)' }}>{title}</div>}
             {renderRichText(text)}
         </div>
     );

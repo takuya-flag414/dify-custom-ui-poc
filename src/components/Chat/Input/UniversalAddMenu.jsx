@@ -255,13 +255,9 @@ const UniversalAddMenu = ({
                             />
                             <MenuItem
                                 icon={<DocumentRichtextIcon />}
-                                label="📄 A4ドキュメント"
-                                subtext={IS_DEV_MODE ? "用途に合わせて形式を選択" : "印刷可能なA4ドキュメント"}
-                                onClick={IS_DEV_MODE 
-                                    ? () => navigateTo('ARTIFACT_A4_SUB', 'right')
-                                    : () => handleArtifactSelect('html_document', 'A4ドキュメント')
-                                }
-                                showArrow={IS_DEV_MODE}
+                                label="📄 Wordドキュメント"
+                                subtext="JSON形式・Wordエクスポート対応"
+                                onClick={() => handleArtifactSelect('json_document', 'Wordドキュメント')}
                             />
                             <MenuItem
                                 icon={<PresentationIcon />}
@@ -272,40 +268,7 @@ const UniversalAddMenu = ({
                         </motion.div>
                     )}
 
-                    {view === 'ARTIFACT_A4_SUB' && (
-                        <motion.div
-                            key="artifact_a4_sub"
-                            variants={slideVariants}
-                            initial={getAnimationState().initial}
-                            animate="center"
-                            exit={getAnimationState().exit}
-                            transition={springTransition}
-                        >
-                            <div className="flex items-center gap-2 px-1 py-1 mb-2">
-                                <button
-                                    onClick={() => navigateTo('ARTIFACT_L1', 'left')}
-                                    className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5 border-none bg-transparent outline-none"
-                                >
-                                    <ChevronLeftIcon />
-                                </button>
-                                <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">A4ドキュメント形式</span>
-                            </div>
-                            <MenuItem
-                                icon={<DocumentRichtextIcon />}
-                                label="印刷可能なA4ドキュメント"
-                                subtext="HTML形式 (レイアウト固定・印刷向け)"
-                                onClick={() => handleArtifactSelect('html_document', '印刷可能なA4ドキュメント')}
-                            />
-                            {IS_DEV_MODE && (
-                                <MenuItem
-                                    icon={<DocumentRichtextIcon />}
-                                    label="編集可能なA4ドキュメント"
-                                    subtext="JSON形式 (構造化データ・ページ分割対応)"
-                                    onClick={() => handleArtifactSelect('json_document', '編集可能なA4ドキュメント')}
-                                />
-                            )}
-                        </motion.div>
-                    )}
+
 
                     {view === 'ARTIFACT_L2' && (
                         <motion.div
