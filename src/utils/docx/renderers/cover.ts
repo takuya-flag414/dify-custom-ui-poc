@@ -112,7 +112,7 @@ export function renderCover(block: any): (Table | Paragraph)[] {
       border: {
         top: { style: BorderStyle.SINGLE, size: 24, color: '1E3A8A' },
       },
-      spacing: { after: 4500 }, // フッターまでの下部空間 (約8.0cm)
+      spacing: { after: 3000 }, // フッターまでの下部空間 (約5.3cm)
     })
   );
 
@@ -123,6 +123,7 @@ export function renderCover(block: any): (Table | Paragraph)[] {
     if (date) {
       footerRows.push(
         new TableRow({
+          cantSplit: true,
           children: [
             new TableCell({
               children: [
@@ -177,6 +178,7 @@ export function renderCover(block: any): (Table | Paragraph)[] {
     if (author) {
       footerRows.push(
         new TableRow({
+          cantSplit: true,
           children: [
             new TableCell({
               children: [

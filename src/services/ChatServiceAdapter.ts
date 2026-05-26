@@ -149,6 +149,10 @@ export const ChatServiceAdapter = {
                     scenarioKey = 'html_slide';
                 } else if (type === 'json_slide' || type === 'json_slide_advanced') {
                     scenarioKey = 'json_slide_advanced';
+                } else if (type === 'drawio') {
+                    scenarioKey = 'drawio';
+                } else if (type === 'mermaid') {
+                    scenarioKey = 'mermaid';
                 } else {
                     scenarioKey = 'html_business_document'; 
                 }

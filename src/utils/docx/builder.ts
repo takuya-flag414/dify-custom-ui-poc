@@ -1,4 +1,4 @@
-import { Document, Paragraph, PageBreak, BorderStyle } from 'docx';
+import { Document, Paragraph, PageBreak, BorderStyle, Table } from 'docx';
 import { dispatchRenderer } from './renderers/index';
 
 /**
@@ -30,6 +30,19 @@ export class DocxBuilder {
         // 各ブロックタイプに応じたレンダラーを実行
         const renderedElements = await dispatchRenderer(block, pageIndex, blockIndex, imageCache, meta);
         if (renderedElements) {
+          // 直前の最終要素が Table で、今回追加する最初の要素も Table の場合、
+          // Wordの自動テーブル結合を回避するために空の段落（スペーサー段落）を挟み込む
+          if (
+            documentChildren.length > 0 &&
+            documentChildren[documentChildren.length - 1] instanceof Table &&
+            renderedElements[0] instanceof Table
+          ) {
+            documentChildren.push(
+              new Paragraph({
+                spacing: { before: 120, after: 120 },
+              })
+            );
+          }
           documentChildren.push(...renderedElements);
         }
       }
@@ -64,7 +77,6 @@ export class DocxBuilder {
             },
             paragraph: {
               spacing: { before: 360, after: 180 },
-              keepNext: true,
             },
           },
           {
@@ -81,7 +93,6 @@ export class DocxBuilder {
             },
             paragraph: {
               spacing: { before: 480, after: 240 },
-              keepNext: true,
               border: {
                 bottom: { style: BorderStyle.SINGLE, size: 12, color: '1E3A8A' }, // 1.5ptの下線
               },
@@ -101,7 +112,6 @@ export class DocxBuilder {
             },
             paragraph: {
               spacing: { before: 320, after: 160 },
-              keepNext: true,
             },
           },
           {
@@ -114,8 +124,7 @@ export class DocxBuilder {
               color: '1A1A1A',
             },
             paragraph: {
-              lineSpacing: { line: 384 }, // 1.6倍
-              spacing: { after: 120 },
+              spacing: { line: 384, after: 120 }, // 1.6倍の行間、段落後の余白
             },
           },
         ],
@@ -124,6 +133,10 @@ export class DocxBuilder {
         {
           properties: {
             page: {
+              size: {
+                width: 11906, // A4 width (210mm)
+                height: 16838, // A4 height (297mm)
+              },
               margin: {
                 top: 1440,
                 bottom: 1440,

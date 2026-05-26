@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0" version="22.0.0">
+  <diagram id="genspark_architecture" name="Page-1">
+    <mxGraphModel dx="2000" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <mxCell id="title" value="&lt;b style=&quot;font-size: 24px;&quot;&gt;Genspark風 AIスライド生成プロセスマップ&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="0" width="600" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="lane1" value="ユーザー" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;startSize=40;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1950" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="lane2" value="オーケストレーション層" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;startSize=40;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="1950" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="lane3" value="基盤AIモデル層" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;startSize=40;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="1950" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="lane4" value="フロントエンド層" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;startSize=40;" vertex="1" parent="1">
+          <mxGeometry x="40" y="440" width="1950" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="lane5" value="エクスポートパイプライン層" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;startSize=40;" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="1950" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="infoBox" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;【アーキテクチャの重要ポイント】&lt;/b&gt;&lt;br&gt;・&lt;b&gt;JSONスキーマの厳格な検証&lt;/b&gt;により、AIのハルシネーションによるレイアウト崩れを未然に防止（自己修復ループ内包）&lt;br&gt;・&lt;b&gt;Mermaid.jsの分離実行&lt;/b&gt;：XSS脆弱性回避のため必ず「securityLevel: &amp;#39;strict&amp;#39;」でフロントエンドレンダリングを実施 &lt;br&gt;・&lt;b&gt;PPTX変換のフォールバック&lt;/b&gt;：OOXMLで表現困難な複雑な図解は画像化して互換性を維持 " style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=#f5f5f5;strokeColor=#666666;spacing=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="760" width="1950" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n1" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="トピック・クエリ入力&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="160" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="意図解析 &amp;amp;&lt;br&gt;タスクルーティング&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="340" y="190" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Deep Research&lt;br&gt;(外部Web情報収集)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="540" y="330" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="JSONスキーマ生成&lt;br&gt;(スライド構造化)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="330" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="JSON構造検証&lt;br&gt;(エラー時自己修復)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="940" y="190" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" value="レイアウト判定 &amp;amp;&lt;br&gt;コンポーネント呼出&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="500" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" value="UIテキストマウント&lt;br&gt;(Tailwind CSS)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="455" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" value="動的SVGレンダリング&lt;br&gt;(Mermaid.js)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="555" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" value="高精細画像生成&lt;br&gt;(Nano Banana Pro)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="335" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n12" value="ブラウザ描画完了&lt;br&gt;(状態保持)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="500" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n13" value="エクスポート要求&lt;br&gt;(PDF/PPTX)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n14" value="ファイル変換エンジン&lt;br&gt;(Puppeteer/PptxGenJS)&lt;br&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="650" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n15" value="End" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1920" y="80" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" edge="1" parent="1" source="n1" target="n2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n2" target="n3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n3" target="n4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n4" target="n5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="n5" target="n6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="n6" target="n7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="n7" target="n8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n7" target="n9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="n7" target="n10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="n8" target="n12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="n9" target="n12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="n10" target="n12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="n12" target="n13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="n13" target="n14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="n14" target="n15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333333;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

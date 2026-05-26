@@ -1,6 +1,7 @@
-// src/mocks/scenarios.js
 import sampleA4Html from './artifact_sample_html/sample_a4_document_04.html?raw';
 import sampleSlideHtml from './artifact_sample_html/sample_slide_01.html?raw';
+import sampleDrawioXml from './sample/drawio-sample.xml?raw';
+import sampleMermaidCode from './sample/mermaid-sample.mmd?raw';
 
 /**
  * JSONレスポンス生成用ヘルパー
@@ -220,6 +221,64 @@ const styleTemplates = {
  * 後方互換のため、配列形式のシナリオも引き続きサポートされます。
  */
 export const scenarios = {
+
+  // =================================================================
+  // Pattern: Drawio XML
+  // =================================================================
+  'drawio': {
+    efficient: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "drawio"}\n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "Draw.io形式の業務フロー図を作成しました。",
+          [],
+          [],
+          "業務フロー図をXML形式で生成します。"
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "経費精算業務フロー",
+            artifact_type: "drawio",
+            artifact_content: sampleDrawioXml
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 1500 } } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "drawio", "thinking": "業務フロー図の作成ですね！"} \n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "Draw.io形式のフロー図が完成しました！🔄✨\n\n右側のパネルでプレビューと保存が可能です。",
+          [],
+          [],
+          "業務フロー図を作成中..."
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "経費精算業務フロー",
+            artifact_type: "drawio",
+            artifact_content: sampleDrawioXml
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 1600 } } }
+    ]
+  },
 
   // =================================================================
   // Pattern: HTML A4 Document
@@ -2893,6 +2952,64 @@ h2.section-title {
   ],
 
   // =================================================================
+  // Pattern: Mermaid Diagram
+  // =================================================================
+  'mermaid': {
+    efficient: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "mermaid"}\n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "システム構成図（Mermaid形式）を作成しました。",
+          [],
+          [],
+          "ご指定の構成情報に基づいて構成図を構築します。"
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "標準Webシステム構成図",
+            artifact_type: "mermaid",
+            artifact_content: sampleMermaidCode
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 1500 } } }
+    ],
+    partner: [
+      { event: 'node_started', data: { title: 'LLM_Intent_Analysis', node_type: 'llm' } },
+      { event: 'node_finished', data: { title: 'LLM_Intent_Analysis', outputs: { text: '```json\n{"category": "ARTIFACT_GEN", "artifact_type": "mermaid", "thinking": "システム構成図の生成ですね！各構成レイヤーに適切なスタイルを定義して見栄えを整えます。"} \n```' } } },
+      { event: 'node_started', data: { title: 'Artifact_Generator', node_type: 'llm' } },
+      {
+        event: 'message',
+        answer: createMockJson(
+          "ご要望のシステム構成図を作成しました！📐✨\n\n右側のパネルで、ダイアグラムのインタラクティブなプレビューや各種ダウンロードが可能です。",
+          [],
+          [],
+          "システム構成図を作成中..."
+        )
+      },
+      {
+        event: 'message',
+        answer: JSON.stringify({
+          artifact: {
+            artifact_title: "標準Webシステム構成図",
+            artifact_type: "mermaid",
+            artifact_content: sampleMermaidCode
+          }
+        })
+      },
+      { event: 'node_finished', data: { title: 'Artifact_Generator', node_type: 'llm', status: 'succeeded' } },
+      { event: 'message_end', metadata: { usage: { total_tokens: 1600 } } }
+    ]
+  },
+
+  // =================================================================
   // ★追加: エラーシミュレーション用シナリオ (mock_error)
   // =================================================================
   'mock_error': [
@@ -3001,5 +3118,10 @@ export const scenarioSuggestions = {
     '予算配分を見直したい',
     'ロードマップを短縮して',
     'KPIを追加して'
+  ],
+  'mermaid': [
+    '構成図のレイアウトを左から右にして',
+    '各レイヤーの説明を追加して',
+    'データベース構成を拡張して'
   ]
 };

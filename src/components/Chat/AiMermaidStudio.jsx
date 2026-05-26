@@ -29,7 +29,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
     const [direction, setDirection] = useState('TD'); // TD or LR
 
     // 制約事項
-    const [selectedConstraints, setSelectedConstraints] = useState(['日本語ラベルを使用する']);
+    const [selectedConstraints, setSelectedConstraints] = useState(['図の中の文字（ラベル）をすべて日本語にする']);
     const [customConstraints, setCustomConstraints] = useState('');
 
     // ChatInput用の状態
@@ -43,13 +43,13 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
     const diagramTypesConfig = {
         'おまかせ': {
             icon: <Sparkles size={20} />,
-            desc: 'AIが最適解を判断',
+            desc: 'AIが内容に最適な図を自動で選択します',
             instruction: '入力された内容を分析し、最も適したMermaid図（フローチャート、シーケンス図、ER図、ガントチャートなど）を自動的に選択して生成してください。選んだ図タイプとその理由を簡潔に添えてから、Mermaidコードを出力してください。',
             sampleCode: null
         },
         'フローチャート': {
             icon: <GitBranch size={20} />,
-            desc: '業務フロー・プロセス',
+            desc: '業務の流れや手順の整理',
             instruction: `graph を使用してフローチャートを作成してください。
 【文法ルール】
 - 宣言: \`graph TD\`（上から下）または \`graph LR\`（左から右）で開始する。
@@ -64,7 +64,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'シーケンス図': {
             icon: <MessageSquare size={20} />,
-            desc: 'API連携・通信フロー',
+            desc: 'システム同士や人のやり取りの順序',
             instruction: `sequenceDiagram を使用して、システム間やアクター間のメッセージのやり取りを時系列で表現してください。
 【文法ルール】
 - \`participant 参加者名\` または \`actor 参加者名\` で参加者を宣言する。
@@ -81,7 +81,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'ER図': {
             icon: <Database size={20} />,
-            desc: 'データベース設計',
+            desc: 'データ同士の結びつき・テーブル設計',
             instruction: `erDiagram を使用して、エンティティとその関係性を表現してください。
 【文法ルール】
 - エンティティ定義: \`エンティティ名 { データ型 カラム名 "制約(PK/FK/オプション)" }\`。
@@ -102,7 +102,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'ガントチャート': {
             icon: <Calendar size={20} />,
-            desc: 'スケジュール管理',
+            desc: 'プロジェクトのスケジュール・工程表',
             instruction: `gantt を使用して、タスク、期間、依存関係を表現してください。
 【文法ルール】
 - 必ず \`title タイトル名\` と \`dateFormat YYYY-MM-DD\` を先頭に記述する。
@@ -142,7 +142,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'アーキテクチャ図': {
             icon: <Cloud size={20} />,
-            desc: 'クラウド構成',
+            desc: 'システムのインフラ・クラウド構成',
             instruction: `architecture-beta を使用して構成図を表現してください。
 【文法ルール・制約】
 - グループ: \`group グループID(アイコン名)[タイトル]\`、入れ子は \`in 親グループID\` を末尾に追加。
@@ -158,7 +158,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'クラス図': {
             icon: <Box size={20} />,
-            desc: 'オブジェクト関係',
+            desc: 'プログラムの構造やデータ同士の関係',
             instruction: `classDiagram を使用して、クラスの属性、メソッド、関係性を表現してください。
 【文法ルール】
 - クラス定義: \`class クラス名 { +型 属性名 +メソッド名() }\`。可視性: \`+\`(public), \`-\`(private), \`#\`(protected), \`~\`(package)。
@@ -178,7 +178,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         '状態遷移図': {
             icon: <Activity size={20} />,
-            desc: '状態遷移',
+            desc: 'システムや物の状態の移り変わり',
             instruction: `stateDiagram-v2 を使用して、システムやプロセスの状態遷移を表現してください。
 【文法ルール】
 - 開始/終了状態: \`[*]\` を使用する（\`[*] --> 状態名\` で開始、\`状態名 --> [*]\` で終了）。
@@ -196,7 +196,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'ジャーニーチャート': {
             icon: <Map size={20} />,
-            desc: 'ユーザー体験の可視化',
+            desc: '顧客の体験や感情の動き（ジャーニーマップ）',
             instruction: `journey を使用して、ユーザー体験の各ステップと満足度を表現してください。
 【文法ルール】
 - \`title タイトル名\` で図のタイトルを設定する。
@@ -214,7 +214,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'Gitグラフ': {
             icon: <GitMerge size={20} />,
-            desc: 'ブランチと履歴',
+            desc: 'プログラム更新履歴のブランチ（枝分かれ）',
             instruction: `gitGraph を使用して、Gitのブランチやコミット履歴を視覚化してください。
 【文法ルール】
 - \`commit\`: 現在のブランチにコミットを追加（\`commit id: "コミットID" tag: "タグ名" type: NORMAL|REVERSE|HIGHLIGHT\`）。
@@ -232,7 +232,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'パイチャート': {
             icon: <PieChart size={20} />,
-            desc: 'データの比率・円グラフ',
+            desc: 'データの内訳と割合（円グラフ）',
             instruction: `pie を使用して、データの比率を円グラフで表現してください。
 【文法ルール】
 - 先頭に \`pie\`（オプションで \`pie showData\` とすると実数値も表示）と \`title タイトル名\` を記述する。
@@ -246,7 +246,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         '要件図': {
             icon: <ListChecks size={20} />,
-            desc: 'システム要件と関連',
+            desc: 'システムに求められる機能・要件の整理',
             instruction: `requirementDiagram を使用して、システム要件とその関連性を表現してください。
 【文法ルール・制約】
 - 要件定義: \`requirement 要件ID { id: 識別子番号  text: "要件の説明文（必ずダブルクォートで囲む）"  risk: low|medium|high  verifymethod: analysis|inspection|test|demonstration }\`。
@@ -268,7 +268,7 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
         },
         'C4図': {
             icon: <Layers size={20} />,
-            desc: 'システムアーキテクチャ',
+            desc: 'システムアーキテクチャの階層的な図解',
             instruction: `C4Context を使用して、システムのコンテキスト、コンテナ、コンポーネントを階層的に表現してください。
 【文法ルール・制約】
 - 利用可能な図タイプ: \`C4Context\`（コンテキスト図）、\`C4Container\`（コンテナ図）、\`C4Component\`（コンポーネント図）。
@@ -290,11 +290,11 @@ const AiMermaidStudio = ({ onBack, onGenerate, mockMode, backendBApiKey, backend
     const types = Object.keys(diagramTypesConfig);
 
     const constraintsList = [
-        '日本語ラベルを使用する',
-        'シンプルにまとめる',
-        '詳細に記述する',
-        '図の装飾(色付け)を提案する',
-        '専門用語を避ける'
+        '図の中の文字（ラベル）をすべて日本語にする',
+        '主要な要素だけをすっきりとまとめる',
+        '細かい手順や例外パターンまで詳細に書く',
+        '色分けやスタイルを追加して見やすくする',
+        '専門用語は使わずに分かりやすい言葉で図解する'
     ];
 
     const toggleConstraint = (c) => {
@@ -337,7 +337,7 @@ ${text}
     };
 
     return (
-        <div className="ai-slide-studio-container">
+        <div className="ai-slide-studio-container studio-mermaid">
             {/* Header */}
             <header className="ai-slide-studio-header">
                 <div className="header-left">
@@ -359,13 +359,13 @@ ${text}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <div className="studio-logo-badge" style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.2)' }}>
+                        <div className="studio-logo-badge">
                             Mermaid Diagram Engine
                         </div>
-                        <h1 className="studio-title">AI 思考・業務整理</h1>
+                        <h1 className="studio-title">AI 構成・設計図</h1>
                         <p className="studio-subtitle">
-                            テキストやファイルから、業務フローやシステム設計図を自動生成します。<br />
-                            複雑なMermaid記法を覚える必要はありません。
+                            システム構成やデータの関連図、スケジュールの工程表などを自動で作成します。<br />
+                            難解なコード（Mermaid記法）を覚える必要はなく、テキストを入力するだけで整理された図が完成します。
                         </p>
                     </motion.div>
 

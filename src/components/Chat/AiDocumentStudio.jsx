@@ -108,7 +108,7 @@ ${customConstraints ? `・${customConstraints}` : ''}
     };
 
     return (
-        <div className="ai-slide-studio-container">
+        <div className="ai-slide-studio-container studio-document">
             <header className="ai-slide-studio-header">
                 <div className="header-left">
                     <button className="ai-slide-back-button" onClick={onBack}>
@@ -127,7 +127,7 @@ ${customConstraints ? `・${customConstraints}` : ''}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <div className="studio-logo-badge" style={{ background: 'linear-gradient(135deg, #0A84FF 0%, #0056b3 100%)', color: '#ffffff' }}>
+                        <div className="studio-logo-badge">
                             Document Generation Engine
                         </div>
                         <h1 className="studio-title">AI ドキュメントスタジオ</h1>
@@ -161,7 +161,6 @@ ${customConstraints ? `・${customConstraints}` : ''}
                                     key={t} 
                                     className={`ai-slide-mode-card ${template === t ? 'active' : ''}`}
                                     onClick={() => setTemplate(t)}
-                                    style={template === t ? { borderColor: '#0A84FF', backgroundColor: 'rgba(10, 132, 255, 0.05)' } : {}}
                                 >
                                     <div className="mode-card-icon">{templatesConfig[t].icon}</div>
                                     <div className="mode-card-content">
@@ -182,7 +181,6 @@ ${customConstraints ? `・${customConstraints}` : ''}
                                     key={t} 
                                     className={`ai-slide-option-chip ${tone === t ? 'active' : ''}`}
                                     onClick={() => setTone(t)}
-                                    style={tone === t ? { borderColor: '#0A84FF', color: '#0056b3', backgroundColor: 'rgba(10, 132, 255, 0.08)' } : {}}
                                 >
                                     {t}
                                 </button>
@@ -199,7 +197,6 @@ ${customConstraints ? `・${customConstraints}` : ''}
                                     key={v} 
                                     className={`ai-slide-option-chip ${volume === v ? 'active' : ''}`}
                                     onClick={() => setVolume(v)}
-                                    style={volume === v ? { borderColor: '#0A84FF', color: '#0056b3', backgroundColor: 'rgba(10, 132, 255, 0.08)' } : {}}
                                 >
                                     {v}
                                 </button>
@@ -216,7 +213,6 @@ ${customConstraints ? `・${customConstraints}` : ''}
                                     key={c} 
                                     className={`ai-slide-option-chip ${selectedConstraints.includes(c) ? 'active' : ''}`}
                                     onClick={() => toggleConstraint(c)}
-                                    style={selectedConstraints.includes(c) ? { borderColor: '#0A84FF', color: '#0056b3', backgroundColor: 'rgba(10, 132, 255, 0.08)' } : {}}
                                 >
                                     {c}
                                 </button>
@@ -227,7 +223,6 @@ ${customConstraints ? `・${customConstraints}` : ''}
                             placeholder="その他の制約事項や記載してほしい内容（例：必ず株式会社〇〇への言及を含めること）"
                             value={customConstraints}
                             onChange={(e) => setCustomConstraints(e.target.value)}
-                            style={{ focusBorderColor: '#0A84FF' }}
                         />
                     </div>
                 </div>

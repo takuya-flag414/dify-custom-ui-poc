@@ -8,15 +8,6 @@ import './WelcomeScreen.css';
 import { getTimeBasedGreeting } from '../../utils/timeUtils';
 import ChatInput from './ChatInput';
 import { useSeasonalBackground } from '../../hooks/useSeasonalBackground';
-import { 
-    Presentation, 
-    Table, 
-    FileText, 
-    Layout, 
-    MessageSquare, 
-    MoreHorizontal,
-    GitBranch
-} from 'lucide-react';
 import PromptWizardModal from './Wizard/PromptWizardModal';
 
 const containerVariants = {
@@ -68,6 +59,7 @@ const WelcomeScreen = ({
     onEnterSlideStudio, // ★追加
     onEnterDocumentStudio, // ★追加
     onEnterMermaidStudio, // ★追加
+    onEnterDrawioStudio, // ★追加
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
@@ -81,6 +73,8 @@ const WelcomeScreen = ({
             onEnterDocumentStudio();
         } else if (id === 'mermaid_studio' && onEnterMermaidStudio) {
             onEnterMermaidStudio();
+        } else if (id === 'drawio_studio' && onEnterDrawioStudio) {
+            onEnterDrawioStudio();
         } else {
             setActiveWizardId(id);
         }
@@ -166,25 +160,68 @@ const WelcomeScreen = ({
                             onRestoreTextConsumed={onRestoreTextConsumed}
                         />
 
-                        {/* Genspark Style Feature Launcher */}
+                        {/* 各種生成スタジオ機能の起動ボタン（Gensparkスタイル） */}
                         <div className={`welcome-feature-launcher ${isFaded ? 'faded' : ''}`}>
                             <button className="feature-launch-button slide" onClick={() => handleChipClick('slide_creation')}>
                                 <div className="feature-icon-wrapper">
-                                    <Presentation size={24} />
+                                    {/* AIスライド用のカスタムSVG（プロジェクタースクリーンと資料構成） */}
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                                        <path d="M8 21l4-4 4 4" />
+                                        <path d="M12 17v4" />
+                                        <line className="anim-slide-item anim-slide-1" x1="6" y1="7" x2="18" y2="7" strokeWidth="1.5" />
+                                        <g className="anim-slide-item anim-slide-2">
+                                            <circle cx="7" cy="11" r="1" />
+                                            <line x1="10" y1="11" x2="16" y2="11" strokeWidth="1.5" />
+                                        </g>
+                                        <g className="anim-slide-item anim-slide-3">
+                                            <circle cx="7" cy="14" r="1" />
+                                            <line x1="10" y1="14" x2="14" y2="14" strokeWidth="1.5" />
+                                        </g>
+                                    </svg>
                                 </div>
                                 <span className="feature-label">AIスライド</span>
                             </button>
                             <button className="feature-launch-button document" onClick={() => handleChipClick('document_studio')}>
                                 <div className="feature-icon-wrapper">
-                                    <FileText size={24} />
+                                    {/* AIドキュメント用のカスタムSVG（Word風のテキスト書類レイアウト） */}
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />
+                                        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                                        <line className="anim-doc-line anim-doc-1" x1="7" y1="12" x2="17" y2="12" strokeWidth="2.5" />
+                                        <line className="anim-doc-line anim-doc-2" x1="7" y1="16" x2="17" y2="16" strokeWidth="1.5" />
+                                        <line className="anim-doc-line anim-doc-3" x1="7" y1="19" x2="13" y2="19" strokeWidth="1.5" />
+                                    </svg>
                                 </div>
                                 <span className="feature-label">AIドキュメント</span>
                             </button>
                             <button className="feature-launch-button mermaid" onClick={() => handleChipClick('mermaid_studio')}>
                                 <div className="feature-icon-wrapper">
-                                    <GitBranch size={24} />
+                                    {/* AI構成・設計図用のカスタムSVG（サーバー、DB、接続コネクタのシステムアーキテクチャ） */}
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect className="anim-mermaid-node" x="10" y="2" width="8" height="5" rx="1" />
+                                        <path className="anim-mermaid-node anim-mermaid-db" d="M4 19v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H6a2 2 0 0 1-2-2z" />
+                                        <rect className="anim-mermaid-node" x="16" y="16" width="6" height="6" rx="1" />
+                                        <path d="M14 7v6c0 1.1-.9 2-2 2H8" />
+                                        <path d="M14 11h5c1.1 0 2 .9 2 2v3" />
+                                        <circle className="anim-mermaid-dot" cx="14" cy="7" r="1.5" fill="currentColor" />
+                                        <circle className="anim-mermaid-dot" cx="8" cy="15" r="1.5" fill="currentColor" />
+                                    </svg>
                                 </div>
-                                <span className="feature-label">AI思考・業務整理</span>
+                                <span className="feature-label">AI構成・設計図</span>
+                            </button>
+                            <button className="feature-launch-button drawio" onClick={() => handleChipClick('drawio_studio')}>
+                                <div className="feature-icon-wrapper">
+                                    {/* AI業務フロー・手順図用のカスタムSVG（開始、ひし形分岐、処理のフローチャート） */}
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle className="anim-drawio-node anim-drawio-1" cx="12" cy="4" r="3" />
+                                        <rect className="anim-drawio-node anim-drawio-3" x="8" y="18" width="8" height="4" rx="1" />
+                                        <path className="anim-drawio-node anim-drawio-2" d="M12 9l4 2.5-4 2.5-4-2.5z" />
+                                        <path d="M12 7v2" />
+                                        <path d="M12 14v4" />
+                                    </svg>
+                                </div>
+                                <span className="feature-label">AI業務フロー・手順図</span>
                             </button>
                         </div>
 

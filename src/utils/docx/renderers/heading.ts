@@ -31,7 +31,6 @@ export function renderHeading(block: any, meta?: any): Paragraph[] {
           before: 240, // 段落前の余白 (12pt)
           after: 120,  // 段落後の余白 (6pt)
         },
-        keepNext: true, // 見出しの孤立防止
       }),
     ];
   }

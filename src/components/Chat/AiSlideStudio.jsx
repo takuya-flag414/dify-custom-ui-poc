@@ -168,7 +168,7 @@ ${exclusionsText}
     };
 
     return (
-        <div className="ai-slide-studio-container">
+        <div className="ai-slide-studio-container studio-slide">
             {/* Header */}
             <header className="ai-slide-studio-header">
                 <div className="header-left">

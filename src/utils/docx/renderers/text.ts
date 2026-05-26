@@ -62,26 +62,60 @@ export function renderRichText(block: any, meta?: any): (Paragraph | Table)[] {
   // バリアント（お知らせボックスなど）のスタイリング再現
   const validVariants = ['notice-box', 'notice-dash', 'notice-side'];
   if (block.variant && validVariants.includes(block.variant)) {
-    let borderColor = '0066CC'; // info: 青
-    let bgColor = 'F0F8FF';
+    const variant = block.variant;
+    const isLetter = meta?.template === 'letter';
 
-    if (isLetter) {
-      // ビジネスレターの場合は常に白黒基調（黒ボーダー、背景白）
+    // デフォルトのボーダー色と背景色（CSSの定義に準拠）
+    let borderColor = '1A1A1A'; // 標準は黒（#1A1A1A）
+    let bgColor = 'FFFFFF';    // 標準は白
+
+    // 各バリアントに応じたパラメータの調整
+    let isCenter = false;
+    let cellMargins = { top: 160, bottom: 160, left: 280, right: 280 }; // 1pt = 20 dxa. notice-box: 8pt/14pt -> 160/280 dxa
+    let cellBorders: any = {
+      top: { style: BorderStyle.SINGLE, size: 12, color: borderColor }, // 1.5pt
+      bottom: { style: BorderStyle.SINGLE, size: 12, color: borderColor },
+      left: { style: BorderStyle.SINGLE, size: 12, color: borderColor },
+      right: { style: BorderStyle.SINGLE, size: 12, color: borderColor },
+    };
+
+    if (variant === 'notice-box') {
+      isCenter = true; // タイトルは中央寄せ
       borderColor = '1A1A1A';
       bgColor = 'FFFFFF';
-    } else {
-      if (block.variant === 'warning') {
-        borderColor = 'FF9900'; // warning: オレンジ
-        bgColor = 'FFFDF0';
-      } else if (block.variant === 'success') {
-        borderColor = '33CC66'; // success: 緑
-        bgColor = 'F0FFF4';
-      }
+      cellBorders = {
+        top: { style: BorderStyle.SINGLE, size: 12, color: borderColor },
+        bottom: { style: BorderStyle.SINGLE, size: 12, color: borderColor },
+        left: { style: BorderStyle.SINGLE, size: 12, color: borderColor },
+        right: { style: BorderStyle.SINGLE, size: 12, color: borderColor },
+      };
+    } else if (variant === 'notice-dash') {
+      isCenter = false; // タイトルは左寄せ
+      borderColor = '1A1A1A';
+      bgColor = 'FFFFFF';
+      cellMargins = { top: 140, bottom: 140, left: 280, right: 280 }; // 7pt/14pt -> 140/280 dxa
+      cellBorders = {
+        top: { style: BorderStyle.DASHED, size: 8, color: borderColor }, // 1pt
+        bottom: { style: BorderStyle.DASHED, size: 8, color: borderColor },
+        left: { style: BorderStyle.DASHED, size: 8, color: borderColor },
+        right: { style: BorderStyle.DASHED, size: 8, color: borderColor },
+      };
+    } else if (variant === 'notice-side') {
+      isCenter = false; // タイトルは左寄せ
+      borderColor = isLetter ? '1A1A1A' : '1E3A8A'; // 非レター時はプライマリーカラーのネイビー
+      bgColor = 'FFFFFF';
+      cellMargins = { top: 60, bottom: 60, left: 240, right: 0 }; // 3pt/12pt/0pt -> 60/240/0 dxa
+      cellBorders = {
+        top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+        bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+        left: { style: BorderStyle.SINGLE, size: 24, color: borderColor }, // 左側のみ3pt
+        right: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+      };
     }
 
     const cellChildren: Paragraph[] = [];
 
-    // 1. タイトルがある場合（中央揃え・太字）
+    // 1. タイトルがある場合（フォントサイズ9pt相当=18）
     if (titleText) {
       cellChildren.push(
         new Paragraph({
@@ -89,27 +123,29 @@ export function renderRichText(block: any, meta?: any): (Paragraph | Table)[] {
             new TextRun({
               text: titleText,
               bold: true,
-              size: 22, // 11pt相当
-              color: isLetter ? '1A1A1A' : borderColor,
+              size: 18, // 9pt
+              color: isLetter ? '1A1A1A' : (variant === 'notice-side' ? '1A1A1A' : borderColor),
             }),
           ],
-          alignment: AlignmentType.CENTER,
+          alignment: isCenter ? AlignmentType.CENTER : AlignmentType.LEFT,
           spacing: {
-            before: 120,
-            after: 80,
+            before: 60,
+            after: variant === 'notice-box' ? 60 : 120,
           },
         })
       );
 
-      // タイトルが存在する場合、自動的に下に区切り水平線を引く
-      cellChildren.push(
-        new Paragraph({
-          border: {
-            top: { style: BorderStyle.SINGLE, size: 4, color: isLetter ? 'B0B8C1' : borderColor },
-          },
-          spacing: { before: 60, after: 120 },
-        })
-      );
+      // notice-box の場合のみ、タイトルの下に細い水平区切り線を引く
+      if (variant === 'notice-box') {
+        cellChildren.push(
+          new Paragraph({
+            border: {
+              top: { style: BorderStyle.SINGLE, size: 4, color: 'B0B8C1' }, // 0.5pt相当の細い線
+            },
+            spacing: { before: 40, after: 120 },
+          })
+        );
+      }
     }
 
     // 2. 本文がある場合（左揃え・部分的な太字パース対応）
@@ -127,7 +163,7 @@ export function renderRichText(block: any, meta?: any): (Paragraph | Table)[] {
       );
     }
 
-    // 全周囲に枠線を引いた1セルテーブルとして表現
+    // 各バリアントに応じた設定で1セルのテーブルとして表現
     return [
       new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
@@ -137,13 +173,8 @@ export function renderRichText(block: any, meta?: any): (Paragraph | Table)[] {
               new TableCell({
                 children: cellChildren,
                 shading: { fill: bgColor },
-                margins: { top: 180, bottom: 180, left: 240, right: 240 },
-                borders: {
-                  top: { style: BorderStyle.SINGLE, size: 16, color: borderColor },
-                  bottom: { style: BorderStyle.SINGLE, size: 16, color: borderColor },
-                  left: { style: BorderStyle.SINGLE, size: 16, color: borderColor },
-                  right: { style: BorderStyle.SINGLE, size: 16, color: borderColor },
-                },
+                margins: cellMargins,
+                borders: cellBorders,
               }),
             ],
           }),

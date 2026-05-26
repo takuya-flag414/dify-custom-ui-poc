@@ -19,12 +19,12 @@
     --doc-font-mono: "Courier New", "Osaka-Mono", monospace;
 
     /* A4 Dimensions ( 縦横比 1:1.414 を維持し、画面向けにスケール ) */
-    --doc-page-width: 820px;
-    --doc-page-min-height: 1160px;
-    --doc-page-padding-top: 25mm;
-    --doc-page-padding-bottom: 25mm;
-    --doc-page-padding-left: 25mm;
-    --doc-page-padding-right: 25mm;
+    --doc-page-width: 794px;
+    --doc-page-min-height: 1123px;
+    --doc-page-padding-top: 25.4mm;
+    --doc-page-padding-bottom: 25.4mm;
+    --doc-page-padding-left: 25.4mm;
+    --doc-page-padding-right: 25.4mm;
 }
 
 /* Page Container */
@@ -38,8 +38,8 @@
 
 .json-doc-page {
     background-color: var(--doc-bg-page);
-    width: 100%;
-    max-width: var(--doc-page-width);
+    width: var(--doc-page-width);
+    max-width: none;
     margin: 0 auto 50px auto;
     min-height: var(--doc-page-min-height);
     padding: 0;

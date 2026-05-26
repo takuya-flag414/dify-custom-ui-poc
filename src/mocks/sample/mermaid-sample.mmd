@@ -1,0 +1,27 @@
+graph TD
+    classDef default fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px,color:#334155;
+    classDef client fill:#e0f2fe,stroke:#38bdf8,stroke-width:1.5px,color:#0369a1;
+    classDef api fill:#e0e7ff,stroke:#6366f1,stroke-width:1.5px,color:#4338ca;
+    classDef db fill:#fef3c7,stroke:#f59e0b,stroke-width:1.5px,color:#b45309;
+
+    subgraph client_tier ["🖥️ クライアント層"]
+        Browser["ブラウザ (React UI)"]:::client
+        AppClient["モバイルアプリ Client"]:::client
+    end
+
+    subgraph api_tier ["⚡ ゲートウェイ・API層"]
+        NGINX["NGINX リバースプロキシ"]:::api
+        AuthService["認証サービス (JWT)"]:::api
+        APIService["メイン API サーバー (Node.js)"]:::api
+    end
+
+    subgraph db_tier ["🗄️ データ層"]
+        Redis["キャッシュ・セッション (Redis)"]:::db
+        Postgres[("メインデータベース (PostgreSQL)")]:::db
+    end
+
+    Browser & AppClient -->|HTTPS| NGINX
+    NGINX -->|認証要求| AuthService
+    NGINX -->|ビジネス要求| APIService
+    APIService -->|キャッシュ参照/更新| Redis
+    APIService -->|データ永続化| Postgres

@@ -116,7 +116,7 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
     const handleAutoFit = () => {
         if (containerRef.current) {
             const containerWidth = containerRef.current.clientWidth - 80; // 左右パディング考慮
-            const docWidth = 820; // JsonDocument.css の --doc-page-width
+            const docWidth = 794; // JsonDocument.css の --doc-page-width に合わせる
             const newScale = containerWidth / docWidth;
             setScale(Math.min(newScale, 1.2)); // 最大 120%
         }

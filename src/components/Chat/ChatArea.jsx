@@ -11,12 +11,14 @@ import WelcomeScreen from './WelcomeScreen';
 import AiSlideStudio from './AiSlideStudio'; // ★追加
 import AiMermaidStudio from './AiMermaidStudio'; // ★追加
 import AiDocumentStudio from './AiDocumentStudio'; // ★追加
+import AiDrawioStudio from './AiDrawioStudio'; // ★追加
 import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
 import JsonSlidePanel from '../Artifacts/JsonSlidePanel';
 import JsonDocumentPanel from '../Artifacts/JsonDocumentPanel';
 import MermaidPanel from '../Artifacts/MermaidPanel'; // ★追加: Mermaid専用パネルのインポート
+import DrawioPanel from '../Artifacts/DrawioPanel'; // ★追加: Drawio専用パネルのインポート
 
 
 
@@ -138,7 +140,7 @@ const ChatArea = (props) => {
   // 自動的に viewMode を 'welcome' に戻すことで画面崩れを防ぐ
   useEffect(() => {
     if (isHistoryLoading) return;
-    if (viewMode === 'ai_slide_studio' || viewMode === 'ai_mermaid_studio' || viewMode === 'ai_document_studio') return;
+    if (viewMode === 'ai_slide_studio' || viewMode === 'ai_mermaid_studio' || viewMode === 'ai_document_studio' || viewMode === 'ai_drawio_studio') return;
 
     const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
     if (viewMode !== nextView && !isGenerating) {
@@ -358,9 +360,11 @@ const ChatArea = (props) => {
                   setSearchSettings(options.searchSettings);
                 }
 
-                // 通常のチャットメッセージとして送信（is_artifactをtrueにしない）
+                // ★追加: 生成開始と同時にMermaidパネルを準備
+                setActiveArtifact({ type: 'mermaid', label: '設計・構成図' });
                 handleSendMessageInternal(promptText, files || [], { 
-                  ...(options || {})
+                  ...(options || {}),
+                  artifact: { requested: true, type: 'mermaid', label: '設計・構成図' } 
                 });
               }}
             />
@@ -389,6 +393,30 @@ const ChatArea = (props) => {
               }}
             />
           </motion.div>
+        ) : viewMode === 'ai_drawio_studio' ? (
+          <motion.div key="drawio_studio" {...transitionProps} className="chat-view-container">
+            <AiDrawioStudio 
+              onBack={() => setViewMode('welcome')} 
+              mockMode={mockMode}
+              backendBApiKey={backendBApiKey}
+              backendBApiUrl={backendBApiUrl}
+              sendKey={sendKey}
+              onGenerate={(promptText, files, options) => {
+                setViewMode('chat');
+                
+                if (options?.searchSettings) {
+                  setSearchSettings(options.searchSettings);
+                }
+
+                // ★追加: 生成開始と同時にDrawioパネルを準備
+                setActiveArtifact({ type: 'drawio', label: '業務フロー・手順図' });
+                handleSendMessageInternal(promptText, files || [], { 
+                  ...(options || {}),
+                  artifact: { requested: true, type: 'drawio', label: '業務フロー・手順図' } 
+                });
+              }}
+            />
+          </motion.div>
         ) : (viewMode === 'welcome' && !isHistoryLoading) ? (
           <motion.div key="welcome" {...transitionProps} className="chat-view-container">
             <WelcomeScreen
@@ -413,6 +441,7 @@ const ChatArea = (props) => {
               onEnterSlideStudio={() => setViewMode('ai_slide_studio')}
               onEnterDocumentStudio={() => setViewMode('ai_document_studio')}
               onEnterMermaidStudio={() => setViewMode('ai_mermaid_studio')}
+              onEnterDrawioStudio={() => setViewMode('ai_drawio_studio')}
             />
           </motion.div>
         ) : (
@@ -488,6 +517,7 @@ const ChatArea = (props) => {
         const isJsonSlide = currentArtifactType === 'json_slide' || currentArtifactType === 'json_slide_advanced';
         const isJsonDocument = currentArtifactType === 'json_document';
         const isMermaid = currentArtifactType && currentArtifactType.startsWith('mermaid'); // ★追加: Mermaid判定
+        const isDrawio = currentArtifactType === 'drawio'; // ★追加: Drawio判定
 
         // ★追加: Artifactを識別するためのキー。切り替え時に再マウントを強制する
         const artifactKey = openedArtifact 
@@ -500,30 +530,37 @@ const ChatArea = (props) => {
               key={`json-slide-${artifactKey}`}
               isOpen={isArtifactOpen && isJsonSlide}
               onClose={closeArtifact}
-              artifact={openedArtifact}
-              streamingMessage={streamingMessage}
+              artifact={isJsonSlide ? openedArtifact : null}
+              streamingMessage={isJsonSlide ? streamingMessage : null}
             />
             <JsonDocumentPanel
               key={`json-doc-${artifactKey}`}
               isOpen={isArtifactOpen && isJsonDocument}
               onClose={closeArtifact}
-              artifact={openedArtifact}
-              streamingMessage={streamingMessage}
+              artifact={isJsonDocument ? openedArtifact : null}
+              streamingMessage={isJsonDocument ? streamingMessage : null}
             />
             <MermaidPanel
               key={`mermaid-${artifactKey}`}
               isOpen={isArtifactOpen && isMermaid}
               onClose={closeArtifact}
-              artifact={openedArtifact}
-              streamingMessage={streamingMessage}
+              artifact={isMermaid ? openedArtifact : null}
+              streamingMessage={isMermaid ? streamingMessage : null}
               onSendMessage={handleSendMessageInternal}
+            />
+            <DrawioPanel
+              key={`drawio-${artifactKey}`}
+              isOpen={isArtifactOpen && isDrawio}
+              onClose={closeArtifact}
+              artifact={isDrawio ? openedArtifact : null}
+              streamingMessage={isDrawio ? streamingMessage : null}
             />
             <ArtifactPanel
               key={`generic-art-${artifactKey}`}
-              isOpen={isArtifactOpen && !isJsonSlide && !isJsonDocument && !isMermaid}
+              isOpen={isArtifactOpen && !isJsonSlide && !isJsonDocument && !isMermaid && !isDrawio}
               onClose={closeArtifact}
-              artifact={openedArtifact}
-              streamingMessage={streamingMessage}
+              artifact={(!isJsonSlide && !isJsonDocument && !isMermaid && !isDrawio) ? openedArtifact : null}
+              streamingMessage={(!isJsonSlide && !isJsonDocument && !isMermaid && !isDrawio) ? streamingMessage : null}
               onQuoteSelect={(text) => setQuoteContext(text)}
             />
           </>

@@ -1,6 +1,26 @@
 /* src/components/Settings/SettingsArea.css */
 
 /* === Container === */
+:root {
+    /* グラスモーフィズム共通変数（ライトモード） */
+    --glass-bg: rgba(255, 255, 255, 0.65);              /* メインのガラス背景 */
+    --glass-bg-card: rgba(255, 255, 255, 0.45);         /* 設定カード（島）用 */
+    --glass-border-light: rgba(255, 255, 255, 0.5);      /* ボーダー（上・左：明るい） */
+    --glass-border-dark: rgba(255, 255, 255, 0.2);       /* ボーダー（下・右：暗い） */
+    --glass-shadow: rgba(99, 102, 241, 0.15);            /* 影（インディゴ系で柔らかく） */
+    --glass-blur: 25px;                                  /* ぼかし強度 */
+}
+
+[data-theme='dark'] {
+    /* グラスモーフィズム共通変数（ダークモード） */
+    --glass-bg: rgba(30, 30, 32, 0.75);
+    --glass-bg-card: rgba(45, 45, 48, 0.45);
+    --glass-border-light: rgba(255, 255, 255, 0.12);
+    --glass-border-dark: rgba(0, 0, 0, 0.2);
+    --glass-shadow: rgba(0, 0, 0, 0.45);
+    --glass-blur: 25px;
+}
+
 .settings-area-container {
     display: flex;
     width: 100%;
@@ -8,7 +28,7 @@
     background-color: var(--bg-base);
     overflow: hidden;
     position: relative;
-    /* Depth Pattern */
+    /* 奥行き感を出すための背景パターン */
     background-image:
         radial-gradient(circle at 0% 0%, var(--bg-layer-1) 0%, transparent 50%),
         radial-gradient(circle at 100% 100%, var(--bg-layer-1) 0%, transparent 50%);
@@ -181,18 +201,20 @@
 
 .settings-header {
     height: 52px;
-    /* Match Toolbar Height */
+    /* ツールバーの高さに合わせる */
     padding: 0 var(--space-6);
     display: flex;
     align-items: center;
     flex-shrink: 0;
     border-bottom: 1px solid var(--color-border);
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.35);               /* 背景をより透過させる */
+    -webkit-backdrop-filter: blur(var(--glass-blur));    /* Safari用ぼかし */
+    backdrop-filter: blur(var(--glass-blur));            /* 磨りガラスぼかし */
 }
 
 [data-theme='dark'] .settings-header {
-    background: rgba(30, 30, 30, 0.5);
+    background: rgba(30, 30, 32, 0.35);
+    border-bottom-color: var(--glass-border-light);
 }
 
 .settings-page-title {
@@ -457,17 +479,20 @@
     max-width: 95vw;
     max-height: 90vh;
 
-    /* macOS Sequoia HUD Material */
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    /* グラスモーフィズム背景とぼかし効果 */
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
 
-    /* Specular Edge Reflection */
+    /* 磨りガラスの厚みと光の反射を表現するボーダーとソフトな影 */
     border-radius: 16px;
+    border: 1px solid var(--glass-border-light);
+    border-right-color: var(--glass-border-dark);
+    border-bottom-color: var(--glass-border-dark);
     box-shadow:
-        0 0 0 0.5px rgba(255, 255, 255, 0.4) inset,
+        0 0 0 0.5px var(--glass-border-light) inset,
         0 0 0 1px rgba(0, 0, 0, 0.05),
-        0 25px 60px rgba(0, 0, 0, 0.25);
+        0 25px 60px var(--glass-shadow);
 
     overflow: hidden;
     position: relative;
@@ -475,11 +500,24 @@
 }
 
 [data-theme='dark'] .settings-modal-container {
-    background: rgba(40, 40, 42, 0.96);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border-light);
+    border-right-color: var(--glass-border-dark);
+    border-bottom-color: var(--glass-border-dark);
     box-shadow:
-        0 0 0 0.5px rgba(255, 255, 255, 0.08) inset,
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        0 30px 60px rgba(0, 0, 0, 0.6);
+        0 0 0 0.5px var(--glass-border-light) inset,
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 30px 60px var(--glass-shadow);
+}
+
+/* backdrop-filter 非対応環境向けのフォールバック処理 */
+@supports not (backdrop-filter: blur(1px)) {
+    .settings-modal-container {
+        background: #fdfdfd;
+    }
+    [data-theme='dark'] .settings-modal-container {
+        background: #202022;
+    }
 }
 
 .settings-modal-content-wrapper {
@@ -534,10 +572,46 @@
 /* Adjust SettingsNav padding in Modal mode to accommodate Close Button if inside */
 .settings-modal-container .settings-nav {
     padding-top: 50px;
-    /* Make space for close button */
+    /* クローズボタン用の余白 */
+    background: transparent !important;
+    /* 親のモーダルコンテナがグラス背景を持つため、完全透過にして一体化 */
+    border-right: 1px solid var(--glass-border-light);
+    /* 磨りガラスの光沢境界線に変更 */
+    box-shadow: none;
+    /* ダークモード用の内側シャドウを解除 */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+[data-theme='dark'] .settings-modal-container .settings-nav {
+    background: transparent !important;
+    border-right: 1px solid var(--glass-border-light);
+    box-shadow: none;
+}
+
+/* モーダル表示時のヘッダーを透過させてガラス板と統合 */
+.settings-modal-container .settings-header {
     background: transparent;
-    /* Container handles the background/glass */
-    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--glass-border-light);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* モーダル内ナビゲーションのアクティブアイテム（選択中のボタン）をグラスブルーに */
+.settings-modal-container .settings-nav-item.active {
+    background: rgba(10, 132, 255, 0.2);
+    /* 透過感のある美しいブルー */
+    border: 1px solid rgba(10, 132, 255, 0.35);
+    box-shadow:
+        0 4px 12px rgba(10, 132, 255, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    color: #0A84FF;
+}
+
+[data-theme='dark'] .settings-modal-container .settings-nav-item.active {
+    background: rgba(10, 132, 255, 0.25);
+    border-color: rgba(10, 132, 255, 0.45);
+    color: #64b5f6;
 }
 
 .settings-modal-container .settings-panel {

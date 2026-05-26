@@ -1,6 +1,7 @@
 // src/components/Settings/sections/ProfileSettings.jsx
 import React, { useState, useEffect } from 'react';
-import { Save, Check, User, AtSign, CircleUser, LogOut, Mail, Calendar } from 'lucide-react';
+import { Check, AtSign, CircleUser, LogOut, Mail, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MacSettingsSection, MacSettingsRow } from './MacSettingsComponents';
 import './SettingsCommon.css';
 import './ProfileSettings.css';
@@ -25,27 +26,22 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
   const [isSaved, setIsSaved] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
 
-  // settingsから初期値をロード（authUserのdisplayNameをフォールバック）
+  // 初期値のロード
   useEffect(() => {
     const savedName = settings?.profile?.displayName;
     const authName = currentUser?.name;
-
-    // 優先順位:
-    // 1. savedNameがあり、デフォルト値「User」でなければそれを使用（ユーザーが変更した場合）
-    // 2. authUserのdisplayName
-    // 3. savedName（デフォルト値でも）
-    // 4. 'User'（最終フォールバック）
-    const isCustomSavedName = savedName && savedName !== 'User';
-    const finalName = isCustomSavedName ? savedName : (authName || savedName || 'User');
-
-    console.log('[ProfileSettings] savedName:', savedName, 'authName:', authName, 'finalName:', finalName);
+    const finalName = (savedName && savedName !== 'User') ? savedName : (authName || savedName || 'User');
     setDisplayName(finalName);
   }, [settings, currentUser?.name]);
 
-  const handleSave = () => {
-    onUpdateSettings('profile', 'displayName', displayName);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
+  // オートセーブ（フォーカスが外れた時）
+  const handleBlur = () => {
+    const savedName = settings?.profile?.displayName;
+    if (displayName !== savedName && displayName.trim() !== '') {
+      onUpdateSettings('profile', 'displayName', displayName);
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
+    }
   };
 
   const handleLogout = () => {
@@ -59,8 +55,6 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
     }
   };
 
-  const hasChanges = displayName !== (settings?.profile?.displayName || 'User');
-
   return (
     <div className="settings-container">
       {/* Profile Card / Header */}
@@ -68,7 +62,7 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
         <div style={{
           width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'var(--bg-layer-2)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '32px', fontWeight: 'bold', color: 'var(--color-primary)',
+          fontSize: '32px', fontWeight: 'bold', color: 'var(--sys-color-primary, #0A84FF)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid var(--color-border)',
           marginBottom: '12px'
         }}>
@@ -82,26 +76,46 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
         </p>
       </div>
 
-      <MacSettingsSection title="Basic Information">
+      {/* 編集可能セクション */}
+      <MacSettingsSection title="Profile">
         <MacSettingsRow
           icon={CircleUser}
           label="表示名"
           description="アプリ内で表示されるあなたの名前"
+          isLast={true}
         >
-          <input
-            type="text"
-            className="settings-input"
-            style={{ width: '200px', textAlign: 'right' }}
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="User Name"
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AnimatePresence>
+              {isSaved && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{ color: '#30D158' }} // sys-color-success
+                >
+                  <Check size={16} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <input
+              type="text"
+              className="settings-input"
+              style={{ width: '200px', textAlign: 'right' }}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              onBlur={handleBlur}
+              placeholder="User Name"
+            />
+          </div>
         </MacSettingsRow>
+      </MacSettingsSection>
 
+      {/* 読み取り専用セクション */}
+      <MacSettingsSection title="Account Details">
         <MacSettingsRow
           icon={AtSign}
           label="User ID"
-          description="システム識別用の固有ID（変更不可）"
+          description="システム識別用の固有ID"
         >
           <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--color-text-sub)' }}>
             {currentUser?.id || 'N/A'}
@@ -130,13 +144,13 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
         </MacSettingsRow>
       </MacSettingsSection>
 
-      {/* ★追加: Account セクション（ログアウト） */}
+      {/* 危険な操作セクション */}
       {onLogout && (
-        <MacSettingsSection title="Account">
+        <MacSettingsSection title="Danger Zone">
           <MacSettingsRow
             icon={LogOut}
             label="ログアウト"
-            description="現在のアカウントからログアウトします"
+            description="現在のアカウントから安全にログアウトします"
             isLast={true}
             danger
           >
@@ -149,27 +163,6 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
           </MacSettingsRow>
         </MacSettingsSection>
       )}
-
-      <div className="settings-actions">
-        <button
-          className="settings-btn primary"
-          onClick={handleSave}
-          disabled={!hasChanges}
-          style={!hasChanges ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-        >
-          {isSaved ? (
-            <>
-              <Check size={14} />
-              <span>保存しました</span>
-            </>
-          ) : (
-            <>
-              <Save size={14} />
-              <span>保存</span>
-            </>
-          )}
-        </button>
-      </div>
     </div>
   );
 };

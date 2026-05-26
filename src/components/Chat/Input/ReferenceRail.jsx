@@ -14,6 +14,8 @@ const ARTIFACT_TYPE_MAP = {
     html_slide: { emoji: '📽️', label: '印刷可能なプレゼンスライド' },
     json_slide: { emoji: '🎯', label: 'プレゼンスライド' },
     json_slide_advanced: { emoji: '🎯', label: 'プレゼンスライド' },
+    drawio: { emoji: '🔄', label: '業務フロー' },
+    mermaid: { emoji: '📐', label: '設計・構成図' },
 };
 
 const getArtifactBadgeText = (artifact) => {

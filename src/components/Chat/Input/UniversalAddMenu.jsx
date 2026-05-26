@@ -93,6 +93,14 @@ const PresentationIcon = () => (
     </svg>
 );
 
+const DiagramIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+    </svg>
+);
+
 // --- Animation Configs (Aligned with ContextSelector) ---
 
 const slideVariants = {
@@ -252,6 +260,18 @@ const UniversalAddMenu = ({
                                 subtext="チャット内でさっと読む軽量なメモ"
                                 onClick={() => navigateTo('ARTIFACT_L2', 'right')}
                                 showArrow
+                            />
+                            <MenuItem
+                                icon={<ComparisonIcon />}
+                                label="🔄 業務フロー"
+                                subtext="Draw.io形式のフロー図"
+                                onClick={() => handleArtifactSelect('drawio', '業務フロー')}
+                            />
+                            <MenuItem
+                                icon={<DiagramIcon />}
+                                label="📐 設計・構成図"
+                                subtext="Mermaid形式のシステム構成図やフロー図"
+                                onClick={() => handleArtifactSelect('mermaid', '設計・構成図')}
                             />
                             <MenuItem
                                 icon={<DocumentRichtextIcon />}

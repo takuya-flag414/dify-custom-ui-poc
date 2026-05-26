@@ -23,6 +23,8 @@ export interface SettingsCategory {
     label: string;
     icon: React.FC<{ size?: number | string }>;
     component: React.FC<SettingsComponentProps>;
+    /** グループ化のためのセクション名（追加） */
+    group?: string;
     /** 必要な権限（なければ誰でもアクセス可能） */
     requiredPermission?: PermissionCode;
     /** DevModeでのみ表示（開発者向け機能） */
@@ -40,21 +42,21 @@ export const settingsCategories: SettingsCategory[] = [
         label: 'プロフィール',
         icon: User,
         component: ProfileSettings,
-        // 誰でもアクセス可能
+        group: 'アカウント',
     },
     {
         id: 'general',
-        label: '一般設定',
+        label: '一般・外観',
         icon: Settings,
         component: GeneralSettings,
-        // 誰でもアクセス可能
+        group: 'アプリケーション',
     },
     {
         id: 'prompt',
         label: 'AIの振る舞い',
         icon: Sparkles,
         component: PromptSettings,
-        // 誰でもアクセス可能
+        group: 'Apple Intelligence',
     },
     {
         id: 'rag',
@@ -62,6 +64,7 @@ export const settingsCategories: SettingsCategory[] = [
         icon: FileText,
         component: RagSettings,
         requiredPermission: 'knowledge:manage',
+        group: 'Apple Intelligence',
     },
     {
         id: 'admin_console',
@@ -69,13 +72,15 @@ export const settingsCategories: SettingsCategory[] = [
         icon: BarChart2,
         component: AdminSettings,
         requiredPermission: 'admin:access',
+        group: 'システム管理',
     },
     {
         id: 'debug',
         label: '開発者オプション',
         icon: Terminal,
         component: DebugSettings,
-        devModeOnly: true,  // DevModeでのみ表示
+        devModeOnly: true,
+        group: 'システム管理',
     },
 ];
 

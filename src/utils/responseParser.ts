@@ -26,7 +26,7 @@ export interface ProcessLogs {
  */
 export interface ArtifactData {
     artifact_title: string;
-    artifact_type: 'summary_report' | 'checklist' | 'comparison_table' | 'faq' | 'meeting_minutes' | string;
+    artifact_type: 'summary_report' | 'checklist' | 'comparison_table' | 'faq' | 'meeting_minutes' | 'drawio' | string;
     artifact_content: string;
     citations?: LlmCitation[];
 }
@@ -239,9 +239,20 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
     const partialArtifactTitle = extractPartialField(textToParse, 'artifact_title');
     const partialArtifactContent = extractPartialField(textToParse, 'artifact_content');
     if (partialArtifactTitle) {
+        let extractedType = extractPartialField(textToParse, 'artifact_type');
+        
+        // ★追加: artifact_type がまだ抽出できていない場合でも、コンテンツに特有のタグがあれば推測する
+        if (!extractedType && partialArtifactContent) {
+            if (partialArtifactContent.includes('<mxGraphModel') || 
+                partialArtifactContent.includes('<mxfile') || 
+                partialArtifactContent.includes('<mxCell')) {
+                extractedType = 'drawio';
+            }
+        }
+
         partialArtifact = {
             artifact_title: partialArtifactTitle,
-            artifact_type: extractPartialField(textToParse, 'artifact_type') || 'summary_report',
+            artifact_type: extractedType || 'summary_report',
             artifact_content: partialArtifactContent || '',
         };
     }
@@ -255,6 +266,17 @@ export const parseLlmResponse = (rawText: string | null | undefined): ParsedLlmR
                 artifact_title: partialPresentationTitle,
                 artifact_type: 'json_slide',
                 artifact_content: '', // ストリーミング中は生成中アニメーション用に空文字
+            };
+        }
+    }
+
+    // ★追加: JSONラッパーすら省略して、AIが直接XMLを出力し始めた場合のフォールバック抽出
+    if (!partialArtifact) {
+        if (textToParse.includes('<mxGraphModel') || textToParse.includes('<mxfile')) {
+            partialArtifact = {
+                artifact_title: '業務フロー・手順図', // デフォルト
+                artifact_type: 'drawio',
+                artifact_content: textToParse,
             };
         }
     }
