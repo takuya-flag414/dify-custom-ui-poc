@@ -454,7 +454,8 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                 );
             })}
 
-            {/* 最終回答LLMの思考プロセスの描画を追加 */}
+            {/* 最終回答LLMの思考プロセスの描画は非表示にするため、無効化しました */}
+            {/*
             {hasThinking && (
                 <div className="thought-monologue-container action-monologue final-thinking">
                     {Array.isArray(thinkingContent) ? (
@@ -474,6 +475,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                     )}
                 </div>
             )}
+            */}
 
             {/* 最終回答との視覚的な区切り - 本文が表示されてから表示 */}
             {hasAnswer && <hr className="thought-divider" />}
