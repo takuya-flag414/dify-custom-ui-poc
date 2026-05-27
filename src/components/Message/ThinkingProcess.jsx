@@ -123,10 +123,68 @@ const ThinkingDots = () => {
     return <span>{dots}</span>;
 };
 
+// アコーディオン形式で思考プロセスを表示するコンポーネント
+const ThinkingAccordion = ({ content, isStreaming, onComplete }) => {
+    // ★一時的にアコーディオンUI表示を無効・非表示化
+    return null;
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    if (!content || !Array.isArray(content) || content.length === 0) return null;
+
+    return (
+        <div className="mt-2 border border-gray-100 rounded-lg bg-gray-50/50 overflow-hidden">
+            <button
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100/50 transition-colors"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <div className="flex items-center gap-1.5">
+                    <span className="text-gray-400">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transform transition-transform ${isOpen ? 'rotate-90' : ''}`}>
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </span>
+                    <span>思考プロセスを見る ({content.length}ステップ)</span>
+                </div>
+            </button>
+            {isOpen && (
+                <div className="px-3 pb-3 pt-1 border-t border-gray-100">
+                    <ul className="flex flex-col gap-2 mt-1">
+                        {content.map((t, i) => (
+                            <li key={i} className="text-xs">
+                                <div className="flex items-start gap-1.5">
+                                    <span className="text-blue-400 mt-0.5">▪</span>
+                                    <div>
+                                        <strong className="text-gray-700 font-medium">{t.action_label}</strong>
+                                        {t.detail && (
+                                            <div className="text-gray-500 mt-0.5">
+                                                {isStreaming ? (
+                                                    <TypewriterEffect
+                                                        content={t.detail}
+                                                        onComplete={i === content.length - 1 ? onComplete : undefined}
+                                                    />
+                                                ) : (
+                                                    <MarkdownRenderer content={t.detail} />
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => {
     // stepsまたはthinkingContentがあるかチェック
     const hasSteps = steps && steps.length > 0;
-    const hasThinking = thinkingContent && thinkingContent.trim().length > 0;
+    const hasThinking = thinkingContent && 
+        (typeof thinkingContent === 'string' ? thinkingContent.trim().length > 0 : 
+         Array.isArray(thinkingContent) ? thinkingContent.length > 0 : false);
     const hasContent = hasSteps || hasThinking;
 
     // コンテンツがない場合、ストリーミング中でなければ何も表示しない
@@ -153,12 +211,16 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
         if (!currentStep) return;
 
         const isDone = currentStep.status === 'done' || currentStep.status === 'error';
-        // thinkingContentも含めてモノローグ有無を判定（LLM_Synthesis対応）
-        const hasMonologue = currentStep.thinking || currentStep.reasoning || currentStep.thinkingContent;
+        
+        // TypewriterEffectによってUI進行をブロックすべきテキストがあるか判定
+        // display_text がある場合はブロック(タイピング完了を待つ)。
+        // thinkingContent が文字列の場合（直接表示される場合）もブロックする。
+        // thinkingContent が配列の場合（アコーディオンに隠れる場合）はブロックしない。
+        const hasBlockingText = !!currentStep.display_text || 
+                                (typeof currentStep.thinkingContent === 'string' && currentStep.thinkingContent.trim().length > 0);
 
-        // モノローグがない場合は、完了したら即座に次のステップへ進む
-        // (モノローグがある場合はTypewriterEffectのonCompleteで進める)
-        if (isDone && !hasMonologue) {
+        // ブロックすべきテキストがない場合は、完了したら即座に次のステップへ進む
+        if (isDone && !hasBlockingText) {
             setVisualCurrentStepIndex(prev => prev + 1);
         }
     }, [steps, visualCurrentStepIndex, isStreaming, hasSteps]);
@@ -168,12 +230,27 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
         const mode = determineRenderMode(step);
         if (mode === 'silent') return false;
         if (mode === 'action') return true;
-        return !!(step.thinking || step.reasoning);
+        return !!step.display_text;
     });
 
     // ステップ完了ハンドル (TypewriterEffectから呼ばれる)
     const handleStepComplete = (index) => {
         setVisualCurrentStepIndex(prev => Math.max(prev, index + 1));
+    };
+
+    // 配列・文字列の両方に対応したモノローグ描画ヘルパー
+    const renderMonologueContent = (content, isStreaming, onComplete) => {
+        if (!content) return null;
+
+        // 従来の文字列の場合
+        return isStreaming ? (
+            <TypewriterEffect
+                content={content}
+                onComplete={onComplete}
+            />
+        ) : (
+            <MarkdownRenderer content={content} />
+        );
     };
 
     return (
@@ -192,8 +269,18 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
 
                 const mode = determineRenderMode(step);
                 const isStepDone = step.status === 'done' || step.status === 'error';
+
+                // ★追加: 最終回答ノード等(silentモード)の実行中の場合、最新のthinkingContent(配列)のaction_labelを優先表示する
+                let dynamicLabel = step.thinkingText || 'Thinking';
+                if (mode === 'silent' && Array.isArray(thinkingContent) && thinkingContent.length > 0) {
+                    const latestActionLabel = thinkingContent[thinkingContent.length - 1].action_label;
+                    if (latestActionLabel) {
+                        dynamicLabel = latestActionLabel;
+                    }
+                }
+
                 // 末尾の「.」や「。」を削除してベーステキストを作成 (全角・半角ドット対応)
-                const baseThinkingText = (step.thinkingText || 'Thinking').replace(/[.．。]+$/, '');
+                const baseThinkingText = dynamicLabel.replace(/[.．。]+$/, '');
                 const thinkingText = (
                     <>
                         {baseThinkingText}
@@ -221,9 +308,10 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
 
                 // ルーターノード（判定結果）はチップUI非表示、thinkingのみ表示
                 if (step.iconType === 'router') {
-                    const monologueContent = step.thinking || step.reasoning;
+                    const monologueContent = step.display_text;
+                    const stepThinkingContent = step.thinkingContent;
 
-                    if (!monologueContent) {
+                    if (!monologueContent && (!stepThinkingContent || stepThinkingContent.length === 0)) {
                         // thinkingもなければ基本非表示だが、現在進行中ならThinkingを表示
                         if (isStreaming && index === visualCurrentStepIndex) {
                             return ThinkingPlaceholder;
@@ -234,14 +322,18 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                     return (
                         <div key={step.id || index} className="thought-monologue-container">
                             {isStepDone ? (
-                                isStreaming ? (
-                                    <TypewriterEffect
-                                        content={monologueContent}
-                                        onComplete={() => handleStepComplete(index)}
-                                    />
-                                ) : (
-                                    <MarkdownRenderer content={monologueContent} />
-                                )
+                                <>
+                                    {renderMonologueContent(monologueContent, isStreaming, () => handleStepComplete(index))}
+                                    {stepThinkingContent && (
+                                        Array.isArray(stepThinkingContent) ? (
+                                            <ThinkingAccordion content={stepThinkingContent} isStreaming={isStreaming} onComplete={() => {}} />
+                                        ) : (
+                                            <div className="mt-2 text-sm text-gray-500 italic">
+                                                {renderMonologueContent(stepThinkingContent, isStreaming, () => {})}
+                                            </div>
+                                        )
+                                    )}
+                                </>
                             ) : (
                                 <div className="fluid-loading-container small">
                                     <FluidOrb width="24px" height="24px" />
@@ -254,7 +346,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
 
                 // Action: チップ型UI
                 if (mode === 'action') {
-                    const actionMonologueContent = step.thinking || step.reasoning;
+                    const actionMonologueContent = step.display_text;
                     const hasAdditionalResults = step.additionalResults && step.additionalResults.length > 0;
 
                     // ファイル検索ストアツールは「社内データを検索」とわかりやすく表示
@@ -307,25 +399,15 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                             )}
                             {actionMonologueContent && isStepDone && (
                                 <div className="thought-monologue-container action-monologue">
-                                    {isStreaming ? (
-                                        <TypewriterEffect
-                                            content={actionMonologueContent}
-                                            onComplete={() => handleStepComplete(index)}
-                                        />
-                                    ) : (
-                                        <MarkdownRenderer content={actionMonologueContent} />
-                                    )}
+                                    {renderMonologueContent(actionMonologueContent, isStreaming, () => handleStepComplete(index))}
                                 </div>
                             )}
                             {step.thinkingContent && isStepDone && (
                                 <div className="thought-monologue-container action-monologue synthesis-thinking">
-                                    {isStreaming ? (
-                                        <TypewriterEffect
-                                            content={step.thinkingContent}
-                                            onComplete={() => handleStepComplete(index)}
-                                        />
+                                    {Array.isArray(step.thinkingContent) ? (
+                                        <ThinkingAccordion content={step.thinkingContent} isStreaming={isStreaming} onComplete={() => handleStepComplete(index)} />
                                     ) : (
-                                        <MarkdownRenderer content={step.thinkingContent} />
+                                        renderMonologueContent(step.thinkingContent, isStreaming, () => handleStepComplete(index))
                                     )}
                                 </div>
                             )}
@@ -334,10 +416,11 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                 }
 
                 // Monologue: thinking/reasoningフィールドを表示
-                const monologueContent = step.thinking || step.reasoning;
+                const monologueContent = step.display_text;
+                const stepThinkingContent = step.thinkingContent;
 
                 // コンテンツがまだない場合（processing中）
-                if (!monologueContent) {
+                if (!monologueContent && (!stepThinkingContent || stepThinkingContent.length === 0)) {
                     // 現在進行中のステップならThinkingプレースホルダーを表示（thinkingTextを使用）
                     if (isStreaming && index === visualCurrentStepIndex && !isStepDone) {
                         return ThinkingPlaceholder;
@@ -348,14 +431,18 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                 return (
                     <div key={step.id || index} className="thought-monologue-container">
                         {isStepDone ? (
-                            isStreaming ? (
-                                <TypewriterEffect
-                                    content={monologueContent}
-                                    onComplete={() => handleStepComplete(index)}
-                                />
-                            ) : (
-                                <MarkdownRenderer content={monologueContent} />
-                            )
+                            <>
+                                {renderMonologueContent(monologueContent, isStreaming, () => handleStepComplete(index))}
+                                {stepThinkingContent && (
+                                    Array.isArray(stepThinkingContent) ? (
+                                        <ThinkingAccordion content={stepThinkingContent} isStreaming={isStreaming} onComplete={() => {}} />
+                                    ) : (
+                                        <div className="mt-2 text-sm text-gray-500 italic">
+                                            {renderMonologueContent(stepThinkingContent, isStreaming, () => {})}
+                                        </div>
+                                    )
+                                )}
+                            </>
                         ) : (
                             // 処理中はプレースホルダーを表示
                             <div className="fluid-loading-container small">
@@ -366,6 +453,27 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                     </div>
                 );
             })}
+
+            {/* 最終回答LLMの思考プロセスの描画を追加 */}
+            {hasThinking && (
+                <div className="thought-monologue-container action-monologue final-thinking">
+                    {Array.isArray(thinkingContent) ? (
+                        <ThinkingAccordion
+                            content={thinkingContent}
+                            isStreaming={isStreaming}
+                            onComplete={() => {}}
+                        />
+                    ) : (
+                        <div className="mt-2 text-sm text-gray-500 italic">
+                            {isStreaming ? (
+                                <TypewriterEffect content={thinkingContent} />
+                            ) : (
+                                <MarkdownRenderer content={thinkingContent} />
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* 最終回答との視覚的な区切り - 本文が表示されてから表示 */}
             {hasAnswer && <hr className="thought-divider" />}

@@ -17,8 +17,7 @@ export interface ThoughtStep {
     iconType: string;
     renderMode?: 'silent' | 'action' | 'monologue';
     thinkingText?: string;
-    thinking?: string;
-    reasoning?: string;
+    display_text?: string | { action_label: string; detail: string }[];
     resultLabel?: string;
     resultValue?: string;
 }
@@ -94,7 +93,7 @@ export const rebuildThoughtProcess = (
         iconType: 'router',
         renderMode: 'monologue',
         thinkingText: '質問の意図を解析しています...',
-        thinking: processLogs.intent_analysis?.thinking || '',
+        display_text: processLogs.intent_analysis?.display_text || '',
         resultLabel: '検索方針',
         resultValue: intentDisplay.resultValue,
     });
@@ -110,8 +109,8 @@ export const rebuildThoughtProcess = (
         });
     }
 
-    // 3. RAG戦略 (rag_strategy.thinking が存在する場合のみ)
-    if (processLogs.rag_strategy?.thinking) {
+    // 3. RAG戦略 (rag_strategy.display_text が存在する場合のみ)
+    if (processLogs.rag_strategy?.display_text) {
         steps.push({
             id: generateId(),
             title: '検索戦略を策定中...',
@@ -119,7 +118,7 @@ export const rebuildThoughtProcess = (
             iconType: 'reasoning',
             renderMode: 'monologue',
             thinkingText: '検索戦略を策定中...',
-            thinking: processLogs.rag_strategy.thinking,
+            display_text: processLogs.rag_strategy.display_text,
         });
     }
 
@@ -133,8 +132,8 @@ export const rebuildThoughtProcess = (
         });
     }
 
-    // 5. Web検索戦略 (web_search_strategy.reasoning が存在する場合のみ)
-    if (processLogs.web_search_strategy?.reasoning) {
+    // 5. Web検索戦略 (web_search_strategy.display_text が存在する場合のみ)
+    if (processLogs.web_search_strategy?.display_text) {
         steps.push({
             id: generateId(),
             title: '検索戦略を策定中...',
@@ -142,7 +141,7 @@ export const rebuildThoughtProcess = (
             iconType: 'reasoning',
             renderMode: 'monologue',
             thinkingText: '検索戦略を策定中...',
-            reasoning: processLogs.web_search_strategy.reasoning,
+            display_text: processLogs.web_search_strategy.display_text,
         });
     }
 

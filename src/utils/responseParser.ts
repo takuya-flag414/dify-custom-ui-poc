@@ -13,9 +13,9 @@ export interface SmartAction {
  * process_logs の型定義（最終回答LLMが出力する推論プロセスログ）
  */
 export interface ProcessLogs {
-    intent_analysis?: { thinking?: string };
-    rag_strategy?: { thinking?: string };
-    web_search_strategy?: { reasoning?: string };
+    intent_analysis?: { display_text?: string | { action_label: string; detail: string }[] };
+    rag_strategy?: { display_text?: string | { action_label: string; detail: string }[] };
+    web_search_strategy?: { display_text?: string | { action_label: string; detail: string }[] };
     is_store_summary_executed?: boolean | string;
     is_rag_search_executed?: boolean | string;
     is_web_search_executed?: boolean | string;
@@ -38,7 +38,7 @@ export interface ParsedLlmResponse {
     answer: string;
     citations: LlmCitation[];
     smartActions: SmartAction[];
-    thinking: string;
+    thinking: string | { action_label: string; detail: string }[];
     isParsed: boolean;
     processLogs: ProcessLogs | null;
     usedRag: boolean;
@@ -112,9 +112,63 @@ const extractPartialJson = (text: string): string | null => extractPartialField(
 /**
  * 壊れた（生成途中の）JSON文字列から、thinkingフィールドの中身を可能な限り抽出する
  * @param text - 解析対象のテキスト
- * @returns 抽出できた思考テキスト（見つからない場合はnull）
+ * @returns 抽出できた思考テキストまたは配列（見つからない場合はnull）
  */
-const extractPartialThinking = (text: string): string | null => extractPartialField(text, 'thinking');
+const extractPartialThinking = (text: string): string | { action_label: string; detail: string }[] | null => {
+    // 1. まずは従来の文字列型 "thinking": "..." を試行
+    const strMatch = extractPartialField(text, 'thinking');
+    if (strMatch !== null && strMatch.trim().length > 0) return strMatch;
+
+    // 2. 配列型 "thinking": [ ... を試行
+    const arrayStartMatch = text.match(/"thinking"\s*:\s*\[/);
+    if (!arrayStartMatch || arrayStartMatch.index === undefined) return null;
+
+    const startIndex = arrayStartMatch.index + arrayStartMatch[0].length;
+    let arrayContent = text.substring(startIndex);
+
+    // 回答フェーズ（"answer": など）に突入している場合は切り詰める
+    const endMatch = arrayContent.match(/]\s*,\s*"/);
+    if (endMatch && endMatch.index !== undefined) {
+        arrayContent = arrayContent.substring(0, endMatch.index);
+    }
+
+    const items: { action_label: string; detail: string }[] = [];
+
+    // 完成している、あるいは "action_label" が抽出可能なオブジェクトを正規表現で探す
+    // {"action_label": "...", "detail": "..."}
+    const objectRegex = /\{\s*"action_label"\s*:\s*"([^"]+)"(?:[^{}]*)\}/g;
+    let match;
+    let lastIndex = 0;
+    
+    while ((match = objectRegex.exec(arrayContent)) !== null) {
+        try {
+            const parsedObj = JSON.parse(match[0]);
+            items.push(parsedObj);
+        } catch {
+            // パース失敗時でも action_label は抽出できているので格納
+            items.push({ action_label: match[1], detail: '' });
+        }
+        lastIndex = objectRegex.lastIndex;
+    }
+
+    // 最後に生成中の不完全なオブジェクトがあるかチェック
+    const remaining = arrayContent.substring(lastIndex);
+    const pendingLabelMatch = remaining.match(/"action_label"\s*:\s*"([^"]*)/);
+    
+    if (pendingLabelMatch) {
+        const actionLabel = pendingLabelMatch[1];
+        const pendingDetailMatch = remaining.match(/"detail"\s*:\s*"([^]*)/);
+        let detail = '';
+        if (pendingDetailMatch) {
+            detail = pendingDetailMatch[1];
+            // 末尾の不完全なエスケープやクォートを取り除く
+            detail = detail.replace(/\\?["']?$/, '');
+        }
+        items.push({ action_label: actionLabel, detail });
+    }
+
+    return items.length > 0 ? items : null;
+};
 
 /**
  * LLMのレスポンス（テキスト）を解析し、JSONであれば回答と出典、Smart Actionsを抽出する。

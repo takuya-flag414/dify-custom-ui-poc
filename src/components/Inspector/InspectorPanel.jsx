@@ -218,7 +218,7 @@ const ThoughtTimeline = ({ steps, isStreaming }) => {
 
             {steps.map((step, index) => {
                 const isError = step.status === 'error';
-                const hasDetail = step.thinking || step.resultValue || step.errorMessage || (step.additionalResults && step.additionalResults.length > 0);
+                const hasDetail = step.display_text || step.resultValue || step.errorMessage || (step.additionalResults && step.additionalResults.length > 0);
 
                 return (
                     <motion.div
@@ -251,7 +251,7 @@ const ThoughtTimeline = ({ steps, isStreaming }) => {
                                 // 1. 判定・戦略系ノードは internalLog を優先し、思考は非表示にする
                                 const isStrategicNode = step.title?.includes('判定') || step.title?.includes('戦略');
                                 const showLog = isStrategicNode && step.internalLog;
-                                const showThinking = !isStrategicNode && step.thinking;
+                                const showThinking = !isStrategicNode && step.display_text;
 
                                 return (
                                     <div className={`timeline-details ${isError ? 'error' : ''}`}>
@@ -275,7 +275,7 @@ const ThoughtTimeline = ({ steps, isStreaming }) => {
                                         {showThinking && !isError && (
                                             <div className="timeline-detail-row thinking">
                                                 <span className="timeline-detail-icon">🧠</span>
-                                                <span className="timeline-detail-text">{step.thinking}</span>
+                                                <span className="timeline-detail-text">{step.display_text}</span>
                                             </div>
                                         )}
 

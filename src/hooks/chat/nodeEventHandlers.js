@@ -224,7 +224,7 @@ export const processQueryRewriteFinished = (outputs, nodeId, addLog) => {
         const optimizedQuery = parsedJson.optimized_query || '';
         const targetDomains = parsedJson.target_domains || [];
 
-        addLog(`[LLM_Query_Rewrite] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
+        addLog(`[LLM_Query_Rewrite] thinking: ${typeof parsedJson.thinking === 'object' ? JSON.stringify(parsedJson.thinking) : (parsedJson.thinking || 'N/A')}`, 'info');
         addLog(`[LLM_Query_Rewrite] optimized_query: ${optimizedQuery || 'N/A'}`, 'info');
         addLog(`[LLM_Query_Rewrite] target_domains: ${JSON.stringify(targetDomains)}`, 'info');
 
@@ -238,7 +238,8 @@ export const processQueryRewriteFinished = (outputs, nodeId, addLog) => {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',
-                thinking: parsedJson.thinking || '',
+                display_text: parsedJson.display_text || '',
+                thinkingContent: parsedJson.thinking || '',
                 resultLabel: '最適化クエリ',
                 resultValue: optimizedQuery,
                 additionalResults: domainsDisplay ? [
@@ -271,7 +272,7 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
 
     if (parsedJson) {
         // ログ出力
-        addLog(`[Intent_Analysis] thinking: ${parsedJson.thinking || 'N/A'}`, 'info');
+        addLog(`[Intent_Analysis] thinking: ${typeof parsedJson.thinking === 'object' ? JSON.stringify(parsedJson.thinking) : (parsedJson.thinking || 'N/A')}`, 'info');
         addLog(`[Intent_Analysis] category: ${parsedJson.category || 'N/A'}`, 'info');
         if (parsedJson.session_title) {
             addLog(`[Intent_Analysis] session_title: ${parsedJson.session_title}`, 'info');
@@ -304,7 +305,8 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
         }
 
         // --- Thinkingの表示制御 (ガードロジック) ---
-        let finalThinking = parsedJson.thinking || '';
+        let finalThinking = parsedJson.display_text || '';
+        let finalThinkingContent = parsedJson.thinking || '';
         const lowerTitle = (title || '').toLowerCase();
         
         // LLMの出力揺らぎ対策: booleanのfalseと文字列の"false"の両方に対応
@@ -312,13 +314,17 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
         const isWebFalse = String(parsedJson.requires_web).toLowerCase() === 'false';
         
         if (lowerTitle.includes('rag')) {
-            if (isRagFalse) finalThinking = '';
+            if (isRagFalse) { finalThinking = ''; }
         } else if (lowerTitle.includes('web')) {
-            if (isWebFalse) finalThinking = '';
+            if (isWebFalse) { finalThinking = ''; }
         } else {
             // Hybrid や 汎用(LLM_Intent_Analysis) などの場合
-            // RAGもWebも不要(false)な場合のみThinkingを非表示にする
-            if (isRagFalse && isWebFalse) finalThinking = '';
+            // RAGもWebも不要(false)な場合でも、Intent_Analysis自身の思考プロセスは残す
+            // 過去の仕様では非表示にしていたが、構造化Thinkingを確認できるようにするため維持する
+            if (isRagFalse && isWebFalse) {
+                finalThinking = ''; // 宣言文(display_text)は空で良い
+                // finalThinkingContent = ''; // 思考プロセス(thinking)はクリアしない
+            }
         }
 
         return {
@@ -327,7 +333,8 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
                 ...t,
                 title: `判定: ${displayInfo.title}`,
                 status: 'done',
-                thinking: finalThinking,
+                display_text: finalThinking,
+                thinkingContent: finalThinkingContent,
                 resultLabel: '検索方針',
                 resultValue: finalResultValue,
                 internalLog: internalLog // ★メッセージデータとして保持
@@ -348,7 +355,8 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
             const jsonMatch = rawText.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const manualParsed = JSON.parse(jsonMatch[0]);
-                fallbackThinking = manualParsed.thinking || '';
+                fallbackThinking = manualParsed.display_text || '';
+                let fallbackThinkingContent = manualParsed.thinking || '';
                 fallbackCategory = manualParsed.category || null;
                 fallbackRequiresRag = manualParsed.requires_rag;
                 fallbackRequiresWeb = manualParsed.requires_web;
@@ -362,13 +370,26 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
         const fbLowerTitle = (title || '').toLowerCase();
         const fbIsRagFalse = String(fallbackRequiresRag).toLowerCase() === 'false';
         const fbIsWebFalse = String(fallbackRequiresWeb).toLowerCase() === 'false';
+        
+        // fallbackThinkingContentが定義されていない可能性への対応
+        let finalFbThinkingContent = '';
+        try {
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const manualParsed = JSON.parse(jsonMatch[0]);
+                finalFbThinkingContent = manualParsed.thinking || '';
+            }
+        } catch(e) {}
 
         if (fbLowerTitle.includes('rag')) {
-            if (fbIsRagFalse) fallbackThinking = '';
+            if (fbIsRagFalse) { fallbackThinking = ''; }
         } else if (fbLowerTitle.includes('web')) {
-            if (fbIsWebFalse) fallbackThinking = '';
+            if (fbIsWebFalse) { fallbackThinking = ''; }
         } else {
-            if (fbIsRagFalse && fbIsWebFalse) fallbackThinking = '';
+            if (fbIsRagFalse && fbIsWebFalse) {
+                fallbackThinking = '';
+                // finalFbThinkingContent = ''; // 思考プロセスはクリアしない
+            }
         }
 
         // フォールバックからも session_title を抽出
@@ -404,7 +425,8 @@ export const processIntentAnalysisFinished = (outputs, nodeId, addLog, title) =>
                 ...t,
                 title: resultText || t.title,
                 status: 'done',
-                thinking: fallbackThinking // ここでも反映
+                display_text: fallbackThinking, // ここでも反映
+                thinkingContent: finalFbThinkingContent
             } : t
         };
     }
@@ -479,7 +501,8 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',
-                thinking: parsedJson.reasoning || '',
+                display_text: parsedJson.display_text || '',
+                thinkingContent: parsedJson.reasoning || parsedJson.thinking || '',
                 resultLabel: 'メイン検索',
                 resultValue: parsedJson.query_main || '',
                 additionalResults,
@@ -508,10 +531,10 @@ export const processLlmSynthesisFinished = (outputs, nodeId, addLog) => {
     const parsedJson = extractJsonFromLlmOutput(rawText);
 
     if (parsedJson) {
-        const thinking = parsedJson.thinking || '';
+        const thinking = parsedJson.display_text || parsedJson.thinking || '';
         const internalLog = parsedJson.internal_log || '';
 
-        addLog(`[LLM_Synthesis] thinking: ${thinking || 'N/A'}`, 'info');
+        addLog(`[LLM_Synthesis] thinking: ${typeof parsedJson.thinking === 'object' ? JSON.stringify(parsedJson.thinking) : (parsedJson.thinking || 'N/A')}`, 'info');
         addLog(`[LLM_Synthesis] internal_log: ${internalLog || 'N/A'}`, 'info');
 
         // ★追加: internal_log があれば特別なプレフィックスでシステムログに記録
@@ -523,7 +546,8 @@ export const processLlmSynthesisFinished = (outputs, nodeId, addLog) => {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',
-                thinking: thinking,  // モノローグとして ThinkingProcess.jsx に表示される
+                display_text: parsedJson.display_text || '',
+                thinkingContent: parsedJson.thinking || '',
                 internalLog: internalLog // ★追加
             } : t
         };
@@ -549,9 +573,9 @@ export const processRagStrategyFinished = (outputs, nodeId, addLog) => {
     const parsedJson = extractJsonFromLlmOutput(rawText);
 
     if (parsedJson) {
-        const thinking = parsedJson.thinking || '';
+        const thinking = parsedJson.display_text || parsedJson.thinking || '';
 
-        addLog(`[LLM_RAG_Strategy] thinking: ${thinking || 'N/A'}`, 'info');
+        addLog(`[LLM_RAG_Strategy] thinking: ${typeof parsedJson.thinking === 'object' ? JSON.stringify(parsedJson.thinking) : (parsedJson.thinking || 'N/A')}`, 'info');
 
         // ★追加: internal_log をキャプチャ
         const internalLog = parsedJson.internal_log || '';
@@ -563,7 +587,8 @@ export const processRagStrategyFinished = (outputs, nodeId, addLog) => {
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',
-                thinking: thinking,  // モノローグとして ThinkingProcess.jsx に表示される
+                display_text: parsedJson.display_text || '',
+                thinkingContent: parsedJson.thinking || '',
                 internalLog: internalLog // ★追加
             } : t
         };
