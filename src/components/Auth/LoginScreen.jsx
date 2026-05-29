@@ -234,6 +234,7 @@ const LoginScreen = () => {
                             こちら
                         </button>
                     </p>
+                    {/*
                     <p className="login-footer__text">
                         アカウントをお持ちでない方は{' '}
                         <button
@@ -244,6 +245,7 @@ const LoginScreen = () => {
                             新規登録
                         </button>
                     </p>
+                    */}
                 </div>
             </motion.div>
 

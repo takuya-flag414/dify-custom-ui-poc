@@ -201,17 +201,17 @@ class AuthService {
             // セッションID生成（ブラウザセッション単位でユニーク）
             const sessionId = this._getSessionId();
 
-            const logRef = doc(collection(db, 'audit_logs'));
-            await setDoc(logRef, {
-                timestamp: Timestamp.now(),
+            // Cloud Functions経由で監査ログを保存
+            const logAuditAction = httpsCallable(functions, 'logAuditAction');
+            await logAuditAction({
                 action,
                 email: targetEmail,
-                user_id: targetUserId,
-                session_id: sessionId,
-                project_id: import.meta.env.VITE_PROJECT_ID || 'unknown-project',
+                userId: targetUserId,
+                sessionId,
                 details
             });
-            console.log(`[AuthService] Audit logged: ${action} for ${targetEmail} (session: ${sessionId})`);
+            
+            console.log(`[AuthService] Audit logged via Functions: ${action} for ${targetEmail} (session: ${sessionId})`);
         } catch (e) {
             console.error('[AuthService] Failed to record audit log:', e);
         }

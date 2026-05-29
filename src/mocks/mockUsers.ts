@@ -189,6 +189,7 @@ export const MOCK_ROLES: Role[] = [
     { id: 'role_admin', role_code: 'admin', name: '管理者' },
     { id: 'role_general', role_code: 'general', name: '一般ユーザー' },
     { id: 'role_viewer', role_code: 'viewer', name: '閲覧専用' },
+    { id: 'role_knowledge_manager', role_code: 'general', name: 'ナレッジマネージャー' },
 ];
 
 /**

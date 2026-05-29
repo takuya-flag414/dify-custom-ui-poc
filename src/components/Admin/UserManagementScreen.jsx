@@ -413,6 +413,7 @@ const UserManagementScreen = () => {
                 >
                   <option value="role_general">一般権限 (role_general)</option>
                   <option value="role_admin">管理者権限 (role_admin)</option>
+                  <option value="role_knowledge_manager">ナレッジマネージャー (role_knowledge_manager)</option>
                 </select>
               </div>
 

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Check, User, Briefcase, Building2 } from 'lucide-react';
 import { MacSettingsSection, MacSettingsRow } from './MacSettingsComponents';
+import { useDebounce } from '../../../hooks/useDebounce';
 import './SettingsCommon.css';
 import './PromptSettings.css';
 
@@ -11,6 +12,10 @@ const PromptSettings = ({ settings, onUpdateSettings }) => {
   const [userProfile, setUserProfile] = useState({ role: '', department: '' });
   const [customInstructions, setCustomInstructions] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  
+  const debouncedUserProfile = useDebounce(userProfile, 800);
+  const debouncedInstructions = useDebounce(customInstructions, 800);
+  const isInitialMount = React.useRef(true);
 
   useEffect(() => {
     if (settings?.prompt) {
@@ -26,18 +31,26 @@ const PromptSettings = ({ settings, onUpdateSettings }) => {
     setUserProfile(newProfile);
   };
 
-  // ★ v3.0: Intelligence Profile 全体を保存
-  const handleSaveProfile = () => {
-    onUpdateSettings('prompt', 'userProfile', userProfile);
-    onUpdateSettings('prompt', 'customInstructions', customInstructions);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 1500);
-  };
+  // デバウンス値が変更されたら自動保存
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
+    // settings側の値と差分があるかチェック（外部からの変更時は保存APIを叩かない）
+    const isProfileChanged = JSON.stringify(debouncedUserProfile) !== JSON.stringify(settings?.prompt?.userProfile || { role: '', department: '' });
+    const isInstructionsChanged = debouncedInstructions !== (settings?.prompt?.customInstructions || '');
 
-  // 変更検知
-  const hasProfileChanges =
-    JSON.stringify(userProfile) !== JSON.stringify(settings?.prompt?.userProfile || { role: '', department: '' }) ||
-    customInstructions !== (settings?.prompt?.customInstructions || '');
+    if (isProfileChanged || isInstructionsChanged) {
+      onUpdateSettings('prompt', 'userProfile', debouncedUserProfile);
+      onUpdateSettings('prompt', 'customInstructions', debouncedInstructions);
+      
+      setIsSaved(true);
+      const timer = setTimeout(() => setIsSaved(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [debouncedUserProfile, debouncedInstructions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="settings-container">
@@ -92,7 +105,7 @@ const PromptSettings = ({ settings, onUpdateSettings }) => {
             />
           </div>
 
-          <div className="intelligence-profile-actions">
+          <div className="intelligence-profile-actions" style={{ justifyContent: 'flex-end', minHeight: '36px' }}>
             <AnimatePresence>
               {isSaved && (
                 <motion.span
@@ -105,14 +118,6 @@ const PromptSettings = ({ settings, onUpdateSettings }) => {
                 </motion.span>
               )}
             </AnimatePresence>
-            <button
-              className="settings-btn primary"
-              onClick={handleSaveProfile}
-              disabled={!hasProfileChanges}
-              style={!hasProfileChanges ? { opacity: 0.5 } : {}}
-            >
-              <Save size={14} /> 保存
-            </button>
           </div>
         </div>
       </MacSettingsSection>

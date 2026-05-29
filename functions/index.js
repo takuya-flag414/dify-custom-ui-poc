@@ -4,7 +4,7 @@
  */
 
 const { setGlobalOptions } = require("firebase-functions/v2");
-const { onDocumentCreated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 // v2 のインポートを整理
 const { beforeUserSignedIn } = require("firebase-functions/v2/identity");
 const functionsV1 = require("firebase-functions/v1");
@@ -322,6 +322,33 @@ exports.adminCreateSecureUserProfile = onCall(async (request) => {
             assigned_at: now
         });
 
+        // 4. 通知メールの発行リクエスト (Firebase Extension: Trigger Email from Firestore)
+        const mailDoc = {
+            to: [userData.email], // 暗号化前の平文のメールアドレス
+            message: {
+                subject: '【Dify Custom UI】アカウントが発行されました',
+                text: `
+${userData.displayName} 様
+
+Dify Custom UI のアカウントが発行されました。
+管理者が設定した初期パスワードでログイン後、パスワードを変更してください。
+
+ログインURL: ${process.env.VITE_APP_URL || 'https://YOUR_DOMAIN'}/login
+
+※本メールは送信専用アドレスから配信されています。ご返信いただいてもお答えできませんのでご了承ください。
+`,
+                html: `
+<p>${userData.displayName} 様</p>
+<p>Dify Custom UI のアカウントが発行されました。</p>
+<p>管理者が設定した初期パスワードでログイン後、パスワードを変更してください。</p>
+<p><a href="${process.env.VITE_APP_URL || 'https://YOUR_DOMAIN'}/login">ログイン画面へ</a></p>
+<hr>
+<p style="font-size: 12px; color: #666;">※本メールは送信専用アドレスから配信されています。ご返信いただいてもお答えできませんのでご了承ください。</p>
+`
+            }
+        };
+        batch.set(db.collection('mail').doc(), mailDoc);
+
         await batch.commit();
 
         logger.info(`KMS: Admin Secure Profile Created for target: ${targetUid} by admin: ${adminUid}`);
@@ -441,15 +468,15 @@ exports.getDecryptedUserMappings = onCall(async (request) => {
     const db = getFirestore();
 
     try {
-        // 1. 管理者権限チェック
+        // 1. 管理者・ナレッジマネージャー権限チェック
         const adminRolesQuery = await db.collection('user_roles')
             .where('user_id', '==', adminUid)
-            .where('role_id', '==', 'role_admin')
+            .where('role_id', 'in', ['role_admin', 'role_knowledge_manager'])
             .get();
 
         if (adminRolesQuery.empty) {
             logger.warn(`Permission Denied: User ${adminUid} attempted to fetch all user mappings.`);
-            throw new HttpsError("permission-denied", "管理者権限が必要です");
+            throw new HttpsError("permission-denied", "管理者またはナレッジマネージャー権限が必要です");
         }
 
         // 2. ユーザー一覧を取得
@@ -493,4 +520,93 @@ exports.getDecryptedUserMappings = onCall(async (request) => {
         logger.error(`getDecryptedUserMappings Failed:`, error);
         throw new HttpsError("internal", `マッピングの取得に失敗しました: ${error.message}`);
     }
+});
+
+/**
+ * 監査ログをFirestoreに保存する (Callable Function)
+ * フロントエンドからの直接書き込みを防ぐためのスパム対策
+ */
+exports.logAuditAction = onCall(async (request) => {
+    const { action, email, userId, sessionId, details } = request.data;
+    
+    // スパム対策：最低限の必須データがない場合は弾く
+    if (!action) {
+        throw new HttpsError("invalid-argument", "Action is required");
+    }
+
+    const db = getFirestore();
+    try {
+        await db.collection('audit_logs').add({
+            timestamp: Timestamp.now(),
+            action: action,
+            email: email || "unknown",
+            user_id: userId || null,
+            session_id: sessionId || null,
+            project_id: process.env.VITE_PROJECT_ID || "dify-custom-ui-poc",
+            details: details || {}
+        });
+        return { success: true };
+    } catch (error) {
+        logger.error(`Failed to create audit log for ${email}:`, error);
+        throw new HttpsError("internal", "Failed to write audit log");
+    }
+});
+
+/**
+ * 拡張機能 (Trigger Email) の送信ステータス変更を検知して監査ログに記録する (v2)
+ */
+exports.onEmailDeliveryStatusChanged = onDocumentUpdated("mail/{mailId}", async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+
+    if (!beforeData || !afterData) return null;
+
+    const beforeState = beforeData.delivery?.state;
+    const afterState = afterData.delivery?.state;
+
+    // ステータスが SUCCESS または ERROR に変わった時だけログに出力する
+    if (beforeState !== afterState && (afterState === "SUCCESS" || afterState === "ERROR")) {
+        const emailAddress = (afterData.to && afterData.to[0]) || "unknown";
+        const actionName = afterState === "SUCCESS" ? "EMAIL_DELIVERED_SUCCESS" : "EMAIL_DELIVERED_FAILED";
+        
+        const logPayload = {
+            message: `Email Delivery: ${afterState} for ${emailAddress}`,
+            action: actionName,
+            email: emailAddress,
+            userId: null,
+            projectId: "dify-custom-ui-poc",
+            details: {
+                error: afterData.delivery?.error || null,
+                mailId: event.params.mailId
+            },
+            origin: "email_extension_trigger"
+        };
+
+        // 1. Cloud Logging への出力 (重大度に応じて)
+        if (afterState === "ERROR") {
+            logger.warn(logPayload);
+        } else {
+            logger.info(logPayload);
+        }
+
+        // 2. Firestoreの audit_logs コレクションにも保存（管理画面のUIで表示させるため）
+        try {
+            const db = getFirestore();
+            await db.collection('audit_logs').add({
+                timestamp: Timestamp.now(),
+                action: actionName,
+                email: emailAddress,
+                user_id: null,
+                session_id: null,
+                project_id: process.env.VITE_PROJECT_ID || "dify-custom-ui-poc",
+                details: {
+                    error: afterData.delivery?.error || null,
+                    mailId: event.params.mailId
+                }
+            });
+        } catch (error) {
+            logger.error("Failed to write email delivery status to audit_logs collection:", error);
+        }
+    }
+    return null;
 });

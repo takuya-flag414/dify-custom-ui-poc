@@ -12,8 +12,10 @@ service cloud.firestore {
 
     // 共通関数：システム管理者かどうか（自身のプロフィールデータのroleで判定）
     function isAdmin() {
+      let userRef = /databases/$(database)/documents/users/$(request.auth.uid);
       return isCompanyUser() && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+             exists(userRef) && 
+             get(userRef).data.role == 'admin';
     }
 
     // 共通関数：メール認証済み、または管理者が発行したアカウントか
@@ -21,45 +23,48 @@ service cloud.firestore {
       // メール認証済みであればOK
       let isVerified = request.auth.token.email_verified == true;
       // プロフィールにis_admin_createdフラグがあればOK
-      let isAdminCreated = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_admin_created == true;
+      let userRef = /databases/$(database)/documents/users/$(request.auth.uid);
+      let isAdminCreated = exists(userRef) && get(userRef).data.is_admin_created == true;
       
       return isVerified || isAdminCreated;
     }
 
     // ========== 特例：新規登録フロー用のセキュリティ緩和 ==========
     
-    // 1. ユーザー名簿の作成
+    // 1. ユーザー名簿の作成・更新
     match /users/{userId} {
-      // パターンA: 自分自身のプロフィール作成 (is_admin_created の偽造を防ぐ)
-      allow write: if isCompanyUser() && request.auth.uid == userId
-                   && (!('is_admin_created' in request.resource.data) || request.resource.data.is_admin_created == false);
+      // 読み取りは認証済みユーザーに許可
+      allow read: if isCompanyUser() && isVerifiedOrAdminCreated();
+
+      // パターンA: 自分自身のプロフィール作成 (is_admin_createdやroleの偽造を防ぐ)
+      // (管理者が新規アカウントを発行する運用に変更したためコメントアウト)
+      // allow create: if isCompanyUser() && request.auth.uid == userId
+      //               && (!('is_admin_created' in request.resource.data) || request.resource.data.is_admin_created == false)
+      //               && (!('role' in request.resource.data) || request.resource.data.role == 'user');
+                    
+      // パターンB: 自分自身のプロフィール更新 (role と is_admin_created の変更を禁止)
+      allow update: if isCompanyUser() && request.auth.uid == userId
+                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'is_admin_created']));
                    
-      // パターンB: 管理者による代理作成
+      // パターンC: 管理者による代理作成・更新・削除
       allow write: if isAdmin();
     }
 
     // 2. ロールの割り当て
     match /user_roles/{docId} {
-      // パターンA: ユーザー自身が「一般権限」を付与する場合のみ許可
-      allow write: if isCompanyUser() 
-                   && request.resource.data.user_id == request.auth.uid
-                   && request.resource.data.role_id == 'role_general';
+      // 読み取りは認証済みユーザーに許可
+      allow read: if isCompanyUser() && isVerifiedOrAdminCreated();
 
-      // パターンB: 管理者による代理割り当て
+      // クライアントからの直接付与は禁止。Cloud Functions または管理者のみ。
       allow write: if isAdmin();
     }
 
     // 3. 監査ログ
     match /audit_logs/{docId} {
-      // ログの作成は誰でも可能（パスワードリセット要求など、未ログイン時のアクションを記録するため）
-      allow create: if true;
-      allow update: if false;
-      allow write: if true;  // 追加: write操作を明示的に許可
+      // フロントエンドからの直接書き込みを廃止したため、作成許可を削除（Functions経由のみ）
       
-      // 読み取りと削除（古いログの整理）は認証済みユーザーなら許可
-      // （※本来はisAdmin()で縛るべきですが、現在isAdmin関数の判定ロジックが移行期のため
-      // 　フロントエンド側のUIガードと併用して安全性を担保します）
-      allow read, delete: if isCompanyUser();
+      // 読み取りと削除（古いログの整理）は管理者のみ許可
+      allow read, delete: if isAdmin();
     }
     // 4. AI利用分析ログ
     match /ai_usage_logs/{docId} {
@@ -69,11 +74,35 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // 5. RBAC・マスタデータ（ログイン時のプロファイル構築に必要）
+    match /roles/{docId} {
+      allow read: if isCompanyUser() && isVerifiedOrAdminCreated();
+    }
+    match /role_permissions/{docId} {
+      allow read: if isCompanyUser() && isVerifiedOrAdminCreated();
+    }
+    match /permissions/{docId} {
+      allow read: if isCompanyUser() && isVerifiedOrAdminCreated();
+    }
+    match /departments/{docId} {
+      allow read: if isCompanyUser() && isVerifiedOrAdminCreated();
+    }
+
+    // 6. ナレッジ監査ログ
+    match /knowledge_audit_logs/{logId} {
+      // 誰でも書き込み可能（フロントエンドからのロギング）
+      allow create: if isCompanyUser();
+      
+      // 読み取りは社内ユーザーであれば許可（厳密な制御はフロントエンド側で行う）
+      allow read: if isCompanyUser();
+    }
+
     // =========================================================
 
-    // デフォルトルール（audit_logs以外は isVerifiedOrAdminCreated を満たすことが必須）
+    // デフォルトルール
     match /{document=**} {
-      allow read, write: if document != 'audit_logs' && isCompanyUser() && isVerifiedOrAdminCreated();
+      // 全ての予期せぬアクセスをデフォルトで禁止にする（各コレクションで明示的に許可する）
+      allow read, write: if false;
     }
   }
 }

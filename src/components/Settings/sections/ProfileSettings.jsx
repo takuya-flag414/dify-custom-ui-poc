@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Check, User, AtSign, CircleUser, LogOut, Mail, Calendar } from 'lucide-react';
 import { MacSettingsSection, MacSettingsRow } from './MacSettingsComponents';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { motion, AnimatePresence } from 'framer-motion';
 import './SettingsCommon.css';
 import './ProfileSettings.css';
 
@@ -25,6 +27,9 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
   const [isSaved, setIsSaved] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
 
+  const debouncedDisplayName = useDebounce(displayName, 800);
+  const isInitialMount = React.useRef(true);
+
   // settingsから初期値をロード（authUserのdisplayNameをフォールバック）
   useEffect(() => {
     const savedName = settings?.profile?.displayName;
@@ -42,11 +47,21 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
     setDisplayName(finalName);
   }, [settings, currentUser?.name]);
 
-  const handleSave = () => {
-    onUpdateSettings('profile', 'displayName', displayName);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
-  };
+  // デバウンス値が変更されたら自動保存
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const hasChanges = debouncedDisplayName !== (settings?.profile?.displayName || 'User');
+    if (hasChanges && debouncedDisplayName.trim() !== '') {
+      onUpdateSettings('profile', 'displayName', debouncedDisplayName);
+      setIsSaved(true);
+      const timer = setTimeout(() => setIsSaved(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [debouncedDisplayName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = () => {
     if (!logoutConfirm) {
@@ -58,8 +73,6 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
       onLogout();
     }
   };
-
-  const hasChanges = displayName !== (settings?.profile?.displayName || 'User');
 
   return (
     <div className="settings-container">
@@ -150,25 +163,20 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
         </MacSettingsSection>
       )}
 
-      <div className="settings-actions">
-        <button
-          className="settings-btn primary"
-          onClick={handleSave}
-          disabled={!hasChanges}
-          style={!hasChanges ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-        >
-          {isSaved ? (
-            <>
+      <div className="settings-actions" style={{ display: 'flex', justifyContent: 'flex-end', minHeight: '36px', marginTop: '16px' }}>
+        <AnimatePresence>
+          {isSaved && (
+            <motion.div
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-success)', fontSize: '13px' }}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0 }}
+            >
               <Check size={14} />
               <span>保存しました</span>
-            </>
-          ) : (
-            <>
-              <Save size={14} />
-              <span>保存</span>
-            </>
+            </motion.div>
           )}
-        </button>
+        </AnimatePresence>
       </div>
     </div>
   );
