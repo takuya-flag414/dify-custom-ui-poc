@@ -80,3 +80,6 @@ export const ENABLE_MESSAGE_EDIT = import.meta.env.VITE_ENABLE_MESSAGE_EDIT !== 
 
 // 回答の再生成機能を有効にするかどうか（デフォルトは true: 表示）
 export const ENABLE_MESSAGE_REGENERATE = import.meta.env.VITE_ENABLE_MESSAGE_REGENERATE !== 'false';
+
+// Fast/DeepThink切り替えボタン（IntelligenceSelector）を表示するかどうか（デフォルトは false: 非表示）
+export const SHOW_REASONING_SELECTOR = import.meta.env.VITE_SHOW_REASONING_SELECTOR === 'true';

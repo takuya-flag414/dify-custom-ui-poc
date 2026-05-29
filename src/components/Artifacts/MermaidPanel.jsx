@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MermaidViewer from './MermaidViewer';
 import { detectMermaidType, MERMAID_DIAGRAM_MAP } from '../../utils/mermaidHelper';
 import './ArtifactPanel.css'; // ボタン、ヘッダー、背景などの共通CSSを共有
+import { getArtifactIcon, getArtifactColor } from '../../utils/artifactIconHelper';
 import './MermaidPanel.css';  // Mermaid専用レイアウトのCSS
 
 // アイコンコンポーネントの定義
@@ -419,8 +420,11 @@ ${displayContent}
                     {/* ヘッダーセクション */}
                     <div className="artifact-header">
                         <div className="artifact-title-group">
-                            <div className="artifact-icon">
-                                <span style={{ fontSize: '18px' }}>{typeInfo.emoji}</span>
+                            <div className="artifact-icon" style={{ backgroundColor: `${getArtifactColor(displayType)}15` }}>
+                                {(() => {
+                                    const Icon = getArtifactIcon(displayType);
+                                    return <Icon size={20} style={{ color: getArtifactColor(displayType) }} />;
+                                })()}
                             </div>
                             <div className="artifact-header-info">
                                 <span className="artifact-title" title={displayFileName || displayTitle}>

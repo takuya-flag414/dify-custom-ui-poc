@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DomainSelector from '../../Shared/DomainSelector';
+import { getArtifactIcon, getArtifactColor } from '../../../utils/artifactIconHelper';
 
 // 表示制御フラグをインポート
 import { ENABLE_SPECIFY_WEBSITE, ENABLE_CREATE_ARTIFACT } from '../../../config/env';
@@ -11,14 +12,6 @@ import { IS_DEV_MODE } from '../../../config/devMode';
 const BoltIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor" />
-    </svg>
-);
-
-const DocumentRichtextIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-        <polyline points="14 2 14 8 20 8" />
-        <path d="M8 13h8M8 17h8M8 9h2" />
     </svg>
 );
 
@@ -47,57 +40,6 @@ const ChevronRightIcon = () => (
 const ChevronLeftIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="m15 18-6-6 6-6"></path>
-    </svg>
-);
-
-const SummaryIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2" />
-        <path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2" />
-        <path d="M21 12H3" />
-    </svg>
-);
-
-const MinutesIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
-    </svg>
-);
-
-const ChecklistIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m9 11 3 3L22 4" />
-        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-    </svg>
-);
-
-const ComparisonIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" />
-    </svg>
-);
-
-const FAQIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-        <path d="M12 17h.01" />
-        <circle cx="12" cy="12" r="10" />
-    </svg>
-);
-
-const PresentationIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-        <line x1="8" y1="21" x2="16" y2="21" />
-        <line x1="12" y1="17" x2="12" y2="21" />
-    </svg>
-);
-
-const DiagramIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="20" x2="18" y2="10"></line>
-        <line x1="12" y1="20" x2="12" y2="4"></line>
-        <line x1="6" y1="20" x2="6" y2="14"></line>
     </svg>
 );
 
@@ -256,32 +198,44 @@ const UniversalAddMenu = ({
                             </div>
                             <MenuItem
                                 icon={<BoltIcon />}
-                                label="⚡️ クイックまとめ"
+                                label="クイックまとめ"
                                 subtext="チャット内でさっと読む軽量なメモ"
                                 onClick={() => navigateTo('ARTIFACT_L2', 'right')}
                                 showArrow
                             />
                             <MenuItem
-                                icon={<ComparisonIcon />}
-                                label="🔄 業務フロー"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('drawio');
+                                    return <Icon size={20} style={{ color: getArtifactColor('drawio') }} />;
+                                })()}
+                                label="業務フロー"
                                 subtext="Draw.io形式のフロー図"
                                 onClick={() => handleArtifactSelect('drawio', '業務フロー')}
                             />
                             <MenuItem
-                                icon={<DiagramIcon />}
-                                label="📐 設計・構成図"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('mermaid');
+                                    return <Icon size={20} style={{ color: getArtifactColor('mermaid') }} />;
+                                })()}
+                                label="設計・構成図"
                                 subtext="Mermaid形式のシステム構成図やフロー図"
                                 onClick={() => handleArtifactSelect('mermaid', '設計・構成図')}
                             />
                             <MenuItem
-                                icon={<DocumentRichtextIcon />}
-                                label="📄 Wordドキュメント"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('json_document');
+                                    return <Icon size={20} style={{ color: getArtifactColor('json_document') }} />;
+                                })()}
+                                label="Wordドキュメント"
                                 subtext="JSON形式・Wordエクスポート対応"
                                 onClick={() => handleArtifactSelect('json_document', 'Wordドキュメント')}
                             />
                             <MenuItem
-                                icon={<PresentationIcon />}
-                                label="📊 プレゼンスライド"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('json_slide');
+                                    return <Icon size={20} style={{ color: getArtifactColor('json_slide') }} />;
+                                })()}
+                                label="プレゼンスライド"
                                 subtext="構造化データ形式のプレゼン資料"
                                 onClick={() => handleArtifactSelect('json_slide', 'プレゼンスライド')}
                             />
@@ -309,32 +263,47 @@ const UniversalAddMenu = ({
                                 <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">クイックまとめ</span>
                             </div>
                             <MenuItem
-                                icon={<SummaryIcon />}
-                                label="📝 要約・レポート"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('summary_report');
+                                    return <Icon size={20} style={{ color: getArtifactColor('summary_report') }} />;
+                                })()}
+                                label="要約・レポート"
                                 subtext="長文の要約や箇条書きの報告"
                                 onClick={() => handleArtifactSelect('summary_report', '要約・レポート')}
                             />
                             <MenuItem
-                                icon={<MinutesIcon />}
-                                label="📋 議事録・Next Action"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('meeting_minutes');
+                                    return <Icon size={20} style={{ color: getArtifactColor('meeting_minutes') }} />;
+                                })()}
+                                label="議事録・Next Action"
                                 subtext="会議の記録とアクションアイテム"
                                 onClick={() => handleArtifactSelect('meeting_minutes', '議事録・Next Action')}
                             />
                             <MenuItem
-                                icon={<ChecklistIcon />}
-                                label="✅ チェックリスト"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('checklist');
+                                    return <Icon size={20} style={{ color: getArtifactColor('checklist') }} />;
+                                })()}
+                                label="チェックリスト"
                                 subtext="タスクや確認事項のリストアップ"
                                 onClick={() => handleArtifactSelect('checklist', 'チェックリスト')}
                             />
                             <MenuItem
-                                icon={<ComparisonIcon />}
-                                label="📊 比較表"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('comparison_table');
+                                    return <Icon size={20} style={{ color: getArtifactColor('comparison_table') }} />;
+                                })()}
+                                label="比較表"
                                 subtext="複数要素のメリット・デメリット"
                                 onClick={() => handleArtifactSelect('comparison_table', '比較表')}
                             />
                             <MenuItem
-                                icon={<FAQIcon />}
-                                label="❓ FAQ"
+                                icon={(() => {
+                                    const Icon = getArtifactIcon('faq');
+                                    return <Icon size={20} style={{ color: getArtifactColor('faq') }} />;
+                                })()}
+                                label="FAQ"
                                 subtext="よくある質問と回答のリスト"
                                 onClick={() => handleArtifactSelect('faq', 'FAQ (想定問答集)')}
                             />

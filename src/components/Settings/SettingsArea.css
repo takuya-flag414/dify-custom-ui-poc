@@ -3,11 +3,11 @@
 /* === Container === */
 :root {
     /* グラスモーフィズム共通変数（ライトモード） */
-    --glass-bg: rgba(255, 255, 255, 0.65);              /* メインのガラス背景 */
-    --glass-bg-card: rgba(255, 255, 255, 0.45);         /* 設定カード（島）用 */
-    --glass-border-light: rgba(255, 255, 255, 0.5);      /* ボーダー（上・左：明るい） */
-    --glass-border-dark: rgba(255, 255, 255, 0.2);       /* ボーダー（下・右：暗い） */
-    --glass-shadow: rgba(99, 102, 241, 0.15);            /* 影（インディゴ系で柔らかく） */
+    --glass-bg: rgba(255, 255, 255, 0.85);              /* メインのガラス背景（白の輝度を高めて明るく） */
+    --glass-bg-card: rgba(255, 255, 255, 0.65);         /* 設定カード（島）用 */
+    --glass-border-light: rgba(255, 255, 255, 0.6);      /* ボーダー（上・左：明るい） */
+    --glass-border-dark: rgba(255, 255, 255, 0.25);      /* ボーダー（下・右：暗い） */
+    --glass-shadow: rgba(99, 102, 241, 0.12);            /* 影（インディゴ系で柔らかく） */
     --glass-blur: 25px;                                  /* ぼかし強度 */
 }
 
@@ -455,15 +455,21 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    /* Ensure it's on top of EVERYTHING including sidebar */
+    /* サイドバーを含む画面全体の一番上に表示 */
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.4);
-    /* Darker overlay for better contrast */
-    backdrop-filter: blur(4px);
-    /* Blur the whole app behind */
-    /* Focus on modal */
+    background-color: rgba(0, 0, 0, 0.12);
+    /* ライトモード時は背後が暗くなりすぎないように薄いオーバーレイに設定 */
+    backdrop-filter: blur(8px);
+    /* 暗さの代わりにぼかしを強めてモーダルにフォーカスさせる */
+    -webkit-backdrop-filter: blur(8px);
+    transition: background-color 0.2s ease, backdrop-filter 0.2s ease;
+}
+
+[data-theme='dark'] .settings-modal-overlay {
+    background-color: rgba(0, 0, 0, 0.55);
+    /* ダークモード時はしっかりと暗いオーバーレイを維持 */
 }
 
 .settings-modal-click-trap {

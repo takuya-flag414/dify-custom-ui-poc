@@ -674,6 +674,86 @@ function App() {
                             retryCount={errorIntelligence.retryCount}
                           />
                         } />
+                        <Route path="/chat/studio/:studioType" element={
+                          <ChatView
+                            messages={messages}
+                            streamingMessage={streamingMessage}
+                            setMessages={setMessages}
+                            isGenerating={isGenerating}
+                            isHistoryLoading={isHistoryLoading}
+                            conversationId={conversationId}
+                            setConversationId={handleSetConversationId}
+                            addLog={addLog}
+                            handleConversationCreated={handleConversationCreated}
+                            activeContextFiles={activeContextFiles}
+                            setActiveContextFiles={setActiveContextFiles}
+                            handleSendMessage={handleSendMessage}
+                            searchSettings={searchSettings}
+                            setSearchSettings={setSearchSettings}
+                            onOpenConfig={() => setIsConfigModalOpen(true)}
+                            openArtifact={openArtifact}
+                            isArtifactOpen={isArtifactOpen}
+                            closeArtifact={closeArtifact}
+                            activeArtifact={activeArtifact}
+                            effectiveDisplayName={effectiveDisplayName}
+                            startTutorial={startTutorial}
+                            stopGeneration={stopGeneration}
+                            handleEdit={handleEdit}
+                            handleRegenerate={handleRegenerate}
+                            mockMode={mockMode}
+                            backendBApiKey={backendBApiKey}
+                            backendBApiUrl={backendBApiUrl}
+                            sendKey={settings?.general?.sendKey || 'enter'}
+                            newChatTrigger={newChatTrigger}
+                            restoreText={pendingRestoreText}
+                            onRestoreTextConsumed={() => setPendingRestoreText(null)}
+                            isShieldActive={shieldMode.isCurrentShieldActive}
+                            activeError={errorIntelligence.activeError}
+                            retryCountdown={errorIntelligence.retryCountdown}
+                            isRetrying={errorIntelligence.isRetrying}
+                            retryCount={errorIntelligence.retryCount}
+                          />
+                        } />
+                        <Route path="/chat/:conversationId/studio/:studioType" element={
+                          <ChatView
+                            messages={messages}
+                            streamingMessage={streamingMessage}
+                            setMessages={setMessages}
+                            isGenerating={isGenerating}
+                            isHistoryLoading={isHistoryLoading}
+                            conversationId={conversationId}
+                            setConversationId={handleSetConversationId}
+                            addLog={addLog}
+                            handleConversationCreated={handleConversationCreated}
+                            activeContextFiles={activeContextFiles}
+                            setActiveContextFiles={setActiveContextFiles}
+                            handleSendMessage={handleSendMessage}
+                            searchSettings={searchSettings}
+                            setSearchSettings={setSearchSettings}
+                            onOpenConfig={() => setIsConfigModalOpen(true)}
+                            openArtifact={openArtifact}
+                            isArtifactOpen={isArtifactOpen}
+                            closeArtifact={closeArtifact}
+                            activeArtifact={activeArtifact}
+                            effectiveDisplayName={effectiveDisplayName}
+                            startTutorial={startTutorial}
+                            stopGeneration={stopGeneration}
+                            handleEdit={handleEdit}
+                            handleRegenerate={handleRegenerate}
+                            mockMode={mockMode}
+                            backendBApiKey={backendBApiKey}
+                            backendBApiUrl={backendBApiUrl}
+                            sendKey={settings?.general?.sendKey || 'enter'}
+                            newChatTrigger={newChatTrigger}
+                            restoreText={pendingRestoreText}
+                            onRestoreTextConsumed={() => setPendingRestoreText(null)}
+                            isShieldActive={shieldMode.isCurrentShieldActive}
+                            activeError={errorIntelligence.activeError}
+                            retryCountdown={errorIntelligence.retryCountdown}
+                            isRetrying={errorIntelligence.isRetrying}
+                            retryCount={errorIntelligence.retryCount}
+                          />
+                        } />
                         <Route path="/chat/:conversationId" element={
                           <ChatView
                             messages={messages}

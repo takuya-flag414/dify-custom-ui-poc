@@ -1,6 +1,7 @@
 // src/components/Artifacts/ArtifactCard.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
+import { getArtifactIcon, getArtifactColor } from '../../utils/artifactIconHelper';
 import './ArtifactCard.css';
 
 /**
@@ -72,8 +73,11 @@ const ArtifactCard = ({ title, type, content, citations = [], fileName, onClick 
                 damping: 20
             }}
         >
-            <div className="artifact-icon-box">
-                <span className="artifact-type-emoji">{typeInfo.emoji}</span>
+            <div className="artifact-icon-box" style={{ backgroundColor: `${getArtifactColor(type)}15` }}>
+                {(() => {
+                    const Icon = getArtifactIcon(type);
+                    return <Icon size={20} style={{ color: getArtifactColor(type) }} />;
+                })()}
             </div>
             <div className="artifact-info">
                 <div className="artifact-card-title" title={displayCardTitle}>{displayCardTitle}</div>

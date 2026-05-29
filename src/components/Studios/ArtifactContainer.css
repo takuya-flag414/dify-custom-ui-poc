@@ -1,0 +1,39 @@
+.artifact-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--sys-bg-base, #ffffff);
+    color: var(--sys-fg-base, #000000);
+}
+
+.artifact-container-header {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.artifact-back-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    color: var(--sys-color-primary, #007AFF);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.artifact-back-button:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+
+.artifact-container-main {
+    flex: 1;
+    overflow: auto;
+    padding: 24px;
+}

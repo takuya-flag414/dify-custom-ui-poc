@@ -2,11 +2,14 @@
 import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon, Users as UsersIcon, Clock as HistoryIcon, MoreHorizontal } from 'lucide-react';
+import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon, Users as UsersIcon, Clock as HistoryIcon, MoreHorizontal, Grid as GridIcon } from 'lucide-react';
 import DeletePopover from './DeletePopover';
 import ContextMenu from './ContextMenu';
 import { groupConversationsByDate } from '../../utils/dateUtils';
 import { FEATURE_FLAGS } from '../../config/featureFlags';
+import AllToolsModal from '../Chat/Toolbox/AllToolsModal';
+import { USE_CASES } from '../Chat/UseCasePanel';
+import { useFavoriteArtifacts } from '../../hooks/useFavoriteArtifacts';
 import './Sidebar.css';
 
 /**
@@ -184,6 +187,11 @@ const Sidebar = ({
   const [menuConfig, setMenuConfig] = useState({ isOpen: false, targetConv: null, anchorRect: null });
   const [deletePopoverConfig, setDeletePopoverConfig] = useState({ isOpen: false, targetConv: null, anchorRect: null });
   const [renamingId, setRenamingId] = useState(null);
+  // ツールボックスモーダルの開閉状態
+  const [isToolboxOpen, setIsToolboxOpen] = useState(false);
+
+  // お気に入りツール管理フック（AllToolsModal と共有）
+  const { favorites, toggleFavorite } = useFavoriteArtifacts();
 
   const groupedConversations = useMemo(() => {
     if (isCollapsed) return [];
@@ -200,6 +208,16 @@ const Sidebar = ({
   const handleGoToSettings = () => {
     // ★ backgroundLocation: 現在のチャット位置を保存して設定画面へ
     navigate('/settings/profile', { state: { backgroundLocation: location } });
+  };
+
+  // ツールボックスからスタジオへ遷移するハンドラー
+  const handleSelectTool = (type) => {
+    setIsToolboxOpen(false);
+    if (conversationId) {
+      navigate(`/chat/${conversationId}/studio/${type}`);
+    } else {
+      navigate(`/chat/studio/${type}`);
+    }
   };
 
   const handleMenuOpen = (e, conv) => {
@@ -301,6 +319,32 @@ const Sidebar = ({
 
         {/* 3. Navigation - "System Links" */}
         <div className="sidebar-nav-section">
+          {/* All Tools (Toolbox) Shortcut Button */}
+          <button
+            className={`footer-btn toolbox-shortcut-btn ${isToolboxOpen ? 'active' : ''}`}
+            onClick={() => setIsToolboxOpen(true)}
+            title="すべてのツール"
+          >
+            <motion.div layout className="footer-icon-anchor">
+              <GridIcon size={18} strokeWidth={2} />
+            </motion.div>
+
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10, width: 0 }}
+                  animate={{ opacity: 1, x: 0, width: 'auto' }}
+                  exit={{ opacity: 0, x: -10, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="footer-label"
+                  style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                >
+                  すべてのツール
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+
           <button
             className={`footer-btn history-btn ${currentView === 'history' ? 'active' : ''}`}
             onClick={() => navigate('/history')}
@@ -514,7 +558,7 @@ const Sidebar = ({
           </button>
         </div>
 
-        {/* Popovers */}
+        {/* Popovers & Modals */}
         <ContextMenu
           isOpen={menuConfig.isOpen}
           anchorRect={menuConfig.anchorRect}
@@ -528,6 +572,15 @@ const Sidebar = ({
           onClose={() => setDeletePopoverConfig(prev => ({ ...prev, isOpen: false }))}
           onConfirm={handleConfirmDelete}
           conversationName={deletePopoverConfig.targetConv?.name || ''}
+        />
+        {/* ツールボックスモーダル（サイドバーフッターから起動） */}
+        <AllToolsModal
+          isOpen={isToolboxOpen}
+          onClose={() => setIsToolboxOpen(false)}
+          onSelect={handleSelectTool}
+          useCases={USE_CASES}
+          favorites={favorites}
+          toggleFavorite={toggleFavorite}
         />
       </div>
     </LayoutGroup>

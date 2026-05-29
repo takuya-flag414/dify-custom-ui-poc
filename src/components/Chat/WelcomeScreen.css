@@ -306,202 +306,231 @@
     }
 }
 
-/* === Feature Launcher (Genspark Style) === */
-.welcome-feature-launcher {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 24px;
-    margin-top: 32px;
-    width: 100%;
-    transition: all 0.3s ease;
-}
-
-.feature-launch-button {
+/* === UseCase Panel (Apple Intelligence Style) === */
+.use-case-panel {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
+    gap: 16px;
+    margin-top: 32px;
+    width: 100%;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 8px;
-    width: 80px;
 }
 
-.feature-icon-wrapper {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    color: var(--feature-color, var(--color-primary));
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-[data-theme='dark'] .feature-icon-wrapper {
-    background: rgba(45, 45, 45, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.feature-launch-button:hover {
-    transform: translateY(-4px);
-}
-
-.feature-launch-button:hover .feature-icon-wrapper {
-    transform: scale(1.1);
-    background: white;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-    border-color: var(--feature-color);
-}
-
-[data-theme='dark'] .feature-launch-button:hover .feature-icon-wrapper {
-    background: rgba(60, 60, 60, 1);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-}
-
-/* 各機能のアクセントカラー */
-.feature-launch-button.slide { --feature-color: #FF9500; }
-.feature-launch-button.document { --feature-color: #185ABD; }
-.feature-launch-button.mermaid { --feature-color: #0A8276; }
-.feature-launch-button.drawio { --feature-color: #AF52DE; }
-.feature-launch-button.sheet { --feature-color: #34C759; }
-.feature-launch-button.doc { --feature-color: #007AFF; }
-.feature-launch-button.design { --feature-color: #AF52DE; }
-.feature-launch-button.chat { --feature-color: #5856D6; }
-.feature-launch-button.more { --feature-color: #8E8E93; }
-
-.feature-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-sub);
-    letter-spacing: -0.01em;
-    transition: color 0.2s ease;
-}
-
-.feature-launch-button:hover {
-    color: var(--color-text-main);
-}
-
-/* フォームフォーカス時の非表示制御 */
-.welcome-feature-launcher.faded {
+.use-case-panel.faded {
     opacity: 0.1;
     pointer-events: none;
     transform: translateY(10px);
 }
 
-/* === Responsive === */
-@media (max-width: 768px) {
-    .welcome-feature-launcher {
-        gap: 16px;
-    }
-    
-    .feature-launch-button {
-        width: 70px;
-    }
-    
-    .feature-icon-wrapper {
-        width: 44px;
-        height: 44px;
-    }
+/* mat-hud Style */
+.mat-hud-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(50px) saturate(210%);
+    -webkit-backdrop-filter: blur(50px) saturate(210%);
+    box-shadow: 
+        0 15px 45px rgba(0, 0, 0, 0.1),
+        0 0 0 0.5px rgba(255, 255, 255, 0.4) inset;
+    border-radius: 20px;
 }
 
-/* === Reduced Motion === */
-@media (prefers-reduced-motion: reduce) {
-
-    .welcome-greeting,
-    .welcome-guide-text,
-    .welcome-footer-links {
-        transition: none;
-    }
-
-    .welcome-greeting.faded {
-        transform: none;
-    }
+[data-theme='dark'] .mat-hud-panel {
+    background: rgba(35, 35, 35, 0.65);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.25),
+        0 0 0 0.5px rgba(255, 255, 255, 0.12) inset;
 }
 
-/* === SVG Micro Animations === */
-
-/* 1. AIスライド: 箇条書きが左からフェードイン */
-.anim-slide-item {
-    opacity: 1; /* デフォルトは表示状態 */
-    transform: translateX(0);
-}
-.feature-launch-button:hover .anim-slide-item {
-    animation: slideItemIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    opacity: 0;
-    transform: translateX(-4px);
-}
-.feature-launch-button:hover .anim-slide-1 { animation-delay: 0.1s; }
-.feature-launch-button:hover .anim-slide-2 { animation-delay: 0.2s; }
-.feature-launch-button:hover .anim-slide-3 { animation-delay: 0.3s; }
-
-@keyframes slideItemIn {
-    0% { opacity: 0; transform: translateX(-4px); }
-    100% { opacity: 1; transform: translateX(0); }
+/* 🔗 ショートカット行 (お気に入りチップ ＋ ツールボックスボタン横並びコンテナ) */
+.use-case-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
 }
 
-/* 2. AIドキュメント: 行が左から右に描画される */
-.anim-doc-line {
-    transform-origin: left;
-    transform: scaleX(1);
-}
-.feature-launch-button:hover .anim-doc-line {
-    animation: docLineDraw 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    transform: scaleX(0);
-}
-.feature-launch-button:hover .anim-doc-1 { animation-delay: 0.1s; }
-.feature-launch-button:hover .anim-doc-2 { animation-delay: 0.2s; }
-.feature-launch-button:hover .anim-doc-3 { animation-delay: 0.3s; }
-
-@keyframes docLineDraw {
-    0% { transform: scaleX(0); }
-    100% { transform: scaleX(1); }
-}
-
-/* 3. AI構成・設計図: ノードが浮き沈みし、通信ドットが明滅する */
-.feature-launch-button:hover .anim-mermaid-node {
-    animation: mermaidNodeFloat 1.5s ease-in-out infinite alternate;
-}
-.feature-launch-button:hover .anim-mermaid-db {
-    animation-delay: 0.5s;
-}
-.feature-launch-button:hover .anim-mermaid-dot {
-    animation: mermaidDotBlink 0.8s ease-in-out infinite alternate;
-    transform-origin: center;
+/* お気に入りピルチップ */
+.use-case-shortcuts .use-case-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 9999px; /* 丸みのあるピル型 */
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.02),
+        0 0 0 0.5px rgba(255, 255, 255, 0.3) inset;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes mermaidNodeFloat {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-1.5px); }
-}
-@keyframes mermaidDotBlink {
-    0% { opacity: 0.2; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1.5); fill: var(--feature-color); }
+[data-theme='dark'] .use-case-shortcuts .use-case-item {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.15),
+        0 0 0 0.5px rgba(255, 255, 255, 0.08) inset;
 }
 
-/* 4. AI業務フロー: 各ノードが順番にポップアップする */
-.anim-drawio-node {
-    transform-origin: center;
-    transform: scale(1);
+.use-case-shortcuts .use-case-item:hover {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.04),
+        0 0 0 0.5px rgba(255, 255, 255, 0.4) inset;
 }
-.feature-launch-button:hover .anim-drawio-node {
-    animation: drawioNodePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-.feature-launch-button:hover .anim-drawio-1 { animation-delay: 0.1s; }
-.feature-launch-button:hover .anim-drawio-2 { animation-delay: 0.25s; }
-.feature-launch-button:hover .anim-drawio-3 { animation-delay: 0.4s; }
 
-@keyframes drawioNodePop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
+[data-theme='dark'] .use-case-shortcuts .use-case-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
 }
+
+.use-case-shortcuts .use-case-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--color-text-main);
+}
+
+/* 🧰 ツールボックス起動ボタン (お気に入りチップと調和したフラットデザイン) */
+.toolbox-trigger-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: var(--color-text-sub);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme='dark'] .toolbox-trigger-button {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--color-text-sub);
+}
+
+.toolbox-trigger-button:hover {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.45);
+    color: var(--color-text-main);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='dark'] .toolbox-trigger-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-main);
+}
+
+.toolbox-trigger-icon {
+    color: var(--color-text-sub);
+    transition: color 0.2s ease;
+}
+
+.toolbox-trigger-button:hover .toolbox-trigger-icon {
+    color: var(--color-text-main);
+}
+
+[data-theme='dark'] .toolbox-trigger-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+
+
+/* UseCase Item (お気に入りリスト専用) */
+.favorite-list .use-case-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.2s ease-out;
+    user-select: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='dark'] .favorite-list .use-case-item {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.favorite-list .use-case-item:hover {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .favorite-list .use-case-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.use-case-item-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.use-case-icon {
+    font-size: 18px;
+}
+
+.use-case-label {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--color-text-main);
+}
+
+/* Favorite Button (お気に入りリスト内) */
+.favorite-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--color-text-muted);
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.favorite-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
+}
+
+[data-theme='dark'] .favorite-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.favorite-button.is-favorite {
+    color: #FFD60A; /* ai-yellow */
+}
+
+.favorite-button.is-favorite:hover {
+    transform: scale(1.1);
+}
+
+
+

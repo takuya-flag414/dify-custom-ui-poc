@@ -1,0 +1,358 @@
+/* src/components/Chat/Toolbox/AllToolsModal.css */
+/* 📂 ツールボックスモーダル（Adobe CC製品コンソール風） */
+.toolbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.12); /* ライトモード時はオーバーレイを薄く */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: background-color 0.2s ease, backdrop-filter 0.2s ease;
+}
+
+[data-theme='dark'] .toolbox-overlay {
+    background: rgba(0, 0, 0, 0.55); /* ダークモード時はしっかり暗く */
+}
+
+.toolbox-console {
+    width: 90vw;
+    max-width: 1080px;
+    height: 640px;
+    max-height: 85vh;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    border: 1px solid rgba(255, 255, 255, 0.6); /* 磨りガラス境界線 */
+    border-right-color: rgba(255, 255, 255, 0.25);
+    border-bottom-color: rgba(255, 255, 255, 0.25);
+    border-radius: 16px; /* 角丸を16pxに統一 */
+    overflow: hidden;
+    
+    /* グラスモーフィズム背景とぼかし */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    
+    /* ソフトな影とインセット光沢 */
+    box-shadow: 
+        0 0 0 0.5px rgba(255, 255, 255, 0.6) inset,
+        0 0 0 1px rgba(0, 0, 0, 0.05),
+        0 25px 60px rgba(99, 102, 241, 0.12);
+}
+
+[data-theme='dark'] .toolbox-console {
+    background: rgba(30, 30, 32, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-right-color: rgba(0, 0, 0, 0.2);
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 
+        0 0 0 0.5px rgba(255, 255, 255, 0.12) inset,
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 30px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* 左カラム：サイドバーメニュー */
+.toolbox-sidebar {
+    background: transparent !important; /* 親コンテナがグラス背景を持つため完全透過 */
+    border-right: 1px solid rgba(255, 255, 255, 0.6); /* 磨りガラス光沢境界線 */
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+[data-theme='dark'] .toolbox-sidebar {
+    background: transparent !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.toolbox-sidebar-header {
+    padding-left: 8px;
+}
+
+.toolbox-logo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-main);
+    letter-spacing: -0.01em;
+}
+
+.toolbox-sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-menu-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.05);
+    margin: 8px 8px;
+}
+
+[data-theme='dark'] .sidebar-menu-divider {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    outline: none;
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s ease;
+}
+
+.sidebar-menu-item-icon {
+    font-size: 14px;
+}
+
+.sidebar-menu-item .menu-item-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-sub);
+}
+
+/* Inset Highlight on Sidebar Items */
+.sidebar-menu-item::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0);
+    z-index: -1;
+    transition: background 0.2s ease;
+}
+
+.sidebar-menu-item:hover::after {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='dark'] .sidebar-menu-item:hover::after {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-menu-item.active {
+    color: #0A84FF;
+}
+
+.sidebar-menu-item.active .menu-item-label {
+    color: #0A84FF; /* アクティブ文字色はシステムブルー */
+    font-weight: 600;
+}
+
+[data-theme='dark'] .sidebar-menu-item.active {
+    color: #64b5f6;
+}
+
+[data-theme='dark'] .sidebar-menu-item.active .menu-item-label {
+    color: #64b5f6;
+}
+
+.sidebar-menu-item.active::after {
+    background: rgba(10, 132, 255, 0.15); /* グラスブルー */
+    border: 1px solid rgba(10, 132, 255, 0.3);
+    box-shadow: 
+        0 4px 12px rgba(10, 132, 255, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='dark'] .sidebar-menu-item.active::after {
+    background: rgba(10, 132, 255, 0.25);
+    border-color: rgba(10, 132, 255, 0.45);
+    box-shadow: none;
+}
+
+/* 右カラム：メイン領域 */
+.toolbox-main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: transparent; /* 完全透過 */
+}
+
+.toolbox-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6); /* 磨りガラス境界線 */
+}
+
+[data-theme='dark'] .toolbox-main-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.toolbox-main-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.toolbox-close-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-sub);
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.toolbox-close-button:hover {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
+}
+
+[data-theme='dark'] .toolbox-close-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+
+.toolbox-main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.toolbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+/* ツールカード（Adobe CC風、高品質） */
+.toolbox-tool-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.45); /* 透過背景 */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='dark'] .toolbox-tool-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 3Dホバーと発光エフェクト */
+.toolbox-tool-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.85);
+    box-shadow: 
+        0 12px 24px rgba(99, 102, 241, 0.08),
+        0 0 0 0.5px rgba(255, 255, 255, 0.6);
+}
+
+[data-theme='dark'] .toolbox-tool-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 
+        0 16px 28px rgba(0, 0, 0, 0.3),
+        0 0 0 0.5px rgba(255, 255, 255, 0.15);
+}
+
+.tool-card-icon {
+    font-size: 24px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.6); /* より滑らかな白透過 */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='dark'] .tool-card-icon {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tool-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 20px; /* お気に入りボタンの退避領域 */
+}
+
+.tool-card-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin: 0;
+}
+
+.tool-card-desc {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* カード内お気に入りボタン */
+.tool-card-fav-button {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0; /* 通常時は非表示にし、ホバーで表示 */
+}
+
+.toolbox-tool-card:hover .tool-card-fav-button,
+.tool-card-fav-button.is-fav {
+    opacity: 1; /* ホバー時またはお気に入り登録時は表示 */
+}
+
+.tool-card-fav-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-main);
+}
+
+[data-theme='dark'] .tool-card-fav-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.tool-card-fav-button.is-fav {
+    color: #FFD60A; /* ai-yellow */
+}
+
+.tool-card-fav-button.is-fav:hover {
+    transform: scale(1.1);
+}

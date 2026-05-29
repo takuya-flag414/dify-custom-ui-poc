@@ -9,6 +9,7 @@ import { splitArtifactPages } from '../../utils/splitArtifactPages';
 import { sanitizeArtifactHtml } from '../../utils/sanitizeArtifactHtml';
 // import html2pdf from 'html2pdf.js';
 import './ArtifactPanel.css';
+import { getArtifactIcon, getArtifactColor } from '../../utils/artifactIconHelper';
 
 
 const CloseIcon = () => (
@@ -229,7 +230,7 @@ const ARTIFACT_TYPE_MAP = {
 
 const getTypeBadge = (type) => {
     const info = ARTIFACT_TYPE_MAP[type];
-    if (info) return `${info.emoji} ${info.label}`;
+    if (info) return info.label;
     return type || 'ドキュメント';
 };
 
@@ -1114,8 +1115,11 @@ const ArtifactPanel = ({ isOpen, onClose, artifact, streamingMessage, onQuoteSel
                     {/* Header */}
                     <div className="artifact-header">
                         <div className="artifact-title-group">
-                            <div className="artifact-icon">
-                                <DocIcon />
+                            <div className="artifact-icon" style={{ backgroundColor: `${getArtifactColor(displayType)}15` }}>
+                                {(() => {
+                                    const Icon = getArtifactIcon(displayType);
+                                    return <Icon size={20} style={{ color: getArtifactColor(displayType) }} />;
+                                })()}
                             </div>
                             <div className="artifact-header-info">
                                 <span className="artifact-title">

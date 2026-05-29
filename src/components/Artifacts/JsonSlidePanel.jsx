@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PresentationPanel from './JsonSlide/PresentationPanel';
 import './ArtifactPanel.css'; // スタイルはArtifactPanelと共有
+import { getArtifactIcon, getArtifactColor } from '../../utils/artifactIconHelper';
 
 const CloseIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -85,15 +86,18 @@ const JsonSlidePanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                     {/* Header */}
                     <div className="artifact-header">
                         <div className="artifact-title-group">
-                            <div className="artifact-icon">
-                                <DocIcon />
+                            <div className="artifact-icon" style={{ backgroundColor: `${getArtifactColor('json_slide')}15` }}>
+                                {(() => {
+                                    const Icon = getArtifactIcon('json_slide');
+                                    return <Icon size={20} style={{ color: getArtifactColor('json_slide') }} />;
+                                })()}
                             </div>
                             <div className="artifact-header-info">
                                 <span className="artifact-title">
                                     {displayTitle}
                                     {isGeneratingArtifact && <span className="typing-cursor"></span>}
                                 </span>
-                                <span className="artifact-type-badge-panel">🎯 プレゼンスライド</span>
+                                <span className="artifact-type-badge-panel">プレゼンスライド</span>
                             </div>
                         </div>
 

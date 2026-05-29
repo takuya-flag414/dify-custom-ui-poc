@@ -6,6 +6,7 @@ import usePagination from './JsonDocument/utils/usePagination';
 import { DocxExportEngine } from '../../utils/docx/engine';
 import GeneratingAnimation from './GeneratingArtifact';
 import './ArtifactPanel.css';
+import { getArtifactIcon, getArtifactColor } from '../../utils/artifactIconHelper';
 import './JsonDocument/styles/JsonDocument.css';
 import './JsonDocument/styles/JsonDocEditor.css';
 
@@ -200,15 +201,18 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
                 >
                     <div className="artifact-header">
                         <div className="artifact-title-group">
-                            <div className="artifact-icon">
-                                <DocIcon />
+                            <div className="artifact-icon" style={{ backgroundColor: `${getArtifactColor('json_document')}15` }}>
+                                {(() => {
+                                    const Icon = getArtifactIcon('json_document');
+                                    return <Icon size={20} style={{ color: getArtifactColor('json_document') }} />;
+                                })()}
                             </div>
                             <div className="artifact-header-info">
                                 <span className="artifact-title">
                                     {displayTitle}
                                     {isGeneratingArtifact && <span className="typing-cursor"></span>}
                                 </span>
-                                <span className="artifact-type-badge-panel">📑 Wordドキュメント</span>
+                                <span className="artifact-type-badge-panel">Wordドキュメント</span>
                             </div>
                         </div>
 

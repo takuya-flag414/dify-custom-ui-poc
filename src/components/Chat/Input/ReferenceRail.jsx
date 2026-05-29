@@ -1,28 +1,30 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Globe, Database } from 'lucide-react';
 import FileIcon from '../../Shared/FileIcon';
 import PrivacyShieldButton from '../PrivacyShieldButton';
+import { getArtifactIcon, getArtifactColor } from '../../../utils/artifactIconHelper';
 
 const ARTIFACT_TYPE_MAP = {
-    html_document: { emoji: '📄', label: '印刷可能なA4ドキュメント' },
-    json_document: { emoji: '📑', label: 'Wordドキュメント' },
-    summary_report: { emoji: '📝', label: '要約・レポート' },
-    checklist: { emoji: '✅', label: 'チェックリスト' },
-    comparison_table: { emoji: '📊', label: '比較表' },
-    faq: { emoji: '❓', label: 'FAQ (想定問答集)' },
-    meeting_minutes: { emoji: '📋', label: '議事録・Next Action' },
-    html_slide: { emoji: '📽️', label: '印刷可能なプレゼンスライド' },
-    json_slide: { emoji: '🎯', label: 'プレゼンスライド' },
-    json_slide_advanced: { emoji: '🎯', label: 'プレゼンスライド' },
-    drawio: { emoji: '🔄', label: '業務フロー' },
-    mermaid: { emoji: '📐', label: '設計・構成図' },
+    html_document: { label: '印刷可能なA4ドキュメント' },
+    json_document: { label: 'Wordドキュメント' },
+    summary_report: { label: '要約・レポート' },
+    checklist: { label: 'チェックリスト' },
+    comparison_table: { label: '比較表' },
+    faq: { label: 'FAQ (想定問答集)' },
+    meeting_minutes: { label: '議事録・Next Action' },
+    html_slide: { label: '印刷可能なプレゼンスライド' },
+    json_slide: { label: 'プレゼンスライド' },
+    json_slide_advanced: { label: 'プレゼンスライド' },
+    drawio: { label: '業務フロー' },
+    mermaid: { label: '設計・構成図' },
 };
 
 const getArtifactBadgeText = (artifact) => {
     const typeKey = artifact?.type || artifact?.label;
     const info = ARTIFACT_TYPE_MAP[typeKey];
-    if (info) return `${info.emoji} ${info.label}`;
-    return `📄 ${artifact?.label || artifact?.type || 'ドキュメント'}`;
+    if (info) return info.label;
+    return artifact?.label || artifact?.type || 'ドキュメント';
 };
 
 // Close Icon Component
@@ -92,23 +94,31 @@ const ReferenceRail = ({
                         )}
 
                         {/* ★追加: Artifact Badge */}
-                        {activeArtifact && (
-                            <GlassChip onRemove={onRemoveArtifact} className="text-purple-700 dark:text-purple-300 bg-purple-100/30 border-purple-200/50">
-                                <span>{getArtifactBadgeText(activeArtifact)}</span>
-                            </GlassChip>
-                        )}
+                        {activeArtifact && (() => {
+                            const typeKey = activeArtifact?.type || activeArtifact?.label;
+                            const Icon = getArtifactIcon(typeKey);
+                            const iconColor = getArtifactColor(typeKey);
+                            return (
+                                <GlassChip onRemove={onRemoveArtifact} className="text-purple-700 dark:text-purple-300 bg-purple-100/30 border-purple-200/50">
+                                    <Icon size={14} style={{ color: iconColor }} />
+                                    <span>{getArtifactBadgeText(activeArtifact)}</span>
+                                </GlassChip>
+                            );
+                        })()}
 
                         {/* Selected Store */}
                         {activeStore && (
                             <GlassChip onRemove={onRemoveStore} className="text-emerald-700 dark:text-emerald-400 bg-emerald-100/30 border-emerald-200/50">
-                                <span>🗄️ {activeStore.display_name}</span>
+                                <Database size={14} style={{ color: '#34c759' }} />
+                                <span>{activeStore.display_name}</span>
                             </GlassChip>
                         )}
 
                         {/* Active Domains */}
                         {activeDomains.map((domain, idx) => (
                             <GlassChip key={`domain-${idx}`} onRemove={() => onRemoveDomain(idx)} className="text-blue-700 dark:text-blue-400 bg-blue-100/30 border-blue-200/50">
-                                <span>🌐 {domain}</span>
+                                <Globe size={14} style={{ color: '#007aff' }} />
+                                <span>{domain}</span>
                             </GlassChip>
                         ))}
 

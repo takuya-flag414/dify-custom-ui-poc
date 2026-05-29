@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../../App.css';
 import './ChatArea.css';
@@ -8,10 +9,7 @@ import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
 import HistorySkeleton from './HistorySkeleton';
 import WelcomeScreen from './WelcomeScreen';
-import AiSlideStudio from './AiSlideStudio'; // ★追加
-import AiMermaidStudio from './AiMermaidStudio'; // ★追加
-import AiDocumentStudio from './AiDocumentStudio'; // ★追加
-import AiDrawioStudio from './AiDrawioStudio'; // ★追加
+import UniversalStudio from './UniversalStudio'; // ★追加: 統合型スタジオ
 import ScrollToBottomButton from './ScrollToBottomButton';
 import TableModal from '../Shared/TableModal';
 import ArtifactPanel from '../Artifacts/ArtifactPanel';
@@ -24,6 +22,7 @@ import DrawioPanel from '../Artifacts/DrawioPanel'; // ★追加: Drawio専用�
 
 const ChatArea = (props) => {
   const {
+    studioType,
     messages,
     streamingMessage,
     isGenerating,
@@ -62,6 +61,19 @@ const ChatArea = (props) => {
 
   // ★追加: 表示モード管理
   const [viewMode, setViewMode] = useState('welcome');
+
+  const navigate = useNavigate();
+
+  // ★追加: studioTypeプロップスとviewModeの同期
+  useEffect(() => {
+    if (studioType) {
+      setViewMode(`studio_${studioType}`);
+    } else {
+      // studioTypeが指定されていない場合は、メッセージ有無とconversationIdに応じて通常ビューを決定
+      const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
+      setViewMode(nextView);
+    }
+  }, [studioType, messages.length, props.conversationId]);
 
   // ★追加: 自動スクロール有効状態管理
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
@@ -112,7 +124,7 @@ const ChatArea = (props) => {
       setActiveArtifact(restoredArtifact);
       
       // ★追加: 履歴ロード完了時に viewMode を確定させる (useEffectのタイミングによるチラつき防止)
-      if (viewMode !== 'ai_slide_studio') {
+      if (!viewMode.startsWith('studio_')) {
         // ★修正: メッセージが0件でも conversationId がある場合は chat ビューにする
         const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
         if (viewMode !== nextView) {
@@ -140,7 +152,7 @@ const ChatArea = (props) => {
   // 自動的に viewMode を 'welcome' に戻すことで画面崩れを防ぐ
   useEffect(() => {
     if (isHistoryLoading) return;
-    if (viewMode === 'ai_slide_studio' || viewMode === 'ai_mermaid_studio' || viewMode === 'ai_document_studio' || viewMode === 'ai_drawio_studio') return;
+    if (viewMode.startsWith('studio_')) return;
 
     const nextView = (messages.length === 0 && !props.conversationId) ? 'welcome' : 'chat';
     if (viewMode !== nextView && !isGenerating) {
@@ -319,100 +331,41 @@ const ChatArea = (props) => {
   return (
     <div className={`chat-area${viewMode === 'welcome' ? ' chat-area-initial' : ''} ${isArtifactOpen ? 'artifact-open' : ''}`}>
       <AnimatePresence mode="wait">
-        {viewMode === 'ai_slide_studio' ? (
-          <motion.div key="studio" {...transitionProps} className="chat-view-container">
-            <AiSlideStudio 
-              onBack={() => setViewMode('welcome')} 
-              mockMode={mockMode}
-              backendBApiKey={backendBApiKey}
-              backendBApiUrl={backendBApiUrl}
-              sendKey={sendKey}
-              onGenerate={(promptText, files, options) => {
-                setViewMode('chat');
-                
-                // ★追加: スタジオでの設定をアプリ全体の検索設定に同期させる
-                if (options?.searchSettings) {
-                  setSearchSettings(options.searchSettings);
+        {viewMode.startsWith('studio_') ? (
+          <motion.div key="universal_studio" {...transitionProps} className="chat-view-container">
+            <UniversalStudio
+              type={viewMode.replace('studio_', '')}
+              onBack={() => {
+                if (props.conversationId) {
+                  navigate(`/chat/${props.conversationId}`);
+                } else {
+                  navigate('/chat');
                 }
-
-                // ★追加: 生成開始と同時にスライドパネルを準備
-                setActiveArtifact({ type: 'json_slide', label: 'プレゼンスライド' });
-                // ★追加: artifactオプションおよびChatInputからのoptionsをマージして送信
-                handleSendMessageInternal(promptText, files || [], { 
-                  ...(options || {}),
-                  artifact: { requested: true, type: 'json_slide', label: 'プレゼンスライド' } 
-                });
               }}
-            />
-          </motion.div>
-        ) : viewMode === 'ai_mermaid_studio' ? (
-          <motion.div key="mermaid_studio" {...transitionProps} className="chat-view-container">
-            <AiMermaidStudio 
-              onBack={() => setViewMode('welcome')} 
               mockMode={mockMode}
               backendBApiKey={backendBApiKey}
               backendBApiUrl={backendBApiUrl}
               sendKey={sendKey}
-              onGenerate={(promptText, files, options) => {
-                setViewMode('chat');
+              onGenerate={(promptText, files, options, artifactInfo) => {
+                if (props.conversationId) {
+                  navigate(`/chat/${props.conversationId}`);
+                } else {
+                  navigate('/chat');
+                }
                 
                 if (options?.searchSettings) {
                   setSearchSettings(options.searchSettings);
                 }
 
-                // ★追加: 生成開始と同時にMermaidパネルを準備
-                setActiveArtifact({ type: 'mermaid', label: '設計・構成図' });
-                handleSendMessageInternal(promptText, files || [], { 
-                  ...(options || {}),
-                  artifact: { requested: true, type: 'mermaid', label: '設計・構成図' } 
-                });
-              }}
-            />
-          </motion.div>
-        ) : viewMode === 'ai_document_studio' ? (
-          <motion.div key="document_studio" {...transitionProps} className="chat-view-container">
-            <AiDocumentStudio 
-              onBack={() => setViewMode('welcome')} 
-              mockMode={mockMode}
-              backendBApiKey={backendBApiKey}
-              backendBApiUrl={backendBApiUrl}
-              sendKey={sendKey}
-              onGenerate={(promptText, files, options) => {
-                setViewMode('chat');
-                
-                if (options?.searchSettings) {
-                  setSearchSettings(options.searchSettings);
+                // Artifactの種類を設定
+                if (artifactInfo) {
+                  setActiveArtifact(artifactInfo);
                 }
-
-                // ★追加: 生成開始と同時にドキュメントパネルを準備
-                setActiveArtifact({ type: 'json_document', label: 'AIドキュメント' });
-                handleSendMessageInternal(promptText, files || [], { 
-                  ...(options || {}),
-                  artifact: { requested: true, type: 'json_document', label: 'AIドキュメント' } 
-                });
-              }}
-            />
-          </motion.div>
-        ) : viewMode === 'ai_drawio_studio' ? (
-          <motion.div key="drawio_studio" {...transitionProps} className="chat-view-container">
-            <AiDrawioStudio 
-              onBack={() => setViewMode('welcome')} 
-              mockMode={mockMode}
-              backendBApiKey={backendBApiKey}
-              backendBApiUrl={backendBApiUrl}
-              sendKey={sendKey}
-              onGenerate={(promptText, files, options) => {
-                setViewMode('chat');
                 
-                if (options?.searchSettings) {
-                  setSearchSettings(options.searchSettings);
-                }
-
-                // ★追加: 生成開始と同時にDrawioパネルを準備
-                setActiveArtifact({ type: 'drawio', label: '業務フロー・手順図' });
+                // 送信
                 handleSendMessageInternal(promptText, files || [], { 
                   ...(options || {}),
-                  artifact: { requested: true, type: 'drawio', label: '業務フロー・手順図' } 
+                  artifact: artifactInfo ? { requested: true, ...artifactInfo } : undefined
                 });
               }}
             />
@@ -438,10 +391,13 @@ const ChatArea = (props) => {
               restoreText={restoreText || wizardText}
               onRestoreTextConsumed={handleRestoreTextConsumed}
               onWizardComplete={handleWizardComplete}
-              onEnterSlideStudio={() => setViewMode('ai_slide_studio')}
-              onEnterDocumentStudio={() => setViewMode('ai_document_studio')}
-              onEnterMermaidStudio={() => setViewMode('ai_mermaid_studio')}
-              onEnterDrawioStudio={() => setViewMode('ai_drawio_studio')}
+              onEnterStudio={(type) => {
+                if (props.conversationId) {
+                  navigate(`/chat/${props.conversationId}/studio/${type}`);
+                } else {
+                  navigate(`/chat/studio/${type}`);
+                }
+              }}
             />
           </motion.div>
         ) : (

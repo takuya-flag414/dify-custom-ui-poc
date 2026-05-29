@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ArtifactPanel.css'; // Reusing generic panel styles
+import { getArtifactIcon, getArtifactColor } from '../../utils/artifactIconHelper';
 
 const CloseIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -90,8 +91,11 @@ const DrawioPanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                     {/* ヘッダーセクション */}
                     <div className="artifact-header">
                         <div className="artifact-title-group">
-                            <div className="artifact-icon">
-                                <span style={{ fontSize: '18px' }}>🔄</span>
+                            <div className="artifact-icon" style={{ backgroundColor: `${getArtifactColor('drawio')}15` }}>
+                                {(() => {
+                                    const Icon = getArtifactIcon('drawio');
+                                    return <Icon size={20} style={{ color: getArtifactColor('drawio') }} />;
+                                })()}
                             </div>
                             <div className="artifact-header-info">
                                 <span className="artifact-title" title={displayTitle}>

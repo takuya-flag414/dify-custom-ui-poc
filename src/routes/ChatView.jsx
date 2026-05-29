@@ -74,7 +74,7 @@ const ChatView = ({
     isRetrying,
     retryCount,
 }) => {
-    const { conversationId: urlConversationId } = useParams();
+    const { conversationId: urlConversationId, studioType: urlStudioType } = useParams();
     const navigate = useNavigate();
 
     // URL → State 同期: URLパラメータが変わったら conversationId を更新
@@ -141,6 +141,7 @@ const ChatView = ({
             }}
         >
             <ChatArea
+                studioType={urlStudioType}
                 messages={messages}
                 streamingMessage={streamingMessage}
                 setMessages={setMessages}

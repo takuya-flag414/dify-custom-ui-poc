@@ -17,31 +17,6 @@
   position: relative;
 }
 
-/* 各スタジオごとのテーマカラー定義のオーバーライド */
-.ai-slide-studio-container.studio-slide {
-  --studio-primary: #FF9500;
-  --studio-primary-rgb: 255, 149, 0;
-  --studio-primary-hover: #E08400;
-}
-
-.ai-slide-studio-container.studio-document {
-  --studio-primary: #185ABD;
-  --studio-primary-rgb: 24, 90, 189;
-  --studio-primary-hover: #12499A;
-}
-
-.ai-slide-studio-container.studio-mermaid {
-  --studio-primary: #0A8276;
-  --studio-primary-rgb: 10, 130, 118;
-  --studio-primary-hover: #075E55;
-}
-
-.ai-slide-studio-container.studio-drawio {
-  --studio-primary: #AF52DE;
-  --studio-primary-rgb: 175, 82, 222;
-  --studio-primary-hover: #953EC2;
-}
-
 /* === Inner Content (Centered & Max-width Synchronized with WelcomeScreen) === */
 .studio-inner {
   max-width: 800px;

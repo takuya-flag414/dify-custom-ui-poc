@@ -5,6 +5,7 @@ import IntelligenceSendButton from '../IntelligenceSendButton';
 import PrivacyShieldButton from '../PrivacyShieldButton';
 import UniversalAddMenu from './UniversalAddMenu'; // Import Add Menu
 import { motion, AnimatePresence } from 'framer-motion';
+import { SHOW_REASONING_SELECTOR } from '../../../config/env';
 
 // --- Icons ---
 const iconProps = {
@@ -262,11 +263,13 @@ const ControlDeck = ({
                     <PrivacyShieldButton detections={privacyWarning.detections} />
                 )}
 
-                {/* Intelligence Selector */}
-                <IntelligenceSelector
-                    mode={searchSettings?.reasoningMode || 'fast'}
-                    onChange={(mode) => setSearchSettings({ ...searchSettings, reasoningMode: mode })}
-                />
+                {/* Intelligence Selector - 環境変数に基づいて表示・非表示を制御 */}
+                {SHOW_REASONING_SELECTOR && (
+                    <IntelligenceSelector
+                        mode={searchSettings?.reasoningMode || 'fast'}
+                        onChange={(mode) => setSearchSettings({ ...searchSettings, reasoningMode: mode })}
+                    />
+                )}
 
                 {/* Send Button */}
                 <IntelligenceSendButton
