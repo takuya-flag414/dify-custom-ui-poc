@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { ShieldCheck, Eye, EyeOff, Copy, Check, Users, Upload, AlertCircle, FileText, Download } from 'lucide-react';
 import { authService } from '../../services/AuthService';
+import { MOCK_DEPARTMENTS } from '../../mocks/mockUsers';
 import './UserManagementScreen.css';
 
 const UserManagementScreen = () => {
@@ -10,6 +11,7 @@ const UserManagementScreen = () => {
     emailPrefix: '',
     password: '',
     employeeCode: '',
+    departmentId: '',
     roleId: 'role_general'
   });
   
@@ -19,7 +21,8 @@ const UserManagementScreen = () => {
   const [successData, setSuccessData] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  const domain = '@iflag.co.jp';
+  const [selectedDomain, setSelectedDomain] = useState('@iflag.co.jp');
+  const allowedDomains = ['@iflag.co.jp', '@epark.co.jp'];
 
   // --- Bulk (CSV) State ---
   const [activeTab, setActiveTab] = useState('single');
@@ -59,7 +62,8 @@ const UserManagementScreen = () => {
         let emailPrefix = cells[1] || '';
         let rowPassword = cells[2] || '';
         let employeeCode = cells[3] || '';
-        let roleRaw = cells[4] || 'general';
+        let deptId = cells[4] || '';
+        let roleRaw = cells[5] || 'general';
         
         if (!displayName || !emailPrefix) {
             errors.push(`行 ${i + 1}: 氏名またはメールアドレスが空欄です。`);
@@ -81,6 +85,7 @@ const UserManagementScreen = () => {
             emailPrefix,
             password: rowPassword,
             employeeCode,
+            departmentId: deptId ? parseInt(deptId, 10) : null,
             roleId,
             status: 'pending'
         });
@@ -144,7 +149,7 @@ const UserManagementScreen = () => {
     
     for (let i = 0; i < parsedRows.length; i++) {
         const row = parsedRows[i];
-        const fullEmail = `${row.emailPrefix}${domain}`;
+        const fullEmail = `${row.emailPrefix}${selectedDomain}`;
         
         try {
             await authService.adminCreateUser(
@@ -152,7 +157,7 @@ const UserManagementScreen = () => {
                 row.password,
                 row.displayName,
                 row.roleId,
-                null,
+                row.departmentId,
                 row.employeeCode,
                 {}
             );
@@ -171,7 +176,7 @@ const UserManagementScreen = () => {
 
   const downloadTemplate = (e) => {
     e.preventDefault();
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "氏名,メールプレフィックス(yamada等),初期パスワード(空欄で自動生成),社員番号,権限(general または admin)\n山田 太郎,yamada,,123456,general\nシステム 管理,admin_sys,,654321,admin";
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "氏名,メールプレフィックス,初期パスワード(空欄で自動生成),社員番号,部署ID(1:商品企画 2:営業 3:マーケ 4:その他 5:カスタマー),権限(general または admin)\n山田 太郎,yamada,,123456,1,general\nシステム 管理,admin_sys,,654321,2,admin";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -197,7 +202,7 @@ const UserManagementScreen = () => {
     setLoading(true);
     setError('');
 
-    const fullEmail = `${formData.emailPrefix}${domain}`;
+    const fullEmail = `${formData.emailPrefix}${selectedDomain}`;
 
     try {
       await authService.adminCreateUser(
@@ -205,7 +210,7 @@ const UserManagementScreen = () => {
         formData.password,
         formData.displayName,
         formData.roleId,
-        null, // departmentId
+        formData.departmentId ? parseInt(formData.departmentId, 10) : null,
         formData.employeeCode,
         {}    // securityInfo
       );
@@ -237,6 +242,7 @@ const UserManagementScreen = () => {
       emailPrefix: '',
       password: '',
       employeeCode: '',
+      departmentId: '',
       roleId: 'role_general'
     });
     setSuccessData(null);
@@ -331,7 +337,17 @@ const UserManagementScreen = () => {
                     className="admin-input"
                     disabled={loading}
                   />
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>{domain}</span>
+                  <select
+                    value={selectedDomain}
+                    onChange={(e) => setSelectedDomain(e.target.value)}
+                    className="admin-select"
+                    style={{ width: 'auto', margin: 0 }}
+                    disabled={loading}
+                  >
+                    {allowedDomains.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -370,6 +386,21 @@ const UserManagementScreen = () => {
                   disabled={loading}
                 />
               </div>
+<div className="form-group">
+                <label>部署</label>
+                <select 
+                  name="departmentId" 
+                  value={formData.departmentId} 
+                  onChange={handleChange}
+                  className="admin-select"
+                  disabled={loading}
+                >
+                  <option value="">部署を選択してください</option>
+                  {MOCK_DEPARTMENTS.map(dept => (
+                    <option key={dept.id} value={dept.id}>{dept.name}</option>
+                  ))}
+                </select>
+              </div>
 
               <div className="form-group">
                 <label>ロール（権限）</label>
@@ -382,6 +413,7 @@ const UserManagementScreen = () => {
                 >
                   <option value="role_general">一般権限 (role_general)</option>
                   <option value="role_admin">管理者権限 (role_admin)</option>
+                  <option value="role_knowledge_manager">ナレッジマネージャー (role_knowledge_manager)</option>
                 </select>
               </div>
 
@@ -399,6 +431,52 @@ const UserManagementScreen = () => {
             // Bulk Tab Content
             <div>
               <h2>CSVで一括作成</h2>
+
+              <div style={{ 
+                marginBottom: '24px', 
+                padding: '16px', 
+                background: 'var(--bg-tertiary)', 
+                borderRadius: '12px', 
+                border: '1px solid var(--border-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>作成対象ドメイン:</span>
+                <select
+                  value={selectedDomain}
+                  onChange={(e) => setSelectedDomain(e.target.value)}
+                  className="admin-select"
+                  style={{ width: 'auto', minWidth: '160px', margin: 0 }}
+                  disabled={bulkStatus === 'processing'}
+                >
+                  {allowedDomains.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>※CSVの全ユーザーにこのドメインが適用されます</span>
+              </div>
+
+              <div style={{
+                marginBottom: '24px',
+                padding: '12px 16px',
+                background: 'rgba(234, 179, 8, 0.1)',
+                border: '1px solid rgba(234, 179, 8, 0.2)',
+                borderRadius: '8px',
+                color: '#ca8a04',
+                fontSize: '0.85rem',
+                lineHeight: '1.5',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px'
+              }}>
+                <AlertCircle size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+                <div>
+                  <strong>⚠️ 一括作成時の注意</strong><br/>
+                  DBの仕様により、プロジェクトを不正使用から保護するために同一のIPアドレスから1時間あたりの最大のアカウント申込数が200となっていることに注意してください。
+                </div>
+              </div>
+
               {bulkStatus === 'idle' && (
                 <>
                   <a href="#" className="download-link" onClick={downloadTemplate}>

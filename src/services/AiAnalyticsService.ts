@@ -1,5 +1,5 @@
-// src/services/AiAnalyticsService.ts
-import { db } from '../lib/firebase';
+import { db, functions } from '../lib/firebase';
+import { httpsCallable } from 'firebase/functions';
 import { 
     collection, 
     addDoc, 
@@ -10,6 +10,8 @@ import {
     Timestamp,
     serverTimestamp 
 } from 'firebase/firestore';
+import { isStrictFEMode } from '../config/env';
+import { MOCK_DEPARTMENTS, MOCK_USERS } from '../mocks/mockUsers';
 
 /**
  * AI利用ログのインターフェース
@@ -118,16 +120,38 @@ class AiAnalyticsService {
 
     /**
      * 分析用統計データを取得する（管理者用）
-     * @param days 取得対象期間（日数）
+     * @param range 取得対象期間（日数数値 または 'YYYY-MM' 形式の文字列）
      */
-    async getAiUsageStats(days: number = 30) {
+    async getAiUsageStats(range: number | string = 30) {
         try {
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - days);
+            let startTimestamp: Timestamp;
+            let endTimestamp: Timestamp | null = null;
+
+            if (typeof range === 'string' && range.includes('-')) {
+                // "YYYY-MM" 形式の場合
+                const [year, month] = range.split('-').map(Number);
+                const startDate = new Date(year, month - 1, 1, 0, 0, 0);
+                const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+                startTimestamp = Timestamp.fromDate(startDate);
+                endTimestamp = Timestamp.fromDate(endDate);
+            } else {
+                // 従来の日数（数値）指定の場合
+                const days = typeof range === 'number' ? range : parseInt(range as string) || 30;
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                startTimestamp = Timestamp.fromDate(cutoffDate);
+            }
             
+            const constraints = [
+                where('timestamp', '>=', startTimestamp)
+            ];
+            if (endTimestamp) {
+                constraints.push(where('timestamp', '<=', endTimestamp));
+            }
+
             const q = query(
                 collection(db, 'ai_usage_logs'),
-                where('timestamp', '>=', Timestamp.fromDate(cutoffDate)),
+                ...constraints,
                 orderBy('timestamp', 'desc')
             );
             
@@ -146,6 +170,36 @@ class AiAnalyticsService {
         } catch (error) {
             console.error('[AiAnalyticsService] Failed to fetch AI usage stats:', error);
             return [];
+        }
+    }
+
+    /**
+     * 分析に必要なユーザー・部署マッピングを取得する
+     */
+    async getAnalysisMappings() {
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Using mock mappings...');
+            const userMap: Record<string, { name: string, departmentId: any }> = {};
+            MOCK_USERS.forEach(u => {
+                userMap[u.user_id] = {
+                    name: u.name,
+                    departmentId: u.department_id || null
+                };
+            });
+            const deptMap: Record<string, string> = {};
+            MOCK_DEPARTMENTS.forEach(d => {
+                deptMap[d.id.toString()] = d.name;
+            });
+            return { userMap, deptMap };
+        }
+
+        try {
+            const getDecryptedUserMappings = httpsCallable(functions, 'getDecryptedUserMappings');
+            const result = await getDecryptedUserMappings();
+            return result.data as { userMap: any, deptMap: any };
+        } catch (error) {
+            console.error('[AiAnalyticsService] Failed to fetch secure mappings:', error);
+            return { userMap: {}, deptMap: {} };
         }
     }
 }

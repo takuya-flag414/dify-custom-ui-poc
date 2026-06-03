@@ -12,6 +12,7 @@ import {
     applyActionCode,
     checkActionCode,
     deleteUser,
+    updatePassword,
     User as FirebaseUser
 } from 'firebase/auth';
 import {
@@ -63,6 +64,7 @@ export interface UserProfile {
     preferences: UserPreferences;
     createdAt?: string;
     updatedAt?: string;
+    requirePasswordChange?: boolean;   // 初回ログイン時のパスワード変更要求フラグ
     // 後方互換用フィールド（移行期間中）
     role?: string;                     // レガシーロール ('admin' | 'user')
 }
@@ -181,6 +183,7 @@ class AuthService {
             },
             createdAt: userData.created_at?.toDate ? userData.created_at.toDate().toISOString() : userData.created_at,
             updatedAt: userData.updated_at?.toDate ? userData.updated_at.toDate().toISOString() : userData.updated_at,
+            requirePasswordChange: userData.require_password_change === true,
             role: legacyRole,
         };
     }
@@ -198,17 +201,27 @@ class AuthService {
             // セッションID生成（ブラウザセッション単位でユニーク）
             const sessionId = this._getSessionId();
 
-            const logRef = doc(collection(db, 'audit_logs'));
-            await setDoc(logRef, {
-                timestamp: Timestamp.now(),
+            // Cloud Functions経由で監査ログを保存
+            const logAuditAction = httpsCallable(functions, 'logAuditAction');
+            
+            // 環境変数(VITE_APP_NAME)を使用して、どのアプリかを識別
+            const appName = (import.meta as any).env?.VITE_APP_NAME || 'chat_app';
+            
+            const enrichedDetails = {
+                ...details,
+                hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown'
+            };
+
+            await logAuditAction({
                 action,
                 email: targetEmail,
-                user_id: targetUserId,
-                session_id: sessionId,
-                project_id: import.meta.env.VITE_PROJECT_ID || 'unknown-project',
-                details
+                userId: targetUserId,
+                sessionId,
+                projectId: appName,
+                details: enrichedDetails
             });
-            console.log(`[AuthService] Audit logged: ${action} for ${targetEmail} (session: ${sessionId})`);
+            
+            console.log(`[AuthService] Audit logged via Functions: ${action} for ${targetEmail} (session: ${sessionId})`);
         } catch (e) {
             console.error('[AuthService] Failed to record audit log:', e);
         }
@@ -255,7 +268,8 @@ class AuthService {
                     accountStatus: user.account_status,
                     roles: roles,
                     permissions: permissions,
-                    preferences: user.preferences || { theme: 'system', aiStyle: 'partner' }
+                    preferences: user.preferences || { theme: 'system', aiStyle: 'partner' },
+                    requirePasswordChange: user.require_password_change === true
                 };
                 return {
                     token: 'mock-token-fe-mode',
@@ -431,6 +445,46 @@ class AuthService {
     }
 
     /**
+     * 初回ログイン時のパスワード変更
+     */
+    async updateInitialPassword(newPassword: string): Promise<void> {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            throw new Error('ログインしていません');
+        }
+
+        try {
+            // Firebase Authのパスワード更新
+            await updatePassword(currentUser, newPassword);
+
+            // Cloud Functionを呼び出してFirestoreのフラグをクリア
+            const clearRequirePasswordChange = httpsCallable(functions, 'clearRequirePasswordChange');
+            await clearRequirePasswordChange();
+
+            // 監査ログ記録
+            this._logAuditAction('PASSWORD_CHANGED_INITIAL', currentUser.email || 'unknown', currentUser.uid, {
+                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
+            });
+
+            console.log('[AuthService] Initial password updated successfully');
+        } catch (error: any) {
+            console.error('[AuthService] Update initial password failed:', error);
+            
+            this._logAuditAction('PASSWORD_CHANGE_FAILED', currentUser.email || 'unknown', currentUser.uid, {
+                error_code: error.code,
+                error_message: error.message
+            });
+
+            if (error.code === 'auth/weak-password') {
+                throw new Error('パスワードは6文字以上である必要があります');
+            } else if (error.code === 'auth/requires-recent-login') {
+                throw new Error('セキュリティのため、一度ログアウトして再ログインしてからお試しください');
+            }
+            throw new Error('パスワードの変更に失敗しました');
+        }
+    }
+
+    /**
      * サインアップ（Firebase標準 メール確認フロー）
      */
     async signup(
@@ -438,6 +492,7 @@ class AuthService {
         password: string,
         displayName: string,
         employeeCode: string = '',
+        departmentId: number | null = null,
         securityInfo: Partial<SecurityInfo> = {}
     ): Promise<{ message: string }> {
         const { lastName, firstName, dateOfBirth } = securityInfo;
@@ -447,8 +502,11 @@ class AuthService {
         }
 
         const normalizedEmail = email.toLowerCase().trim();
-        if (!normalizedEmail.endsWith('@iflag.co.jp')) {
-            throw new Error('このアプリは会社用ドメイン（@iflag.co.jp)でのみ登録可能です');
+        const allowedDomains = ['@iflag.co.jp', '@epark.co.jp'];
+        const isAllowed = allowedDomains.some(domain => normalizedEmail.endsWith(domain));
+        
+        if (!isAllowed) {
+            throw new Error('このアプリは許可されたドメイン（@iflag.co.jp, @epark.co.jp）でのみ登録可能です');
         }
 
         try {
@@ -476,6 +534,7 @@ class AuthService {
                 email: normalizedEmail,
                 displayName: displayName || `${lastName || ''} ${firstName || ''}`.trim(),
                 employeeCode: employeeCode,
+                departmentId: departmentId,
                 preferences: {
                     theme: 'system',
                     aiStyle: 'partner',
@@ -581,8 +640,11 @@ class AuthService {
         }
 
         const normalizedEmail = email.toLowerCase().trim();
-        if (!normalizedEmail.endsWith('@iflag.co.jp')) {
-            throw new Error('このアプリは会社用ドメイン（@iflag.co.jp)でのみ登録可能です');
+        const allowedDomains = ['@iflag.co.jp', '@epark.co.jp'];
+        const isAllowed = allowedDomains.some(domain => normalizedEmail.endsWith(domain));
+
+        if (!isAllowed) {
+            throw new Error('このアプリは許可されたドメインでのみ作成可能です');
         }
 
         try {

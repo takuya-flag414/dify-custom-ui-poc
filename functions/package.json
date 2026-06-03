@@ -13,6 +13,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.1058.0",
     "@google-cloud/kms": "^5.4.0",
     "firebase-admin": "^13.8.0",
     "firebase-functions": "^7.2.5"

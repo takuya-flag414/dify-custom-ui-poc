@@ -10,6 +10,8 @@ const PromptSettings = ({ settings, onUpdateSettings }) => {
   const [userProfile, setUserProfile] = useState({ role: '', department: '' });
   const [customInstructions, setCustomInstructions] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  
+
 
   useEffect(() => {
     if (settings?.prompt) {
@@ -110,6 +112,7 @@ const PromptSettings = ({ settings, onUpdateSettings }) => {
 ・回答は箇条書きでお願いします`}
             />
           </div>
+
         </div>
       </MacSettingsSection>
     </div>

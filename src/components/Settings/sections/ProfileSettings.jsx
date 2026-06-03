@@ -163,6 +163,7 @@ const ProfileSettings = ({ settings, onUpdateSettings, currentUser, onLogout }) 
           </MacSettingsRow>
         </MacSettingsSection>
       )}
+
     </div>
   );
 };
