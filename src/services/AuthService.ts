@@ -719,6 +719,16 @@ class AuthService {
      * ユーザー設定を更新
      */
     async updatePreferences(userId: string, prefs: Partial<UserPreferences>): Promise<UserPreferences> {
+        if (isStrictFEMode) {
+            console.log('🔒 [Strict FE Mode] Simulating updatePreferences locally...');
+            return {
+                theme: 'system',
+                aiStyle: 'partner',
+                isOnboardingCompleted: false, // デフォルト値
+                ...prefs,
+            } as UserPreferences;
+        }
+
         const userRef = doc(db, 'users', userId);
         const getSecureUserProfile = httpsCallable(functions, 'getSecureUserProfile');
         const result = await getSecureUserProfile();

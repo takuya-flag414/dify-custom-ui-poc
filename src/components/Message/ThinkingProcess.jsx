@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './ThinkingProcess.css';
-import FluidOrb from '../Shared/FluidOrb';
 import { determineRenderMode } from '../../config/thinkingRenderRules';
 import TypewriterEffect from '../Shared/TypewriterEffect';
 import MarkdownRenderer from '../Shared/MarkdownRenderer';
@@ -109,18 +108,26 @@ const Icons = {
     )
 };
 
-// アニメーションする3点リーダー
-const ThinkingDots = () => {
-    const [dots, setDots] = useState('.');
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setDots(prev => prev.length >= 3 ? '.' : prev + '.');
-        }, 500);
-        return () => clearInterval(interval);
-    }, []);
-
-    return <span>{dots}</span>;
+// アニメーションするローディングテキスト
+const AnimatedLoadingText = ({ text }) => {
+    if (!text) return null;
+    
+    // 文字列を1文字ずつに分割（サロゲートペア対応のためArray.fromを使用）
+    const characters = Array.from(text);
+    
+    return (
+        <span className="letter-wrapper">
+            {characters.map((char, index) => (
+                <span 
+                    key={index} 
+                    className="loader-letter"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                    {char === ' ' ? '\u00A0' : char}
+                </span>
+            ))}
+        </span>
+    );
 };
 
 // アコーディオン形式で思考プロセスを表示するコンポーネント
@@ -258,8 +265,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
             {/* 初期ローディング状態: ステップがまだ1つもない場合のみ表示 */}
             {!hasSteps && isStreaming && (
                 <div className="fluid-loading-container">
-                    <FluidOrb width="40px" height="40px" />
-                    <span className="fluid-loading-text">Thinking<ThinkingDots /></span>
+                    <span className="fluid-loading-text"><AnimatedLoadingText text="Thinking" /></span>
                 </div>
             )}
 
@@ -281,19 +287,14 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
 
                 // 末尾の「.」や「。」を削除してベーステキストを作成 (全角・半角ドット対応)
                 const baseThinkingText = dynamicLabel.replace(/[.．。]+$/, '');
-                const thinkingText = (
-                    <>
-                        {baseThinkingText}
-                        <ThinkingDots />
-                    </>
-                );
+                // アニメーション用のコンポーネントを使用
+                const animatedThinkingText = <AnimatedLoadingText text={baseThinkingText} />;
 
                 // 共通プレースホルダー: 現在進行中のステップで、かつ表示するものがない場合に表示
                 const ThinkingPlaceholder = (
                     <div key={step.id || index} className="thought-monologue-container">
                         <div className="fluid-loading-container small">
-                            <FluidOrb width="24px" height="24px" />
-                            <span className="fluid-loading-text">{thinkingText}</span>
+                            <span className="fluid-loading-text">{animatedThinkingText}</span>
                         </div>
                     </div>
                 );
@@ -336,8 +337,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                                 </>
                             ) : (
                                 <div className="fluid-loading-container small">
-                                    <FluidOrb width="24px" height="24px" />
-                                    <span className="fluid-loading-text">Thinking<ThinkingDots /></span>
+                                    <span className="fluid-loading-text"><AnimatedLoadingText text="Thinking" /></span>
                                 </div>
                             )}
                         </div>
@@ -446,8 +446,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                         ) : (
                             // 処理中はプレースホルダーを表示
                             <div className="fluid-loading-container small">
-                                <FluidOrb width="24px" height="24px" />
-                                <span className="fluid-loading-text">Thinking<ThinkingDots /></span>
+                                <span className="fluid-loading-text"><AnimatedLoadingText text="Thinking" /></span>
                             </div>
                         )}
                     </div>

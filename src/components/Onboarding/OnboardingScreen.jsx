@@ -231,9 +231,9 @@ const OnboardingScreen = ({
             <div className="onboarding-bg-shape bg-shape-5" />
             <div className="onboarding-bg-shape bg-shape-6" />
 
-            <div className="onboarding-screen-content">
-                <ProgressLine currentStep={currentStep} totalSteps={totalSteps} />
+            <div className="onboarding-overlay" />
 
+            <div className="onboarding-console">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentStep === 5 ? `${currentStep}-${diagnosisMode}-${diagnosisSubStep}` : currentStep}
@@ -246,7 +246,7 @@ const OnboardingScreen = ({
                             stiffness: 250,
                             damping: 25,
                         }}
-                        style={{ width: '100%', display: 'flex', justifyContent: 'center', flex: 1 }}
+                        style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', flex: 1, position: 'relative' }}
                     >
                         {renderStep()}
                     </motion.div>

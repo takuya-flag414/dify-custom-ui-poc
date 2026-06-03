@@ -51,15 +51,15 @@ export class MockStreamGenerator {
           // ★追加: 遅延ルール定義
           const DELAY_RULES = {
             'Query Rewriter': 500,
-            'Intent Classifier': 800,
-            'LLM_Intent_Analysis': 800,
+            'Intent Classifier': 8000,
+            'LLM_Intent_Analysis': 8000,
             'Search Strategy': 1000,
             'LLM_Search_Strategy': 1000,
             'Perplexity Search': 2600,
             'Web Search': 2600,
             'LLM_Search_Partner': 660,
-            'default_llm': 400,
-            'default_tool': 660
+            'default_llm': 8000,
+            'default_tool': 6600 
           };
 
           // 2. シナリオの各イベントを処理

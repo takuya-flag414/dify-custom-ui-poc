@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import ContextSelector from '../../Shared/ContextSelector';
+import StoreSelectorModal from '../../Shared/StoreSelectorModal';
 import IntelligenceSelector from '../../Shared/IntelligenceSelector';
 import IntelligenceSendButton from '../IntelligenceSendButton';
 import PrivacyShieldButton from '../PrivacyShieldButton';
 import UniversalAddMenu from './UniversalAddMenu'; // Import Add Menu
 import { motion, AnimatePresence } from 'framer-motion';
 import { SHOW_REASONING_SELECTOR } from '../../../config/env';
+import { useGeminiStores } from '../../../hooks/useGeminiStores';
 
 // --- Icons ---
 const iconProps = {
@@ -71,6 +73,26 @@ const GlobeAltIcon = () => (
     </svg>
 );
 
+const SearchIcon = () => (
+    <svg {...iconProps}>
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);
+
+const ChevronUpIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+);
+
+const CloseIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+);
+
 // --- Mode Logic ---
 const getModeInfo = (settings) => {
     const { ragEnabled, webEnabled, domainFilters } = settings || { ragEnabled: false, webEnabled: false };
@@ -78,15 +100,43 @@ const getModeInfo = (settings) => {
     const suffix = filterCount > 0 ? ` (${filterCount})` : '';
 
     if (ragEnabled && webEnabled) {
-        return { label: '社内データ + Web', class: 'text-purple-600 dark:text-purple-400', icon: <RocketLaunchIcon /> };
+        return { 
+            id: 'hybrid',
+            label: '社内データ + Web', 
+            textClass: 'text-purple-600 dark:text-purple-400',
+            bgClass: 'bg-purple-500/10 dark:bg-purple-400/10',
+            ringClass: 'ring-1 ring-purple-500/20 dark:ring-purple-400/20',
+            icon: <RocketLaunchIcon /> 
+        };
     }
     if (ragEnabled) {
-        return { label: '社内データ', class: 'text-green-600 dark:text-green-400', icon: <BuildingOfficeIcon /> };
+        return { 
+            id: 'rag',
+            label: '社内データ', 
+            textClass: 'text-green-600 dark:text-green-400',
+            bgClass: 'bg-green-500/10 dark:bg-green-400/10',
+            ringClass: 'ring-1 ring-green-500/20 dark:ring-green-400/20',
+            icon: <BuildingOfficeIcon /> 
+        };
     }
     if (webEnabled) {
-        return { label: `Web検索${suffix}`, class: 'text-blue-600 dark:text-blue-400', icon: <GlobeAltIcon /> };
+        return { 
+            id: 'web',
+            label: `Web検索${suffix}`, 
+            textClass: 'text-blue-600 dark:text-blue-400',
+            bgClass: 'bg-blue-500/10 dark:bg-blue-400/10',
+            ringClass: 'ring-1 ring-blue-500/20 dark:ring-blue-400/20',
+            icon: <GlobeAltIcon /> 
+        };
     }
-    return { label: `チャット${suffix}`, class: 'text-gray-500 dark:text-gray-400', icon: <ChatBubbleIcon /> };
+    return { 
+        id: 'chat',
+        label: `チャット${suffix}`, 
+        textClass: 'text-gray-500 dark:text-gray-400',
+        bgClass: '',
+        ringClass: '',
+        icon: <ChatBubbleIcon /> 
+    };
 };
 
 const ControlDeck = ({
@@ -117,6 +167,16 @@ const ControlDeck = ({
 }) => {
     const [isContextOpen, setIsContextOpen] = useState(false);
     const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+    const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
+
+    // Phase B: ストア一覧をAPI経由で取得
+    const {
+        stores,
+        isLoading: isStoresLoading,
+        error: storesError,
+        refetch: refetchStores,
+    } = useGeminiStores(mockMode, backendBApiKey, backendBApiUrl);
+
     const contextRef = useRef(null);
     const addMenuRef = useRef(null);
 
@@ -192,7 +252,7 @@ const ControlDeck = ({
                 <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
 
                 {/* Context Selector Trigger */}
-                <div className="relative" ref={contextRef}>
+                <div className="relative flex items-center gap-1.5" ref={contextRef}>
                     {/* Error Tooltip */}
                     <AnimatePresence>
                         {showStoreError && (
@@ -218,15 +278,50 @@ const ControlDeck = ({
                         <motion.button
                             layout
                             onClick={() => setIsContextOpen(!isContextOpen)}
-                            className={`flex items-center h-8 px-3 gap-2 rounded-full transition-colors ${modeInfo.class} hover:bg-black/5 dark:hover:bg-white/10 ${isContextOpen ? 'bg-black/5 dark:bg-white/10' : ''}`}
-                            title={modeInfo.label}
+                            className={`flex items-center h-8 px-3 gap-1.5 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 ${isContextOpen ? 'bg-black/5 dark:bg-white/10 text-gray-800 dark:text-gray-200' : ''}`}
+                            title="検索モードを変更"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            {modeInfo.icon}
-                            <span className="text-xs font-medium whitespace-nowrap">{modeInfo.label}</span>
+                            <SearchIcon />
+                            <span className="text-xs font-medium whitespace-nowrap">検索モード</span>
+                            <motion.div
+                                animate={{ rotate: isContextOpen ? 180 : 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                className="flex items-center justify-center"
+                            >
+                                <ChevronUpIcon />
+                            </motion.div>
                         </motion.button>
                     </motion.div>
+
+                    {/* Floating Status Badge */}
+                    <AnimatePresence mode="popLayout">
+                        {modeInfo.id !== 'chat' && (
+                            <motion.div
+                                initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                                animate={{ opacity: 1, x: 0, scale: 1 }}
+                                exit={{ opacity: 0, x: -10, scale: 0.9 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                                className={`flex items-center h-6 px-2.5 rounded-full ${modeInfo.bgClass} ${modeInfo.textClass} ${modeInfo.ringClass} backdrop-blur-md group`}
+                                title={modeInfo.label}
+                            >
+                                <div className="[&>svg]:w-3.5 [&>svg]:h-3.5 mr-1">
+                                    {modeInfo.icon}
+                                </div>
+                                <span className="text-[11px] font-medium whitespace-nowrap">
+                                    {modeInfo.label}
+                                </span>
+                                <button
+                                    onClick={() => setSearchSettings({ ...searchSettings, ragEnabled: false, webEnabled: false, selectedStoreId: null, selectedStoreName: null })}
+                                    className={`ml-1.5 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 transition-all`}
+                                    title="検索モードを解除"
+                                >
+                                    <CloseIcon />
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Popover */}
                     <AnimatePresence>
@@ -247,6 +342,11 @@ const ControlDeck = ({
                                         backendBApiKey={backendBApiKey}
                                         backendBApiUrl={backendBApiUrl}
                                         onStoreSelected={onStoreSelected}
+                                        onOpenStoreModal={() => {
+                                            setIsContextOpen(false);
+                                            refetchStores();
+                                            setIsStoreModalOpen(true);
+                                        }}
                                     />
                                 </div>
                             </motion.div>
@@ -281,6 +381,25 @@ const ControlDeck = ({
                     disabled={!canSend}
                 />
             </div>
+
+            <StoreSelectorModal
+                isOpen={isStoreModalOpen}
+                onClose={() => setIsStoreModalOpen(false)}
+                stores={stores || []}
+                isLoading={isStoresLoading}
+                onSelect={(store, isHybrid) => {
+                    setSearchSettings({
+                        ...searchSettings,
+                        ragEnabled: true,
+                        webEnabled: isHybrid,
+                        selectedStoreId: store.id,
+                        selectedStoreName: store.display_name || '',
+                    });
+                    if (onStoreSelected) {
+                        onStoreSelected(store);
+                    }
+                }}
+            />
         </div>
     );
 };

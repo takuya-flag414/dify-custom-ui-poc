@@ -35,14 +35,12 @@ const StepDiagnosisQuestion: React.FC<Props> = ({
     const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleSelect = useCallback((answer: 'A' | 'B') => {
-        // 既にタイマーが走っている場合はキャンセル
         if (autoAdvanceTimer.current) {
             clearTimeout(autoAdvanceTimer.current);
         }
         onSelect(answer);
     }, [onSelect]);
 
-    // 設問切り替え時のアニメーション
     const contentVariants = {
         enter: { opacity: 0, y: 10 },
         center: { opacity: 1, y: 0 },
@@ -50,139 +48,122 @@ const StepDiagnosisQuestion: React.FC<Props> = ({
     };
 
     return (
-        <div className="onboarding-step-new split-layout">
-            <div className="onboarding-step-left">
-                {/* カウンター */}
-                <motion.div
-                    className="diagnosis-question-header"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
+        <div className="onboarding-step-new">
+            {/* カウンター */}
+            <motion.div
+                className="diagnosis-question-header"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                style={{ marginBottom: '16px' }}
+            >
+                <span className="diagnosis-question-counter" style={{ padding: '6px 12px', background: 'rgba(10, 132, 255, 0.1)', color: 'var(--sys-color-primary, #0A84FF)', borderRadius: '12px', fontSize: '13px' }}>
+                    質問 {questionIndex + 1} / {totalQuestions}
+                </span>
+            </motion.div>
+
+            {/* タイトル */}
+            <AnimatePresence mode="wait">
+                <motion.h1
+                    key={`title-${questionIndex}`}
+                    className="diagnosis-question-title"
+                    variants={contentVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+                    style={{ fontSize: '28px', marginBottom: '16px', fontWeight: 800 }}
                 >
-                    <span className="diagnosis-question-counter">
-                        Q{questionIndex + 1} / {totalQuestions}
-                    </span>
+                    {questionData.title}
+                </motion.h1>
+            </AnimatePresence>
+
+            {/* サブタイトル */}
+            <AnimatePresence mode="wait">
+                <motion.p
+                    key={`subtitle-${questionIndex}`}
+                    className="diagnosis-question-subtitle"
+                    variants={contentVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: 'spring', stiffness: 250, damping: 25, delay: 0.05 }}
+                    style={{ marginBottom: '32px' }}
+                >
+                    {questionData.subtitle}
+                </motion.p>
+            </AnimatePresence>
+
+            {/* A/B 選択肢 */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={`options-${questionIndex}`}
+                    className="diagnosis-options"
+                    variants={contentVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: 'spring', stiffness: 250, damping: 25, delay: 0.1 }}
+                    style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+                >
+                    <motion.button
+                        type="button"
+                        className={`diagnosis-option-card${selectedAnswer === 'A' ? ' selected' : ''}`}
+                        onClick={() => handleSelect('A')}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                    >
+                        <span className="diagnosis-option-emoji">{questionData.optionA.icon}</span>
+                        <div className="diagnosis-option-content">
+                            <h4>{questionData.optionA.label}</h4>
+                            <p>{questionData.optionA.description}</p>
+                        </div>
+                        {selectedAnswer === 'A' && (
+                            <motion.div
+                                className="diagnosis-option-check"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                            >
+                                <CheckIcon />
+                            </motion.div>
+                        )}
+                    </motion.button>
+
+                    <motion.button
+                        type="button"
+                        className={`diagnosis-option-card${selectedAnswer === 'B' ? ' selected' : ''}`}
+                        onClick={() => handleSelect('B')}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                    >
+                        <span className="diagnosis-option-emoji">{questionData.optionB.icon}</span>
+                        <div className="diagnosis-option-content">
+                            <h4>{questionData.optionB.label}</h4>
+                            <p>{questionData.optionB.description}</p>
+                        </div>
+                        {selectedAnswer === 'B' && (
+                            <motion.div
+                                className="diagnosis-option-check"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                            >
+                                <CheckIcon />
+                            </motion.div>
+                        )}
+                    </motion.button>
                 </motion.div>
+            </AnimatePresence>
 
-                {/* タイトル */}
-                <AnimatePresence mode="wait">
-                    <motion.h1
-                        key={`title-${questionIndex}`}
-                        className="diagnosis-question-title"
-                        variants={contentVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                            type: 'spring',
-                            stiffness: 250,
-                            damping: 25,
-                        }}
-                        style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '24px' }}
-                    >
-                        {questionData.title}
-                    </motion.h1>
-                </AnimatePresence>
-                <div className="title-decoration-line" style={{ marginBottom: 0 }} />
-            </div>
-
-            <div className="onboarding-step-right">
-                {/* サブタイトル */}
-                <AnimatePresence mode="wait">
-                    <motion.p
-                        key={`subtitle-${questionIndex}`}
-                        className="diagnosis-question-subtitle"
-                        variants={contentVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                            type: 'spring',
-                            stiffness: 250,
-                            damping: 25,
-                            delay: 0.05,
-                        }}
-                    >
-                        {questionData.subtitle}
-                    </motion.p>
-                </AnimatePresence>
-
-                {/* A/B 選択肢 */}
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={`options-${questionIndex}`}
-                        className="diagnosis-options"
-                        variants={contentVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                            type: 'spring',
-                            stiffness: 250,
-                            damping: 25,
-                            delay: 0.1,
-                        }}
-                    >
-                        {/* Option A */}
-                        <motion.button
-                            type="button"
-                            className={`diagnosis-option-card${selectedAnswer === 'A' ? ' selected' : ''}`}
-                            onClick={() => handleSelect('A')}
-                            whileTap={{ scale: 0.98 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                        >
-                            <span className="diagnosis-option-emoji">{questionData.optionA.icon}</span>
-                            <div className="diagnosis-option-content">
-                                <h4>{questionData.optionA.label}</h4>
-                                <p>{questionData.optionA.description}</p>
-                            </div>
-                            {selectedAnswer === 'A' && (
-                                <motion.div
-                                    className="diagnosis-option-check"
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                                >
-                                    <CheckIcon />
-                                </motion.div>
-                            )}
-                        </motion.button>
-
-                        {/* Option B */}
-                        <motion.button
-                            type="button"
-                            className={`diagnosis-option-card${selectedAnswer === 'B' ? ' selected' : ''}`}
-                            onClick={() => handleSelect('B')}
-                            whileTap={{ scale: 0.98 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                        >
-                            <span className="diagnosis-option-emoji">{questionData.optionB.icon}</span>
-                            <div className="diagnosis-option-content">
-                                <h4>{questionData.optionB.label}</h4>
-                                <p>{questionData.optionB.description}</p>
-                            </div>
-                            {selectedAnswer === 'B' && (
-                                <motion.div
-                                    className="diagnosis-option-check"
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                                >
-                                    <CheckIcon />
-                                </motion.div>
-                            )}
-                        </motion.button>
-                    </motion.div>
-                </AnimatePresence>
-
-                {/* 戻るボタン */}
-                <motion.div
-                    className="onboarding-actions-new"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.15, duration: 0.3 }}
-                    style={{ flexDirection: 'row', maxWidth: 'none', justifyContent: 'flex-start', paddingTop: '24px' }}
-                >
+            {/* アクションバー（Sticky Footer） */}
+            <motion.div
+                className="onboarding-footer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.3 }}
+            >
+                <div className="onboarding-footer-left">
                     <button
                         type="button"
                         className="onboarding-btn-new onboarding-btn-secondary-new"
@@ -191,8 +172,19 @@ const StepDiagnosisQuestion: React.FC<Props> = ({
                     >
                         戻る
                     </button>
-                </motion.div>
-            </div>
+                </div>
+                
+                <div className="onboarding-pagination">
+                    {/* 診断中は専用のプログレスインジケータ（ドット）を表示 */}
+                    {Array.from({ length: totalQuestions }).map((_, idx) => (
+                        <div key={idx} className={`pagination-dot ${idx === questionIndex ? 'active' : ''}`} />
+                    ))}
+                </div>
+
+                <div className="onboarding-footer-right">
+                    {/* 選択肢をタップして進むため、「次へ」は非表示 */}
+                </div>
+            </motion.div>
         </div>
     );
 };

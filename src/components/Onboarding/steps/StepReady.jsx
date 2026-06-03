@@ -42,7 +42,7 @@ const StepReady = ({ name, customInstructions, onComplete, onPrev }) => {
     const hasInstructions = customInstructions && customInstructions.trim().length > 0;
 
     return (
-        <div className="onboarding-step-new" style={{ maxWidth: '800px', margin: '0 auto', padding: '16px 0' }}>
+        <div className="onboarding-step-new">
             {/* 完了アイコン */}
             <motion.div
                 className="onboarding-icon-new ready-icon-glow"
@@ -54,7 +54,7 @@ const StepReady = ({ name, customInstructions, onComplete, onPrev }) => {
                     damping: 20,
                     delay: 0.1,
                 }}
-                style={{ width: '100px', height: '100px', margin: '0 auto 24px' }}
+                style={{ width: '80px', height: '80px', marginBottom: '24px' }}
             >
                 <RocketIcon />
             </motion.div>
@@ -65,11 +65,10 @@ const StepReady = ({ name, customInstructions, onComplete, onPrev }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '16px' }}
+                style={{ fontSize: '28px', marginBottom: '16px' }}
             >
                 {name ? `${name}さん、はじめましょう！` : 'はじめましょう！'}
             </motion.h1>
-            <div className="title-decoration-line" style={{ margin: '0 auto 24px' }} />
 
             {/* サブタイトル */}
             <motion.p
@@ -77,7 +76,7 @@ const StepReady = ({ name, customInstructions, onComplete, onPrev }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                style={{ fontSize: '1.25rem', color: 'var(--color-text-sub)', marginBottom: '32px' }}
+                style={{ marginBottom: '32px' }}
             >
                 準備が整いました。あなたのAIアシスタントが使えます。
             </motion.p>
@@ -88,7 +87,18 @@ const StepReady = ({ name, customInstructions, onComplete, onPrev }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35, duration: 0.45 }}
-                style={{ width: '100%', maxWidth: '440px', margin: '0 auto 32px', padding: '24px', borderRadius: 'var(--radius-3xl)', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
+                style={{
+                    width: '100%',
+                    maxWidth: '480px',
+                    padding: '24px',
+                    borderRadius: '20px',
+                    background: 'var(--glass-bg, rgba(255, 255, 255, 0.45))',
+                    border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.5))',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px'
+                }}
             >
                 <SummaryItem
                     label="お名前"
@@ -102,31 +112,39 @@ const StepReady = ({ name, customInstructions, onComplete, onPrev }) => {
                 />
             </motion.div>
 
-            {/* ボタン */}
+            {/* アクションバー（Sticky Footer） */}
             <motion.div
-                className="onboarding-actions-new"
+                className="onboarding-footer"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45, duration: 0.45 }}
-                style={{ flexDirection: 'row', maxWidth: 'none', justifyContent: 'center', paddingTop: 0 }}
             >
-                <button
-                    type="button"
-                    className="onboarding-btn-new onboarding-btn-secondary-new"
-                    onClick={onPrev}
-                    style={{ minWidth: '120px' }}
-                >
-                    戻る
-                </button>
-                <motion.button
-                    className="onboarding-btn-new onboarding-btn-primary-new"
-                    onClick={onComplete}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{ minWidth: '240px' }}
-                >
-                    チャットをはじめる
-                </motion.button>
+                <div className="onboarding-footer-left">
+                    <button
+                        type="button"
+                        className="onboarding-btn-new onboarding-btn-secondary-new"
+                        onClick={onPrev}
+                        style={{ minWidth: '100px' }}
+                    >
+                        戻る
+                    </button>
+                </div>
+
+                <div className="onboarding-pagination">
+                    {/* 最終画面なのでドットは不要ですが、バランスのためにチェックマーク等を入れても良いです。ここでは空にしておきます */}
+                </div>
+
+                <div className="onboarding-footer-right">
+                    <motion.button
+                        className="onboarding-btn-new onboarding-btn-primary-new ready-btn-glow"
+                        onClick={onComplete}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        style={{ minWidth: '180px', height: '40px', fontSize: '14px', background: 'linear-gradient(135deg, var(--sys-color-primary, #0A84FF), #005bb5)' }}
+                    >
+                        チャットをはじめる
+                    </motion.button>
+                </div>
             </motion.div>
         </div>
     );

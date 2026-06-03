@@ -6,12 +6,9 @@ import './ContextSelector.css';
 // 表示制御フラグをインポート
 import { ENABLE_WEB_SEARCH, ENABLE_INTERNAL_DATA } from '../../config/env';
 
-// Phase B: API経由でストア一覧を取得
-import { useGeminiStores } from '../../hooks/useGeminiStores';
-
-// Sub-components
-import ViewHeader from './ViewHeader';
-import StoreSelector from './StoreSelector';
+// ViewHeaderとStoreSelectorは不要になったため削除
+// import ViewHeader from './ViewHeader';
+// import StoreSelector from './StoreSelector';
 
 // --- Icons (SVG) ---
 const iconProps = {
@@ -142,24 +139,8 @@ const ModeButton = ({ mode, isActive, onClick }) => {
 const ContextSelector = ({
     settings,
     onSettingsChange,
-    // Phase B: Backend B連携用
-    mockMode = 'OFF',
-    backendBApiKey = '',
-    backendBApiUrl = 'https://api.dify.ai/v1',
-    // v3.0: ストア選択時にストアオブジェクトを親に通知
-    onStoreSelected,
+    onOpenStoreModal,
 }) => {
-    // View state: 'main' | 'stores'
-    const [view, setView] = useState('main');
-    const [slideDirection, setSlideDirection] = useState('right');
-
-    // Phase B: ストア一覧をAPI経由で取得
-    const {
-        stores,
-        isLoading: isStoresLoading,
-        error: storesError,
-        refetch: refetchStores,
-    } = useGeminiStores(mockMode, backendBApiKey, backendBApiUrl);
 
     const currentModeId = useMemo(() => {
         const { ragEnabled, webEnabled } = settings;
@@ -168,19 +149,6 @@ const ContextSelector = ({
         if (!ragEnabled && webEnabled) return 'deep';
         return 'chat'; // デフォルト
     }, [settings]);
-
-    // Navigation helpers
-    const navigateTo = (targetView, direction = 'right') => {
-        setSlideDirection(direction);
-        setView(targetView);
-        if (targetView === 'stores') {
-            refetchStores();
-        }
-    };
-
-    const goBack = (targetView) => {
-        navigateTo(targetView, 'left');
-    };
 
     // Mode selection handler
     const handleModeSelect = (modeId) => {
@@ -196,56 +164,11 @@ const ContextSelector = ({
         }
     };
 
-    // Store Selection Handler (Enterprise mode)
-    const handleStoreSelect = (storeId) => {
-        const store = stores.find(s => s.id === storeId);
-
-        // v4.0: webEnabled の状態を維持する
-        const nextWebEnabled = settings.webEnabled || false;
-        const nextRagEnabled = true;
-
-        onSettingsChange({
-            ...settings,
-            ragEnabled: nextRagEnabled,
-            webEnabled: nextWebEnabled,
-            selectedStoreId: storeId,
-            selectedStoreName: store?.display_name || '',
-        });
-        // ★ストアオブジェクトを親に直接渡す（activeStore 即時反映用）
-        if (store && onStoreSelected) {
-            onStoreSelected(store);
-        }
-    };
-
-    // Hybrid Mode Toggle Handler (Persistent)
-    const handleToggleHybridMode = () => {
-        const nextWebEnabled = !settings.webEnabled;
-        onSettingsChange({
-            ...settings,
-            ragEnabled: true, // Always enable RAG when toggling hybrid in store view
-            webEnabled: nextWebEnabled,
-        });
-    };
-
-    // Get animation initial/exit states based on direction
-    const getAnimationState = () => ({
-        initial: slideDirection === 'right' ? 'enterFromRight' : 'enterFromLeft',
-        exit: slideDirection === 'right' ? 'exitToLeft' : 'exitToRight'
-    });
-
     // --- Render Views ---
 
     // Main view (v3.0: All basic modes + Enterprise entry)
     const renderMainView = () => (
-        <motion.div
-            key="main"
-            variants={slideVariants}
-            initial={getAnimationState().initial}
-            animate="center"
-            exit={getAnimationState().exit}
-            transition={springTransition}
-            className="view-content"
-        >
+        <div className="view-content">
             <div className="context-section-label">検索モード</div>
 
             <div className="primary-modes-group">
@@ -262,7 +185,9 @@ const ContextSelector = ({
                 {ENABLE_INTERNAL_DATA && (
                     <div className={`mode-item-wrapper ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}>
                         <button
-                            onClick={() => navigateTo('stores', 'right')}
+                            onClick={() => {
+                                if (onOpenStoreModal) onOpenStoreModal();
+                            }}
                             className={`mode-item ${['enterprise', 'hybrid'].includes(currentModeId) ? `active mode-enterprise` : ''}`}
                         >
                             <div className="mode-icon-wrapper">
@@ -274,45 +199,15 @@ const ContextSelector = ({
                             </div>
                             {['enterprise', 'hybrid'].includes(currentModeId) && <CheckIcon className="check-icon" />}
                         </button>
-                        <button
-                            className="mode-sub-settings-btn"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                navigateTo('stores', 'right');
-                            }}
-                            title="ストア選択"
-                        >
-                            <ChevronRightIcon />
-                        </button>
                     </div>
                 )}
             </div>
-        </motion.div>
+        </div>
     );
 
     return (
         <div className="context-selector-container">
-            <AnimatePresence mode="wait" initial={false}>
-                {view === 'main' && renderMainView()}
-                {view === 'stores' && (
-                    <StoreSelector
-                        onBack={() => goBack('main')}
-                        stores={stores}
-                        isLoading={isStoresLoading}
-                        error={storesError}
-                        onRefresh={refetchStores}
-                        activeStoreId={settings.selectedStoreId || null}
-                        onSelect={handleStoreSelect}
-                        isHybridMode={settings.ragEnabled === true && settings.webEnabled === true}
-                        onToggleHybridMode={handleToggleHybridMode}
-                        variants={slideVariants}
-                        initial={getAnimationState().initial}
-                        animate="center"
-                        exit={getAnimationState().exit}
-                        transition={springTransition}
-                    />
-                )}
-            </AnimatePresence>
+            {renderMainView()}
         </div>
     );
 };

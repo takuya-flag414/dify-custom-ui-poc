@@ -81,84 +81,97 @@ const StepContextTutorial = ({ mode, onNext, onPrev }) => {
     const content = TUTORIAL_CONTENT[mode];
     const IconComponent = content.icon;
 
+    // ステップ番号に応じたアクティブなドットを計算 (Knowledge=1, Web=2, Hybrid=3)
+    const getActiveDotIndex = () => {
+        if (mode === 'knowledge') return 1;
+        if (mode === 'web') return 2;
+        if (mode === 'hybrid') return 3;
+        return 1;
+    };
+    const activeIndex = getActiveDotIndex();
+
     return (
-        <div className="onboarding-step-new tutorial-step split-layout">
-            <div className="onboarding-step-left">
-                {/* フィーチャーバッジ */}
-                <motion.div
-                    className="tutorial-badge"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ marginBottom: '24px' }}
-                >
-                    {content.feature}
-                </motion.div>
+        <div className="onboarding-step-new">
+            {/* フィーチャーバッジ */}
+            <motion.div
+                className="tutorial-badge"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                style={{ marginBottom: '16px' }}
+            >
+                {content.feature}
+            </motion.div>
 
-                {/* アイコン */}
-                <motion.div
-                    className={`tutorial-icon-wrapper ${content.iconColorClass}`}
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.05 }}
-                    style={{ width: '120px', height: '120px', marginBottom: '32px' }}
-                >
-                    <IconComponent />
-                </motion.div>
+            {/* アイコン */}
+            <motion.div
+                className={`tutorial-icon-wrapper ${content.iconColorClass}`}
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.05 }}
+                style={{ width: '80px', height: '80px', marginBottom: '24px', borderRadius: '20px' }}
+            >
+                <IconComponent />
+            </motion.div>
 
-                {/* タイトル */}
-                <motion.h1
-                    className="onboarding-title-new"
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1, duration: 0.4 }}
-                    style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '16px' }}
-                >
-                    {content.title}
-                </motion.h1>
-                <div className="title-decoration-line" style={{ marginBottom: '0' }} />
-            </div>
+            {/* タイトル */}
+            <motion.h1
+                className="onboarding-title-new"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+                style={{ fontSize: '28px', marginBottom: '16px' }}
+            >
+                {content.title}
+            </motion.h1>
 
-            <div className="onboarding-step-right">
-                {/* 説明文 */}
-                <motion.p
-                    className="onboarding-subtitle-new"
-                    style={{ maxWidth: '600px', fontSize: '1.25rem', lineHeight: 1.8, marginBottom: '48px', color: 'var(--color-text-sub)' }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15, duration: 0.4 }}
-                >
-                    {content.description}
-                </motion.p>
+            {/* 説明文 */}
+            <motion.p
+                className="onboarding-subtitle-new"
+                style={{ maxWidth: '480px', marginBottom: '32px' }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.4 }}
+            >
+                {content.description}
+            </motion.p>
 
-                {/* ボタン */}
-                <motion.div
-                    className="onboarding-actions-new"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.25, duration: 0.4 }}
-                    style={{ flexDirection: 'row', maxWidth: 'none', justifyContent: 'flex-start', paddingTop: 0 }}
-                >
+            {/* アクションバー（Sticky Footer） */}
+            <motion.div
+                className="onboarding-footer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+            >
+                <div className="onboarding-footer-left">
                     <button
                         type="button"
                         className="onboarding-btn-new onboarding-btn-secondary-new"
                         onClick={onPrev}
-                        style={{ minWidth: '120px' }}
+                        style={{ minWidth: '100px' }}
                     >
                         戻る
                     </button>
+                </div>
+
+                <div className="onboarding-pagination">
+                    {[0, 1, 2, 3, 4, 5].map((idx) => (
+                        <div key={idx} className={`pagination-dot ${idx === activeIndex ? 'active' : ''}`} />
+                    ))}
+                </div>
+
+                <div className="onboarding-footer-right">
                     <motion.button
                         className="onboarding-btn-new onboarding-btn-primary-new"
                         onClick={onNext}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        style={{ minWidth: '160px' }}
+                        style={{ minWidth: '140px', height: '40px', fontSize: '14px' }}
                     >
                         次へ
-                        <ArrowRightIcon />
                     </motion.button>
-                </motion.div>
-            </div>
+                </div>
+            </motion.div>
         </div>
     );
 };

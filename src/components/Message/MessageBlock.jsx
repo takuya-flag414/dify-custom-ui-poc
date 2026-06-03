@@ -21,6 +21,7 @@ import ArtifactCard from '../Artifacts/ArtifactCard';
 import { ENABLE_MESSAGE_EDIT, ENABLE_MESSAGE_REGENERATE } from '../../config/env';
 // ★追加: インラインエラーカード（ワークフローエラー表示用）
 import InlineErrorCard from './InlineErrorCard';
+import RadarOrb from '../Shared/RadarOrb';
 
 // ★追加: 引用アイコン
 const ReplyIcon = () => (
@@ -111,6 +112,30 @@ const MessageBlock = ({
     // ★移動: isAi/isUserの定義を先頭に（タイプライター制御で参照するため）
     const isAi = role === 'ai';
     const isUser = role === 'user';
+
+    // ★追加: アバター用RadarOrbのモード判定
+    const getOrbMode = () => {
+        if (hasWorkflowError) return 'error';
+        if (!isStreaming) return 'idle'; 
+        
+        // 最新の実行中ノードを特定する
+        if (thoughtProcess && thoughtProcess.length > 0) {
+            const latestNode = [...thoughtProcess].reverse().find(step => step.status !== 'done') || thoughtProcess[thoughtProcess.length - 1];
+            const type = latestNode.iconType || '';
+            const title = latestNode.title || '';
+            const isSearch = ['search', 'retrieval', 'file-search', 'http-request'].includes(type) || title.includes('Search') || title.includes('検索');
+            const isWriting = ['writing', 'document', 'document-extractor'].includes(type) || title.includes('Write') || title.includes('生成');
+            
+            if (isSearch) return 'search';
+            if (isWriting) return 'writing';
+        }
+        return 'thinking';
+    };
+
+    // ★追加: 逆回転フラグの判定 (AIがテキストまたはArtifactを出力し始めている場合)
+    const isTextOutputting = Boolean(text && text.length > 0);
+    const isArtifactOutputting = Boolean(artifact && (artifact.artifact_content?.length > 0 || artifact.artifact_title));
+    const isReversed = Boolean(isAi && isStreaming && (isTextOutputting || isArtifactOutputting));
 
     const [showRaw, setShowRaw] = useState(false);
     // ★追加: 編集モード用State
@@ -375,7 +400,7 @@ const MessageBlock = ({
                 {/* AI: Mini Intelligence Orb, User: アバター */}
                 {isAi ? (
                     <div className="ai-orb-indicator">
-                        <div className={`mini-intelligence-orb ${isStreaming ? 'active' : 'idle'}`} />
+                        <RadarOrb mode={getOrbMode()} size="32px" isReversed={isReversed} />
                     </div>
                 ) : (
                     <div className="avatar-user">

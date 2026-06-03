@@ -83,3 +83,6 @@ export const ENABLE_MESSAGE_REGENERATE = import.meta.env.VITE_ENABLE_MESSAGE_REG
 
 // Fast/DeepThink切り替えボタン（IntelligenceSelector）を表示するかどうか（デフォルトは false: 非表示）
 export const SHOW_REASONING_SELECTOR = import.meta.env.VITE_SHOW_REASONING_SELECTOR === 'true';
+
+// ハイブリッド検索モードボタン（ロケット）を表示するかどうか（デフォルトは false: 非表示）
+export const SHOW_HYBRID_SEARCH = import.meta.env.VITE_SHOW_HYBRID_SEARCH === 'true';

@@ -51,63 +51,74 @@ const StepWelcome = ({ onNext, onSkip }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
-                    style={{ fontSize: '4rem', fontWeight: 800, marginBottom: '24px' }}
                 >
                     ようこそ
                 </motion.h1>
-                <div className="title-decoration-line" />
-            </div>
 
-            <div className="onboarding-step-right">
                 {/* サブタイトル */}
                 <motion.p
                     className="onboarding-subtitle-new"
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.5 }}
-                    style={{ fontSize: '1.75rem', color: 'var(--color-primary)' }}
+                    style={{ color: 'var(--color-primary)' }}
                 >
                     あなたの新しい思考のパートナーへ。
                 </motion.p>
+                <div className="title-decoration-line" style={{ marginTop: '24px' }} />
+            </div>
 
+            <div className="onboarding-step-right">
                 {/* 説明 */}
                 <motion.p
                     className="onboarding-description-new"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4, duration: 0.5 }}
-                    style={{ fontSize: '1.25rem', lineHeight: 1.8, marginBottom: '32px' }}
+                    style={{ fontSize: '1.25rem', lineHeight: 1.8 }}
                 >
                     まず、このアシスタントでできることを<br />
                     簡単にご紹介します。
                 </motion.p>
 
-                {/* ボタン */}
+                {/* アクションバー（Sticky Footer） */}
                 <motion.div
-                    className="onboarding-actions-new"
+                    className="onboarding-footer"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5, duration: 0.5 }}
-                    style={{ flexDirection: 'row', maxWidth: 'none', justifyContent: 'flex-start', paddingTop: 0, alignItems: 'center' }}
                 >
-                    <motion.button
-                        className="onboarding-btn-new onboarding-btn-primary-new"
-                        onClick={onNext}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        style={{ minWidth: '240px' }}
-                    >
-                        チュートリアルを開始
-                        <ArrowRightIcon />
-                    </motion.button>
-                    <button
-                        type="button"
-                        className="onboarding-btn-new onboarding-btn-ghost-new"
-                        onClick={onSkip}
-                        style={{ minWidth: '120px', marginLeft: '12px' }}
-                    >
-                        スキップ
-                    </button>
+                    <div className="onboarding-footer-left">
+                        <button
+                            type="button"
+                            className="onboarding-btn-new onboarding-btn-ghost-new"
+                            onClick={onSkip}
+                            style={{ minWidth: '120px' }}
+                        >
+                            スキップ
+                        </button>
+                    </div>
+
+                    <div className="onboarding-pagination">
+                        {/* ページネーション: 現在ステップ0 */}
+                        <div className="pagination-dot active" />
+                        <div className="pagination-dot" />
+                        <div className="pagination-dot" />
+                        <div className="pagination-dot" />
+                        <div className="pagination-dot" />
+                        <div className="pagination-dot" />
+                    </div>
+
+                    <div className="onboarding-footer-right">
+                        <button
+                            className="onboarding-btn-new onboarding-btn-primary-new"
+                            onClick={onNext}
+                            style={{ minWidth: '200px', height: '48px', fontSize: '15px' }}
+                        >
+                            チュートリアルを開始
+                            <ArrowRightIcon />
+                        </button>
+                    </div>
                 </motion.div>
             </div>
         </div>

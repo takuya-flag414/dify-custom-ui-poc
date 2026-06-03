@@ -42,76 +42,82 @@ const StepInstructions = ({ instructions, onInstructionsChange, onNext, onPrev }
     };
 
     return (
-        <div className="onboarding-step-new split-layout">
-            <div className="onboarding-step-left">
-                {/* アイコン */}
-                <motion.div
-                    className="onboarding-icon-new"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    style={{ width: '96px', height: '96px', marginBottom: '32px' }}
-                >
-                    <RulesIcon />
-                </motion.div>
+        <div className="onboarding-step-new">
+            {/* アイコン */}
+            <motion.div
+                className="onboarding-icon-new"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                style={{ width: '80px', height: '80px', marginBottom: '24px' }}
+            >
+                <RulesIcon />
+            </motion.div>
 
-                {/* タイトル（AIの語りかけ） */}
-                <motion.h1
-                    className="onboarding-title-new"
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1, duration: 0.4 }}
-                    style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '24px' }}
-                >
-                    文章の好みや、回答のルールは<br />ありますか？
-                </motion.h1>
-                <div className="title-decoration-line" style={{ marginBottom: 0 }} />
-            </div>
+            {/* タイトル */}
+            <motion.h1
+                className="onboarding-title-new"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+                style={{ fontSize: '28px', marginBottom: '16px' }}
+            >
+                文章の好みや、回答のルールはありますか？
+            </motion.h1>
 
-            <div className="onboarding-step-right">
-                {/* サブタイトル */}
-                <motion.p
-                    className="onboarding-subtitle-new"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15, duration: 0.4 }}
-                    style={{ fontSize: '1.25rem', color: 'var(--color-text-sub)', marginBottom: '32px' }}
-                >
-                    設定しておくと、毎回のやり取りに反映されます。
-                </motion.p>
+            {/* サブタイトル */}
+            <motion.p
+                className="onboarding-subtitle-new"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.4 }}
+                style={{ marginBottom: '32px' }}
+            >
+                設定しておくと、毎回のやり取りに反映されます。
+            </motion.p>
 
-                {/* Textarea */}
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.4 }}
-                    style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
-                >
-                    <textarea
-                        className={`onboarding-textarea${isFocused ? ' focused' : ''}`}
-                        placeholder={PLACEHOLDER_EXAMPLES}
-                        value={instructions}
-                        onChange={(e) => onInstructionsChange(e.target.value)}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
-                        onKeyDown={handleKeyDown}
-                        rows={6}
-                        maxLength={500}
-                        style={{ fontSize: '1.125rem', borderRadius: 'var(--radius-2xl)', padding: '24px' }}
-                    />
-                    <p className="onboarding-input-hint" style={{ textAlign: 'right', marginTop: '12px' }}>
-                        {instructions.length} / 500　　後から設定で変更できます
-                    </p>
-                </motion.div>
+            {/* Textarea */}
+            <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+                style={{ width: '100%', maxWidth: '520px', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+            >
+                <textarea
+                    className={`onboarding-textarea${isFocused ? ' focused' : ''}`}
+                    placeholder={PLACEHOLDER_EXAMPLES}
+                    value={instructions}
+                    onChange={(e) => onInstructionsChange(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    onKeyDown={handleKeyDown}
+                    rows={5}
+                    maxLength={500}
+                    style={{
+                        background: 'var(--glass-bg, rgba(255, 255, 255, 0.45))',
+                        border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.5))',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        width: '100%',
+                        resize: 'none',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03) inset',
+                        color: 'var(--color-text-main)',
+                        fontSize: '15px'
+                    }}
+                />
+                <p className="onboarding-input-hint" style={{ textAlign: 'right', marginTop: '12px', fontSize: '12px' }}>
+                    {instructions.length} / 500　　後から設定で変更できます
+                </p>
+            </motion.div>
 
-                {/* ボタン */}
-                <motion.div
-                    className="onboarding-actions-new"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.4 }}
-                    style={{ flexDirection: 'row', maxWidth: 'none', justifyContent: 'flex-start', paddingTop: '24px', alignItems: 'center' }}
-                >
+            {/* アクションバー（Sticky Footer） */}
+            <motion.div
+                className="onboarding-footer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+            >
+                <div className="onboarding-footer-left">
                     <button
                         type="button"
                         className="onboarding-btn-new onboarding-btn-secondary-new"
@@ -124,22 +130,28 @@ const StepInstructions = ({ instructions, onInstructionsChange, onNext, onPrev }
                         type="button"
                         className="onboarding-btn-new onboarding-btn-ghost-new"
                         onClick={onNext}
-                        style={{ minWidth: '220px', marginLeft: '12px' }}
+                        style={{ marginLeft: '12px' }}
                     >
-                        スキップ（後で設定する）
+                        スキップ
                     </button>
+                </div>
+
+                <div className="onboarding-pagination">
+                    <div className="pagination-dot active" />
+                </div>
+
+                <div className="onboarding-footer-right">
                     <motion.button
                         className="onboarding-btn-new onboarding-btn-primary-new"
                         onClick={onNext}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        style={{ minWidth: '160px', marginLeft: 'auto' }}
+                        style={{ minWidth: '140px', height: '40px', fontSize: '14px' }}
                     >
                         次へ
-                        <ArrowRightIcon />
                     </motion.button>
-                </motion.div>
-            </div>
+                </div>
+            </motion.div>
         </div>
     );
 };
