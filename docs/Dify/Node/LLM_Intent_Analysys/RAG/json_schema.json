@@ -1,0 +1,42 @@
+{
+    "properties": {
+        "category": {
+            "description": "CHAT=雑談・挨拶, TASK=情報収集・質問回答, GENERATE=ドキュメント・成果物の生成",
+            "enum": [
+                "CHAT",
+                "TASK",
+                "GENERATE"
+            ],
+            "type": "string"
+        },
+        "thinking": {
+            "description": "【開発者用ログ】推論プロセス。なぜそのカテゴリを選択したか、会話履歴の有無や特定のキーワードに基づいた判断理由を記述する。",
+            "type": "string"
+        },
+        "requires_rag": {
+            "description": "RAG（ドキュメント検索）が必要かどうか。categoryがTASKの中で、過去のコンテキスト(context_rag)に情報がなく、新たな検索が必要な場合にtrue。",
+            "type": "string"
+        },
+        "requires_web": {
+            "description": "Web検索が必要かどうか。このモードでは常にfalse。",
+            "type": "string"
+        },
+        "session_title": {
+            "description": "会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字 \"\" を返す。",
+            "type": "string"
+        },
+        "display_text": {
+            "description": "ユーザーへの状況に応じた挨拶と、具体的なアクションの宣言。TASKの場合は『社内資料を確認しますね✨』、CHATの場合は空文字。",
+            "type": "string"
+        }
+    },
+    "required": [
+        "thinking",
+        "category",
+        "display_text",
+        "requires_web",
+        "requires_rag",
+        "session_title"
+    ],
+    "type": "object"
+}

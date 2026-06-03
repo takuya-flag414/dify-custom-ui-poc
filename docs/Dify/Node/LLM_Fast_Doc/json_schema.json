@@ -1,0 +1,140 @@
+{
+    "properties": {
+        "thinking": {
+            "description": "回答前の内部推論。以下をすべて記述すること：(1)文脈の解釈（会話履歴・ファイル・RAG・Webの棚卸し）、(2)モード判定（Mode A / Mode B とその根拠）、(3)回答戦略（前回との重複回避・提示内容の設計）、(4)【Mode Bの場合】artifact_type判定（json_document / json_slide / Markdown型のどれか、その根拠）。このフィールドはユーザーに表示されない。",
+            "type": "string"
+        },
+        "answer": {
+            "description": "ユーザーへ直接提示される回答本文。Markdownを使用して構造化すること。Mode Aでは結論ファーストで情報を提示し末尾に問いかけを添える。Mode Bではドキュメント生成方針（2〜4文）と「以下のボタンから生成できます」のみを記述し、内容そのものは書かない。artifact_typeの内部名（summary_report, json_document, json_slide等）を含めてはならない。文書系は『Wordドキュメント』、スライド系は『プレゼンスライド』と表現すること。",
+            "type": "string"
+        },
+        "citations": {
+            "description": "回答で参照した情報源のリスト。外部コンテキストがない場合は空配列 [] を出力すること。",
+            "items": {
+                "properties": {
+                    "id": {
+                        "description": "引用番号。cite_1, cite_2 ... の形式で連番付与。",
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "ソースの正式名称。省略せず記載すること。",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "ソースの種別。web=Web検索、rag=社内ナレッジ、file=添付ファイル。",
+                        "enum": [
+                            "web",
+                            "rag",
+                            "file"
+                        ],
+                        "type": "string"
+                    },
+                    "url": {
+                        "description": "WebソースはフルURL。RAG・ファイルはファイル名。短縮URL不可。",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "source",
+                    "url"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "session_title": {
+            "description": "会話スレッドのタイトル。初回ターンのみ15文字以内で生成。2ターン目以降は必ず空文字 \"\" を出力すること。",
+            "type": "string"
+        },
+        "smart_actions": {
+            "description": "ユーザーの次のアクションを促すボタンUIのリスト。",
+            "items": {
+                "properties": {
+                    "icon": {
+                        "description": "ボタンに表示するアイコン名。例: sparkles, file-text, search, message-circle-question。",
+                        "type": "string"
+                    },
+                    "label": {
+                        "description": "ボタンに表示されるテキスト。artifact_typeの内部名を含めてはならない。文書系は『Wordドキュメント』、スライド系は『プレゼンスライド』などユーザー向け表示名を使うこと。",
+                        "type": "string"
+                    },
+                    "payload": {
+                        "description": "ボタン押下時に送信されるデータ。generate_documentの場合はtextとartifact_typeの両方を必ず含めること。",
+                        "properties": {
+                            "artifact_type": {
+                                "description": "generate_documentの場合のみ必須。生成する文書の種別を内部名で指定する。json_document は見出し・本文・箇条書き・表・グラフ・SVG・改ページなどを構造化JSONとして保持する Wordドキュメント向け標準形式であり、提案書・報告書・案内文・招待状など正式文書、印刷・配布・PDF化を想定する文書、表紙・ページ番号・A4レイアウト指定がある文書、複数ページ構成の文書、Word出力・後編集・再利用を前提とした文書では json_document を選択すること。json_slide はプレゼン資料・説明会資料・研修資料・役員報告・提案スライドなど、横長スライド形式が自然で、16:9レイアウトやタイトル・アジェンダ・複数スライド構成を前提とする資料に選択すること。上記を満たさない場合はMarkdown型（summary_report / meeting_minutes / checklist / comparison_table / faq）を選択すること。",
+                                "enum": [
+                                    "json_document",
+                                    "json_slide",
+                                    "summary_report",
+                                    "meeting_minutes",
+                                    "checklist",
+                                    "comparison_table",
+                                    "faq"
+                                ],
+                                "type": "string"
+                            },
+                            "options": {
+                                "description": "selectionの場合のみ使用。選択肢のリスト。",
+                                "items": {
+                                    "properties": {
+                                        "label": {
+                                            "description": "選択肢の表示テキスト。",
+                                            "type": "string"
+                                        },
+                                        "value": {
+                                            "description": "選択肢の値。",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "label",
+                                        "value"
+                                    ],
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
+                            "text": {
+                                "description": "ボタン押下時にユーザー入力として送信されるテキスト。generate_documentの場合はLLM_Artifact_GeneratorまたはLLM_Artifact_Slide_Generatorへの生成指示文。artifact_typeの内部名・バッククォート表記を含めてはならない。ユーザーに見える文言では、json_document は『Wordドキュメント』、json_slide は『プレゼンスライド』と表現すること。",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "text"
+                        ],
+                        "type": "object"
+                    },
+                    "type": {
+                        "description": "アクションの種別。selection=絞り込みフェーズ、suggested_question=提案後の派生質問、websearch=最新情報の再検索促進、generate_document=Artifact生成の委譲。",
+                        "enum": [
+                            "selection",
+                            "suggested_question",
+                            "websearch",
+                            "generate_document"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type",
+                    "label",
+                    "icon",
+                    "payload"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        }
+    },
+    "required": [
+        "thinking",
+        "answer",
+        "citations",
+        "smart_actions",
+        "session_title"
+    ],
+    "type": "object"
+}

@@ -1,0 +1,202 @@
+{
+    "type": "object",
+    "properties": {
+        "thinking": {
+            "type": "string",
+            "description": "分析プロセスの思考ログ。is_full_generateの判定理由・スイムレーン構成の検討・変更箇所と保持箇所の特定理由を記述する。"
+        },
+        "is_full_generate": {
+            "type": "string",
+            "enum": [
+                "true",
+                "false"
+            ],
+            "description": "true=Mode A（初回生成・大幅刷新）、false=Mode B（細部修正）。会話履歴にdrawio図が存在しない場合、またはユーザーが全体の作り直しを指示した場合はtrue。"
+        },
+        "swimlanes": {
+            "type": "array",
+            "description": "スイムレーン（役割・部門）のリスト。Mode Bでは変更がない場合も既存構成を全件出力する。",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "一意ID（例: lane_1）"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "レーン名称（例: 申請者、承認者、システム）"
+                    }
+                },
+                "required": [
+                    "id",
+                    "label"
+                ]
+            }
+        },
+        "processes": {
+            "type": "array",
+            "description": "ワークフローの全プロセスステップ。Mode Bでは保持ノードも含めて全件出力する。",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "一意ID（例: proc_1）"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "プロセス名称"
+                    },
+                    "lane_id": {
+                        "type": "string",
+                        "description": "所属スイムレーンのID"
+                    },
+                    "order": {
+                        "type": "integer",
+                        "description": "実行順序（1始まり）"
+                    },
+                    "shape": {
+                        "type": "string",
+                        "enum": [
+                            "process",
+                            "decision",
+                            "start",
+                            "end",
+                            "document"
+                        ],
+                        "description": "図形タイプ"
+                    },
+                    "note": {
+                        "type": "string",
+                        "description": "補足説明（任意）"
+                    }
+                },
+                "required": [
+                    "id",
+                    "label",
+                    "lane_id",
+                    "order",
+                    "shape"
+                ]
+            }
+        },
+        "connections": {
+            "type": "array",
+            "description": "プロセス間の接続（矢印）リスト。Mode Bでは保持エッジも含めて全件出力する。",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "from_id": {
+                        "type": "string",
+                        "description": "接続元プロセスID"
+                    },
+                    "to_id": {
+                        "type": "string",
+                        "description": "接続先プロセスID"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "矢印ラベル（条件分岐時: Yes/No等）"
+                    }
+                },
+                "required": [
+                    "from_id",
+                    "to_id"
+                ]
+            }
+        },
+        "layout_hints": {
+            "type": "object",
+            "description": "Generatorへのレイアウト指示",
+            "properties": {
+                "direction": {
+                    "type": "string",
+                    "enum": [
+                        "LR",
+                        "TB"
+                    ],
+                    "description": "フロー方向。LR=左→右（スイムレーン4本以下推奨）、TB=上→下（5本以上推奨）"
+                },
+                "color_scheme": {
+                    "type": "string",
+                    "description": "レーンごとの色定義（例: lane_1=#dae8fc,lane_2=#d5e8d4）"
+                },
+                "complexity_level": {
+                    "type": "string",
+                    "enum": [
+                        "simple",
+                        "medium",
+                        "complex"
+                    ],
+                    "description": "図の複雑度見積もり"
+                }
+            },
+            "required": [
+                "direction",
+                "complexity_level"
+            ]
+        },
+        "changes": {
+            "type": "array",
+            "description": "【Mode B専用】変更するプロセス・接続のリスト。is_full_generate=trueの場合は空配列。",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "target_id": {
+                        "type": "string",
+                        "description": "変更対象のプロセスID（新規追加の場合は新規IDを採番）"
+                    },
+                    "change_type": {
+                        "type": "string",
+                        "enum": [
+                            "add",
+                            "modify",
+                            "delete"
+                        ],
+                        "description": "変更種別：add=追加、modify=修正、delete=削除"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "何をどのように変えるかの具体的な説明"
+                    }
+                },
+                "required": [
+                    "target_id",
+                    "change_type",
+                    "description"
+                ]
+            }
+        },
+        "preserved_ids": {
+            "type": "array",
+            "description": "【Mode B専用】変更しないプロセスIDの明示リスト。is_full_generate=trueの場合は空配列。Editorはこのリストのノードを一切変更してはならない。",
+            "items": {
+                "type": "string"
+            }
+        },
+        "clarification_needed": {
+            "type": "array",
+            "description": "情報が不足しており確認が必要な項目リスト。不足がなければ空配列。Mode Bでは基本的に空配列。",
+            "items": {
+                "type": "string"
+            }
+        },
+        "answer": {
+            "type": "string",
+            "description": "ユーザーへの日本語応答。Mode A：分析結果の要約とXML生成への移行を通知。Mode B：【変更する箇所】【変更しない箇所】を箇条書きで明示してXML生成への移行を通知。clarification_neededが空でない場合は確認事項を提示。"
+        }
+    },
+    "required": [
+        "thinking",
+        "is_full_generate",
+        "swimlanes",
+        "processes",
+        "connections",
+        "layout_hints",
+        "changes",
+        "preserved_ids",
+        "clarification_needed",
+        "answer"
+    ]
+}

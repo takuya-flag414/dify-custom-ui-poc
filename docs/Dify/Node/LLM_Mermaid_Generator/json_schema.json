@@ -1,0 +1,56 @@
+{
+    "type": "object",
+    "properties": {
+        "thinking": {
+            "type": "string",
+            "description": "思考ログ。①初回生成か修正かの判断理由、②diagram_typeの選定理由（修正時は既存タイプの確認）、③構造設計またはdiff内容の整理を記述する。"
+        },
+        "diagram_type": {
+            "type": "string",
+            "enum": [
+                "flowchart",
+                "sequenceDiagram",
+                "classDiagram",
+                "stateDiagram",
+                "erDiagram",
+                "gantt",
+                "pie",
+                "journey",
+                "gitGraph",
+                "mindmap",
+                "timeline",
+                "requirementDiagram",
+                "C4Context",
+                "architecture-beta"
+            ],
+            "description": "生成するMermaid図のタイプ。修正時は既存コードのタイプを引き継ぐこと。"
+        },
+        "artifact_title": {
+            "type": "string",
+            "description": "図のタイトル。修正時は変更がなければ既存タイトルを引き継ぐ。"
+        },
+        "artifact_type": {
+            "type": "string",
+            "enum": [
+                "mermaid"
+            ],
+            "description": "固定値 'mermaid'。必ずこの値を設定すること。"
+        },
+        "artifact_content": {
+            "type": "string",
+            "description": "Mermaid図のコード文字列。コードブロック（```mermaid）は含めず、純粋なMermaidコードのみを出力すること。改行は \\n でエスケープすること。"
+        },
+        "answer": {
+            "type": "string",
+            "description": "ユーザーへの日本語応答。初回生成時は図の概要を説明。修正時は【変更した箇所】【変更しなかった箇所】を箇条書きで明示。情報不足の場合は確認事項を提示。artifact_contentの生成が完了した後に出力すること。"
+        }
+    },
+    "required": [
+        "thinking",
+        "diagram_type",
+        "artifact_title",
+        "artifact_type",
+        "artifact_content",
+        "answer"
+    ]
+}

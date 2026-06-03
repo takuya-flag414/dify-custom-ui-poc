@@ -1,0 +1,64 @@
+{
+    "properties": {
+        "category": {
+            "description": "CHAT=雑談・挨拶, TASK=情報収集・質問回答, GENERATE=ドキュメント・成果物の生成",
+            "enum": [
+                "CHAT",
+                "TASK",
+                "GENERATE"
+            ],
+            "type": "string"
+        },
+        "thinking": {
+            "description": "推論プロセスの各ステップを配列で出力します。各ステップはユーザーへの進捗報告として表示されます。",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "action_label": {
+                        "type": "string",
+                        "description": "現在行っている思考・作業の進捗報告。必ず現在進行形または完了形（例: '質問の意図を分析しています...', '過去の会話を確認しました'）で記述すること。"
+                    },
+                    "detail": {
+                        "type": "string",
+                        "description": "そのステップでの具体的な推論結果や理由（例: '最新の天気情報を取得する必要があると判断しました'）"
+                    }
+                },
+                "required": [
+                    "action_label",
+                    "detail"
+                ]
+            }
+        },
+        "requires_rag": {
+            "description": "RAG（ドキュメント検索）が必要かどうか。このモードでは常にfalse。",
+            "type": "string"
+        },
+        "requires_web": {
+            "description": "Web検索が必要かどうか。categoryがTASKの中で、外部の最新情報や検索が必要な場合にtrue。",
+            "type": "string"
+        },
+        "search_query": {
+            "description": "Web検索に使用する検索クエリ。CHATの場合は空文字。",
+            "type": "string"
+        },
+        "session_title": {
+            "description": "会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字 \"\" を返す。",
+            "type": "string"
+        },
+        "display_text": {
+            "description": "ユーザーへの状況に応じた挨拶と、具体的なアクションの宣言。SEARCHの場合は『[トピック]を検索します』、CHATの場合は空文字。",
+            "type": "string"
+        }
+    },
+    "required": [
+        "thinking",
+        "category",
+        "display_text",
+        "requires_web",
+        "requires_rag",
+        "search_query",
+        "session_title"
+    ],
+    "type": "object"
+}

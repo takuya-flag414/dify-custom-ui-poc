@@ -22,6 +22,7 @@ import { ENABLE_MESSAGE_EDIT, ENABLE_MESSAGE_REGENERATE } from '../../config/env
 // ★追加: インラインエラーカード（ワークフローエラー表示用）
 import InlineErrorCard from './InlineErrorCard';
 import RadarOrb from '../Shared/RadarOrb';
+import CreditUsageBadge from './CreditUsageBadge';
 
 // ★追加: 引用アイコン
 const ReplyIcon = () => (
@@ -655,6 +656,8 @@ const MessageBlock = ({
                             {showKnowledgeBadge && <AiKnowledgeBadge />}
                             {/* ★追加: トークン消費表示 */}
                             {message.usage && <TokenUsageIndicator usage={message.usage} />}
+                            {/* ★変更: クレジット消費表示 (ターン全体の合計を表示) */}
+                            {(message.totalCredit > 0) && <CreditUsageBadge credit={message.totalCredit} />}
                             {/* ★変更: ENABLE_SMART_ACTIONSフラグで排他制御 */}
                             {FEATURE_FLAGS.ENABLE_SMART_ACTIONS ? (
                                 /* SmartActionsが有効 → AIからの提案のみ表示、「関連する質問」は非表示 */

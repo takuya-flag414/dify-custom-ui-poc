@@ -13,8 +13,9 @@ import PrivacyConfirmDialog from './PrivacyConfirmDialog';
 
 import { scanText } from '../../utils/privacyDetector';
 import { scanFiles, hasFileWarnings, getFileDetections, isScannableFile } from '../../utils/fileScanner';
-// import { fetchKnowledgeStores } from '../../services/DifyClient'; // Removed in favor of hook
 import { useGeminiStores } from '../../hooks/useGeminiStores';
+import { useCredit } from '../../contexts/CreditContext';
+import InlineErrorCard from './InlineErrorCard';
 import './ChatInput.css';
 
 // --- Main Component ---
@@ -55,6 +56,10 @@ const ChatInput = ({
   const [isDragging, setIsDragging] = useState(false);
   const [privacyWarning, setPrivacyWarning] = useState({ hasWarning: false, detections: [] });
   const [showPrivacyConfirm, setShowPrivacyConfirm] = useState(false);
+
+  // ★追加: クレジット管理
+  const { creditBalance } = useCredit();
+  const isCreditExhausted = creditBalance <= 0;
 
   // Store & Domain State (Managed here to lift up to ReferenceRail)
   const [activeStore, setActiveStore] = useState(null); // { id, display_name, ... }
@@ -144,6 +149,11 @@ const ChatInput = ({
 
   const handleSend = () => {
     if ((!text.trim() && selectedFiles.length === 0) || isLoading) return;
+
+    // ★追加: クレジット残高チェック
+    if (isCreditExhausted) {
+      return;
+    }
 
     // ★バリデーション: RAG有効(Enterprise/Hybrid)かつストア未選択の場合
     const isRagEnabled = searchSettings.ragEnabled === true; // autoは除外 (標準モードはストア不要)
@@ -278,9 +288,10 @@ const ChatInput = ({
     }
   }, [isLoading, addFiles]);
 
-  const placeholder = customPlaceholder || (isHistoryLoading ? "履歴を読み込んでいます..." : isLoading ? "思考中..." : "AIに相談...");
+  const placeholder = isCreditExhausted ? "クレジット上限に達しました" : (customPlaceholder || (isHistoryLoading ? "履歴を読み込んでいます..." : isLoading ? "思考中..." : "AIに相談..."));
   const hasFiles = selectedFiles.length > 0;
-  const canSend = (text.trim().length > 0 || hasFiles) && !isLoading;
+  // ★変更: クレジット残高0の場合は送信ボタンを無効化
+  const canSend = (text.trim().length > 0 || hasFiles) && !isLoading && !isCreditExhausted;
 
   // --- Available Files for Mentions ---
   const availableFiles = useMemo(() => {
@@ -352,6 +363,13 @@ const ChatInput = ({
     <>
       <div className={isCentered ? "chat-input-container-centered" : "chat-input-container"}>
 
+        {/* ★変更: インラインエラーカードの常時表示 */}
+        {isCreditExhausted && (
+          <div style={{ marginBottom: '12px' }}>
+            <InlineErrorCard />
+          </div>
+        )}
+
         {/* Hidden File Input */}
         <input
           type="file"
@@ -398,7 +416,7 @@ const ChatInput = ({
             text={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isLoading}
+            disabled={isLoading || isCreditExhausted}
             placeholder={placeholder}
             isHistoryLoading={isHistoryLoading}
             focusTrigger={quote || restoreFocusTrigger || undefined} // ★改修: quoteまたは復元時にフォーカス

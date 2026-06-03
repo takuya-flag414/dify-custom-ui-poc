@@ -10,6 +10,7 @@ import { FEATURE_FLAGS } from '../../config/featureFlags';
 import AllToolsModal from '../Chat/Toolbox/AllToolsModal';
 import { USE_CASES } from '../Chat/UseCasePanel';
 import { useFavoriteArtifacts } from '../../hooks/useFavoriteArtifacts';
+import { useCredit } from '../../contexts/CreditContext';
 import './Sidebar.css';
 
 /**
@@ -177,6 +178,8 @@ const Sidebar = ({
   onViewChange,
   currentUser
 }) => {
+  const { creditBalance, nextResetDate } = useCredit();
+
   // ★ URLルーティング: navigate/location を使用
   const navigate = useNavigate();
   const location = useLocation();
@@ -445,8 +448,33 @@ const Sidebar = ({
           </AnimatePresence>
         </div>
 
-        {/* 4. Footer */}
+        {/* 4. Footer & Credit Indicator */}
         <div className="sidebar-footer">
+          {/* Credit Indicator */}
+          <div className={`sidebar-credit-indicator ${creditBalance <= 0 ? 'credit-empty' : ''} ${isCollapsed ? 'collapsed' : ''}`} title={`残クレジット (次回リセット: ${nextResetDate})`}>
+             {isCollapsed ? (
+                 <div className="credit-collapsed-display" title={`次回リセット: ${nextResetDate}`}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                      <line x1="12" y1="18" x2="12" y2="22"></line>
+                      <line x1="12" y1="2" x2="12" y2="6"></line>
+                    </svg>
+                    <span className="credit-value-small">
+                        {creditBalance > 9999 ? Math.floor(creditBalance/1000) + 'k' : creditBalance}
+                    </span>
+                 </div>
+             ) : (
+                 <div className="credit-full-display">
+                    <span className="credit-label">クレジット</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <span className="credit-value">{creditBalance.toLocaleString()} <span className="credit-unit">CR</span></span>
+                        <span style={{ fontSize: '9px', opacity: 0.6, marginTop: '2px' }}>次回リセット: {nextResetDate}</span>
+                    </div>
+                 </div>
+             )}
+          </div>
+
           {/* Studios Button */}
           {FEATURE_FLAGS.SHOW_SIDEBAR_STUDIOS && (
             <button

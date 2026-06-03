@@ -1,0 +1,35 @@
+{
+    "type": "object",
+    "properties": {
+        "thinking": {
+            "type": "string",
+            "description": "XML設計の思考ログ。各ノードのID設計・座標計算・レーン配置の決定理由を記述する。"
+        },
+        "artifact_title": {
+            "type": "string",
+            "description": "生成した図のタイトル。ファイル名としても使用される（例：経費精算ワークフロー）。"
+        },
+        "artifact_type": {
+            "type": "string",
+            "enum": [
+                "drawio"
+            ],
+            "description": "固定値 'drawio'。必ずこの値を設定すること。"
+        },
+        "artifact_content": {
+            "type": "string",
+            "description": "Draw.io (diagrams.net) でパース可能な完全なXML文字列。<?xml ...> から始まり </mxfile> で終わること。改行は \\n、ダブルクォートは \\\" にエスケープすること。"
+        },
+        "answer": {
+            "type": "string",
+            "description": "ユーザーへの日本語応答。生成した図の概要（スイムレーン数・プロセス数・主な分岐）を伝え、「Draw.ioで編集可能です。」で締める。artifact_contentの生成が完了した後に出力すること。"
+        }
+    },
+    "required": [
+        "thinking",
+        "artifact_title",
+        "artifact_type",
+        "artifact_content",
+        "answer"
+    ]
+}

@@ -1,0 +1,64 @@
+{
+    "properties": {
+        "thinking": {
+            "description": "ドメイン選定の根拠やクエリ最適化の意図を技術的な日本語で記述",
+            "type": "string"
+        },
+        "query_alt": {
+            "description": "視点を変えた代替クエリ",
+            "type": "string"
+        },
+        "query_main": {
+            "description": "検索意図を明確にしたメインクエリ",
+            "type": "string"
+        },
+        "display_text": {
+            "description": "ユーザーへの調査方針の報告（挨拶なし、指定の報告用フレーズから開始）",
+            "type": "string"
+        },
+        "recency": {
+            "description": "情報の鮮度指定（指定がない場合は 'any' を出力）",
+            "enum": [
+                "day",
+                "week",
+                "month",
+                "year",
+                "any"
+            ],
+            "type": "string"
+        },
+        "search_mode": {
+            "description": "検索モード（常に 'fast'）",
+            "enum": [
+                "fast"
+            ],
+            "type": "string"
+        },
+        "selected_model": {
+            "description": "使用するモデル（常に 'sonar'）",
+            "enum": [
+                "sonar"
+            ],
+            "type": "string"
+        },
+        "target_domains": {
+            "description": "検索対象のドメイン（最大3つ）",
+            "items": {
+                "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+        }
+    },
+    "required": [
+        "thinking",
+        "display_text",
+        "search_mode",
+        "selected_model",
+        "query_main",
+        "query_alt",
+        "recency",
+        "target_domains"
+    ],
+    "type": "object"
+}

@@ -1,0 +1,22 @@
+{
+    "properties": {
+        "thinking": {
+            "description": "【開発者用ログ】ストアの要約情報とユーザーの質問を比較し、どのようなキーワードで検索するのが最適か、その推論プロセスを記述する。",
+            "type": "string"
+        },
+        "rag_search_query": {
+            "description": "RAG検索に使用する最適化された検索クエリ。単なる単語の羅列ではなく、ストア要約内の専門用語を用いた『完全な自然言語の質問文』にすること。",
+            "type": "string"
+        },
+        "display_text": {
+            "description": "ユーザーへの調査方針の報告。『方針がまとまりました。〇〇について社内ドキュメントを検索します』といった報告用フレーズから始めること。挨拶は禁止。",
+            "type": "string"
+        }
+    },
+    "required": [
+        "thinking",
+        "display_text",
+        "rag_search_query"
+    ],
+    "type": "object"
+}

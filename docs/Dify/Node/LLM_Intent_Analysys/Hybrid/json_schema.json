@@ -1,0 +1,47 @@
+{
+    "properties": {
+        "category": {
+            "description": "CHAT=雑談・挨拶, TASK=情報収集・質問回答, GENERATE=ドキュメント・成果物の生成",
+            "enum": [
+                "CHAT",
+                "TASK",
+                "GENERATE"
+            ],
+            "type": "string"
+        },
+        "thinking": {
+            "description": "Inspector Panel表示用：なぜRAGまたはWebが必要か、または不要と判断したかの技術的な推論プロセス",
+            "type": "string"
+        },
+        "requires_rag": {
+            "description": "社内ドキュメント(RAG)へのアクセスが必要か（context_ragの内容と照らして判断）",
+            "type": "string"
+        },
+        "requires_web": {
+            "description": "外部Web情報へのアクセスが必要か（context_webの有効性と照らして判断）",
+            "type": "string"
+        },
+        "search_query": {
+            "description": "Web検索が必要な場合の最適化された検索キーワード（不要なら空文字）",
+            "type": "string"
+        },
+        "session_title": {
+            "description": "会話の最初のターンにのみ生成する（例:「React 19」「SaaS稟議」など2語以内）。     会話履歴が存在しない・空・短い・判断が難しい場合は**必ず生成**すること。     迷ったら生成する。2ターン目以降（明らかに過去の履歴がある場合）のみ空文字 \"\" を返す。",
+            "type": "string"
+        },
+        "display_text": {
+            "description": "ユーザーに提示するアクション宣言（例：『社内規定と最新のWeb情報を照らし合わせて確認しますね✨』）",
+            "type": "string"
+        }
+    },
+    "required": [
+        "thinking",
+        "category",
+        "display_text",
+        "requires_web",
+        "requires_rag",
+        "search_query",
+        "session_title"
+    ],
+    "type": "object"
+}

@@ -1,0 +1,35 @@
+{
+    "type": "object",
+    "properties": {
+        "thinking": {
+            "type": "string",
+            "description": "編集の思考ログ。変更対象ノードの特定・座標再計算・保持ノードとの整合性確認の過程を記述する。"
+        },
+        "artifact_title": {
+            "type": "string",
+            "description": "図のタイトル。変更がない場合は既存タイトルをそのまま引き継ぐ。"
+        },
+        "artifact_type": {
+            "type": "string",
+            "enum": [
+                "drawio"
+            ],
+            "description": "固定値 'drawio'。必ずこの値を設定すること。"
+        },
+        "artifact_content": {
+            "type": "string",
+            "description": "編集済みの完全なDraw.io XML文字列。変更箇所のみでなく、保持ノードを含めたXML全体を出力すること。改行は \\n、ダブルクォートは \\\" にエスケープすること。"
+        },
+        "answer": {
+            "type": "string",
+            "description": "ユーザーへの日本語応答。【変更した箇所】と【変更しなかった箇所】を箇条書きで必ず明示すること。artifact_contentの生成が完了した後に出力すること。"
+        }
+    },
+    "required": [
+        "thinking",
+        "artifact_title",
+        "artifact_type",
+        "artifact_content",
+        "answer"
+    ]
+}

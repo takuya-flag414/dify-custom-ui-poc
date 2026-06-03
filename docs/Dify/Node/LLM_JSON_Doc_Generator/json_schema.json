@@ -1,0 +1,319 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "thinking",
+        "artifact_title",
+        "artifact_type",
+        "artifact_content",
+        "answer"
+    ],
+    "properties": {
+        "thinking": {
+            "type": "string",
+            "description": "内部推論。[Analysis]→[Document Strategy]→[Outline Planning]→[Consistency Check]→[Block Mapping]→[Markup]→[Safety Check]→[Self Scoring] の順で記述する。"
+        },
+        "artifact_title": {
+            "type": "string",
+            "description": "文書全体の管理用タイトル。artifact_content.meta.title と意味的に整合させること。"
+        },
+        "artifact_type": {
+            "type": "string",
+            "const": "json_document",
+            "description": "アーティファクトの種別。必ず 'json_document' を指定する。"
+        },
+        "artifact_content": {
+            "type": "object",
+            "description": "文書本体。meta（メタデータ）と blocks（本文ブロック配列）を含む。",
+            "additionalProperties": false,
+            "required": [
+                "meta",
+                "blocks"
+            ],
+            "properties": {
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "文書のメタデータ。",
+                    "properties": {
+                        "template": {
+                            "type": "string",
+                            "enum": [
+                                "letter"
+                            ],
+                            "description": "ビジネスレター形式を使用する場合に指定。"
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "文書のメインタイトル・件名。"
+                        },
+                        "date": {
+                            "type": "string",
+                            "description": "文書の日付テキスト。例: 2026年3月26日"
+                        },
+                        "refNo": {
+                            "type": "string",
+                            "description": "文書番号・リファレンス番号。"
+                        },
+                        "recipient": {
+                            "description": "宛名情報。文字列または構造化オブジェクト。",
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "postal": {
+                                            "type": "string"
+                                        },
+                                        "address": {
+                                            "type": "string"
+                                        },
+                                        "company": {
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "sender": {
+                            "description": "差出人情報。文字列または構造化オブジェクト。",
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "postal": {
+                                            "type": "string"
+                                        },
+                                        "address": {
+                                            "type": "string"
+                                        },
+                                        "company": {
+                                            "type": "string"
+                                        },
+                                        "department": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "blocks": {
+                    "type": "array",
+                    "description": "文書本文を構成するブロック配列。",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "level",
+                                    "text"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "heading"
+                                    },
+                                    "level": {
+                                        "type": "number",
+                                        "description": "見出しレベル。1, 2, 3 を推奨。"
+                                    },
+                                    "text": {
+                                        "type": "string",
+                                        "description": "見出しテキスト。"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "text"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "rich_text"
+                                    },
+                                    "text": {
+                                        "type": "string",
+                                        "description": "本文テキスト。**太字** または <strong>太字</strong> をサポート。"
+                                    },
+                                    "variant": {
+                                        "type": "string",
+                                        "enum": [
+                                            "notice-box",
+                                            "notice-side",
+                                            "warning",
+                                            "success",
+                                            "info"
+                                        ],
+                                        "description": "装飾ボックス指定。省略時は通常段落。"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "variant 指定時のボックスタイトル。"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "list"
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "箇条書き項目の配列。"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "rows"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "table"
+                                    },
+                                    "headers": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "列見出し。"
+                                    },
+                                    "rows": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "description": "表の行データ。"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "data"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "chart"
+                                    },
+                                    "chart_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "bar",
+                                            "line",
+                                            "pie"
+                                        ],
+                                        "description": "グラフ種別。"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "グラフタイトル。"
+                                    },
+                                    "height": {
+                                        "type": "number",
+                                        "description": "グラフ高さ。デフォルト300を想定。"
+                                    },
+                                    "data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "required": [
+                                                "name",
+                                                "value"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "description": "項目名。"
+                                                },
+                                                "value": {
+                                                    "type": "number",
+                                                    "description": "数値。"
+                                                }
+                                            }
+                                        },
+                                        "description": "グラフデータ配列。各要素は {name, value}。"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "content"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "svg"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "description": "SVG要素の生テキスト。"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "page_break"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "answer": {
+            "type": "string",
+            "description": "生成した文書の要点を簡潔に説明するテキスト。"
+        }
+    }
+}

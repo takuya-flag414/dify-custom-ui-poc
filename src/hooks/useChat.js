@@ -11,6 +11,9 @@ import SecureVaultService from '../services/SecureVaultService';
 import { analyzeIntelligenceError } from '../utils/errorIntelligence';
 // ★追加: AI利用分析サービス
 import { aiAnalyticsService } from '../services/AiAnalyticsService';
+// ★追加: クレジット管理
+import { useCredit } from '../contexts/CreditContext';
+import { calculateNodeCredit } from '../utils/creditCalculator';
 
 // ★リファクタリング: 分離したモジュールからインポート
 import { DEFAULT_SEARCH_SETTINGS } from './chat/constants';
@@ -79,6 +82,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     const [messages, setMessages] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+
+    // ★追加: クレジット減算・管理機能
+    const { deductCredit, creditBalance } = useCredit();
 
     // ★追加: ストリーミング中のAIメッセージを別stateで管理（パフォーマンス最適化）
     // これにより、ストリーミング中のメッセージ更新がmessages配列全体の走査を回避
@@ -207,6 +213,12 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
     // --- メッセージ送信処理 (Adapter利用) ---
     const handleSendMessage = async (text, attachments = [], options = {}) => {
+        // ★追加: クレジットが0以下の場合は送信をブロック (SmartActions等の抜け穴対策)
+        if (creditBalance <= 0) {
+            addLog('[useChat] Credit exhausted. Blocking message send from SmartActions or other sources.', 'warn');
+            return;
+        }
+
         const tracker = createPerfTracker(addLog);
         tracker.markStart();
 
@@ -309,7 +321,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             processStatus: null,
             thinking: '',  // ★追加: Chain-of-Thought用
             mode: isFastMode ? 'fast' : 'normal',
-            artifact: options.artifact // ★追加: 生成中のArtifact情報を付与
+            artifact: options.artifact, // ★追加: 生成中のArtifact情報を付与
+            totalCredit: 0 // ★追加: ターン全体の合計消費クレジット
         };
         setStreamingMessage(initialAiMessage);
 
@@ -518,6 +531,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             let capturedOptimizedQuery = null;
             let capturedUsage = null;
             let protocolMode = 'PENDING';
+            let accumulatedCredit = 0; // ★追加: ターン合計クレジット追跡用（同期ループ用）
 
             // 表示遅延タイマー（ちらつき防止）
             // messageイベント受信時にタイマーを開始する（思考プロセス完了後）
@@ -635,6 +649,21 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 const outputs = data.data?.outputs;
 
                                 if (nodeId) tracker.markNodeEnd(nodeId);
+
+                                // ★追加: クレジット消費の計算と減算
+                                const consumedCredit = calculateNodeCredit(data.data);
+                                if (consumedCredit > 0) {
+                                    // ★追加: ログ出力 (Real API対応)
+                                    addLog(`[Credit] 消費クレジット: ${consumedCredit} CR (Node: ${title || nodeId})`, 'info');
+                                    deductCredit(consumedCredit);
+                                    
+                                    // ★追加: ターン合計クレジットに加算（ローカル変数とState両方）
+                                    accumulatedCredit += consumedCredit;
+                                    setStreamingMessage(prev => prev ? {
+                                        ...prev,
+                                        totalCredit: accumulatedCredit
+                                    } : prev);
+                                }
 
                                 // ★追加: ノードエラー処理（status === 'failed' の場合）
                                 const nodeError = processNodeError(data, addLog);
@@ -884,6 +913,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                             ...capturedUsage
                                         };
                                     }
+
+                                    // ★追加: 非同期Stateの遅延対策として、最終的な合計クレジットを直接上書き
+                                    finalMessage.totalCredit = accumulatedCredit;
 
                                     setMessages(prevMsgs => [...prevMsgs, finalMessage]);
                                     setStreamingMessage(null);
