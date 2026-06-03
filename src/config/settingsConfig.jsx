@@ -6,9 +6,7 @@ import { User, Settings, FileText, Terminal, BarChart2, Sparkles, Sliders } from
 import ProfileSettings from '../components/Settings/sections/ProfileSettings';
 import AppearanceSettings from '../components/Settings/sections/AppearanceSettings';
 import PromptSettings from '../components/Settings/sections/PromptSettings';
-import RagSettings from '../components/Settings/sections/RagSettings';
 import SystemSettings from '../components/Settings/sections/SystemSettings';
-import AdminSettings from '../components/Settings/sections/AdminSettings';
 import DebugSettings from '../components/Settings/sections/DebugSettings';
 
 export const settingsCategories = [
@@ -39,14 +37,6 @@ export const settingsCategories = [
     allowedRoles: ['user', 'admin', 'developer'],
     group: 'AI Personalization',
   },
-  {
-    id: 'rag',
-    label: 'データ連携 (RAG)',
-    icon: FileText,
-    component: (props) => <RagSettings {...props} />,
-    allowedRoles: ['admin', 'developer'],
-    group: 'AI Personalization',
-  },
 
   // === ⚙️ システム・管理者（System & Admin） ===
   {
@@ -55,14 +45,6 @@ export const settingsCategories = [
     icon: Sliders,
     component: (props) => <SystemSettings {...props} />,
     allowedRoles: ['user', 'admin', 'developer'],
-    group: 'System & Admin',
-  },
-  {
-    id: 'admin_console',
-    label: '管理コンソール',
-    icon: BarChart2,
-    component: (props) => <AdminSettings {...props} />,
-    allowedRoles: ['admin', 'developer'],
     group: 'System & Admin',
   },
   {

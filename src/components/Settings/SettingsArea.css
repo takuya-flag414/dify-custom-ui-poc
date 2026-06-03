@@ -230,18 +230,6 @@
     padding: 24px 32px;
 }
 
-/* Full Width Mode (RAG page) */
-.settings-section-container.full-width {
-    max-width: none;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-}
-
-.settings-content-scroll.full-width {
-    padding: 0;
-}
 
 /* === Responsive (Mobile) === */
 @media (max-width: 768px) {

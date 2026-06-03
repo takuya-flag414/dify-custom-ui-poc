@@ -8,9 +8,7 @@ import type { PermissionCode } from '../services/AuthService';
 import ProfileSettings from '../components/Settings/sections/ProfileSettings';
 import GeneralSettings from '../components/Settings/sections/GeneralSettings';
 import PromptSettings from '../components/Settings/sections/PromptSettings';
-import RagSettings from '../components/Settings/sections/RagSettings';
 import DebugSettings from '../components/Settings/sections/DebugSettings';
-import AdminSettings from '../components/Settings/sections/AdminSettings';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SettingsComponentProps = any;
@@ -57,22 +55,6 @@ export const settingsCategories: SettingsCategory[] = [
         icon: Sparkles,
         component: PromptSettings,
         group: 'Apple Intelligence',
-    },
-    {
-        id: 'rag',
-        label: 'RAGデータ管理',
-        icon: FileText,
-        component: RagSettings,
-        requiredPermission: 'knowledge:manage',
-        group: 'Apple Intelligence',
-    },
-    {
-        id: 'admin_console',
-        label: '管理コンソール',
-        icon: BarChart2,
-        component: AdminSettings,
-        requiredPermission: 'admin:access',
-        group: 'システム管理',
     },
     {
         id: 'debug',
