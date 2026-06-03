@@ -325,6 +325,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                             {isStepDone ? (
                                 <>
                                     {renderMonologueContent(monologueContent, isStreaming, () => handleStepComplete(index))}
+                                    {/* ★一時的にThinking表示を無効・非表示化
                                     {stepThinkingContent && (
                                         Array.isArray(stepThinkingContent) ? (
                                             <ThinkingAccordion content={stepThinkingContent} isStreaming={isStreaming} onComplete={() => {}} />
@@ -334,6 +335,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                                             </div>
                                         )
                                     )}
+                                    */}
                                 </>
                             ) : (
                                 <div className="fluid-loading-container small">
@@ -402,6 +404,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                                     {renderMonologueContent(actionMonologueContent, isStreaming, () => handleStepComplete(index))}
                                 </div>
                             )}
+                            {/* ★一時的にThinking表示を無効・非表示化
                             {step.thinkingContent && isStepDone && (
                                 <div className="thought-monologue-container action-monologue synthesis-thinking">
                                     {Array.isArray(step.thinkingContent) ? (
@@ -411,6 +414,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                                     )}
                                 </div>
                             )}
+                            */}
                         </div>
                     );
                 }
@@ -433,6 +437,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                         {isStepDone ? (
                             <>
                                 {renderMonologueContent(monologueContent, isStreaming, () => handleStepComplete(index))}
+                                {/* ★一時的にThinking表示を無効・非表示化
                                 {stepThinkingContent && (
                                     Array.isArray(stepThinkingContent) ? (
                                         <ThinkingAccordion content={stepThinkingContent} isStreaming={isStreaming} onComplete={() => {}} />
@@ -442,6 +447,7 @@ const ThinkingProcess = ({ steps, isStreaming, thinkingContent, hasAnswer }) => 
                                         </div>
                                     )
                                 )}
+                                */}
                             </>
                         ) : (
                             // 処理中はプレースホルダーを表示
