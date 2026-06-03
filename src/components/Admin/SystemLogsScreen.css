@@ -48,6 +48,7 @@
     border-collapse: collapse;
     font-size: 13px;
     text-align: left;
+    table-layout: fixed;
 }
 
 .logs-table th {
@@ -97,9 +98,18 @@
 .action-badge.ACCOUNT_DELETED { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
 .action-badge.ADMIN_CREATED_USER { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
 .action-badge.PASSWORD_RESET_REQUEST { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.action-badge.PASSWORD_RESET_REQUESTED { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.action-badge.PASSWORD_RESET_FAILED { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.action-badge.PASSWORD_CHANGED_INITIAL { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.action-badge.PASSWORD_CHANGE_FAILED { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .action-badge.EMAIL_SENT_SUCCESS { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.action-badge.EMAIL_DELIVERED_SUCCESS { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
 .action-badge.EMAIL_SENT_FAILED { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.action-badge.EMAIL_DELIVERED_FAILED { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .action-badge.ACCOUNT_CREATE_FAILED { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+.action-badge.EMAIL_VERIFIED_SUCCESS { background: rgba(16, 185, 129, 0.15); color: #059669; }
+.action-badge.ACCOUNT_VERIFIED_SIGNIN { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.action-badge.ACCOUNT_SIGNIN_UNVERIFIED { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 
 .log-details {
     color: var(--color-text-sub);
@@ -132,7 +142,6 @@
 .log-summary {
     color: var(--color-text-sub);
     font-size: 12px;
-    max-width: 300px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -145,7 +154,7 @@
 
 .detail-expanded-content {
     background: linear-gradient(to bottom, rgba(99, 102, 241, 0.03), rgba(0, 0, 0, 0.1));
-    padding: 24px 40px 24px 56px;
+    padding: 24px 24px 24px 40px;
     border-bottom: 1px solid var(--color-border);
     animation: slideDown 0.2s ease-out;
 }
@@ -157,18 +166,20 @@
 
 .detail-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    grid-template-columns: minmax(0, 350px) minmax(0, 1fr);
+    gap: 24px 40px;
 }
 
 .detail-item {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 
 .detail-item.full-width {
     grid-column: span 2;
+    min-width: 0;
 }
 
 .detail-item label {
@@ -182,6 +193,7 @@
 .detail-item span {
     font-size: 14px;
     color: var(--color-text-main);
+    word-break: break-word;
 }
 
 .detail-item .text-error {
@@ -199,6 +211,9 @@
     border: 1px solid rgba(96, 165, 250, 0.2);
     display: inline-block;
     width: fit-content;
+    max-width: 100%;
+    word-break: break-all;
+    box-sizing: border-box;
 }
 
 .json-pre {
@@ -209,9 +224,31 @@
     font-size: 12px;
     line-height: 1.6;
     margin: 0;
-    overflow-x: auto;
+    overflow-x: scroll;
+    white-space: pre;
+    max-width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.json-pre::-webkit-scrollbar {
+    height: 8px;
+    display: block;
+}
+
+.json-pre::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    margin: 4px;
+}
+
+.json-pre::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.json-pre::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .logs-footer {

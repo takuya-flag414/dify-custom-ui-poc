@@ -203,12 +203,22 @@ class AuthService {
 
             // Cloud Functions経由で監査ログを保存
             const logAuditAction = httpsCallable(functions, 'logAuditAction');
+            
+            // 環境変数(VITE_APP_NAME)を使用して、どのアプリかを識別
+            const appName = (import.meta as any).env?.VITE_APP_NAME || 'chat_app';
+            
+            const enrichedDetails = {
+                ...details,
+                hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown'
+            };
+
             await logAuditAction({
                 action,
                 email: targetEmail,
                 userId: targetUserId,
                 sessionId,
-                details
+                projectId: appName,
+                details: enrichedDetails
             });
             
             console.log(`[AuthService] Audit logged via Functions: ${action} for ${targetEmail} (session: ${sessionId})`);

@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "aiagent-forrag"
+  },
+  "targets": {},
+  "etags": {
+    "aiagent-forrag": {
+      "extensionInstances": {
+        "firestore-send-email": "388472cbd0f6a7f2f622b23260458649abee196d553f347edad1e76d5338f07a"
+      }
+    }
   }
 }

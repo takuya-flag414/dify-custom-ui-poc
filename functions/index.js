@@ -13,6 +13,7 @@ const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, Timestamp, FieldValue } = require("firebase-admin/firestore");
 const logger = require("firebase-functions/logger");
 const { encrypt, decrypt, createSearchHash } = require("./kmsUtils");
+const { SESClient, SendEmailCommand } = require("@aws-sdk/client-ses");
 
 // グローバルオプションの設定
 setGlobalOptions({ region: "asia-northeast1" });
@@ -36,7 +37,7 @@ exports.onAuditLogCreated = onDocumentCreated("audit_logs/{logId}", (event) => {
         email: email,
         userId: data.user_id || null,
         sessionId: data.session_id || null,
-        project_id: data.project_id || "unknown-project",
+        project_id: data.project_id || "backend_system",
         details: data.details || {},
         timestamp: data.timestamp ? data.timestamp.toDate() : new Date(),
         origin: "firestore_trigger"
@@ -57,7 +58,7 @@ exports.onNewUserCreated = functionsV1.region('asia-northeast1').auth.user().onC
         action: "ACCOUNT_CREATED_INTERNAL",
         email: user.email,
         userId: user.uid,
-        projectId: "dify-custom-ui-poc",
+        projectId: "backend_system",
         origin: "auth_trigger_created"
     });
     return null;
@@ -71,7 +72,7 @@ exports.onUserDeleted = functionsV1.region('asia-northeast1').auth.user().onDele
         action: "ACCOUNT_DELETED_INTERNAL",
         email: user.email,
         userId: user.uid,
-        projectId: "dify-custom-ui-poc",
+        projectId: "backend_system",
         origin: "auth_trigger_deleted"
     });
     
@@ -145,7 +146,7 @@ exports.beforeSignIn = beforeUserSignedIn(async (event) => {
                         action: "EMAIL_VERIFIED_SUCCESS",
                         email: user.email,
                         userId: user.uid,
-                        projectId: "dify-custom-ui-poc",
+                        projectId: "backend_system",
                         origin: "auth_blocking_signin"
                     });
 
@@ -164,7 +165,7 @@ exports.beforeSignIn = beforeUserSignedIn(async (event) => {
             action: user.emailVerified ? "ACCOUNT_VERIFIED_SIGNIN" : "ACCOUNT_SIGNIN_UNVERIFIED",
             email: user.email,
             userId: user.uid,
-            projectId: "dify-custom-ui-poc",
+            projectId: "backend_system",
             origin: "auth_blocking_signin"
         });
     } catch (error) {
@@ -323,25 +324,34 @@ exports.adminCreateSecureUserProfile = onCall(async (request) => {
         });
 
         // 4. 通知メールの発行リクエスト (Firebase Extension: Trigger Email from Firestore)
+        const expireTime = new Date();
+        expireTime.setDate(expireTime.getDate() + 7); // 7日後にTTLで自動削除させるためのフィールド
+        
         const mailDoc = {
             to: [userData.email], // 暗号化前の平文のメールアドレス
+            expire_at: Timestamp.fromDate(expireTime),
             message: {
-                subject: '【Dify Custom UI】アカウントが発行されました',
+                subject: '【AIagent】アカウントが発行されました',
                 text: `
 ${userData.displayName} 様
 
-Dify Custom UI のアカウントが発行されました。
-管理者が設定した初期パスワードでログイン後、パスワードを変更してください。
+アイフラッグの社内向けAIチャットボットAIagentのアカウントが発行されました。
+管理者が設定した初期パスワード「password1」と社内の@epark.co.jpドメインのメールアドレスで初期ログインを行ってください。
 
-ログインURL: ${process.env.VITE_APP_URL || 'https://YOUR_DOMAIN'}/login
+よろしくお願いいたします
+アイフラッグインターン生AIagentチーム
+
+ログイン画面へ: ${process.env.VITE_APP_URL || 'https://YOUR_DOMAIN'}/login
 
 ※本メールは送信専用アドレスから配信されています。ご返信いただいてもお答えできませんのでご了承ください。
 `,
                 html: `
 <p>${userData.displayName} 様</p>
-<p>Dify Custom UI のアカウントが発行されました。</p>
-<p>管理者が設定した初期パスワードでログイン後、パスワードを変更してください。</p>
-<p><a href="${process.env.VITE_APP_URL || 'https://YOUR_DOMAIN'}/login">ログイン画面へ</a></p>
+<p>アイフラッグの社内向けAIチャットボットAIagentのアカウントが発行されました。<br>
+管理者が設定した初期パスワード「password1」と社内の@epark.co.jpドメインのメールアドレスで初期ログインを行ってください。</p>
+<p>よろしくお願いいたします<br>
+アイフラッグインターン生AIagentチーム</p>
+<p><a href="${process.env.VITE_APP_URL || 'https://YOUR_DOMAIN'}/login" style="display:inline-block; margin-top:10px; padding:10px 20px; background-color:#2563eb; color:#ffffff; text-decoration:none; border-radius:5px;">ログイン画面へ</a></p>
 <hr>
 <p style="font-size: 12px; color: #666;">※本メールは送信専用アドレスから配信されています。ご返信いただいてもお答えできませんのでご了承ください。</p>
 `
@@ -414,6 +424,7 @@ exports.getSecureUserProfile = onCall(async (request) => {
         return {
             ...data,
             displayName: name,
+            name: name, // フロントエンドが userData.name を参照した場合のフェールセーフ
             email: email,
             lastName: lastName,
             firstName: firstName,
@@ -527,7 +538,7 @@ exports.getDecryptedUserMappings = onCall(async (request) => {
  * フロントエンドからの直接書き込みを防ぐためのスパム対策
  */
 exports.logAuditAction = onCall(async (request) => {
-    const { action, email, userId, sessionId, details } = request.data;
+    let { action, email, userId, sessionId, details, projectId } = request.data;
     
     // スパム対策：最低限の必須データがない場合は弾く
     if (!action) {
@@ -535,6 +546,38 @@ exports.logAuditAction = onCall(async (request) => {
     }
 
     const db = getFirestore();
+    let enrichedDetails = { ...(details || {}) };
+
+    try {
+        // バックエンドによる救済措置：ナレッジアプリ等からFirebase Auth/Firestoreの暗号化データがそのまま送られてきた場合、
+        // ログが見にくくならないようにFirestoreから正しい復号データを取得して上書きする
+        if (userId) {
+            const isNameEncrypted = enrichedDetails.displayName && enrichedDetails.displayName.length > 30;
+            // メアドの暗号化文字列には '@' が含まれず、長さが30以上になる特徴を利用して判定
+            const isEmailEncrypted = email && !email.includes('@') && email.length > 30;
+
+            if (isNameEncrypted || isEmailEncrypted) {
+                const userDoc = await db.collection('users').doc(userId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.is_encrypted) {
+                        if (isNameEncrypted && userData.displayName) {
+                            enrichedDetails.displayName = await decrypt(userData.displayName);
+                        }
+                        if (isEmailEncrypted && userData.email) {
+                            email = await decrypt(userData.email);
+                        }
+                    } else {
+                        if (isNameEncrypted) enrichedDetails.displayName = userData.displayName || userData.name || enrichedDetails.displayName;
+                        if (isEmailEncrypted) email = userData.email || email;
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        logger.error(`Failed to enrich data for audit log (userId: ${userId}):`, e);
+    }
+
     try {
         await db.collection('audit_logs').add({
             timestamp: Timestamp.now(),
@@ -542,8 +585,8 @@ exports.logAuditAction = onCall(async (request) => {
             email: email || "unknown",
             user_id: userId || null,
             session_id: sessionId || null,
-            project_id: process.env.VITE_PROJECT_ID || "dify-custom-ui-poc",
-            details: details || {}
+            project_id: projectId || "backend_system",
+            details: enrichedDetails
         });
         return { success: true };
     } catch (error) {
@@ -574,7 +617,7 @@ exports.onEmailDeliveryStatusChanged = onDocumentUpdated("mail/{mailId}", async 
             action: actionName,
             email: emailAddress,
             userId: null,
-            projectId: "dify-custom-ui-poc",
+            projectId: "backend_system",
             details: {
                 error: afterData.delivery?.error || null,
                 mailId: event.params.mailId
@@ -598,7 +641,7 @@ exports.onEmailDeliveryStatusChanged = onDocumentUpdated("mail/{mailId}", async 
                 email: emailAddress,
                 user_id: null,
                 session_id: null,
-                project_id: process.env.VITE_PROJECT_ID || "dify-custom-ui-poc",
+                project_id: "backend_system",
                 details: {
                     error: afterData.delivery?.error || null,
                     mailId: event.params.mailId
@@ -608,5 +651,123 @@ exports.onEmailDeliveryStatusChanged = onDocumentUpdated("mail/{mailId}", async 
             logger.error("Failed to write email delivery status to audit_logs collection:", error);
         }
     }
+    return null;
+});
+
+/**
+ * カスタムメール送信関数 (Firebase Extensionの代替)
+ * mailコレクションに追加されたドキュメントを検知し、AWS SDKで送信する
+ */
+exports.processMailQueue = onDocumentCreated("mail/{mailId}", async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) return null;
+
+    const mailData = snapshot.data();
+    const mailId = event.params.mailId;
+
+    // すでに処理済みならスキップ
+    if (mailData.delivery && mailData.delivery.state) {
+        return null;
+    }
+
+    const toAddresses = mailData.to || [];
+    if (toAddresses.length === 0) {
+        logger.warn(`No recipient found for mailId: ${mailId}`);
+        return null;
+    }
+
+    const subject = mailData.message?.subject || "No Subject";
+    const htmlBody = mailData.message?.html || "";
+    const textBody = mailData.message?.text || "";
+
+    const region = process.env.AWS_SES_REGION || "ap-northeast-1";
+    const accessKeyId = process.env.AWS_SES_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.AWS_SES_SECRET_ACCESS_KEY;
+    const fromEmail = process.env.AWS_SES_FROM_EMAIL;
+
+    if (!accessKeyId || !secretAccessKey || !fromEmail) {
+        logger.error(`AWS SES configuration missing! Please check your .env variables.`);
+        // エラーを記録
+        await snapshot.ref.update({
+            delivery: {
+                state: "ERROR",
+                error: "AWS SES configuration missing",
+                attempts: 1,
+                endTime: Timestamp.now(),
+            }
+        });
+        return null;
+    }
+
+    const sesClient = new SESClient({
+        region: region,
+        credentials: {
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretAccessKey,
+        },
+    });
+
+    const sendEmailCommand = new SendEmailCommand({
+        Source: fromEmail,
+        Destination: {
+            ToAddresses: toAddresses,
+        },
+        Message: {
+            Subject: {
+                Data: subject,
+                Charset: "UTF-8",
+            },
+            Body: {
+                Html: {
+                    Data: htmlBody,
+                    Charset: "UTF-8",
+                },
+                Text: {
+                    Data: textBody,
+                    Charset: "UTF-8",
+                },
+            },
+        },
+    });
+
+    try {
+        logger.info(`Attempting to send email via SES to ${toAddresses.join(', ')}`);
+        
+        // Processing state
+        await snapshot.ref.update({
+            delivery: {
+                state: "PROCESSING",
+                attempts: 1,
+                startTime: Timestamp.now(),
+            }
+        });
+
+        await sesClient.send(sendEmailCommand);
+
+        logger.info(`Email successfully sent via SES to ${toAddresses.join(', ')}`);
+
+        // Success state
+        await snapshot.ref.update({
+            delivery: {
+                state: "SUCCESS",
+                attempts: 1,
+                endTime: Timestamp.now(),
+            }
+        });
+
+    } catch (error) {
+        logger.error(`Failed to send email via SES:`, error);
+        
+        // Error state
+        await snapshot.ref.update({
+            delivery: {
+                state: "ERROR",
+                error: error.message || "Unknown SES Error",
+                attempts: 1,
+                endTime: Timestamp.now(),
+            }
+        });
+    }
+
     return null;
 });

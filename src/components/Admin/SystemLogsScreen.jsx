@@ -149,16 +149,33 @@ const SystemLogsScreen = () => {
             case 'LOGIN_SUCCESS': return 'ログイン成功';
             case 'LOGIN_FAILED': return 'ログイン失敗';
             case 'LOGOUT': return 'ログアウト';
-            case 'PASSWORD_RESET_REQUEST': return 'パスワードリセット要求';
+            case 'PASSWORD_RESET_REQUEST':
+            case 'PASSWORD_RESET_REQUESTED': return 'パスワードリセット要求';
+            case 'PASSWORD_RESET_FAILED': return 'パスワードリセット失敗';
+            case 'PASSWORD_CHANGED_INITIAL': return '初期パスワード変更';
+            case 'PASSWORD_CHANGE_FAILED': return 'パスワード変更失敗';
             case 'ACCOUNT_CREATED_PROVISIONAL': return '仮登録完了(セルフ)';
             case 'ACCOUNT_VERIFIED': return '本登録完了';
             case 'ACCOUNT_DELETED': return 'アカウント削除';
             case 'ADMIN_CREATED_USER': return 'アカウント発行完了(管理者)';
-            case 'EMAIL_SENT_SUCCESS': return 'メール送信成功';
-            case 'EMAIL_SENT_FAILED': return 'メール送信失敗';
+            case 'EMAIL_SENT_SUCCESS':
+            case 'EMAIL_DELIVERED_SUCCESS': return 'メール送信成功';
+            case 'EMAIL_SENT_FAILED':
+            case 'EMAIL_DELIVERED_FAILED': return 'メール送信失敗';
             case 'ACCOUNT_CREATE_FAILED': return 'アカウント作成失敗';
+            case 'EMAIL_VERIFIED_SUCCESS': return 'メール認証完了';
+            case 'ACCOUNT_VERIFIED_SIGNIN': return '認証済ログイン';
+            case 'ACCOUNT_SIGNIN_UNVERIFIED': return '未認証ログイン';
             default: return action;
         }
+    };
+
+    const formatEmail = (email) => {
+        if (!email) return '-';
+        if (!email.includes('@') && email.length > 30) {
+            return '退職者 (削除済みユーザー)';
+        }
+        return email;
     };
 
     const formatDate = (date) => {
@@ -190,9 +207,9 @@ const SystemLogsScreen = () => {
                         <thead>
                             <tr>
                                 <th style={{ width: '40px' }}></th>
-                                <th>日時</th>
-                                <th>アクション</th>
-                                <th>対象者</th>
+                                <th style={{ width: '140px' }}>日時</th>
+                                <th style={{ width: '180px' }}>アクション</th>
+                                <th style={{ width: '220px' }}>対象者</th>
                                 <th>詳細・備考</th>
                             </tr>
                         </thead>
@@ -208,7 +225,7 @@ const SystemLogsScreen = () => {
                                         </td>
                                         <td className="log-time">{formatDate(log.createdAt)}</td>
                                         <td><span className={`action-badge ${log.action || ''}`}>{formatAction(log.action)}</span></td>
-                                        <td>{log.email || '-'}</td>
+                                        <td>{formatEmail(log.email)}</td>
                                         <td className="log-summary">
                                             {log.details && Object.keys(log.details).length > 0
                                                 ? JSON.stringify(log.details)
@@ -231,7 +248,7 @@ const SystemLogsScreen = () => {
                                                             <code>{log.session_id || 'N/A'}</code>
                                                         </div>
                                                         <div className="detail-item">
-                                                            <label>プロジェクトID</label>
+                                                            <label>アプリ/アクセス元 (Project ID)</label>
                                                             <code>{log.project_id || 'N/A'}</code>
                                                         </div>
 
@@ -247,7 +264,7 @@ const SystemLogsScreen = () => {
                                                             else if (key === 'error_message') { label = 'エラー詳細'; className = "text-error"; }
                                                             else if (key === 'reason') { label = '失敗理由'; className = "text-error"; }
                                                             else if (key === 'type') label = '操作タイプ';
-                                                            else if (key === 'role' || key === 'roleId') label = '割り当てロール';
+                                                            else if (key === 'role' || key === 'roleId' || key === 'roles') label = '割り当てロール';
                                                             else if (key === 'status') label = 'ステータス';
                                                             else if (key === 'displayName') label = '表示名';
                                                             else if (key === 'userAgent') label = 'アクセス環境 (UA)';
@@ -256,11 +273,18 @@ const SystemLogsScreen = () => {
                                                             else if (key === 'deletedAt') label = '削除日時';
                                                             else if (key === 'oobCode') label = '認証コード(一部)';
                                                             else if (key === 'departmentId') label = '部署ID';
+                                                            else if (key === 'appSource') label = 'アクセス元アプリ';
+                                                            else if (key === 'hostname') label = 'アクセス元ドメイン';
 
-                                                            // 値が長すぎる場合の処理 (UAなど)
-                                                            const displayValue = (typeof value === 'string' && value.length > 100)
-                                                                ? value.substring(0, 100) + '...'
-                                                                : String(value);
+                                                            // 値が長すぎる場合や未復号データの処理
+                                                            let displayValue = value;
+                                                            if (key === 'displayName' && typeof value === 'string' && value.length > 30) {
+                                                                displayValue = '退職者 (削除済みユーザー)';
+                                                            } else {
+                                                                displayValue = (typeof value === 'string' && value.length > 100)
+                                                                    ? value.substring(0, 100) + '...'
+                                                                    : String(value);
+                                                            }
 
                                                             return (
                                                                 <div className={`detail-item ${key === 'userAgent' ? 'full-width' : ''}`} key={key}>
