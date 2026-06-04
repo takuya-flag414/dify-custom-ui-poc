@@ -47,10 +47,11 @@ const usePagination = (blocks, meta) => {
                     return (currentHeight + blockHeight + nextBlockHeight > PAGE_HEIGHT_LIMIT);
                 }
 
-                // 2. 非分割ブロックの場合 (Table, SVG, Chart, 装飾付きのお知らせブロック)
+                // 2. 非分割ブロックの場合 (Table, SVG, Chart, Mermaid, 装飾付きのお知らせブロック)
                 const isNonSplittable = block.type === 'table' || 
                                         block.type === 'svg' || 
                                         block.type === 'chart' ||
+                                        block.type === 'mermaid' ||
                                         (block.type === 'rich_text' && block.variant && block.variant !== 'default');
 
                 if (isNonSplittable) {
@@ -172,11 +173,12 @@ const estimateBlockHeight = (block) => {
             const rowCount = (block.rows?.length || 0);
             return rowCount * 44 + 60; // テーブル行の高さをスリムに
         case 'svg':
-            return 240;
+        case 'chart':
+        case 'mermaid':
+            // 図表類は一律で余裕を持たせた高さで見積もる（CSS側でmax-height:400px制約をかける前提）
+            return 400;
         case 'list':
             return (block.items?.length || 0) * 32 + 30; // リストの項目間隔をスリムに
-        case 'chart':
-            return 360;
         case 'toc':
             return PAGE_HEIGHT_LIMIT; // 1ページ占有（独立ページ化）
         default:

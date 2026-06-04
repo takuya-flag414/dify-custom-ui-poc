@@ -1,10 +1,7 @@
-import { mockUserCredits } from '../mocks/creditMocks';
+import { mockUserCredits, mockSystemSettings } from '../mocks/creditMocks';
 
 // 非同期通信のネットワーク遅延をシミュレート
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-const DEFAULT_INITIAL_BALANCE = 5000;
-const DEFAULT_CREDIT_LIMIT = 5000;
 
 // --- 疑似クーロン用ロジック ---
 const _getNextMonday = (date: Date): Date => {
@@ -19,7 +16,12 @@ const _getNextMonday = (date: Date): Date => {
 const _checkAndApplyWeeklyReset = (userId: string) => {
   const now = Date.now();
   if (!mockUserCredits[userId]) {
-    mockUserCredits[userId] = { balance: DEFAULT_INITIAL_BALANCE, limit: DEFAULT_CREDIT_LIMIT, lastResetTime: now };
+    // 新規ユーザーにはデフォルト上限（スタンダード）を付与
+    mockUserCredits[userId] = { 
+      balance: mockSystemSettings.defaultStandardLimit, 
+      limit: mockSystemSettings.defaultStandardLimit, 
+      lastResetTime: now 
+    };
     return;
   }
   
@@ -93,5 +95,14 @@ export const creditApi = {
     console.log(`[Mock Backend] Admin ${adminUserId} granted ${amount} CR to ${targetUserId}`);
     _checkAndApplyWeeklyReset(targetUserId);
     mockUserCredits[targetUserId].balance += amount;
+  },
+
+  /**
+   * 【管理者用】システム全体のデフォルト上限を更新する（モック）
+   */
+  updateSystemCreditLimit: async (newStandardLimit: number): Promise<void> => {
+    await delay(200);
+    console.log(`[Mock Backend] Global standard limit updated to ${newStandardLimit}`);
+    mockSystemSettings.defaultStandardLimit = newStandardLimit;
   }
 };

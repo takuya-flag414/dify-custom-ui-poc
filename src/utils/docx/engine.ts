@@ -26,28 +26,35 @@ export class DocxExportEngine {
       const imageCache = new Map<string, string>();
       
       // 画像キャプチャを必要とするブロックタイプ
-      const imageTypes = ['chart', 'svg'];
+      const imageTypes = ['chart', 'svg', 'mermaid'];
+
+      console.log('[DocxExport] 画像キャプチャ開始 (対象タイプ:', imageTypes, ')');
 
       // 各ページのブロックをスキャン
       for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
         const pageBlocks = pages[pageIndex];
+
         for (let blockIndex = 0; blockIndex < pageBlocks.length; blockIndex++) {
           const block = pageBlocks[blockIndex];
           
           if (imageTypes.includes(block.type)) {
-            // React側と一対一で対応するDOM IDを組み立て
-            const elementId = `json-doc-block-${pageIndex}-${blockIndex}`;
+            // React側と一対一で対応するDOM IDを組み立て（ブロックタイプも含めて一意性を保証）
+            const elementId = `json-doc-block-${pageIndex}-${blockIndex}-${block.type}`;
+            console.log(`[DocxExport] キャプチャ: "${elementId}"`);
             
             // DOMから非同期で画像をキャプチャ
             const dataUrl = await captureElementById(elementId);
             if (dataUrl) {
               imageCache.set(elementId, dataUrl);
+              console.log(`[DocxExport] ✓ キャプチャ成功: "${elementId}"`);
             } else {
-              console.warn(`Could not capture image for block ${block.type} at page ${pageIndex}, index ${blockIndex}`);
+              console.error(`[DocxExport] ✕ キャプチャ失敗: ${block.type} (page=${pageIndex}, block=${blockIndex})`);
             }
           }
         }
       }
+
+      console.log('[DocxExport] キャプチャ完了。キャッシュKEY:', Array.from(imageCache.keys()));
 
       // 2. ドキュメント構築 (画像キャッシュをビルダーに渡す)
       const builder = new DocxBuilder();

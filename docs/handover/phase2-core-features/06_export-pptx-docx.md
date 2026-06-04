@@ -202,8 +202,8 @@ sequenceDiagram
 
     Note over Engine: 1. 画像キャプチャフェーズ
     loop 各ページ・各ブロックをスキャン
-        Engine->>Engine: chart または svg ブロックを検出
-        Engine->>Capture: captureElementById(`json-doc-block-${pageIndex}-${blockIndex}`)
+        Engine->>Engine: chart または svg, mermaid ブロックを検出
+        Engine->>Capture: captureElementById(`json-doc-block-${pageIndex}-${blockIndex}-${block.type}`)
         Capture->>Capture: DOM要素をhtml2canvas等でキャプチャ
         Capture-->>Engine: DataURL（Base64画像）を返却
         Engine->>Engine: imageCache に保存
@@ -227,7 +227,7 @@ sequenceDiagram
 
 ### 3.3 画像キャプチャの仕組み（imageCapture.ts）
 
-`chart` / `svg` ブロックはテキストベースのWordでは直接表現できないため、DOM要素を画像としてキャプチャしてWordに埋め込みます。
+`chart` / `svg` / `mermaid` ブロックはテキストベースのWordでは直接表現できないため、DOM要素を画像としてキャプチャしてWordに埋め込みます。
 
 ```typescript
 // src/utils/docx/imageCapture.ts のイメージ
@@ -235,13 +235,13 @@ export const captureElementById = async (elementId: string): Promise<string | nu
     const element = document.getElementById(elementId);
     if (!element) return null;
 
-    // html2canvas 等を使ってDOM要素をキャプチャ
-    const canvas = await html2canvas(element);
-    return canvas.toDataURL('image/png'); // Base64 DataURL として返却
+    // html-to-image 等を使ってDOM要素をキャプチャ
+    const dataUrl = await toPng(element);
+    return dataUrl; // Base64 DataURL として返却
 };
 ```
 
-`json-doc-block-${pageIndex}-${blockIndex}` という ID は、`JsonDocParser.jsx` 内でブロックに付与されており、エクスポートエンジンとの対応が保証されています。
+`json-doc-block-${pageIndex}-${blockIndex}-${block.type}` という ID は、`JsonDocParser.jsx` 内で各図表ブロックに付与されており、エクスポートエンジンとの対応が保証されています。末尾にブロックタイプ（`chart`や`mermaid`）を含めることで、ページ内に複数の図表が存在してもキャプチャ時のID衝突や画像の入れ替わりを確実に防ぐ設計になっています。
 
 ### 3.4 renderers/の各スクリプトの役割
 
@@ -254,7 +254,7 @@ export const captureElementById = async (elementId: string): Promise<string | nu
 | `list.ts` | `list` | Word箇条書き・番号付きリスト |
 | `toc.ts` | `toc` | 目次ページ |
 | `letterHeader.ts` | `letter_header` | ビジネスレターのヘッダー |
-| `imageBlock.ts` | `chart` / `svg` | キャプチャ済み画像をWordに埋め込む |
+| `imageBlock.ts` | `chart` / `svg` / `mermaid` | キャプチャ済みのDataURL(Base64)を `Uint8Array` に変換し、`ImageRun.data` に渡してWord内に画像として埋め込む（※`docx`ライブラリはBlobをサポートしていないため、必ず`Uint8Array`に変換する） |
 
 ---
 

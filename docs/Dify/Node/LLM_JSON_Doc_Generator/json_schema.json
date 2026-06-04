@@ -47,6 +47,18 @@
                             "type": "string",
                             "description": "文書のメインタイトル・件名。"
                         },
+                        "org": {
+                            "type": "string",
+                            "description": "組織名や会社名。"
+                        },
+                        "label": {
+                            "type": "string",
+                            "description": "文書の分類ラベル。例: MONTHLY REPORT, 提案書"
+                        },
+                        "year": {
+                            "type": "string",
+                            "description": "対象の年度や西暦。例: 2026"
+                        },
                         "date": {
                             "type": "string",
                             "description": "文書の日付テキスト。例: 2026年3月26日"
@@ -303,6 +315,24 @@
                                     "type": {
                                         "type": "string",
                                         "const": "page_break"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "type",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "const": "mermaid"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "description": "Mermaid記法の生コード。Markdownコードブロック(```mermaid)は含めず、中身だけを記述すること。"
                                     }
                                 }
                             }

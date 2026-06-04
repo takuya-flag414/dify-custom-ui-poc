@@ -1,21 +1,25 @@
-import { Paragraph, ImageRun, TextRun } from 'docx';
+import { Paragraph, ImageRun, TextRun, AlignmentType } from 'docx';
 
 /**
- * Base64のData URLを Blob に変換する（ブラウザ環境で最も安定して画像埋め込みを行う手法）
+ * DataURL (base64文字列) を Uint8Array に変換する
+ * docx ライブラリは Uint8Array を公式サポートしており、
+ * Blob を as any で渡す方法より確実に動作する
  */
-function base64ToBlob(base64Str: string): Blob {
-  const parts = base64Str.split(',');
-  const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/png';
-  const raw = window.atob(parts[1] || parts[0]);
-  const uint8Array = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) {
-    uint8Array[i] = raw.charCodeAt(i);
+function base64ToUint8Array(dataUrl: string): Uint8Array {
+  // "data:image/png;base64,iVBOR..." から Base64部分のみを抽出
+  const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+  const binaryStr = window.atob(base64Data);
+  const len = binaryStr.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryStr.charCodeAt(i);
   }
-  return new Blob([uint8Array], { type: mime });
+  return bytes;
 }
 
 /**
- * 画像キャプチャ対象のブロック（Chart, Svg）を画像要素としてWordに埋め込む
+ * 画像キャプチャ対象のブロック（Chart, Svg, Mermaid）を画像要素としてWordに埋め込む
+ * ImageRun.data には docx 公式サポート型である Uint8Array を渡す
  */
 export function renderImageBlock(
   block: any,
@@ -23,11 +27,14 @@ export function renderImageBlock(
   blockIndex: number,
   imageCache: Map<string, string>
 ): Paragraph[] {
-  const elementId = `json-doc-block-${pageIndex}-${blockIndex}`;
-  const dataUrl = imageCache.get(elementId);
+  // ブロックタイプも含めた一意なDOMのIDで画像キャッシュを参照
+  const elementId = `json-doc-block-${pageIndex}-${blockIndex}-${block.type}`;
+  console.log(`[ImageBlock] 画像取得: elementId="${elementId}" (type=${block.type})`);
 
-  if (!dataUrl) {
-    console.warn(`Image URL not found in cache for block ID: ${elementId}`);
+  const cacheValue = imageCache.get(elementId);
+
+  if (!cacheValue) {
+    console.error(`[ImageBlock] ✕ キャッシュで画像が見つかりません: "${elementId}"`);
     return [
       new Paragraph({
         children: [
@@ -40,30 +47,52 @@ export function renderImageBlock(
     ];
   }
 
-  // Blobデータを生成
-  const blob = base64ToBlob(dataUrl);
+  let dataUrl: string;
+  let originalWidth = 450;
+  let originalHeight = 300;
 
-  // 用紙サイズ（標準A4印刷幅: 約 450〜500pt）に合わせた表示サイズの初期設定
-  let width = 450;
-  let height = 300;
-
-  if (block.type === 'svg') {
-    width = 450;
-    height = 200;
-  } else if (block.type === 'chart') {
-    width = 450;
-    height = 280;
+  try {
+    const parsed = JSON.parse(cacheValue);
+    dataUrl = parsed.dataUrl;
+    originalWidth = parsed.width || 450;
+    originalHeight = parsed.height || 300;
+  } catch (e) {
+    // 過去互換（単一文字列だった場合）
+    dataUrl = cacheValue;
+    if (block.type === 'svg') originalHeight = 200;
+    else if (block.type === 'chart') originalHeight = 280;
+    else if (block.type === 'mermaid') originalHeight = 350;
   }
+
+  // DataURL → Uint8Array に変換（docx ライブラリが公式サポートする型）
+  const uint8Array = base64ToUint8Array(dataUrl);
+  console.log(`[ImageBlock] ✓ Uint8Array変換完了: ${uint8Array.length} bytes`);
+
+  // 用紙サイズ（標準A4印刷幅: 約 450〜500pt）に合わせたアスペクト比の維持
+  const maxWidth = 490; // A4印刷幅の実用的な最大値
+  let targetWidth = originalWidth;
+  let targetHeight = originalHeight;
+
+  if (originalWidth > maxWidth) {
+    const ratio = maxWidth / originalWidth;
+    targetWidth = maxWidth;
+    targetHeight = Math.round(originalHeight * ratio);
+  }
+
+  console.log(`[ImageBlock] ✓ Word埋め込みサイズ: ${targetWidth}x${targetHeight}`);
 
   return [
     new Paragraph({
+      alignment: AlignmentType.CENTER,
       children: [
         new ImageRun({
-          data: blob, // Uint8ArrayではなくBlobを渡すことで、Zip内部での破損を防止
+          // Uint8Array を直接渡す（docx 公式サポート型）
+          data: uint8Array,
           transformation: {
-            width: width,
-            height: height,
+            width: targetWidth,
+            height: targetHeight,
           },
+          type: 'png',
         } as any),
       ],
       spacing: {

@@ -13,10 +13,14 @@ export async function captureElementById(elementId: string): Promise<string | nu
   }
 
   try {
+    const width = element.offsetWidth || 500;
+    const height = element.offsetHeight || 300;
+
     // html-to-image の toPng を実行
     // レイアウト崩れを防ぎ、余白や背景色を綺麗に反映させるためのオプションを指定
     const dataUrl = await toPng(element, {
       cacheBust: true,
+      pixelRatio: 2, // 高解像度キャプチャを有効化 (品質向上)
       backgroundColor: '#ffffff', // キャプチャ時の背景色を白に固定
       style: {
         transform: 'scale(1)',
@@ -25,7 +29,8 @@ export async function captureElementById(elementId: string): Promise<string | nu
         height: element.style.height || 'auto',
       }
     });
-    return dataUrl;
+    // 寸法情報と一緒にJSON文字列化して返す
+    return JSON.stringify({ dataUrl, width, height });
   } catch (error) {
     console.error(`Failed to capture element ${elementId}:`, error);
     return null;

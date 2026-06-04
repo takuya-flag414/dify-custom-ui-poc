@@ -36,6 +36,7 @@ export async function dispatchRenderer(
       return []; // builder.tsのページ境界で自動改ページされるため、ここでは空配列を返却
     case 'chart':
     case 'svg':
+    case 'mermaid':
       return renderImageBlock(block, pageIndex, blockIndex, imageCache);
     case 'toc':
       return renderTOC(block);

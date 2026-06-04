@@ -573,83 +573,84 @@
     background-color: transparent; 
 }
 
-/* Typography for Document (Article Style) -> Ultra-Realistic A4 Paper Style */
+/* Typography for Document (Article Style) -> Modern Paper Style */
 .artifact-content {
     /* Paper sizing and minimum height for A4 aspect ratio (1:1.414) */
     width: 100%;
     max-width: 720px; 
     min-height: calc(720px * 1.414);
     
-    /* Paper visual styling (No border-radius, pure white) */
+    /* Paper visual styling */
     background-color: #ffffff !important;
-    border-radius: 0 !important; /* 本物のA4用紙は角丸がない */
+    border-radius: 0 !important; /* A4用紙のメタファーとして角丸なし */
     
-    /* 物理的な紙の厚みと設置面の落ち影を多重レイヤーで再現 */
+    /* Apple風の繊細で多重的なシャドウ (アンビエントシャドウ + エッジハイライト) */
     box-shadow: 
-        0 1px 3px rgba(0, 0, 0, 0.04), 
-        0 4px 12px rgba(0, 0, 0, 0.08), 
-        0 14px 24px rgba(0, 0, 0, 0.12), 
-        inset 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
+        0 1px 3px rgba(0, 0, 0, 0.02), 
+        0 8px 24px rgba(0, 0, 0, 0.04), 
+        0 16px 40px rgba(0, 0, 0, 0.08), 
+        inset 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
     
-    /* Word標準余白 (25.4mm ≈ 96px) より少し控えめな20mm余白を採用 */
+    /* 余白 */
     padding: 25mm 20mm !important; 
-    margin: 32px auto 64px auto; /* 上部の隙間と、下部の十分なスクロール余白 */
+    margin: 32px auto 64px auto;
     
-    /* Typography - 印刷物としての厳格なスタイリング */
-    font-family: "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif; /* 明朝体を優先して文書っぽく */
-    color: #000000 !important; /* インクの純黒 */
-    line-height: 1.6 !important; /* 印刷標準行間 */
-    font-size: 14.5px !important; /* 10.5pt〜11pt相当 */
-    text-align: justify !important; /* 両端揃え */
-    font-feature-settings: "palt" 1; /* プロポーショナルメトリクス */
+    /* Typography - Macネイティブのような洗練されたサンセリフ */
+    font-family: "-apple-system", "BlinkMacSystemFont", "Inter", "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    color: #1d1d1f !important; /* Appleのオフブラック */
+    line-height: 1.75 !important; /* ゆったりとした行間 */
+    font-size: 15px !important;
+    text-align: justify !important;
+    font-feature-settings: "palt" 1;
 }
 
-/* Markdown Styles Override for Artifact (Force Light Mode styling) */
-/* 見出し: 印刷物のpt仕様に準拠 */
+/* ダークモード時も紙は白いままにするため、ダークモード用の文字色反転を行わない */
+
+/* 見出し */
 .artifact-content h1,
 [data-theme='dark'] .artifact-content h1 {
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif; /* 見出しはゴシック体 */
-    font-size: 32px !important; /* ~24pt相当 */
+    font-family: "-apple-system", "BlinkMacSystemFont", "Inter", "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 32px !important;
     font-weight: 700 !important;
     margin-top: 0 !important;
     margin-bottom: 24px !important;
-    padding-bottom: 0 !important; /* 下線を排除 (印刷物らしく) */
+    padding-bottom: 0 !important;
     border-bottom: none !important;
-    letter-spacing: 0.05em !important;
-    color: #000000 !important;
-    text-align: center !important; /* タイトルは中央揃え */
+    letter-spacing: 0.02em !important;
+    color: #1d1d1f !important;
+    text-align: center !important;
 }
 
 .artifact-content h2,
 [data-theme='dark'] .artifact-content h2 {
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
-    font-size: 24px !important; /* ~18pt相当 */
+    font-family: "-apple-system", "BlinkMacSystemFont", "Inter", "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 22px !important;
     font-weight: 700 !important;
-    margin-top: 32px !important;
+    margin-top: 36px !important;
     margin-bottom: 16px !important;
-    color: #000000 !important;
+    color: #1d1d1f !important;
     text-align: left !important;
+    letter-spacing: 0.01em !important;
 }
 
 .artifact-content h3,
 [data-theme='dark'] .artifact-content h3 {
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
-    font-size: 19px !important; /* ~14pt相当 */
+    font-family: "-apple-system", "BlinkMacSystemFont", "Inter", "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 18px !important;
     font-weight: 600 !important;
-    margin-top: 24px !important;
+    margin-top: 28px !important;
     margin-bottom: 12px !important;
-    color: #000000 !important;
+    color: #1d1d1f !important;
     text-align: left !important;
 }
 
 .artifact-content p,
 [data-theme='dark'] .artifact-content p {
     margin-bottom: 1.5em !important;
-    color: #000000 !important;
-    text-indent: 1em !important; /* 日本語文書の段落開始1文字下げ */
+    color: #1d1d1f !important;
+    text-indent: 1em !important;
 }
 
-/* 箇条書きでは字下げを無効化 */
 .artifact-content li p,
 [data-theme='dark'] .artifact-content li p {
     text-indent: 0 !important;
@@ -662,99 +663,123 @@
 [data-theme='dark'] .artifact-content ol {
     margin-bottom: 1.5em !important;
     padding-left: 1.5em !important;
-    color: #000000 !important;
+    color: #1d1d1f !important;
 }
 
 .artifact-content li,
 [data-theme='dark'] .artifact-content li {
     margin-bottom: 0.5em !important;
-    color: #000000 !important;
+    color: #1d1d1f !important;
 }
 
-/* ハイパーリンク (Word標準の濃い青と常に下線) */
+/* ハイパーリンク (システムブルー) */
 .artifact-content a,
 [data-theme='dark'] .artifact-content a {
-    color: #0563C1 !important;
+    color: #007aff !important;
+    text-decoration: none !important;
+    transition: text-decoration 0.2s ease;
+}
+
+.artifact-content a:hover,
+[data-theme='dark'] .artifact-content a:hover {
     text-decoration: underline !important;
 }
 
-/* コードブロックもドキュメントの一部として印刷風に見せる (角丸排除) */
+/* コードブロック (角丸で洗練されたグレー背景) */
 .artifact-content .code-block-wrapper,
 [data-theme='dark'] .artifact-content .code-block-wrapper {
     margin: 24px 0 !important;
-    border: 1px solid #000000 !important; /* 黒枠 */
-    border-radius: 0 !important; /* 角丸なし */
-    box-shadow: none !important;
-    background-color: #ffffff !important; /* 白背景 */
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+    background-color: #f5f5f7 !important;
+    overflow: hidden !important;
 }
 
 .artifact-content .code-block-header,
 [data-theme='dark'] .artifact-content .code-block-header {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #000000 !important;
-    color: #000000 !important;
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif !important;
-    border-radius: 0 !important;
+    background-color: #f5f5f7 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #86868b !important;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Inter", sans-serif !important;
+    border-radius: 8px 8px 0 0 !important;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
 }
 
 .artifact-content pre,
 [data-theme='dark'] .artifact-content pre {
     background-color: transparent !important;
-    border-radius: 0 !important;
+    border-radius: 0 0 8px 8px !important;
+    padding: 16px !important;
+    margin: 0 !important;
 }
 
 .artifact-content pre code,
 [data-theme='dark'] .artifact-content pre code {
-    color: #000000 !important; 
-    font-family: 'Consolas', 'Courier New', monospace !important;
+    color: #1d1d1f !important; 
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
     font-size: 13px !important;
+    line-height: 1.5 !important;
 }
 
-/* 引用ブロック (Blockquote) -> 簡素な縦線 */
+/* 引用ブロック (モダンなアクセントラインと薄い背景) */
 .artifact-content blockquote,
 [data-theme='dark'] .artifact-content blockquote {
-    border-left: 3px solid #000000 !important; /* 黒線 */
-    padding-left: 16px !important;
-    margin-left: 0 !important;
-    color: #000000 !important;
-    background-color: transparent !important; /* 背景なし */
-    border-radius: 0 !important; /* 角丸なし */
-    font-style: normal !important; /* 斜体は日本語文書に合わないため解除 */
+    border-left: 4px solid #007aff !important;
+    padding: 12px 16px !important;
+    margin: 24px 0 !important;
+    color: #1d1d1f !important;
+    background-color: rgba(0, 122, 255, 0.04) !important;
+    border-radius: 0 8px 8px 0 !important;
+    font-style: normal !important;
 }
 
-/* テーブルスタイル (ソリッドな黒罫線) */
+/* テーブルスタイル (細いグレー罫線と角丸ラッパー) */
 .artifact-content table,
 [data-theme='dark'] .artifact-content table {
     width: 100% !important;
-    border-collapse: collapse !important;
-    border: 1px solid #000000 !important; /* 外枠黒 */
-    margin: 24px 0 !important;
-    background-color: #ffffff !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+    background-color: transparent !important;
 }
 
 .artifact-content th,
 .artifact-content td,
 [data-theme='dark'] .artifact-content th,
 [data-theme='dark'] .artifact-content td {
-    border: 1px solid #000000 !important; /* セル枠黒 */
-    padding: 8px 12px !important;
-    color: #000000 !important;
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif !important;
+    border: none !important;
+    border-bottom: 1px solid #e5e5ea !important;
+    padding: 12px 16px !important;
+    color: #1d1d1f !important;
+    font-family: "-apple-system", "BlinkMacSystemFont", "Inter", "Hiragino Kaku Gothic ProN", sans-serif !important;
+    font-size: 14px !important;
 }
 
 .artifact-content th,
 [data-theme='dark'] .artifact-content th {
-    background-color: #f3f3f3 !important; /* ヘッダは極薄いグレー印刷 */
+    background-color: #f2f2f7 !important;
     font-weight: 600 !important;
     text-transform: none !important;
+    border-bottom: 2px solid #e5e5ea !important;
 }
 
+/* 最後の行の下線を消す */
+.artifact-content tr:last-child td,
+[data-theme='dark'] .artifact-content tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* テーブルラッパーに角丸とボーダーをつける */
 .artifact-content .markdown-table-wrapper,
 [data-theme='dark'] .artifact-content .markdown-table-wrapper {
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
+    border: 1px solid #e5e5ea !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    border-radius: 8px !important;
     margin-bottom: 24px !important;
+    overflow: hidden !important; /* 角丸を適用するため */
 }
 
 /* --- sup (上付き文字) --- */
@@ -765,7 +790,7 @@
     vertical-align: baseline;
     top: -0.4em;
     padding-left: 0.1em;
-    color: var(--color-primary, #0563C1); /* リンク色と合わせて視認性を確保 */
+    color: var(--color-primary, #007aff); /* リンク色と合わせて視認性を確保 */
     font-weight: 500;
 }
 

@@ -640,11 +640,14 @@ const MessageBlock = ({
                             )}
                         </AnimatePresence>
 
-                        {/* ★変更: AIメッセージ用のアクションボタン群（コピー + 再生成） */}
+                        {/* ★変更: AIメッセージ用のアクションボタン群（コピー + 再生成 + クレジット） */}
                         {isAi && (
                             <div className="ai-action-group">
                                 {renderCopyButton()}
                                 {renderRegenerateButton()}
+                                {!isStreaming && isTypewriterComplete && (message.totalCredit > 0) && (
+                                    <CreditUsageBadge credit={message.totalCredit} />
+                                )}
                             </div>
                         )}
                     </div>
@@ -656,8 +659,6 @@ const MessageBlock = ({
                             {showKnowledgeBadge && <AiKnowledgeBadge />}
                             {/* ★追加: トークン消費表示 */}
                             {message.usage && <TokenUsageIndicator usage={message.usage} />}
-                            {/* ★変更: クレジット消費表示 (ターン全体の合計を表示) */}
-                            {(message.totalCredit > 0) && <CreditUsageBadge credit={message.totalCredit} />}
                             {/* ★変更: ENABLE_SMART_ACTIONSフラグで排他制御 */}
                             {FEATURE_FLAGS.ENABLE_SMART_ACTIONS ? (
                                 /* SmartActionsが有効 → AIからの提案のみ表示、「関連する質問」は非表示 */

@@ -79,7 +79,7 @@ const DownloadIcon = () => (
  * JsonDocumentPanel
  * 構造化されたJSONデータに基づき、A4ドキュメントを表示・編集するパネルです。
  */
-const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, updateMessage }) => {
+const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, updateMessage, onSendMessage }) => {
     const isGeneratingArtifact = streamingMessage && streamingMessage.isStreaming && streamingMessage.artifact;
     const shouldShowPanel = artifact || isGeneratingArtifact;
 
@@ -282,6 +282,7 @@ const JsonDocumentPanel = ({ isOpen, onClose, artifact, streamingMessage, update
                                         isEditMode={isEditMode}
                                         selectedBlockIndex={selectedBlockIndex}
                                         onBlockClick={setSelectedBlockIndex}
+                                        onSendMessage={onSendMessage}
                                     />
                                 </div>
                             )}

@@ -8,6 +8,7 @@ import DocChart from './blocks/DocChart';
 import DocTOC from './blocks/DocTOC';
 import DocCover from './blocks/DocCover';
 import DocLetterHeader from './blocks/DocLetterHeader';
+import DocMermaid from './blocks/DocMermaid';
 import EditableBlockWrapper from './components/EditableBlockWrapper';
 
 const BLOCK_COMPONENTS = {
@@ -20,6 +21,7 @@ const BLOCK_COMPONENTS = {
     toc: DocTOC,
     cover: DocCover,
     letter_header: DocLetterHeader,
+    mermaid: DocMermaid,
 };
 
 /**
@@ -31,7 +33,8 @@ const JsonDocParser = ({
     pageIndex,
     isEditMode = false, 
     selectedBlockIndex = null, 
-    onBlockClick = () => {} 
+    onBlockClick = () => {},
+    onSendMessage
 }) => {
     if (!blocks || blocks.length === 0) {
         return <div style={{ color: '#999', fontStyle: 'italic' }}>コンテンツがありません</div>;
@@ -57,8 +60,8 @@ const JsonDocParser = ({
                         isSelected={selectedBlockIndex === index}
                         onClick={() => onBlockClick(index)}
                     >
-                        <div id={`json-doc-block-${pageIndex}-${index}`}>
-                            <Component block={block} />
+                        <div id={`json-doc-block-${pageIndex}-${index}-${block.type}`}>
+                            <Component block={block} onSendMessage={onSendMessage} />
                         </div>
                     </EditableBlockWrapper>
                 );

@@ -41,7 +41,8 @@
     width: var(--doc-page-width);
     max-width: none;
     margin: 0 auto 50px auto;
-    min-height: var(--doc-page-min-height);
+    height: var(--doc-page-min-height); /* min-height から height に変更し固定 */
+    overflow: hidden; /* コンテンツが溢れてページレイアウトが崩れるのを防ぐ */
     padding: 0;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     border: 1px solid #d1d1d1;
@@ -180,14 +181,28 @@
     line-height: 1.6;
 }
 
-/* SVG Blocks */
-.doc-block-svg-container {
+/* 図表類 (SVG, Chart, Mermaid) Blocks */
+.doc-block-svg-container,
+.doc-chart-container,
+.doc-mermaid-viewer-wrapper {
     margin: 20px 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     background-color: transparent;
     padding: 0;
     border: none;
+    width: 100%;
+}
+
+.doc-block-svg-container svg,
+.doc-chart-container canvas,
+.doc-chart-container svg,
+.doc-mermaid-viewer-wrapper svg {
+    max-height: 400px;
+    max-width: 100%;
+    height: auto;
 }
 
 /* TOC Blocks */

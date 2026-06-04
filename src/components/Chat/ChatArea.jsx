@@ -495,6 +495,7 @@ const ChatArea = (props) => {
               onClose={closeArtifact}
               artifact={isJsonDocument ? openedArtifact : null}
               streamingMessage={isJsonDocument ? streamingMessage : null}
+              onSendMessage={handleSendMessageInternal}
             />
             <MermaidPanel
               key={`mermaid-${artifactKey}`}

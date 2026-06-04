@@ -1,43 +1,30 @@
 import { Table, TableRow, TableCell, Paragraph, TextRun, WidthType, BorderStyle, AlignmentType } from 'docx';
+import { createCoverViewModel } from '../../document/coverViewModel';
 
 /**
  * 表紙ブロックをWordの編集可能なネイティブ要素（中央揃え・水平罫線の王道ビジネス仕様）に変換する
  */
 export function renderCover(block: any): (Table | Paragraph)[] {
-  const meta = block.meta || {};
-  const title = meta.title || '無題のドキュメント';
-  const subtitle = meta.subtitle || '';
-  const author = meta.author || '';
-  const date = meta.date || '';
-  const org = meta.org || 'SEIHOKU INDUSTRIES';
-  const label = meta.label || 'MONTHLY REPORT';
-  const year = meta.year || '2026';
-
-  // 将来のビジネスレター用追加項目 (受け取るが、現在は要素に追加しない)
-  const recipient = meta.recipient || '';
-  const senderDetails = meta.senderDetails || '';
-  const refNo = meta.refNo || '';
-  const salutation = meta.salutation || '';
-  const complimentaryClose = meta.complimentaryClose || '';
+  const vm = createCoverViewModel(block?.meta);
 
   // 統一フォント設定 (半角英数は Yu Gothic, 日本語は 游ゴシック)
   const fontSetting = { ascii: 'Yu Gothic', eastAsia: '游ゴシック' };
   const elements: (Table | Paragraph)[] = [];
 
-  // ① 組織名 (右寄せ / 9pt / #888888 / 大文字)
+  // ① 組織名 (右寄せ / 9pt / #888888 / 大文字) または タイトルまでの上部余白
   elements.push(
     new Paragraph({
       alignment: AlignmentType.RIGHT,
-      children: [
+      children: vm.org ? [
         new TextRun({
-          text: org.toUpperCase(),
+          text: vm.org.toUpperCase(),
           size: 18, // 9pt
           color: '888888',
           bold: true,
           font: fontSetting,
         }),
-      ],
-      spacing: { after: 2400 }, // タイトルブロックまでの上部空間 (約4.2cm)
+      ] : [],
+      spacing: { before: 1200, after: 2400 }, // タイトルブロックまでの上部空間
     })
   );
 
@@ -53,30 +40,32 @@ export function renderCover(block: any): (Table | Paragraph)[] {
   );
 
   // ③ 年度 & 分類ラベル (11pt / プライマリ色濃紺 #1E3A8A / 太字)
-  elements.push(
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [
-        new TextRun({
-          text: `${year} / ${label.toUpperCase()}`,
-          size: 22, // 11pt
-          color: '1E3A8A',
-          bold: true,
-          font: fontSetting,
-        }),
-      ],
-      spacing: { after: 400 },
-    })
-  );
+  if (vm.badgeText) {
+    elements.push(
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [
+          new TextRun({
+            text: vm.badgeText.toUpperCase(),
+            size: 22, // 11pt
+            color: '1E3A8A',
+            bold: true,
+            font: fontSetting,
+          }),
+        ],
+        spacing: { after: 400 },
+      })
+    );
+  }
 
   // ④ メインタイトル (28pt / #1A1A1A / 太字)
-  const titleSpacingAfter = subtitle ? 200 : 0;
+  const titleSpacingAfter = vm.subtitle ? 200 : 0;
   elements.push(
     new Paragraph({
       alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
-          text: title,
+          text: vm.title,
           size: 56, // 28pt
           color: '1A1A1A',
           bold: true,
@@ -88,13 +77,13 @@ export function renderCover(block: any): (Table | Paragraph)[] {
   );
 
   // ⑤ サブタイトル (12pt / #555555 / 斜体)
-  if (subtitle) {
+  if (vm.subtitle) {
     elements.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
           new TextRun({
-            text: subtitle,
+            text: vm.subtitle,
             size: 24, // 12pt
             color: '555555',
             font: fontSetting,
@@ -112,15 +101,15 @@ export function renderCover(block: any): (Table | Paragraph)[] {
       border: {
         top: { style: BorderStyle.SINGLE, size: 24, color: '1E3A8A' },
       },
-      spacing: { after: 3000 }, // フッターまでの下部空間 (約5.3cm)
+      spacing: { after: 3200 }, // フッターまでの下部空間 (1ページに収まるよう調整)
     })
   );
 
   // ⑦ フッター情報 (中央寄せの2列テーブル / 枠線なし)
-  if (date || author) {
+  if (vm.hasFooter) {
     const footerRows: TableRow[] = [];
 
-    if (date) {
+    if (vm.date) {
       footerRows.push(
         new TableRow({
           cantSplit: true,
@@ -154,7 +143,7 @@ export function renderCover(block: any): (Table | Paragraph)[] {
                   alignment: AlignmentType.LEFT,
                   children: [
                     new TextRun({ 
-                      text: date, 
+                      text: vm.date, 
                       size: 18, // 9pt
                       color: '1A1A1A', 
                       font: fontSetting,
@@ -175,7 +164,7 @@ export function renderCover(block: any): (Table | Paragraph)[] {
       );
     }
 
-    if (author) {
+    if (vm.author) {
       footerRows.push(
         new TableRow({
           cantSplit: true,
@@ -209,7 +198,7 @@ export function renderCover(block: any): (Table | Paragraph)[] {
                   alignment: AlignmentType.LEFT,
                   children: [
                     new TextRun({ 
-                      text: author, 
+                      text: vm.author, 
                       size: 18, // 9pt
                       color: '1A1A1A', 
                       font: fontSetting,

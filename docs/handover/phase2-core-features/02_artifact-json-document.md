@@ -74,8 +74,8 @@ blocks.map((block, index) => {
             isSelected={selectedBlockIndex === index}
             onClick={() => onBlockClick(index)}
         >
-            {/* IDはDOCXエクスポート時の画像キャプチャに使用 */}
-            <div id={`json-doc-block-${pageIndex}-${index}`}>
+            {/* IDはDOCXエクスポート時の画像キャプチャに使用。ID衝突や画像入れ替わりを防ぐため、末尾にblock.typeを含める */}
+            <div id={`json-doc-block-${pageIndex}-${index}-${block.type}`}>
                 <Component block={block} />
             </div>
         </EditableBlockWrapper>
@@ -84,7 +84,7 @@ blocks.map((block, index) => {
 ```
 
 **重要な設計ポイント:**
-- `id={json-doc-block-${pageIndex}-${index}}` は、DOCXエクスポート時にDOM要素を画像キャプチャするために必要（`captureElementById()`で使用）
+- `id={json-doc-block-${pageIndex}-${index}-${block.type}}` は、DOCXエクスポート時にDOM要素を画像キャプチャするために必要（`captureElementById()`で使用）。ページ内に複数の図表が存在しても一意性を保つため、ブロックタイプを含める設計になっている。
 - 未知のブロック種別は赤字表示でデバッグを支援する
 
 ### 2.3 AIが出力するJSONスキーマ（ドキュメント）

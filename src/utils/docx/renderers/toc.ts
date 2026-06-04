@@ -1,4 +1,4 @@
-import { Paragraph, TextRun, Tab, HeadingLevel, TabStopType } from 'docx';
+import { Paragraph, TextRun, Tab, HeadingLevel, TabStopType, AlignmentType, BorderStyle } from 'docx';
 
 /**
  * 目次ブロックをWordのドットリーダー付き右揃え段落に変換する
@@ -7,8 +7,18 @@ export function renderTOC(block: any): Paragraph[] {
   const entries = block.entries || [];
   const paragraphs: Paragraph[] = [
     new Paragraph({
-      text: '目次',
-      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER,
+      children: [
+        new TextRun({
+          text: '目次',
+          size: 32, // 16pt
+          bold: true,
+          font: { ascii: 'Yu Gothic', eastAsia: '游ゴシック' },
+        })
+      ],
+      border: {
+        bottom: { style: BorderStyle.SINGLE, size: 12, color: '1E3A8A' },
+      },
       spacing: { before: 240, after: 240 },
     }),
   ];

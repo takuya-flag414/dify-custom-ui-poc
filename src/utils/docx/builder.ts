@@ -124,7 +124,7 @@ export class DocxBuilder {
               color: '1A1A1A',
             },
             paragraph: {
-              spacing: { line: 384, after: 120 }, // 1.6倍の行間、段落後の余白
+              spacing: { line: 240, after: 120 }, // 1.0倍の行間、段落後の余白
             },
           },
         ],

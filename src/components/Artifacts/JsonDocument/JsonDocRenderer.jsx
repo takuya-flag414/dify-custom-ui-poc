@@ -14,7 +14,8 @@ const JsonDocRenderer = ({
     isGenerating,
     isEditMode = false,
     selectedBlockIndex = null,
-    onBlockClick = () => {}
+    onBlockClick = () => {},
+    onSendMessage
 }) => {
     // 本文内のタイトル重複を避けるため、H1を除外（usePagination内部と同じロジック）
     const filteredBlocks = blocks.filter(b => !(b.type === 'heading' && b.level === 1));
@@ -67,6 +68,7 @@ const JsonDocRenderer = ({
                             blocks={pageBlocks} 
                             pageIndex={index}
                             isEditMode={isEditMode}
+                            onSendMessage={onSendMessage}
                             onBlockClick={(idx) => {
                                 const globalIdx = idx + blockOffset;
                                 const headerCount = isLetter ? 1 : 2;

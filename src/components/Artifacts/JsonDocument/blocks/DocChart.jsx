@@ -12,7 +12,7 @@ import {
  * A4ドキュメント内にグラフを表示するコンポーネントです。
  */
 const DocChart = ({ block }) => {
-    const { chart_type = 'bar', data = [], title, height = 300 } = block;
+    const { chart_type = 'bar', data = [], title, height = 240 } = block;
 
     // 印刷物に適したコンサバティブなカラーパレット（ダークネイビー + グレー階調）
     const COLORS = ['#003366', '#333333', '#666666', '#999999', '#cccccc', '#1a1a1a'];
@@ -30,7 +30,7 @@ const DocChart = ({ block }) => {
                         <XAxis dataKey="name" fontSize={10} tick={{ fill: '#333' }} />
                         <YAxis fontSize={10} tick={{ fill: '#333' }} />
                         <Tooltip />
-                        <Legend iconType="circle" />
+                        <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', color: '#555' }} />
                         <Line type="monotone" dataKey="value" stroke="#003366" strokeWidth={2} dot={{ r: 4, fill: '#003366' }} activeDot={{ r: 6 }} />
                     </LineChart>
                 );
@@ -41,8 +41,8 @@ const DocChart = ({ block }) => {
                             data={data}
                             cx="50%"
                             cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
+                            innerRadius={70}
+                            outerRadius={100}
                             paddingAngle={2}
                             dataKey="value"
                             stroke="#fff"
@@ -52,7 +52,7 @@ const DocChart = ({ block }) => {
                             ))}
                         </Pie>
                         <Tooltip />
-                        <Legend verticalAlign="bottom" height={36}/>
+                        <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', color: '#555' }}/>
                     </PieChart>
                 );
             case 'bar':
@@ -63,7 +63,7 @@ const DocChart = ({ block }) => {
                         <XAxis dataKey="name" fontSize={10} tick={{ fill: '#333' }} />
                         <YAxis fontSize={10} tick={{ fill: '#333' }} />
                         <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
-                        <Legend iconType="rect" />
+                        <Legend iconType="rect" wrapperStyle={{ fontSize: '11px', color: '#555' }} />
                         <Bar dataKey="value" fill="#003366" radius={[2, 2, 0, 0]} />
                     </BarChart>
                 );
@@ -72,18 +72,19 @@ const DocChart = ({ block }) => {
 
     return (
         <div className="doc-chart-container" style={{ 
-            margin: '32px 0', 
-            padding: '24px', 
+            margin: '24px auto', 
+            padding: '16px 0', 
+            maxWidth: '560px',
             backgroundColor: 'transparent', 
             borderTop: '1px solid #000',
             borderBottom: '1px solid #000'
         }}>
             {title && <h4 style={{ 
-                margin: '0 0 20px 0', 
-                fontSize: '12pt', 
+                margin: '0 0 12px 0', 
+                fontSize: '10pt', 
                 fontFamily: 'var(--doc-font-sans)',
                 textAlign: 'center', 
-                color: '#000' 
+                color: '#333' 
             }}>{title}</h4>}
             <div style={{ width: '100%', height: `${height}px` }}>
                 <ResponsiveContainer width="100%" height="100%">

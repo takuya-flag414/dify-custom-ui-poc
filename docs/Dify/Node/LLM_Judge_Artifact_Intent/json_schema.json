@@ -1,0 +1,22 @@
+{
+    "type": "object",
+    "properties": {
+        "internal_log": {
+            "type": "string",
+            "description": "ユーザーの入力意図を判定するための内部思考ログと理由"
+        },
+        "is_artifact_request": {
+            "type": "string",
+            "description": "Artifactの内容修正や更新の指示であれば 'true'、単なる質問・雑談であれば 'false'"
+        },
+        "is_type_change": {
+            "type": "string",
+            "description": "「Wordドキュメントにして」「プレゼンスライドに変更して」「フロー図にして」など、Artifactの形式（タイプ）変更を求めている場合は 'true'、それ以外は 'false'"
+        }
+    },
+    "required": [
+        "internal_log",
+        "is_artifact_request",
+        "is_type_change"
+    ]
+}

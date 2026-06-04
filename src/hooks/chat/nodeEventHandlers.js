@@ -687,7 +687,8 @@ export const logWorkflowOutput = (outputs, title, addLog) => {
     } else if (title.startsWith('LLM_') && (
         title.includes('Hybrid') || title.includes('Doc') ||
         title.includes('Search') || title.includes('General') ||
-        title.includes('Chat') || title.includes('Fast')
+        title.includes('Chat') || title.includes('Fast') ||
+        title.includes('Judge') || title.includes('Intent')
     )) {
         // 対象ノードの場合（Generatorなどは processArtifactNodeFinished で処理されるが、念のため適用）
         const logText = truncateForLog(outputText);
