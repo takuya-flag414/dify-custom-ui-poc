@@ -1,3 +1,4 @@
+// @deprecated - Phase 2: 動的スライドレイアウトエンジンへの移行に伴い、将来のリファクタリングで削除予定です。
 // src/components/Artifacts/JsonSlide/slides/KpiDashboardSlide.jsx
 // KPIダッシュボードスライド: 決算資料・経営ダッシュボード風の高度な指標表示
 import React from 'react';

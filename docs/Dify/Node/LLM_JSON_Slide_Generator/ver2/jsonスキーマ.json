@@ -1,0 +1,360 @@
+{
+    "type": "object",
+    "description": "動的スライドレイアウトエンジン v2 JSON スキーマ。レイアウト指示は含まず、純粋な情報構造のみを定義する。フロントエンドの推論エンジン（LayoutEngine）が blocks の種類・数・重みを解析し、最適なグリッド（SingleColumnGrid / TwoColumnSplitGrid / ThreeColumnMultiGrid / RowStackGrid）を自動選択する。agenda ブロックを導入した場合、section_header スライドは冗長になるため原則省略すること。",
+    "required": [
+        "artifact_id",
+        "thinking",
+        "presentation_title",
+        "theme",
+        "slides",
+        "answer"
+    ],
+    "properties": {
+        "artifact_id": {
+            "type": "integer",
+            "description": "アーティファクトの一意識別子。YYYYMMDDHHmmss形式の数値。"
+        },
+        "thinking": {
+            "type": "string",
+            "description": "内部推論。[1.Analysis]→[2.Story Structure]→[3.Outline Planning]→[4.Consistency Check]→[5.Block Design]→[6.Safety Check]→[7.Self Scoring]の順で記述。"
+        },
+        "presentation_title": {
+            "type": "string",
+            "description": "プレゼンテーション全体のタイトル。"
+        },
+        "theme": {
+            "type": "string",
+            "enum": [
+                "modern-indigo"
+            ],
+            "default": "modern-indigo",
+            "description": "適用するビジュアルテーマ。フロントエンドのテーマレジストリが参照する。"
+        },
+        "slides": {
+            "type": "array",
+            "description": "スライドデータ配列。修正時は既存IDを維持すること。",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "blocks"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "一意識別子（例: slide_1）。修正時は維持すること。"
+                    },
+                    "key_message": {
+                        "type": "string",
+                        "description": "スライドが伝えるべき単一の結論・主張（30文字以内推奨）。title_cover と section_divider を除くすべてのスライドで必須。結論形式（○○が必要 / ○○を推奨する）で記述すること。"
+                    },
+                    "blocks": {
+                        "type": "array",
+                        "description": "スライドを構成する情報ブロックの配列。フロントエンドのLayoutEngineがこの配列を解析し、最適なグリッドを自動選択する。レイアウト指示（左右配置等）をブロック内に含めてはならない。",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "type"
+                            ],
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "ブロックの種類。LayoutEngineの重み付け（Weight 1: text/list, Weight 2: content_card/key_value_card/quote, Weight 3: comparison_table/chart/mermaid）に基づきグリッドが決定される。",
+                                    "enum": [
+                                        "title_cover",
+                                        "section_header",
+                                        "agenda",
+                                        "text",
+                                        "list",
+                                        "content_card",
+                                        "key_value_card",
+                                        "comparison_table",
+                                        "chart",
+                                        "mermaid",
+                                        "quote",
+                                        "card",
+                                        "column_group",
+                                        "timeline",
+                                        "process_flow",
+                                        "matrix_2x2",
+                                        "funnel",
+                                        "kpi_metrics",
+                                        "venn_diagram",
+                                        "cycle"
+                                    ]
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "description": "title_cover / section_header / content_card / key_value_card / chart ブロックで使用するタイトル・見出し。"
+                                },
+                                "subtitle": {
+                                    "type": "string",
+                                    "description": "title_cover / section_header ブロック専用。サブタイトル。"
+                                },
+                                "date": {
+                                    "type": "string",
+                                    "description": "title_cover ブロック専用。作成日（例: 2025.06.05）。必ず埋めること。"
+                                },
+                                "eyebrow": {
+                                    "type": "string",
+                                    "description": "title_cover ブロック専用。文書属性（例: PROPOSAL, CONFIDENTIAL）。必ず推論して埋めること。"
+                                },
+                                "author": {
+                                    "type": "string",
+                                    "description": "title_cover ブロック専用。発表者・部署名。必ず推論して埋めること。"
+                                },
+                                "section_number": {
+                                    "type": "string",
+                                    "description": "section_header ブロック専用。セクション番号（例: PART 01）。※ agenda ブロックによる中間アジェンダを使用する場合は、section_header スライドは省略することを推奨する（冗長になるため）。"
+                                },
+                                "active_index": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "description": "agenda ブロック専用。現在進行中のセクションのインデックス（0始まり）。表紙直後の全体目次スライドでは 0 を設定し、各セクション開始直前の中間アジェンダでは対応するセクション番号（1, 2, 3...）を設定する。該当するセクションがハイライト表示され、完了済みセクションにはチェックマークが表示される。"
+                                },
+                                "content": {
+                                    "type": "string",
+                                    "description": "text ブロック専用。段落テキスト・リード文・説明文の本文。Hybrid Markup（**太字**, <span class='text-primary'>強調</span>等）に対応。"
+                                },
+                                "heading_level": {
+                                    "type": "integer",
+                                    "enum": [1, 2, 3],
+                                    "description": "text ブロック専用。見出しレベル（省略時は本文として扱う）。"
+                                },
+                                "items": {
+                                    "type": "array",
+                                    "description": "list ブロック専用（文字列配列）、または agenda ブロック専用（オブジェクト配列）。list の場合は最大6件。agenda の場合は { title: string, subtitle?: string, duration?: string } のオブジェクト配列（最大8件推奨）。",
+                                    "maxItems": 8,
+                                    "items": {
+                                        "anyOf": [
+                                            { "type": "string" },
+                                            {
+                                                "type": "object",
+                                                "required": ["title"],
+                                                "properties": {
+                                                    "title": { "type": "string", "description": "アジェンダ項目のタイトル（例: 1. 経営環境の変化と生成AI導入の必要性）" },
+                                                    "subtitle": { "type": "string", "description": "アジェンダ項目のサブタイトル・補足説明（任意）" },
+                                                    "duration": { "type": "string", "description": "所要時間（例: 10 min）（任意）" }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                "style": {
+                                    "type": "string",
+                                    "enum": [
+                                        "bullet",
+                                        "numbered"
+                                    ],
+                                    "default": "bullet",
+                                    "description": "list ブロック専用。箇条書き（bullet）または番号付きリスト（numbered）。省略時はbullet。"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "content_card ブロック専用。カードの説明文。"
+                                },
+                                "points": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "content_card ブロック専用。補足の箇条書き（最大4件）。",
+                                    "maxItems": 4
+                                },
+                                "label": {
+                                    "type": "string",
+                                    "description": "key_value_card ブロック専用。指標名・KPI名（例: 顧客満足度）。"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "description": "key_value_card ブロック専用。強調する数値・値（例: 95%, 2,400万）。"
+                                },
+                                "unit": {
+                                    "type": "string",
+                                    "description": "key_value_card / chart ブロック専用。単位（例: 億円, NPS）。"
+                                },
+                                "change": {
+                                    "type": "string",
+                                    "description": "key_value_card ブロック専用。前期比・増減（例: +12.3pt）。"
+                                },
+                                "trend": {
+                                    "type": "string",
+                                    "enum": [
+                                        "up",
+                                        "down",
+                                        "flat"
+                                    ],
+                                    "description": "key_value_card ブロック専用。トレンド方向。"
+                                },
+                                "headers": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "comparison_table ブロック専用。列ヘッダー（最大6列）。",
+                                    "maxItems": 6
+                                },
+                                "rows": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "description": "comparison_table ブロック専用。行データ（最大10行）。",
+                                    "maxItems": 10
+                                },
+                                "chart_type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "bar",
+                                        "line",
+                                        "area",
+                                        "pie",
+                                        "doughnut"
+                                    ],
+                                    "description": "chart ブロック専用。グラフ種別。定量比較・推移には bar / line、構成比には pie / doughnut、累積変化には area を推奨。"
+                                },
+                                "data": {
+                                    "type": "array",
+                                    "description": "chart ブロック専用。グラフデータ（最大10件）。",
+                                    "maxItems": 10,
+                                    "items": {
+                                        "type": "object",
+                                        "required": [
+                                            "label",
+                                            "value"
+                                        ],
+                                        "properties": {
+                                            "label": {
+                                                "type": "string",
+                                                "description": "データポイントのラベル（例: 2022年, 競合A）。"
+                                            },
+                                            "value": {
+                                                "type": "number",
+                                                "description": "データポイントの数値。"
+                                            }
+                                        }
+                                    }
+                                },
+                                "code": {
+                                    "type": "string",
+                                    "description": "mermaid ブロック専用。Mermaid記法によるダイアグラムコード。codeフィールドには記法名（flowchart TD等）から直接記述し、先頭に 'mermaid' キーワードは不要。ノードIDに日本語・特殊文字・スペースを使用禁止。ノードラベルのみ日本語可（例: A[担当者A]）。flowchart/graphは15ノード以下、sequenceDiagramは参加者8以下を厳守。"
+                                },
+                                "text": {
+                                    "type": "string",
+                                    "description": "quote ブロック専用。引用文本体。"
+                                },
+                                "role": {
+                                    "type": "string",
+                                    "description": "quote ブロック専用。発言者の役職・肩書き。"
+                                },
+                                "emphasis": {
+                                    "type": "string",
+                                    "enum": ["high"],
+                                    "description": "card ブロック専用。強調レベル。"
+                                },
+                                "blocks": {
+                                    "type": "array",
+                                    "description": "card / column_group ブロック専用。内部にネストされる子ブロックの配列。ネスト内の各オブジェクトはBlockカタログの仕様（type, content, items等）に従うこと。",
+                                    "items": {
+                                        "type": "object"
+                                    }
+                                },
+                                "steps": {
+                                    "type": "array",
+                                    "description": "timeline / process_flow ブロック専用。プロセスのステップ配列。文字列配列、または { title, owner, content[] } のオブジェクト配列。",
+                                    "items": {
+                                        "anyOf": [
+                                            { "type": "string" },
+                                            {
+                                                "type": "object",
+                                                "required": ["title"],
+                                                "properties": {
+                                                    "title": { "type": "string", "description": "ステップのタイトル" },
+                                                    "owner": { "type": "string", "description": "作業者（任意）" },
+                                                    "content": { "type": "array", "items": { "type": "string" }, "description": "作業内容の箇条書き（任意）" }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                "direction": {
+                                    "type": "string",
+                                    "enum": ["horizontal", "vertical"],
+                                    "description": "timeline / process_flow ブロック専用。タイムラインの方向。"
+                                },
+                                "show_arrows": {
+                                    "type": "boolean",
+                                    "description": "timeline / process_flow ブロック専用。矢印（➔や↓）を表示するかどうか。"
+                                },
+                                "xAxisLabel": {
+                                    "type": "string",
+                                    "description": "matrix_2x2 ブロック専用。X軸のラベル名（例: 価格）。"
+                                },
+                                "yAxisLabel": {
+                                    "type": "string",
+                                    "description": "matrix_2x2 ブロック専用。Y軸のラベル名（例: 品質）。"
+                                },
+                                "items": {
+                                    "type": "array",
+                                    "description": "matrix_2x2 / venn_diagram / cycle ブロック専用。配置要素の配列。matrix_2x2の場合は { label, x, y }、Venn/Cycleの場合は文字列配列。",
+                                    "items": {
+                                        "anyOf": [
+                                            { "type": "string" },
+                                            {
+                                                "type": "object",
+                                                "required": ["label", "x", "y"],
+                                                "properties": {
+                                                    "label": { "type": "string", "description": "要素のラベル名" },
+                                                    "x": { "type": "number", "minimum": 0, "maximum": 1, "description": "X座標相対位置（0.0〜1.0）" },
+                                                    "y": { "type": "number", "minimum": 0, "maximum": 1, "description": "Y座標相対位置（0.0〜1.0）" }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                "stages": {
+                                    "type": "array",
+                                    "description": "funnel ブロック専用。ファネルのステージ一覧。",
+                                    "items": {
+                                        "type": "object",
+                                        "required": ["label", "value"],
+                                        "properties": {
+                                            "label": { "type": "string", "description": "段階名（例: リード獲得）" },
+                                            "value": { "type": "string", "description": "段階の数値や割合（例: 10,000 件）" }
+                                        }
+                                    }
+                                },
+                                "metrics": {
+                                    "type": "array",
+                                    "description": "kpi_metrics ブロック専用。KPI指標のリスト。",
+                                    "items": {
+                                        "type": "object",
+                                        "required": ["label", "value"],
+                                        "properties": {
+                                            "label": { "type": "string", "description": "KPI名" },
+                                            "value": { "type": "string", "description": "KPIの数値（単位含む）" },
+                                            "trend": { "type": "string", "enum": ["up", "down", "flat"], "description": "トレンド方向" },
+                                            "trendValue": { "type": "string", "description": "前月比や目標比の補足数値" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "speaker_notes": {
+                        "type": "string",
+                        "description": "（任意）登壇者向けの補足メモ・話す内容のガイド。スライドには表示されない。"
+                    }
+                }
+            }
+        },
+        "answer": {
+            "type": "string",
+            "description": "ユーザーへの挨拶と内容の要約。生成したスライドの枚数・構成を簡潔に説明し、PPTXエクスポートやブラッシュアップを促すメッセージを含めること。必ずJSONの最後に置くこと。"
+        }
+    }
+}

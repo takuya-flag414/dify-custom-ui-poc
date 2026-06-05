@@ -7,8 +7,8 @@ import { modernIndigoMap } from '../themes/modern-indigo';
 export const themeRegistry = {
     'corporate-modern': corporateModernMap,
     'modern-indigo': modernIndigoMap,
-    // 将来的に新しいデザインカタログをここに追加可能
-    // 'vibrant-startup': vibrantStartupMap,
+    'consulting-classic': modernIndigoMap, // dynamic fallback
+    'tech-startup': modernIndigoMap,     // dynamic fallback
 };
 
 /**

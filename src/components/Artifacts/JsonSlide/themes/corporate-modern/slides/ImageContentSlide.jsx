@@ -1,3 +1,4 @@
+// @deprecated - Phase 2: 動的スライドレイアウトエンジンへの移行に伴い、将来のリファクタリングで削除予定です。
 // src/components/Artifacts/JsonSlide/slides/ImageContentSlide.jsx
 // 画像+テキストスライド: 左右分割で画像とコンテンツを並列表示
 // レイアウト崩壊防止: 画像フォールバック, object-fit: cover, overflow制御

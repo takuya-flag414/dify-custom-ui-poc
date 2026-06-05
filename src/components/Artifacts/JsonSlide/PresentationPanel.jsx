@@ -41,10 +41,11 @@ const defaultThemeId = 'corporate-modern';
  * @param {string} viewMode - 表示モード ('single' | 'list')
  * @param {function} setViewMode - モード変更関数
  */
-const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'single', setViewMode, onExportStatusChange }, ref) => {
+const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'single', setViewMode, onExportStatusChange, onSendMessage }, ref) => {
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     const [currentPalette, setCurrentPalette] = useState('blue'); // 追加: パレット状態
     const [showPaletteOptions, setShowPaletteOptions] = useState(false); // 追加: パレット選択肢の表示状態
+    const [mermaidErrors, setMermaidErrors] = useState({}); // 追加: Mermaidエラー状態
 
     // 編集モード用 State
     const [slideData, setSlideData] = useState(null);     // 編集中のスライド配列
@@ -90,6 +91,8 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                 id: slide.id || `slide_${idx + 1}`,
                 layout_type: slide.layout_type || 'content_slide',
                 content: slide.content || { title: `スライド ${idx + 1}` },
+                blocks: slide.blocks,
+                key_message: slide.key_message,
             }));
 
             return {
@@ -118,6 +121,7 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
         setCurrentSlideIndex(0);
         setSlideData(null);    // 編集データをクリアして再初期化を促す
         setCurrentTheme(null); // テーマもリセット
+        setMermaidErrors({});  // エラー状態もリセット
     }, [content]);
 
     // presentationData が確定したら slideData と originalSlides を初期化
@@ -149,10 +153,6 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
     // ===== PPTXエクスポート ハンドラー =====
     const handleExportPPTX = async () => {
         const activeThemeName = currentTheme || defaultThemeId;
-        if (activeThemeName !== 'modern-indigo') {
-            alert('PPTXエクスポートは現在「modern-indigo」テーマのみ対応しています。');
-            return;
-        }
 
         const activeSlidesData = slideData || presentationData.slides;
         if (!activeSlidesData) return;
@@ -240,6 +240,18 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
 
     const handleGoTo = useCallback((index) => {
         setCurrentSlideIndex(index);
+    }, []);
+
+    const handleMermaidError = useCallback((index, error, code) => {
+        setMermaidErrors(prev => {
+            if (error) {
+                return { ...prev, [index]: { error, code } };
+            } else {
+                const newErrors = { ...prev };
+                delete newErrors[index];
+                return newErrors;
+            }
+        });
     }, []);
 
     // キーボードナビゲーション
@@ -369,6 +381,7 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                                     slideIndex={index}
                                     totalSlides={activeSlides.length}
                                     isStatic={true}
+                                    onMermaidError={handleMermaidError}
                                 />
                             </div>
                         </div>
@@ -386,6 +399,7 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                 data-theme={activeTheme}
                 data-palette={currentPalette}
                 tabIndex={0}
+                style={{ position: 'relative' }}
             >
                 <div className="panel-header">
                     {/* テーマセレクター (DEVモードのみ) */}
@@ -468,10 +482,64 @@ const PresentationPanel = forwardRef(({ content, isGenerating, viewMode = 'singl
                                 themeId={activeTheme}
                                 slideIndex={currentSlideIndex}
                                 totalSlides={activeSlides.length}
+                                onMermaidError={handleMermaidError}
                             />
                         </motion.div>
                     </AnimatePresence>
                 </div>
+
+                {/* Mermaidエラー時のAI修正依頼ボタン（ナビゲーターの上、スライドの下） */}
+                {mermaidErrors[currentSlideIndex] && onSendMessage && (
+                    <div className="json-slide-panel-error-footer" style={{ 
+                        position: 'absolute',
+                        bottom: '68px', // ナビゲーターの上（16px padding + 52px height）
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 10,
+                        display: 'flex', 
+                        justifyContent: 'center'
+                    }}>
+                        <button 
+                            onClick={() => {
+                                const { error, code } = mermaidErrors[currentSlideIndex];
+                                const promptText = `スライド ${currentSlideIndex + 1} 枚目のMermaidダイアグラムのレンダリング中に以下のエラーが発生しました。文法を修正し、正しいMermaidコードを再生成してください。\n■ 発生したエラーメッセージ：\n\`\`\`\n${error}\n\`\`\`\n\n■ エラーが発生した元のソースコード：\n\`\`\`mermaid\n${code}\n\`\`\``;
+                                onSendMessage(promptText);
+                            }}
+                            title="AIにエラー内容を送信して修正を依頼します"
+                            style={{ 
+                                padding: '8px 16px', 
+                                fontSize: '13px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                cursor: 'pointer',
+                                backgroundColor: 'var(--color-bg-primary)',
+                                color: 'var(--color-text-primary)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '6px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                                transition: 'all 0.2s ease',
+                                fontWeight: 500
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)';
+                                e.currentTarget.style.borderColor = 'var(--color-primary)';
+                                e.currentTarget.style.color = 'var(--color-primary)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'var(--color-bg-primary)';
+                                e.currentTarget.style.borderColor = 'var(--color-border)';
+                                e.currentTarget.style.color = 'var(--color-text-primary)';
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            AIに修正を依頼する
+                        </button>
+                    </div>
+                )}
 
                 {/* ナビゲーション */}
                 <SlideNavigation

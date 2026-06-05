@@ -47,7 +47,7 @@ const DownloadIcon = () => (
     </svg>
 );
 
-const JsonSlidePanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
+const JsonSlidePanel = ({ isOpen, onClose, artifact, streamingMessage, onSendMessage }) => {
     const isGeneratingArtifact = streamingMessage && streamingMessage.isStreaming && streamingMessage.artifact;
     const shouldShowPanel = artifact || isGeneratingArtifact;
 
@@ -181,6 +181,7 @@ const JsonSlidePanel = ({ isOpen, onClose, artifact, streamingMessage }) => {
                             viewMode={viewMode}
                             setViewMode={setViewMode}
                             onExportStatusChange={setIsExporting}
+                            onSendMessage={onSendMessage}
                         />
                     </div>
                 </motion.div>

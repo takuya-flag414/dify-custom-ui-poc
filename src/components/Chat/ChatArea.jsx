@@ -488,6 +488,7 @@ const ChatArea = (props) => {
               onClose={closeArtifact}
               artifact={isJsonSlide ? openedArtifact : null}
               streamingMessage={isJsonSlide ? streamingMessage : null}
+              onSendMessage={handleSendMessageInternal}
             />
             <JsonDocumentPanel
               key={`json-doc-${artifactKey}`}

@@ -149,11 +149,19 @@ const MermaidViewer = ({ chartCode, onError }) => {
                 // mermaid.render は非同期関数です
                 const { svg: renderedSvg } = await mermaid.render(id, chartCode);
 
+                // 描画の一瞬のフラッシュ（巨大化）を防ぐため、SVG文字列の段階で
+                // Mermaidが付与した固定のwidth/height/styleを削除し、レスポンシブな100%指定に強制書き換えする
+                let preprocessedSvg = renderedSvg
+                    .replace(/<svg([^>]*)width="[^"]*"/gi, '<svg$1')
+                    .replace(/<svg([^>]*)height="[^"]*"/gi, '<svg$1')
+                    .replace(/<svg([^>]*)style="[^"]*"/gi, '<svg$1')
+                    .replace(/<svg/, '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet"');
+
                 // XSS対策のため、生成されたSVGをDOMPurifyでサニタイズする
                 // ※ USE_PROFILES: { svg: true } だけでは Mermaid が生成する
                 //   <text>, <tspan>, <foreignObject> などのラベル要素が削除されてしまい
                 //   ノードの見出しが消えるため、必要なタグ・属性を明示的に許可する
-                const cleanSvg = DOMPurify.sanitize(renderedSvg, {
+                const cleanSvg = DOMPurify.sanitize(preprocessedSvg, {
                     USE_PROFILES: { svg: true, svgFilters: true },
                     // フローチャートのラベル・タイムライン等で使われる foreignObject を許可
                     ADD_TAGS: ['foreignObject'],
@@ -161,6 +169,7 @@ const MermaidViewer = ({ chartCode, onError }) => {
                     ADD_ATTR: [
                         'requiredFeatures',
                         'viewBox',
+                        'preserveAspectRatio',
                         'transform',
                         'dy',
                         'dx',

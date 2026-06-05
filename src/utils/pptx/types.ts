@@ -61,6 +61,8 @@ export interface SlideData {
   type: string;
   layout_type?: string;
   content: SlideContent;
+  blocks?: any[];
+  key_message?: string;
 }
 
 export interface ExportOptions {

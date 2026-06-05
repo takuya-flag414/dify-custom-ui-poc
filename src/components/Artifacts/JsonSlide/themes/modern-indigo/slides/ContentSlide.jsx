@@ -1,3 +1,4 @@
+// @deprecated - Phase 2: 動的スライドレイアウトエンジンへの移行に伴い、将来のリファクタリングで削除予定です。
 // src/components/Artifacts/JsonSlide/themes/modern-indigo/slides/ContentSlide.jsx
 import React from 'react';
 import { motion } from 'framer-motion';

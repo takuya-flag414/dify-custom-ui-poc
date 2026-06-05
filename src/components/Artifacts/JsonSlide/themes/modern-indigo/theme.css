@@ -233,3 +233,15 @@
 .presentation-panel[data-theme="modern-indigo"] .slide-markdown-content p {
     break-inside: avoid-column;
 }
+
+/* 新しい動的レイアウト用 CSS 変数 */
+.json-slide-root.theme-modern-indigo {
+    --primary-color: #6366f1;
+    --bg-color: #ffffff;
+    --bg-alt: #f8fafc;
+    --text-main: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --font-heading: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    --card-bg: #ffffff;
+}

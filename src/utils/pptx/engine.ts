@@ -1,5 +1,6 @@
 import pptxgen from 'pptxgenjs';
 import { ExportOptions, SlideData } from './types';
+import { DynamicSlideRenderer } from './renderers/DynamicSlideRenderer.ts';
 import { globalThemeRegistry } from './core/Registry';
 
 /**
@@ -9,19 +10,33 @@ export class PptxExportEngine {
   private pptx: pptxgen;
   private options: ExportOptions;
 
+  private getConfig() {
+    const theme = globalThemeRegistry.getTheme(this.options.themeName, this.options.palette);
+    if (theme) return theme.config;
+    
+    // 登録されていない新しいテーマ（consulting-classic等）の場合は簡易的なConfigを生成
+    const isDark = this.options.themeName === 'tech-startup';
+    return {
+      colors: {
+        primary: isDark ? 'ff007f' : (this.options.themeName === 'consulting-classic' ? '00205B' : '6366F1'),
+        bg: { 
+          main: isDark ? '0f172a' : 'ffffff',
+          dark: isDark ? '000000' : '1e293b'
+        },
+        text: {
+          main: isDark ? 'ffffff' : '000000',
+          body: isDark ? 'f1f5f9' : '333333'
+        }
+      }
+    };
+  }
+
   constructor(options: ExportOptions) {
     this.options = options;
-
-    const theme = globalThemeRegistry.getTheme(options.themeName, options.palette);
-    if (!theme) {
-      throw new Error(`対象外テーマエラー: 現在のテーマ「${options.themeName}」はエクスポートに対応していません。`);
-    }
-
     this.pptx = new pptxgen();
     this.pptx.layout = 'LAYOUT_16x9';
-
     // マスターレイアウト定義 (テーマ固有の設定を使用)
-    this.defineMasterLayouts(theme.config);
+    this.defineMasterLayouts(this.getConfig());
   }
 
   private defineMasterLayouts(config: any) {
@@ -48,13 +63,26 @@ export class PptxExportEngine {
    * エクスポート処理のエントリーポイント
    */
   public async export(slides: SlideData[]) {
+    const config = this.getConfig();
     const theme = globalThemeRegistry.getTheme(this.options.themeName, this.options.palette);
-    if (!theme) return;
 
     for (let i = 0; i < slides.length; i++) {
       const slideData = slides[i];
-      const type = slideData.layout_type || slideData.type;
 
+      // --- 動的レイアウト (Dynamic Slide) の処理 ---
+      if (slideData.blocks && slideData.blocks.length > 0) {
+        const dynamicRenderer = new DynamicSlideRenderer(this.pptx, config);
+        await dynamicRenderer.render(slideData, i);
+        continue; // レガシー処理をスキップ
+      }
+
+      // --- レガシー目的特化型 (Fallback) の処理 ---
+      if (!theme) {
+        console.warn('レガシーレイアウトは登録されたテーマのみ対応しています');
+        continue;
+      }
+      
+      const type = slideData.layout_type || slideData.type;
       const RendererClass = theme.registry.getRenderer(type);
 
       if (RendererClass) {

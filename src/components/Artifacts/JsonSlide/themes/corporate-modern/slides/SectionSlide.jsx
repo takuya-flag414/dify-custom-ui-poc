@@ -1,3 +1,4 @@
+// @deprecated - Phase 2: 動的スライドレイアウトエンジンへの移行に伴い、将来のリファクタリングで削除予定です。
 // src/components/Artifacts/JsonSlide/slides/SectionSlide.jsx
 // セクション区切りスライド: コーポレートカラーが支配するプロフェッショナルデザイン
 import React from 'react';

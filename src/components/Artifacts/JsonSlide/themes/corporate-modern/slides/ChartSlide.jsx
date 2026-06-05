@@ -1,3 +1,4 @@
+// @deprecated - Phase 2: 動的スライドレイアウトエンジンへの移行に伴い、将来のリファクタリングで削除予定です。
 // src/components/Artifacts/JsonSlide/slides/ChartSlide.jsx
 // グラフスライド: コーポレート・プロフェッショナルなチャート表示（マルチレイアウト対応）
 import React, { useMemo } from 'react';
