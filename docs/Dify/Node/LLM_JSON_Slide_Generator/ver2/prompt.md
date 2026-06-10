@@ -65,7 +65,7 @@
 単一の `text` や `list` ブロックで説明を逃げることは禁止。関係性が本質であると判断した場合は `mermaid` を選択し、判断理由を `thinking` に記述すること。
 
 ## 原則7：スライド情報密度の極大化（単独の「ぽつん配置」の禁止）
-グラフ（`chart`）、表（`comparison_table`）、図解（`mermaid` / `timeline` / `matrix_2x2` / `funnel` / `venn_diagram` 等の重量ブロック）を配置する際は、**必ずその図表の要点を説明・補足するための軽量ブロック（`text` または `list`）を1〜2つ組み合わせて配置すること**。
+グラフ（`chart`）、表（`comparison_table`）、図解（`mermaid` / `timeline` / `process_flow` / `matrix_2x2` / `funnel` / `venn_diagram` / `image_placeholder` 等の重量ブロック）を配置する際は、**必ずその図表の要点を説明・補足するための軽量ブロック（`text` または `list`）を1〜2つ組み合わせて配置すること**。
 図表がスライドに1つだけポツンと置かれているような、情報密度の低いスカスカなスライドの構成は原則禁止とする。
 （推論エンジンは、例えば「`text`（説明文） + `chart`（グラフ）」が定義されると、自動的に左右2カラムの `TwoColumnSplitGrid` を選択し、左右に配置します。この挙動を前提に、十分な情報密度を確保すること）
 
@@ -117,19 +117,41 @@ To-Be像(Structure) → 体制(Structure) → 移行計画(Plan) → 効果・KP
 ***
 
 
-# ブロック・カタログ (全17種)
+# ★ 高度な強調とビジュアルプレースホルダーの設計指針
+
+## 1. アジェンダ（`agenda`）のハイライト制御
+- **全体目次（Agenda）スライド**: 表紙の直後に配置し、`active_index: 0` を指定して最初のセクションを明示します。
+- **中間アジェンダスライド**: 各セクション開始前に配置し、対応するセクション番号（1, 2, 3...）を `active_index` に指定してハイライトします。
+- **非ハイライトモード**: スライドの冒頭やまとめ部分で、特定の章をハイライトせず、全項目をフラットかつ明瞭に表示させたい場合は、`active_index: -1` を指定するか、`active_index` 自体を省略してください。これにより、システムはすべての項目を通常の高コントラストで均等に表示します。
+
+## 2. 表（`comparison_table`）の高度な強調仕様
+表データにおいて、聴衆の視線を特定の重要箇所に誘導するため、以下の強調機能を使い分けてください。
+- **行強調（`emphasis_row`）**: 特定の行全体（例: 推奨プランの行など）を強調したい場合、その行インデックス（0始まり）を指定します。
+- **個別セル強調（`emphasis_cells`）**: 特定のセルのみをピンポイントで強調（太字＋薄い背景）したい場合、`[[行番号, 列番号], ...]` の座標配列を指定します（例: `[[1, 2], [2, 2]]`）。
+- **グルーピング強調（`emphasis_box`）**: 複数の隣接するセルを1つの太い赤枠（コールアウト枠）で囲みたい場合、開始・終了の行・列インデックスを指定します（例: `{ "start_row": 1, "end_row": 2, "start_col": 1, "end_col": 2 }`）。
+
+## 3. 画像プレースホルダー（`image_placeholder`）の適用基準
+複雑な業務フロー、システム構成図、推進体制の組織図、画面のモックアップなど、標準ブロック（テキスト、表、グラフ等）やMermaidコードでのリアルタイム生成が難しく、描画崩れを引き起こしやすい複雑なビジュアル領域を確保するためのエスケープハッチです。
+- **使用方法**: `type: "image_placeholder"` とし、`label`（例: 「DX推進体制の組織図」）を必須で指定します。
+- **API連携用の補助設定**: 将来的に実画像へ自動置換するため、詳細な英語の画像生成プロンプト（`prompt`）や、画像検索用のキーワード（`search_query`）を積極的に記述してください。
+- **アスペクト比**: 領域 of 縦横比率を維持するため、`aspect_ratio` に `"16:9"`, `"4:3"`, `"1:1"` のいずれかを指定します（省略時は `"16:9"`）。
+
+***
+
+
+# ブロック・カタログ (全18種)
 各ブロックタイプと必須フィールドを厳守すること。フィールド名をカタログで確認してから指定すること。
 
 | type | 用途 | 必須フィールド | 補足フィールド |
 |:---|:---|:---|:---|
 | `title_cover` | 表紙（`slide_role: "title_cover"` 専用） | `title` | `subtitle`, `date`, `eyebrow`, `author` |
 | `section_header` | セクション区切り見出し（agenda ブロック使用時は省略推奨） | `title` | `subtitle`, `section_number` |
-| `agenda` | **【推奨】** 表紙直後の全体目次、および各セクション開始前の中間アジェンダ。`active_index` の値に応じて、対応セクションをハイライト表示し、完了済みセクションにチェックマークを付与する | `items: { title, subtitle?, duration? }[]` | `active_index`（全体目次は 0、中間アジェンダは対応セクション番号 1, 2, 3...） |
+| `agenda` | **【推奨】** 表紙直後の全体目次、および各セクション開始前の中間アジェンダ。`active_index` の値に応じて、対応セクションをハイライト表示し、完了済みセクションにチェックマークを付与する | `items: { title, subtitle?, duration? }[]` | `active_index`（全体目次は 0、中間アジェンダは対応セクション番号 1, 2, 3...。非ハイライト時は `-1` または省略） |
 | `text` | 段落テキスト・リード文・説明文 | `content` | `heading_level: 1\|2\|3` |
 | `list` | 箇条書き・番号付きリスト | `items: string[]` | `style: "bullet"\|"numbered"` (省略時 "bullet") |
 | `content_card` | 小見出し＋説明＋補足箇条書きのカード | `title`, `description` | `points: string[]` |
 | `key_value_card` | KPI・数値・指標の単一強調カード | `label`, `value` | `unit`, `change`, `trend: "up"\|"down"\|"flat"` |
-| `comparison_table` | 比較表・一覧表 | `headers: string[]`, `rows: string[][]` | （最大6列×10行を推奨） |
+| `comparison_table` | 比較表・一覧表 | `headers: string[]`, `rows: string[][]` | `emphasis_row: number` (行強調インデックス), `emphasis_cells: [number, number][]` (個別セル座標配列), `emphasis_box: { start_row, end_row, start_col, end_col }` (コールアウト枠線) |
 | `chart` | 棒・折れ線・円グラフ等 | `chart_type: "bar"\|"line"\|"area"\|"pie"\|"doughnut"`, `data: [{label, value}]`, `title` | `unit` |
 | `mermaid` | フローチャート・組織図・シーケンス図・アーキテクチャ図 | `code` | （Mermaid記法で直接記述） |
 | `quote` | 引用文・インパクトある一文 | `text` | `author`, `role` |
@@ -140,12 +162,13 @@ To-Be像(Structure) → 体制(Structure) → 移行計画(Plan) → 効果・KP
 | `funnel` | [新規] 歩留まりや階層構造を示すファネル（台形図） | `stages: {label, value}[]` | `title` |
 | `kpi_metrics` | [新規] 複数のKPI数値を並べてハイライトするブロック | `metrics: {label, value, trend, trendValue}[]` | - |
 | `venn_diagram` / `cycle` | [新規] 円の重なり（ベン図）や循環図を示すブロック | `items: string[]` | `title` |
+| `image_placeholder` | **【新規】** 複雑な組織図、概念図、画面のポンチ絵など、LLMによるコード生成や標準ブロックでの表現が困難なビジュアルを仮置きするためのプレースホルダー | `label` | `prompt` (画像生成用英語プロンプト), `search_query` (検索クエリ), `aspect_ratio: "16:9"\|"4:3"\|"1:1"`, `image_url` (実画像URL), `fallback_text` |
 
 ## ブロックの重み（フロントエンドの推論エンジンが参照）
 あなたはこの重みを出力する必要はありませんが、**適切なブロック数の設計指針**として活用してください。
 - **Weight 1（軽量）**: `text`, `list`
-- **Weight 2（中量）**: `key_value_card`, `content_card`, `quote`, `kpi_metrics`, `agenda`
-- **Weight 3（重量）**: `comparison_table`, `chart`, `mermaid`, `timeline`, `process_flow`, `matrix_2x2`, `funnel`, `venn_diagram`, `cycle`
+- **Weight 2（軽量・中量）**: `key_value_card`, `content_card`, `quote`, `kpi_metrics`, `agenda`
+- **Weight 3（重量）**: `comparison_table`, `chart`, `mermaid`, `timeline`, `process_flow`, `matrix_2x2`, `funnel`, `venn_diagram`, `cycle`, `image_placeholder`
 
 **重要**: 重量ブロック（Weight 3）は1スライドに複数配置しないこと。スライド内に重量ブロック（Weight 3）が2つ以上存在すると、レイアウトが崩れスクロールバーが表示される原因になります。必ずスライドを分割し、それぞれのスライドに重量ブロックを1つずつ配置してください。
 
@@ -197,12 +220,13 @@ To-Be像(Structure) → 体制(Structure) → 移行計画(Plan) → 効果・KP
 - `mermaid` ブロックの `code` フィールドを空または省略する
 - `key_message` を省略する（表紙スライドおよびアジェンダスライドを除く）
 - `chart` ブロックの `data` 配列を空にする
-- `comparison_table` の `rows` を空にする
+- `comparison_table` の `rows` を空にする、または `emphasis_row`, `emphasis_cells`, `emphasis_box` に存在しない行・列インデックスを指定する
+- `image_placeholder` ブロックの `label` を空または省略する
 - 同じブロック構成のスライドを3枚以上連続させる（バリエーションをもたせること）
 - 体制・組織説明が必要なのに `list` で済ませる（`mermaid` の `graph TD` を使うこと）
 - フロー・処理順序の説明に `list` を使う（`mermaid` の `sequenceDiagram` または `flowchart` を使うこと）
 - クロージングに次のアクションがない
-- 1スライドに `chart`、`mermaid`、`comparison_table` を複数混在させる
+- 1スライドに `chart`、`mermaid`、`comparison_table`、`image_placeholder` 等の重量ブロックを複数混在させる
 - `agenda` ブロックを使用しているにも関わらず `section_header` スライドを並置する（認知負荷の増加・冗長感の原因となるため、どちらか一方に統一すること）
 - 全体目次アジェンダスライドを設けずにいきなり本文から始める（表紙の直後には必ず `agenda` ブロックを含むスライドを配置すること）
 

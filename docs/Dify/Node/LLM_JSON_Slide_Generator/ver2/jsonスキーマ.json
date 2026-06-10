@@ -60,7 +60,7 @@
                             "properties": {
                                 "type": {
                                     "type": "string",
-                                    "description": "ブロックの種類。LayoutEngineの重み付け（Weight 1: text/list, Weight 2: content_card/key_value_card/quote, Weight 3: comparison_table/chart/mermaid）に基づきグリッドが決定される。",
+                                    "description": "ブロックの種類。LayoutEngineの重み付け（Weight 1: text/list, Weight 2: content_card/key_value_card/quote, Weight 3: comparison_table/chart/mermaid/image_placeholder）に基づきグリッドが決定される。",
                                     "enum": [
                                         "title_cover",
                                         "section_header",
@@ -81,7 +81,8 @@
                                         "funnel",
                                         "kpi_metrics",
                                         "venn_diagram",
-                                        "cycle"
+                                        "cycle",
+                                        "image_placeholder"
                                     ]
                                 },
                                 "title": {
@@ -110,8 +111,8 @@
                                 },
                                 "active_index": {
                                     "type": "integer",
-                                    "minimum": 0,
-                                    "description": "agenda ブロック専用。現在進行中のセクションのインデックス（0始まり）。表紙直後の全体目次スライドでは 0 を設定し、各セクション開始直前の中間アジェンダでは対応するセクション番号（1, 2, 3...）を設定する。該当するセクションがハイライト表示され、完了済みセクションにはチェックマークが表示される。"
+                                    "minimum": -1,
+                                    "description": "agenda ブロック専用。現在進行中のセクションのインデックス（0始まり）。表紙直後の全体目次スライドでは 0 を設定し、各セクション開始直前の中間アジェンダでは対応するセクション番号（1, 2, 3...）を設定する。非ハイライト表示（全体アジェンダ表示）にする場合は -1 または省略を設定する。該当するセクションがハイライト表示され、完了済みセクションにはチェックマークが表示される。"
                                 },
                                 "content": {
                                     "type": "string",
@@ -164,7 +165,7 @@
                                 },
                                 "label": {
                                     "type": "string",
-                                    "description": "key_value_card ブロック専用。指標名・KPI名（例: 顧客満足度）。"
+                                    "description": "key_value_card ブロック専用の指標名・KPI名（例: 顧客満足度）、または image_placeholder ブロック専用の指示ラベル（例: DX推進体制の組織図）。"
                                 },
                                 "value": {
                                     "type": "string",
@@ -340,6 +341,57 @@
                                             "trend": { "type": "string", "enum": ["up", "down", "flat"], "description": "トレンド方向" },
                                             "trendValue": { "type": "string", "description": "前月比や目標比の補足数値" }
                                         }
+                                    }
+                                },
+                                "prompt": {
+                                    "type": "string",
+                                    "description": "image_placeholder ブロック専用。画像生成APIに送るための英語のグラフィック生成用詳細プロンプト。"
+                                },
+                                "search_query": {
+                                    "type": "string",
+                                    "description": "image_placeholder ブロック専用。ストックフォトや画像検索API用のビジネス文脈に沿った検索キーワード。"
+                                },
+                                "aspect_ratio": {
+                                    "type": "string",
+                                    "enum": ["16:9", "4:3", "1:1"],
+                                    "default": "16:9",
+                                    "description": "image_placeholder ブロック専用。確保するアスペクト比。未指定時は 16:9。"
+                                },
+                                "image_url": {
+                                    "type": "string",
+                                    "description": "image_placeholder ブロック専用。生成・取得済みの実画像URL（指定がある場合はプレースホルダーに代わり画像を表示）。"
+                                },
+                                "fallback_text": {
+                                    "type": "string",
+                                    "description": "image_placeholder ブロック専用。画像読み込み失敗時や支援技術用の代替テキスト。"
+                                },
+                                "emphasis_row": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "description": "comparison_table ブロック専用。強調する行のインデックス（0始まり）。"
+                                },
+                                "emphasis_cells": {
+                                    "type": "array",
+                                    "description": "comparison_table ブロック専用。個別セルの強調判定座標の配列（[[行インデックス, 列インデックス], ...]）。0始まり。",
+                                    "items": {
+                                        "type": "array",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    }
+                                },
+                                "emphasis_box": {
+                                    "type": "object",
+                                    "description": "comparison_table ブロック専用。コールアウト枠線（グルーピング強調）用のボックス座標。",
+                                    "required": ["start_row", "end_row", "start_col", "end_col"],
+                                    "properties": {
+                                        "start_row": { "type": "integer", "minimum": 0, "description": "開始行インデックス（0始まり）" },
+                                        "end_row": { "type": "integer", "minimum": 0, "description": "終了行インデックス（0始まり）" },
+                                        "start_col": { "type": "integer", "minimum": 0, "description": "開始列インデックス（0始まり）" },
+                                        "end_col": { "type": "integer", "minimum": 0, "description": "終了列インデックス（0始まり）" }
                                     }
                                 }
                             }

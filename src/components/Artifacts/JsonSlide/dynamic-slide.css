@@ -372,3 +372,38 @@
     color: #0f172a;
 }
 
+/* 親コンテナに明示的な高さを与え、子要素が % で高さを計算できるようにする */
+/* ユーザー要望により Mermaid を含むゾーンだけ特例扱いとして高さを伝播させる */
+.split-layout .left-zone:has(.slide-mermaid),
+.split-layout .right-zone:has(.slide-mermaid) {
+    height: 100%;
+}
+
+/* Mermaid ブロックのレイアウトおよび最大サイズ制限 */
+.slide-mermaid {
+    height: 100% !important;
+    max-height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slide-mermaid .mermaid-viewer-container {
+    height: 100% !important;
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden !important;
+}
+
+.slide-mermaid .mermaid-viewer-container svg {
+    /* 高さが親から伝播するため、ここで初めて 100% 制限が有効になります */
+    height: 100% !important;
+    width: 100% !important;
+    max-height: 100% !important;
+    max-width: 100% !important;
+    object-fit: contain;
+}
