@@ -529,6 +529,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             let detectedTraceMode = 'knowledge';
             let isConversationIdSynced = false;
             let capturedOptimizedQuery = null;
+            let capturedSearchQueryMain = null; // ★追加
+            let capturedSearchQueryAlt = null;  // ★追加
+            let searchNodeCount = 0;            // ★追加: 検索実行回数
             let capturedUsage = null;
             let protocolMode = 'PENDING';
             let accumulatedCredit = 0; // ★追加: ターン合計クレジット追跡用（同期ループ用）
@@ -613,6 +616,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     sessionFiles,
                                     displayFiles,
                                     capturedOptimizedQuery,
+                                    capturedSearchQueryMain, // ★追加
+                                    capturedSearchQueryAlt,  // ★追加
+                                    searchNodeCount,         // ★追加
                                     userText: text
                                 });
 
@@ -621,9 +627,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                     continue;
                                 }
 
-                                const { nodeId, displayTitle, iconType, detectedTraceMode: newTraceMode, renderMode, thinkingText } = result;
+                                const { nodeId, displayTitle, iconType, detectedTraceMode: newTraceMode, renderMode, thinkingText, isSearchNode } = result;
                                 if (newTraceMode) {
                                     detectedTraceMode = newTraceMode;
+                                }
+
+                                if (isSearchNode) {
+                                    searchNodeCount++; // ★追加
                                 }
 
                                 tracker.markNodeStart(nodeId, displayTitle);
@@ -714,6 +724,8 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                                 if (title === 'LLM_Search_Strategy') {
                                     const result = processSearchStrategyFinished(outputs, nodeId, addLog);
                                     if (result) {
+                                        if (result.queryMain) capturedSearchQueryMain = result.queryMain; // ★追加
+                                        if (result.queryAlt) capturedSearchQueryAlt = result.queryAlt;   // ★追加
                                         setStreamingMessage(prev => prev ? {
                                             ...prev,
                                             thoughtProcess: prev.thoughtProcess.map(result.thoughtProcessUpdate)

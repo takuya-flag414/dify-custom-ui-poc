@@ -70,7 +70,7 @@ const getFileNameToDisplay = (inputs, sessionFiles, displayFiles) => {
  * @returns {Object|null} { displayTitle, iconType, detectedTraceMode } または null（非表示ノード）
  */
 export const processNodeStarted = (data, context) => {
-    const { sessionFiles, displayFiles, capturedOptimizedQuery, userText } = context;
+    const { sessionFiles, displayFiles, capturedOptimizedQuery, capturedSearchQueryMain, capturedSearchQueryAlt, searchNodeCount, userText } = context;
 
     const nodeType = data.data?.node_type;
     const title = data.data?.title;
@@ -90,6 +90,7 @@ export const processNodeStarted = (data, context) => {
     let detectedTraceMode = null;
     let renderMode = null;
     let thinkingText = null; // ★追加: Thinkingプレースホルダーのテキスト
+    let isSearchNode = false; // ★追加: 検索ノードフラグ
 
     if (mapping) {
         // マッピングテーブルにマッチした場合
@@ -104,9 +105,15 @@ export const processNodeStarted = (data, context) => {
             displayTitle = `ドキュメント「${fileNameToDisplay}」を解析中...`;
             detectedTraceMode = 'document';
         } else if (mapping.dynamic === 'search') {
-            const query = inputs.query || capturedOptimizedQuery || userText;
+            let query = inputs.query || capturedOptimizedQuery || userText;
+            if (searchNodeCount === 0 && capturedSearchQueryMain) {
+                query = capturedSearchQueryMain;
+            } else if (searchNodeCount === 1 && capturedSearchQueryAlt) {
+                query = capturedSearchQueryAlt;
+            }
             displayTitle = `Web検索: "${query}"`;
             detectedTraceMode = 'search';
+            isSearchNode = true;
         }
     } else if (nodeType === 'document-extractor') {
         // マッピングにないが document-extractor タイプの場合
@@ -116,10 +123,16 @@ export const processNodeStarted = (data, context) => {
         iconType = 'document';
     } else if (nodeType === 'tool' && title?.includes('Perplexity')) {
         // Perplexity検索のフォールバック
-        const query = inputs.query || capturedOptimizedQuery || userText;
+        let query = inputs.query || capturedOptimizedQuery || userText;
+        if (searchNodeCount === 0 && capturedSearchQueryMain) {
+            query = capturedSearchQueryMain;
+        } else if (searchNodeCount === 1 && capturedSearchQueryAlt) {
+            query = capturedSearchQueryAlt;
+        }
         displayTitle = `Web検索: "${query}"`;
         detectedTraceMode = 'search';
         iconType = 'search';
+        isSearchNode = true;
     } else if (nodeType === 'tool' && title?.includes('ファイル検索ストア')) {
         // ファイル検索ストアツールのフォールバック
         displayTitle = '📂 社内データを検索中...';
@@ -154,7 +167,8 @@ export const processNodeStarted = (data, context) => {
         iconType,
         detectedTraceMode,
         renderMode,
-        thinkingText // ★追加
+        thinkingText, // ★追加
+        isSearchNode // ★追加
     };
 };
 
@@ -498,6 +512,8 @@ export const processSearchStrategyFinished = (outputs, nodeId, addLog) => {
         }
 
         return {
+            queryMain: parsedJson.query_main, // ★追加
+            queryAlt: parsedJson.query_alt,   // ★追加
             thoughtProcessUpdate: (t) => t.id === nodeId ? {
                 ...t,
                 status: 'done',

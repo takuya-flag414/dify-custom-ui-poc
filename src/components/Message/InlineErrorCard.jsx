@@ -172,26 +172,17 @@ const InlineErrorCard = ({
                 <div className="inline-error-desc">{error.description}</div>
 
                 {/* Auto-Retry ステータス */}
-                {error.retryStrategy === 'auto-retry' && (
+                {error.retryStrategy === 'auto-retry' && isRetrying && (
                     <div className="inline-error-retry-status">
-                        {isRetrying ? (
-                            <>
-                                <div className="inline-error-spinner" />
-                                <span>
-                                    自動で再送信を試みています...
-                                    {retryCountdown > 0 && ` (${retryCountdown}秒後)`}
-                                </span>
-                                {retryCount > 0 && (
-                                    <span className="inline-error-retry-count">
-                                        ({retryCount}/{error.maxRetries})
-                                    </span>
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                <div className="inline-error-spinner" />
-                                <span>自動リトライ待機中...</span>
-                            </>
+                        <div className="inline-error-spinner" />
+                        <span>
+                            自動で再送信を試みています...
+                            {retryCountdown > 0 && ` (${retryCountdown}秒後)`}
+                        </span>
+                        {retryCount > 0 && (
+                            <span className="inline-error-retry-count">
+                                ({retryCount}/{error.maxRetries})
+                            </span>
                         )}
                     </div>
                 )}

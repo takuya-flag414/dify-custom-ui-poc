@@ -116,7 +116,9 @@ const MessageBlock = ({
 
     // ★追加: アバター用RadarOrbのモード判定
     const getOrbMode = () => {
-        if (hasWorkflowError) return 'error';
+        if (hasWorkflowError) {
+            return isRetrying ? 'error' : 'idle';
+        }
         if (!isStreaming) return 'idle'; 
         
         // 最新の実行中ノードを特定する

@@ -1,109 +1,5 @@
 {
-    "properties": {
-        "answer": {
-            "description": "チャット欄に表示する短い補足メッセージ。1〜2文で簡潔に記述し、『Markdownで整理しました』など自然な案内文にする。",
-            "type": "string"
-        },
-        "artifact_content": {
-            "description": "【必須】Markdown本文。HTMLではなく、見出し・箇条書き・番号付きリスト・表などを必要に応じて使った完成形のMarkdown文字列を格納する。Markdownコードブロック全体で囲わないこと。",
-            "type": "string"
-        },
-        "artifact_title": {
-            "description": "【必須】生成するMarkdown Artifactのタイトル。Artifactパネルのヘッダー表示や識別に使用される。フロントエンドはこのフィールドを検出した時点でパネルを開くため、必ず thinking の直後に出力する。",
-            "type": "string"
-        },
-        "artifact_type": {
-            "description": "【必須】Markdown Artifactの種別。上流で確定済みの値をそのまま出力する。再判定・再分類は行わない。",
-            "enum": [
-                "summary_report",
-                "meeting_minutes",
-                "checklist",
-                "comparison_table",
-                "faq"
-            ],
-            "type": "string"
-        },
-        "citations": {
-            "description": "本文生成時に参照した情報源の一覧。このノードのターンでRAG検索やWeb検索を実行していなくても、添付ファイル、上流ノードで取得済みの参照情報、会話内で与えられた参考情報を使った場合は格納する。参照元が本当に存在しない場合のみ空配列 [] を返す。",
-            "items": {
-                "properties": {
-                    "id": {
-                        "description": "情報源の一意な識別子。アプリ側で参照元を追跡するためのID。",
-                        "type": "string"
-                    },
-                    "source": {
-                        "description": "情報源名・記事名・ファイル名・資料名など、人間が見て分かる表示用の名称。",
-                        "type": "string"
-                    },
-                    "type": {
-                        "description": "情報源の種別。web はWeb由来、rag はRAG取得情報、file は添付ファイルや参照ファイルを示す。",
-                        "enum": [
-                            "web",
-                            "rag",
-                            "file"
-                        ],
-                        "type": "string"
-                    },
-                    "url": {
-                        "description": "参照元URLまたは参照先識別子。Web記事URL、RAG元資料URL、ファイル参照URLなどを格納する。",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "id",
-                    "type",
-                    "source",
-                    "url"
-                ],
-                "type": "object"
-            },
-            "type": "array"
-        },
-        "smart_actions": {
-            "description": "Artifact生成後にUI上へ表示する提案アクションボタンの一覧。通常は空配列 [] を返す。",
-            "items": {
-                "properties": {
-                    "icon": {
-                        "description": "UIで表示するアイコン識別子。",
-                        "type": "string"
-                    },
-                    "label": {
-                        "description": "ユーザーに見せるボタン文言。短く具体的に記述する。",
-                        "type": "string"
-                    },
-                    "payload": {
-                        "description": "ボタン押下時に渡す付加情報。",
-                        "properties": {
-                            "text": {
-                                "description": "アクション実行時に次段へ渡すテキスト。",
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "text"
-                        ],
-                        "type": "object"
-                    },
-                    "type": {
-                        "description": "アクションの内部種別。",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "type",
-                    "label",
-                    "icon",
-                    "payload"
-                ],
-                "type": "object"
-            },
-            "type": "array"
-        },
-        "thinking": {
-            "description": "内部用の計画メモ。ユーザーには表示されない。指定された artifact_type の確認、入力意図の整理、構成方針、情報不足時の扱い、出典反映方針、answer の方針などを具体的に記述する。artifact_title より前に出力すること。",
-            "type": "string"
-        }
-    },
+    "type": "object",
     "required": [
         "thinking",
         "artifact_title",
@@ -113,5 +9,104 @@
         "citations",
         "smart_actions"
     ],
-    "type": "object"
+    "properties": {
+        "thinking": {
+            "type": "string",
+            "description": "内部用の計画メモ。ユーザーには表示されない。必ず以下の順序で記述すること。\n\n【0. 品質方針（CREATE・EDITともに必須・最初に記述）】\nターゲット読者：（ユーザーの指示・コンテキストから推定）\nこのドキュメントで最も伝えるべき1文：（核心メッセージを1文で明記）\n情報密度：ライト / スタンダード / ヘビー（理由も1文で添える）\n\n【1. モードと型の記録】\nmode: CREATE または EDIT\nartifact_type: 確定した型\n\n【2. モード別推論】\nCREATEの場合：入力意図の整理・構成方針・情報不足時の扱い\nEDITの場合：original_found（true/false）・修正指示リスト・変更しない箇所の宣誓・一貫性チェック（修正後のトーン・用語・構造の矛盾がないか確認）\n\n【3. answer の方針】\nチャット欄に出す1〜2文の案内文の草案を書くこと。"
+        },
+        "artifact_title": {
+            "type": "string",
+            "description": "【必須】Markdown Artifactのタイトル。\n\n命名ルール：\n- 「〇〇について」「〇〇まとめ」「〇〇に関するドキュメント」などの形式的・汎用的タイトルは禁止。\n- ドキュメントの核心（誰が・何を・どう判断できるか）を表す名詞句または短文にする。\n- 文字数の目安：15〜35文字。\n- 修正時（EDIT）：ユーザーから明示的な変更指示がない限り、元のタイトルをそのまま維持する。\n\n必ず thinking の直後に出力すること（パネル表示のトリガーになるため）。"
+        },
+        "artifact_type": {
+            "type": "string",
+            "description": "【必須】Markdown Artifactの種別。新規生成時は上流で確定済みの値をそのまま出力する。修正時は元の artifact_type を維持する（ユーザーが明示的に型の変更を指示した場合のみ変更可）。",
+            "enum": [
+                "summary_report",
+                "meeting_minutes",
+                "checklist",
+                "comparison_table",
+                "faq"
+            ]
+        },
+        "artifact_content": {
+            "type": "string",
+            "description": "【必須】Markdown本文。HTMLではなく、見出し・箇条書き・表などを使った完成形のMarkdown文字列。\n\n品質要件：\n- そのままユーザーに見せられる完成形であること（下書き禁止）。\n- 新規生成時はゼロから作成し、修正時は変更箇所を反映した「完全なMarkdown全文（差分出力は不可）」を格納する。\n- 修正時（EDIT）：ユーザーからの変更指示がない部分は元の構成・テキストをそのまま維持すること。\n- Markdownコードブロック全体で囲わないこと。\n- 先頭から末尾まで省略なく出力すること。「以下同様」「…省略…」等の省略表現は絶対に禁止。"
+        },
+        "answer": {
+            "type": "string",
+            "description": "チャット欄に表示する短い補足メッセージ。1〜2文で簡潔に記述する。\n- 新規作成時：ドキュメントの核心に触れる1文 + 必要に応じて補足。例：「Q3営業の重点施策と課題をsummary_reportにまとめました。」\n- 修正時：具体的に何を変えたかを明記する。例：「アクションアイテム欄に田中さんの担当を追記しました。」\n- 修正時に元のコードが見つからなかった場合はその旨を案内する。\n- 「Markdownで整理しました」のような内容のない定型文は避ける。"
+        },
+        "citations": {
+            "type": "array",
+            "description": "本文生成・修正時に参照した情報源の一覧。添付ファイル・会話内の参考情報・RAG・Web検索を使った場合は格納する。参照元が本当に存在しない場合のみ空配列 [] を返す。",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type",
+                    "source",
+                    "url"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "rag",
+                            "file"
+                        ]
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "smart_actions": {
+            "type": "array",
+            "description": "提案アクションボタンの一覧。\n\n【重要】原則として1〜3件を必ず生成すること。空配列 [] はコンテキストが完全に空で何も提案できない例外的な場合のみ許可。\n\n品質要件：\n- label（表示名）：単語のみの指示や体言止め（NG：「詳細化」「タスク化」）は禁止。「〜する」などの動作と対象が明確な動詞を含む具体的な表現（OK：「背景と詳細な解説を追加する」「アクションアイテムをタスク化する」）にすること。\n- payload.text：極端に短い指示（NG：「英語にして」）は禁止。次に受けるLLMが文脈を失わないように「何をベースに、どう処理してほしいか」を具体的に説明した文章形式にすること。\n\n生成ルール：\n- artifact_type に応じた自然な次のアクションを提案する。\n- summary_report：「背景と詳細な解説を追加する」「重要ポイントを3点に絞り込む」など\n- meeting_minutes：「アクションアイテムをタスク化する」「次回会議のアジェンダ案を作る」など\n- checklist：「担当・期限付きの表形式にする」「項目に優先度ラベルを付与する」など\n- comparison_table：「推奨する選択肢とその理由を提示」「表の内容をFAQ形式に変換する」など\n- faq：「回答を簡潔にした簡易版を作る」など\n- コンテキストが空だった場合は「ファイルを追加してより詳細な版を生成する」を追加する。",
+            "items": {
+                "type": "object",
+                "required": [
+                    "type",
+                    "label",
+                    "icon",
+                    "payload"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "アクションの種別。通常は 'user_message' を使用する。"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "ボタンに表示するラベル。20文字以内で簡潔に。「〜する」という動詞を含む丁寧な表現にする。"
+                    },
+                    "icon": {
+                        "type": "string",
+                        "description": "Lucide アイコン名。例: list, zap, globe, scissors, plus, refresh-cw, file-text, filter, languages, calendar"
+                    },
+                    "payload": {
+                        "type": "object",
+                        "required": [
+                            "text"
+                        ],
+                        "properties": {
+                            "text": {
+                                "type": "string",
+                                "description": "ボタン押下時にユーザーメッセージとして送信される具体的な指示文。文脈を完全に含め、LLMが次のターンで何をすべきか迷わない具体的な文章形式にする。"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
