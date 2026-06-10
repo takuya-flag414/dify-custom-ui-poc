@@ -504,7 +504,10 @@ export const mockMessages: Record<string, MockMessage[]> = {
         {
             id: 'msg_12_2',
             role: 'ai',
-            text: '「次世代エンタープライズDX戦略」に関する戦略スライドを作成しました！🪄\n\nご要望通り、表やグラフ（ROI）、Mermaidを用いたアーキテクチャ図などをふんだんに盛り込み、コンサルティングファーム水準の全7枚の長大スライドとして構成しています。\n新しい動的レイアウトエンジン（Dynamic Slide Engine）が、各スライドの要素量や重み（Weight）に応じて最適なグリッド（左右分割、3カラムなど）を自動選択して美しく描画しています。右側のパネルでご確認ください。',
+            text: `「次世代エンタープライズDX戦略」に関する戦略スライドを作成しました！🪄
+
+ご要望通り、表やグラフ（ROI）、Mermaidを用いたアーキテクチャ図などをふんだんに盛り込み、コンサルティングファーム水準 of 全22枚の長大スライドとして構成しています。
+新しい動的レイアウトエンジン（Dynamic Slide Engine）が、各スライドの要素量や重み（Weight）に応じて最適なグリッド（左右分割、3カラムなど）を自動選択して美しく描画しています。右側のパネルでご確認ください。`,
             rawContent: '',
             citations: [],
             artifact: {
@@ -532,23 +535,24 @@ export const mockMessages: Record<string, MockMessage[]> = {
                             blocks: [
                                 {
                                     type: "agenda",
-                                    active_index: 0,
+                                    active_index: -1,
                                     items: [
-                                        { title: "1. 経営環境の変化と生成AI導入の必要性", subtitle: "競合動向および社内オペレーションの課題", duration: "10 min" },
-                                        { title: "2. コスト管理とセキュリティ設計方針", subtitle: "RAGアーキテクチャとセキュリティ緩和策", duration: "20 min" },
-                                        { title: "3. 3段階の導入ロードマップと推進体制（AI CoE）", subtitle: "フェーズ別マイルストーンと組織改編", duration: "15 min" },
-                                        { title: "4. リスク要因と投資対効果（ROI）予測", subtitle: "ハルシネーション対策と3年間のコスト削減効果", duration: "15 min" }
+                                        { title: "1. 戦略的適用領域", subtitle: "現状課題と生成AIがもたらすシナジー", duration: "10 min" },
+                                        { title: "2. システムとセキュリティ設計", subtitle: "AI基盤アーキテクチャとガバナンス", duration: "15 min" },
+                                        { title: "3. ロードマップと推進体制", subtitle: "3段階の導入フェーズとAI CoE", duration: "15 min" },
+                                        { title: "4. ROIと成果予測", subtitle: "投資対効果とリスク緩和策", duration: "10 min" }
                                     ]
                                 }
                             ],
-                            speaker_notes: "本日の全体アジェンダと各パートの時間配分です。まずは第1パートから入ります。"
+                            speaker_notes: "本日の全体アジェンダと各パートの時間配分です。まずはエグゼクティブサマリーと導入部からご説明します。"
                         },
                         {
-                            key_message: "生成AIの全社導入により、定型業務を極限まで自動化し、創造的なコア業務へのリソース集中を実現する。",
+                            key_message: "生成AIを全社導入し、定型業務を極限まで自動化することで、創造的なコア業務へのリソース集中を実現する。",
                             blocks: [
                                 {
                                     type: "text",
-                                    content: "【エグゼクティブ・サマリー】\n現在の労働市場の縮小とコスト増大に対応するため、従来のRPAやSaaS導入といった局所的な改善から、LLM（大規模言語モデル）を中核とした「全社プロセスの自律化」へパラダイムシフトを図る必要があります。"
+                                    content: `【エグゼクティブ・サマリー】
+現在の労働市場の縮小とコスト増大に対応するため、従来のRPAやSaaS導入といった局所的な改善から、LLM（大規模言語モデル）を中核とした「全社プロセスの自律化」へパラダイムシフトを図る必要があります。`
                                 },
                                 {
                                     type: "list",
@@ -562,11 +566,12 @@ export const mockMessages: Record<string, MockMessage[]> = {
                             speaker_notes: "全体のサマリーです。"
                         },
                         {
-                            key_message: "現状のオペレーションは限界を迎えつつあり、人的リソースの枯渇が事業成長の最大のボトルネックとなっている。",
+                            key_message: "既存オペレーションは限界を迎えており、非効率な業務プロセスが事業成長の最大のボトルネックとなっている。",
                             blocks: [
                                 {
                                     type: "text",
-                                    content: "社内ヒアリングおよび業務量調査の結果、特にバックオフィス部門と営業支援部門において、深刻なリソース不足が顕在化しています。\n日々の「検索」「集計」「転記」といった非付加価値業務に多大な時間が割かれており、既存のシステムでは対応しきれない非構造化データの処理が課題です。"
+                                    content: `社内ヒアリングおよび業務量調査の結果、特にバックオフィス部門と営業支援部門において深刻なリソース不足が顕在化しています。
+日々の「検索」「集計」「転記」といった非付加価値業務に多大な時間が割かれており、既存のシステムでは対応しきれない非構造化データの処理が課題です。`
                                 },
                                 {
                                     type: "key_value_card",
@@ -587,82 +592,86 @@ export const mockMessages: Record<string, MockMessage[]> = {
                             speaker_notes: "現状の課題とKPIです。"
                         },
                         {
-                            key_message: "本戦略を実行することで、圧倒的な生産性向上とコスト削減のダブルインパクトをもターンす。",
+                            key_message: "本日の検討アジェンダ",
                             blocks: [
                                 {
-                                    type: "key_value_card",
-                                    title: "定型業務の自動化率",
-                                    value: "+40%"
-                                },
-                                {
-                                    type: "key_value_card",
-                                    title: "社内ナレッジ検索時間",
-                                    value: "-70%"
-                                },
-                                {
-                                    type: "key_value_card",
-                                    title: "顧客対応キャパシティ",
-                                    value: "3倍"
+                                    type: "agenda",
+                                    active_index: 0,
+                                    items: [
+                                        { title: "1. 戦略的適用領域", subtitle: "現状課題と生成AIがもたらすシナジー", duration: "10 min" },
+                                        { title: "2. システムとセキュリティ設計", subtitle: "AI基盤アーキテクチャとガバナンス", duration: "15 min" },
+                                        { title: "3. ロードマップと推進体制", subtitle: "3段階の導入フェーズとAI CoE", duration: "15 min" },
+                                        { title: "4. ROIと成果予測", subtitle: "投資対効果とリスク緩和策", duration: "10 min" }
+                                    ]
                                 }
                             ],
-                            speaker_notes: "AI導入によって得られる定量インパクトのハイライトです。"
+                            speaker_notes: "第1パートである「戦略的適用領域」についてご説明します。"
                         },
                         {
-                            key_message: "競合他社は既にAI投資を加速しており、自社のみが旧来のプロセスに留まることは致命的な競争力低下を招く。",
+                            key_message: "定型度と専門性の軸で業務をマッピングし、自動化インパクトが最も高い領域から優先的に適用を開始する。",
                             blocks: [
                                 {
                                     type: "text",
-                                    content: "市場の主要プレイヤーとのケイパビリティ比較です。\nトップランナーであるA社は既に全社規模でのLLM展開を完了しており、商品企画からカスタマーサポートに至るまでAIネイティブなプロセスを構築しています。"
+                                    content: "社内の全業務を定型度と専門性の2軸で評価しました。右上（定型・高専門）はAIによる高度な支援が可能な領域、右下（定型・低専門）は完全自動化が可能な領域です。これらの領域から優先的にAIソリューションを展開します。"
+                                },
+                                {
+                                    type: "matrix_2x2",
+                                    title: "社内業務の生成AI適用マトリックス",
+                                    xAxisLabel: "業務の定型度",
+                                    yAxisLabel: "業務の専門性",
+                                    items: [
+                                        { label: "定型レポーティング", x: 0.8, y: 0.2 },
+                                        { label: "契約書レビュー", x: 0.7, y: 0.8 },
+                                        { label: "高度な企画立案", x: 0.2, y: 0.9 },
+                                        { label: "突発的なトラブル対応", x: 0.1, y: 0.4 }
+                                    ]
+                                }
+                            ],
+                            speaker_notes: "2x2マトリックスを用いた業務の適用領域分析です。"
+                        },
+                        {
+                            key_message: "競合はすでにAI投資を本格化させており、自社のみが旧来のプロセスに留まることは致命的な競争力低下を招く。",
+                            blocks: [
+                                {
+                                    type: "text",
+                                    content: "市場の主要プレイヤーとのケイパビリティ比較です。トップランナーであるA社は既に全社規模でのLLM展開を完了しています。自社も本施策を導入することで、競合と同等以上の競争力を確保します。"
                                 },
                                 {
                                     type: "comparison_table",
-                                    headers: ["評価軸", "自社 (現状)", "自社 (AI導入後)", "A社 (競合)", "B社 (競合)"],
+                                    emphasis_cells: [
+                                        [0, 1],
+                                        [1, 1]
+                                    ],
+                                    emphasis_box: {
+                                        start_row: 1,
+                                        end_row: 2,
+                                        start_col: 2,
+                                        end_col: 3
+                                    },
+                                    headers: ["評価軸", "A社 (競合)", "自社 (現状)", "自社 (AI導入後)"],
                                     rows: [
-                                        ["情報検索スピード", "手動 (数時間)", "即時 (数秒)", "即時 (数秒)", "部分自動化"],
-                                        ["文書作成の自動化", "未対応", "80%自動化", "75%自動化", "未対応"],
-                                        ["顧客対応の24時間化", "未対応", "対応済", "対応済", "未対応"],
-                                        ["システム開発アジリティ", "低い", "極めて高い", "高い", "中程度"],
-                                        ["データ活用レベル", "限定的", "予測・最適化", "予測・最適化", "集計レベル"]
+                                        ["情報検索スピード", "即時 (数秒)", "手動 (数時間)", "即時 (数秒)"],
+                                        ["文書作成の自動化", "75%自動化", "未対応", "80%自動化"],
+                                        ["顧客対応の24時間化", "対応済", "未対応", "対応済"]
                                     ]
                                 }
                             ],
-                            speaker_notes: "競合比較です。"
+                            speaker_notes: "競合他社との能力比較表です。自社の導入後をハイライトしています。"
                         },
                         {
-                            key_message: "フロントオフィス（営業部門）においては、提案活動の品質向上とリードタイムの大幅短縮を実現する。",
+                            key_message: "LLM基盤、独自データ(RAG)、および業務システムの統合こそが、持続的な競争優位とビジネス価値を創出する。",
                             blocks: [
                                 {
                                     type: "text",
-                                    content: "最も収益に直結する営業部門では、セールス担当者の本来の業務である「顧客との対話」に時間を割けるよう、バックグラウンド業務をLLMに委譲します。"
+                                    content: "生成AI単体では一般的な回答しか得られません。真の価値は、LLMが社内の独自データ（RAG）を読み込み、さらに社内システムとAPIで連携することで初めて生まれます。これら3つの要素の重なりが、業務の自律化をもたらします。"
                                 },
                                 {
-                                    type: "list",
-                                    items: [
-                                        "【提案書ドラフトの自動生成】: 過去の類似案件や顧客企業の最新IR情報を読み込み、骨子を自動作成",
-                                        "【商談議事録とCRM連携】: 商談の音声データからネクストアクションを抽出し、SFA/CRMへ自動入力",
-                                        "【見積書チェック】: 過去の受注データと照合し、リスクや原価異常を自動で検知・アラート"
-                                    ]
+                                    type: "venn_diagram",
+                                    title: "生成AI活用がもたらす価値のシナジー",
+                                    items: ["LLM基盤", "社内データ (RAG)", "業務システム (API)"]
                                 }
                             ],
-                            speaker_notes: "営業部門でのユースケース詳細です。"
-                        },
-                        {
-                            key_message: "バックオフィス（管理部門）においては、膨大な規定照会とドキュメント作成作業をAIが代替する。",
-                            blocks: [
-                                {
-                                    type: "text",
-                                    content: "人事、法務、経理などのコストセンターにおいては、属人化しやすい専門知識の共有と定型処理のスピードアップが急務です。"
-                                },
-                                {
-                                    type: "list",
-                                    items: [
-                                        "【法務】: 契約書の一次レビュー自動化と、自社有利・不利条項の瞬時ハイライト",
-                                        "【人事】: 社員からの「就業規則」「福利厚生」に関する問い合わせを24時間対応チャットボットで一次対応",
-                                        "【経理】: 請求書のPDFから必要な項目をOCRとLLMの組み合わせで高精度に抽出し、ERPへ自動起票"
-                                    ]
-                                }
-                            ],
-                            speaker_notes: "バックオフィス部門でのユースケース詳細です。"
+                            speaker_notes: "生成AI活用のコアとなる3要素のベン図です。"
                         },
                         {
                             key_message: "本日の検討アジェンダ",
@@ -671,31 +680,75 @@ export const mockMessages: Record<string, MockMessage[]> = {
                                     type: "agenda",
                                     active_index: 1,
                                     items: [
-                                        { title: "1. 経営環境の変化と生成AI導入の必要性", subtitle: "競合動向および社内オペレーションの課題", duration: "10 min" },
-                                        { title: "2. コスト管理とセキュリティ設計方針", subtitle: "RAGアーキテクチャとセキュリティ緩和策", duration: "20 min" },
-                                        { title: "3. 3段階の導入ロードマップと推進体制（AI CoE）", subtitle: "フェーズ別マイルストーンと組織改編", duration: "15 min" },
-                                        { title: "4. リスク要因と投資対効果（ROI）予測", subtitle: "ハルシネーション対策と3年間のコスト削減効果", duration: "15 min" }
+                                        { title: "1. 戦略的適用領域", subtitle: "現状課題と生成AIがもたらすシナジー", duration: "10 min" },
+                                        { title: "2. システムとセキュリティ設計", subtitle: "AI基盤アーキテクチャとガバナンス", duration: "15 min" },
+                                        { title: "3. ロードマップと推進体制", subtitle: "3段階の導入フェーズとAI CoE", duration: "15 min" },
+                                        { title: "4. ROIと成果予測", subtitle: "投資対効果とリスク緩和策", duration: "10 min" }
                                     ]
                                 }
                             ],
-                            speaker_notes: "第2パートである「コスト管理とセキュリティ設計方針」についてご説明します。"
+                            speaker_notes: "第2パートである「システムとセキュリティ設計」についてご説明します。"
                         },
                         {
-                            key_message: "社内データを統合し、セキュアな環境でLLMを活用する「AI基盤アーキテクチャ」を構築する。",
+                            key_message: "社内データをセキュアに統合し、ハルシネーションを防止する「RAGハイブリッド基盤」を構築する。",
                             blocks: [
                                 {
                                     type: "text",
-                                    content: "既存の社内データベースやドキュメントストレージ（SharePoint, Google Drive等）をクローリングし、ベクトルデータベースにインデックス化します。\nこれにより、従業員は社内の独自ナレッジに基づいた回答をセキュアに引き出すことが可能となります（RAGアプローチ）。"
+                                    content: "既存の社内ドキュメント（SharePoint等）をベクトルデータベースにインデックス化し、従業員は社内の独自ナレッジに基づいた回答をセキュアに引き出すことが可能となります。"
                                 },
                                 {
                                     type: "mermaid",
-                                    code: "graph TD\n    A[ユーザーUI] --> B(API Gateway)\n    B --> C{LLM Orchestrator}\n    C --> D[Vector DB / RAG]\n    D -.-> E[(社内システム)]\n    D -.-> F[(社内ドキュメント)]\n    C --> G[OpenAI / Anthropic]\n    C --> H[社内規定フィルター]\n    style A fill:#f9f,stroke:#333,stroke-width:2px"
+                                    code: `graph TD
+    A[ユーザーUI] --> B(API Gateway)
+    B --> C{LLM Orchestrator}
+    D -.-> E[(社内システム)]
+    D -.-> F[(社内文書)]
+    C --> G[OpenAI / Anthropic]
+    C --> H[監査フィルター]
+    style A fill:#f9f,stroke:#333,stroke-width:2px`
                                 }
                             ],
                             speaker_notes: "システムアーキテクチャです。"
                         },
                         {
-                            key_message: "エンタープライズでの導入に必須となる強固なセキュリティ・コンプライアンス要件を完全に満たす。",
+                            key_message: "AIエージェントは、コンテキスト抽出から監査までの一連のプロセスを自律的かつ安全に実行する。",
+                            blocks: [
+                                {
+                                    type: "timeline",
+                                    direction: "horizontal",
+                                    show_arrows: true,
+                                    steps: [
+                                        {
+                                            title: "1. コンテキスト収集",
+                                            owner: "エージェント",
+                                            content: [
+                                                "ユーザーのプロンプトを解析",
+                                                "必要な追加情報の特定と取得"
+                                            ]
+                                        },
+                                        {
+                                            title: "2. RAG検索＆統合",
+                                            owner: "RAGエンジン",
+                                            content: [
+                                                "社内DBから関連文書を抽出",
+                                                "情報の妥当性を検証・フィルタリング"
+                                            ]
+                                        },
+                                        {
+                                            title: "3. ガバナンス監査＆出力",
+                                            owner: "LLM / 監査機構",
+                                            content: [
+                                                "機密情報・PIIのマスキング",
+                                                "最終回答の生成とユーザーへの提供"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            speaker_notes: "エージェントの処理プロセスを示すタイムライン図です。"
+                        },
+                        {
+                            key_message: "エンタープライズ導入に必須となる強固なセキュリティ・ガバナンス要件を完全に担保する。",
                             blocks: [
                                 {
                                     type: "text",
@@ -711,7 +764,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
                                     ]
                                 }
                             ],
-                            speaker_notes: "セキュリティとコンプライアンスについてです。"
+                            speaker_notes: "セキュリティとコンプライアンス要件です。"
                         },
                         {
                             key_message: "本日の検討アジェンダ",
@@ -720,22 +773,22 @@ export const mockMessages: Record<string, MockMessage[]> = {
                                     type: "agenda",
                                     active_index: 2,
                                     items: [
-                                        { title: "1. 経営環境の変化と生成AI導入の必要性", subtitle: "競合動向および社内オペレーションの課題", duration: "10 min" },
-                                        { title: "2. コスト管理とセキュリティ設計方針", subtitle: "RAGアーキテクチャとセキュリティ緩和策", duration: "20 min" },
-                                        { title: "3. 3段階の導入ロードマップと推進体制（AI CoE）", subtitle: "フェーズ別マイルストーンと組織改編", duration: "15 min" },
-                                        { title: "4. リスク要因と投資対効果（ROI）予測", subtitle: "ハルシネーション対策と3年間のコスト削減効果", duration: "15 min" }
+                                        { title: "1. 戦略的適用領域", subtitle: "現状課題と生成AIがもたらすシナジー", duration: "10 min" },
+                                        { title: "2. システムとセキュリティ設計", subtitle: "AI基盤アーキテクチャとガバナンス", duration: "15 min" },
+                                        { title: "3. ロードマップと推進体制", subtitle: "3段階の導入フェーズとAI CoE", duration: "15 min" },
+                                        { title: "4. ROIと成果予測", subtitle: "投資対効果とリスク緩和策", duration: "10 min" }
                                     ]
                                 }
                             ],
-                            speaker_notes: "第3パートである「3段階の導入ロードマップと推進体制」についてご説明します。"
+                            speaker_notes: "第3パートである「ロードマップと推進体制」についてご説明します。"
                         },
                         {
-                            key_message: "本質的な変革を実現するため、3段階のフェーズに分けた着実なロードマップを推進する。",
+                            key_message: "本質的な業務変革を遂げるため、3段階のフェーズに分けた着実なロードマップを推進する。",
                             blocks: [
                                 {
                                     type: "content_card",
                                     title: "Phase 1: PoC・基盤構築 (1-3ヶ月)",
-                                    description: "一部の先行部門（IT・人事）に限定してAIアシスタントを導入し、セキュリティ要件のクリアと基本機能の検証を行う。",
+                                    description: "先行部門（IT・人事）に限定導入し、セキュリティ要件のクリアと基本機能の検証を行う。",
                                     points: [
                                         "セキュアなLLM環境の構築",
                                         "社内ガイドラインの策定",
@@ -745,7 +798,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
                                 {
                                     type: "content_card",
                                     title: "Phase 2: 全社展開 (4-9ヶ月)",
-                                    description: "全社員向けにAIツールを開放し、部門特有の業務（営業資料作成、契約書チェック等）へのユースケースを拡大する。",
+                                    description: "全社員向けにAIツールを開放し、部門特有の業務へのユースケースを拡大する。",
                                     points: [
                                         "説明会およびプロンプト研修",
                                         "社内ナレッジ（RAG）の拡充",
@@ -755,7 +808,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
                                 {
                                     type: "content_card",
                                     title: "Phase 3: 自律化 (10ヶ月~)",
-                                    description: "単なる「対話型AI」から脱却し、社内システムとAPI連携してタスクを自動実行する「AIエージェント」へと進化させる。",
+                                    description: "対話型AIから脱却し、システムとAPI連携してタスクを自動実行する「AIエージェント」へ進化。",
                                     points: [
                                         "既存SaaSとのAPI統合",
                                         "ワークフローの完全自動化",
@@ -766,18 +819,43 @@ export const mockMessages: Record<string, MockMessage[]> = {
                             speaker_notes: "導入ロードマップです。"
                         },
                         {
-                            key_message: "全社的なAI活用を牽引するため、部門横断型の「AI CoE (Center of Excellence)」を設置する。",
+                            key_message: "全社的なAI活用を牽引し、セキュリティとアジリティを両立する部門横断型の「AI CoE」を組織する。",
                             blocks: [
                                 {
                                     type: "text",
-                                    content: "現場にツールの利用を丸投げするのではなく、経営直下に推進組織を設置し、各事業部との橋渡しを行います。"
+                                    content: "現場にツールの利用を丸投げするのではなく、経営直下に推進組織（Center of Excellence）を設置し、各事業部との橋渡しを行います。"
                                 },
                                 {
                                     type: "mermaid",
-                                    code: "graph TD\n    A[経営層 (Sponsor)] --> B{AI CoE (推進組織)}\n    B --> C[IT部門 (インフラ提供)]\n    B --> D[法務・リスク管理 (ガバナンス)]\n    B --> E[各事業部アンバサダー]\n    E --> F[営業部門]\n    E --> G[バックオフィス]\n    E --> H[開発部門]\n    style B fill:#3b82f6,color:#fff,stroke:#1d4ed8,stroke-width:2px"
+                                    code: `graph TD
+    A[経営層 (Sponsor)] --> B{AI CoE (推進組織)}
+    B --> C[IT部門 (インフラ提供)]
+    B --> D[法務・リスク管理 (ガバナンス)]
+    B --> E[各事業部アンバサダー]
+    E --> F[営業部門]
+    E --> G[バックオフィス]
+    E --> H[開発部門]
+    style B fill:#3b82f6,color:#fff,stroke:#1d4ed8,stroke-width:2px`
                                 }
                             ],
                             speaker_notes: "推進体制とAI CoEについてです。"
+                        },
+                        {
+                            key_message: "各事業部でのユースケース検証用に、具体的なAI CoE活動モデルを描いたイメージ図を配置予定。",
+                            blocks: [
+                                {
+                                    type: "text",
+                                    content: "AI CoEの具体的なコミュニケーションフローや、課題吸い上げからソリューション実装までのプロセスモデルを視覚的に表現する必要があります。この部分は将来的に図解デザイン画像を配置します。"
+                                },
+                                {
+                                    type: "image_placeholder",
+                                    label: "AI CoE 課題解決サイクル・イメージ図",
+                                    prompt: "A circular flowchart showing problem intake, vector search, prompt tuning, and deployment with human feedback loop, McKinsey corporate classic slide style, vector illustration, white background, blue tones",
+                                    search_query: "corporate business innovation process cycle diagram",
+                                    aspect_ratio: "16:9"
+                                }
+                            ],
+                            speaker_notes: "AI CoEの業務サイクルを示す図解用のプレースホルダーです。"
                         },
                         {
                             key_message: "本日の検討アジェンダ",
@@ -786,36 +864,38 @@ export const mockMessages: Record<string, MockMessage[]> = {
                                     type: "agenda",
                                     active_index: 3,
                                     items: [
-                                        { title: "1. 経営環境の変化と生成AI導入の必要性", subtitle: "競合動向および社内オペレーションの課題", duration: "10 min" },
-                                        { title: "2. コスト管理とセキュリティ設計方針", subtitle: "RAGアーキテクチャとセキュリティ緩和策", duration: "20 min" },
-                                        { title: "3. 3段階の導入ロードマップと推進体制（AI CoE）", subtitle: "フェーズ別マイルストーンと組織改編", duration: "15 min" },
-                                        { title: "4. リスク要因と投資対効果（ROI）予測", subtitle: "ハルシネーション対策と3年間のコスト削減効果", duration: "15 min" }
+                                        { title: "1. 戦略的適用領域", subtitle: "現状課題と生成AIがもたらすシナジー", duration: "10 min" },
+                                        { title: "2. システムとセキュリティ設計", subtitle: "AI基盤アーキテクチャとガバナンス", duration: "15 min" },
+                                        { title: "3. ロードマップと推進体制", subtitle: "3段階の導入フェーズとAI CoE", duration: "15 min" },
+                                        { title: "4. ROIと成果予測", subtitle: "投資対効果とリスク緩和策", duration: "10 min" }
                                     ]
                                 }
                             ],
-                            speaker_notes: "第4パートである「リスク要因と投資対効果（ROI）予測」についてご説明します。"
+                            speaker_notes: "第4パートである「ROIと成果予測」についてご説明します。"
                         },
                         {
-                            key_message: "導入プロジェクトにおける主要な想定リスクと、それに対する具体的かつ実効性のある緩和策を定義。",
+                            key_message: "導入時の課題（誤回答やコスト高騰）を想定し、実効性のある回避策（Mitigation）をあらかじめ定義する。",
                             blocks: [
                                 {
                                     type: "comparison_table",
+                                    emphasis_row: 1,
                                     headers: ["リスク要因", "影響度", "発生確率", "緩和策 (Mitigation)"],
                                     rows: [
                                         ["ハルシネーションによる誤った意思決定", "高", "中", "RAGによる自社データへのグラウンディング徹底、および人間による最終確認(HITL)ルールの制定"],
-                                        ["従業員のITリテラシー不足・活用低迷", "中", "高", "各部門のアンバサダーを通じた定期的なプロンプト共有会、および業務フローへの組み込み(API化)"],
+                                        ["従業員のITリテラシー不足・活用低迷", "中", "高", "各部門のアンバサダーを通じた定期的なプロンプト共有会、および業務フローへの組み込み"],
                                         ["予期せぬAPIコストの高騰", "中", "低", "トークン使用量のダッシュボード監視と、部門別の上限アラート設定の導入"]
                                     ]
                                 }
                             ],
-                            speaker_notes: "リスク要因とその緩和策についてのまとめです。"
+                            speaker_notes: "リスク要因と緩和策の表です。"
                         },
                         {
-                            key_message: "初期投資は初年度に集中するものの、2年目以降から大幅なコスト削減効果が発現し、3年目で投資回収を完了する。",
+                            key_message: "システム構築費は初年度に集中するが、2年目以降の業務削減効果により、3年目での投資回収を完了する。",
                             blocks: [
                                 {
                                     type: "text",
-                                    content: "システム構築およびライセンス費用として初年度に約1.5億円を投下します。\nしかし、2年目からは定型業務の自動化による人件費抑制効果（年間約2.2億円）が初期投資を上回り、大きなフリーキャッシュフローを生み出します。"
+                                    content: `システム構築およびライセンス費用として初年度に約1.5億円を投下します。
+しかし、2年目からは定型業務の自動化による人件費抑制効果（年間約2.2億円）が初期投資を上回り、大きなフリーキャッシュフローを生み出します。`
                                 },
                                 {
                                     type: "chart",
@@ -830,38 +910,120 @@ export const mockMessages: Record<string, MockMessage[]> = {
                             speaker_notes: "ROIについてです。"
                         },
                         {
-                            // テスト: key_value_card の unit / change / trend
-                            key_message: "AI導入12ヶ月後、主要KPIはすべて計画値を上回り、ROI目標を早期達成した。",
+                            key_message: "主要事業部門のパフォーマンス分析において、営業・開発・サポートの各KPIは計画を上回る推移を記録。",
                             blocks: [
                                 {
-                                    type: "key_value_card",
-                                    label: "業務自動化率",
-                                    value: "43",
-                                    unit: "%",
-                                    change: "+3pt (計画比)",
-                                    trend: "up"
+                                    type: "card",
+                                    title: "営業部門: 売上構成比率",
+                                    blocks: [
+                                        {
+                                            type: "chart",
+                                            chart_type: "donut",
+                                            data: [
+                                                { label: "AIソリューション", value: 55, color: "#00205B" },
+                                                { label: "コンサルティング", value: 30, color: "#3b82f6" },
+                                                { label: "保守・サポート", value: 15, color: "#10b981" }
+                                            ]
+                                        },
+                                        {
+                                            type: "text",
+                                            content: "生成AIを活用した「AIソリューション」が全体の55%を占め、最重要成長ドライバーへ成長。コンサルティングと保守サービスがその導入と維持を強力に補完しています。"
+                                        }
+                                    ]
                                 },
                                 {
-                                    type: "key_value_card",
-                                    label: "ナレッジ検索時間",
-                                    value: "-72",
-                                    unit: "%",
-                                    change: "目標値: -70%",
-                                    trend: "down"
+                                    type: "card",
+                                    title: "開発部門: リリースリードタイム (日)",
+                                    blocks: [
+                                        {
+                                            type: "chart",
+                                            chart_type: "line",
+                                            data: [
+                                                { label: "4月", value: 20 },
+                                                { label: "5月", value: 16 },
+                                                { label: "6月", value: 14 }
+                                            ]
+                                        },
+                                        {
+                                            type: "text",
+                                            content: "CI/CDパイプラインの自動化および開発プロセスの標準化により、平均リリースリードタイムが4月の20日から6月には14日（-30%）へ大幅に短縮され、リリース速度が加速しています。"
+                                        }
+                                    ]
                                 },
                                 {
-                                    type: "key_value_card",
-                                    label: "月間APIコスト",
-                                    value: "218",
-                                    unit: "万円",
-                                    change: "前月比 +2%",
-                                    trend: "flat"
+                                    type: "card",
+                                    title: "インフラ部門: サーバー可用性 (SLA%)",
+                                    blocks: [
+                                        {
+                                            type: "chart",
+                                            chart_type: "column",
+                                            data: [
+                                                { label: "東京", value: 99.9, color: "#10b981" },
+                                                { label: "大阪", value: 99.5, color: "#3b82f6" },
+                                                { label: "ソウル", value: 98.8, color: "#94a3b8" }
+                                            ]
+                                        },
+                                        {
+                                            type: "text",
+                                            content: "東京・大阪リージョンでは目標SLA（99.5%以上）を安定してクリア。ソウルリージョンについては、ネットワーク経路の冗長化を進め、可用性の向上に努めています。"
+                                        }
+                                    ]
                                 }
                             ],
-                            speaker_notes: "key_value_card の unit/change/trend のテストスライドです。"
+                            speaker_notes: "部門別の詳細KPIを多角的に分析し、成長要因と今後の投資効率を可視化するスライドです。"
                         },
                         {
-                            // テスト: list の style: numbered
+                            key_message: "先行導入したサポート部門では、問い合わせ対応の省力化と品質向上のダブルインパクトを実証。",
+                            blocks: [
+                                {
+                                    type: "list",
+                                    items: [
+                                        "先行してAIアシスタントを導入したカスタマーサポート部門における12ヶ月目の実績データです。",
+                                        "顧客対応スピードの大幅な向上と、エージェントの負荷軽減に成功しています。"
+                                    ]
+                                },
+                                {
+                                    type: "card",
+                                    title: "カスタマーサポート部門 導入効果",
+                                    emphasis: "high",
+                                    blocks: [
+                                        {
+                                            type: "kpi_metrics",
+                                            metrics: [
+                                                { label: "AI自己解決率", value: "75%", trend: "up", trendValue: "+45pt" },
+                                                { label: "初回応答時間", value: "1.2分", trend: "down", trendValue: "-90%" }
+                                            ]
+                                        },
+                                        {
+                                            type: "text",
+                                            content: "AIによる一次受付が機能し、有人対応が必要な難易度の高い案件へのリソース集中が可能になりました。"
+                                        }
+                                    ]
+                                }
+                            ],
+                            speaker_notes: "ネスト構造を用いた導入効果のハイライトスライドです。"
+                        },
+                        {
+                            key_message: "流入する問い合わせの約8割をAIで自己解決させ、有人サポートを高度な個別対応に集中させる。",
+                            blocks: [
+                                {
+                                    type: "text",
+                                    content: `カスタマーサポート部門における月間の問い合わせ処理のファネル分析です。
+AIエージェントが定型的な問い合わせの大部分を吸収し、有人エスカレーションを最小限に抑えています。`
+                                },
+                                {
+                                    type: "funnel",
+                                    title: "AI導入後の問い合わせ処理ファネル",
+                                    stages: [
+                                        { label: "総問い合わせ件数", value: 10000 },
+                                        { label: "AIによる自己解決", value: 7500 },
+                                        { label: "有人対応エスカレーション", value: 2500 }
+                                    ]
+                                }
+                            ],
+                            speaker_notes: "ファネル図による処理プロセスの可視化です。"
+                        },
+                        {
                             key_message: "全社導入を成功させるための重要マイルストーンは、以下の5ステップで順次遂行する。",
                             blocks: [
                                 {
@@ -880,140 +1042,19 @@ export const mockMessages: Record<string, MockMessage[]> = {
                                     ]
                                 }
                             ],
-                            speaker_notes: "list style: numbered のテストスライドです。"
+                            speaker_notes: "番号付きリストを用いたアクションプランの提示です。"
                         },
                         {
-                            // テスト: quote ブロック
                             key_message: "",
                             blocks: [
                                 {
                                     type: "quote",
-                                    text: "AIは私たちの仕事を奪うのではなく、私たちが本当にやるべき仕事に集中させてくれる道具だ。",
+                                    text: "AIは私たちの仕事を奪うのではなく、私たちが本当にやるべき創造的な仕事に集中させてくれる強力なパートナーだ。",
                                     author: "山田 太郎",
                                     role: "代表取締役社長 / 株式会社 未来テクノロジー"
                                 }
                             ],
-                            speaker_notes: "quote ブロックのテストスライドです。"
-                        },
-                        {
-                            key_message: "メンター・メンティーのマッチングにおいては、メンタリングの質向上のため、メンターの希望を基準としつつ、メンティーの希望もプロセスに組み込んだマッチングフローを構築する。",
-                            blocks: [
-                                {
-                                    type: "timeline",
-                                    direction: "horizontal",
-                                    show_arrows: true,
-                                    steps: [
-                                        {
-                                            title: "1. ショートリスト作成",
-                                            owner: "事務局",
-                                            content: [
-                                                "以下の条件でショートリストを作成\n  - 業界(異業種)\n  - 所在地(近接所在地)\n  - 社会人年数(年次逆転NG)\n  - メンタリング経験(未経験同士は可能な限り回避)",
-                                                "各メンター・メンティーにショートリストを送付"
-                                            ]
-                                        },
-                                        {
-                                            title: "2. マッチング希望者の選定",
-                                            owner: "メンター・メンティー",
-                                            content: [
-                                                "ショートリストをもとに、マッチング希望者の上位5名を選定",
-                                                "順位を記入し事務局へショートリストを返送"
-                                            ]
-                                        },
-                                        {
-                                            title: "3. マッチング最終化",
-                                            owner: "事務局",
-                                            content: [
-                                                "以下の優先順位でマッチングを最終化(詳細後述)\n  - 両者の希望が一致\n  - メンターの希望\n  - メンティーの希望や話題の互換性等",
-                                                "マッチング相手をメンター・メンティーに連絡\n  - 連絡先は個別案内\n  - プロフィール集を全員へ送付"
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ],
-                            speaker_notes: "マッチングフローの手順説明スライドです。"
-                        },
-                        {
-                            key_message: "自社のポジショニングを明確化し、価格と品質のバランスにおいて競合に対する優位性を確立する。",
-                            blocks: [
-                                {
-                                    type: "matrix_2x2",
-                                    title: "競合マトリックス",
-                                    xAxisLabel: "価格",
-                                    yAxisLabel: "品質",
-                                    items: [
-                                        { label: "自社", x: 0.8, y: 0.9 },
-                                        { label: "A社", x: 0.3, y: 0.4 },
-                                        { label: "B社", x: 0.9, y: 0.6 }
-                                    ]
-                                }
-                            ],
-                            speaker_notes: "競合マトリックスを用いた価格・品質ポジショニング分析スライドです。"
-                        },
-                        {
-                            key_message: "主要な事業継続KPIは順調に推移しており、特にMAU（月間アクティブユーザー）が大幅な増加傾向を示している。",
-                            blocks: [
-                                {
-                                    type: "card",
-                                    title: "主要KPI概要 (コンテナ)",
-                                    emphasis: "high",
-                                    blocks: [
-                                        {
-                                            type: "kpi_metrics",
-                                            metrics: [
-                                                { label: "MAU", value: "120万", trend: "up", trendValue: "+15%" },
-                                                { label: "チャーンレート", value: "1.2%", trend: "down", trendValue: "-0.3pt" }
-                                            ]
-                                        },
-                                        {
-                                            type: "text",
-                                            content: "ネストされたKPIとテキストです。順調に推移しています。"
-                                        }
-                                    ]
-                                }
-                            ],
-                            speaker_notes: "ネスト対応コンテナのテストスライドです。"
-                        },
-                        {
-                            key_message: "次世代サービスのメインターゲット層として、若年層・高所得層・テック層の3つのセグメントを定義する。",
-                            blocks: [
-                                {
-                                    type: "venn_diagram",
-                                    title: "ターゲット層",
-                                    items: ["若年層", "高所得層", "テック層"]
-                                }
-                            ],
-                            speaker_notes: "ターゲット層のベン図テストスライドです。"
-                        },
-                        {
-                            key_message: "認知から受注に至るセールスファネルの歩留まり率を改善し、最終コンバージョン率の底上げを図る。",
-                            blocks: [
-                                {
-                                    type: "funnel",
-                                    title: "セールスファネル推移",
-                                    stages: [
-                                        { label: "リード獲得", value: 10000 },
-                                        { label: "MQL", value: 4500 },
-                                        { label: "受注", value: 300 }
-                                    ]
-                                }
-                            ],
-                            speaker_notes: "ファネル図のテストスライドです。"
-                        },
-                        {
-                            key_message: "投資効率（ROI）が最も高いDX推進施策へ優先的に予算を集中し、全体の生産性を極大化させる。",
-                            blocks: [
-                                {
-                                    type: "comparison_table",
-                                    emphasis_row: 1,
-                                    headers: ["施策", "コスト", "見込み効果"],
-                                    rows: [
-                                        ["SNS広告", "中", "小"],
-                                        ["DX推進", "高", "大 (ROI 300%)"],
-                                        ["展示会", "高", "中"]
-                                    ]
-                                }
-                            ],
-                            speaker_notes: "比較表のハイライトテストスライドです。"
+                            speaker_notes: "社長からのメッセージによる締めくくりです。"
                         }
                     ]
                 }),

@@ -16,50 +16,71 @@ export default function TitleCoverGrid({ blocks }: TitleCoverGridProps) {
             alignItems: 'flex-start',
             textAlign: 'left',
             height: '100%', 
-            padding: '10% 15%' 
+            padding: '0 4cqi',
+            boxSizing: 'border-box',
+            position: 'relative'
         }}>
+            {/* メインタイトル */}
             <h1 className="title-cover-title" style={{
-                fontSize: '2.5rem',
+                fontSize: 'var(--text-cover-title, 4.2cqi)',
                 fontWeight: 700,
-                color: 'var(--primary-color)',
-                marginBottom: '1rem',
-                lineHeight: 1.2,
-                textAlign: 'left'
+                color: 'var(--primary-color, #00205B)',
+                marginBottom: '1.4cqi',
+                lineHeight: 'var(--text-line-height-heading, 1.3)',
+                textAlign: 'left',
+                maxWidth: '92%'
             }}>
                 {coverBlock.title}
             </h1>
             
-            {coverBlock.subtitle && (
-                <h2 className="title-cover-subtitle" style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 400,
-                    color: 'var(--text-color)',
-                    marginBottom: '2rem'
-                }}>
-                    {coverBlock.subtitle}
-                </h2>
-            )}
-
+            {/* セパレーター線 (CSSでテーマごとに制御) */}
             <div className="title-cover-separator" style={{
                 width: '100%',
                 height: '2px',
-                backgroundColor: 'var(--primary-color)',
-                marginBottom: '2rem'
+                backgroundColor: 'var(--primary-color, #00205B)',
+                margin: '1.5cqi 0'
             }}></div>
 
-            <div className="title-cover-meta" style={{
+            {/* サブタイトルおよびその他のメタ情報の垂直スタック */}
+            <div className="title-cover-meta-stack" style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                color: 'var(--text-color)',
-                fontSize: '0.85rem'
+                flexDirection: 'column',
+                gap: '1cqi',
+                marginTop: '0.8cqi',
+                textAlign: 'left'
             }}>
-                <div>
-                    {coverBlock.presenter && <div style={{ fontWeight: 600 }}>{coverBlock.presenter}</div>}
-                    {coverBlock.organization && <div>{coverBlock.organization}</div>}
-                </div>
-                <div>
-                    {coverBlock.date && <div>{coverBlock.date}</div>}
-                </div>
+                {coverBlock.subtitle && (
+                    <h2 className="title-cover-subtitle" style={{
+                        fontSize: 'var(--text-cover-subtitle, 1.8cqi)',
+                        fontWeight: 500,
+                        color: 'var(--text-main, #333333)',
+                        lineHeight: 'var(--text-line-height-heading, 1.3)',
+                        margin: 0,
+                        maxWidth: '92%'
+                    }}>
+                        {coverBlock.subtitle}
+                    </h2>
+                )}
+
+                {coverBlock.presenter && (
+                    <div className="title-cover-presenter" style={{
+                        fontSize: 'var(--text-body, 1.2cqi)',
+                        color: 'var(--text-secondary, #475569)',
+                        fontWeight: 'normal'
+                    }}>
+                        {coverBlock.presenter}
+                        {coverBlock.organization && ` | ${coverBlock.organization}`}
+                    </div>
+                )}
+
+                {coverBlock.date && (
+                    <div className="title-cover-date" style={{
+                        fontSize: 'var(--text-body, 1.2cqi)',
+                        color: 'var(--text-secondary, #475569)'
+                    }}>
+                        {coverBlock.date}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -13,6 +13,7 @@ interface CreditContextType {
   deductCredit: (amount: number) => void;
   addCredit: (amount: number) => void;
   nextResetDate: string; // ★追加: 次回リセット日
+  userTier: number | null; // ★追加: ユーザーTier
 }
 
 const CreditContext = createContext<CreditContextType | undefined>(undefined);
@@ -28,6 +29,7 @@ export const CreditProvider: React.FC<CreditProviderProps> = ({ children, initia
 
   const [creditBalance, setCreditBalance] = useState<number>(initialBalance);
   const [nextResetDate, setNextResetDate] = useState<string>(''); // ★APIから取得するように変更
+  const [userTier, setUserTier] = useState<number | null>(null); // ★APIから取得
   const [isLoadingCredit, setIsLoadingCredit] = useState<boolean>(true);
 
   // 初回マウント時、またはuserId変更時にバックエンドから残高を取得
@@ -44,6 +46,7 @@ export const CreditProvider: React.FC<CreditProviderProps> = ({ children, initia
         if (isMounted) {
           setCreditBalance(response.balance);
           setNextResetDate(response.nextResetDateStr); // ★APIからセット
+          setUserTier(response.tier); // ★APIからセット
         }
       } catch (err) {
         console.error('[CreditContext] Failed to fetch credit:', err);
@@ -82,7 +85,7 @@ export const CreditProvider: React.FC<CreditProviderProps> = ({ children, initia
   };
 
   return (
-    <CreditContext.Provider value={{ creditBalance, isLoadingCredit, deductCredit, addCredit, nextResetDate }}>
+    <CreditContext.Provider value={{ creditBalance, isLoadingCredit, deductCredit, addCredit, nextResetDate, userTier }}>
       {children}
     </CreditContext.Provider>
   );

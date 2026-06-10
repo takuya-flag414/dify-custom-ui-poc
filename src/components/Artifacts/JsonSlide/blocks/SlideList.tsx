@@ -1,6 +1,9 @@
 import React from 'react';
 import SlideMarkdown from '../MarkdownRenderer';
 
+// JSモジュールであるSlideMarkdownをTypeScriptが誤認識するのを防ぐキャスト
+const Markdown: any = SlideMarkdown;
+
 interface Props {
     items: string[];
     style?: 'bullet' | 'numbered';
@@ -9,8 +12,7 @@ interface Props {
 const listStyle: React.CSSProperties = {
     margin: '0',
     paddingLeft: '2.0cqi',
-    fontSize: '1.4cqi',
-    lineHeight: '1.5'
+    // fontSize と lineHeight は Typography System クラスに委譲
 };
 
 const itemStyle: React.CSSProperties = {
@@ -19,22 +21,25 @@ const itemStyle: React.CSSProperties = {
 };
 
 export const SlideList: React.FC<Props> = ({ items, style = 'bullet' }) => {
+    // リストはデフォルトで少し大きめの本文（body_large）として扱う
+    const variantClass = 'text-variant-body-large';
+
     if (style === 'numbered') {
         return (
-            <ol className="slide-block slide-list slide-list-numbered" style={{ ...listStyle, listStyleType: 'decimal', paddingLeft: '32px' }}>
+            <ol className={`slide-block slide-list slide-list-numbered ${variantClass}`} style={{ ...listStyle, listStyleType: 'decimal', paddingLeft: '32px' }}>
                 {items.map((item, idx) => (
                     <li key={idx} style={itemStyle}>
-                        <SlideMarkdown content={item} inline />
+                        <Markdown content={item} inline />
                     </li>
                 ))}
             </ol>
         );
     }
     return (
-        <ul className="slide-block slide-list slide-list-bullet" style={{ ...listStyle, listStyleType: 'disc', paddingLeft: '32px' }}>
+        <ul className={`slide-block slide-list slide-list-bullet ${variantClass}`} style={{ ...listStyle, listStyleType: 'disc', paddingLeft: '32px' }}>
             {items.map((item, idx) => (
                 <li key={idx} style={itemStyle}>
-                    <SlideMarkdown content={item} inline />
+                    <Markdown content={item} inline />
                 </li>
             ))}
         </ul>

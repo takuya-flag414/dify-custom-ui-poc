@@ -47,6 +47,18 @@ export const ConsultingClassicDecoration: React.FC = () => (
                 --primary-color: #00205B; /* 濃紺 */
                 --text-main: #333333;
                 --border-color: #cbd5e1;
+                
+                /* タイポグラフィ変数の上書き（全体的にシャープで引き締まった印象に） */
+                --text-body: 1.15cqi;
+                --text-caption: 1.05cqi;
+            }
+            /* 表紙スライド（TitleCoverGrid）時は、上部の飾り線を非表示にして純白にする */
+            .theme-consulting-classic.grid-TitleCoverGrid .consulting-classic-decoration {
+                border-top: none !important;
+            }
+            /* 表紙のセパレーター線（中央線）を非表示にする */
+            .theme-consulting-classic .title-cover-separator {
+                display: none !important;
             }
             /* エグゼクティブ・ボックス化されたKey Message (下線スタイルへ変更) */
             .theme-consulting-classic .slide-key-message {
@@ -56,10 +68,10 @@ export const ConsultingClassicDecoration: React.FC = () => (
                 padding: 0 0 12px 0 !important;
                 margin-bottom: 20px !important;
                 font-weight: bold;
-                font-size: 15px !important;
+                font-size: var(--text-key-message) !important;
                 box-shadow: none !important;
                 text-align: left;
-                line-height: 1.5 !important;
+                line-height: var(--text-line-height-heading) !important;
             }
             .theme-consulting-classic .grid-column {
                 padding: 8px !important;
@@ -85,15 +97,12 @@ export const ConsultingClassicDecoration: React.FC = () => (
                 border-left: 3px solid var(--primary-color) !important; /* 左アクセント線 */
             }
             .theme-consulting-classic .card-value {
-                font-size: 24px !important;
+                font-size: var(--text-value, 24px) !important;
                 margin-top: 4px !important;
             }
+            /* 古い直接指定を削除し、システム変数に委ねる */
             .theme-consulting-classic .slide-text {
-                font-size: 13px !important;
-                line-height: 1.4 !important;
-                white-space: pre-wrap !important;
-                text-align: left !important;
-                margin-top: 0 !important;
+                white-space: pre-wrap !important; /* コンサルテーマ独自の改行保持 */
             }
             /* リスト（箇条書き）のプロフェッショナル化 */
             .theme-consulting-classic ul {

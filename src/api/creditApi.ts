@@ -16,11 +16,12 @@ const _getNextMonday = (date: Date): Date => {
 const _checkAndApplyWeeklyReset = (userId: string) => {
   const now = Date.now();
   if (!mockUserCredits[userId]) {
-    // 新規ユーザーにはデフォルト上限（スタンダード）を付与
+    // 新規ユーザーにはデフォルト上限（Tier 2）を付与
     mockUserCredits[userId] = { 
-      balance: mockSystemSettings.defaultStandardLimit, 
-      limit: mockSystemSettings.defaultStandardLimit, 
-      lastResetTime: now 
+      balance: mockSystemSettings.default_tier2_limit, 
+      limit: mockSystemSettings.default_tier2_limit, 
+      lastResetTime: now,
+      tier: 2
     };
     return;
   }
@@ -39,6 +40,7 @@ const _checkAndApplyWeeklyReset = (userId: string) => {
 export interface FetchCreditResponse {
   balance: number;
   nextResetDateStr: string;
+  tier: number;
 }
 
 export const creditApi = {
@@ -55,7 +57,8 @@ export const creditApi = {
     
     return {
       balance: mockUserCredits[userId].balance,
-      nextResetDateStr
+      nextResetDateStr,
+      tier: mockUserCredits[userId].tier
     };
   },
 
@@ -100,9 +103,9 @@ export const creditApi = {
   /**
    * 【管理者用】システム全体のデフォルト上限を更新する（モック）
    */
-  updateSystemCreditLimit: async (newStandardLimit: number): Promise<void> => {
+  updateSystemCreditLimit: async (newTier2Limit: number): Promise<void> => {
     await delay(200);
-    console.log(`[Mock Backend] Global standard limit updated to ${newStandardLimit}`);
-    mockSystemSettings.defaultStandardLimit = newStandardLimit;
+    console.log(`[Mock Backend] Global Tier 2 limit updated to ${newTier2Limit}`);
+    mockSystemSettings.default_tier2_limit = newTier2Limit;
   }
 };

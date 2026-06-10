@@ -178,7 +178,7 @@ const Sidebar = ({
   onViewChange,
   currentUser
 }) => {
-  const { creditBalance, nextResetDate } = useCredit();
+  const { creditBalance, nextResetDate, userTier } = useCredit();
 
   // ★ URLルーティング: navigate/location を使用
   const navigate = useNavigate();
@@ -460,13 +460,19 @@ const Sidebar = ({
                       <line x1="12" y1="18" x2="12" y2="22"></line>
                       <line x1="12" y1="2" x2="12" y2="6"></line>
                     </svg>
-                    <span className="credit-value-small">
-                        {creditBalance > 9999 ? Math.floor(creditBalance/1000) + 'k' : creditBalance}
-                    </span>
+                    <div className="credit-value-small-container">
+                        {userTier && <span className="tier-badge-small">T{userTier}</span>}
+                        <span className="credit-value-small">
+                            {creditBalance > 9999 ? Math.floor(creditBalance/1000) + 'k' : creditBalance}
+                        </span>
+                    </div>
                  </div>
              ) : (
                  <div className="credit-full-display">
-                    <span className="credit-label">クレジット</span>
+                    <div className="credit-label-row">
+                        <span className="credit-label">クレジット</span>
+                        {userTier && <span className="tier-badge">Tier {userTier}</span>}
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <span className="credit-value">{creditBalance.toLocaleString()} <span className="credit-unit">CR</span></span>
                         <span style={{ fontSize: '9px', opacity: 0.6, marginTop: '2px' }}>次回リセット: {nextResetDate}</span>

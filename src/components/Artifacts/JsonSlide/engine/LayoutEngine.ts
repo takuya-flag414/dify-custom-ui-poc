@@ -103,8 +103,8 @@ export const inferLayout = (blocks: SlideBlock[]): string => {
         return 'TwoColumnSplitGrid';
     }
 
-    // 要素が3つで、すべてが軽量〜中量（カードなど）の場合は3カラム
-    if (blockCount === 3 && allLightOrMedium) {
+    // 要素が3つで、すべてが軽量〜中量（カードなど）の場合、またはすべてが card/column_group の場合は3カラム
+    if (blockCount === 3 && (allLightOrMedium || blocks.every(b => b.type === 'card' || b.type === 'column_group'))) {
         return 'ThreeColumnMultiGrid';
     }
 

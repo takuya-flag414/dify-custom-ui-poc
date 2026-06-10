@@ -12,7 +12,10 @@ interface Props {
     activeIndex?: number; // 進行中の章のインデックス (0-indexed)
 }
 
-export const SlideAgenda: React.FC<Props> = ({ items = [], activeIndex = 0 }) => {
+export const SlideAgenda: React.FC<Props> = ({ items = [], activeIndex = -1 }) => {
+    // 有効なハイライト項目（0以上のインデックス）が存在するかどうか
+    const hasActiveHighlight = activeIndex !== undefined && activeIndex !== null && activeIndex >= 0 && activeIndex < items.length;
+
     return (
         <div className="slide-block slide-agenda" style={{
             display: 'flex',
@@ -30,8 +33,9 @@ export const SlideAgenda: React.FC<Props> = ({ items = [], activeIndex = 0 }) =>
                 const subtitle = isString ? undefined : item.subtitle;
                 const duration = isString ? undefined : item.duration;
                 
-                const isActive = idx === activeIndex;
-                const isPast = idx < activeIndex;
+                const isActive = hasActiveHighlight && idx === activeIndex;
+                const isPast = hasActiveHighlight && idx < activeIndex;
+                const isMuted = hasActiveHighlight && !isActive; // ハイライトがあって自分自身がアクティブでない場合のみミュート
                 
                 // マッキンゼーブルー & グレーアウトの色設計
                 const circleBg = isActive 
@@ -39,15 +43,15 @@ export const SlideAgenda: React.FC<Props> = ({ items = [], activeIndex = 0 }) =>
                     : 'transparent';
                 const circleColor = isActive 
                     ? '#ffffff' 
-                    : 'var(--text-muted, #64748b)';
+                    : (isMuted ? 'var(--text-muted, #94a3b8)' : 'var(--primary-color, #00205B)');
                 const circleBorder = isActive
                     ? '1px solid var(--primary-color, #00205B)'
-                    : '1px solid var(--border-color, #cbd5e1)';
+                    : (isMuted ? '1px solid var(--border-color, #cbd5e1)' : '1.5px solid var(--primary-color, #00205B)');
                 
                 const titleColor = isActive 
                     ? 'var(--primary-color, #00205B)' 
-                    : 'var(--text-muted, #64748b)';
-                const titleWeight = isActive ? 'bold' : 'normal';
+                    : (isMuted ? 'var(--text-muted, #94a3b8)' : 'var(--text-main, #1e293b)');
+                const titleWeight = isActive || !hasActiveHighlight ? 'bold' : 'normal';
                 
                 return (
                     <div key={idx} style={{ 
@@ -60,7 +64,8 @@ export const SlideAgenda: React.FC<Props> = ({ items = [], activeIndex = 0 }) =>
                         background: isActive ? 'rgba(0, 32, 91, 0.04)' : 'transparent',
                         borderLeft: isActive ? '4px solid var(--primary-color, #00205B)' : '4px solid transparent',
                         marginLeft: '-4px', // ボーダー分のオフセット
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        opacity: isMuted ? 0.45 : 1.0 // 非アクティブの項目のみ半透明にして視線誘導効果を出す
                     }}>
                         {/* 左：章番号（丸） */}
                         <div style={{
@@ -86,14 +91,14 @@ export const SlideAgenda: React.FC<Props> = ({ items = [], activeIndex = 0 }) =>
                                 fontSize: '1.3cqi', 
                                 fontWeight: titleWeight, 
                                 color: titleColor 
-                            }}>
+                             }}>
                                 {title}
                             </div>
                             {subtitle && (
                                 <div style={{ 
                                     fontSize: '1.0cqi', 
-                                    color: isActive ? 'var(--text-main, #333333)' : 'var(--text-muted, #94a3b8)',
-                                    opacity: isActive ? 0.8 : 0.6
+                                    color: isActive ? 'var(--text-main, #333333)' : (isMuted ? 'var(--text-muted, #94a3b8)' : 'var(--text-secondary, #475569)'),
+                                    opacity: isActive ? 0.8 : 0.7
                                 }}>
                                     {subtitle}
                                 </div>
@@ -104,9 +109,9 @@ export const SlideAgenda: React.FC<Props> = ({ items = [], activeIndex = 0 }) =>
                         {duration && (
                             <div style={{ 
                                 fontSize: '1.1cqi', 
-                                color: isActive ? 'var(--primary-color, #00205B)' : 'var(--text-muted, #94a3b8)',
+                                color: isActive ? 'var(--primary-color, #00205B)' : (isMuted ? 'var(--text-muted, #94a3b8)' : 'var(--text-secondary, #475569)'),
                                 fontWeight: isActive ? 'bold' : 'normal',
-                                opacity: isActive ? 0.9 : 0.7,
+                                opacity: isActive ? 0.9 : 0.8,
                                 flexShrink: 0
                             }}>
                                 {duration}

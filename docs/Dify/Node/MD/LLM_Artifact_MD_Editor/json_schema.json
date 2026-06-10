@@ -1,0 +1,112 @@
+{
+    "properties": {
+        "answer": {
+            "description": "何を修正したかを1〜2文で簡潔に説明すること。例：「議事録のアクションアイテム欄を修正しました。」「比較表の価格列を更新しました。」元のコードが見つからなかった場合はその旨を案内すること。",
+            "type": "string"
+        },
+        "artifact_content": {
+            "description": "【必須】修正後の完全なMarkdown全文。差分・パッチ形式は不可。元のMarkdown構造・見出し階層・箇条書き形式・表の列定義・Q&A構造は、ユーザーが変更を指示していない限りそのまま保持すること。ストリーミング中に逐次更新されるため、必ず artifact_type の直後に出力すること。",
+            "type": "string"
+        },
+        "artifact_title": {
+            "description": "【必須】ドキュメントのタイトル。ユーザーから変更指示がない限り、会話履歴中の元の artifact_title をそのまま維持すること。このフィールド検出の瞬間にパネルが開くため、必ず thinking の直後・artifact_type より前に出力すること。",
+            "type": "string"
+        },
+        "artifact_type": {
+            "description": "【必須】会話履歴中の元の artifact_type をそのまま返すこと。ユーザーが明示的に型の変更を指示した場合のみ変更してよい。ただし変更先も Markdown型 5種のいずれかに限る。",
+            "enum": [
+                "summary_report",
+                "meeting_minutes",
+                "checklist",
+                "comparison_table",
+                "faq"
+            ],
+            "type": "string"
+        },
+        "citations": {
+            "description": "本文修正時に参照した情報源の一覧。このノードのターンでRAG検索やWeb検索を実行していなくても、添付ファイル、上流ノードで取得済みの参照情報、会話内で与えられた参考情報を使った場合は格納する。参照元が本当に存在しない場合のみ空配列 [] を返す。",
+            "items": {
+                "properties": {
+                    "id": {
+                        "description": "情報源の一意な識別子。",
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "情報源名・記事名・ファイル名・資料名など。",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "情報源の種別。",
+                        "enum": [
+                            "web",
+                            "rag",
+                            "file"
+                        ],
+                        "type": "string"
+                    },
+                    "url": {
+                        "description": "参照元URLまたは参照先識別子。",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "source",
+                    "url"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "smart_actions": {
+            "description": "Artifact生成後にUI上へ表示する提案アクションボタンの一覧。通常は空配列 [] を返す。",
+            "items": {
+                "properties": {
+                    "icon": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "payload": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "text"
+                        ],
+                        "type": "object"
+                    },
+                    "type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type",
+                    "label",
+                    "icon",
+                    "payload"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "thinking": {
+            "description": "内部用の計画メモ。ユーザーには表示されない。mode: EDIT、original_found、original_artifact_type、修正指示リスト、変更しない箇所の確認（見出し階層・リスト形式・表の列定義・セクション順序・その他内容）、懸念事項を記述する。artifact_title より前に出力すること。",
+            "type": "string"
+        }
+    },
+    "required": [
+        "thinking",
+        "artifact_title",
+        "artifact_type",
+        "artifact_content",
+        "answer",
+        "citations",
+        "smart_actions"
+    ],
+    "type": "object"
+}
