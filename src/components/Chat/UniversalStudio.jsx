@@ -46,7 +46,7 @@ const darkenColor = (hex, percent) => {
     return "#" + (0x1000000 + rOut * 0x10000 + gOut * 0x100 + bOut).toString(16).slice(1);
 };
 
-const UniversalStudio = ({ type, onBack, onGenerate, mockMode, backendBApiKey, backendBApiUrl, sendKey = 'enter' }) => {
+const UniversalStudio = ({ type, onBack, onGenerate, mockMode, backendBApiKey, backendBApiUrl, sendKey = 'enter', activeCustomBot }) => {
     // -------------------------
     // 共通ステート
     // -------------------------
@@ -885,6 +885,7 @@ ${text}`.trim();
                         backendBApiKey={backendBApiKey}
                         backendBApiUrl={backendBApiUrl}
                         sendKey={sendKey}
+                        activeBot={activeCustomBot} // ★追加: カスタムボット情報
                     />
                 </div>
 

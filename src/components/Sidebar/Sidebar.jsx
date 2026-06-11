@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon, Users as UsersIcon, Clock as HistoryIcon, MoreHorizontal, Grid as GridIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Sparkles as SparklesIcon, Layers as LayersIcon, Users as UsersIcon, Clock as HistoryIcon, MoreHorizontal, Grid as GridIcon, Bot as BotIcon } from 'lucide-react';
 import DeletePopover from './DeletePopover';
 import ContextMenu from './ContextMenu';
 import { groupConversationsByDate } from '../../utils/dateUtils';
@@ -185,6 +185,7 @@ const Sidebar = ({
   const location = useLocation();
   const currentView = location.pathname.startsWith('/settings') ? 'settings' 
     : location.pathname.startsWith('/history') ? 'history'
+    : location.pathname.startsWith('/custom-bots') ? 'custom-bots'
     : 'chat';
 
   const [menuConfig, setMenuConfig] = useState({ isOpen: false, targetConv: null, anchorRect: null });
@@ -481,15 +482,15 @@ const Sidebar = ({
              )}
           </div>
 
-          {/* Studios Button */}
-          {FEATURE_FLAGS.SHOW_SIDEBAR_STUDIOS && (
+          {/* Custom Bots Button */}
+          {FEATURE_FLAGS.SHOW_SIDEBAR_CUSTOM_BOTS && (
             <button
-              className={`footer-btn studios-btn ${currentView === 'studios' ? 'active' : ''}`}
-              onClick={() => onViewChange && onViewChange('studios')}
-              title="Studios"
+              className={`footer-btn custom-bots-btn ${currentView === 'custom-bots' ? 'active' : ''}`}
+              onClick={() => navigate('/custom-bots')}
+              title="カスタムボット"
             >
               <motion.div layout className="footer-icon-anchor">
-                <LayersIcon size={18} strokeWidth={2} />
+                <BotIcon size={18} strokeWidth={2} />
               </motion.div>
 
               <AnimatePresence>
@@ -502,7 +503,7 @@ const Sidebar = ({
                     className="footer-label"
                     style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
                   >
-                    Studios
+                    カスタムボット
                   </motion.span>
                 )}
               </AnimatePresence>

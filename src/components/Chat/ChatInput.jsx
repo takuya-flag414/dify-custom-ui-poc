@@ -42,6 +42,7 @@ const ChatInput = ({
   restoreText = null,
   onRestoreTextConsumed,
   isShieldActive = false, // ★追加: シールドモード状態
+  activeBot = null, // ★追加: カスタムボット状態
   placeholder: customPlaceholder, // ★追加: 外部からプレースホルダーを指定可能に
 }) => {
   const [text, setText] = useState('');
@@ -448,6 +449,7 @@ const ChatInput = ({
             isTyping={text.length > 0}
             isStreaming={isStreaming}
             canSend={canSend}
+            activeBot={activeBot} // ★追加: カスタムボット情報
             onSend={handleSend}
             onStop={onStop}
             isLoading={isLoading}

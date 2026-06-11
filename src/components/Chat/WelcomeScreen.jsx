@@ -58,6 +58,7 @@ const WelcomeScreen = ({
     onRestoreTextConsumed,
     onWizardComplete,
     onEnterStudio, // ★追加: 統合型
+    activeCustomBot, // ★追加: カスタムボット情報
 }) => {
     const { greeting, subMessage } = getTimeBasedGreeting(userName);
     const [isFaded, setIsFaded] = useState(false);
@@ -150,6 +151,7 @@ const WelcomeScreen = ({
                             sendKey={sendKey}
                             restoreText={restoreText}
                             onRestoreTextConsumed={onRestoreTextConsumed}
+                            activeBot={activeCustomBot} // ★追加: カスタムボット情報
                         />
 
                         {/* UseCasePanel - Apple Intelligence風 Glassmorphism パネル */}

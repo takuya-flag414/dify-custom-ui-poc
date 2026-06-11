@@ -19,7 +19,7 @@ import InspectorPanel from './components/Inspector/InspectorPanel';
 import ArtifactPanel from './components/Artifacts/ArtifactPanel';
 import TestPanel from './components/DevTools/TestPanel';
 import SystemBootScreen from './components/Loading/SystemBootScreen';
-import { StudiosContainer } from './components/Studios';
+import { CustomBotsContainer } from './components/CustomBots';
 
 import { useLogger } from './hooks/useLogger';
 import { useConversations } from './hooks/useConversations';
@@ -88,14 +88,15 @@ function App() {
   const currentView = displayLocation.pathname.startsWith('/settings') ? 'settings'
     : displayLocation.pathname.startsWith('/admin') ? 'admin'
       : displayLocation.pathname.startsWith('/history') ? 'history'
-        : 'chat';
+        : displayLocation.pathname.startsWith('/custom-bots') ? 'custom-bots'
+          : 'chat';
   const isSettingsOpen = location.pathname.startsWith('/settings');
 
   // ★追加: テストパネル状態
   const [isTestPanelOpen, setIsTestPanelOpen] = useState(false);
 
-  // ★追加: Studiosギャラリー強制表示フラグ
-  const [forceShowStudioGallery, setForceShowStudioGallery] = useState(false);
+  // ★追加: CustomBotsギャラリー強制表示フラグ
+  const [showCustomBotsGallery, setShowCustomBotsGallery] = useState(false);
 
   // ★追加: 新規チャット開始時のコンテキストリセット用トリガー
   const [newChatTrigger, setNewChatTrigger] = useState(0);
@@ -110,6 +111,7 @@ function App() {
         roles: authUser.roles,         // RBAC
         name: authUser.displayName || 'User',
         email: authUser.email,
+        departmentId: authUser.departmentId, // ★追加: 部署ボットのスコープフィルタ用
         createdAt: authUser.createdAt,
       };
     }
@@ -230,15 +232,17 @@ function App() {
   const {
     messages,
     setMessages,
-    // ★追加: ストリーミング中メッセージ（パフォーマンス最適化）
-    streamingMessage,
     isGenerating,
+    streamingMessage,
     isHistoryLoading,
+    activeCustomBot,
+    resetChatState,
     activeContextFiles,
     setActiveContextFiles,
     handleSendMessage,
     searchSettings,
     setSearchSettings,
+    updateSearchSettings,
     // ★追加: Phase 1.5 - 停止・編集・再送信機能
     stopGeneration,
     handleEdit,
@@ -249,8 +253,6 @@ function App() {
     // ★Phase 2: サニタイズ通知
     sanitizeNotification,
     setSanitizeNotification,
-    // ★追加: 状態リセット関数
-    resetChatState,
   } = useChat(
     mockMode,
     authUser?.userId,
@@ -451,9 +453,9 @@ function App() {
       return;
     }
 
-    // Studiosに切り替える時はギャラリー強制表示フラグをセット
-    if (view === 'studios') {
-      setForceShowStudioGallery(true);
+    if (view === 'custom-bots') {
+      navigate('/custom-bots');
+      return;
     }
 
     if (view === 'chat') {
@@ -647,6 +649,7 @@ function App() {
                         <Route path="/chat" element={
                           <ChatView
                             messages={messages}
+                            activeCustomBot={activeCustomBot}
                             streamingMessage={streamingMessage}
                             setMessages={setMessages}
                             isGenerating={isGenerating}
@@ -767,6 +770,7 @@ function App() {
                         <Route path="/chat/:conversationId" element={
                           <ChatView
                             messages={messages}
+                            activeCustomBot={activeCustomBot}
                             streamingMessage={streamingMessage}
                             setMessages={setMessages}
                             isGenerating={isGenerating}
@@ -808,6 +812,29 @@ function App() {
                           <HistoryView 
                             handleDeleteConversation={handleDeleteConversation}
                             handleRenameConversation={handleRenameConversation}
+                          />
+                        } />
+                        <Route path="/custom-bots" element={
+                          <CustomBotsContainer
+                            mockMode={mockMode}
+                            apiUrl={apiUrl}
+                            apiKey={apiKey}
+                            backendBApiKey={backendBApiKey}
+                            backendBApiUrl={backendBApiUrl}
+                            currentUser={currentUser}
+                            onSelectBot={(bot) => {
+                              console.log("Selected Bot:", bot);
+                              localStorage.setItem('pending_custom_bot', JSON.stringify({
+                                id: bot.bot_id,
+                                name: bot.name,
+                                icon: bot.icon,
+                                system_prompt: bot.system_prompt,
+                                rag_config: bot.rag_config,
+                                context_file_url: bot.context_file_url,
+                              }));
+                              handleSetConversationId(null);
+                              navigate('/chat');
+                            }}
                           />
                         } />
                         <Route path="/admin/users" element={

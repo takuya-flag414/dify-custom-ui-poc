@@ -1,0 +1,204 @@
+/* src/components/CustomBots/CustomBotCard.css */
+
+.custom-bot-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.45); /* 透過背景 */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  min-height: 160px;
+}
+
+[data-theme='dark'] .custom-bot-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 3Dホバーと発光エフェクト */
+.custom-bot-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 
+      0 12px 24px rgba(99, 102, 241, 0.08),
+      0 0 0 0.5px rgba(255, 255, 255, 0.6);
+}
+
+[data-theme='dark'] .custom-bot-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 
+      0 16px 28px rgba(0, 0, 0, 0.3),
+      0 0 0 0.5px rgba(255, 255, 255, 0.15);
+}
+
+.bot-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.bot-icon-wrapper {
+  font-size: 24px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.6); /* より滑らかな白透過 */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  color: var(--color-text-main);
+}
+
+[data-theme='dark'] .bot-icon-wrapper {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.bot-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0; /* デフォルトは非表示 */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateX(4px);
+}
+
+.custom-bot-card:hover .bot-actions {
+  opacity: 1; /* ホバーで表示 */
+  transform: translateX(0);
+}
+
+.bot-actions button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.bot-actions button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-text-main);
+}
+
+[data-theme='dark'] .bot-actions button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bot-actions button.danger:hover {
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+}
+
+.bot-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bot-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.bot-description {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bot-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 11px;
+}
+
+[data-theme='dark'] .bot-card-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bot-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.bot-visibility-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-text-sub);
+}
+
+[data-theme='dark'] .bot-visibility-badge {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* RAGバッジ（紫系 — 検索モードの青と被らない） */
+.bot-rag-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bot-rag-badge {
+  background: rgba(124, 58, 237, 0.2);
+  color: #a78bfa;
+}
+
+/* コンテキストファイルバッジ（シアン系） */
+.bot-file-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(8, 145, 178, 0.1);
+  color: #0891b2;
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bot-file-badge {
+  background: rgba(8, 145, 178, 0.2);
+  color: #22d3ee;
+}
+
+.bot-creator-info {
+  color: var(--color-text-muted);
+}

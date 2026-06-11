@@ -1,0 +1,11 @@
+/* src/components/CustomBots/CustomBotsContainer.css */
+.custom-bots-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: transparent; /* 背景を透明にして親の壁紙・グラデーションを活かす */
+}

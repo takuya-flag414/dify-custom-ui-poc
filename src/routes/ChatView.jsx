@@ -68,6 +68,7 @@ const ChatView = ({
     restoreText,              // ★追加: 復元テキスト
     onRestoreTextConsumed,    // ★追加: 復元完了コールバック
     isShieldActive,           // ★追加: シールドモード状態
+    activeCustomBot,          // ★追加: カスタムボット状態
     // ★追加: エラーインテリジェンスのステート
     activeError,
     retryCountdown,
@@ -172,6 +173,7 @@ const ChatView = ({
                 restoreText={restoreText}
                 onRestoreTextConsumed={onRestoreTextConsumed}
                 isShieldActive={isShieldActive}
+                activeCustomBot={activeCustomBot} // ★追加
                 // ★追加: リトライステータスの伝播
                 activeError={activeError}
                 retryCountdown={retryCountdown}

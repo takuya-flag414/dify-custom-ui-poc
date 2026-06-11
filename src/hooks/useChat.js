@@ -96,6 +96,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
     const [dynamicMockMessages, setDynamicMockMessages] = useState({});
     const [searchSettings, setSearchSettings] = useState(DEFAULT_SEARCH_SETTINGS);
+    
+    // ★追加: カスタムボット状態
+    const [activeCustomBot, setActiveCustomBot] = useState(null);
 
     const searchSettingsRef = useRef(searchSettings);
     const promptSettingsRef = useRef(promptSettings);
@@ -144,6 +147,19 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
     const resetChatState = useCallback(() => {
         setSearchSettings(DEFAULT_SEARCH_SETTINGS);
         setSessionFiles([]);
+
+        // カスタムボットの復元またはクリア
+        const pendingBot = localStorage.getItem('pending_custom_bot');
+        if (pendingBot) {
+            try {
+                setActiveCustomBot(JSON.parse(pendingBot));
+            } catch (e) {}
+            localStorage.removeItem('pending_custom_bot');
+        } else {
+            // New Chat が押された場合などはクリアされる
+            setActiveCustomBot(null);
+        }
+
         addLog('[useChat] Chat state reset to default.', 'info');
     }, [addLog]);
 
@@ -206,6 +222,13 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             if (result.sessionFiles.length > 0) {
                 setSessionFiles(result.sessionFiles);
             }
+            // ★追加: 履歴からカスタムボット状態を復元
+            if (result.restoredSettings && result.restoredSettings.activeCustomBot) {
+                setActiveCustomBot(result.restoredSettings.activeCustomBot);
+            } else if (result.messages.length > 0) {
+                setActiveCustomBot(null);
+            }
+            
             setIsHistoryLoading(false);
         };
         loadHistory();
@@ -419,15 +442,26 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
 
             const hasReceivedAnyArtifact = receivedTypes.size > 0;
 
+            // ★追加: カスタムボットのRAG設定によるオーバーライド
+            const isBotRagEnabled = activeCustomBot?.rag_config?.enabled;
+            const botStoreId = activeCustomBot?.rag_config?.target_store_id;
+
+            // ChatServiceAdapter の入力変数（Dify開始ノード用）にも上書きを反映するためのマージ設定
+            const effectiveSearchSettings = {
+                ...currentSettings,
+                ragEnabled: currentSettings.ragEnabled || isBotRagEnabled,
+                selectedStoreId: isBotRagEnabled ? botStoreId : currentSettings.selectedStoreId
+            };
+
             const difyInputs = {
-                rag_enabled: currentSettings.ragEnabled ? 'true' : 'false',
-                web_enabled: currentSettings.webEnabled ? 'true' : 'false',
+                rag_enabled: effectiveSearchSettings.ragEnabled ? 'true' : 'false',
+                web_enabled: effectiveSearchSettings.webEnabled ? 'true' : 'false',
                 domain_filter: domainFilterString,
                 current_time: currentTimeStr,
                 ai_style: promptSettings?.aiStyle || 'partner',
                 system_prompt: JSON.stringify(systemPromptPayload),
-                reasoning_mode: currentSettings.reasoningMode || 'fast',
-                gemini_store_id: currentSettings.selectedStoreId || '',
+                reasoning_mode: effectiveSearchSettings.reasoningMode || 'fast',
+                gemini_store_id: effectiveSearchSettings.selectedStoreId || '',
                 has_received_artifact: hasReceivedAnyArtifact ? 'true' : 'false',
             };
 
@@ -447,6 +481,11 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
             // ★追加: dify_inputs をペイロードにマージ
             const parsedPayload = JSON.parse(structuredQuery);
             parsedPayload.dify_inputs = difyInputs;
+
+            // ★追加: カスタムボットが有効な場合、プロトコルに追加
+            if (activeCustomBot) {
+                parsedPayload.custom_bot = activeCustomBot;
+            }
 
             // ★追加: Artifactリクエスト情報をペイロードに含める
             // generate_document SmartAction経由の場合、options.artifact が設定されている
@@ -515,7 +554,7 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
                     text: finalStructuredQuery, // サニタイズ済みJSON
                     conversationId,
                     files: allFilesToSend.map(f => ({ id: f.id, name: f.name })),
-                    searchSettings: currentSettings,
+                    searchSettings: effectiveSearchSettings,
                     promptSettings: promptSettings,
                     displayName: promptSettings?.displayName || '',
                     artifact: options.artifact || undefined // ★追加: Artifactリクエスト情報
@@ -1147,6 +1186,9 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         streamingMessage,
         isGenerating,
         isHistoryLoading,
+        sessionFiles,
+        activeCustomBot,
+        resetChatState,
         setIsLoading: setIsGenerating,
         activeContextFiles: sessionFiles,
         setActiveContextFiles: setSessionFiles,

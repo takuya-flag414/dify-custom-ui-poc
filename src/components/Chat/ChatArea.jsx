@@ -52,6 +52,7 @@ const ChatArea = (props) => {
     restoreText = null,
     onRestoreTextConsumed,
     isShieldActive = false,  // ★追加: シールドモード状態
+    activeCustomBot = null,  // ★追加: カスタムボット状態
     // ★追加: エラーインテリジェンスのステート
     activeError = null,
     retryCountdown = 0,
@@ -330,6 +331,8 @@ const ChatArea = (props) => {
 
   return (
     <div className={`chat-area${viewMode === 'welcome' ? ' chat-area-initial' : ''} ${isArtifactOpen ? 'artifact-open' : ''}`}>
+      {/* カスタムボットインジケーターはControlDeckに移動したため削除 */}
+
       <AnimatePresence mode="wait">
         {viewMode.startsWith('studio_') ? (
           <motion.div key="universal_studio" {...transitionProps} className="chat-view-container">
@@ -346,6 +349,7 @@ const ChatArea = (props) => {
               backendBApiKey={backendBApiKey}
               backendBApiUrl={backendBApiUrl}
               sendKey={sendKey}
+              activeCustomBot={activeCustomBot} // ★追加: カスタムボット情報
               onGenerate={(promptText, files, options, artifactInfo) => {
                 if (props.conversationId) {
                   navigate(`/chat/${props.conversationId}`);
@@ -391,6 +395,7 @@ const ChatArea = (props) => {
               restoreText={restoreText || wizardText}
               onRestoreTextConsumed={handleRestoreTextConsumed}
               onWizardComplete={handleWizardComplete}
+              activeCustomBot={activeCustomBot}
               onEnterStudio={(type) => {
                 if (props.conversationId) {
                   navigate(`/chat/${props.conversationId}/studio/${type}`);
@@ -456,6 +461,7 @@ const ChatArea = (props) => {
                 restoreText={restoreText || wizardText}
                 onRestoreTextConsumed={handleRestoreTextConsumed}
                 isShieldActive={isShieldActive}
+                activeBot={activeCustomBot}
               />
             </div>
           </motion.div>

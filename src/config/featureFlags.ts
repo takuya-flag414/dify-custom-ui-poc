@@ -6,8 +6,8 @@
 export interface FeatureFlags {
     /** true: 設定画面をモーダル表示, false: 設定画面を全画面表示（従来） */
     USE_SETTINGS_MODAL: boolean;
-    /** true: サイドバーにStudiosボタンを表示, false: 非表示 */
-    SHOW_SIDEBAR_STUDIOS: boolean;
+    /** true: サイドバーにCustomBotsボタンを表示, false: 非表示 */
+    SHOW_SIDEBAR_CUSTOM_BOTS: boolean;
     /** true: サイドバーにIntelligenceボタンを表示, false: 非表示 */
     SHOW_SIDEBAR_INTELLIGENCE: boolean;
     /**
@@ -32,7 +32,7 @@ export const FEATURE_FLAGS: FeatureFlags = {
     // false: 設定画面を全画面表示（従来）
     USE_SETTINGS_MODAL: getEnvBoolean('VITE_FEATURE_USE_SETTINGS_MODAL', true),
     // サイドバー項目の表示制御
-    SHOW_SIDEBAR_STUDIOS: getEnvBoolean('VITE_FEATURE_SHOW_SIDEBAR_STUDIOS', false),
+    SHOW_SIDEBAR_CUSTOM_BOTS: getEnvBoolean('VITE_FEATURE_SHOW_SIDEBAR_CUSTOM_BOTS', true),
     SHOW_SIDEBAR_INTELLIGENCE: getEnvBoolean('VITE_FEATURE_SHOW_SIDEBAR_INTELLIGENCE', false),
     // SmartActions と「関連する質問」の排他制御
     // true  → SmartActions表示 / 「関連する質問」非表示

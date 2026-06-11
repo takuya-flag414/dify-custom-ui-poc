@@ -93,6 +93,16 @@ const CloseIcon = () => (
     </svg>
 );
 
+const RobotIcon = () => (
+    <svg {...iconProps}>
+        <rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect>
+        <circle cx="12" cy="5" r="2"></circle>
+        <path d="M12 7v4"></path>
+        <line x1="8" y1="16" x2="8.01" y2="16"></line>
+        <line x1="16" y1="16" x2="16.01" y2="16"></line>
+    </svg>
+);
+
 // --- Mode Logic ---
 const getModeInfo = (settings) => {
     const { ragEnabled, webEnabled, domainFilters } = settings || { ragEnabled: false, webEnabled: false };
@@ -163,7 +173,10 @@ const ControlDeck = ({
     canSend,
     onSend,
     onStop,
-    isLoading
+    isLoading,
+    
+    // Custom Bot
+    activeBot
 }) => {
     const [isContextOpen, setIsContextOpen] = useState(false);
     const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
@@ -251,108 +264,126 @@ const ControlDeck = ({
                 {/* Vertical Divider */}
                 <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
 
-                {/* Context Selector Trigger */}
-                <div className="relative flex items-center gap-1.5" ref={contextRef}>
-                    {/* Error Tooltip */}
-                    <AnimatePresence>
-                        {showStoreError && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                                animate={{ opacity: 1, y: -45, scale: 1 }}
-                                exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                                className="absolute left-1/2 -translate-x-1/2 -top-2 z-50 whitespace-nowrap pointer-events-none"
-                            >
-                                <div className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg relative">
-                                    ストアを選択してください
-                                    {/* Triangle */}
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-red-500" />
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <motion.div
-                        animate={showStoreError ? { x: [-5, 5, -5, 5, 0] } : {}}
-                        transition={{ duration: 0.4 }}
-                    >
-                        <motion.button
-                            layout
-                            onClick={() => setIsContextOpen(!isContextOpen)}
-                            className={`flex items-center h-8 px-3 gap-1.5 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 ${isContextOpen ? 'bg-black/5 dark:bg-white/10 text-gray-800 dark:text-gray-200' : ''}`}
-                            title="検索モードを変更"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <SearchIcon />
-                            <span className="text-xs font-medium whitespace-nowrap">検索モード</span>
-                            <motion.div
-                                animate={{ rotate: isContextOpen ? 180 : 0 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                className="flex items-center justify-center"
-                            >
-                                <ChevronUpIcon />
-                            </motion.div>
-                        </motion.button>
-                    </motion.div>
-
-                    {/* Floating Status Badge */}
+                {activeBot ? (
                     <AnimatePresence mode="popLayout">
-                        {modeInfo.id !== 'chat' && (
-                            <motion.div
-                                initial={{ opacity: 0, x: -10, scale: 0.9 }}
-                                animate={{ opacity: 1, x: 0, scale: 1 }}
-                                exit={{ opacity: 0, x: -10, scale: 0.9 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                                className={`flex items-center h-6 px-2.5 rounded-full ${modeInfo.bgClass} ${modeInfo.textClass} ${modeInfo.ringClass} backdrop-blur-md group`}
-                                title={modeInfo.label}
-                            >
-                                <div className="[&>svg]:w-3.5 [&>svg]:h-3.5 mr-1">
-                                    {modeInfo.icon}
-                                </div>
-                                <span className="text-[11px] font-medium whitespace-nowrap">
-                                    {modeInfo.label}
-                                </span>
-                                <button
-                                    onClick={() => setSearchSettings({ ...searchSettings, ragEnabled: false, webEnabled: false, selectedStoreId: null, selectedStoreName: null })}
-                                    className={`ml-1.5 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 transition-all`}
-                                    title="検索モードを解除"
+                        <motion.div
+                            initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            exit={{ opacity: 0, x: -10, scale: 0.9 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                            className="flex items-center h-8 px-3 gap-1.5 rounded-full bg-amber-500/10 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20 dark:ring-amber-400/20 backdrop-blur-md"
+                            title={activeBot.name || 'カスタムボット'}
+                        >
+                            <RobotIcon />
+                            <span className="text-xs font-semibold whitespace-nowrap">
+                                {activeBot.name || 'カスタムボット'}
+                            </span>
+                        </motion.div>
+                    </AnimatePresence>
+                ) : (
+                    <div className="relative flex items-center gap-1.5" ref={contextRef}>
+                        {/* Context Selector Trigger */}
+                        {/* Error Tooltip */}
+                        <AnimatePresence>
+                            {showStoreError && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                                    animate={{ opacity: 1, y: -45, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                                    className="absolute left-1/2 -translate-x-1/2 -top-2 z-50 whitespace-nowrap pointer-events-none"
                                 >
-                                    <CloseIcon />
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                    <div className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg relative">
+                                        ストアを選択してください
+                                        {/* Triangle */}
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-red-500" />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                    {/* Popover */}
-                    <AnimatePresence>
-                        {isContextOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                                className="absolute left-0 bottom-[calc(100%+8px)] z-50 origin-bottom-left"
+                        <motion.div
+                            animate={showStoreError ? { x: [-5, 5, -5, 5, 0] } : {}}
+                            transition={{ duration: 0.4 }}
+                        >
+                            <motion.button
+                                layout
+                                onClick={() => setIsContextOpen(!isContextOpen)}
+                                className={`flex items-center h-8 px-3 gap-1.5 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 ${isContextOpen ? 'bg-black/5 dark:bg-white/10 text-gray-800 dark:text-gray-200' : ''}`}
+                                title="検索モードを変更"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                             >
-                                {/* ContextSelector component */}
-                                <div className="shadow-2xl rounded-2xl overflow-hidden ring-1 ring-black/5">
-                                    <ContextSelector
-                                        settings={searchSettings}
-                                        onSettingsChange={setSearchSettings}
-                                        mockMode={mockMode}
-                                        backendBApiKey={backendBApiKey}
-                                        backendBApiUrl={backendBApiUrl}
-                                        onStoreSelected={onStoreSelected}
-                                        onOpenStoreModal={() => {
-                                            setIsContextOpen(false);
-                                            refetchStores();
-                                            setIsStoreModalOpen(true);
-                                        }}
-                                    />
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                                <SearchIcon />
+                                <span className="text-xs font-medium whitespace-nowrap">検索モード</span>
+                                <motion.div
+                                    animate={{ rotate: isContextOpen ? 180 : 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="flex items-center justify-center"
+                                >
+                                    <ChevronUpIcon />
+                                </motion.div>
+                            </motion.button>
+                        </motion.div>
+
+                        {/* Floating Status Badge */}
+                        <AnimatePresence mode="popLayout">
+                            {modeInfo.id !== 'chat' && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                                    exit={{ opacity: 0, x: -10, scale: 0.9 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                                    className={`flex items-center h-6 px-2.5 rounded-full ${modeInfo.bgClass} ${modeInfo.textClass} ${modeInfo.ringClass} backdrop-blur-md group`}
+                                    title={modeInfo.label}
+                                >
+                                    <div className="[&>svg]:w-3.5 [&>svg]:h-3.5 mr-1">
+                                        {modeInfo.icon}
+                                    </div>
+                                    <span className="text-[11px] font-medium whitespace-nowrap">
+                                        {modeInfo.label}
+                                    </span>
+                                    <button
+                                        onClick={() => setSearchSettings({ ...searchSettings, ragEnabled: false, webEnabled: false, selectedStoreId: null, selectedStoreName: null })}
+                                        className={`ml-1.5 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 transition-all`}
+                                        title="検索モードを解除"
+                                    >
+                                        <CloseIcon />
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Popover */}
+                        <AnimatePresence>
+                            {isContextOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                                    className="absolute left-0 bottom-[calc(100%+8px)] z-50 origin-bottom-left"
+                                >
+                                    {/* ContextSelector component */}
+                                    <div className="shadow-2xl rounded-2xl overflow-hidden ring-1 ring-black/5">
+                                        <ContextSelector
+                                            settings={searchSettings}
+                                            onSettingsChange={setSearchSettings}
+                                            mockMode={mockMode}
+                                            backendBApiKey={backendBApiKey}
+                                            backendBApiUrl={backendBApiUrl}
+                                            onStoreSelected={onStoreSelected}
+                                            onOpenStoreModal={() => {
+                                                setIsContextOpen(false);
+                                                refetchStores();
+                                                setIsStoreModalOpen(true);
+                                            }}
+                                        />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
 
 
             </div>

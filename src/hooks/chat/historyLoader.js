@@ -107,14 +107,18 @@ const buildMessagesFromApi = (chronologicalMessages) => {
       // ★追加: ユーザーメッセージのJSONから設定を復元
       try {
         const parsed = JSON.parse(item.query);
-        if (parsed.knowledge_context) {
-          const kc = parsed.knowledge_context;
+        const kc = parsed.knowledge_context || parsed.context;
+        if (kc) {
           restoredSettings = {
             webEnabled: kc.web_search_enabled || false,
             ragEnabled: kc.domain_context === 'knowledge',
             selectedStoreId: (kc.selected_store_ids && kc.selected_store_ids.length > 0) ? kc.selected_store_ids[0] : null,
-            domainFilters: kc.domain_filter || []
+            domainFilters: kc.domain_filter || [],
+            activeCustomBot: parsed.custom_bot || null // ★追加: カスタムボット情報の復元
           };
+        } else if (parsed.custom_bot) {
+          if (!restoredSettings) restoredSettings = {};
+          restoredSettings.activeCustomBot = parsed.custom_bot;
         }
       } catch (e) {
         // パースエラーは無視
@@ -271,6 +275,7 @@ export const loadChatHistory = async ({
         messages: newMessages,
         sessionFiles: restoredFiles,
         searchSettings: finalSettings,
+        restoredSettings: restoredSettings, // ★追加
         error: null,
         shouldSkip: false
       };

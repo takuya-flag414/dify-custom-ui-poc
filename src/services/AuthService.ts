@@ -265,6 +265,7 @@ class AuthService {
                     email: user.email,
                     name: user.name,
                     displayName: user.displayName || user.name,
+                    departmentId: user.department_id,         // ★修正: 部署IDを追加（スコープ検証用）
                     accountStatus: user.account_status,
                     roles: roles,
                     permissions: permissions,
@@ -719,6 +720,7 @@ class AuthService {
                             email: user.email,
                             name: user.name,
                             displayName: user.displayName || user.name,
+                            departmentId: user.department_id,         // ★修正: 部署IDを追加（スコープ検証用）
                             accountStatus: user.account_status,
                             roles: roles,
                             permissions: permissions,
