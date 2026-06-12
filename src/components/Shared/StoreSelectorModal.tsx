@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Folder, LayoutGrid, List, Rocket } from 'lucide-react';
 import { SHOW_HYBRID_SEARCH } from '../../config/env';
+import { useAuth } from '../../context/AuthContext';
+import { formatStoreDisplayName } from '../../utils/storeFormatter';
 import './StoreSelectorModal.css';
 
 export interface Store {
@@ -32,10 +34,39 @@ const StoreSelectorModal: React.FC<StoreSelectorModalProps> = ({
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [isHybridMode, setIsHybridMode] = useState(false);
 
+    const { user } = useAuth();
+    
+    // RBAC Permissions
+    const isAdmin = user?.roles?.some(r => r.roleCode === 'admin') || user?.role === 'admin';
+    const isKnowledgeManager = user?.roles?.some(r => r.roleCode === 'knowledge_manager') || user?.permissions?.includes('knowledge:manage');
+    const deptCode = user?.departmentId?.toString() || '';
+
     const filteredStores = useMemo(() => {
-        if (!searchQuery) return stores;
-        return stores.filter(s => s.display_name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }, [stores, searchQuery]);
+        let storesToDisplay = stores;
+
+        // RBAC filtering
+        storesToDisplay = storesToDisplay.filter(store => {
+            if (isAdmin) return true;
+            if (!isKnowledgeManager) return false;
+
+            const parts = store.display_name.split('_');
+            if (parts.length < 2) return false;
+            
+            const storeDept = parts[1];
+            if (storeDept === deptCode) return true;
+
+            return false;
+        });
+
+        if (!searchQuery) return storesToDisplay;
+        
+        return storesToDisplay.filter(s => {
+            // 検索時は元の名前と整形後の名前の両方でヒットするようにする
+            const formattedName = formatStoreDisplayName(s.display_name);
+            const query = searchQuery.toLowerCase();
+            return s.display_name.toLowerCase().includes(query) || formattedName.toLowerCase().includes(query);
+        });
+    }, [stores, searchQuery, isAdmin, isKnowledgeManager, deptCode]);
 
     const handleConfirm = () => {
         const store = stores.find(s => s.id === selectedStoreId);
@@ -131,8 +162,8 @@ const StoreSelectorModal: React.FC<StoreSelectorModalProps> = ({
                                                 <motion.div layout="position">
                                                     <Folder size={viewMode === 'grid' ? 48 : 24} className="folder-icon" />
                                                 </motion.div>
-                                                <motion.div layout="position" className="folder-name">
-                                                    {store.display_name}
+                                                <motion.div layout="position" className="folder-name" title={store.display_name}>
+                                                    {formatStoreDisplayName(store.display_name)}
                                                 </motion.div>
                                             </motion.div>
                                         ))}

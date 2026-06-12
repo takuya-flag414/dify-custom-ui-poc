@@ -245,6 +245,18 @@ class AuthService {
     // ============================================
 
     /**
+     * カスタムアクションの監査ログを記録
+     */
+    async logAuditAction(
+        action: string,
+        targetEmail: string,
+        targetUserId: string | null = null,
+        details: Record<string, any> = {}
+    ): Promise<void> {
+        return this._logAuditAction(action, targetEmail, targetUserId, details);
+    }
+
+    /**
      * ログイン
      */
     async login(email: string, password: string): Promise<LoginResult> {

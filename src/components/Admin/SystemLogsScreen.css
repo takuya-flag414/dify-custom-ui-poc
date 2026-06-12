@@ -110,6 +110,8 @@
 .action-badge.EMAIL_VERIFIED_SUCCESS { background: rgba(16, 185, 129, 0.15); color: #059669; }
 .action-badge.ACCOUNT_VERIFIED_SIGNIN { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .action-badge.ACCOUNT_SIGNIN_UNVERIFIED { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.action-badge.TIER_CHANGED { background: rgba(14, 165, 233, 0.15); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.3); }
+.action-badge.CREDIT_BONUS_ADJUSTED { background: rgba(236, 72, 153, 0.15); color: #db2777; border: 1px solid rgba(236, 72, 153, 0.3); }
 
 .log-details {
     color: var(--color-text-sub);
