@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIエージェントアプリ ユーザーマニュアル</title>
+    <title>AI エージェントアプリ ユーザーマニュアル</title>
     <style>
         /* ==========================================================================
            1. Design Tokens & Variables
@@ -12,7 +12,6 @@
         :root {
             /* Color System */
             --sys-color-primary: #0A84FF;
-            /* System Blue for Web */
             --sys-bg-base: #FFFFFF;
             --sys-bg-alt: #F5F5F7;
             --text-primary: rgba(0, 0, 0, 0.85);
@@ -55,7 +54,6 @@
 
         html {
             scroll-behavior: smooth;
-            /* スムーススクロールを追加 */
         }
 
         :focus-visible {
@@ -133,20 +131,18 @@
 
         .toc-inner {
             width: 280px;
-            /* アニメーション中のレイアウト崩れ防止 */
             padding: 80px 24px 48px;
-            /* トグルボタンのスペース確保 */
         }
 
         .nav-content {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
         }
 
         .nav-link {
             display: block;
-            padding: 8px 12px;
+            padding: 7px 12px;
             color: var(--text-secondary);
             text-decoration: none;
             font-size: 14px;
@@ -166,6 +162,23 @@
             font-weight: 600;
         }
 
+        /* Sub-navigation links (slightly indented) */
+        .nav-sublink {
+            display: block;
+            padding: 5px 12px 5px 24px;
+            color: var(--text-tertiary);
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 400;
+            border-radius: 6px;
+            transition: all 0.2s var(--ease-spring);
+        }
+
+        .nav-sublink:hover {
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.03);
+        }
+
         /* Main Content Area */
         .main-content {
             flex-grow: 1;
@@ -175,7 +188,6 @@
 
         .content-container {
             max-width: 800px;
-            /* Readability width */
             margin: 0 auto;
             padding: 80px 48px 120px;
         }
@@ -191,12 +203,10 @@
         h5,
         h6 {
             scroll-margin-top: 80px;
-            /* スムーススクロールジャンプ時の上部余白 */
         }
 
         h1 {
             font-size: 40px;
-            /* Larger for full-screen */
             font-weight: 700;
             letter-spacing: -0.02em;
             margin-bottom: 16px;
@@ -232,6 +242,15 @@
             font-weight: 600;
             margin: 28px 0 12px;
             color: var(--text-secondary);
+        }
+
+        h5 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 20px 0 8px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         p {
@@ -353,11 +372,79 @@
             background: #FF3B30;
         }
 
+        .callout-new .callout-title {
+            color: #34C759;
+        }
+
+        .callout-new .icon {
+            background: #34C759;
+        }
+
         .callout-icon {
             width: 18px;
             height: 18px;
             border-radius: 50%;
             display: inline-block;
+        }
+
+        /* New Feature Badge */
+        .badge-new {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid rgba(52, 199, 89, 0.25);
+            font-size: 11px;
+            font-weight: 700;
+            color: #34C759;
+            vertical-align: middle;
+            margin-left: 8px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Step indicator */
+        .step-list {
+            list-style: none;
+            margin: 0 0 24px 0;
+            counter-reset: step-counter;
+        }
+
+        .step-list li {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            counter-increment: step-counter;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--sys-color-primary);
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+
+        /* Key shortcut display */
+        kbd {
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 8px;
+            background: var(--sys-bg-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
         }
 
         /* ==========================================================================
@@ -448,8 +535,6 @@
                 -webkit-backdrop-filter: blur(30px) saturate(180%);
                 border-bottom: 1px solid var(--border-color);
                 z-index: 25;
-
-                /* Accordion behavior for mobile */
                 display: grid;
                 grid-template-rows: 0fr;
                 transition: grid-template-rows 0.4s var(--ease-spring);
@@ -462,21 +547,17 @@
 
             .toc-container.is-closed {
                 width: 100%;
-                /* モバイル時はPC側の閉じるスタイルを無効化 */
                 opacity: 1;
             }
 
             .toc-inner {
                 width: 100%;
                 min-height: 0;
-                /* Required for grid animation */
                 padding: 0;
-                /* はみ出し防止のためゼロにする */
             }
 
             .nav-content {
                 padding: 16px 20px 24px;
-                /* 代わりに内側の要素で余白を確保する */
             }
 
             .content-container {
@@ -523,11 +604,27 @@
             <div class="toc-inner">
                 <nav class="nav-content">
                     <a href="#ch1" class="nav-link active">第1章：はじめに</a>
-                    <a href="#ch2" class="nav-link">第2章：基本の使い方</a>
-                    <a href="#ch3" class="nav-link">第3章：高度な入力・参照機能</a>
-                    <a href="#ch4" class="nav-link">第4章：アーティファクトの活用</a>
-                    <a href="#ch5" class="nav-link">第5章：プライバシーシールド</a>
-                    <a href="#ch6" class="nav-link">第6章：Q&A</a>
+                    <a href="#ch2" class="nav-link">第2章：画面の見方と基本操作</a>
+                    <a href="#ch2-sidebar" class="nav-sublink">サイドバー</a>
+                    <a href="#ch2-history" class="nav-sublink">会話履歴の管理</a>
+                    <a href="#ch2-message" class="nav-sublink">メッセージ操作</a>
+                    <a href="#ch3" class="nav-link">第3章：チャット入力の使い方</a>
+                    <a href="#ch3-addmenu" class="nav-sublink">「+」ボタンメニュー</a>
+                    <a href="#ch3-files" class="nav-sublink">ファイル操作</a>
+                    <a href="#ch3-mention" class="nav-sublink">@メンション</a>
+                    <a href="#ch3-quote" class="nav-sublink">引用（Quote）</a>
+                    <a href="#ch4" class="nav-link">第4章：ツールボックスとスタジオ</a>
+                    <a href="#ch4-toolbox" class="nav-sublink">ツールボックス</a>
+                    <a href="#ch4-studio" class="nav-sublink">各スタジオの説明</a>
+                    <a href="#ch5" class="nav-link">第5章：アーティファクトの活用</a>
+                    <a href="#ch5-panel" class="nav-sublink">パネル操作</a>
+                    <a href="#ch5-export" class="nav-sublink">エクスポート</a>
+                    <a href="#ch6" class="nav-link">第6章：カスタムボット</a>
+                    <a href="#ch6-gallery" class="nav-sublink">ギャラリーの使い方</a>
+                    <a href="#ch6-create" class="nav-sublink">ボットの作成</a>
+                    <a href="#ch7" class="nav-link">第7章：プライバシーシールド</a>
+                    <a href="#ch8" class="nav-link">第8章：設定</a>
+                    <a href="#ch9" class="nav-link">第9章：Q&A</a>
                 </nav>
             </div>
         </aside>
@@ -536,53 +633,167 @@
         <main class="main-content">
             <div class="content-container">
 
-                <h1>ユーザーマニュアル：<br><span class="ai-concept">AIエージェントアプリ</span></h1>
-                <p class="subtitle">(詳細版)</p>
+                <h1>ユーザーマニュアル：<br><span class="ai-concept">AI エージェントアプリ</span></h1>
+                <p class="subtitle">デスクトップインテリジェンス版 — 詳細ガイド</p>
 
-                <p>本アプリケーションは、AIとの対話をビジネスや創作活動に最適化するための高度なインターフェースを提供します。このマニュアルでは、各機能の背後にある仕組みから、効率的な操作手順までを詳細に解説します。
-                </p>
+                <p>本アプリケーションは、AIとの対話をビジネスや創作活動に最適化するための高度なインターフェースです。このマニュアルでは、全機能の使い方を体系的に解説します。</p>
 
-                <!-- Chapter 1 -->
+                <!-- ===== Chapter 1 ===== -->
                 <section id="ch1">
                     <h2>第1章：はじめに</h2>
-                    <h3>コンセプト：Intelligence at Your Fingertips</h3>
-                    <p>本AIエージェントアプリは、強力なAIの能力を最大限に引き出し、業務の生産性を高めるために設計されました。</p>
+                    <h3>コンセプト：Desktop Intelligence</h3>
+                    <p>本AIエージェントアプリは、強力なAIの能力を最大限に引き出し、日常業務の生産性を高めるために設計されました。主な特徴は次の3点です。</p>
                     <ul>
-                        <li><strong>シームレスな参照</strong>: ローカルファイルやWeb情報を AI の知識として即座に組み込めます。</li>
-                        <li><strong>構造化されたアウトプット</strong>: チャットの枠を超え、スライドやドキュメント（アーティファクト）として情報を整理・保存できます。</li>
+                        <li><strong>シームレスな参照</strong>: ローカルファイルや社内ナレッジベースをAIの知識として即座に組み込めます。</li>
+                        <li><strong>構造化されたアウトプット</strong>: チャットの枠を超え、スライド・ドキュメント・図解（アーティファクト）として情報を整理・保存できます。</li>
                         <li><strong>プロアクティブな保護</strong>: 入力内容をリアルタイムでスキャンし、機密情報の漏洩を未然に防ぎます。</li>
                     </ul>
+
+                    <h3>画面の基本構成</h3>
+                    <p>アプリは主に3つの領域で構成されています。</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>領域</th>
+                                    <th>役割</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>サイドバー（左）</strong></td>
+                                    <td>ナビゲーション、会話履歴、設定へのアクセス。折りたたみ可能。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>チャットエリア（中央）</strong></td>
+                                    <td>AIとの会話を行うメインエリア。入力欄と会話履歴が表示される。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>アーティファクトパネル（右）</strong></td>
+                                    <td>AIが生成したスライドやドキュメントを表示する専用パネル。必要なときだけ開く。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
 
-                <!-- Chapter 2 -->
+                <!-- ===== Chapter 2 ===== -->
                 <section id="ch2">
-                    <h2>第2章：基本の使い方</h2>
-                    <h3>効率的なチャット操作</h3>
+                    <h2>第2章：画面の見方と基本操作</h2>
+
+                    <h3 id="ch2-sidebar">サイドバーのナビゲーション</h3>
+                    <p>サイドバーは左端に固定表示されており、アプリの各機能へのゲートウェイです。</p>
+
+                    <h4>サイドバーの開閉</h4>
                     <ul>
-                        <li><strong>メッセージ送信</strong>: 入力フィールドで <code>Enter</code> キーを押すか、右側の送信ボタンをクリックします。</li>
-                        <li><strong>改行</strong>: <code>Shift + Enter</code> で入力フィールド内で改行できます。</li>
-                        <li><strong>新規チャット (New Chat)</strong>: 目次メニューなどのボタンから、AIの記憶（コンテキスト）をリセットし、クリーンな状態で新しい会話を開始できます。
-                        </li>
-                        <li><strong>履歴の再開</strong>: 過去のタイトルをクリックするだけで、いつでもその時点の文脈から再開可能です。</li>
+                        <li><strong>折りたたみ / 展開</strong>: サイドバー左上の「□|」アイコンをクリックすることで、サイドバーをアイコンのみのコンパクト表示に切り替えられます。</li>
+                        <li>折りたたんだ状態でも、アイコンにマウスをホバーするとボタン名のツールチップが表示されます。</li>
                     </ul>
 
-                    <h3>メッセージアクション</h3>
-                    <p>AIの回答の下には、便利なアクションボタンが用意されています。</p>
+                    <h4>主なナビゲーションボタン</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ボタン</th>
+                                    <th>機能</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>✏️ 新しいチャット</strong></td>
+                                    <td>AIの記憶（コンテキスト）をリセットし、クリーンな状態で新しい会話を開始します。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>☰ すべてのツール</strong></td>
+                                    <td>ツールボックスを開き、スライド作成・議事録・図解など用途別ツールを起動します（<a href="#ch4">第4章参照</a>）。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>🕐 すべての履歴</strong></td>
+                                    <td>全会話の一覧画面へ遷移します。検索や日付絞り込みが利用可能です。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>🤖 カスタムボット</strong></td>
+                                    <td>ペルソナやナレッジを組み込んだカスタムボット一覧を開きます（<a href="#ch6">第6章参照</a>）。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>⚙️ 設定</strong></td>
+                                    <td>プロフィール・テーマ・送信キーなどの設定画面を開きます（<a href="#ch8">第8章参照</a>）。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4>クレジット残高インジケーター</h4>
+                    <p>サイドバー下部には、現在のクレジット残高が表示されます。クレジットは1回のAIへの送信で消費され、定期的にリセットされます。</p>
                     <ul>
-                        <li><strong>コピー</strong>: 回答テキストをクリップボードに保存します。</li>
-                        <li style="color: var(--text-tertiary);"><strong>編集・再送信（実装予定）</strong>: 送信済みのメッセージを修正して送り直したり、AIの回答を同じ指示で再生成したりする機能は、今後のアップデートで提供予定です。</li>
+                        <li><strong>残高の確認</strong>: 「クレジット ○○ CR」として表示されます。サイドバーを折りたたんだ状態でも数値が表示されます。</li>
+                        <li><strong>次回リセット日</strong>: 残高の下に「次回リセット: ○月○日」と表示されます。</li>
+                        <li><strong>クレジット上限到達時</strong>: 入力欄に「クレジット上限に達しました」と表示され、AIへの送信が一時停止されます。リセット日をお待ちください。</li>
+                        <li><strong>Tier</strong>: ユーザーのプランに応じたTierバッジ（例: <code>Tier 2</code>）が表示される場合があります。</li>
                     </ul>
+
+                    <h3 id="ch2-history">会話履歴の管理</h3>
+                    <p>過去の会話はサイドバーに日付グループ別（今日、昨日、先週、など）で一覧表示されます。</p>
+
+                    <h4>履歴の操作</h4>
+                    <ul>
+                        <li><strong>再開</strong>: 過去の会話タイトルをクリックすることで、その時点の文脈から再開できます。</li>
+                        <li><strong>コンテキストメニュー</strong>: 会話タイトルにホバーすると右端に「…」ボタンが表示されます。クリックするとメニューが開き、次の操作が可能です：
+                            <ul>
+                                <li><strong>名前を変更</strong>: タイトルをインラインで直接編集できます。<kbd>Enter</kbd>で保存、<kbd>Esc</kbd>でキャンセル。</li>
+                                <li><strong>削除</strong>: 会話を削除します（確認ポップオーバーが表示されます）。</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3 id="ch2-message">メッセージ操作</h3>
+                    <p>AIの回答には、下部にアクションボタンが表示されます。</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>アクション</th>
+                                    <th>説明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>コピー</strong></td>
+                                    <td>回答テキスト全文をクリップボードに保存します。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>引用（Quote）</strong></td>
+                                    <td>回答内のテキストを選択して「引用」すると、その内容を参照しながら追加質問ができます（<a href="#ch3-quote">詳細は第3章参照</a>）。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>テーブル展開</strong></td>
+                                    <td>回答内の表にホバーして展開ボタンをクリックすると、大きなモーダルで表を閲覧できます。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4>ページ下部への「↓」ボタン</h4>
+                    <p>長い会話で上にスクロールした際、画面下部に「↓」ボタンが表示されます。クリックすると、最新のメッセージへ自動スクロールします。</p>
                 </section>
 
-                <!-- Chapter 3 -->
+                <!-- ===== Chapter 3 ===== -->
                 <section id="ch3">
-                    <h2>第3章：高度な入力・参照機能</h2>
-                    <h3>Universal Add Menu (「+」ボタン)</h3>
-                    <p>入力欄左側の「+」アイコンをクリックして、外部情報の追加や、特定の形式でのコンテンツ作成を開始できます。</p>
+                    <h2>第3章：チャット入力の使い方</h2>
+
+                    <h3>基本的な送信操作</h3>
+                    <ul>
+                        <li><strong>送信</strong>: デフォルトは <kbd>Enter</kbd> キー。設定で <kbd>Ctrl</kbd> + <kbd>Enter</kbd> に変更可能（<a href="#ch8">設定 &gt; General 参照</a>）。</li>
+                        <li><strong>改行</strong>: <kbd>Shift</kbd> + <kbd>Enter</kbd> で入力フィールド内で改行します。</li>
+                        <li><strong>生成の停止</strong>: AIが回答を生成中は入力欄の右側に「■ 停止」ボタンが表示されます。クリックすると生成を中断でき、入力したテキストは入力欄に自動復元されます。</li>
+                    </ul>
+
+                    <h3 id="ch3-addmenu">「+」ボタン（ユニバーサルアドメニュー）</h3>
+                    <p>入力欄左下の「<strong>+</strong>」アイコンをクリックすると、コンテキスト追加メニューが開きます。</p>
 
                     <h4>1. ファイルアップロード</h4>
-                    <p>ローカルのドキュメントをアップロードして、AIの知識（コンテキスト）として追加できます。アップロードされた内容に基づいた分析や要約が可能になります。</p>
-
+                    <p>ローカルのドキュメントをアップロードして、AIの知識（コンテキスト）として追加できます。</p>
                     <div class="table-wrapper">
                         <table>
                             <thead>
@@ -604,17 +815,13 @@
                                     <td><strong>データ・表計算</strong></td>
                                     <td>Excel (<code>.xlsx</code>), CSV (<code>.csv</code>)</td>
                                 </tr>
+                                <tr>
+                                    <td><strong>画像</strong></td>
+                                    <td>PNG (<code>.png</code>), JPEG (<code>.jpg</code>, <code>.jpeg</code>), GIF, WebP</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <h5>⚠️ 非対応・制限のある形式</h5>
-                    <ul>
-                        <li><strong>画像ファイル</strong>: <code>.png</code>, <code>.jpg</code>, <code>.svg</code> など（※将来のアップデートで対応予定です）</li>
-                        <li><strong>マルチメディア</strong>: 音声 (<code>.mp3</code> 等)、動画 (<code>.mp4</code> 等)</li>
-                        <li><strong>圧縮・実行ファイル</strong>: <code>.zip</code>, <code>.exe</code>, <code>.js</code>, <code>.py</code> 等</li>
-                        <li><strong>保護ファイル</strong>: パスワード保護や暗号化されたファイルは読み取ることができません。</li>
-                    </ul>
 
                     <blockquote class="callout-important">
                         <div class="callout-title"><span class="callout-icon icon"></span>IMPORTANT</div>
@@ -622,52 +829,156 @@
                         <p>アップロードされたファイル内のテキストについては、プライバシーシールドによるトークン化（自動隠蔽）が適用されません。機密情報が含まれるファイルは、事前に内容を確認または編集してからアップロードしてください。</p>
                     </blockquote>
 
-                    <h4>2. Artifact（アーティファクト）の作成</h4>
-                    <p>メニューから作成したいドキュメント形式を直接指定できます。</p>
+                    <h4>2. Artifact を作成</h4>
+                    <p>「Artifact を作成」を選択すると、生成したいドキュメントの種類を選ぶサブメニューが開きます。選択した形式がリファレンスレール（入力欄上部のタグ表示エリア）に追加され、AIへの指示に反映されます。</p>
+
+                    <p><strong>クイックまとめ</strong>（チャット内でさっと読む軽量な形式）：</p>
                     <ul>
-                        <li><strong>クイックまとめ</strong>: 要約・レポート、議事録・Next Action、チェックリスト、比較表、FAQ (想定問答集)。</li>
-                        <li><strong>A4ドキュメント</strong>: 印刷や正式な報告書に適したリッチなレイアウト。</li>
-                        <li><strong>プレゼンスライド</strong>: ブラウザ上で閲覧可能なスライドショー形式。</li>
+                        <li>要約・レポート</li>
+                        <li>議事録・Next Action</li>
+                        <li>チェックリスト</li>
+                        <li>比較表</li>
+                        <li>FAQ（想定問答集）</li>
                     </ul>
 
-                    <h4>3. 将来追加予定の機能</h4>
+                    <p><strong>リッチドキュメント</strong>（専用パネルで表示する本格的な形式）：</p>
                     <ul>
-                        <li><strong>メッセージの編集・再送信</strong>: 一度送信した内容を修正したり、回答を再生成したりする機能。</li>
-                        <li><strong>Webサイトを指定</strong>: 特定のサイトのURLを指定し、情報を取得する機能。</li>
+                        <li>Wordドキュメント（JSON構造化、Word形式でエクスポート可）</li>
+                        <li>業務フロー（Draw.io 形式のフロー図）</li>
+                        <li>設計・構成図（Mermaid 形式のシステム構成図・シーケンス図）</li>
+                        <li>プレゼンスライド（JSON構造化スライド）</li>
+                    </ul>
+
+                    <blockquote class="callout-tip">
+                        <div class="callout-title"><span class="callout-icon icon"></span>TIP</div>
+                        <p>Artifact の種類は <strong>× ボタン</strong> で解除するまで入力欄に保持されます。連続して同じ種類のArtifactを生成したい場合は、そのままArtifactタグを残した状態で次の指示を送信してください。</p>
+                    </blockquote>
+
+                    <h3 id="ch3-files">ファイルのドラッグ＆ドロップ</h3>
+                    <p>入力エリア全体にファイルをドラッグ＆ドロップして追加することもできます。複数ファイルを一度にドロップ可能です。同名ファイルが既に存在する場合は、自動的に <code>ファイル名 (1).pdf</code> のようにリネームされます。</p>
+
+                    <h3 id="ch3-mention">@メンション機能 <span class="badge-new">NEW</span></h3>
+                    <p>入力テキスト内で <code>@</code> を入力すると、アップロード済みのファイルやセッション中に参照したファイルの一覧がポップアップ表示されます。ファイルを選択すると、そのファイルを明示的にAIへ参照させることができます。</p>
+                    <ul>
+                        <li>複数ファイルをアップロードした際、特定のファイルだけを参照させたい場合に便利です。</li>
+                        <li><code>@ファイル名</code> の形でタグが入力欄に挿入されます。</li>
+                    </ul>
+
+                    <h3 id="ch3-quote">引用（Quote）機能 <span class="badge-new">NEW</span></h3>
+                    <p>AIの回答テキストを選択すると、「引用」ボタンが表示されます。クリックすると、選択したテキストが入力欄の上部に「引用タグ」として表示されます。その状態でメッセージを送信すると、AIは引用部分を文脈として参照した上で回答します。</p>
+                    <ul>
+                        <li>引用タグは「×」ボタンでいつでも取り消せます。</li>
+                        <li>回答の一部について「もっと詳しく」「別の言い方で」などと深掘りするのに最適です。</li>
                     </ul>
                 </section>
 
-                <!-- Chapter 4 -->
+                <!-- ===== Chapter 4 ===== -->
                 <section id="ch4">
-                    <h2>第4章：アーティファクト（生成物）の活用</h2>
-                    <p>アーティファクトとは、AIが生成した「まとまった情報（スライドやドキュメント）」を閲覧・編集・保存するための専用機能です。</p>
+                    <h2>第4章：ツールボックスと各スタジオ <span class="badge-new">NEW</span></h2>
 
-                    <h3>1. リアルタイム生成プロセス</h3>
-                    <p>AIに資料作成を依頼すると、チャットの右側に専用の「アーティファクト・パネル」が自動的に開きます。</p>
+                    <h3 id="ch4-toolbox">ツールボックス（すべてのツール）</h3>
+                    <p>ツールボックスは、用途別のAI活用シナリオを一覧から選べるランチャーです。</p>
+
+                    <h4>起動方法</h4>
                     <ul>
-                        <li><strong>生成ステータスの表示</strong>:
-                            AIが思考し、レイアウトを構成する過程がリアルタイムで表示されます（例：「デザインを設計中...」「3枚目のスライドをレイアウト中...」）。</li>
+                        <li><strong>サイドバー</strong>から「すべてのツール（格子アイコン）」ボタンをクリック。</li>
+                        <li><strong>ウェルカム画面</strong>（新規チャット時）の「すべてのツール」ショートカットボタンをクリック。</li>
+                    </ul>
+
+                    <h4>ツールの種類</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>カテゴリ</th>
+                                    <th>ツール名</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>🎨 発表・提案する</strong></td>
+                                    <td>プレゼン資料を作る、提案書・仕様書を作る</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>📝 記録・要約する</strong></td>
+                                    <td>議事録をまとめる、長文を要約する</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>💡 整理・比較する</strong></td>
+                                    <td>比較表を作成する、チェックリスト化、FAQを作る</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>📐 図解・可視化する</strong></td>
+                                    <td>業務フロー図を描く、システム構成図を生成</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4>お気に入り登録</h4>
+                    <p>ツールボックス内の各ツールの右側に「★」ボタンがあります。クリックするとお気に入りに追加され、ウェルカム画面の入力欄の下にショートカットとして表示されるようになります。もう一度クリックすると解除されます。</p>
+
+                    <h3 id="ch4-studio">各スタジオの説明</h3>
+                    <p>ツールボックスから一部のツールを選ぶと、「スタジオモード」と呼ばれる専用の入力インターフェースに遷移します。スタジオでは、フォームに沿って必要事項を入力することで、AIへ最適な指示が自動生成されます。</p>
+
+                    <h4>📊 プレゼンスライドスタジオ</h4>
+                    <p>スライドのテーマ、対象者、枚数、トーンを入力フォームに記入して送信すると、AIが構成を考えてスライドを生成します。生成中は「アーティファクトパネル」がリアルタイムで開き、スライドが構築される様子を確認できます。</p>
+
+                    <h4>📄 ドキュメントスタジオ</h4>
+                    <p>提案書・仕様書・報告書など、構造的なWordドキュメントを生成します。作成した文書はWord形式（<code>.docx</code>）でエクスポートできます。</p>
+
+                    <h4>🏗️ システム構成図スタジオ（Mermaid）</h4>
+                    <p>システム構成、シーケンス図、フローチャートなどをMermaid記法で生成します。生成後は「コードを表示」ボタンでMermaidのテキストコードを確認・コピーできます。</p>
+
+                    <h4>🔄 業務フロースタジオ（Draw.io）</h4>
+                    <p>業務フローや手順を視覚的な配置図として生成します。生成後はXML形式でエクスポートし、Draw.io（diagrams.net）で開いて編集できます。</p>
+
+                    <blockquote class="callout-tip">
+                        <div class="callout-title"><span class="callout-icon icon"></span>TIP</div>
+                        <p><strong>スタジオモードから通常チャットへ</strong></p>
+                        <p>スタジオ画面の「← 戻る」ボタンをクリックすると、元のチャット画面に戻ります。スタジオで生成を実行すると、自動的にチャットビューへ遷移して会話が続けられます。</p>
+                    </blockquote>
+                </section>
+
+                <!-- ===== Chapter 5 ===== -->
+                <section id="ch5">
+                    <h2>第5章：アーティファクト（生成物）の活用</h2>
+                    <p>アーティファクトとは、AIが生成した「まとまった情報（スライドやドキュメント）」を閲覧・操作・保存するための専用パネルです。</p>
+
+                    <h3>リアルタイム生成プロセス</h3>
+                    <p>AIに資料作成を依頼すると、チャットの右側に「アーティファクトパネル」が自動的に開きます。</p>
+                    <ul>
+                        <li><strong>生成ステータスの表示</strong>: AIが思考し、レイアウトを構成する過程がリアルタイムで表示されます（例：「デザインを設計中...」「3枚目のスライドをレイアウト中...」）。</li>
                         <li><strong>ストリーミング描画</strong>: 完成を待たずに、生成されている途中経過を確認できます。</li>
                     </ul>
 
-                    <h3>2. パネルの高度な操作</h3>
+                    <h3 id="ch5-panel">パネルの高度な操作</h3>
                     <p>パネル上部のコントロールツールを使用して、閲覧環境を最適化できます。</p>
                     <ul>
                         <li><strong>ズームコントロール</strong>:
                             <ul>
-                                <li><strong>ズームイン/アウト</strong>: マグニファイア（+ / -）アイコンで <strong>10%刻み</strong> の調整が可能です。
-                                </li>
+                                <li><strong>ズームイン/アウト</strong>: マグニファイア（+ / -）アイコンで <strong>10% 刻み</strong>の調整が可能です。</li>
                                 <li><strong>オートフィット (Auto Fit)</strong>: パネルの幅に合わせて、読みやすい最適な倍率に自動調整されます。</li>
-                                <li><strong>リセット</strong>: 標準のフィット状態（100%基準）に瞬時に戻します。</li>
+                                <li><strong>リセット</strong>: 標準のフィット状態に瞬時に戻します。</li>
                             </ul>
                         </li>
                         <li><strong>全画面プレビュー</strong>: 拡大アイコンをクリックすると、スライドなどを画面全体に表示してプレゼンテーション形式で閲覧できます。</li>
                         <li><strong>出典の参照 (Citations)</strong>: アーティファクト内に引用元がある場合、出典アイコンから元の資料のどの部分を参照したかを確認できます。</li>
                     </ul>
 
-                    <h3>3. 多彩なエクスポートオプション</h3>
-                    <p>パネル右上の「…」アクションメニューから、用途に合わせた保存方法を選択できます。</p>
+                    <h4>Mermaid図 固有の操作</h4>
+                    <ul>
+                        <li><strong>コードを表示 / プレビューを表示</strong>: ボタンで、レンダリングされた図とMermaidソースコードを切り替えられます。</li>
+                        <li><strong>コードのコピー</strong>: Mermaidコードを直接コピーして、他のツール（Notion, GitHubなど）に貼り付けられます。</li>
+                    </ul>
 
+                    <h4>Draw.io図 固有の操作</h4>
+                    <ul>
+                        <li><strong>XML として保存</strong>: エクスポートメニューからXML形式でダウンロードし、Draw.io（diagrams.net）で開いて編集できます。</li>
+                    </ul>
+
+                    <h3 id="ch5-export">多彩なエクスポートオプション</h3>
+                    <p>パネル右上の「<strong>…</strong>」アクションメニューから、用途に合わせた保存方法を選択できます。</p>
                     <div class="table-wrapper">
                         <table>
                             <thead>
@@ -679,11 +990,15 @@
                             <tbody>
                                 <tr>
                                     <td><strong>Markdown として保存</strong></td>
-                                    <td>文書構造を維持したテキスト形式。GitHub, Notion, Obsidian への貼り付けに最適。</td>
+                                    <td>文書構造を維持したテキスト形式。GitHub, Notion, Obsidianへの貼り付けに最適。</td>
                                 </tr>
                                 <tr>
                                     <td><strong>HTML として保存</strong></td>
                                     <td>ブラウザで見たままのデザインを維持したファイル。オフラインでの閲覧や共有に。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Word として保存</strong></td>
+                                    <td>Wordドキュメント形式で直接ダウンロード（JSON Document タイプのみ）。</td>
                                 </tr>
                                 <tr>
                                     <td><strong>PDF として保存</strong></td>
@@ -707,18 +1022,97 @@
                     </blockquote>
                 </section>
 
-                <!-- Chapter 5 -->
-                <section id="ch5">
-                    <h2>第5章：プライバシーシールド <span class="ai-shield-badge">🔒 保護機能</span></h2>
+                <!-- ===== Chapter 6 ===== -->
+                <section id="ch6">
+                    <h2>第6章：カスタムボット <span class="badge-new">NEW</span></h2>
+                    <p>カスタムボットとは、特定の役割（ペルソナ）や社内ナレッジを組み込んだ専用のAIアシスタントです。用途に特化したボットを使うことで、より的確な回答が得られます。</p>
+
+                    <h4>アクセス方法</h4>
+                    <p>サイドバーの「🤖 カスタムボット」ボタンをクリックすると、ボットギャラリーページへ遷移します。</p>
+
+                    <h3 id="ch6-gallery">ボットギャラリーの使い方</h3>
+
+                    <h4>タブ切り替え</h4>
+                    <ul>
+                        <li><strong>すべて</strong>: アクセス可能なすべてのボットを表示します。</li>
+                        <li><strong>マイボット</strong>: 自分が作成したボットのみを表示します。</li>
+                        <li><strong>部署ボット</strong>: 同じ部署のメンバーと共有されているボットです。</li>
+                        <li><strong>全社ボット</strong>: 組織全体で共有されている公開ボットです。</li>
+                    </ul>
+
+                    <h4>検索・フィルター・ソート</h4>
+                    <ul>
+                        <li><strong>検索窓</strong>: ボット名、説明文、作成者でインクリメンタル検索できます。</li>
+                        <li><strong>ナレッジフィルター</strong>: ナレッジの種類で絞り込みができます（すべて / 事前定義RAGのみ / ファイル添付のみ / ハイブリッド）。</li>
+                        <li><strong>ソート順</strong>: 作成日（新しい順）または ボット名（五十音順）で並び替えられます。</li>
+                    </ul>
+
+                    <h4>グリッド / リスト 表示切り替え</h4>
+                    <p>右上のアイコンで、カード形式（グリッド）とリスト形式を切り替えられます。</p>
+
+                    <h4>ボットを選んでチャットを開始する</h4>
+                    <ol class="step-list">
+                        <li>ボットカードをクリックします。</li>
+                        <li>確認モーダルが表示されるので「このボットで始める」をクリックします。</li>
+                        <li>チャット画面へ自動遷移し、選択したボットが有効になります。入力欄にボット名が表示されます。</li>
+                        <li>通常どおりメッセージを送信すると、そのボットのペルソナ・ナレッジに基づいた回答が返ってきます。</li>
+                    </ol>
+
+                    <blockquote class="callout-tip">
+                        <div class="callout-title"><span class="callout-icon icon"></span>TIP</div>
+                        <p>カスタムボットを使用中は、チャット入力欄にボット名のバッジが表示されます。通常のAI（ボットなし）に戻したい場合は、「新しいチャット」ボタンをクリックしてください。</p>
+                    </blockquote>
+
+                    <h3 id="ch6-create">ボットの作成・編集（マイボットのみ）</h3>
+                    <p>ギャラリー画面の右上「＋ 新しいボットを作成」ボタンからボット作成モーダルが開きます。</p>
+
+                    <h4>設定できる主な項目</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>項目</th>
+                                    <th>説明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>ボット名</strong></td>
+                                    <td>ギャラリーや入力欄に表示される名前。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>説明</strong></td>
+                                    <td>ボットの用途を説明するテキスト。他ユーザーへの案内にもなります。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>システムプロンプト</strong></td>
+                                    <td>AIに与えるペルソナや行動指針。「あなたは〇〇部門の専門家です」のように記述します。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RAG（ナレッジベース）</strong></td>
+                                    <td>社内ナレッジストアを紐付けることで、そのボット専用の知識を持たせられます。</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>公開範囲</strong></td>
+                                    <td>自分のみ（マイボット）/ 部署共有 / 全社公開 から選択します。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p>既存のマイボットは、カードの「…」メニューから「編集」を選択して変更できます。他者が作成したボット（部署ボット・全社ボット）は閲覧・利用のみ可能で、編集はできません。</p>
+                </section>
+
+                <!-- ===== Chapter 7 ===== -->
+                <section id="ch7">
+                    <h2>第7章：プライバシーシールド <span class="ai-shield-badge">🔒 保護機能</span></h2>
                     <p>プライバシーシールドは、機密情報をブラウザの外に出さないための「セキュア・トンネリング」機能です。</p>
 
                     <h3>技術的な仕組み：トークン化と復元</h3>
-                    <p>本機能は、AIへの資料作成依頼などの作業中に<strong>「うっかり混入してしまった個人情報」</strong>をサーバーへ送る前に自動で検知し、無意味な記号（トークン）に置き換えます。
-                    </p>
+                    <p>本機能は、AIへの資料作成依頼などの作業中に<strong>「うっかり混入してしまった個人情報」</strong>をサーバーへ送る前に自動で検知し、無意味な記号（トークン）に置き換えます。</p>
 
                     <h4>1. トークン化（情報の秘匿）</h4>
-                    <p>置換処理はすべて<strong>ユーザーのブラウザ内（クライアントサイド）</strong>で完結します。サーバーへは置換後のトークンのみが送信されるため、元の生の情報は一度もネットワークを流れません。
-                    </p>
+                    <p>置換処理はすべて<strong>ユーザーのブラウザ内（クライアントサイド）</strong>で完結します。サーバーへは置換後のトークンのみが送信されるため、元の生の情報は一度もネットワークを流れません。</p>
 
                     <h4>2. 自動復元（情報の書き戻し）</h4>
                     <p>AIからの回答にトークンが含まれている場合、画面に表示される直前に、ブラウザが保持している対応表（Vault）を参照して元の情報に書き戻します。</p>
@@ -729,7 +1123,7 @@
                         <p>プライバシーシールド（トークン化処理）は、チャット入力欄に直接入力されたテキストに対してのみ機能します。<strong>アップロードされたファイル内の機密情報は検知・保護の対象外</strong>となり、平文のまま送信されるため、十分にご注意ください。</p>
                     </blockquote>
 
-                    <h4>【具体例】会議の要約レポート作成中に個人情報を誤って含めたシーン</h4>
+                    <h4>【具体例】個人情報を誤って含めたシーン</h4>
                     <div class="table-wrapper">
                         <table>
                             <thead>
@@ -742,26 +1136,22 @@
                             <tbody>
                                 <tr>
                                     <td><strong>ユーザーの入力</strong></td>
-                                    <td>「以下のメモを元に要約レポートを作って。参加者：山田（<strong>090-1234-5678</strong>）、備考：会費はカード（<strong>4111-1111-1111-1111</strong>）で支払済」
-                                    </td>
+                                    <td>「参加者：山田（<strong>090-1234-5678</strong>）、カード（<strong>4111-1111-1111-1111</strong>）で支払済」</td>
                                     <td>生の情報がブラウザ上にある</td>
                                 </tr>
                                 <tr>
                                     <td><strong>AIへの送信データ</strong></td>
-                                    <td>「以下のメモを元に要約レポートを作って。参加者：山田（<code>{{PHONE_A1}}</code>）、備考：会費はカード（<code>{{CARD_B1}}</code>）で支払済」
-                                    </td>
-                                    <td><strong>生の情報はここで遮断され、送信されない</strong></td>
+                                    <td>「参加者：山田（<code>{{PHONE_A1}}</code>）、カード（<code>{{CARD_B1}}</code>）で支払済」</td>
+                                    <td><strong>生の情報はここで遮断</strong></td>
                                 </tr>
                                 <tr>
                                     <td><strong>AIからの回答</strong></td>
-                                    <td>「会議の要約を作成しました。参加者の山田様（<code>{{PHONE_A1}}</code>）の会費精算（カード：<code>{{CARD_B1}}</code>）も完了している旨を記載しています。」
-                                    </td>
+                                    <td>「山田様（<code>{{PHONE_A1}}</code>）の会費精算（カード：<code>{{CARD_B1}}</code>）...」</td>
                                     <td>サーバー上にはトークンしか残らない</td>
                                 </tr>
                                 <tr>
                                     <td><strong>画面上の表示</strong></td>
-                                    <td>「会議の要約を作成しました。参加者の山田様（<strong>090-1234-5678</strong>）の会費精算（カード：<strong>4111-1111...</strong>）も完了している旨を記載しています。」
-                                    </td>
+                                    <td>「山田様（<strong>090-1234-5678</strong>）の会費精算（カード：<strong>4111-1111...</strong>）...」</td>
                                     <td>ブラウザ内で元の情報が復元される</td>
                                 </tr>
                             </tbody>
@@ -771,10 +1161,8 @@
                     <h3>安全性の根拠：Secure Vault（保管庫）</h3>
                     <p>トークンと元の情報の対応表は、ブラウザのメモリ上にある一時的な保管庫（Secure Vault）にのみ存在します。</p>
                     <ul>
-                        <li><strong>セッション限定</strong>:
-                            この保管庫は現在のブラウザセッション（タブ）にのみ紐付いています。ページをリロードしたり、タブを閉じたりすると、メモリ上の対応表は完全に消去されます。</li>
-                        <li><strong>追跡不可</strong>: サーバー側にはトークンしか記録されないため、万が一サーバー上のデータが流出したとしても、ユーザーの生情報を特定することは不可能です。
-                        </li>
+                        <li><strong>セッション限定</strong>: この保管庫は現在のブラウザセッション（タブ）にのみ紐付いています。ページをリロードしたり、タブを閉じたりすると、メモリ上の対応表は完全に消去されます。</li>
+                        <li><strong>追跡不可</strong>: サーバー側にはトークンしか記録されないため、万が一サーバー上のデータが流出したとしても、ユーザーの生情報を特定することは不可能です。</li>
                     </ul>
 
                     <h3>検知対象と対象外の項目</h3>
@@ -790,7 +1178,7 @@
                             <tbody>
                                 <tr>
                                     <td><strong>クレジットカード</strong></td>
-                                    <td>13～19桁の番号 (Luhnアルゴリズム検証付)</td>
+                                    <td>13〜19桁の番号 (Luhnアルゴリズム検証付)</td>
                                     <td><strong>あり</strong> (中間をマスク)</td>
                                 </tr>
                                 <tr>
@@ -823,22 +1211,103 @@
                     </div>
 
                     <h3>検知時のアクション</h3>
-                    <p>機密情報が検知された場合、送信確認ダイアログでトグルを切り替えることで、あえて保護を解除（🔓 除外）してそのままの情報を送信することも可能です。</p>
+                    <p>機密情報が検知された場合、送信確認ダイアログが表示されます。ダイアログ内のトグルを切り替えることで、あえて保護を解除（🔓 除外）してそのままの情報を送信することも可能です。</p>
                 </section>
 
-                <!-- Chapter 6 -->
-                <section id="ch6">
-                    <h2>第6章：Q&A（よくある質問）</h2>
+                <!-- ===== Chapter 8 ===== -->
+                <section id="ch8">
+                    <h2>第8章：設定 <span class="badge-new">NEW</span></h2>
+                    <p>サイドバー下部の「⚙️ 設定」ボタンから設定画面を開けます。設定はサイドシートとして現在のチャット画面の上に重なって表示されます（チャット画面は維持されます）。</p>
+
+                    <h3>Profile（プロフィール）</h3>
+                    <ul>
+                        <li><strong>表示名</strong>: アプリ内で表示されるあなたの名前を変更できます。入力欄からフォーカスが外れると自動保存されます。</li>
+                        <li><strong>アカウント情報</strong>（読み取り専用）: User ID、メールアドレス、登録日が確認できます。</li>
+                        <li><strong>ログアウト</strong>: 「Danger Zone」セクションからログアウトできます。2回クリックで確認ステップが必要です。</li>
+                    </ul>
+
+                    <h3>General（一般設定）</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>設定項目</th>
+                                    <th>選択肢</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>外観モード</strong></td>
+                                    <td>Light（ライト）/ Dark（ダーク）/ Auto（OS設定に連動）</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>メッセージ送信キー</strong></td>
+                                    <td>Enter（デフォルト）/ Ctrl + Enter</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4>Advanced（詳細設定）</h4>
+                    <ul>
+                        <li><strong>設定の初期化</strong>: オンボーディング（初回ガイド）を再度表示させます。2回クリックで確認ステップが必要です。</li>
+                    </ul>
+
+                    <h3>Prompt（AIへの前提設定）</h3>
+                    <p>この設定は、すべての会話でAIに共通して伝えられる「前提知識」を定義します。一度設定すると、毎回伝えなくてもAIがあなたの背景を理解した上で回答してくれます。</p>
+
+                    <h4>AIに教える前提知識</h4>
+                    <ul>
+                        <li><strong>役職</strong>: 例: 営業マネージャー、エンジニア</li>
+                        <li><strong>部署</strong>: 例: 営業部、開発チーム（任意）</li>
+                    </ul>
+                    <p>入力欄からフォーカスが外れると自動保存されます（画面に「✓ 保存済み」と表示されます）。</p>
+
+                    <h4>カスタム指示</h4>
+                    <p>AIへの追加指示を自由形式で記述できます。例えば：</p>
+                    <ul>
+                        <li>「結論から述べてください」</li>
+                        <li>「専門用語は噛み砕いて説明してください」</li>
+                        <li>「回答は箇条書きでお願いします」</li>
+                    </ul>
+                    <p>こちらも入力欄からフォーカスが外れると自動保存されます。</p>
+                </section>
+
+                <!-- ===== Chapter 9 ===== -->
+                <section id="ch9">
+                    <h2>第9章：Q&A（よくある質問）</h2>
 
                     <h3>Q: プライバシーシールドを解除しても大丈夫ですか？</h3>
-                    <p><strong>A:</strong> 解除（🔓 除外）すると、その情報は平文のままサーバーへ送信されます。誤検知であることが確実な場合を除き、デフォルトの「🔒
-                        保護」のまま使用することを強く推奨します。</p>
+                    <p><strong>A:</strong> 解除（🔓 除外）すると、その情報は平文のままサーバーへ送信されます。誤検知であることが確実な場合を除き、デフォルトの「🔒 保護」のまま使用することを強く推奨します。</p>
 
+                    <h3>Q: クレジットが0になったらどうなりますか？</h3>
+                    <p><strong>A:</strong> クレジット残高が0になると、入力欄に「クレジット上限に達しました」と表示され、AIへのメッセージ送信が一時停止されます。次回リセット日（サイドバー下部に表示）になると自動的に残高が回復します。</p>
+
+                    <h3>Q: カスタムボットを他のユーザーと共有できますか？</h3>
+                    <p><strong>A:</strong> はい。ボット作成・編集時に「公開範囲」を「部署共有」または「全社公開」に設定することで共有できます。部署ボットは同じ部署のメンバーに、全社ボットはすべてのユーザーに表示されます。</p>
+
+                    <h3>Q: スタジオモードとアーティファクト作成（「+」メニュー）の違いは何ですか？</h3>
+                    <p><strong>A:</strong> どちらも同じ種類のアーティファクトを生成しますが、<strong>スタジオモード</strong>はフォームを使ってAIへの指示を組み立てる「ガイド付き」の方法です。一方、<strong>「+」メニューからのArtifact指定</strong>は、自分でプロンプトを直接書く「フリーフォーム」の方法です。慣れないうちはスタジオモードが便利です。</p>
+
+                    <h3>Q: @メンションが使えないのはなぜですか？</h3>
+                    <p><strong>A:</strong> @メンション候補が表示されるのは、<strong>現在のセッションでファイルをアップロードしていた場合</strong>のみです。先に「+」ボタンからファイルをアップロードしてから、入力欄で <code>@</code> を入力してください。</p>
+
+                    <h3>Q: Mermaid図を他のツールで編集するには？</h3>
+                    <p><strong>A:</strong> アーティファクトパネルの「コードを表示」ボタンをクリックし、Mermaidコードをコピーしてください。コピーしたコードは Mermaid Live Editor（mermaid.live）や Notion、GitHubのMarkdownなどに貼り付けて利用できます。</p>
+
+                    <h3>Q: Draw.io図を編集するには？</h3>
+                    <p><strong>A:</strong> アクションメニューから「XML として保存」を選択してダウンロードし、<a href="https://app.diagrams.net" target="_blank" rel="noopener noreferrer">diagrams.net（Draw.io）</a>でそのXMLファイルを開くと、ビジュアル編集が可能になります。</p>
+
+                    <h3>Q: 過去の会話の名前を変えることはできますか？</h3>
+                    <p><strong>A:</strong> はい。サイドバーの会話タイトルにホバーすると「…」メニューが表示されます。そこから「名前を変更」を選択し、直接テキストを編集できます。<kbd>Enter</kbd> で保存、<kbd>Esc</kbd> でキャンセルです。</p>
+
+                    <h3>Q: 設定のカスタム指示は全会話に適用されますか？</h3>
+                    <p><strong>A:</strong> はい。設定 &gt; Prompt で登録した「役職・部署」と「カスタム指示」は、すべての会話に共通して適用されます。特定の会話だけ別の指示にしたい場合は、チャット内でその旨を伝えてください。</p>
                 </section>
 
                 <blockquote class="callout-important">
                     <div class="callout-title"><span class="callout-icon icon"></span>IMPORTANT</div>
-                    <p>機密性の高い情報を AI に送信する際は、組織のガイドラインに従い、プライバシーシールドの警告内容を必ず確認してから送信してください。</p>
+                    <p>機密性の高い情報をAIに送信する際は、組織のガイドラインに従い、プライバシーシールドの警告内容を必ず確認してから送信してください。</p>
                 </blockquote>
 
             </div>
@@ -853,7 +1322,6 @@
             const tocContainer = document.querySelector('.toc-container');
             const navLinks = document.querySelectorAll('.nav-link');
             const sections = document.querySelectorAll('section');
-            const mainContent = document.querySelector('.main-content');
 
             let isScrollingToTarget = false;
             let scrollTimeout = null;
@@ -882,7 +1350,7 @@
                     clearTimeout(scrollTimeout);
                     scrollTimeout = setTimeout(() => {
                         isScrollingToTarget = false;
-                    }, 800); // 800ms後に再開 (スクロールの完了目安に合わせて調整)
+                    }, 800);
 
                     // リンクがクリックされたらアコーディオンを閉じる (Mobile用)
                     if (window.innerWidth <= 800 && tocToggle) {
@@ -898,13 +1366,13 @@
 
             // スクロールに応じた目次のハイライト連動
             const observerOptions = {
-                root: null, // ブラウザのビューポートを基準にする
-                rootMargin: '0px 0px -60% 0px', // 画面上部40%の位置で判定
+                root: null,
+                rootMargin: '0px 0px -60% 0px',
                 threshold: 0
             };
 
             const observer = new IntersectionObserver((entries) => {
-                if (isScrollingToTarget) return; // ジャンプ中は監視処理をスキップする
+                if (isScrollingToTarget) return;
 
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
