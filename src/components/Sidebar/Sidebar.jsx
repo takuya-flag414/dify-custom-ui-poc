@@ -469,13 +469,9 @@ const Sidebar = ({
                  </div>
              ) : (
                  <div className="credit-full-display">
-
-                
-=======
                     <div className="credit-label-row">
                         <span className="credit-label">クレジット</span>
                         {userTier && <span className="tier-badge">Tier {userTier}</span>}
-
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <span className="credit-value">{creditBalance.toLocaleString()} <span className="credit-unit">CR</span></span>
