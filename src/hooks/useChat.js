@@ -382,7 +382,24 @@ export const useChat = (mockMode, userId, conversationId, addLog, onConversation
         try {
             // ★修正: 現在の添付ファイル（新規アップロード + 入力欄にある既存）のみを対象にする
             // sessionFiles (履歴全体の蓄積) は含めないことで、期限切れIDの送信を防ぐ
-            const activeAttachments = [...uploadedFiles, ...restoredFiles];
+            let activeAttachments = [...uploadedFiles, ...restoredFiles];
+
+            // ★追加: カスタムボットのコンテキストファイルを添付リストに自動結合
+            if (activeCustomBot) {
+                const botUrls = activeCustomBot.context_file_urls || (activeCustomBot.context_file_url ? [activeCustomBot.context_file_url] : []);
+                const botFiles = botUrls.map((url) => {
+                    const parts = url.split('/');
+                    const rawName = parts[parts.length - 1] || `context_file`;
+                    const name = rawName.replace(/^\d+_/, ''); // タイムスタンプ除去
+                    return {
+                        id: `bot_file_${encodeURIComponent(url).replace(/%/g, '_')}`, // URLベースの固定ID（マルチバイト対応）
+                        name: name,
+                        type: 'application/pdf', // デフォルト適当
+                        url: url
+                    };
+                });
+                activeAttachments = [...botFiles, ...activeAttachments]; // ボットファイルが先頭に来るように
+            }
 
             // IDでユニーク化して安全性を確保
             const allFilesToSend = Array.from(

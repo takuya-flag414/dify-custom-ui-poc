@@ -115,19 +115,24 @@
   color: #fff;
 }
 
+/* macOS Sequoia風フォーカス光輪エフェクト */
 .glass-input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   border-color: rgba(10, 132, 255, 0.5); /* Focus Blue */
   box-shadow: 
-    0 0 0 3px rgba(10, 132, 255, 0.15),
+    0 0 0 1px #FFFFFF,
+    0 0 0 4px rgba(10, 132, 255, 0.3),
     inset 0 1px 2px rgba(0, 0, 0, 0.01);
 }
 
+/* ダークモード時のフォーカス光輪 */
 [data-theme='dark'] .glass-input:focus {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(10, 132, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+  background: rgba(30, 30, 30, 0.85);
+  border-color: rgba(10, 132, 255, 0.6);
+  box-shadow: 
+    0 0 0 1px #1E1E1E,
+    0 0 0 4px rgba(10, 132, 255, 0.4);
 }
 
 .glass-input::placeholder {
@@ -165,19 +170,45 @@ select.glass-input {
   background: rgba(10, 132, 255, 0.05);
 }
 
+.file-upload-area.dragging {
+  border-color: rgba(10, 132, 255, 1);
+  background: rgba(10, 132, 255, 0.1);
+  transform: scale(1.02);
+}
+
 .hidden-file-input {
   display: none;
 }
 
-.file-upload-label {
+.file-upload-label-new {
   cursor: pointer;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.upload-icon-main {
   color: #0A84FF;
-  font-weight: 500;
+  opacity: 0.8;
+}
+
+.upload-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upload-text-primary {
+  color: #0A84FF;
+  font-weight: 600;
   font-size: 14px;
+}
+
+.upload-text-secondary {
+  color: var(--color-text-sub);
+  font-size: 11px;
 }
 
 .modal-footer {
@@ -381,21 +412,25 @@ select.glass-input {
   border-color: rgba(5, 150, 105, 0.2);
 }
 
-/* 既存ファイルバッジ */
-.existing-file-badge {
+/* ファイルリストおよびバッジ */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.file-list-item {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(8, 145, 178, 0.07);
-  border: 1px solid rgba(8, 145, 178, 0.25);
   border-radius: 9px;
-  color: #0891b2;
   font-size: 12px;
   font-weight: 500;
 }
 
-.existing-file-badge span {
+.file-list-item span {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -403,9 +438,26 @@ select.glass-input {
   color: var(--color-text-main);
 }
 
+.existing-file-badge {
+  background: rgba(8, 145, 178, 0.07);
+  border: 1px solid rgba(8, 145, 178, 0.25);
+  color: #0891b2;
+}
+
+.new-file-badge {
+  background: rgba(10, 132, 255, 0.07);
+  border: 1px solid rgba(10, 132, 255, 0.25);
+  color: #0A84FF;
+}
+
 [data-theme='dark'] .existing-file-badge {
   background: rgba(8, 145, 178, 0.12);
   border-color: rgba(8, 145, 178, 0.2);
+}
+
+[data-theme='dark'] .new-file-badge {
+  background: rgba(10, 132, 255, 0.12);
+  border-color: rgba(10, 132, 255, 0.2);
 }
 
 /* クリアボタン（共通） */

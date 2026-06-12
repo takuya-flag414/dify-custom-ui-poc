@@ -480,14 +480,12 @@ function App() {
     initial: {
       opacity: 0,
       y: 10,
-      scale: 0.99,
-      filter: "blur(4px)"
+      scale: 0.99
     },
     enter: {
       opacity: 1,
       y: 0,
       scale: 1,
-      filter: "blur(0px)",
       transition: {
         duration: 0.4,
         ease: [0.25, 1, 0.5, 1],
@@ -496,7 +494,6 @@ function App() {
     exit: {
       opacity: 0,
       scale: 0.99,
-      filter: "blur(2px)",
       transition: {
         duration: 0.2,
         ease: "easeOut"
@@ -528,11 +525,10 @@ function App() {
 
   // メインコンテンツ用アニメーション（フェード+上からスライド）
   const mainContentVariants = {
-    hidden: { opacity: 0, y: 20, filter: 'blur(4px)' },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      filter: 'blur(0px)',
       transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] }
     }
   };
@@ -831,6 +827,7 @@ function App() {
                                 system_prompt: bot.system_prompt,
                                 rag_config: bot.rag_config,
                                 context_file_url: bot.context_file_url,
+                                context_file_urls: bot.context_file_urls,
                               }));
                               handleSetConversationId(null);
                               navigate('/chat');

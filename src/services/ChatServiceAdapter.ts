@@ -262,11 +262,13 @@ export const ChatServiceAdapter = {
             user: userId,
             conversation_id: conversationId || '',
             response_mode: 'streaming',
-            files: files.map(f => ({
-                type: 'document',
-                transfer_method: 'local_file',
-                upload_file_id: f.id
-            }))
+            files: files
+                .filter(f => !f.id.startsWith('bot_file_')) // ★追加: カスタムボットの仮想ファイルIDはUUIDではないため除外
+                .map(f => ({
+                    type: 'document',
+                    transfer_method: 'local_file',
+                    upload_file_id: f.id
+                }))
         };
 
         const response = await sendChatMessageApi(requestBody, apiUrl, apiKey);

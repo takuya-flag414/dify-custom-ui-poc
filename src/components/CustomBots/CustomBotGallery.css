@@ -58,6 +58,7 @@
 
 /* MacのSegmented Control風のタブ */
 .gallery-tabs {
+  position: relative; /* 子要素のスライダー背景の基準位置 */
   display: inline-flex;
   gap: 4px;
   background: rgba(255, 255, 255, 0.25);
@@ -68,12 +69,16 @@
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  
+  /* アクティブタブの背景色変数定義 */
+  --tab-active-bg: rgba(255, 255, 255, 0.85);
 }
 
 [data-theme='dark'] .gallery-tabs {
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
+  --tab-active-bg: rgba(255, 255, 255, 0.12);
 }
 
 .glass-tab {
@@ -94,15 +99,16 @@
   color: var(--color-text-main);
 }
 
+/* 背景と影は Framer Motion の indicator が描画するため、ボタン本体は透明化 */
 .glass-tab.active {
   color: var(--color-text-main);
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: transparent;
+  box-shadow: none;
 }
 
 [data-theme='dark'] .glass-tab.active {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: transparent;
+  box-shadow: none;
   color: #fff;
 }
 
@@ -154,3 +160,267 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
+
+/* ==========================================================================
+   Sequoia風操作パネル（タブ ＆ ツールバー）
+   ========================================================================== */
+.gallery-control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.gallery-tabs-container {
+  display: flex;
+  align-items: center;
+}
+
+/* ツールバーコンテナ */
+.gallery-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-right-color: rgba(255, 255, 255, 0.2);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+[data-theme='dark'] .gallery-toolbar {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-right-color: rgba(255, 255, 255, 0.03);
+  border-bottom-color: rgba(255, 255, 255, 0.03);
+}
+
+/* 検索窓 */
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 240px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-text-main);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .search-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-input:focus {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(10, 132, 255, 0.5);
+  /* Halo（光輪）フォーカスエフェクト */
+  box-shadow: 
+    0 0 0 1px #FFFFFF,
+    0 0 0 4px rgba(10, 132, 255, 0.3);
+}
+
+[data-theme='dark'] .search-input:focus {
+  background: rgba(30, 30, 30, 0.85);
+  border-color: rgba(10, 132, 255, 0.6);
+  box-shadow: 
+    0 0 0 1px #1E1E1E,
+    0 0 0 4px rgba(10, 132, 255, 0.4);
+}
+
+/* 右側コントロール群 */
+.toolbar-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* カスタムセレクト */
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 28px 8px 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-main);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .toolbar-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-select:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+[data-theme='dark'] .toolbar-select:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.toolbar-select:focus {
+  border-color: rgba(10, 132, 255, 0.5);
+  box-shadow: 
+    0 0 0 1px #FFFFFF,
+    0 0 0 3px rgba(10, 132, 255, 0.2);
+}
+
+[data-theme='dark'] .toolbar-select:focus {
+  border-color: rgba(10, 132, 255, 0.6);
+  box-shadow: 
+    0 0 0 1px #1E1E1E,
+    0 0 0 3px rgba(10, 132, 255, 0.3);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 10px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* レイアウト切り替えトグル */
+.layout-toggle-group {
+  display: flex;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 3px;
+  border-radius: 9px;
+}
+
+[data-theme='dark'] .layout-toggle-group {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggle-btn:hover {
+  color: var(--color-text-main);
+}
+
+.toggle-btn.active {
+  background: #FFFFFF;
+  color: #0A84FF;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] .toggle-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* リストレイアウトのコンテナ */
+.gallery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ==========================================================================
+   カテゴリ別セクション表示スタイル
+   ========================================================================== */
+
+/* セクション全体のコンテナ */
+.gallery-sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 36px; /* セクション間の十分な余白 */
+  width: 100%;
+}
+
+.gallery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='dark'] .section-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* 磨りガラス調の件数バッジ */
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-sub);
+  backdrop-filter: blur(4px);
+}
+
+[data-theme='dark'] .section-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+

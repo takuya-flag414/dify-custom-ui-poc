@@ -5,19 +5,30 @@
   flex-direction: column;
   gap: 16px;
   padding: 20px;
-  border-radius: 16px;
+  border-radius: 18px; /* macOS Sequoia 角丸基準 */
   background: rgba(255, 255, 255, 0.45); /* 透過背景 */
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  
+  /* グラスモーフィズム：上・左は明るく、右・下は暗くして立体感をシミュレート */
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-right-color: rgba(255, 255, 255, 0.2);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+  
   cursor: pointer;
   position: relative;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   min-height: 160px;
+  
+  /* 磨りガラス背後のVibrancy（彩度強調）を再現 */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 
 [data-theme='dark'] .custom-bot-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 30, 30, 0.45); /* ダークモード時の磨りガラス */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-right-color: rgba(255, 255, 255, 0.05);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
@@ -25,17 +36,22 @@
 .custom-bot-card:hover {
   transform: translateY(-4px);
   background: rgba(255, 255, 255, 0.75);
-  border-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.60);
+  border-right-color: rgba(255, 255, 255, 0.3);
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+  /* ほのかにブルー系に光るシャドウ */
   box-shadow: 
-      0 12px 24px rgba(99, 102, 241, 0.08),
+      0 12px 28px rgba(10, 132, 255, 0.12),
       0 0 0 0.5px rgba(255, 255, 255, 0.6);
 }
 
 [data-theme='dark'] .custom-bot-card:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
+  border-right-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
   box-shadow: 
-      0 16px 28px rgba(0, 0, 0, 0.3),
+      0 16px 32px rgba(0, 0, 0, 0.3),
       0 0 0 0.5px rgba(255, 255, 255, 0.15);
 }
 
@@ -142,40 +158,44 @@
 .bot-badges {
   display: flex;
   gap: 6px;
+  row-gap: 4px;
   align-items: center;
+  flex-wrap: wrap; /* ハイブリッドバッジ複数表示時の折り返しをサポート */
 }
 
 .bot-visibility-badge {
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 3px 8px; /* ナレッジバッジと揃えて左右余白を 8px に */
+  border-radius: 5px;
+  font-size: 11px; /* 明示的に小さく設定 */
   font-weight: 500;
   background: rgba(0, 0, 0, 0.04);
   color: var(--color-text-sub);
+  white-space: nowrap; /* テキストの縦潰れ防止 */
+  flex-shrink: 0;
 }
 
 [data-theme='dark'] .bot-visibility-badge {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* RAGバッジ（紫系 — 検索モードの青と被らない） */
+/* RAGバッジ（緑系 — 共有データテーマに統一） */
 .bot-rag-badge {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: rgba(124, 58, 237, 0.1);
-  color: #7c3aed;
+  padding: 3px 8px; /* 左右の余白を少しゆったりに */
+  border-radius: 5px;
+  font-size: 11px;
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
   font-weight: 500;
   max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0; /* フレックス縮小を可能にする */
 }
 
 [data-theme='dark'] .bot-rag-badge {
-  background: rgba(124, 58, 237, 0.2);
-  color: #a78bfa;
+  background: rgba(5, 150, 105, 0.2);
+  color: #34d399;
 }
 
 /* コンテキストファイルバッジ（シアン系） */
@@ -183,15 +203,14 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 3px 8px; /* 左右の余白を少しゆったりに */
+  border-radius: 5px;
+  font-size: 11px;
   background: rgba(8, 145, 178, 0.1);
   color: #0891b2;
   font-weight: 500;
   max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0; /* フレックス縮小を可能にする */
 }
 
 [data-theme='dark'] .bot-file-badge {
@@ -199,6 +218,168 @@
   color: #22d3ee;
 }
 
+/* バッジ内のテキスト省略処理を親ではなくインナーテキストに適用 */
+.bot-rag-badge .badge-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.bot-file-badge .badge-text {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.file-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-count-text {
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: 2px;
+  opacity: 0.95;
+  font-size: 10px;
+}
+
 .bot-creator-info {
   color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  min-width: 0; /* フレックスアイテムの縮小を可能にする */
+}
+
+.creator-id {
+  display: inline-block;
+  max-width: 75px; /* カードサイズに合わせてIDの最大幅を制限 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   リストモード専用スタイル
+   ========================================================================== */
+.custom-bot-card.list-mode {
+  flex-direction: row;
+  align-items: center;
+  min-height: auto;
+  padding: 12px 20px;
+  gap: 20px;
+  border-radius: 12px; /* リスト表示時は角丸を少し抑えてすっきりと */
+}
+
+.bot-list-item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+.bot-list-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 2;
+  min-width: 0;
+}
+
+.bot-list-left .bot-icon-wrapper {
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.bot-list-left .bot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bot-list-left .bot-name {
+  font-size: 14px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bot-list-left .bot-description {
+  font-size: 12px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: unset;
+  display: block;
+}
+
+.bot-list-middle {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 3;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.bot-list-middle .bot-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* リストモード時はバッジをさらに小さくスマートに */
+.custom-bot-card.list-mode .bot-visibility-badge,
+.custom-bot-card.list-mode .bot-rag-badge,
+.custom-bot-card.list-mode .bot-file-badge {
+  font-size: 10px;
+  padding: 2px 6px; /* 右端のゆとりを持たせるために 6px に変更 */
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.custom-bot-card.list-mode .bot-rag-badge,
+.custom-bot-card.list-mode .bot-file-badge {
+  max-width: 140px; /* テキストが長い場合に自動で丸める */
+}
+
+.bot-list-middle .bot-creator-info {
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+
+/* リストモード時は作成者IDの最大幅を少し緩める */
+.custom-bot-card.list-mode .creator-id {
+  max-width: 120px;
+}
+
+.bot-list-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ホバー時のアクション表示（リストモード） */
+.custom-bot-card.list-mode .bot-actions {
+  opacity: 0;
+  transform: translateX(4px);
+}
+
+.custom-bot-card.list-mode:hover .bot-actions {
+  opacity: 1;
+  transform: translateX(0);
 }

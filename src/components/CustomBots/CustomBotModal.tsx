@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CustomBot, BotVisibility } from '../../types/customBot';
 import StoreSelectorModal, { Store } from '../Shared/StoreSelectorModal';
 import './CustomBotModal.css';
-import { X, Loader2, Upload, Database, Paperclip, CheckCircle2, XCircle } from 'lucide-react';
+import { X, Loader2, Upload, Database, Paperclip, CheckCircle2, XCircle, CloudUpload } from 'lucide-react';
 
 
 interface CustomBotModalProps {
@@ -38,11 +38,12 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
   const [isStoreSelectorOpen, setIsStoreSelectorOpen] = useState(false);
 
   // コンテキストファイル
-  const [file, setFile] = useState<File | null>(null);
-  const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [existingFileUrls, setExistingFileUrls] = useState<string[]>([]);
 
   // --- UI状態 ---
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // botToEdit または isOpen の変更時にフォームを初期化・復元
   useEffect(() => {
@@ -65,13 +66,10 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
         }
 
         // ナレッジ設定の復元（ファイル）
-        if (botToEdit.context_file_url) {
-          setExistingFileUrl(botToEdit.context_file_url);
-          setFile(null);
-        } else {
-          setExistingFileUrl(null);
-          setFile(null);
-        }
+        // マイグレーション対応: 古い context_file_url があれば配列の先頭に入れる
+        const urls = botToEdit.context_file_urls || (botToEdit.context_file_url ? [botToEdit.context_file_url] : []);
+        setExistingFileUrls(urls);
+        setFiles([]);
       } else {
         // --- 新規作成モード: 全フィールドをリセット ---
         setName('');
@@ -79,8 +77,8 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
         setSystemPrompt('');
         setVisibility('private');
         setSelectedStore(null);
-        setExistingFileUrl(null);
-        setFile(null);
+        setExistingFileUrls([]);
+        setFiles([]);
       }
     }
   }, [botToEdit, isOpen]);
@@ -103,16 +101,37 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
     setSelectedStore(null);
   };
 
-  const handleClearFile = () => {
-    setFile(null);
-    setExistingFileUrl(null);
+  const handleRemoveExistingFile = (urlToRemove: string) => {
+    setExistingFileUrls(prev => prev.filter(url => url !== urlToRemove));
+  };
+
+  const handleRemoveNewFile = (indexToRemove: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== indexToRemove));
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setFiles(prev => [...prev, ...Array.from(e.dataTransfer.files!)]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      let context_file_url: string | undefined;
+      let context_file_urls: string[] = [...existingFileUrls];
       let rag_config: CustomBot['rag_config'];
 
       // RAGの処理
@@ -124,11 +143,12 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
         };
       }
 
-      // ファイルの処理（新規アップロード or 既存URL維持）
-      if (file) {
-        context_file_url = await customBotsApi.uploadContextFile(file);
-      } else if (existingFileUrl) {
-        context_file_url = existingFileUrl;
+      // ファイルの処理（新規アップロード）
+      if (files.length > 0) {
+        // 並列で全ファイルをアップロード
+        const uploadPromises = files.map(f => customBotsApi.uploadContextFile(f));
+        const uploadedUrls = await Promise.all(uploadPromises);
+        context_file_urls = [...context_file_urls, ...uploadedUrls];
       }
 
       const botData: Partial<CustomBot> = {
@@ -137,7 +157,7 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
         system_prompt: systemPrompt,
         visibility,
         rag_config: rag_config ?? undefined,
-        context_file_url: context_file_url ?? undefined,
+        context_file_urls: context_file_urls.length > 0 ? context_file_urls : undefined,
       };
 
       if (botToEdit) {
@@ -217,7 +237,7 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
                 <div className="form-group">
                   <label>
                     ナレッジ設定（オプション）
-                    <span className="knowledge-label-hint">RAGとファイルは両方同時に設定可能です（ハイブリッド）</span>
+                    <span className="knowledge-label-hint">共有データとファイルのアップロードは併用できます</span>
                   </label>
                   <div className="knowledge-section">
                     
@@ -225,7 +245,7 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
                     <div className="knowledge-panel">
                       <div className="knowledge-panel-header">
                         <Database size={14} className="icon-rag" />
-                        <span className="knowledge-panel-title">事前定義RAG</span>
+                        <span className="knowledge-panel-title">社内共有データ</span>
                       </div>
                       {selectedStore ? (
                         <div className="selected-store-badge">
@@ -251,7 +271,7 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
                         </button>
                       )}
                       <p className="knowledge-hint">
-                        Gemini File Search ストアに登録された恒久的なナレッジを、このボットのコンテキストとして使用します。
+                        登録済みの社内データ（マニュアルや規程等）をボットの知識として設定します。
                       </p>
                     </div>
 
@@ -263,37 +283,71 @@ export const CustomBotModal: React.FC<CustomBotModalProps> = ({
                         <Paperclip size={14} className="icon-file" />
                         <span className="knowledge-panel-title">コンテキストファイル</span>
                       </div>
-                      {/* 既存ファイルの表示 */}
-                      {existingFileUrl && !file && (
-                        <div className="existing-file-badge">
-                          <Paperclip size={13} />
-                          <span>{getFileNameFromUrl(existingFileUrl)}</span>
-                          <button
-                            type="button"
-                            className="clear-btn"
-                            onClick={handleClearFile}
-                            title="ファイルをクリア"
-                          >
-                            <XCircle size={15} />
-                          </button>
+                      {/* アップロード済み/選択済みファイルリスト */}
+                      {(existingFileUrls.length > 0 || files.length > 0) && (
+                        <div className="file-list">
+                          {existingFileUrls.map((url, i) => (
+                            <div key={`existing-${i}`} className="file-list-item existing-file-badge">
+                              <Paperclip size={13} />
+                              <span>{getFileNameFromUrl(url)}</span>
+                              <button
+                                type="button"
+                                className="clear-btn"
+                                onClick={() => handleRemoveExistingFile(url)}
+                                title="ファイルを削除"
+                              >
+                                <XCircle size={15} />
+                              </button>
+                            </div>
+                          ))}
+                          {files.map((f, i) => (
+                            <div key={`new-${i}`} className="file-list-item new-file-badge">
+                              <Paperclip size={13} />
+                              <span>{f.name}</span>
+                              <button
+                                type="button"
+                                className="clear-btn"
+                                onClick={() => handleRemoveNewFile(i)}
+                                title="アップロードをキャンセル"
+                              >
+                                <XCircle size={15} />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
+
                       {/* 新規ファイル選択 */}
-                      <div className="file-upload-area">
+                      <div 
+                        className={`file-upload-area ${isDragging ? 'dragging' : ''}`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                      >
                         <input
                           type="file"
                           id="bot-file-upload"
                           className="hidden-file-input"
+                          multiple
                           accept=".pdf,.docx,.doc,.txt,.md"
-                          onChange={e => setFile(e.target.files ? e.target.files[0] : null)}
+                          onChange={e => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              const selectedFiles = Array.from(e.target.files);
+                              setFiles(prev => [...prev, ...selectedFiles]);
+                              e.target.value = ''; // 入力リセットで同じファイルを再選択可能に
+                            }
+                          }}
                         />
-                        <label htmlFor="bot-file-upload" className="file-upload-label">
-                          <Upload size={18} />
-                          {file ? file.name : (existingFileUrl ? '別のファイルに差し替え...' : 'ファイルを選択 (PDF, DOCX等)')}
+                        <label htmlFor="bot-file-upload" className="file-upload-label-new">
+                          <CloudUpload size={32} className="upload-icon-main" />
+                          <div className="upload-text-group">
+                            <span className="upload-text-primary">クリック、またはここにファイルをドラッグ＆ドロップ</span>
+                            <span className="upload-text-secondary">対応形式: PDF, DOCX, TXT, MD 等</span>
+                          </div>
                         </label>
                       </div>
                       <p className="knowledge-hint">
-                        アップロードされたファイルは Firebase Storage に保存され、ボット利用時に Cloud Functions 経由でDifyへ転送されます。
+                        手元のファイルをアップロードして、ボット固有の知識として追加します。
                       </p>
                     </div>
                   </div>

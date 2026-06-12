@@ -11,14 +11,12 @@ const pageTransitionVariants = {
     initial: {
         opacity: 0,
         y: 10,
-        scale: 0.99,
-        filter: "blur(4px)"
+        scale: 0.99
     },
     enter: {
         opacity: 1,
         y: 0,
         scale: 1,
-        filter: "blur(0px)",
         transition: {
             duration: 0.4,
             ease: [0.25, 1, 0.5, 1],
@@ -27,7 +25,6 @@ const pageTransitionVariants = {
     exit: {
         opacity: 0,
         scale: 0.99,
-        filter: "blur(2px)",
         transition: {
             duration: 0.2,
             ease: "easeOut"

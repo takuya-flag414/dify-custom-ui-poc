@@ -14,6 +14,7 @@ export interface CustomBot {
     target_store_name?: string;
   };
   context_file_url?: string;
+  context_file_urls?: string[];
   created_at: string;
   updated_at?: string;
 }
