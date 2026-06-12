@@ -166,6 +166,8 @@ const SystemLogsScreen = () => {
             case 'EMAIL_VERIFIED_SUCCESS': return 'メール認証完了';
             case 'ACCOUNT_VERIFIED_SIGNIN': return '認証済ログイン';
             case 'ACCOUNT_SIGNIN_UNVERIFIED': return '未認証ログイン';
+            case 'TIER_CHANGED': return 'Tier変更';
+            case 'CREDIT_BONUS_ADJUSTED': return 'ボーナス調整';
             default: return action;
         }
     };
@@ -275,6 +277,13 @@ const SystemLogsScreen = () => {
                                                             else if (key === 'departmentId') label = '部署ID';
                                                             else if (key === 'appSource') label = 'アクセス元アプリ';
                                                             else if (key === 'hostname') label = 'アクセス元ドメイン';
+                                                            else if (key === 'oldTier') label = '変更前Tier';
+                                                            else if (key === 'newTier') label = '変更後Tier';
+                                                            else if (key === 'oldBalance') label = '変更前残高';
+                                                            else if (key === 'newBalance') label = '変更後残高';
+                                                            else if (key === 'amount') label = '調整額 (CR)';
+                                                            else if (key === 'adminId') label = '実行管理者UID';
+                                                            else if (key === 'adminEmail') label = '実行管理者メール';
 
                                                             // 値が長すぎる場合や未復号データの処理
                                                             let displayValue = value;

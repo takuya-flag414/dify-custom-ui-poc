@@ -771,3 +771,12 @@ exports.processMailQueue = onDocumentCreated("mail/{mailId}", async (event) => {
 
     return null;
 });
+
+// --- Credit Management Functions ---
+const creditFunctions = require("./creditFunctions");
+exports.fetchUserCredit = creditFunctions.fetchUserCredit;
+exports.deductUserCredit = creditFunctions.deductUserCredit;
+exports.addUserCredit = creditFunctions.addUserCredit;
+exports.grantBonusCredit = creditFunctions.grantBonusCredit;
+exports.updateUserTier = creditFunctions.updateUserTier;
+exports.adminGetUserCreditsList = creditFunctions.adminGetUserCreditsList;

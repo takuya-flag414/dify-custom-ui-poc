@@ -4,6 +4,7 @@ import { Globe, Database } from 'lucide-react';
 import FileIcon from '../../Shared/FileIcon';
 import PrivacyShieldButton from '../PrivacyShieldButton';
 import { getArtifactIcon, getArtifactColor } from '../../../utils/artifactIconHelper';
+import { formatStoreDisplayName } from '../../../utils/storeFormatter';
 
 const ARTIFACT_TYPE_MAP = {
     html_document: { label: '印刷可能なA4ドキュメント' },
@@ -110,7 +111,7 @@ const ReferenceRail = ({
                         {activeStore && (
                             <GlassChip onRemove={onRemoveStore} className="text-emerald-700 dark:text-emerald-400 bg-emerald-100/30 border-emerald-200/50">
                                 <Database size={14} style={{ color: '#34c759' }} />
-                                <span>{activeStore.display_name}</span>
+                                <span>{formatStoreDisplayName(activeStore.display_name)}</span>
                             </GlassChip>
                         )}
 

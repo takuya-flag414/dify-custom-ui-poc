@@ -451,9 +451,9 @@ const Sidebar = ({
         {/* 4. Footer & Credit Indicator */}
         <div className="sidebar-footer">
           {/* Credit Indicator */}
-          <div className={`sidebar-credit-indicator ${creditBalance <= 0 ? 'credit-empty' : ''} ${isCollapsed ? 'collapsed' : ''}`} title={`残クレジット (次回リセット: ${nextResetDate})`}>
+          <div className={`sidebar-credit-indicator ${creditBalance <= 0 ? 'credit-empty' : ''} ${isCollapsed ? 'collapsed' : ''}`} title={`残クレジット (次回リセット: ${nextResetDate}) | Tier: ${currentUser?.tier || 1}`}>
              {isCollapsed ? (
-                 <div className="credit-collapsed-display" title={`次回リセット: ${nextResetDate}`}>
+                 <div className="credit-collapsed-display" title={`次回リセット: ${nextResetDate} | Tier: ${currentUser?.tier || 1}`}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
                       <circle cx="12" cy="12" r="10"></circle>
                       <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
@@ -466,10 +466,15 @@ const Sidebar = ({
                  </div>
              ) : (
                  <div className="credit-full-display">
-                    <span className="credit-label">クレジット</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="credit-label">クレジット</span>
+                      <span style={{ fontSize: '11px', padding: '2px 6px', background: 'rgba(14, 165, 233, 0.15)', borderRadius: '4px', color: '#0284c7', border: '1px solid rgba(14, 165, 233, 0.3)', fontWeight: 700 }}>
+                        Tier {currentUser?.tier || 1}
+                      </span>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <span className="credit-value">{creditBalance.toLocaleString()} <span className="credit-unit">CR</span></span>
-                        <span style={{ fontSize: '9px', opacity: 0.6, marginTop: '2px' }}>次回リセット: {nextResetDate}</span>
+                        <span style={{ fontSize: '9px', opacity: 0.6, marginTop: '4px' }}>次回リセット: {nextResetDate}</span>
                     </div>
                  </div>
              )}

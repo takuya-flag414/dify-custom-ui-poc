@@ -791,22 +791,23 @@ const UsageAnalysisScreen = () => {
                         onClick={() => setActiveTokenKey(activeTokenKey === item.id ? null : item.id)}
                         style={{ cursor: 'pointer', padding: '4px 0' }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', fontWeight: 600 }}>
-                          {activeTokenKey === item.id && (
-                            <div className="token-mini-breakdown" style={{ marginTop: 0, gap: '8px' }}>
-                              <span className="token-label-in">In: {item.prompt_tokens.toLocaleString()}</span>
-                              <span className="token-label-out">Out: {item.completion_tokens.toLocaleString()}</span>
-                            </div>
-                          )}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontWeight: 600, position: 'relative' }}>
                           <span style={{ minWidth: '60px', textAlign: 'right' }}>{item.tokens.toLocaleString()}</span>
-                          <Icons.ChevronDown 
-                            size={12} 
+                          <Icons.ChevronRight 
+                            size={14} 
                             style={{ 
                               opacity: 0.5, 
                               transform: activeTokenKey === item.id ? 'rotate(180deg)' : 'rotate(0)',
-                              transition: 'transform 0.2s ease'
+                              transition: 'transform 0.2s ease',
+                              marginLeft: '8px'
                             }} 
                           />
+                          {activeTokenKey === item.id && (
+                            <div style={{ position: 'absolute', left: '100%', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '8px', marginLeft: '12px', whiteSpace: 'nowrap', zIndex: 10 }}>
+                              <span className="token-label-in" style={{ fontSize: '0.8rem', padding: '2px 6px' }}>In: {item.prompt_tokens.toLocaleString()}</span>
+                              <span className="token-label-out" style={{ fontSize: '0.8rem', padding: '2px 6px' }}>Out: {item.completion_tokens.toLocaleString()}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>

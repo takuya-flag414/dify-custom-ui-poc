@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Activity, Users, BarChart3 } from 'lucide-react';
+import { ShieldCheck, Activity, Users, BarChart3, CreditCard } from 'lucide-react';
 import UserManagementScreen from './UserManagementScreen';
 import SystemLogsScreen from './SystemLogsScreen';
 import UsageAnalysisScreen from './UsageAnalysisScreen';
+import CreditManagementScreen from './CreditManagementScreen';
 import './UserManagementScreen.css'; // タブのスタイル等を再利用
 
 const AdminDashboard = () => {
@@ -18,12 +19,18 @@ const AdminDashboard = () => {
         <p>社内システムのアカウント管理機能と、システム稼働ログ（監査）の閲覧、AI利用統計の分析を行います。</p>
       </div>
 
-      <div className="admin-tabs" style={{ maxWidth: '800px' }}>
+      <div className="admin-tabs" style={{ maxWidth: '1000px' }}>
         <button
           className={`admin-tab ${viewTab === 'users' ? 'active' : ''}`}
           onClick={() => setViewTab('users')}
         >
           <Users size={16} /> ユーザー管理
+        </button>
+        <button
+          className={`admin-tab ${viewTab === 'credits' ? 'active' : ''}`}
+          onClick={() => setViewTab('credits')}
+        >
+          <CreditCard size={16} /> クレジット管理
         </button>
         <button
           className={`admin-tab ${viewTab === 'logs' ? 'active' : ''}`}
@@ -39,8 +46,9 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      <div style={{ maxWidth: (viewTab === 'logs' || viewTab === 'analytics') ? '1200px' : '900px', transition: 'max-width 0.3s' }}>
+      <div style={{ maxWidth: (viewTab === 'logs' || viewTab === 'analytics' || viewTab === 'credits') ? '1200px' : '900px', transition: 'max-width 0.3s' }}>
         {viewTab === 'users' && <UserManagementScreen />}
+        {viewTab === 'credits' && <CreditManagementScreen />}
         {viewTab === 'logs' && <SystemLogsScreen />}
         {viewTab === 'analytics' && <UsageAnalysisScreen />}
       </div>
