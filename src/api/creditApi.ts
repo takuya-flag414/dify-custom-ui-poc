@@ -19,11 +19,12 @@ const _getNextMonday = (date: Date): Date => {
 const _checkAndApplyWeeklyReset = (userId: string) => {
   const now = Date.now();
   if (!mockUserCredits[userId]) {
-    // 新規ユーザーにはデフォルト上限（スタンダード）を付与
+    // 新規ユーザーにはデフォルト上限（Tier 2）を付与
     mockUserCredits[userId] = { 
-      balance: mockSystemSettings.defaultStandardLimit, 
-      limit: mockSystemSettings.defaultStandardLimit, 
-      lastResetTime: now 
+      balance: mockSystemSettings.default_tier2_limit, 
+      limit: mockSystemSettings.default_tier2_limit, 
+      lastResetTime: now,
+      tier: 2
     };
     return;
   }
@@ -42,20 +43,23 @@ const _checkAndApplyWeeklyReset = (userId: string) => {
 export interface FetchCreditResponse {
   balance: number;
   nextResetDateStr: string;
+  tier: number;
 }
 
 export const creditApi = {
   fetchUserCredit: async (userId: string): Promise<FetchCreditResponse> => {
     if (isStrictFEMode) {
-      await delay(300);
+      await delay(300); // ネットワーク遅延のシミュレーション
       _checkAndApplyWeeklyReset(userId);
       const nextMonday = _getNextMonday(new Date());
       const nextResetDateStr = `${nextMonday.getMonth() + 1}月${nextMonday.getDate()}日`;
       return {
         balance: mockUserCredits[userId].balance,
-        nextResetDateStr
+        nextResetDateStr,
+        tier: mockUserCredits[userId].tier // ← 下のコードからtierを追加
       };
     }
+    // ← 上のコードから本番API呼び出しを残す
     const fetchCreditFn = httpsCallable<void, FetchCreditResponse>(functions, 'fetchUserCredit');
     const { data } = await fetchCreditFn();
     return data;
@@ -119,13 +123,17 @@ export const creditApi = {
     await updateSettingsFn({ tiers });
   },
 
-  updateSystemCreditLimit: async (newStandardLimit: number): Promise<void> => {
-    // This function is kept for backward compatibility if needed, but it should be replaced by updateSystemSettings
+  /**
+   * 【管理者用】システム全体のデフォルト上限を更新する（モック）
+   */
+  updateSystemCreditLimit: async (newTier2Limit: number): Promise<void> => {
+    // 下のコード（incoming）の変数名変更を採用
     await delay(200);
-    console.log(`[Mock Backend] Global standard limit updated to ${newStandardLimit}`);
-    mockSystemSettings.defaultStandardLimit = newStandardLimit;
-  },
+    console.log(`[Mock Backend] Global Tier 2 limit updated to ${newTier2Limit}`);
+    mockSystemSettings.default_tier2_limit = newTier2Limit;
+  }, // ← カンマを忘れないように注意してください
 
+  // 下のコードで消されかけていた、上のコード（HEAD）の大事な関数を丸ごと復活させる
   adminGetUserCreditsList: async (): Promise<{ users: any[] }> => {
     if (isStrictFEMode) {
       await delay(300);
@@ -133,7 +141,7 @@ export const creditApi = {
         user_id: uid,
         name: `User ${uid}`,
         email: `user${uid}@example.com`,
-        tier: 2,
+        tier: mockUserCredits[uid].tier || 2, // ← せっかくなのでモックのtier情報も使えるように微修正
         credit_balance: mockUserCredits[uid].balance,
         last_reset_time: mockUserCredits[uid].lastResetTime
       }));
@@ -144,3 +152,5 @@ export const creditApi = {
     return data;
   }
 };
+  
+

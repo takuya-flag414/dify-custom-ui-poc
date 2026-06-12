@@ -178,7 +178,7 @@ const Sidebar = ({
   onViewChange,
   currentUser
 }) => {
-  const { creditBalance, nextResetDate } = useCredit();
+  const { creditBalance, nextResetDate, userTier } = useCredit();
 
   // ★ URLルーティング: navigate/location を使用
   const navigate = useNavigate();
@@ -460,17 +460,22 @@ const Sidebar = ({
                       <line x1="12" y1="18" x2="12" y2="22"></line>
                       <line x1="12" y1="2" x2="12" y2="6"></line>
                     </svg>
-                    <span className="credit-value-small">
-                        {creditBalance > 9999 ? Math.floor(creditBalance/1000) + 'k' : creditBalance}
-                    </span>
+                    <div className="credit-value-small-container">
+                        {userTier && <span className="tier-badge-small">T{userTier}</span>}
+                        <span className="credit-value-small">
+                            {creditBalance > 9999 ? Math.floor(creditBalance/1000) + 'k' : creditBalance}
+                        </span>
+                    </div>
                  </div>
              ) : (
                  <div className="credit-full-display">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span className="credit-label">クレジット</span>
-                      <span style={{ fontSize: '11px', padding: '2px 6px', background: 'rgba(14, 165, 233, 0.15)', borderRadius: '4px', color: '#0284c7', border: '1px solid rgba(14, 165, 233, 0.3)', fontWeight: 700 }}>
-                        Tier {currentUser?.tier || 1}
-                      </span>
+
+                
+=======
+                    <div className="credit-label-row">
+                        <span className="credit-label">クレジット</span>
+                        {userTier && <span className="tier-badge">Tier {userTier}</span>}
+
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <span className="credit-value">{creditBalance.toLocaleString()} <span className="credit-unit">CR</span></span>

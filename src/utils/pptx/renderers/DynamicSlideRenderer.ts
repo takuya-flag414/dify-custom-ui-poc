@@ -148,27 +148,31 @@ export class DynamicSlideRenderer {
         x: '15%', y: '25%', w: '70%', h: '25%',
         fontSize: 40, bold: true, color: primaryColor, align: 'left', valign: 'bottom'
       });
-      if (block.subtitle) {
-        slide.addText(block.subtitle, {
-          x: '15%', y: '50%', w: '70%', h: '10%',
-          fontSize: 18, color: textColor, align: 'left', valign: 'top'
-        });
-      }
+      
       slide.addShape(this.pptx.ShapeType.rect, {
-        x: '15%', y: '61%', w: '70%', h: 0.03,
+        x: '15%', y: '52%', w: '70%', h: 0.03,
         fill: { color: primaryColor }
       });
       
-      const presenterText = [block.presenter, block.organization].filter(Boolean).join('\n');
-      slide.addText(presenterText, {
-        x: '15%', y: '65%', w: '35%', h: '15%',
-        fontSize: 14, color: '64748B', align: 'left', valign: 'top'
-      });
+      if (block.subtitle) {
+        slide.addText(block.subtitle, {
+          x: '15%', y: '55%', w: '70%', h: '8%',
+          fontSize: 18, color: textColor, align: 'left', valign: 'top'
+        });
+      }
+      
+      const presenterText = [block.presenter, block.organization].filter(Boolean).join(' | ');
+      if (presenterText) {
+        slide.addText(presenterText, {
+          x: '15%', y: '64%', w: '70%', h: '6%',
+          fontSize: 14, color: '64748B', align: 'left', valign: 'top'
+        });
+      }
       
       if (block.date) {
         slide.addText(block.date, {
-          x: '50%', y: '65%', w: '35%', h: '15%',
-          fontSize: 14, color: '64748B', align: 'right', valign: 'top'
+          x: '15%', y: '70%', w: '70%', h: '6%',
+          fontSize: 14, color: '64748B', align: 'left', valign: 'top'
         });
       }
     } else if (block.type === 'text') {

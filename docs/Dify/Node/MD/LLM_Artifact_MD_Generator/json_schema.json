@@ -1,0 +1,117 @@
+{
+    "properties": {
+        "answer": {
+            "description": "チャット欄に表示する短い補足メッセージ。1〜2文で簡潔に記述し、『Markdownで整理しました』など自然な案内文にする。",
+            "type": "string"
+        },
+        "artifact_content": {
+            "description": "【必須】Markdown本文。HTMLではなく、見出し・箇条書き・番号付きリスト・表などを必要に応じて使った完成形のMarkdown文字列を格納する。Markdownコードブロック全体で囲わないこと。",
+            "type": "string"
+        },
+        "artifact_title": {
+            "description": "【必須】生成するMarkdown Artifactのタイトル。Artifactパネルのヘッダー表示や識別に使用される。フロントエンドはこのフィールドを検出した時点でパネルを開くため、必ず thinking の直後に出力する。",
+            "type": "string"
+        },
+        "artifact_type": {
+            "description": "【必須】Markdown Artifactの種別。上流で確定済みの値をそのまま出力する。再判定・再分類は行わない。",
+            "enum": [
+                "summary_report",
+                "meeting_minutes",
+                "checklist",
+                "comparison_table",
+                "faq"
+            ],
+            "type": "string"
+        },
+        "citations": {
+            "description": "本文生成時に参照した情報源の一覧。このノードのターンでRAG検索やWeb検索を実行していなくても、添付ファイル、上流ノードで取得済みの参照情報、会話内で与えられた参考情報を使った場合は格納する。参照元が本当に存在しない場合のみ空配列 [] を返す。",
+            "items": {
+                "properties": {
+                    "id": {
+                        "description": "情報源の一意な識別子。アプリ側で参照元を追跡するためのID。",
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "情報源名・記事名・ファイル名・資料名など、人間が見て分かる表示用の名称。",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "情報源の種別。web はWeb由来、rag はRAG取得情報、file は添付ファイルや参照ファイルを示す。",
+                        "enum": [
+                            "web",
+                            "rag",
+                            "file"
+                        ],
+                        "type": "string"
+                    },
+                    "url": {
+                        "description": "参照元URLまたは参照先識別子。Web記事URL、RAG元資料URL、ファイル参照URLなどを格納する。",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "source",
+                    "url"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "smart_actions": {
+            "description": "Artifact生成後にUI上へ表示する提案アクションボタンの一覧。通常は空配列 [] を返す。",
+            "items": {
+                "properties": {
+                    "icon": {
+                        "description": "UIで表示するアイコン識別子。",
+                        "type": "string"
+                    },
+                    "label": {
+                        "description": "ユーザーに見せるボタン文言。短く具体的に記述する。",
+                        "type": "string"
+                    },
+                    "payload": {
+                        "description": "ボタン押下時に渡す付加情報。",
+                        "properties": {
+                            "text": {
+                                "description": "アクション実行時に次段へ渡すテキスト。",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "text"
+                        ],
+                        "type": "object"
+                    },
+                    "type": {
+                        "description": "アクションの内部種別。",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type",
+                    "label",
+                    "icon",
+                    "payload"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "thinking": {
+            "description": "内部用の計画メモ。ユーザーには表示されない。指定された artifact_type の確認、入力意図の整理、構成方針、情報不足時の扱い、出典反映方針、answer の方針などを具体的に記述する。artifact_title より前に出力すること。",
+            "type": "string"
+        }
+    },
+    "required": [
+        "thinking",
+        "artifact_title",
+        "artifact_type",
+        "artifact_content",
+        "answer",
+        "citations",
+        "smart_actions"
+    ],
+    "type": "object"
+}

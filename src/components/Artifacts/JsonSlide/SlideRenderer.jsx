@@ -52,9 +52,9 @@ const SlideRenderer = ({ slide, themeId, slideIndex, totalSlides, isStatic = fal
             <BlockFactory key={idx} block={block} gridName={gridName} slideIndex={slideIndex} onMermaidError={onMermaidError} />
         ));
 
-        // テーマクラスを付与し、CSS変数によるスタイル注入を行う
+        // テーマクラスおよびグリッドクラスを付与し、CSS変数によるスタイル注入を行う
         contentNode = (
-            <div className={`json-slide-root theme-${themeId}`} style={{ position: 'relative' }}>
+            <div className={`json-slide-root theme-${themeId} grid-${gridName}`} style={{ position: 'relative' }}>
                 {Decoration && <Decoration />}
                 <div style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <GridComponent keyMessage={slide.key_message} blocks={slide.blocks}>
@@ -73,10 +73,12 @@ const SlideRenderer = ({ slide, themeId, slideIndex, totalSlides, isStatic = fal
     return (
         <div className="slide-renderer-wrapper" data-slide-id={slide.id || `slide-${slideIndex}`}>
             {contentNode}
-            {/* スライド番号インジケーター */}
-            <div className="slide-page-indicator">
-                {slideIndex + 1} / {totalSlides}
-            </div>
+            {/* スライド番号インジケーター (表紙は表示しない) */}
+            {slideIndex > 0 && (
+                <div className="slide-page-indicator">
+                    {slideIndex + 1} / {totalSlides}
+                </div>
+            )}
         </div>
     );
 };

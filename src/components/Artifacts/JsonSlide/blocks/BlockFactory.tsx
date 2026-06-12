@@ -18,15 +18,17 @@ import { SlideFunnel } from './SlideFunnel.tsx';
 import { SlideKpiMetrics } from './SlideKpiMetrics.tsx';
 import { SlideVenn } from './SlideVenn.tsx';
 import { SlideAgenda } from './SlideAgenda.tsx';
+import { SlideImagePlaceholder } from './SlideImagePlaceholder.tsx';
 
 interface Props {
     block: SlideBlock;
     gridName?: string;
     slideIndex?: number;
     onMermaidError?: (slideIndex: number, error: string | null, code: string) => void;
+    isInsideContainer?: boolean;
 }
 
-export const BlockFactory: React.FC<Props> = ({ block, gridName, slideIndex, onMermaidError }) => {
+export const BlockFactory: React.FC<Props> = ({ block, gridName, slideIndex, onMermaidError, isInsideContainer }) => {
     // 共通プロパティの抽出
     const emphasisClass = block.emphasis ? `block-emphasis block-emphasis-${block.emphasis}` : '';
     
@@ -34,17 +36,25 @@ export const BlockFactory: React.FC<Props> = ({ block, gridName, slideIndex, onM
     const renderContent = () => {
         switch (block.type) {
             case 'text':
-                return <SlideText content={block.content} heading_level={block.heading_level} />;
+                return <SlideText content={block.content} heading_level={block.heading_level} isInsideContainer={isInsideContainer} />;
             case 'list':
                 return <SlideList items={block.items} style={block.style} />;
             case 'comparison_table':
-                return <SlideTable headers={block.headers} rows={block.rows} emphasis_row={block.emphasis_row} />;
+                return (
+                    <SlideTable 
+                        headers={block.headers} 
+                        rows={block.rows} 
+                        emphasis_row={block.emphasis_row} 
+                        emphasis_cells={block.emphasis_cells}
+                        emphasis_box={block.emphasis_box}
+                    />
+                );
             case 'key_value_card':
                 return <SlideCard label={block.label} title={block.title} value={block.value} unit={block.unit} change={block.change} trend={block.trend} />;
             case 'content_card':
                 return <SlideContentCard title={block.title} description={block.description} points={block.points} />;
             case 'chart':
-                return <SlideChart title={block.title} data={block.data} />;
+                return <SlideChart title={block.title} chartType={block.chart_type} data={block.data} />;
             case 'mermaid':
                 return <SlideMermaid code={block.code} slideIndex={slideIndex} onMermaidError={onMermaidError} />;
             case 'section_header':
@@ -75,6 +85,17 @@ export const BlockFactory: React.FC<Props> = ({ block, gridName, slideIndex, onM
                 return <SlideVenn title={block.title} items={block.items} />;
             case 'agenda':
                 return <SlideAgenda items={block.items} activeIndex={block.active_index} />;
+            case 'image_placeholder':
+                return (
+                    <SlideImagePlaceholder 
+                        label={block.label} 
+                        prompt={block.prompt} 
+                        search_query={block.search_query} 
+                        aspect_ratio={block.aspect_ratio} 
+                        image_url={block.image_url} 
+                        fallback_text={block.fallback_text} 
+                    />
+                );
             
             default:
                 return <SlideText content={`[Unsupported block: ${block.type}]`} />;
