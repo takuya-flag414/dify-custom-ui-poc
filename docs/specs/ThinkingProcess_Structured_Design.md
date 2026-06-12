@@ -15,6 +15,7 @@
 対象ファイル: `docs/temp/Node/LLM_Intent_Analysys/Web/json_schema.json`
 `thinking` フィールドの型を `string` から `array` に変更し、内部に `action_label` と `detail` を持つオブジェクトを定義します。
 
+
 ```json
 "thinking": {
     "description": "推論プロセスの各ステップを配列で出力します。各ステップはユーザーへの進捗報告として表示されます。",
